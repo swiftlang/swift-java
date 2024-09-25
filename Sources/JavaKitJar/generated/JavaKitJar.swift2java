@@ -1,0 +1,11 @@
+{
+  "swiftModule" : "JavaKitJar",
+  "translatedClasses" : {
+    "java.util.jar.Attributes" : "Attributes",
+    "java.util.jar.JarEntry" : "JarEntry",
+    "java.util.jar.JarFile" : "JarFile",
+    "java.util.jar.JarInputStream" : "JarInputStream",
+    "java.util.jar.JarOutputStream" : "JarOutputStream",
+    "java.util.jar.Manifest" : "Manifest"
+  }
+}

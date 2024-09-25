@@ -1,0 +1,26 @@
+.DS_Store
+.build
+Packages
+xcuserdata/
+DerivedData/
+.swiftpm
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+*.class
+
+# Ignore gradle build artifacts
+.gradle
+**/build/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Ignore generated sources
+JavaSwiftKitDemo/src/main/java/com/example/swift/generated/*
