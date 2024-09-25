@@ -15,8 +15,8 @@ import JExtractSwift
 
 @main
 struct JExtractSwift {
-  static func main() async throws {
+  static func main() throws {
     let command = SwiftToJava.parseOrExit(CommandLine.arguments)
-    try await command.run()
+    try command.run()
   }
 }

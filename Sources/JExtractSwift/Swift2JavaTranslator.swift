@@ -69,7 +69,7 @@ extension Swift2JavaTranslator {
   public func analyze(
     swiftInterfacePath: String,
     text: String? = nil
-  ) async throws {
+  ) throws {
     if text == nil {
       precondition(
         swiftInterfacePath.hasSuffix(Self.SWIFT_INTERFACE_SUFFIX),
@@ -84,12 +84,12 @@ extension Swift2JavaTranslator {
     log.trace("Analyze: \(swiftInterfacePath)")
     let text = try text ?? String(contentsOfFile: swiftInterfacePath)
 
-    try await analyzeSwiftInterface(interfaceFilePath: swiftInterfacePath, text: text)
+    try analyzeSwiftInterface(interfaceFilePath: swiftInterfacePath, text: text)
 
     log.info("Done processing: \(swiftInterfacePath)")
   }
 
-  package func analyzeSwiftInterface(interfaceFilePath: String, text: String) async throws {
+  package func analyzeSwiftInterface(interfaceFilePath: String, text: String) throws {
     assert(interfaceFilePath.hasSuffix(Self.SWIFT_INTERFACE_SUFFIX))
 
     let sourceFileSyntax = Parser.parse(source: text)
@@ -104,59 +104,6 @@ extension Swift2JavaTranslator {
       translator: self
     )
     visitor.walk(sourceFileSyntax)
-
-    try await self.postProcessImportedDecls()
-  }
-
-  public func postProcessImportedDecls() async throws {
-    log.info(
-      "Post process imported decls...",
-      metadata: [
-        "types": "\(importedTypes.count)",
-        "global/funcs": "\(importedGlobalFuncs.count)",
-      ]
-    )
-
-    // FIXME: the use of dylibs to get symbols is a hack we need to remove and replace with interfaces containing mangled names
-    let dylibPath = ".build/arm64-apple-macosx/debug/lib\(swiftModuleName).dylib"
-    guard var dylib = SwiftDylib(path: dylibPath) else {
-      log.warning(
-        """
-        Unable to find mangled names for imported symbols. Dylib not found: \(dylibPath) This method of obtaining symbols is a workaround; it will be removed.
-        """
-      )
-      return
-    }
-
-    importedGlobalFuncs = try await importedGlobalFuncs._mapAsync { funcDecl in
-      let funcDecl = try await dylib.fillInMethodMangledName(funcDecl)
-      log.info("Mapped method '\(funcDecl.identifier)' -> '\(funcDecl.swiftMangledName)'")
-      return funcDecl
-    }
-
-    importedTypes = Dictionary(uniqueKeysWithValues: try await importedTypes._mapAsync { (tyName, tyDecl) in
-      var tyDecl = tyDecl
-      log.info("Mapping type: \(tyDecl.swiftTypeName)")
-
-      tyDecl = try await dylib.fillInTypeMangledName(tyDecl)
-
-      log.info("Mapping members of: \(tyDecl.swiftTypeName)")
-      tyDecl.initializers = try await tyDecl.initializers._mapAsync { initDecl in
-        dylib.log.logLevel = .trace
-
-        let initDecl = try await dylib.fillInAllocatingInitMangledName(initDecl)
-        log.info("Mapped initializer '\(initDecl.identifier)' -> '\(initDecl.swiftMangledName)'")
-        return initDecl
-      }
-
-      tyDecl.methods = try await tyDecl.methods._mapAsync { funcDecl in
-        let funcDecl = try await dylib.fillInMethodMangledName(funcDecl)
-        log.info("Mapped method '\(funcDecl.identifier)' -> '\(funcDecl.swiftMangledName)'")
-        return funcDecl
-      }
-
-      return (tyName, tyDecl)
-    })
   }
 }
 

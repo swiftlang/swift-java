@@ -73,5 +73,5 @@ public class MySwiftClass {
 
 private func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
   print("[swift][\(file):\(line)](\(function)) \(msg)")
-  fflush(stdout)
+  fflush(Darwin.stdout)
 }

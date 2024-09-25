@@ -74,7 +74,9 @@ define make_swiftinterface
 		-emit-module-interface-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface \
 		-emit-module-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftmodule \
 		-enable-library-evolution \
+                -Xfrontend -abi-comments-in-module-interface \
 		-module-name ${$@_MODULE} \
+                -Xfrontend -abi-comments-in-module-interface \
 		Sources/${$@_MODULE}/${$@_FILENAME}.swift
 	echo "Generated: ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface"
 endef

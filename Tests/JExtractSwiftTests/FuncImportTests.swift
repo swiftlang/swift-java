@@ -61,14 +61,14 @@ final class MethodImportTests {
     }
     """
 
-  @Test func method_helloWorld() async throws {
+  @Test func method_helloWorld() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "helloWorld" }!
 
@@ -100,14 +100,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeInt() async throws {
+  @Test func method_globalTakeInt() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == "globalTakeInt"
@@ -141,14 +141,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeIntLongString() async throws {
+  @Test func method_globalTakeIntLongString() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == "globalTakeIntLongString"
@@ -182,14 +182,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_memorySegment() async throws {
+  @Test func method_class_helloMemberFunction_self_memorySegment() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
@@ -223,14 +223,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_wrapper() async throws {
+  @Test func method_class_helloMemberFunction_self_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberInExtension"
@@ -264,14 +264,14 @@ final class MethodImportTests {
     )
   }
 
-  func test_method_class_helloMemberFunction_self_wrapper() async throws {
+  @Test func test_method_class_helloMemberFunction_self_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
@@ -305,14 +305,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_wrapper() async throws {
+  @Test func method_class_helloMemberFunction_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
@@ -338,14 +338,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_makeInt_wrapper() async throws {
+  @Test func method_class_makeInt_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "makeInt"
@@ -371,14 +371,14 @@ final class MethodImportTests {
     )
   }
 
-  @Test func class_constructor() async throws {
+  @Test func class_constructor() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace
 
-    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let initDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.initializers.first {
       $0.identifier == "init(len:cap:)"

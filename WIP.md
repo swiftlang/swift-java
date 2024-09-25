@@ -57,9 +57,6 @@ Importer:
 - [x] import global functions into the `Module.theFunction` on Java side
 - [x] import functions with parameters
 - [x] import functions return values
-- [x] HACK: use dylib to find mangled names of methods
-- [x] HACK: use dylib to find mangled names of initializers
-- [x] HACK: use dylib to find mangled names of imported types (`TYPE_METADATA_NAME`)
 - [ ] import instance member functions using "wrapper" pattern
 - [ ] handle types like `[any Thing]?`, we can't parse them right now even
 - [ ] support nested types in Swift

@@ -97,7 +97,6 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
-    .package(url: "https://github.com/apple/swift-system", from: "1.0.0"),
   ],
   targets: [
     .macro(
@@ -195,25 +194,6 @@ let package = Package(
       ]
     ),
 
-    // FIXME: This is swift-foundation's proposed Subprocess; remove when available
-    //  https://github.com/apple/swift-foundation/pull/439
-    .target(
-      name: "_Subprocess",
-      dependencies: [
-        "_SubprocessCShims",
-        .product(name: "SystemPackage", package: "swift-system"),
-      ]
-    ),
-    .target(
-      name: "_SubprocessCShims",
-      cSettings: [
-        .define(
-          "_CRT_SECURE_NO_WARNINGS",
-          .when(platforms: [.windows])
-        )
-      ]
-    ),
-
     .target(
       name: "JExtractSwift",
       dependencies: [
@@ -221,7 +201,6 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        "_Subprocess",
         "JavaTypes",
       ]
     ),

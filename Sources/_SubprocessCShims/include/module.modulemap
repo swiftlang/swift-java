@@ -1,5 +1,0 @@
-module _SubprocessCShims {
-    header "_SubprocessCShims.h"
-
-    export *
-}

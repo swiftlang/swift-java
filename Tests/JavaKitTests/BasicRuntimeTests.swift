@@ -50,7 +50,7 @@ struct BasicRuntimeTests {
   }
 
   @Test("Java exceptions")
-  func javaExceptionsInSwift() async throws {
+  func javaExceptionsInSwift() throws {
     do {
       _ = try URL("bad url", environment: jvm.environment)
     } catch {
