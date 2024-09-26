@@ -60,7 +60,7 @@ final class MethodImportTests: XCTestCase {
 
     try await st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.identifier == "helloWorld" }!
+    let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "helloWorld" }!
 
     let output = CodePrinter.toString { printer in
       st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
@@ -100,7 +100,7 @@ final class MethodImportTests: XCTestCase {
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
-      $0.identifier == "globalTakeInt"
+      $0.baseIdentifier == "globalTakeInt"
     }!
 
     let output = CodePrinter.toString { printer in
@@ -141,7 +141,7 @@ final class MethodImportTests: XCTestCase {
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
-      $0.identifier == "globalTakeIntLongString"
+      $0.baseIdentifier == "globalTakeIntLongString"
     }!
 
     let output = CodePrinter.toString { printer in
@@ -184,7 +184,7 @@ final class MethodImportTests: XCTestCase {
     let funcDecl: ImportedFunc = st.importedTypes.first {
       $0.name.javaClassName == "MySwiftClass"
     }!.methods.first {
-      $0.identifier == "helloMemberFunction"
+      $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
@@ -227,7 +227,7 @@ final class MethodImportTests: XCTestCase {
     let funcDecl: ImportedFunc = st.importedTypes.first {
       $0.name.javaClassName == "MySwiftClass"
     }!.methods.first {
-      $0.identifier == "helloMemberFunction"
+      $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
@@ -270,7 +270,7 @@ final class MethodImportTests: XCTestCase {
     let funcDecl: ImportedFunc = st.importedTypes.first {
       $0.name.javaClassName == "MySwiftClass"
     }!.methods.first {
-      $0.identifier == "helloMemberFunction"
+      $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
@@ -305,7 +305,7 @@ final class MethodImportTests: XCTestCase {
     let funcDecl: ImportedFunc = st.importedTypes.first {
       $0.name.javaClassName == "MySwiftClass"
     }!.methods.first {
-      $0.identifier == "makeInt"
+      $0.baseIdentifier == "makeInt"
     }!
 
     let output = CodePrinter.toString { printer in

@@ -63,7 +63,7 @@ final class FunctionDescriptorTests: XCTestCase {
     try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
-      $0.identifier == methodIdentifier
+      $0.baseIdentifier == methodIdentifier
     }!
 
     let output = CodePrinter.toString { printer in

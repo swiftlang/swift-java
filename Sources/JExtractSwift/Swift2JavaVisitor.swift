@@ -103,9 +103,18 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
+    let argumentLabels = node.signature.parameterClause.parameters.map { param in
+      param.firstName.identifier?.name ?? "_"
+    }
+    let argumentLabelsStr = String(argumentLabels.flatMap { label in
+      label + ":"
+    })
+
+    let fullName = "\(node.name.text)(\(argumentLabelsStr))"
+
     var funcDecl = ImportedFunc(
       parentName: currentTypeDecl?.name,
-      identifier: node.name.text,
+      identifier: fullName,
       returnType: javaResultType,
       parameters: params
     )
@@ -156,7 +165,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     var funcDecl = ImportedFunc(
       parentName: currentTypeDecl.name,
-      identifier: initIdentifier,  // FIXME: what is the name of the inits?
+      identifier: initIdentifier,
       returnType: currentTypeDecl.name,
       parameters: params
     )
