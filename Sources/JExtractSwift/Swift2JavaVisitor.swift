@@ -16,23 +16,23 @@ import SwiftParser
 import SwiftSyntax
 
 final class Swift2JavaVisitor: SyntaxVisitor {
-  let log: Logger
+  let translator: Swift2JavaTranslator
 
   /// The Swift module we're visiting declarations in
   let moduleName: String
+
   /// The target java package we are going to generate types into eventually,
   /// store this along with type names as we import them.
   let targetJavaPackage: String
 
-  var javaMethodDecls: [ImportedFunc] = []
-  var javaTypeDecls: [ImportedClass] = []
+  var currentTypeName: String? = nil
 
-  var currentTypeDecl: ImportedClass? = nil
+  var log: Logger { translator.log }
 
-  init(moduleName: String, targetJavaPackage: String, log: Logger) {
+  init(moduleName: String, targetJavaPackage: String, translator: Swift2JavaTranslator) {
     self.moduleName = moduleName
     self.targetJavaPackage = targetJavaPackage
-    self.log = log
+    self.translator = translator
 
     super.init(viewMode: .all)
   }
@@ -43,30 +43,28 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     log.info("Import: \(node.kind) \(node.name)")
-    currentTypeDecl = ImportedClass(
+    let typeName = node.name.text
+    currentTypeName = typeName
+    translator.importedTypes[typeName] = ImportedNominalType(
       // TODO: support nested classes (parent name here)
       name: ImportedTypeName(
-        swiftTypeName: node.name.text,
+        swiftTypeName: typeName,
         javaType: .class(
           package: targetJavaPackage,
-          name: node.name.text
-        )
-      )
+          name: typeName
+        ),
+        swiftMangledName: node.mangledNameFromComment
+      ),
+      kind: .class
     )
-
-    // Retrieve the mangled name, if available.
-    if let mangledName = node.mangledNameFromComment {
-      currentTypeDecl!.name.swiftMangledName = mangledName
-    }
 
     return .visitChildren
   }
 
   override func visitPost(_ node: ClassDeclSyntax) {
-    if let currentTypeDecl {
+    if currentTypeName != nil {
       log.info("Completed import: \(node.kind) \(node.name)")
-      self.javaTypeDecls.append(currentTypeDecl)
-      self.currentTypeDecl = nil
+      currentTypeName = nil
     }
   }
 
@@ -113,7 +111,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)(\(argumentLabelsStr))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeDecl?.name,
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.name,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
@@ -125,26 +123,26 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    if var currentTypeDecl = self.currentTypeDecl {
-      log.info("Record method in \(currentTypeDecl.name.javaType.description)")
-      currentTypeDecl.methods.append(funcDecl)
-      self.currentTypeDecl = currentTypeDecl
+    if let currentTypeName {
+      log.info("Record method in \(currentTypeName)")
+      translator.importedTypes[currentTypeName]?.methods.append(funcDecl)
     } else {
-      javaMethodDecls.append(funcDecl)
+      translator.importedGlobalFuncs.append(funcDecl)
     }
 
     return .skipChildren
   }
 
   override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard var currentTypeDecl = self.currentTypeDecl else {
+    guard let currentTypeName,
+            let currentType = translator.importedTypes[currentTypeName] else {
       fatalError("Initializer must be within a current type, was: \(node)")
     }
     guard node.shouldImport(log: log) else {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentTypeDecl.name.javaType.description)")
+    self.log.info("Import initializer: \(node.kind) \(currentType.name.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -164,9 +162,9 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeDecl.name,
+      parentName: currentType.name,
       identifier: initIdentifier,
-      returnType: currentTypeDecl.name,
+      returnType: currentType.name,
       parameters: params
     )
     funcDecl.isInit = true
@@ -177,9 +175,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    log.info("Record initializer method in \(currentTypeDecl.name.javaType.description): \(funcDecl.identifier)")
-    currentTypeDecl.initializers.append(funcDecl)
-    self.currentTypeDecl = currentTypeDecl
+    log.info("Record initializer method in \(currentType.name.javaType.description): \(funcDecl.identifier)")
+    translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
     return .skipChildren
   }

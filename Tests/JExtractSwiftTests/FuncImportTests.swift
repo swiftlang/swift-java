@@ -181,9 +181,7 @@ final class MethodImportTests: XCTestCase {
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = st.importedTypes.first {
-      $0.name.javaClassName == "MySwiftClass"
-    }!.methods.first {
+    let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
@@ -224,9 +222,7 @@ final class MethodImportTests: XCTestCase {
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = st.importedTypes.first {
-      $0.name.javaClassName == "MySwiftClass"
-    }!.methods.first {
+    let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
@@ -267,9 +263,7 @@ final class MethodImportTests: XCTestCase {
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = st.importedTypes.first {
-      $0.name.javaClassName == "MySwiftClass"
-    }!.methods.first {
+    let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
@@ -302,9 +296,7 @@ final class MethodImportTests: XCTestCase {
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = st.importedTypes.first {
-      $0.name.javaClassName == "MySwiftClass"
-    }!.methods.first {
+    let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "makeInt"
     }!
 

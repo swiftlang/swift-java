@@ -37,7 +37,9 @@ public final class Swift2JavaTranslator {
   // TODO: consider how/if we need to store those etc
   public var importedGlobalFuncs: [ImportedFunc] = []
 
-  public var importedTypes: [ImportedClass] = []
+  /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
+  /// type representation.
+  public var importedTypes: [String: ImportedNominalType] = [:]
 
   public init(
     javaPackage: String,
@@ -83,12 +85,9 @@ extension Swift2JavaTranslator {
     let visitor = Swift2JavaVisitor(
       moduleName: self.swiftModuleName,
       targetJavaPackage: self.javaPackage,
-      log: log
+      translator: self
     )
     visitor.walk(sourceFileSyntax)
-
-    self.importedGlobalFuncs.append(contentsOf: visitor.javaMethodDecls)
-    self.importedTypes.append(contentsOf: visitor.javaTypeDecls)
 
     try await self.postProcessImportedDecls()
   }
@@ -119,7 +118,7 @@ extension Swift2JavaTranslator {
       return funcDecl
     }
 
-    importedTypes = try await importedTypes._mapAsync { tyDecl in
+    importedTypes = Dictionary(uniqueKeysWithValues: try await importedTypes._mapAsync { (tyName, tyDecl) in
       var tyDecl = tyDecl
       log.info("Mapping type: \(tyDecl.name)")
 
@@ -140,8 +139,8 @@ extension Swift2JavaTranslator {
         return funcDecl
       }
 
-      return tyDecl
-    }
+      return (tyName, tyDecl)
+    })
   }
 }
 

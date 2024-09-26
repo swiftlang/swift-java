@@ -27,7 +27,7 @@ extension Swift2JavaTranslator {
   public func writeImportedTypesTo(outputDirectory: String) throws {
     var printer = CodePrinter()
 
-    for ty in importedTypes {
+    for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.name.javaClassName!).java"
       log.info("Printing contents: \(filename)")
       printImportedClass(&printer, ty)
@@ -106,7 +106,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func printImportedClass(_ printer: inout CodePrinter, _ decl: ImportedClass) {
+  public func printImportedClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)  // TODO print any imports the file may need, it we talk to other Swift modules
@@ -164,7 +164,7 @@ extension Swift2JavaTranslator {
     printer.print("")
   }
 
-  public func printClass(_ printer: inout CodePrinter, _ decl: ImportedClass, body: (inout CodePrinter) -> Void) {
+  public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
     printer.printTypeDecl("public final class \(decl.name.javaClassName!)") { printer in
       // ==== Storage of the class
       // FIXME: implement the self storage for the memory address and accessors
@@ -270,7 +270,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  private func printClassMemorySegmentConstructor(_ printer: inout CodePrinter, _ decl: ImportedClass) {
+  private func printClassMemorySegmentConstructor(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
       /** Instances are created using static {@code init} methods rather than through the constructor directly. */
@@ -282,7 +282,7 @@ extension Swift2JavaTranslator {
   }
 
   /// Print a property where we can store the "self" pointer of a class.
-  private func printClassSelfProperty(_ printer: inout CodePrinter, _ decl: ImportedClass) {
+  private func printClassSelfProperty(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
       // Pointer to the referred to class instance's "self".
@@ -295,7 +295,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedClass) {
+  private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
       private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(

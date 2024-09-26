@@ -25,15 +25,26 @@ public struct ImportedProtocol: ImportedDecl {
   public var identifier: String
 }
 
-public struct ImportedClass: ImportedDecl {
+/// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
+/// imported and is being translated into Java.
+public struct ImportedNominalType: ImportedDecl {
   public var name: ImportedTypeName
+  public var kind: NominalTypeKind
 
   public var initializers: [ImportedFunc] = []
   public var methods: [ImportedFunc] = []
 
-  public init(name: ImportedTypeName) {
+  public init(name: ImportedTypeName, kind: NominalTypeKind) {
     self.name = name
+    self.kind = kind
   }
+}
+
+public enum NominalTypeKind {
+  case `actor`
+  case `class`
+  case `enum`
+  case `struct`
 }
 
 public struct ImportedParam: Hashable {
@@ -97,9 +108,10 @@ public struct ImportedTypeName: Hashable {
     javaType.className
   }
 
-  public init(swiftTypeName: String, javaType: JavaType) {
+  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil) {
     self.swiftTypeName = swiftTypeName
     self.javaType = javaType
+    self.swiftMangledName = swiftMangledName ?? ""
   }
 }
 
