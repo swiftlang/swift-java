@@ -28,8 +28,6 @@ public struct ImportedProtocol: ImportedDecl {
 public struct ImportedClass: ImportedDecl {
   public var name: ImportedTypeName
 
-  public var implementedInterfaces: Set<ImportedTypeName> = []
-
   public var initializers: [ImportedFunc] = []
   public var methods: [ImportedFunc] = []
 
@@ -126,6 +124,8 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// This is a full name such as init(cap:name:).
   public var identifier: String
 
+  /// This is the base identifier for the function, e.g., "init" for an
+  /// initializer or "f" for "f(a:b:)".
   public var baseIdentifier: String {
     guard let idx = identifier.firstIndex(of: "(") else {
       return identifier
@@ -134,7 +134,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 
   /// A display name to use to refer to the Swift declaration with its
-  /// enclosing type.
+  /// enclosing type, if there is one.
   public var displayName: String {
     if let parentName {
       return "\(parentName.swiftTypeName).\(identifier)"
