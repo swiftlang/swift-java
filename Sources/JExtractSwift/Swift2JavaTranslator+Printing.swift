@@ -441,7 +441,7 @@ extension Swift2JavaTranslator {
   public func printDowncallMethods(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     printer.printSeparator(decl.identifier)
 
-    printer.printTypeDecl("private static class \(decl.identifier)") { printer in
+    printer.printTypeDecl("private static class \(decl.baseIdentifier)") { printer in
       printFunctionDescriptorValue(&printer, decl);
       printFindMemorySegmentAddrByMangledName(&printer, decl)
       printMethodDowncallHandleForAddrDesc(&printer)
@@ -455,8 +455,8 @@ extension Swift2JavaTranslator {
        * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
        * }
        */
-      public static FunctionDescriptor \(decl.identifier)$descriptor() {
-          return \(decl.identifier).DESC;
+      public static FunctionDescriptor \(decl.baseIdentifier)$descriptor() {
+          return \(decl.baseIdentifier).DESC;
       }
       """
     )
@@ -469,8 +469,8 @@ extension Swift2JavaTranslator {
        * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
        * }
        */
-      public static MethodHandle \(decl.identifier)$handle() {
-          return \(decl.identifier).HANDLE;
+      public static MethodHandle \(decl.baseIdentifier)$handle() {
+          return \(decl.baseIdentifier).HANDLE;
       }
       """
     )
@@ -483,8 +483,8 @@ extension Swift2JavaTranslator {
        * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
        * }
        */
-      public static MemorySegment \(decl.identifier)$address() {
-          return \(decl.identifier).ADDR;
+      public static MemorySegment \(decl.baseIdentifier)$address() {
+          return \(decl.baseIdentifier).ADDR;
       }
       """
     )
@@ -542,8 +542,8 @@ extension Swift2JavaTranslator {
          * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
          * }
          */
-        public static \(returnTy) \(decl.identifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
-          \(maybeReturnCast) \(decl.identifier)(\(renderForwardParams(decl, selfVariant: .memorySegment)));
+        public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
+          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardParams(decl, selfVariant: .memorySegment)));
         }
         """
       )
@@ -557,8 +557,8 @@ extension Swift2JavaTranslator {
        * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
        * }
        */
-      public static \(returnTy) \(decl.identifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
-        var mh$ = \(decl.identifier).HANDLE;
+      public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
+        var mh$ = \(decl.baseIdentifier).HANDLE;
         try {
           if (TRACE_DOWNCALLS) {
              traceDowncall(\(renderForwardParams(decl, selfVariant: .memorySegment)));

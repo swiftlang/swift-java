@@ -59,7 +59,7 @@ package struct SwiftDylib {  // FIXME: remove this entire utility; replace with 
     }
 
     var decl = decl
-    let names = try await nmSymbolNames(grepDemangled: [decl.identifier])
+    let names = try await nmSymbolNames(grepDemangled: [decl.baseIdentifier])
     if let name = names.first {
       log.trace("Selected mangled name for '\(decl.identifier)': \(name)")
       decl.swiftMangledName = name.mangledName
