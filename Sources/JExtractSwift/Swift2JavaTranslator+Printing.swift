@@ -502,9 +502,8 @@ extension Swift2JavaTranslator {
     printer.print(
       """
       /**
-       * Demangled representation:
        * {@snippet lang = Swift:
-       * \(decl.swiftDemangledMangledName)
+       * \(decl.displayName)
        * }
        */
       public static final MemorySegment ADDR = \(swiftModuleName).findOrThrow("\(decl.swiftMangledName)");

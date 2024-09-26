@@ -86,7 +86,6 @@ public struct ImportedTypeName: Hashable {
   public var swiftTypeName: String
 
   public var swiftMangledName: String = ""
-  public var swiftDemangledMangledName: String = ""
 
   public var javaType: JavaType
 
@@ -124,13 +123,24 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var parentName: ImportedTypeName?
   public var hasParent: Bool { parentName != nil }
 
-  public var identifier: String  // FIXME: this is init(cap:name:) complete swift identifier; change that to be base
+  /// This is a full name such as init(cap:name:).
+  public var identifier: String
 
   public var baseIdentifier: String {
     guard let idx = identifier.firstIndex(of: "(") else {
       return identifier
     }
     return String(identifier[..<idx])
+  }
+
+  /// A display name to use to refer to the Swift declaration with its
+  /// enclosing type.
+  public var displayName: String {
+    if let parentName {
+      return "\(parentName.swiftTypeName).\(identifier)"
+    }
+
+    return identifier
   }
 
   public var returnType: ImportedTypeName
@@ -173,7 +183,6 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 
   public var swiftMangledName: String = ""
-  public var swiftDemangledMangledName: String = ""
 
   public var swiftDeclRaw: String? = nil
 
