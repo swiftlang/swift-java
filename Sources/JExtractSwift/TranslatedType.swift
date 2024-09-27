@@ -207,7 +207,7 @@ enum ParameterConvention {
   case indirect
 }
 
-struct TranslatedType {
+public struct TranslatedType {
   /// How a parameter of this type will be passed through C functions.
   var cCompatibleConvention: ParameterConvention
 
@@ -224,14 +224,10 @@ struct TranslatedType {
 
   /// The Java type that is used to present these values in Java.
   var javaType: JavaType
-}
 
-extension TranslatedType {
-  var importedTypeName: ImportedTypeName {
-    ImportedTypeName(
-      swiftTypeName: originalSwiftType.trimmedDescription,
-      javaType: javaType
-    )
+  /// Produce a Swift type name to reference this type.
+  var swiftTypeName: String {
+    originalSwiftType.trimmedDescription
   }
 }
 

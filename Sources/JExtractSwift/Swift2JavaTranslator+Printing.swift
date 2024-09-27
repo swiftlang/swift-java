@@ -421,7 +421,7 @@ extension Swift2JavaTranslator {
        * \(decl.swiftDeclRaw ?? "")
        * }
        */
-      public static \(parentName.javaClassName!) init(\(renderJavaParamDecls(decl, selfVariant: .none))) {
+      public static \(parentName.javaType) init(\(renderJavaParamDecls(decl, selfVariant: .none))) {
         var mh$ = \(descClassIdentifier).HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
@@ -429,7 +429,7 @@ extension Swift2JavaTranslator {
             }
 
             var self = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA);
-            return new \(parentName.javaClassName!)(self);
+            return new \(parentName.javaType)(self);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -524,10 +524,10 @@ extension Swift2JavaTranslator {
     decl: ImportedFunc,
     selfVariant: SelfParameterVariant?
   ) {
-    let returnTy = decl.returnType.fullyQualifiedName
+    let returnTy = decl.returnType.javaType
 
     let maybeReturnCast: String
-    if decl.returnType.isVoid {
+    if decl.returnType.javaType == .void {
       maybeReturnCast = ""  // nothing to return or cast to
     } else {
       maybeReturnCast = "return (\(returnTy))"
@@ -601,7 +601,7 @@ extension Swift2JavaTranslator {
     }
 
     for p in decl.effectiveParameters(selfVariant: selfVariant) {
-      let param = "\(p.type.fullyQualifiedName) \(p.effectiveName ?? nextUniqueParamName())"
+      let param = "\(p.type.javaType.description) \(p.effectiveName ?? nextUniqueParamName())"
       ps.append(param)
     }
 
@@ -641,7 +641,7 @@ extension Swift2JavaTranslator {
       selfVariant: .pointer
     )
 
-    if decl.returnType.isVoid {
+    if decl.returnType.javaType == .void {
       printer.print("FunctionDescriptor.ofVoid(");
       printer.indent()
     } else {
@@ -655,10 +655,9 @@ extension Swift2JavaTranslator {
         // when initializing, we return a pointer to the newly created object
         printer.print("/* -> */\(ForeignValueLayout.SwiftPointer)", .parameterNewlineSeparator(returnTyIsLastTy))
       } else {
-        if var returnDesc = javaMemoryLayoutDescriptor(decl.returnType) {
-          returnDesc.inlineComment = " -> "
-          printer.print(returnDesc, .parameterNewlineSeparator(returnTyIsLastTy))
-        }
+        var returnDesc = decl.returnType.foreignValueLayout
+        returnDesc.inlineComment = " -> "
+        printer.print(returnDesc, .parameterNewlineSeparator(returnTyIsLastTy))
       }
     }
 

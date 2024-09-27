@@ -120,18 +120,18 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     let params: [ImportedParam]
-    let javaResultType: ImportedTypeName
+    let javaResultType: TranslatedType
     do {
       params = try node.signature.parameterClause.parameters.map { param in
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
           param: param,
-          type: try mapTypeToJava(name: param.type)
+          type: try cCompatibleType(for: param.type)
         )
       }
 
-      javaResultType = try mapTypeToJava(name: returnTy)
+      javaResultType = try cCompatibleType(for: returnTy)
     } catch {
       self.log.info("Unable to import function \(node.name) - \(error)")
       return .skipChildren
@@ -147,7 +147,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)(\(argumentLabelsStr))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeName.map { translator.importedTypes[$0] }??.importedTypeName,
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
@@ -186,7 +186,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         // TODO: More robust type handling
         return ImportedParam(
           param: param,
-          type: try mapTypeToJava(name: param.type)
+          type: try cCompatibleType(for: param.type)
         )
       }
     } catch {
@@ -198,9 +198,9 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentType.importedTypeName,
+      parentName: currentType.translatedType,
       identifier: initIdentifier,
-      returnType: currentType.importedTypeName,
+      returnType: currentType.translatedType,
       parameters: params
     )
     funcDecl.isInit = true
@@ -251,13 +251,6 @@ extension FunctionDeclSyntax {
     }
 
     return true
-  }
-}
-
-extension Swift2JavaVisitor {
-  // TODO: this is more more complicated, we need to know our package and imports etc
-  func mapTypeToJava(name swiftType: TypeSyntax) throws -> ImportedTypeName {
-    return try cCompatibleType(for: swiftType).importedTypeName
   }
 }
 
