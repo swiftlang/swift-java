@@ -12,10 +12,9 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwift
-import XCTest
+import Testing
 
-// TODO: Adopt Testing instead
-final class MethodImportTests: XCTestCase {
+final class MethodImportTests {
   let class_interfaceFile =
     """
     // swift-interface-format-version: 1.0
@@ -56,7 +55,7 @@ final class MethodImportTests: XCTestCase {
     }
     """
 
-  func test_method_helloWorld() async throws {
+  @Test func method_helloWorld() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -95,7 +94,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_globalTakeInt() async throws {
+  @Test func method_globalTakeInt() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -136,7 +135,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_globalTakeIntLongString() async throws {
+  @Test func method_globalTakeIntLongString() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -177,7 +176,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_class_helloMemberFunction_self_memorySegment() async throws {
+  @Test func method_class_helloMemberFunction_self_memorySegment() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -218,7 +217,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_class_helloMemberInExtension_self_memorySegment() async throws {
+  @Test func method_class_helloMemberFunction_self_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -300,7 +299,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_class_helloMemberFunction_wrapper() async throws {
+  @Test func method_class_helloMemberFunction_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -333,7 +332,7 @@ final class MethodImportTests: XCTestCase {
     )
   }
 
-  func test_method_class_makeInt_wrapper() async throws {
+  @Test func method_class_makeInt_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
