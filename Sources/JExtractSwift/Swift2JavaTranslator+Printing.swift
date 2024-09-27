@@ -28,7 +28,7 @@ extension Swift2JavaTranslator {
     var printer = CodePrinter()
 
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
-      let filename = "\(ty.javaType).java"
+      let filename = "\(ty.javaClassName).java"
       log.info("Printing contents: \(filename)")
       printImportedClass(&printer, ty)
 
@@ -165,7 +165,7 @@ extension Swift2JavaTranslator {
   }
 
   public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
-    printer.printTypeDecl("public final class \(decl.javaType)") { printer in
+    printer.printTypeDecl("public final class \(decl.javaClassName)") { printer in
       // ==== Storage of the class
       // FIXME: implement the self storage for the memory address and accessors
       printClassSelfProperty(&printer, decl)
@@ -274,7 +274,7 @@ extension Swift2JavaTranslator {
     printer.print(
       """
       /** Instances are created using static {@code init} methods rather than through the constructor directly. */
-      private \(decl.javaType)(MemorySegment selfMemorySegment) {
+      private \(decl.javaClassName)(MemorySegment selfMemorySegment) {
         this.selfMemorySegment = selfMemorySegment;
       }
       """
@@ -412,24 +412,32 @@ extension Swift2JavaTranslator {
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
+    printClassInitializerConstructor(&printer, decl, parentName: parentName)
+  }
+
+  public func printClassInitializerConstructor(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc,
+    parentName: TranslatedType
+  ) {
+    let descClassIdentifier = renderDescClassName(decl)
     printer.print(
       """
       /**
-       * Create an instance of the {@code \(parentName.javaType)} Swift class.
+       * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        *
-       * {@snippet lang=Swift:
+       * {@snippet lang=swift :
        * \(decl.swiftDeclRaw ?? "")
        * }
        */
-      public static \(parentName.javaType) init(\(renderJavaParamDecls(decl, selfVariant: .none))) {
+      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
         var mh$ = \(descClassIdentifier).HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
               traceDowncall(\(renderForwardParams(decl, selfVariant: nil)));
             }
 
-            var self = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA);
-            return new \(parentName.javaType)(self);
+            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -542,8 +550,8 @@ extension Swift2JavaTranslator {
          * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
          * }
          */
-        public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
-          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardParams(decl, selfVariant: .memorySegment)));
+        public \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
+          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardParams(decl, selfVariant: .wrapper)));
         }
         """
       )
@@ -628,6 +636,11 @@ extension Swift2JavaTranslator {
         param = "\(p.renderParameterForwarding() ?? nextUniqueParamName())"
       }
       ps.append(param)
+    }
+
+    // Add the forwarding "self"
+    if selfVariant == .wrapper && !decl.isInit {
+      ps.append("$memorySegment()")
     }
 
     return ps.joined(separator: ", ")

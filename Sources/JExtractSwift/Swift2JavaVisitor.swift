@@ -163,7 +163,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     let initIdentifier =
-      "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
+      "init(\(String(params.flatMap { "\($0.effectiveName ?? "_"):" })))"
 
     var funcDecl = ImportedFunc(
       parentName: currentType.translatedType,

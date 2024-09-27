@@ -331,8 +331,8 @@ final class MethodImportTests {
          * public func helloMemberFunction()
          * }
          */
-        public static void helloMemberFunction(com.example.swift.MySwiftClass self$) {
-            helloMemberFunction(self$);
+        public void helloMemberFunction() {
+            helloMemberFunction($memorySegment());
         }
         """
     )
@@ -364,11 +364,54 @@ final class MethodImportTests {
          * public func makeInt() -> Int
          * }
          */
-        public static long makeInt(com.example.swift.MySwiftClass self$) {
-          return (long) makeInt(self$);
+        public long makeInt() {
+          return (long) makeInt($memorySegment());
         }
         """
     )
   }
 
+  @Test func class_constructor() async throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .trace
+
+    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+
+    let initDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.initializers.first {
+      $0.identifier == "init(len:cap:)"
+    }!
+
+    let output = CodePrinter.toString { printer in
+      st.printClassInitializerConstructor(&printer, initDecl, parentName: initDecl.parentName!)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+         * Create an instance of {@code MySwiftClass}.
+         *
+         * {@snippet lang=swift :
+         * public init(len: Swift.Int, cap: Swift.Int)
+         * }
+         */
+        public MySwiftClass(long len, long cap) {
+          var mh$ = init_len_cap.HANDLE;
+          try {
+            if (TRACE_DOWNCALLS) {
+              traceDowncall(len, cap);
+            }
+
+            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(len, cap, TYPE_METADATA);
+          } catch (Throwable ex$) {
+            throw new AssertionError(\"should not reach here\", ex$);
+          }
+        }
+        """
+    )
+  }
 }
