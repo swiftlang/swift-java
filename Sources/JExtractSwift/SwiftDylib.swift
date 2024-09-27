@@ -31,7 +31,7 @@ package struct SwiftDylib {  // FIXME: remove this entire utility; replace with 
     self.log = Logger(label: "SwiftDylib(\(path))", logLevel: .trace)  // TODO: take from env
   }
 
-  package func fillInTypeMangledName(_ decl: ImportedClass) async throws -> ImportedClass {
+  package func fillInTypeMangledName(_ decl: ImportedNominalType) async throws -> ImportedNominalType {
     // TODO: this is hacky, not precise at all and will be removed entirely
     guard decl.name.swiftMangledName.isEmpty else {
       // it was already processed

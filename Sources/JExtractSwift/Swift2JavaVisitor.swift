@@ -16,57 +16,93 @@ import SwiftParser
 import SwiftSyntax
 
 final class Swift2JavaVisitor: SyntaxVisitor {
-  let log: Logger
+  let translator: Swift2JavaTranslator
 
   /// The Swift module we're visiting declarations in
   let moduleName: String
+
   /// The target java package we are going to generate types into eventually,
   /// store this along with type names as we import them.
   let targetJavaPackage: String
 
-  var javaMethodDecls: [ImportedFunc] = []
-  var javaTypeDecls: [ImportedClass] = []
+  /// The current type name as a nested name like A.B.C.
+  var currentTypeName: String? = nil
 
-  var currentTypeDecl: ImportedClass? = nil
+  var log: Logger { translator.log }
 
-  init(moduleName: String, targetJavaPackage: String, log: Logger) {
+  init(moduleName: String, targetJavaPackage: String, translator: Swift2JavaTranslator) {
     self.moduleName = moduleName
     self.targetJavaPackage = targetJavaPackage
-    self.log = log
+    self.translator = translator
 
     super.init(viewMode: .all)
   }
 
+  /// Try to resolve the given nominal type node into its imported
+  /// representation.
+  func resolveNominalType(
+    _ nominal: some DeclGroupSyntax & NamedDeclSyntax,
+    kind: NominalTypeKind
+  ) -> ImportedNominalType? {
+    if !nominal.shouldImport(log: log) {
+      return nil
+    }
+
+    guard let fullName = translator.nominalResolution.fullyQualifiedName(of: nominal) else {
+      return nil
+    }
+
+    if let alreadyImported = translator.importedTypes[fullName] {
+      return alreadyImported
+    }
+
+    let importedNominal = ImportedNominalType(
+      name: ImportedTypeName(
+        swiftTypeName: fullName,
+        javaType: .class(
+          package: targetJavaPackage,
+          name: fullName
+        ),
+        swiftMangledName: nominal.mangledNameFromComment
+      ),
+      kind: kind
+    )
+
+    translator.importedTypes[fullName] = importedNominal
+    return importedNominal
+  }
+
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard node.shouldImport(log: log) else {
+    guard let importedNominalType = resolveNominalType(node, kind: .class) else {
       return .skipChildren
     }
 
-    log.info("Import: \(node.kind) \(node.name)")
-    currentTypeDecl = ImportedClass(
-      // TODO: support nested classes (parent name here)
-      name: ImportedTypeName(
-        swiftTypeName: node.name.text,
-        javaType: .class(
-          package: targetJavaPackage,
-          name: node.name.text
-        )
-      )
-    )
-
-    // Retrieve the mangled name, if available.
-    if let mangledName = node.mangledNameFromComment {
-      currentTypeDecl!.name.swiftMangledName = mangledName
-    }
-
+    currentTypeName = importedNominalType.name.swiftTypeName
     return .visitChildren
   }
 
   override func visitPost(_ node: ClassDeclSyntax) {
-    if let currentTypeDecl {
+    if currentTypeName != nil {
       log.info("Completed import: \(node.kind) \(node.name)")
-      self.javaTypeDecls.append(currentTypeDecl)
-      self.currentTypeDecl = nil
+      currentTypeName = nil
+    }
+  }
+
+  override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+    // Resolve the extended type of the extension as an imported nominal, and
+    // recurse if we found it.
+    guard let nominal = translator.nominalResolution.extendedType(of: node),
+          let importedNominalType = resolveNominalType(nominal, kind: .class) else {
+      return .skipChildren
+    }
+
+    currentTypeName = importedNominalType.name.swiftTypeName
+    return .visitChildren
+  }
+
+  override func visitPost(_ node: ExtensionDeclSyntax) {
+    if currentTypeName != nil {
+      currentTypeName = nil
     }
   }
 
@@ -113,7 +149,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)(\(argumentLabelsStr))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeDecl?.name,
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.name,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
@@ -125,26 +161,26 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    if var currentTypeDecl = self.currentTypeDecl {
-      log.info("Record method in \(currentTypeDecl.name.javaType.description)")
-      currentTypeDecl.methods.append(funcDecl)
-      self.currentTypeDecl = currentTypeDecl
+    if let currentTypeName {
+      log.info("Record method in \(currentTypeName)")
+      translator.importedTypes[currentTypeName]?.methods.append(funcDecl)
     } else {
-      javaMethodDecls.append(funcDecl)
+      translator.importedGlobalFuncs.append(funcDecl)
     }
 
     return .skipChildren
   }
 
   override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard var currentTypeDecl = self.currentTypeDecl else {
+    guard let currentTypeName,
+            let currentType = translator.importedTypes[currentTypeName] else {
       fatalError("Initializer must be within a current type, was: \(node)")
     }
     guard node.shouldImport(log: log) else {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentTypeDecl.name.javaType.description)")
+    self.log.info("Import initializer: \(node.kind) \(currentType.name.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -164,9 +200,9 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeDecl.name,
+      parentName: currentType.name,
       identifier: initIdentifier,
-      returnType: currentTypeDecl.name,
+      returnType: currentType.name,
       parameters: params
     )
     funcDecl.isInit = true
@@ -177,15 +213,14 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    log.info("Record initializer method in \(currentTypeDecl.name.javaType.description): \(funcDecl.identifier)")
-    currentTypeDecl.initializers.append(funcDecl)
-    self.currentTypeDecl = currentTypeDecl
+    log.info("Record initializer method in \(currentType.name.javaType.description): \(funcDecl.identifier)")
+    translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
     return .skipChildren
   }
 }
 
-extension ClassDeclSyntax {
+extension DeclGroupSyntax where Self: NamedDeclSyntax {
   func shouldImport(log: Logger) -> Bool {
     guard (accessControlModifiers.first { $0.isPublic }) != nil else {
       log.trace("Cannot import \(self.name) because: is not public")
