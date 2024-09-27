@@ -116,7 +116,7 @@ extension Swift2JavaVisitor {
     }
 
     // Identify the various pointer types from the standard library.
-    if let (requiresArgument, _, _) = name.isNameOfSwiftPointerType {
+    if let (requiresArgument, _, hasCount) = name.isNameOfSwiftPointerType, !hasCount {
       // Dig out the pointee type if needed.
       if requiresArgument {
         guard let genericArguments else {
@@ -144,20 +144,14 @@ extension Swift2JavaVisitor {
       throw TypeTranslationError.unexpectedGenericArguments(type, genericArguments)
     }
 
-    // Nested types aren't mapped into Java.
-    if parent != nil {
-      throw TypeTranslationError.nestedType(type)
+    // Look up the imported types by name to resolve it to a nominal type.
+    let swiftTypeName = type.trimmedDescription // FIXME: This is a hack.
+    guard let resolvedNominal = translator.nominalResolution.resolveNominalType(swiftTypeName),
+          let importedNominal = translator.importedNominalType(resolvedNominal) else {
+      throw TypeTranslationError.unknown(type)
     }
 
-    // Swift types are passed indirectly.
-    // FIXME: Look up type names to figure out which ones are exposed and how.
-    return TranslatedType(
-      cCompatibleConvention: .indirect,
-      originalSwiftType: type,
-      cCompatibleSwiftType: "UnsafeMutablePointer<\(type)>",
-      cCompatibleJavaMemoryLayout: .heapObject,
-      javaType: .class(package: nil, name: name)
-    )
+    return importedNominal.translatedType
   }
 }
 
@@ -286,6 +280,6 @@ enum TypeTranslationError: Error {
   /// Missing generic arguments.
   case missingGenericArguments(TypeSyntax)
 
-  /// Type syntax nodes cannot be mapped.
-  case nestedType(TypeSyntax)
+  /// Unknown nominal type.
+  case unknown(TypeSyntax)
 }

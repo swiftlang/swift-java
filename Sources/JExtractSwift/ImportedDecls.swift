@@ -43,7 +43,7 @@ public struct ImportedNominalType: ImportedDecl {
     TranslatedType(
       cCompatibleConvention: .direct,
       originalSwiftType: "\(raw: swiftTypeName)",
-      cCompatibleSwiftType: "\(raw: swiftTypeName)",
+      cCompatibleSwiftType: "UnsafeRawPointer",
       cCompatibleJavaMemoryLayout: .heapObject,
       javaType: javaType
     )

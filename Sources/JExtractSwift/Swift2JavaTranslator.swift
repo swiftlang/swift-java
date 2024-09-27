@@ -183,6 +183,51 @@ extension Swift2JavaTranslator {
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Type translation
+extension Swift2JavaTranslator {
+  /// Try to resolve the given nominal type node into its imported
+  /// representation.
+  func importedNominalType(
+    _ nominal: some DeclGroupSyntax & NamedDeclSyntax
+  ) -> ImportedNominalType? {
+    if !nominal.shouldImport(log: log) {
+      return nil
+    }
+
+    guard let fullName = nominalResolution.fullyQualifiedName(of: nominal) else {
+      return nil
+    }
+
+    if let alreadyImported = importedTypes[fullName] {
+      return alreadyImported
+    }
+
+    // Determine the nominal type kind.
+    let kind: NominalTypeKind
+    switch Syntax(nominal).as(SyntaxEnum.self) {
+    case .actorDecl:  kind = .actor
+    case .classDecl:  kind = .class
+    case .enumDecl:   kind = .enum
+    case .structDecl: kind = .struct
+    default: return nil
+    }
+
+    let importedNominal = ImportedNominalType(
+      swiftTypeName: fullName,
+      javaType: .class(
+        package: javaPackage,
+        name: fullName
+      ),
+      swiftMangledName: nominal.mangledNameFromComment,
+      kind: kind
+    )
+
+    importedTypes[fullName] = importedNominal
+    return importedNominal
+  }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Errors
 
 public struct Swift2JavaTranslatorError: Error {

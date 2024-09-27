@@ -38,40 +38,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     super.init(viewMode: .all)
   }
 
-  /// Try to resolve the given nominal type node into its imported
-  /// representation.
-  func resolveNominalType(
-    _ nominal: some DeclGroupSyntax & NamedDeclSyntax,
-    kind: NominalTypeKind
-  ) -> ImportedNominalType? {
-    if !nominal.shouldImport(log: log) {
-      return nil
-    }
-
-    guard let fullName = translator.nominalResolution.fullyQualifiedName(of: nominal) else {
-      return nil
-    }
-
-    if let alreadyImported = translator.importedTypes[fullName] {
-      return alreadyImported
-    }
-
-    let importedNominal = ImportedNominalType(
-      swiftTypeName: fullName,
-      javaType: .class(
-        package: targetJavaPackage,
-        name: fullName
-      ),
-      swiftMangledName: nominal.mangledNameFromComment,
-      kind: kind
-    )
-
-    translator.importedTypes[fullName] = importedNominal
-    return importedNominal
-  }
-
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard let importedNominalType = resolveNominalType(node, kind: .class) else {
+    guard let importedNominalType = translator.importedNominalType(node) else {
       return .skipChildren
     }
 
@@ -90,7 +58,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
     guard let nominal = translator.nominalResolution.extendedType(of: node),
-          let importedNominalType = resolveNominalType(nominal, kind: .class) else {
+          let importedNominalType = translator.importedNominalType(nominal) else {
       return .skipChildren
     }
 

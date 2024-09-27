@@ -53,6 +53,12 @@ final class MethodImportTests {
 
       @objc deinit
     }
+
+    // FIXME: Hack to allow us to translate "String", even though it's not
+    // actually available
+    // MANGLED NAME: $ss
+    public class String {
+    }
     """
 
   @Test func method_helloWorld() async throws {
@@ -161,7 +167,7 @@ final class MethodImportTests {
          * public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
          * }
          */
-        public static void globalTakeIntLongString(int i32, long l, String s) {
+        public static void globalTakeIntLongString(int i32, long l, com.example.swift.String s) {
             var mh$ = globalTakeIntLongString.HANDLE;
             try {
                 if (TRACE_DOWNCALLS) {
