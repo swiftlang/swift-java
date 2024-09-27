@@ -15,28 +15,38 @@ import Foundation
 import JavaTypes
 import SwiftSyntax
 
-protocol ImportedDecl: Hashable {
+protocol ImportedDecl {
 
 }
 
 public typealias JavaPackage = String
 
-public struct ImportedProtocol: ImportedDecl {
-  public var identifier: String
-}
-
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
 public struct ImportedNominalType: ImportedDecl {
-  public var name: ImportedTypeName
+  public let swiftTypeName: String
+  public let javaType: JavaType
+  public var swiftMangledName: String?
   public var kind: NominalTypeKind
 
   public var initializers: [ImportedFunc] = []
   public var methods: [ImportedFunc] = []
 
-  public init(name: ImportedTypeName, kind: NominalTypeKind) {
-    self.name = name
+  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil, kind: NominalTypeKind) {
+    self.swiftTypeName = swiftTypeName
+    self.javaType = javaType
+    self.swiftMangledName = swiftMangledName
     self.kind = kind
+  }
+
+  var translatedType: TranslatedType {
+    TranslatedType(
+      cCompatibleConvention: .direct,
+      originalSwiftType: "\(raw: swiftTypeName)",
+      cCompatibleSwiftType: "UnsafeRawPointer",
+      cCompatibleJavaMemoryLayout: .heapObject,
+      javaType: javaType
+    )
   }
 }
 
@@ -47,7 +57,7 @@ public enum NominalTypeKind {
   case `struct`
 }
 
-public struct ImportedParam: Hashable {
+public struct ImportedParam {
   let param: FunctionParameterSyntax
 
   var firstName: String? {
@@ -78,7 +88,7 @@ public struct ImportedParam: Hashable {
   }
 
   // The mapped-to Java type of the above Java type, collections and optionals may be replaced with Java ones etc.
-  var type: ImportedTypeName
+  var type: TranslatedType
 }
 
 extension ImportedParam {
@@ -88,30 +98,6 @@ extension ImportedParam {
     }
 
     return "\(effectiveName!).$memorySegment()"
-  }
-}
-
-public struct ImportedTypeName: Hashable {
-  public var swiftTypeName: String
-
-  public var swiftMangledName: String = ""
-
-  public var javaType: JavaType
-
-  public var isVoid: Bool { javaType == .void }
-
-  public var fullyQualifiedName: String { javaType.description }
-
-  /// Retrieve the Java class name that this type describes, or nil if it
-  /// doesn't represent a class at all.
-  public var javaClassName: String? {
-    javaType.className
-  }
-
-  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil) {
-    self.swiftTypeName = swiftTypeName
-    self.javaType = javaType
-    self.swiftMangledName = swiftMangledName ?? ""
   }
 }
 
@@ -130,7 +116,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// this will contain that declaration's imported name.
   ///
   /// This is necessary when rendering accessor Java code we need the type that "self" is expecting to have.
-  public var parentName: ImportedTypeName?
+  var parentName: TranslatedType?
   public var hasParent: Bool { parentName != nil }
 
   /// This is a full name such as init(cap:name:).
@@ -155,7 +141,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
     return identifier
   }
 
-  public var returnType: ImportedTypeName
+  public var returnType: TranslatedType
   public var parameters: [ImportedParam]
 
   public func effectiveParameters(selfVariant: SelfParameterVariant?) -> [ImportedParam] {
@@ -172,13 +158,21 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
       case .pointer:
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
-          ImportedParam(param: selfParam, type: java_lang_foreign_MemorySegment(swiftTypeName: "Self.self"))
+          ImportedParam(
+            param: selfParam,
+            type: parentName
+          )
         )
 
       case .memorySegment:
         let selfParam: FunctionParameterSyntax = "self$: $java_lang_foreign_MemorySegment"
+        var parentForSelf = parentName
+        parentForSelf.javaType = .javaForeignMemorySegment
         params.append(
-          ImportedParam(param: selfParam, type: java_lang_foreign_MemorySegment(swiftTypeName: ""))
+          ImportedParam(
+            param: selfParam,
+            type: parentForSelf
+          )
         )
 
       case .wrapper:
@@ -201,9 +195,9 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var isInit: Bool = false
 
   public init(
-    parentName: ImportedTypeName?,
+    parentName: TranslatedType?,
     identifier: String,
-    returnType: ImportedTypeName,
+    returnType: TranslatedType,
     parameters: [ImportedParam]
   ) {
     self.parentName = parentName

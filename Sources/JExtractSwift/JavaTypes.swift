@@ -13,13 +13,6 @@
 
 import JavaTypes
 
-func java_lang_foreign_MemorySegment(swiftTypeName: String) -> ImportedTypeName {
-  ImportedTypeName(
-    swiftTypeName: swiftTypeName,
-    javaType: .javaForeignMemorySegment
-  )
-}
-
 extension JavaType {
   /// The description of the type java.lang.foreign.MemorySegment.
   static var javaForeignMemorySegment: JavaType {

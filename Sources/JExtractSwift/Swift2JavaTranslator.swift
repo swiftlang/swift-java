@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import JavaTypes
 import SwiftBasicFormat
 import SwiftParser
 import SwiftSyntax
@@ -56,6 +57,15 @@ public final class Swift2JavaTranslator {
 // MARK: Analysis
 
 extension Swift2JavaTranslator {
+  /// The primitive Java type to use for Swift's Int type, which follows the
+  /// size of a pointer.
+  ///
+  /// FIXME: Consider whether to extract this information from the Swift
+  /// interface file, so that it would be 'int' for 32-bit targets or 'long' for
+  /// 64-bit targets but make the Java code different for the two, vs. adding
+  /// a checked truncation operation at the Java/Swift board.
+  var javaPrimitiveForSwiftInt: JavaType { .long }
+
   public func analyze(
     swiftInterfacePath: String,
     text: String? = nil
@@ -126,11 +136,11 @@ extension Swift2JavaTranslator {
 
     importedTypes = Dictionary(uniqueKeysWithValues: try await importedTypes._mapAsync { (tyName, tyDecl) in
       var tyDecl = tyDecl
-      log.info("Mapping type: \(tyDecl.name)")
+      log.info("Mapping type: \(tyDecl.swiftTypeName)")
 
       tyDecl = try await dylib.fillInTypeMangledName(tyDecl)
 
-      log.info("Mapping members of: \(tyDecl.name)")
+      log.info("Mapping members of: \(tyDecl.swiftTypeName)")
       tyDecl.initializers = try await tyDecl.initializers._mapAsync { initDecl in
         dylib.log.logLevel = .trace
 
@@ -170,6 +180,51 @@ extension Swift2JavaTranslator {
     "java.nio.charset.StandardCharsets",
   ]
 
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Type translation
+extension Swift2JavaTranslator {
+  /// Try to resolve the given nominal type node into its imported
+  /// representation.
+  func importedNominalType(
+    _ nominal: some DeclGroupSyntax & NamedDeclSyntax
+  ) -> ImportedNominalType? {
+    if !nominal.shouldImport(log: log) {
+      return nil
+    }
+
+    guard let fullName = nominalResolution.fullyQualifiedName(of: nominal) else {
+      return nil
+    }
+
+    if let alreadyImported = importedTypes[fullName] {
+      return alreadyImported
+    }
+
+    // Determine the nominal type kind.
+    let kind: NominalTypeKind
+    switch Syntax(nominal).as(SyntaxEnum.self) {
+    case .actorDecl:  kind = .actor
+    case .classDecl:  kind = .class
+    case .enumDecl:   kind = .enum
+    case .structDecl: kind = .struct
+    default: return nil
+    }
+
+    let importedNominal = ImportedNominalType(
+      swiftTypeName: fullName,
+      javaType: .class(
+        package: javaPackage,
+        name: fullName
+      ),
+      swiftMangledName: nominal.mangledNameFromComment,
+      kind: kind
+    )
+
+    importedTypes[fullName] = importedNominal
+    return importedNominal
+  }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------

@@ -54,7 +54,6 @@ public struct ForeignValueLayout: CustomStringConvertible {
 }
 
 extension ForeignValueLayout {
-  public static let SwiftSelf = Self(inlineComment: "Self", javaConstant: "SWIFT_SELF")
   public static let SwiftPointer = Self(javaConstant: "SWIFT_POINTER")
 
   public static let SwiftBool = Self(javaConstant: "SWIFT_BOOL")
@@ -63,6 +62,7 @@ extension ForeignValueLayout {
   public static let SwiftInt64 = Self(javaConstant: "SWIFT_INT64")
   public static let SwiftInt32 = Self(javaConstant: "SWIFT_INT32")
   public static let SwiftInt16 = Self(javaConstant: "SWIFT_INT16")
+  public static let SwiftUInt16 = Self(javaConstant: "SWIFT_UINT16")
   public static let SwiftInt8 = Self(javaConstant: "SWIFT_INT8")
 
   public static let SwiftFloat = Self(javaConstant: "SWIFT_FLOAT")

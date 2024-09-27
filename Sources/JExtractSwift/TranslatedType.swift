@@ -33,7 +33,7 @@ extension Swift2JavaVisitor {
           cCompatibleConvention: .direct,
           originalSwiftType: type,
           cCompatibleSwiftType: "@convention(c) () -> Void",
-          cCompatibleJavaMemoryLayout: .memorySegment,
+          cCompatibleJavaMemoryLayout: .cFunction,
           javaType: .javaLangRunnable
         )
       }
@@ -102,8 +102,21 @@ extension Swift2JavaVisitor {
       )
     }
 
+    // If this is the Swift "Int" type, it's primitive in Java but might
+    // map to either "int" or "long" depending whether the platform is
+    // 32-bit or 64-bit.
+    if parent == nil, name == "Int" {
+      return TranslatedType(
+        cCompatibleConvention: .direct,
+        originalSwiftType: "\(raw: name)",
+        cCompatibleSwiftType: "Swift.\(raw: name)",
+        cCompatibleJavaMemoryLayout: .int,
+        javaType: translator.javaPrimitiveForSwiftInt
+      )
+    }
+
     // Identify the various pointer types from the standard library.
-    if let (requiresArgument, _, _) = name.isNameOfSwiftPointerType {
+    if let (requiresArgument, _, hasCount) = name.isNameOfSwiftPointerType, !hasCount {
       // Dig out the pointee type if needed.
       if requiresArgument {
         guard let genericArguments else {
@@ -121,7 +134,7 @@ extension Swift2JavaVisitor {
         cCompatibleConvention: .direct,
         originalSwiftType: type,
         cCompatibleSwiftType: "UnsafeMutableRawPointer",
-        cCompatibleJavaMemoryLayout: .memorySegment,
+        cCompatibleJavaMemoryLayout: .heapObject,
         javaType: .javaForeignMemorySegment
       )
     }
@@ -131,20 +144,14 @@ extension Swift2JavaVisitor {
       throw TypeTranslationError.unexpectedGenericArguments(type, genericArguments)
     }
 
-    // Nested types aren't mapped into Java.
-    if parent != nil {
-      throw TypeTranslationError.nestedType(type)
+    // Look up the imported types by name to resolve it to a nominal type.
+    let swiftTypeName = type.trimmedDescription // FIXME: This is a hack.
+    guard let resolvedNominal = translator.nominalResolution.resolveNominalType(swiftTypeName),
+          let importedNominal = translator.importedNominalType(resolvedNominal) else {
+      throw TypeTranslationError.unknown(type)
     }
 
-    // Swift types are passed indirectly.
-    // FIXME: Look up type names to figure out which ones are exposed and how.
-    return TranslatedType(
-      cCompatibleConvention: .indirect,
-      originalSwiftType: type,
-      cCompatibleSwiftType: "UnsafeMutablePointer<\(type)>",
-      cCompatibleJavaMemoryLayout: .memorySegment,
-      javaType: .class(package: nil, name: name)
-    )
+    return importedNominal.translatedType
   }
 }
 
@@ -194,7 +201,7 @@ enum ParameterConvention {
   case indirect
 }
 
-struct TranslatedType {
+public struct TranslatedType {
   /// How a parameter of this type will be passed through C functions.
   var cCompatibleConvention: ParameterConvention
 
@@ -211,20 +218,56 @@ struct TranslatedType {
 
   /// The Java type that is used to present these values in Java.
   var javaType: JavaType
+
+  /// Produce a Swift type name to reference this type.
+  var swiftTypeName: String {
+    originalSwiftType.trimmedDescription
+  }
+}
+
+/// Describes the C-compatible layout as it should be referenced from Java.
+enum CCompatibleJavaMemoryLayout {
+  /// A primitive Java type that has a direct counterpart in C.
+  case primitive(JavaType)
+
+  /// The Swift "Int" type, which may be either a Java int (32-bit platforms) or
+  /// Java long (64-bit platforms).
+  case int
+
+  /// A Swift heap object, which is treated as a pointer for interoperability
+  /// purposes but must be retained/released to keep it alive.
+  case heapObject
+
+  /// A C function pointer. In Swift, this will be a @convention(c) function.
+  /// In Java, a downcall handle to a function.
+  case cFunction
 }
 
 extension TranslatedType {
-  var importedTypeName: ImportedTypeName {
-    ImportedTypeName(
-      swiftTypeName: originalSwiftType.trimmedDescription,
-      javaType: javaType
-    )
-  }
+  /// Determine the foreign value layout to use for the translated type with
+  /// the Java Foreign Function and Memory API.
+  var foreignValueLayout: ForeignValueLayout {
+    switch cCompatibleJavaMemoryLayout {
+    case .primitive(let javaType):
+      switch javaType {
+      case .boolean: return .SwiftBool
+      case .byte: return .SwiftInt8
+      case .char: return .SwiftUInt16
+      case .short: return .SwiftInt16
+      case .int: return .SwiftInt32
+      case .long: return .SwiftInt64
+      case .float: return .SwiftFloat
+      case .double: return .SwiftDouble
+      case .array, .class, .void: fatalError("Not a primitive type")
+      }
 
-}
-enum CCompatibleJavaMemoryLayout {
-  case primitive(JavaType)
-  case memorySegment
+    case .int:
+      return .SwiftInt
+
+    case .heapObject, .cFunction:
+      return .SwiftPointer
+    }
+  }
 }
 
 enum TypeTranslationError: Error {
@@ -237,6 +280,6 @@ enum TypeTranslationError: Error {
   /// Missing generic arguments.
   case missingGenericArguments(TypeSyntax)
 
-  /// Type syntax nodes cannot be mapped.
-  case nestedType(TypeSyntax)
+  /// Unknown nominal type.
+  case unknown(TypeSyntax)
 }

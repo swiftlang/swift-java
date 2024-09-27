@@ -38,46 +38,12 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     super.init(viewMode: .all)
   }
 
-  /// Try to resolve the given nominal type node into its imported
-  /// representation.
-  func resolveNominalType(
-    _ nominal: some DeclGroupSyntax & NamedDeclSyntax,
-    kind: NominalTypeKind
-  ) -> ImportedNominalType? {
-    if !nominal.shouldImport(log: log) {
-      return nil
-    }
-
-    guard let fullName = translator.nominalResolution.fullyQualifiedName(of: nominal) else {
-      return nil
-    }
-
-    if let alreadyImported = translator.importedTypes[fullName] {
-      return alreadyImported
-    }
-
-    let importedNominal = ImportedNominalType(
-      name: ImportedTypeName(
-        swiftTypeName: fullName,
-        javaType: .class(
-          package: targetJavaPackage,
-          name: fullName
-        ),
-        swiftMangledName: nominal.mangledNameFromComment
-      ),
-      kind: kind
-    )
-
-    translator.importedTypes[fullName] = importedNominal
-    return importedNominal
-  }
-
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard let importedNominalType = resolveNominalType(node, kind: .class) else {
+    guard let importedNominalType = translator.importedNominalType(node) else {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.name.swiftTypeName
+    currentTypeName = importedNominalType.swiftTypeName
     return .visitChildren
   }
 
@@ -92,11 +58,11 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
     guard let nominal = translator.nominalResolution.extendedType(of: node),
-          let importedNominalType = resolveNominalType(nominal, kind: .class) else {
+          let importedNominalType = translator.importedNominalType(nominal) else {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.name.swiftTypeName
+    currentTypeName = importedNominalType.swiftTypeName
     return .visitChildren
   }
 
@@ -122,18 +88,18 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     let params: [ImportedParam]
-    let javaResultType: ImportedTypeName
+    let javaResultType: TranslatedType
     do {
       params = try node.signature.parameterClause.parameters.map { param in
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
           param: param,
-          type: try mapTypeToJava(name: param.type)
+          type: try cCompatibleType(for: param.type)
         )
       }
 
-      javaResultType = try mapTypeToJava(name: returnTy)
+      javaResultType = try cCompatibleType(for: returnTy)
     } catch {
       self.log.info("Unable to import function \(node.name) - \(error)")
       return .skipChildren
@@ -149,7 +115,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)(\(argumentLabelsStr))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeName.map { translator.importedTypes[$0] }??.name,
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
@@ -180,7 +146,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentType.name.javaType.description)")
+    self.log.info("Import initializer: \(node.kind) \(currentType.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -188,7 +154,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         // TODO: More robust type handling
         return ImportedParam(
           param: param,
-          type: try mapTypeToJava(name: param.type)
+          type: try cCompatibleType(for: param.type)
         )
       }
     } catch {
@@ -200,9 +166,9 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentType.name,
+      parentName: currentType.translatedType,
       identifier: initIdentifier,
-      returnType: currentType.name,
+      returnType: currentType.translatedType,
       parameters: params
     )
     funcDecl.isInit = true
@@ -213,7 +179,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    log.info("Record initializer method in \(currentType.name.javaType.description): \(funcDecl.identifier)")
+    log.info("Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
     return .skipChildren
@@ -253,13 +219,6 @@ extension FunctionDeclSyntax {
     }
 
     return true
-  }
-}
-
-extension Swift2JavaVisitor {
-  // TODO: this is more more complicated, we need to know our package and imports etc
-  func mapTypeToJava(name swiftType: TypeSyntax) throws -> ImportedTypeName {
-    return try cCompatibleType(for: swiftType).importedTypeName
   }
 }
 
