@@ -22,11 +22,11 @@ struct NominalTypeLookupSuite {
     _ resolution: NominalTypeResolution,
     name: String,
     fileID: String = #fileID,
-    fileParh: String = #filePath,
+    filePath: String = #filePath,
     line: Int = #line,
     column: Int = #column
   ) {
-    let sourceLocation = SourceLocation(fileID: fileID, filePath: fileParh, line: line, column: column)
+    let sourceLocation = SourceLocation(fileID: fileID, filePath: filePath, line: line, column: column)
     let nominal = resolution.resolveNominalType(name)
     #expect(nominal != nil, sourceLocation: sourceLocation)
     if let nominal {
