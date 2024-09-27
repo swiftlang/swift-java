@@ -12,10 +12,10 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwift
-import XCTest
+import Testing
 
-// TODO: Adopt Testing instead
-final class FunctionDescriptorTests: XCTestCase {
+@Suite
+final class FunctionDescriptorTests {
   let interfaceFile =
     """
     // swift-interface-format-version: 1.0
@@ -73,7 +73,8 @@ final class FunctionDescriptorTests: XCTestCase {
     try await body(output)
   }
 
-  func test_FunctionDescriptor_globalTakeInt() async throws {
+  @Test
+  func FunctionDescriptor_globalTakeInt() async throws {
     try await functionDescriptorTest("globalTakeInt") { output in
       assertOutput(
         output,
@@ -87,7 +88,8 @@ final class FunctionDescriptorTests: XCTestCase {
     }
   }
 
-  func test_FunctionDescriptor_globalTakeLongIntString() async throws {
+  @Test
+  func FunctionDescriptor_globalTakeLongIntString() async throws {
     try await functionDescriptorTest("globalTakeLongInt") { output in
       assertOutput(
         output,
@@ -102,7 +104,8 @@ final class FunctionDescriptorTests: XCTestCase {
     }
   }
 
-  func test_FunctionDescriptor_echoInt() async throws {
+  @Test
+  func FunctionDescriptor_echoInt() async throws {
     try await functionDescriptorTest("echoInt") { output in
       assertOutput(
         output,

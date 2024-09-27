@@ -12,9 +12,17 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwift
-import XCTest
+import Testing
+import struct Foundation.CharacterSet
 
-func assertOutput(_ got: String, expected: String, file: StaticString = #filePath, line: UInt = #line) {
+func assertOutput(
+  _ got: String,
+  expected: String,
+  fileID: String = #fileID,
+  filePath: String = #filePath,
+  line: Int = #line,
+  column: Int = #column
+) {
   let gotLines = got.split(separator: "\n")
   let expectedLines = expected.split(separator: "\n")
 
@@ -39,7 +47,9 @@ func assertOutput(_ got: String, expected: String, file: StaticString = #filePat
 
       diffLineNumbers.append(no)
 
-      XCTAssertEqual(ge, ee, file: file, line: line)
+      let sourceLocation = SourceLocation(
+        fileID: fileID, filePath: filePath, line: line, column: column)
+      #expect(ge == ee, sourceLocation: sourceLocation)
     }
 
   }

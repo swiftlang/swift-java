@@ -12,22 +12,24 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwift
-import XCTest
+import Testing
 
-final class SwiftDylibTests: XCTestCase {
+final class SwiftDylibTests {
+
+  @Test
   func test_nm() async throws {
     let dylib = SwiftDylib(path: ".build/arm64-apple-macosx/debug/libJavaKitExample.dylib")!
 
     let names = try await dylib.nmSymbolNames(grepDemangled: ["MySwiftClass", "len"])
 
-    XCTAssertTrue(
+    #expect(
       names.contains {
         $0.descriptiveName.contains("JavaKitExample.MySwiftClass.len.getter")
       }
     )
 
     let getter = names.findPropertyGetter()
-    XCTAssertEqual(getter?.mangledName, "$s14JavaKitExample12MySwiftClassC3lenSivg")
-    XCTAssertEqual(getter?.descriptiveName, "JavaKitExample.MySwiftClass.len.getter : Swift.Int")
+    #expect(getter?.mangledName == "$s14JavaKitExample12MySwiftClassC3lenSivg")
+    #expect(getter?.descriptiveName == "JavaKitExample.MySwiftClass.len.getter : Swift.Int")
   }
 }
