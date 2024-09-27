@@ -41,6 +41,8 @@ public final class Swift2JavaTranslator {
   /// type representation.
   public var importedTypes: [String: ImportedNominalType] = [:]
 
+  let nominalResolution: NominalTypeResolution = NominalTypeResolution()
+
   public init(
     javaPackage: String,
     swiftModuleName: String
@@ -81,6 +83,10 @@ extension Swift2JavaTranslator {
     assert(interfaceFilePath.hasSuffix(Self.SWIFT_INTERFACE_SUFFIX))
 
     let sourceFileSyntax = Parser.parse(source: text)
+
+    // Find all of the types and extensions, then bind the extensions.
+    nominalResolution.addSourceFile(sourceFileSyntax)
+    nominalResolution.bindExtensions()
 
     let visitor = Swift2JavaVisitor(
       moduleName: self.swiftModuleName,

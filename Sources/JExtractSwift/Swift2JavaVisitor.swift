@@ -25,6 +25,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   /// store this along with type names as we import them.
   let targetJavaPackage: String
 
+  /// The current type name as a nested name like A.B.C.
   var currentTypeName: String? = nil
 
   var log: Logger { translator.log }
@@ -37,33 +38,70 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     super.init(viewMode: .all)
   }
 
+  /// Try to resolve the given nominal type node into its imported
+  /// representation.
+  func resolveNominalType(
+    _ nominal: some DeclGroupSyntax & NamedDeclSyntax,
+    kind: NominalTypeKind
+  ) -> ImportedNominalType? {
+    if !nominal.shouldImport(log: log) {
+      return nil
+    }
+
+    guard let fullName = translator.nominalResolution.fullyQualifiedName(of: nominal) else {
+      return nil
+    }
+
+    if let alreadyImported = translator.importedTypes[fullName] {
+      return alreadyImported
+    }
+
+    let importedNominal = ImportedNominalType(
+      name: ImportedTypeName(
+        swiftTypeName: fullName,
+        javaType: .class(
+          package: targetJavaPackage,
+          name: fullName
+        ),
+        swiftMangledName: nominal.mangledNameFromComment
+      ),
+      kind: kind
+    )
+
+    translator.importedTypes[fullName] = importedNominal
+    return importedNominal
+  }
+
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard node.shouldImport(log: log) else {
+    guard let importedNominalType = resolveNominalType(node, kind: .class) else {
       return .skipChildren
     }
 
-    log.info("Import: \(node.kind) \(node.name)")
-    let typeName = node.name.text
-    currentTypeName = typeName
-    translator.importedTypes[typeName] = ImportedNominalType(
-      // TODO: support nested classes (parent name here)
-      name: ImportedTypeName(
-        swiftTypeName: typeName,
-        javaType: .class(
-          package: targetJavaPackage,
-          name: typeName
-        ),
-        swiftMangledName: node.mangledNameFromComment
-      ),
-      kind: .class
-    )
-
+    currentTypeName = importedNominalType.name.swiftTypeName
     return .visitChildren
   }
 
   override func visitPost(_ node: ClassDeclSyntax) {
     if currentTypeName != nil {
       log.info("Completed import: \(node.kind) \(node.name)")
+      currentTypeName = nil
+    }
+  }
+
+  override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+    // Resolve the extended type of the extension as an imported nominal, and
+    // recurse if we found it.
+    guard let nominal = translator.nominalResolution.extendedType(of: node),
+          let importedNominalType = resolveNominalType(nominal, kind: .class) else {
+      return .skipChildren
+    }
+
+    currentTypeName = importedNominalType.name.swiftTypeName
+    return .visitChildren
+  }
+
+  override func visitPost(_ node: ExtensionDeclSyntax) {
+    if currentTypeName != nil {
       currentTypeName = nil
     }
   }
@@ -182,7 +220,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   }
 }
 
-extension ClassDeclSyntax {
+extension DeclGroupSyntax where Self: NamedDeclSyntax {
   func shouldImport(log: Logger) -> Bool {
     guard (accessControlModifiers.first { $0.isPublic }) != nil else {
       log.trace("Cannot import \(self.name) because: is not public")

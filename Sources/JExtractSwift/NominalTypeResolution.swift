@@ -17,10 +17,6 @@ import SwiftSyntax
 /// their extended nominal types and mapping type names to their full names.
 @_spi(Testing)
 public class NominalTypeResolution {
-  /// A syntax node for a nominal type declaration.
-  @_spi(Testing)
-  public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax
-
   /// Mapping from the syntax identifier for a given type declaration node,
   /// such as StructDeclSyntax, to the set of extensions of this particular
   /// type.
@@ -38,6 +34,10 @@ public class NominalTypeResolution {
 
   @_spi(Testing) public init() { }
 }
+
+/// A syntax node for a nominal type declaration.
+@_spi(Testing)
+public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax
 
 // MARK: Nominal type name resolution.
 extension NominalTypeResolution {
@@ -170,6 +170,7 @@ extension NominalTypeResolution {
   ///
   /// Returns the list of extensions that could not be resolved.
   @_spi(Testing)
+  @discardableResult
   public func bindExtensions() -> [ExtensionDeclSyntax] {
     while !unresolvedExtensions.isEmpty {
       // Try to resolve all of the unresolved extensions.

@@ -37,6 +37,11 @@ final class MethodImportTests: XCTestCase {
     // MANGLED NAME: $s14MySwiftLibrary23globalTakeLongIntString1l3i321sys5Int64V_s5Int32VSStF
     public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
 
+    extension MySwiftClass {
+      // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC22helloMemberFunctionInExtension
+      public func helloMemberInExtension()
+    }
+
     // MANGLED NAME: $s14MySwiftLibrary0aB5ClassCMa
     public class MySwiftClass {
       // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC3len3capACSi_SitcfC
@@ -200,6 +205,47 @@ final class MethodImportTests: XCTestCase {
          */
         public static void helloMemberFunction(java.lang.foreign.MemorySegment self$) {
             var mh$ = helloMemberFunction.HANDLE;
+            try {
+                if (TRACE_DOWNCALLS) {
+                    traceDowncall(self$);
+                }
+                mh$.invokeExact(self$);
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+        }
+        """
+    )
+  }
+
+  func test_method_class_helloMemberInExtension_self_memorySegment() async throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .trace
+
+    try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+
+    let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
+      $0.baseIdentifier == "helloMemberInExtension"
+    }!
+
+    let output = CodePrinter.toString { printer in
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+         * {@snippet lang=swift :
+         * public func helloMemberInExtension()
+         * }
+         */
+        public static void helloMemberInExtension(java.lang.foreign.MemorySegment self$) {
+            var mh$ = helloMemberInExtension.HANDLE;
             try {
                 if (TRACE_DOWNCALLS) {
                     traceDowncall(self$);
