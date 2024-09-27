@@ -102,6 +102,19 @@ extension Swift2JavaVisitor {
       )
     }
 
+    // If this is the Swift "Int" type, it's primitive in Java but might
+    // map to either "int" or "long" depending whether the platform is
+    // 32-bit or 64-bit.
+    if parent == nil, name == "Int" {
+      return TranslatedType(
+        cCompatibleConvention: .direct,
+        originalSwiftType: "\(raw: name)",
+        cCompatibleSwiftType: "Swift.\(raw: name)",
+        cCompatibleJavaMemoryLayout: .int,
+        javaType: translator.javaPrimitiveForSwiftInt
+      )
+    }
+
     // Identify the various pointer types from the standard library.
     if let (requiresArgument, _, _) = name.isNameOfSwiftPointerType {
       // Dig out the pointee type if needed.
@@ -220,10 +233,16 @@ extension TranslatedType {
       javaType: javaType
     )
   }
-
 }
+
 enum CCompatibleJavaMemoryLayout {
+  /// A primitive Java type.
   case primitive(JavaType)
+
+  /// The Swift "Int" type, which may be either a Java int (32-bit platforms) or
+  /// Java long (64-bit platforms).
+  case int
+
   case memorySegment
 }
 

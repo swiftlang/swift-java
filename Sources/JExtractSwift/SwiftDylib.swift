@@ -33,19 +33,19 @@ package struct SwiftDylib {  // FIXME: remove this entire utility; replace with 
 
   package func fillInTypeMangledName(_ decl: ImportedNominalType) async throws -> ImportedNominalType {
     // TODO: this is hacky, not precise at all and will be removed entirely
-    guard decl.name.swiftMangledName.isEmpty else {
+    guard decl.swiftMangledName == nil else {
       // it was already processed
       return decl
     }
 
     var decl = decl
     let names = try await nmSymbolNames(grepDemangled: [
-      decl.name.swiftTypeName,
+      decl.swiftTypeName,
       "type metadata for",
     ])
     if let name = names.first {
-      log.trace("Selected mangled name for '\(decl.name.javaType.description)': \(name)")
-      decl.name.swiftMangledName = name.mangledName
+      log.trace("Selected mangled name for '\(decl.javaType.description)': \(name)")
+      decl.swiftMangledName = name.mangledName
     }
 
     return decl

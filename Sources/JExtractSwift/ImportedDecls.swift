@@ -28,15 +28,26 @@ public struct ImportedProtocol: ImportedDecl {
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
 public struct ImportedNominalType: ImportedDecl {
-  public var name: ImportedTypeName
+  public let swiftTypeName: String
+  public let javaType: JavaType
+  public var swiftMangledName: String?
   public var kind: NominalTypeKind
 
   public var initializers: [ImportedFunc] = []
   public var methods: [ImportedFunc] = []
 
-  public init(name: ImportedTypeName, kind: NominalTypeKind) {
-    self.name = name
+  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil, kind: NominalTypeKind) {
+    self.swiftTypeName = swiftTypeName
+    self.javaType = javaType
+    self.swiftMangledName = swiftMangledName
     self.kind = kind
+  }
+
+  var importedTypeName: ImportedTypeName {
+    ImportedTypeName(
+      swiftTypeName: swiftTypeName,
+      javaType: javaType
+    )
   }
 }
 
@@ -172,13 +183,31 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
       case .pointer:
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
-          ImportedParam(param: selfParam, type: java_lang_foreign_MemorySegment(swiftTypeName: "Self.self"))
+          ImportedParam(
+            param: selfParam,
+            type: TranslatedType(
+              cCompatibleConvention: .indirect,
+              originalSwiftType: "\(raw: parentName.swiftTypeName)",
+              cCompatibleSwiftType: "UnsafeRawPointer",
+              cCompatibleJavaMemoryLayout: .memorySegment,
+              javaType: .javaForeignMemorySegment
+            ).importedTypeName
+          )
         )
 
       case .memorySegment:
         let selfParam: FunctionParameterSyntax = "self$: $java_lang_foreign_MemorySegment"
         params.append(
-          ImportedParam(param: selfParam, type: java_lang_foreign_MemorySegment(swiftTypeName: ""))
+          ImportedParam(
+            param: selfParam,
+            type: TranslatedType(
+              cCompatibleConvention: .indirect,
+              originalSwiftType: "\(raw: parentName.swiftTypeName)",
+              cCompatibleSwiftType: "UnsafeRawPointer",
+              cCompatibleJavaMemoryLayout: .memorySegment,
+              javaType: .javaForeignMemorySegment
+            ).importedTypeName
+          )
         )
 
       case .wrapper:

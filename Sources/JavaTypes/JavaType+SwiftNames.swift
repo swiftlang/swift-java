@@ -63,10 +63,6 @@ extension JavaType {
     case "Float": self = .float
     case "Double": self = .double
     case "Void": self = .void
-
-    /// NOTE: This is only correct for 64-bit platforms.
-    case "Int": self = .long
-
     default: return nil
     }
   }

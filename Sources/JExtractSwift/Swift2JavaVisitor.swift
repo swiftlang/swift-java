@@ -57,14 +57,12 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     let importedNominal = ImportedNominalType(
-      name: ImportedTypeName(
-        swiftTypeName: fullName,
-        javaType: .class(
-          package: targetJavaPackage,
-          name: fullName
-        ),
-        swiftMangledName: nominal.mangledNameFromComment
+      swiftTypeName: fullName,
+      javaType: .class(
+        package: targetJavaPackage,
+        name: fullName
       ),
+      swiftMangledName: nominal.mangledNameFromComment,
       kind: kind
     )
 
@@ -77,7 +75,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.name.swiftTypeName
+    currentTypeName = importedNominalType.swiftTypeName
     return .visitChildren
   }
 
@@ -96,7 +94,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.name.swiftTypeName
+    currentTypeName = importedNominalType.swiftTypeName
     return .visitChildren
   }
 
@@ -149,7 +147,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)(\(argumentLabelsStr))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentTypeName.map { translator.importedTypes[$0] }??.name,
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.importedTypeName,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
@@ -180,7 +178,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentType.name.javaType.description)")
+    self.log.info("Import initializer: \(node.kind) \(currentType.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -200,9 +198,9 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(params.compactMap { $0.effectiveName ?? "_" }.joined(separator: ":")))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentType.name,
+      parentName: currentType.importedTypeName,
       identifier: initIdentifier,
-      returnType: currentType.name,
+      returnType: currentType.importedTypeName,
       parameters: params
     )
     funcDecl.isInit = true
@@ -213,7 +211,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    log.info("Record initializer method in \(currentType.name.javaType.description): \(funcDecl.identifier)")
+    log.info("Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
     return .skipChildren

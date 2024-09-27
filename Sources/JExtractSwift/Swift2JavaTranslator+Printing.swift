@@ -28,7 +28,7 @@ extension Swift2JavaTranslator {
     var printer = CodePrinter()
 
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
-      let filename = "\(ty.name.javaClassName!).java"
+      let filename = "\(ty.javaType).java"
       log.info("Printing contents: \(filename)")
       printImportedClass(&printer, ty)
 
@@ -116,7 +116,7 @@ extension Swift2JavaTranslator {
       printer.print(
         """
         // FIXME: this detecting is somewhat off
-        public static final String TYPE_METADATA_NAME = "\(decl.name.swiftMangledName)";
+        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName!)";
         static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_METADATA_NAME);
         """
       )
@@ -165,7 +165,7 @@ extension Swift2JavaTranslator {
   }
 
   public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
-    printer.printTypeDecl("public final class \(decl.name.javaClassName!)") { printer in
+    printer.printTypeDecl("public final class \(decl.javaType)") { printer in
       // ==== Storage of the class
       // FIXME: implement the self storage for the memory address and accessors
       printClassSelfProperty(&printer, decl)
@@ -274,7 +274,7 @@ extension Swift2JavaTranslator {
     printer.print(
       """
       /** Instances are created using static {@code init} methods rather than through the constructor directly. */
-      private \(decl.name.javaClassName!)(MemorySegment selfMemorySegment) {
+      private \(decl.javaType)(MemorySegment selfMemorySegment) {
         this.selfMemorySegment = selfMemorySegment;
       }
       """
@@ -307,7 +307,7 @@ extension Swift2JavaTranslator {
         // SWIFT_INT.withName("heapObject"),
         // ...
         // SWIFT_INT.withName("cap")
-      ).withName("\(decl.name.javaClassName!)"); // TODO: is the name right?
+      ).withName("\(decl.javaType)"); // TODO: is the name right?
 
       /**
        * When other types refer to this type, they refer to by a pointer,
