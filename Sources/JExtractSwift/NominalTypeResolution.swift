@@ -205,7 +205,7 @@ extension NominalTypeResolution {
 }
 
 extension ExtensionDeclSyntax {
-  /// Produce the nested type name for the given
+  /// Produce the nested type name for the given decl
   fileprivate var nestedTypeName: [String] {
     var nameComponents: [String] = []
     var extendedType = extendedType
