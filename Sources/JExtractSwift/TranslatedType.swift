@@ -33,7 +33,7 @@ extension Swift2JavaVisitor {
           cCompatibleConvention: .direct,
           originalSwiftType: type,
           cCompatibleSwiftType: "@convention(c) () -> Void",
-          cCompatibleJavaMemoryLayout: .memorySegment,
+          cCompatibleJavaMemoryLayout: .cFunction,
           javaType: .javaLangRunnable
         )
       }
@@ -134,7 +134,7 @@ extension Swift2JavaVisitor {
         cCompatibleConvention: .direct,
         originalSwiftType: type,
         cCompatibleSwiftType: "UnsafeMutableRawPointer",
-        cCompatibleJavaMemoryLayout: .memorySegment,
+        cCompatibleJavaMemoryLayout: .heapObject,
         javaType: .javaForeignMemorySegment
       )
     }
@@ -155,7 +155,7 @@ extension Swift2JavaVisitor {
       cCompatibleConvention: .indirect,
       originalSwiftType: type,
       cCompatibleSwiftType: "UnsafeMutablePointer<\(type)>",
-      cCompatibleJavaMemoryLayout: .memorySegment,
+      cCompatibleJavaMemoryLayout: .heapObject,
       javaType: .class(package: nil, name: name)
     )
   }
@@ -235,15 +235,49 @@ extension TranslatedType {
   }
 }
 
+/// Describes the C-compatible layout as it should be referenced from Java.
 enum CCompatibleJavaMemoryLayout {
-  /// A primitive Java type.
+  /// A primitive Java type that has a direct counterpart in C.
   case primitive(JavaType)
 
   /// The Swift "Int" type, which may be either a Java int (32-bit platforms) or
   /// Java long (64-bit platforms).
   case int
 
-  case memorySegment
+  /// A Swift heap object, which is treated as a pointer for interoperability
+  /// purposes but must be retained/released to keep it alive.
+  case heapObject
+
+  /// A C function pointer. In Swift, this will be a @convention(c) function.
+  /// In Java, a downcall handle to a function.
+  case cFunction
+}
+
+extension TranslatedType {
+  /// Determine the foreign value layout to use for the translated type with
+  /// the Java Foreign Function and Memory API.
+  var foreignValueLayout: ForeignValueLayout {
+    switch cCompatibleJavaMemoryLayout {
+    case .primitive(let javaType):
+      switch javaType {
+      case .boolean: return .SwiftBool
+      case .byte: return .SwiftInt8
+      case .char: return .SwiftUInt16
+      case .short: return .SwiftInt16
+      case .int: return .SwiftInt32
+      case .long: return .SwiftInt64
+      case .float: return .SwiftFloat
+      case .double: return .SwiftDouble
+      case .array, .class, .void: fatalError("Not a primitive type")
+      }
+
+    case .int:
+      return .SwiftInt
+
+    case .heapObject, .cFunction:
+      return .SwiftPointer
+    }
+  }
 }
 
 enum TypeTranslationError: Error {

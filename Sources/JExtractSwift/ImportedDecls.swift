@@ -189,7 +189,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
               cCompatibleConvention: .indirect,
               originalSwiftType: "\(raw: parentName.swiftTypeName)",
               cCompatibleSwiftType: "UnsafeRawPointer",
-              cCompatibleJavaMemoryLayout: .memorySegment,
+              cCompatibleJavaMemoryLayout: .heapObject,
               javaType: .javaForeignMemorySegment
             ).importedTypeName
           )
@@ -204,7 +204,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
               cCompatibleConvention: .indirect,
               originalSwiftType: "\(raw: parentName.swiftTypeName)",
               cCompatibleSwiftType: "UnsafeRawPointer",
-              cCompatibleJavaMemoryLayout: .memorySegment,
+              cCompatibleJavaMemoryLayout: .heapObject,
               javaType: .javaForeignMemorySegment
             ).importedTypeName
           )
