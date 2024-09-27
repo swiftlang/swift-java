@@ -1,6 +1,6 @@
 # Swift Java Interoperability Tools and Libraries
 
-This repository contains two approaches to Swift/Java interopability.
+This repository contains two approaches to Swift/Java interoperability.
 
 - A Swift library (`JavaKit`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
 - The `jextract-swift` tool which is similar to the JDK's `jextract` which allows to extract Java sources which are used
