@@ -11,5 +11,6 @@ jobs:
         with:
           exclude_swift_versions: "[{\"swift_version\": \"5.8\"}]"
           pre_build_command: "apt-get update -y -q && apt-get install -y -q openjdk-21-jdk"
+          build_command: "make"
           env_vars: |
             JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
