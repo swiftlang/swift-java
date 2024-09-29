@@ -223,6 +223,14 @@ public struct TranslatedType {
   var swiftTypeName: String {
     originalSwiftType.trimmedDescription
   }
+
+  /// Produce the "unqualified" Java type name.
+  var unqualifiedJavaTypeName: String {
+    switch javaType {
+    case .class(package: _, name: let name): name
+    default: javaType.description
+    }
+  }
 }
 
 /// Describes the C-compatible layout as it should be referenced from Java.

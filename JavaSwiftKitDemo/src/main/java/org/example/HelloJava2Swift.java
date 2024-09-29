@@ -60,9 +60,12 @@ public class HelloJava2Swift {
 
         JavaKitExample.globalTakeInt(1337);
 
-        MySwiftClass obj = MySwiftClass.init(2222, 7777);
+        MySwiftClass obj = new MySwiftClass(2222, 7777);
 
         SwiftKit.retain(obj.$memorySegment());
         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+
+        obj.voidMethod();
+        obj.takeIntMethod(42);
     }
 }
