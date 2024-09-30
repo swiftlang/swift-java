@@ -14,6 +14,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import Foundation // for e.g. replacingOccurrences
 
 enum JavaClassMacro {}
 

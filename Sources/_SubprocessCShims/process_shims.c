@@ -13,6 +13,8 @@
 #include "include/process_shims.h"
 #include <errno.h>
 #include <signal.h>
+#include <spawn.h>
+#include <grp.h>
 #include <sys/wait.h>
 
 int _was_process_exited(int status) {

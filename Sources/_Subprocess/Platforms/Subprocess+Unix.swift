@@ -283,38 +283,41 @@ extension Subprocess.Configuration {
 internal func monitorProcessTermination(
   forProcessWithIdentifier pid: Subprocess.ProcessIdentifier
 ) async -> Subprocess.TerminationStatus {
-  return await withCheckedContinuation { continuation in
-    let source = DispatchSource.makeProcessSource(
-      identifier: pid.value,
-      eventMask: [.exit, .signal]
-    )
-    source.setEventHandler {
-      source.cancel()
-      var status: Int32 = -1
-      waitpid(pid.value, &status, 0)
-      if _was_process_exited(status) != 0 {
-        continuation.resume(returning: .exited(_get_exit_code(status)))
-        return
-      }
-      if _was_process_signaled(status) != 0 {
-        continuation.resume(returning: .unhandledException(_get_signal_code(status)))
-        return
-      }
-      fatalError("Unexpected exit status type: \(status)")
-    }
-    source.resume()
-  }
+  // FIXME: makeProcessSource seems to not be available, disable for now as we don't use this API
+  fatalError("Not implemented. Missing makeProcessSource")
+//  return await withCheckedContinuation { continuation in
+//    let source = DispatchSource.makeProcessSource(
+//      identifier: pid.value,
+//      eventMask: [.exit, .signal]
+//    )
+//    source.setEventHandler {
+//      source.cancel()
+//      var status: Int32 = -1
+//      waitpid(pid.value, &status, 0)
+//      if _was_process_exited(status) != 0 {
+//        continuation.resume(returning: .exited(_get_exit_code(status)))
+//        return
+//      }
+//      if _was_process_signaled(status) != 0 {
+//        continuation.resume(returning: .unhandledException(_get_signal_code(status)))
+//        return
+//      }
+//      fatalError("Unexpected exit status type: \(status)")
+//    }
+//    source.resume()
+//  }
 }
 
 // MARK: - Read Buffer Size
 extension Subprocess {
   @inline(__always)
   internal static var readBufferSize: Int {
-    #if canImport(Darwin)
+    // FIXME: Platform is not available, not a bug issue, just ignore for now
+    // #if canImport(Darwin)
     return 16384
-    #else
-    return Platform.pageSize
-    #endif  // canImport(Darwin)
+    // #else
+    // return Platform.pageSize
+    // #endif  // canImport(Darwin)
   }
 }
 

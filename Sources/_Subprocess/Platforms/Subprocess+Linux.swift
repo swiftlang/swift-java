@@ -41,9 +41,9 @@ extension Subprocess.Configuration {
     }
 
     let fileDescriptors: [CInt] = [
-      input.getReadFileDescriptor().rawValue, input.getWriteFileDescriptor()?.rawValue ?? 0,
-      output.getWriteFileDescriptor().rawValue, output.getReadFileDescriptor()?.rawValue ?? 0,
-      error.getWriteFileDescriptor().rawValue, error.getReadFileDescriptor()?.rawValue ?? 0,
+      input.getReadFileDescriptor()!.rawValue, input.getWriteFileDescriptor()?.rawValue ?? 0,
+      output.getWriteFileDescriptor()!.rawValue, output.getReadFileDescriptor()?.rawValue ?? 0,
+      error.getWriteFileDescriptor()!.rawValue, error.getReadFileDescriptor()?.rawValue ?? 0,
     ]
 
     var workingDirectory: String?
