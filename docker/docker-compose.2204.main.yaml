@@ -15,5 +15,9 @@ services:
   documentation-check:
     image: swift-java:22.04-main
 
+  test-swift:
+    image: swift-java:22.04-main
+  test-java:
+    image: swift-java:22.04-main
   test:
     image: swift-java:22.04-main
