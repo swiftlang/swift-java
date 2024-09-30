@@ -5,6 +5,11 @@ on:
     types: [ opened, reopened, synchronize ]
 
 jobs:
+  soundness:
+    name: Soundness
+    uses: https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/soundness.yml
+    with:
+      api_breakage_check_enabled: false
   test-java:
     name: Java tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
     runs-on: ubuntu-latest
