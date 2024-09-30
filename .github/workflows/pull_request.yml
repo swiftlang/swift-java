@@ -9,6 +9,7 @@ jobs:
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
     with:
       api_breakage_check_enabled: false
+      license_header_check_project_name: Swift.org
 
   test-java:
     name: Java tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
