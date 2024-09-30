@@ -61,7 +61,7 @@ import JavaRuntime
 
 @JavaClass("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
-  @ExposeToJava
+  @ImplementsJava
   static func main(arguments: [String], environment: JNIEnvironment) {
     print("Command line arguments are: \(arguments)")
   }
@@ -94,7 +94,7 @@ struct HelloSwiftMain: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable verbose output")
   var verbose: Bool = false
 
-  @ExposeToJava
+  @ImplementsJava
   static func main(arguments: [String], environment: JNIEnvironment) {
     let command = Self.parseOrExit(arguments)
     command.run(environment: environment)
@@ -322,12 +322,12 @@ struct HelloSwift { ... }
 ```
 
 Implementations of `native` methods can be written within the Swift type or an
-extension thereof, and should be marked with `@ExposeToJava`. For example:
+extension thereof, and should be marked with `@ImplementsJava`. For example:
 
 ```swift
 @JavaClass("org.swift.javakit.HelloSwift")
 extension HelloSwift {
-  @ExposeToJava
+  @ImplementsJava
   func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
     let average = numbers.isEmpty ? 0.0 : numbers.reduce(0.0) { $0 + $1 } / Double(numbers.count)
     return "Average of \(meaning) is \(average)"
