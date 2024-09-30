@@ -43,6 +43,19 @@ swift test # test all Swift code, e.g. jextract-swift
 ./gradlew test # test all Java code, including integration tests that actually use jextract-ed sources
 ```
 
+To test on Linux using Docker you can:
+
+```bash 
+# run only Swift tests (i.e. swift test)
+docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test-swift
+
+# run only Java tests (i.e. gradle test)
+docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test-java
+
+# run all tests
+docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test 
+```
+
 ### Examples
 
 #### JavaKit (Swift -> Java)
