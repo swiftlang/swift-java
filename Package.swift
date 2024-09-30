@@ -30,6 +30,16 @@ func findJavaHome() -> String {
 }
 let javaHome = findJavaHome()
 
+let javaIncludePath = "\(javaHome)/include"
+#if os(Linux)
+let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+#elseif os(macOS)
+let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+#else
+#error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+// TODO: Handle windows as well
+#endif
+
 let package = Package(
   name: "JavaKit",
   platforms: [
@@ -119,7 +129,7 @@ let package = Package(
       dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
       exclude: ["generated/JavaKit.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -127,7 +137,7 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitJar.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -135,7 +145,7 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitNetwork.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -143,14 +153,14 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitReflection.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
       name: "JavaKitVM",
       dependencies: ["JavaKit"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ],
       linkerSettings: [
         .unsafeFlags(
@@ -169,14 +179,14 @@ let package = Package(
       name: "JavaKitExample",
       dependencies: ["JavaKit"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 
     .target(
       name: "JavaRuntime",
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 
@@ -253,7 +263,7 @@ let package = Package(
         "JExtractSwift"
       ],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
   ]
