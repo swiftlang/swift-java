@@ -6,32 +6,58 @@ on:
 
 jobs:
   soundness:
-    name: Soundness
-    uses: https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/soundness.yml
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
     with:
       api_breakage_check_enabled: false
+
   test-java:
     name: Java tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        swift_version: ['6.0', 'nightly-main']
-        os_version: ['jammy']
+        swift_version: [ nightly-main' ]
+        os_version: [ 'jammy' ]
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/openjdk-23"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '22'
-          cache: 'gradle'
-      - run: ./gradlew build --no-daemon
+      - name: Install Make
+        run: apt update && apt install -y make
+      - name: Install JDK
+        run: "./scripts/install_jdk.sh"
+        # TODO: not using setup-java since incompatible with the swiftlang/swift base image
+        #      - uses: actions/setup-java@v4
+        #        with:
+        #          distribution: 'zulu'
+        #          java-version: '22'
+        #          cache: 'gradle'
+      - name: Generate sources (make) (Temporary)
+        # TODO: this should be triggered by the respective builds
+        run: make jextract-run
+      - name: Gradle build
+        run: ./gradlew build --no-daemon
+
   test-swift:
     name: Swift tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
-    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@main
-    with:
-      exclude_swift_versions: "[{\"swift_version\": \"5.8\"}, {\"swift_version\": \"5.9\"}, {\"swift_version\": \"5.10\"}]"
-      pre_build_command: "apt-get update -y -q && apt-get install -y -q openjdk-21-jdk make"
-      build_command: "make jextract-run"
-      env_vars: |
-        JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: [ '6.0' ]
+        os_version: [ 'jammy' ]
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Make
+        run: apt update && apt install -y make
+      - name: Install JDK
+        run: "./scripts/install_jdk.sh"
+      - name: Generate sources (make) (Temporary)
+        # TODO: this should be triggered by the respective builds
+        run: "make jextract-run"
+      - name: Test Swift
+        run: "swift test"
