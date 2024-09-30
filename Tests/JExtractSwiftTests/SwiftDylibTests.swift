@@ -16,7 +16,11 @@ import Testing
 
 final class SwiftDylibTests {
 
+  #if os(Linux)
+  @Test(.disabled("Dylib.nm approach to getting symbol names not supported on Linux"))
+  #else
   @Test
+  #endif
   func test_nm() async throws {
     let dylib = SwiftDylib(path: ".build/arm64-apple-macosx/debug/libJavaKitExample.dylib")!
 
