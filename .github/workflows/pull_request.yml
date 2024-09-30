@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        swift_version: [ nightly-main' ]
+        swift_version: [ 'nightly-main' ]
         os_version: [ 'jammy' ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -50,6 +50,8 @@ jobs:
         os_version: [ 'jammy' ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/openjdk-23"
     steps:
       - uses: actions/checkout@v4
       - name: Install Make
