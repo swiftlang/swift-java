@@ -10,6 +10,8 @@ jobs:
     with:
       api_breakage_check_enabled: false
       license_header_check_project_name: Swift.org
+      # swift-subprocess includes the word "kill" because SIGKILL signalhandling so we allow it
+      unacceptable_language_check_word_list: "blacklist whitelist slave master sane sanity insane insanity killed killing hang hung hanged hanging" #ignore-unacceptable-language
 
   test-java:
     name: Java tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
