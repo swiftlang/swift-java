@@ -19,6 +19,10 @@ func findJavaHome() -> String {
   // picking up env variables during the build process
   let path = "\(FileManager.default.homeDirectoryForCurrentUser.path()).java_home"
   if let home = try? String(contentsOfFile: path) {
+    if let lastChar = home.last, lastChar.isNewline {
+      return String(home.dropLast())
+    }
+
     return home
   }
 
