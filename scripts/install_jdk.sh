@@ -14,30 +14,48 @@
 ##===----------------------------------------------------------------------===##
 set -euo pipefail
 
-declare -r JDK_VERSION=23
-echo "Installing OpenJDK $JDK_VERSION..."
+declare -r JDK_VENDOR=Corretto
+echo "Installing $JDK_VENDOR JDK..."
 
 apt-get update && apt-get install -y make curl libc6-dev
 
 echo "Download JDK for: $(uname -m)"
 
-if [ "$(uname -m)" = 'aarch64' ]; then
-  curl https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-aarch64_bin.tar.gz --output jdk.tar.gz &&
-  declare -r EXPECT_JDK_SHA=076dcf7078cdf941951587bf92733abacf489a6570f1df97ee35945ffebec5b7;
-else
-  curl https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-x64_bin.tar.gz --output jdk.tar.gz &&
-  declare -r EXPECT_JDK_SHA=08fea92724127c6fa0f2e5ea0b07ff4951ccb1e2f22db3c21eebbd7347152a67;
-fi
+if [ "$JDK_VENDOR" = 'OpenJDK' ]; then
+  if [ "$(uname -m)" = 'aarch64' ]; then
+    curl https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-aarch64_bin.tar.gz --output jdk.tar.gz &&
+    declare -r EXPECT_JDK_SHA=076dcf7078cdf941951587bf92733abacf489a6570f1df97ee35945ffebec5b7;
+  else
+    curl https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-x64_bin.tar.gz --output jdk.tar.gz &&
+    declare -r EXPECT_JDK_SHA=08fea92724127c6fa0f2e5ea0b07ff4951ccb1e2f22db3c21eebbd7347152a67;
+  fi
 
-declare -r JDK_SHA="$(sha256sum jdk.tar.gz | cut -d ' ' -f 1)"
-if [ "$JDK_SHA" != "$EXPECT_JDK_SHA" ]; then
-  echo "Downloaded JDK SHA does not match expected!" &&
-  exit 1;
-else
-  echo "JDK SHA is correct.";
+  declare -r JDK_SHA="$(sha256sum jdk.tar.gz | cut -d ' ' -f 1)"
+  if [ "$JDK_SHA" != "$EXPECT_JDK_SHA" ]; then
+    echo "Downloaded JDK SHA does not match expected!" &&
+    exit 1;
+  else
+    echo "JDK SHA is correct.";
+  fi
+elif [ "$JDK_VENDOR" = 'Corretto' ]; then
+  if [ "$(uname -m)" = 'aarch64' ]; then
+    curl https://corretto.aws/downloads/latest/amazon-corretto-22-aarch64-linux-jdk.tar.gz --output jdk.tar.gz &&
+    declare -r EXPECT_JDK_MD5=1ebe5f5229bb18bc784a1e0f54d3fe39
+  else
+    curl https://corretto.aws/downloads/latest/amazon-corretto-22-x64-linux-jdk.tar.gz --output jdk.tar.gz &&
+    declare -r EXPECT_JDK_MD5=5bd7fe30eb063699a3b4db7a00455841
+  fi
+
+  declare -r JDK_MD5="$(md5sum jdk.tar.gz | cut -d ' ' -f 1)"
+  if [ "$JDK_MD5" != "$EXPECT_JDK_MD5" ]; then
+    echo "Downloaded JDK MD5 does not match expected!" &&
+    exit 1;
+  else
+    echo "JDK MD5 is correct.";
+  fi
 fi
 
 # Extract and verify the JDK installation
-tar xzvf jdk.tar.gz && rm jdk.tar.gz && mkdir -p /usr/lib/jvm; mv jdk-23 /usr/lib/jvm/openjdk-23
-echo "JAVA_HOME = /usr/lib/jvm/openjdk-23"
-/usr/lib/jvm/openjdk-23/bin/java -version
+tar xzvf jdk.tar.gz && rm jdk.tar.gz && mkdir -p /usr/lib/jvm; mv jdk-23 /usr/lib/jvm/default-jdk
+echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
+/usr/lib/jvm/default-jdk/bin/java -version

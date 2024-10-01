@@ -24,7 +24,7 @@ jobs:
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
-      JAVA_HOME: "/usr/lib/jvm/openjdk-23"
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
       - name: Install Make
@@ -54,7 +54,7 @@ jobs:
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
-      JAVA_HOME: "/usr/lib/jvm/openjdk-23"
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
       - name: Install Make
