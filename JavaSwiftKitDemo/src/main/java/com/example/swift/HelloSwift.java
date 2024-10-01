@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 package com.example.swift;
+
 import com.example.swift.HelloSubclass;
 
 public class HelloSwift {

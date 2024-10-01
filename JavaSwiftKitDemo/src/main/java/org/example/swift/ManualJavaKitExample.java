@@ -200,14 +200,13 @@ public class ManualJavaKitExample {
         var mh$ = globalCallJavaCallback.HANDLE;
 
         try {
+             // signature of 'void run()'
              FunctionDescriptor callMe_run_desc = FunctionDescriptor.ofVoid(
-                     // replicate signature of run()
              );
              MethodHandle callMe_run_handle = MethodHandles.lookup()
                      .findVirtual(Runnable.class,
                              "run",
-                             callMe_run_desc.toMethodType()
-                     );
+                             callMe_run_desc.toMethodType());
             callMe_run_handle = callMe_run_handle.bindTo(callMe); // set the first parameter to the Runnable as the "this" of the callback pretty much
 
             try (Arena arena = Arena.ofConfined()) {
