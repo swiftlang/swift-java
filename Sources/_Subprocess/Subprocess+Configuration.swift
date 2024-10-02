@@ -14,7 +14,7 @@
 #if FOUNDATION_FRAMEWORK
 @_implementationOnly import _FoundationCShims
 #else
-package import _CShims
+package import _SubprocessCShims
 #endif
 
 #if canImport(Darwin)

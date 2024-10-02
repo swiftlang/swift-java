@@ -26,7 +26,7 @@ import Glibc
 #if FOUNDATION_FRAMEWORK
 @_implementationOnly import _FoundationCShims
 #else
-internal import _CShims
+internal import _SubprocessCShims
 #endif
 
 import SystemPackage
