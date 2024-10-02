@@ -9,7 +9,10 @@ jobs:
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
     with:
       api_breakage_check_enabled: false
+      # FIXME: Something is off with the format task and it gets "stuck", need to investigate
+      format_check_enabled: false
       license_header_check_project_name: Swift.org
+      # FIXME: we're about to remove _Subprocess immediately anyway, so rather than fixing it one by one remove this adjusted list and use the default again ASAP
       # swift-subprocess includes the word "kill" because SIGKILL signal handling so we allow it
       unacceptable_language_check_word_list: "blacklist whitelist slave master sane sanity insane insanity killed killing hang hung hanged hanging" #ignore-unacceptable-language
 
@@ -29,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Make
-        run: apt update && apt install -y make
+        run: apt-get -qq update && apt-get -qq install -y make
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
@@ -69,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Make
-        run: apt update && apt install -y make
+        run: apt-get -qq update && apt-get -qq install -y make
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
       - name: Generate sources (make) (Temporary)
