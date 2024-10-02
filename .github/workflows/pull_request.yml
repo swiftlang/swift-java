@@ -10,17 +10,18 @@ jobs:
     with:
       api_breakage_check_enabled: false
       license_header_check_project_name: Swift.org
-      # swift-subprocess includes the word "kill" because SIGKILL signalhandling so we allow it
+      # swift-subprocess includes the word "kill" because SIGKILL signal handling so we allow it
       unacceptable_language_check_word_list: "blacklist whitelist slave master sane sanity insane insanity killed killing hang hung hanged hanging" #ignore-unacceptable-language
 
   test-java:
-    name: Java tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
+    name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         swift_version: [ 'nightly-main' ]
         os_version: [ 'jammy' ]
+        jdk_vendor: [ 'Corretto' ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -30,7 +31,7 @@ jobs:
       - name: Install Make
         run: apt update && apt install -y make
       - name: Install JDK
-        run: "bash -x ./docker/install_jdk.sh"
+        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
         #      - uses: actions/setup-java@v4
         #        with:
@@ -44,13 +45,14 @@ jobs:
         run: ./gradlew build --no-daemon
 
   test-swift:
-    name: Swift tests (${{ matrix.swift_version }} - ${{ matrix.os_version }})
+    name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         swift_version: [ 'nightly-main' ]
         os_version: [ 'jammy' ]
+        jdk_vendor: [ 'Corretto' ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -60,7 +62,7 @@ jobs:
       - name: Install Make
         run: apt update && apt install -y make
       - name: Install JDK
-        run: "bash -x ./docker/install_jdk.sh"
+        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: "make jextract-run"

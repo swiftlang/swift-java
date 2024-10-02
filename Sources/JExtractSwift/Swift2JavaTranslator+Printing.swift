@@ -117,7 +117,7 @@ extension Swift2JavaTranslator {
       printer.print(
         """
         // FIXME: this detecting is somewhat off
-        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName!)";
+        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName ?? "")";
         static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_METADATA_NAME);
         """
       )

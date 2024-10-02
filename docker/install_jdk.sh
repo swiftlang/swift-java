@@ -15,7 +15,9 @@
 set -euo pipefail
 
 # Supported JDKs: Corretto or OpenJDK
-declare -r JDK_VENDOR=Corretto
+if [ "$JDK_VENDOR" = "" ]; then
+declare -r JDK_VENDOR="Corretto"
+fi
 echo "Installing $JDK_VENDOR JDK..."
 
 apt-get update && apt-get install -y wget
@@ -32,7 +34,9 @@ if [ "$JDK_VENDOR" = 'OpenJDK' ]; then
   fi
 
   wget -q -O jdk.tar.gz "$JDK_URL"
-  declare -r JDK_SHA="$(sha256sum jdk.tar.gz | cut -d ' ' -f 1)"
+
+  declare JDK_SHA # on separate lines due to: SC2155 (warning): Declare and assign separately to avoid masking return values.
+  JDK_SHA="$(sha256sum jdk.tar.gz | cut -d ' ' -f 1)"
   if [ "$JDK_SHA" != "$EXPECT_JDK_SHA" ]; then
     echo "Downloaded JDK SHA does not match expected!"
     echo "Expected: $EXPECT_JDK_SHA"
@@ -51,7 +55,9 @@ elif [ "$JDK_VENDOR" = 'Corretto' ]; then
   fi
 
   wget -q -O jdk.tar.gz "$JDK_URL"
-  declare -r JDK_MD5="$(md5sum jdk.tar.gz | cut -d ' ' -f 1)"
+
+  declare JDK_MD5 # on separate lines due to: SC2155 (warning): Declare and assign separately to avoid masking return values.
+  JDK_MD5="$(md5sum jdk.tar.gz | cut -d ' ' -f 1)"
   if [ "$JDK_MD5" != "$EXPECT_JDK_MD5" ]; then
     echo "Downloaded JDK MD5 does not match expected!"
     echo "Expected: $EXPECT_JDK_MD5"
@@ -60,15 +66,18 @@ elif [ "$JDK_VENDOR" = 'Corretto' ]; then
   else
     echo "JDK MD5 is correct.";
   fi
+else
+  echo "Unsupported JDK vendor: '$JDK_VENDOR'"
+  exit 1
 fi
 
 # Extract and verify the JDK installation
 
-mkdir -p /usr/lib/jvm/ && cd /usr/lib/jvm/
-tar xzvf /jdk.tar.gz
-ls -lah
-mv "$(ls | head -n1)" default-jdk
-rm /jdk.tar.gz
+mkdir -p /usr/lib/jvm/
+mv jdk.tar.gz /usr/lib/jvm/
+cd /usr/lib/jvm/
+tar xzvf jdk.tar.gz && rm jdk.tar.gz
+mv "$(find . -depth -maxdepth 1 -type d | head -n1)" default-jdk
 
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
 /usr/lib/jvm/default-jdk/bin/java -version
