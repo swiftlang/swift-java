@@ -1,0 +1,23 @@
+services:
+
+  runtime-setup:
+    image: swift-java:22.04-main
+    build:
+      args:
+        base_image: "swiftlang/swift:nightly-main-jammy"
+
+  unit-tests:
+    image: swift-java:22.04-main
+
+  integration-tests:
+    image: swift-java:22.04-main
+
+  documentation-check:
+    image: swift-java:22.04-main
+
+  test-swift:
+    image: swift-java:22.04-main
+  test-java:
+    image: swift-java:22.04-main
+  test:
+    image: swift-java:22.04-main

@@ -11,9 +11,16 @@
 
 #include "include/_CShimsTargetConditionals.h"
 #include "include/process_shims.h"
+#include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
+#include <grp.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <signal.h>
+#include <string.h>
+
+#include <stdio.h>
 
 int _was_process_exited(int status) {
     return WIFEXITED(status);
@@ -61,15 +68,24 @@ int _subprocess_spawn(
     int create_session
 ) {
     int require_pre_fork = uid != NULL ||
-        gid != NULL ||
-        number_of_sgroups > 0 ||
+    gid != NULL ||
+    number_of_sgroups > 0 ||
     create_session > 0;
 
     if (require_pre_fork != 0) {
-        pid_t childPid = fork();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated"
+        pid_t childPid = vfork();
+#pragma GCC diagnostic pop
         if (childPid != 0) {
             *pid = childPid;
             return childPid < 0 ? errno : 0;
+        }
+
+        if (number_of_sgroups > 0 && sgroups != NULL) {
+            if (setgroups(number_of_sgroups, sgroups) != 0) {
+                return errno;
+            }
         }
 
         if (uid != NULL) {
@@ -80,12 +96,6 @@ int _subprocess_spawn(
 
         if (gid != NULL) {
             if (setgid(*gid) != 0) {
-                return errno;
-            }
-        }
-
-        if (number_of_sgroups > 0 && sgroups != NULL) {
-            if (setgroups(number_of_sgroups, sgroups) != 0) {
                 return errno;
             }
         }
@@ -104,7 +114,8 @@ int _subprocess_spawn(
         }
 
         rc = posix_spawnattr_setflags(
-            (posix_spawnattr_t *)spawn_attrs, flags | POSIX_SPAWN_SETEXEC);
+            (posix_spawnattr_t *)spawn_attrs, flags | POSIX_SPAWN_SETEXEC
+        );
         if (rc != 0) {
             return rc;
         }
@@ -126,31 +137,42 @@ static int _subprocess_posix_spawn_fallback(
     const int file_descriptors[_Nonnull],
     char * _Nullable const args[_Nonnull],
     char * _Nullable const env[_Nullable],
-    int create_process_group
+    gid_t * _Nullable process_group_id
 ) {
     // Setup stdin, stdout, and stderr
     posix_spawn_file_actions_t file_actions;
 
     int rc = posix_spawn_file_actions_init(&file_actions);
     if (rc != 0) { return rc; }
-    rc = posix_spawn_file_actions_adddup2(
-        &file_actions, file_descriptors[0], STDIN_FILENO);
-    if (rc != 0) { return rc; }
-    rc = posix_spawn_file_actions_adddup2(
-        &file_actions, file_descriptors[2], STDOUT_FILENO);
-    if (rc != 0) { return rc; }
-    rc = posix_spawn_file_actions_adddup2(
-        &file_actions, file_descriptors[4], STDERR_FILENO);
-    if (rc != 0) { return rc; }
-    if (file_descriptors[1] != 0) {
+    if (file_descriptors[0] >= 0) {
+        rc = posix_spawn_file_actions_adddup2(
+            &file_actions, file_descriptors[0], STDIN_FILENO
+        );
+        if (rc != 0) { return rc; }
+    }
+    if (file_descriptors[2] >= 0) {
+        rc = posix_spawn_file_actions_adddup2(
+            &file_actions, file_descriptors[2], STDOUT_FILENO
+        );
+        if (rc != 0) { return rc; }
+    }
+    if (file_descriptors[4] >= 0) {
+        rc = posix_spawn_file_actions_adddup2(
+            &file_actions, file_descriptors[4], STDERR_FILENO
+        );
+        if (rc != 0) { return rc; }
+    }
+
+    // Close parent side
+    if (file_descriptors[1] >= 0) {
         rc = posix_spawn_file_actions_addclose(&file_actions, file_descriptors[1]);
         if (rc != 0) { return rc; }
     }
-    if (file_descriptors[3] != 0) {
+    if (file_descriptors[3] >= 0) {
         rc = posix_spawn_file_actions_addclose(&file_actions, file_descriptors[3]);
         if (rc != 0) { return rc; }
     }
-    if (file_descriptors[5] != 0) {
+    if (file_descriptors[5] >= 0) {
         rc = posix_spawn_file_actions_addclose(&file_actions, file_descriptors[5]);
         if (rc != 0) { return rc; }
     }
@@ -170,8 +192,10 @@ static int _subprocess_posix_spawn_fallback(
     if (rc != 0) { return rc; }
     // Flags
     short flags = POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETSIGDEF;
-    if (create_process_group) {
+    if (process_group_id != NULL) {
         flags |= POSIX_SPAWN_SETPGROUP;
+        rc = posix_spawnattr_setpgroup(&spawn_attr, *process_group_id);
+        if (rc != 0) { return rc; }
     }
     rc = posix_spawnattr_setflags(&spawn_attr, flags);
 
@@ -196,15 +220,18 @@ int _subprocess_fork_exec(
     char * _Nullable const env[_Nullable],
     uid_t * _Nullable uid,
     gid_t * _Nullable gid,
+    gid_t * _Nullable process_group_id,
     int number_of_sgroups, const gid_t * _Nullable sgroups,
     int create_session,
-    int create_process_group
+    void (* _Nullable configurator)(void)
 ) {
     int require_pre_fork = working_directory != NULL ||
         uid != NULL ||
         gid != NULL ||
+        process_group_id != NULL ||
         (number_of_sgroups > 0 && sgroups != NULL) ||
-        create_session;
+        create_session ||
+        configurator != NULL;
 
 #if _POSIX_SPAWN
     // If posix_spawn is available on this platform and
@@ -219,7 +246,7 @@ int _subprocess_fork_exec(
             working_directory,
             file_descriptors,
             args, env,
-            create_process_group
+            process_group_id
         );
     }
 #endif
@@ -235,6 +262,7 @@ int _subprocess_fork_exec(
             return errno;
         }
     }
+
 
     if (uid != NULL) {
         if (setuid(*uid) != 0) {
@@ -258,41 +286,41 @@ int _subprocess_fork_exec(
         (void)setsid();
     }
 
-    if (create_process_group != 0) {
-        (void)setpgid(0, 0);
+    if (process_group_id != NULL) {
+        (void)setpgid(0, *process_group_id);
     }
 
     // Bind stdin, stdout, and stderr
     int rc = 0;
-    if (file_descriptors[0] != 0) {
+    if (file_descriptors[0] >= 0) {
         rc = dup2(file_descriptors[0], STDIN_FILENO);
-        if (rc != 0) { return rc; }
+        if (rc < 0) { return errno; }
     }
-    if (file_descriptors[2] != 0) {
+    if (file_descriptors[2] >= 0) {
         rc = dup2(file_descriptors[2], STDOUT_FILENO);
-        if (rc != 0) { return rc; }
+        if (rc < 0) { return errno; }
     }
-
-    if (file_descriptors[4] != 0) {
+    if (file_descriptors[4] >= 0) {
         rc = dup2(file_descriptors[4], STDERR_FILENO);
-        if (rc != 0) { return rc; }
+        if (rc < 0) { return errno; }
     }
-
-#warning Shold close all and then return error no early return
     // Close parent side
-    if (file_descriptors[1] != 0) {
+    if (file_descriptors[1] >= 0) {
         rc = close(file_descriptors[1]);
-        if (rc != 0) { return rc; }
     }
-    if (file_descriptors[3] != 0) {
+    if (file_descriptors[3] >= 0) {
         rc = close(file_descriptors[3]);
-        if (rc != 0) { return rc; }
     }
-    if (file_descriptors[4] != 0) {
+    if (file_descriptors[4] >= 0) {
         rc = close(file_descriptors[5]);
-        if (rc != 0) { return rc; }
     }
-
+    if (rc != 0) {
+        return errno;
+    }
+    // Run custom configuratior
+    if (configurator != NULL) {
+        configurator();
+    }
     // Finally, exec
     execve(exec_path, args, env);
     // If we got here, something went wrong

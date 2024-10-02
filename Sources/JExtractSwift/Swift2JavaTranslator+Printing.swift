@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -116,7 +117,7 @@ extension Swift2JavaTranslator {
       printer.print(
         """
         // FIXME: this detecting is somewhat off
-        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName!)";
+        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName ?? "")";
         static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_METADATA_NAME);
         """
       )

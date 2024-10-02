@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2021 - 2022 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2021 - 2022 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef _C_SHIMS_TARGET_CONDITIONALS_H
-#define _C_SHIMS_TARGET_CONDITIONALS_H
+#ifndef _SHIMS_TARGET_CONDITIONALS_H
+#define _SHIMS_TARGET_CONDITIONALS_H
 
 #if __has_include(<TargetConditionals.h>)
 #include <TargetConditionals.h>
@@ -47,10 +47,4 @@
 #define TARGET_OS_WASI 0
 #endif
 
-#if defined(__ANDROID__)
-#define TARGET_OS_ANDROID 1
-#else
-#define TARGET_OS_ANDROID 0
-#endif
-
-#endif // _C_SHIMS_TARGET_CONDITIONALS_H
+#endif // _SHIMS_TARGET_CONDITIONALS_H

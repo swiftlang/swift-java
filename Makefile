@@ -15,23 +15,38 @@
 .PHONY: run clean all
 
 ARCH := $(shell arch)
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+ifeq ($(ARCH), 'i386')
+  ARCH_SUBDIR := x86_64
+else
+  ARCH_SUBDIR := aarch64
+endif
+BUILD_DIR := .build/$(ARCH_SUBDIR)-unknown-linux-gnu
+LIB_SUFFIX := so
+endif
+
+ifeq ($(UNAME), Darwin)
 ifeq ($(ARCH), 'i386')
   ARCH_SUBDIR := x86_64
 else
   ARCH_SUBDIR := arm64
 endif
+BUILD_DIR := .build/$(ARCH_SUBDIR)-apple-macosx
+LIB_SUFFIX := dylib
+endif
 
-BUILD_DIR=".build/$(ARCH_SUBDIR)-apple-macosx"
 
 all: generate-all
 
-$(BUILD_DIR)/debug/libJavaKit.dylib $(BUILD_DIR)/debug/libJavaKitExample.dylib $(BUILD_DIR)/debug/Java2Swift:
+$(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libJavaKitExample.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
 
 ./JavaSwiftKitDemo/build/classes/java/main/com/example/swift/HelloSubclass.class: JavaSwiftKitDemo/src/main/java/com/example/swift
 	./gradlew build
 
-run: $(BUILD_DIR)/debug/libJavaKit.dylib $(BUILD_DIR)/debug/libJavaKitExample.dylib JavaSwiftKitDemo/src/main/java/com/example/swift
+run: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libJavaKitExample.$(LIB_SUFFIX) JavaSwiftKitDemo/src/main/java/com/example/swift
 	java -cp JavaSwiftKitDemo/build/classes/java/main -Djava.library.path=$(BUILD_DIR)/debug/ com.example.swift.HelloSwift
 
 Java2Swift: $(BUILD_DIR)/debug/Java2Swift
@@ -82,7 +97,7 @@ endef
 jextract-swift: generate-JExtract-interface-files
 	swift build
 
-generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.dylib
+generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX)
 	echo "Generate .swiftinterface files..."
 	@$(call make_swiftinterface, "JavaKitExample", "MySwiftLibrary")
 	@$(call make_swiftinterface, "JavaKitExample", "SwiftKit")
@@ -92,8 +107,8 @@ jextract-run: jextract-swift generate-JExtract-interface-files
 		--package-name com.example.swift.generated \
 		--swift-module JavaKitExample \
 		--output-directory JavaSwiftKitDemo/src/main/java \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/MySwiftLibrary.swiftinterface \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/SwiftKit.swiftinterface
+		$(BUILD_DIR)/jextract/JavaKitExample/MySwiftLibrary.swiftinterface \
+		$(BUILD_DIR)/jextract/JavaKitExample/SwiftKit.swiftinterface
 
 
 jextract-run-java: jextract-swift generate-JExtract-interface-files

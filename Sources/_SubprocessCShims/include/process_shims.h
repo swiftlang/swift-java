@@ -15,9 +15,11 @@
 #include <unistd.h>
 #include "_CShimsTargetConditionals.h"
 
-#if TARGET_OS_MAC
+#if _POSIX_SPAWN
 #include <spawn.h>
+#endif
 
+#if TARGET_OS_MAC
 int _subprocess_spawn(
     pid_t * _Nonnull pid,
     const char * _Nonnull exec_path,
@@ -41,9 +43,10 @@ int _subprocess_fork_exec(
     char * _Nullable const env[_Nullable],
     uid_t * _Nullable uid,
     gid_t * _Nullable gid,
+    gid_t * _Nullable process_group_id,
     int number_of_sgroups, const gid_t * _Nullable sgroups,
     int create_session,
-    int create_process_group
+    void (* _Nullable configurator)(void)
 );
 
 int _was_process_exited(int status);

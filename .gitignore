@@ -8,6 +8,7 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 *.class
+bin/
 
 # Ignore gradle build artifacts
 .gradle

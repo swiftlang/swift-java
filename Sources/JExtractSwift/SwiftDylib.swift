@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -109,6 +110,13 @@ package struct SwiftDylib {  // FIXME: remove this entire utility; replace with 
   /// So not even trying to make this very efficient. We find the symbols from the dylib and some
   /// heuristic matching.
   package func nmSymbolNames(grepDemangled: [String]) async throws -> [SwiftSymbolName] {
+    #if os(Linux)
+    #warning("Obtaining symbols with 'nm' is not supported on Linux and about to be removed in any case")
+    return []
+    #endif
+
+    // -----
+
     let nmResult = try await Subprocess.run(
       .named("nm"),
       arguments: ["-gU", path]
