@@ -9,107 +9,110 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
-import Foundation
 import SystemPackage
+import Dispatch
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
+import Foundation
+#endif
 
 extension Subprocess {
-  public struct AsyncBytes: AsyncSequence, Sendable, _AsyncSequence {
-    public typealias Error = any Swift.Error
+    public struct AsyncBytes: AsyncSequence, Sendable, _AsyncSequence {
+        public typealias Error = any Swift.Error
 
-    public typealias Element = UInt8
+        public typealias Element = UInt8
 
-    @_nonSendable
-    public struct Iterator: AsyncIteratorProtocol {
-      public typealias Element = UInt8
+        @_nonSendable
+        public struct Iterator: AsyncIteratorProtocol {
+            public typealias Element = UInt8
 
-      private let fileDescriptor: FileDescriptor
-      private var buffer: [UInt8]
-      private var currentPosition: Int
-      private var finished: Bool
+            private let fileDescriptor: FileDescriptor
+            private var buffer: [UInt8]
+            private var currentPosition: Int
+            private var finished: Bool
 
-      internal init(fileDescriptor: FileDescriptor) {
-        self.fileDescriptor = fileDescriptor
-        self.buffer = []
-        self.currentPosition = 0
-        self.finished = false
-      }
-
-      private mutating func reloadBufferAndNext() async throws -> UInt8? {
-        if self.finished {
-          return nil
-        }
-        try Task.checkCancellation()
-        do {
-          self.buffer = try await self.fileDescriptor.read(
-            upToLength: Subprocess.readBufferSize
-          )
-          self.currentPosition = 0
-          if self.buffer.count < Subprocess.readBufferSize {
-            self.finished = true
-          }
-        } catch {
-          self.finished = true
-          throw error
-        }
-        return try await self.next()
-      }
-
-      public mutating func next() async throws -> UInt8? {
-        if currentPosition < buffer.count {
-          let value = buffer[currentPosition]
-          self.currentPosition += 1
-          return value
-        }
-        return try await self.reloadBufferAndNext()
-      }
-
-      private func read(from fileDescriptor: FileDescriptor, maxLength: Int) async throws -> [UInt8] {
-        return try await withCheckedThrowingContinuation { continuation in
-          DispatchIO.read(
-            fromFileDescriptor: fileDescriptor.rawValue,
-            maxLength: maxLength,
-            runningHandlerOn: .main
-          ) { data, error in
-            guard error == 0 else {
-              continuation.resume(
-                throwing: POSIXError(
-                  .init(rawValue: error) ?? .ENODEV
-                )
-              )
-              return
+            internal init(fileDescriptor: FileDescriptor) {
+                self.fileDescriptor = fileDescriptor
+                self.buffer = []
+                self.currentPosition = 0
+                self.finished = false
             }
-            continuation.resume(returning: Array(data))
-          }
+
+            private mutating func reloadBufferAndNext() async throws -> UInt8? {
+                if self.finished {
+                    return nil
+                }
+                try Task.checkCancellation()
+                do {
+                    self.buffer = try await self.fileDescriptor.read(
+                        upToLength: Subprocess.readBufferSize)
+                    self.currentPosition = 0
+                    if self.buffer.isEmpty {
+                        self.finished = true
+                    }
+                } catch {
+                    self.finished = true
+                    throw error
+                }
+                return try await self.next()
+            }
+
+            public mutating func next() async throws -> UInt8? {
+                if currentPosition < buffer.count {
+                    let value = buffer[currentPosition]
+                    self.currentPosition += 1
+                    return value
+                }
+                return try await self.reloadBufferAndNext()
+            }
+
+            private func read(from fileDescriptor: FileDescriptor, maxLength: Int) async throws -> [UInt8] {
+                return try await withCheckedThrowingContinuation { continuation in
+                    DispatchIO.read(
+                        fromFileDescriptor: fileDescriptor.rawValue,
+                        maxLength: maxLength,
+                        runningHandlerOn: .main
+                    ) { data, error in
+                        guard error == 0 else {
+                            continuation.resume(
+                                throwing: POSIXError(
+                                    .init(rawValue: error) ?? .ENODEV)
+                            )
+                            return
+                        }
+                        continuation.resume(returning: Array(data))
+                    }
+                }
+            }
         }
-      }
-    }
 
-    private let fileDescriptor: FileDescriptor
+        private let fileDescriptor: FileDescriptor
 
-    init(fileDescriptor: FileDescriptor) {
-      self.fileDescriptor = fileDescriptor
-    }
+        init(fileDescriptor: FileDescriptor) {
+            self.fileDescriptor = fileDescriptor
+        }
 
-    public func makeAsyncIterator() -> Iterator {
-      return Iterator(fileDescriptor: self.fileDescriptor)
+        public func makeAsyncIterator() -> Iterator {
+            return Iterator(fileDescriptor: self.fileDescriptor)
+        }
     }
-  }
 }
 
 extension RangeReplaceableCollection {
-  /// Creates a new instance of a collection containing the elements of an asynchronous sequence.
-  ///
-  /// - Parameter source: The asynchronous sequence of elements for the new collection.
-  @inlinable
-  public init<Source: AsyncSequence>(_ source: Source) async rethrows where Source.Element == Element {
-    self.init()
-    for try await item in source {
-      append(item)
+    /// Creates a new instance of a collection containing the elements of an asynchronous sequence.
+    ///
+    /// - Parameter source: The asynchronous sequence of elements for the new collection.
+    @inlinable
+    public init<Source: AsyncSequence>(_ source: Source) async rethrows where Source.Element == Element {
+        self.init()
+        for try await item in source {
+            append(item)
+        }
     }
-  }
 }
 
 public protocol _AsyncSequence<Element, Error>: AsyncSequence {
-  associatedtype Error
+    associatedtype Error
 }
