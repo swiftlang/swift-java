@@ -45,7 +45,7 @@ jobs:
         # TODO: this should be triggered by the respective builds
         run: make jextract-run
       - name: Gradle build
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --debug --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
