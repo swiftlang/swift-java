@@ -53,6 +53,23 @@ A good patch is:
 3. Documented, adding API documentation as needed to cover new functions and properties.
 4. Accompanied by a great commit message, using our commit message template.
 
+### Developing in Docker
+
+You can develop in Docker in order to test Linux behaviors while developing on a Mac.
+
+
+First build the image: 
+
+```
+docker build --tag swift-java docker
+```
+
+And run a development container: 
+
+```
+docker run --rm -it -v$(pwd):/code swift-java /bin/bash
+```
+
 ### Run CI checks locally
 
 You can run the Github Actions workflows locally using
