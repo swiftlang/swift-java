@@ -41,6 +41,15 @@ jobs:
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: make jextract-run
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: Gradle build
         run: ./gradlew build --no-daemon
 
