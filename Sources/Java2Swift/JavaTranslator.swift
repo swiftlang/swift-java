@@ -416,8 +416,9 @@ extension JavaTranslator {
 
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
 
+    let methodAttribute: AttributeSyntax = javaMethod.isStatic ? "@JavaStaticMethod" : "@JavaMethod";
     return """
-      @JavaMethod
+      \(methodAttribute)
       public func \(raw: javaMethod.getName())\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }

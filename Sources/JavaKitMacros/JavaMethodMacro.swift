@@ -34,6 +34,7 @@ extension JavaMethodMacro: BodyMacro {
       fatalError("not a function")
     }
 
+    let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
     let funcName = funcDecl.name.text
     let params = funcDecl.signature.parameterClause.parameters
     let resultType: String =
@@ -54,7 +55,7 @@ extension JavaMethodMacro: BodyMacro {
       ? "try" : "try!"
 
     return [
-      "return \(raw: tryKeyword) dynamicJavaMethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
+      "return \(raw: tryKeyword) dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
     ]
   }
 
