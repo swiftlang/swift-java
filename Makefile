@@ -107,8 +107,8 @@ jextract-run: jextract-swift generate-JExtract-interface-files
 		--package-name com.example.swift.generated \
 		--swift-module JavaKitExample \
 		--output-directory JavaSwiftKitDemo/src/main/java \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/MySwiftLibrary.swiftinterface \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/SwiftKit.swiftinterface
+		$(BUILD_DIR)/jextract/JavaKitExample/MySwiftLibrary.swiftinterface \
+		$(BUILD_DIR)/jextract/JavaKitExample/SwiftKit.swiftinterface
 
 
 jextract-run-java: jextract-swift generate-JExtract-interface-files
