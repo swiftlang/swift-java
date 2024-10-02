@@ -17,6 +17,6 @@ ENV LANGUAGE=en_US.UTF-8
 
 # JDK dependency
 COPY install_jdk.sh .
-RUN bash -x ./install_jdk.sh
+RUN bash -xc 'JDK_VENDOR=Corretto ./install_jdk.sh'
 ENV JAVA_HOME="/usr/lib/jvm/default-jdk"
 ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"

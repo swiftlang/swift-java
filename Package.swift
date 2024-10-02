@@ -32,11 +32,11 @@ let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
 #if os(Linux)
-let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+  let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
-let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+  let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #else
-#error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
 // TODO: Handle windows as well
 #endif
 
