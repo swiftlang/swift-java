@@ -125,6 +125,6 @@ public struct URI {
   public func wait() throws
 }
 extension JavaClass<URI> {
-  @JavaMethod
+  @JavaStaticMethod
   public func create(_ arg0: String) -> URI?
 }

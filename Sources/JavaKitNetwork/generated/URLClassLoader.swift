@@ -74,12 +74,12 @@ public struct URLClassLoader {
   public func wait() throws
 }
 extension JavaClass<URLClassLoader> {
-  @JavaMethod
+  @JavaStaticMethod
   public func newInstance(_ arg0: [URL?]) -> URLClassLoader?
 
-  @JavaMethod
+  @JavaStaticMethod
   public func getSystemResource(_ arg0: String) -> URL?
 
-  @JavaMethod
+  @JavaStaticMethod
   public func getSystemResources(_ arg0: String) throws -> Enumeration<URL>?
 }

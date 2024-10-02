@@ -65,6 +65,6 @@ public struct AccessibleObject {
   public func wait() throws
 }
 extension JavaClass<AccessibleObject> {
-  @JavaMethod
+  @JavaStaticMethod
   public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
 }
