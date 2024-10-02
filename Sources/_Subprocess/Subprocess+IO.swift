@@ -145,10 +145,10 @@ extension Subprocess {
             case fileDescriptor(FileDescriptor?, Bool)
         }
         
-        let storage: Mutex<Storage>
+        let storage: LockedState<Storage>
 
         internal init(storage: Storage) {
-            self.storage = .init(storage)
+          self.storage = .init(initialState: storage)
         }
 
         internal func getReadFileDescriptor() -> FileDescriptor? {
@@ -250,10 +250,10 @@ extension Subprocess {
             case collected(Int, FileDescriptor?, FileDescriptor?)
         }
         
-        private let storage: Mutex<Storage>
+        private let storage: LockedState<Storage>
 
         internal init(storage: Storage) {
-            self.storage = .init(storage)
+          self.storage = .init(initialState: storage)
         }
 
         internal func getWriteFileDescriptor() -> FileDescriptor? {
