@@ -66,4 +66,14 @@ struct BasicRuntimeTests {
       #expect(String(describing: error) == "no protocol: bad url")
     }
   }
+
+  @Test("Static methods")
+  func staticMethods() {
+    let urlConnectionClass = JavaClass<URLConnection>(
+      javaThis: URLConnection.getJNIClass(in: jvm.environment)!,
+      environment: jvm.environment
+    )
+
+    #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
+  }
 }

@@ -146,7 +146,7 @@ extension JavaClass<URLConnection> {
   @JavaMethod
   public func setDefaultAllowUserInteraction(_ arg0: Bool)
 
-  @JavaMethod
+  @JavaStaticMethod
   public func getDefaultAllowUserInteraction() -> Bool
 
   @JavaMethod

@@ -301,9 +301,10 @@ extension AnyJavaObject {
 extension JavaClass {
   /// Call a Java static method with the given name and arguments, which must be
   /// of the correct type, that produces the given result type.
-  public func dynamicJavaMethodCall<each Param: JavaValue, Result: JavaValue>(
+  public func dynamicJavaStaticMethodCall<each Param: JavaValue, Result: JavaValue>(
     methodName: String,
-    args: repeat each Param
+    arguments: repeat each Param,
+    resultType: Result.Type
   ) throws -> Result {
     let thisClass = javaThis
     let environment = javaEnvironment
@@ -325,7 +326,7 @@ extension JavaClass {
 
     // Retrieve the method that performs this call, then
     let jniMethod = Result.jniStaticMethodCall(in: environment)
-    let jniArgs = getJValues(repeat each args, in: environment)
+    let jniArgs = getJValues(repeat each arguments, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
       jniMethod(environment, thisClass, methodID, jniArgs)
     }
@@ -335,9 +336,9 @@ extension JavaClass {
 
   /// Call a Java static method with the given name and arguments, which must be
   /// of the correct type, that produces the given result type.
-  public func dynamicJavaMethodCall<each Param: JavaValue>(
+  public func dynamicJavaStaticMethodCall<each Param: JavaValue>(
     methodName: String,
-    args: repeat each Param
+    arguments: repeat each Param
   ) throws {
     let thisClass = javaThis
     let environment = javaEnvironment
@@ -359,7 +360,7 @@ extension JavaClass {
 
     // Retrieve the method that performs this call, then
     let jniMethod = environment.interface.CallStaticVoidMethodA
-    let jniArgs = getJValues(repeat each args, in: environment)
+    let jniArgs = getJValues(repeat each arguments, in: environment)
     try environment.translatingJNIExceptions {
       jniMethod!(environment, thisClass, methodID, jniArgs)
     }
