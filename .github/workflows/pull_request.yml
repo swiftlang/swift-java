@@ -30,7 +30,7 @@ jobs:
       - name: Install Make
         run: apt update && apt install -y make
       - name: Install JDK
-        run: "./scripts/install_jdk.sh"
+        run: "bash -x ./docker/install_jdk.sh"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
         #      - uses: actions/setup-java@v4
         #        with:
@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: [ '6.0' ]
+        swift_version: [ 'nightly-main' ]
         os_version: [ 'jammy' ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -60,7 +60,7 @@ jobs:
       - name: Install Make
         run: apt update && apt install -y make
       - name: Install JDK
-        run: "./scripts/install_jdk.sh"
+        run: "bash -x ./docker/install_jdk.sh"
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: "make jextract-run"
