@@ -16,6 +16,6 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.MemorySegment;
 
-public interface SwiftHeapObject {
+public interface SwiftHeapObject extends ManagedSwiftType {
     MemorySegment $self();
 }

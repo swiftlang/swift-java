@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.javakit;
+package org.swift.swiftkit;
 
 import java.lang.foreign.MemorySegment;
 

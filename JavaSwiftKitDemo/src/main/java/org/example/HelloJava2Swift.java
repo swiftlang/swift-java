@@ -18,18 +18,10 @@ package org.example;
 
 import com.example.swift.generated.JavaKitExample;
 import com.example.swift.generated.MySwiftClass;
-import org.example.swift.ManualJavaKitExample;
-import org.example.swift.ManualMySwiftClass;
-import org.swift.javakit.*;
+import org.swift.swiftkit.SwiftKit;
 
 // Import swift-extract generated sources
-import static com.example.swift.generated.JavaKitExample.*;
-import static com.example.swift.generated.MySwiftClass.*;
 
-import java.lang.foreign.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 

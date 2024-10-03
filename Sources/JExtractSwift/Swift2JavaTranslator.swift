@@ -171,7 +171,7 @@ extension Swift2JavaTranslator {
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
     // Support library in Java
-    "org.swift.javakit.SwiftKit",
+    "org.swift.swiftkit.SwiftKit",
 
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",

@@ -17,7 +17,7 @@ package org.example.swift;
 // ==== Extra convenience APIs -------------------------------------------------------------------------------------
 // TODO: Think about offering these or not, perhaps only as an option?
 
-import org.swift.javakit.ManagedSwiftType;
+import org.swift.swiftkit.ManagedSwiftType;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;

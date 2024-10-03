@@ -18,12 +18,14 @@ import com.example.swift.generated.JavaKitExample;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static com.example.swift.generated.JavaKitExample.*;
+import com.example.swift.generated.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GlobalFunctionsTest {
     @BeforeAll
     static void beforeAll() {
+        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
+
         System.loadLibrary("swiftCore");
         System.loadLibrary("JavaKitExample");
 
@@ -32,16 +34,16 @@ public class GlobalFunctionsTest {
 
     @Test
     void call_helloWorld() {
-        helloWorld();
+        JavaKitExample.helloWorld();
 
-        assertNotNull(helloWorld$address());
+        assertNotNull(JavaKitExample.helloWorld$address());
     }
 
     @Test
     void call_globalTakeInt() {
         JavaKitExample.globalTakeInt(12);
 
-        assertNotNull(globalTakeInt$address());
+        assertNotNull(JavaKitExample.globalTakeInt$address());
     }
 
 //    @Test

@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.javakit;
-
-import org.swift.swiftkit.SwiftHeapObject;
+package org.swift.swiftkit;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
@@ -25,8 +23,7 @@ import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 
 public class SwiftKit {
 
-    // FIXME: why do we need to hardcore the path, seems it can't find by name
-     private static final String STDLIB_DYLIB_NAME = "swiftCore";
+    private static final String STDLIB_DYLIB_NAME = "swiftCore";
     private static final String STDLIB_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
 
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
@@ -47,6 +44,18 @@ public class SwiftKit {
                     .or(Linker.nativeLinker().defaultLookup());
 
     public SwiftKit() {
+    }
+
+    public static boolean isLinux() {
+        return System.getProperty("os.name").toLowerCase().contains("linux");
+    }
+
+    public static boolean isMacOS() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     static void traceDowncall(String name, Object... args) {
@@ -153,6 +162,7 @@ public class SwiftKit {
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
+    // swift_getTypeByName
 
     /**
      * {@snippet lang=swift :

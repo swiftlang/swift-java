@@ -1,3 +1,5 @@
+import java.util.*
+
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -38,6 +40,30 @@ tasks.test {
     useJUnitPlatform()
 }
 
+fun javaLibraryPaths(): List<String> {
+    val osName = System.getProperty("os.name")
+    val osArch = System.getProperty("os.arch")
+    val isLinux = osName.lowercase(Locale.getDefault()).contains("linux")
+
+    return listOf(
+        if (osName.lowercase(Locale.getDefault()).contains("linux")) {
+            """$rootDir/.build/$osArch-unknown-linux-gnu/debug/"""
+        } else {
+            if (osArch.equals("aarch64")) {
+                """$rootDir/.build/arm64-apple-macosx/debug/"""
+            } else {
+                """$rootDir/.build/$osArch-apple-macosx/debug/"""
+            }
+        },
+        if (isLinux) {
+            "/usr/lib/swift/linux"
+        } else {
+            // assume macOS
+            "/usr/lib/swift/"
+        }
+    )
+}
+
 application {
     mainClass = "org.example.HelloJava2Swift"
 
@@ -51,10 +77,7 @@ application {
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + listOf(
-            """$rootDir/.build/arm64-apple-macosx/debug/""",
-            "/usr/lib/swift/"
-        ).joinToString(":"),
+        "-Djava.library.path=" + javaLibraryPaths().joinToString(File.pathSeparator),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"

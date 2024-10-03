@@ -14,8 +14,6 @@
 
 package org.swift.swiftkit;
 
-import org.swift.javakit.SwiftKit;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.concurrent.ConcurrentSkipListSet;

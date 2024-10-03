@@ -112,6 +112,10 @@ struct JavaToSwift: ParsableCommand {
       }
     }
 
+    for a in try (classPathWithJarFile.map { try URL("file://\($0)", environment: environment) }) {
+      print("f: \(a)")
+    }
+
     // Load all of the requested classes.
     let classLoader = URLClassLoader(
       try classPathWithJarFile.map { try URL("file://\($0)", environment: environment) },
@@ -137,6 +141,7 @@ struct JavaToSwift: ParsableCommand {
         javaClassName = javaClassNameOpt
       }
 
+      print("Load class: \(javaClassName)")
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
         print("warning: could not find Java class '\(javaClassName)'")
         continue

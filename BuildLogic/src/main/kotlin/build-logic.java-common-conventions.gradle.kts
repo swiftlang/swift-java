@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import java.util.*
+
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -40,22 +43,45 @@ tasks.withType(JavaCompile::class).forEach {
     it.options.compilerArgs.add("-Xlint:preview")
 }
 
+fun javaLibraryPaths(): List<String> {
+    val osName = System.getProperty("os.name")
+    val osArch = System.getProperty("os.arch")
+    val isLinux = osName.lowercase(Locale.getDefault()).contains("linux")
+
+    return listOf(
+        if (osName.lowercase(Locale.getDefault()).contains("linux")) {
+            """$rootDir/.build/$osArch-unknown-linux-gnu/debug/"""
+        } else {
+            if (osArch.equals("aarch64")) {
+                """$rootDir/.build/arm64-apple-macosx/debug/"""
+            } else {
+                """$rootDir/.build/$osArch-apple-macosx/debug/"""
+            }
+        },
+        if (isLinux) {
+            "/usr/lib/swift/linux"
+        } else {
+            // assume macOS
+            "/usr/lib/swift/"
+        }
+    )
+}
+
+
 // Configure paths for native (Swift) libraries
 tasks.test {
     jvmArgs(
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + listOf(
-            """$rootDir/.build/arm64-apple-macosx/debug/""",
-            "/usr/lib/swift/"
-        ).joinToString(File.pathSeparator)
+        "-Djava.library.path=" + javaLibraryPaths().joinToString(File.pathSeparator)
     )
 }
 
 tasks.withType<Test> {
     this.testLogging {
-        this.showStandardStreams = true
+        showStandardStreams = true
+        exceptionFormat = TestExceptionFormat.FULL
     }
 }
 
