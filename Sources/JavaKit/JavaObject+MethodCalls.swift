@@ -186,6 +186,7 @@ extension AnyJavaObject {
     arguments: repeat each Param,
     resultType: Result.Type
   ) throws -> Result {
+    print("CALL: \(methodName)")
     let methodID = try javaMethodLookup(
       methodName: methodName,
       parameterTypes: repeat (each Param).self,

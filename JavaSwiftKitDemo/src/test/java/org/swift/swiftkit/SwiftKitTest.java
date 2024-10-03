@@ -18,6 +18,8 @@ import com.example.swift.generated.MySwiftClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,7 +36,7 @@ public class SwiftKitTest {
     }
 
     @Test
-    @Disabled("Re-enable once we have the non-nm mangled name obtaining merged, these tests will fail on Linux otherwise")
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_retain_retainCount_release() {
         var obj = new MySwiftClass(1, 2);
 

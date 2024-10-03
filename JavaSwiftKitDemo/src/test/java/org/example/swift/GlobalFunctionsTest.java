@@ -39,9 +39,6 @@ public class GlobalFunctionsTest {
     @Test
     @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_helloWorld() {
-        if (SwiftKit.isLinux())
-            throw new TestSkippedException("Currently we don't obtain mangled names in Linux so all 'call' tests will fail");
-
         JavaKitExample.helloWorld();
 
         assertNotNull(JavaKitExample.helloWorld$address());

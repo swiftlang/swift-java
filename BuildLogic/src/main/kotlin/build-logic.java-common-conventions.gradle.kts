@@ -12,18 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.*
 import java.util.*
 
 plugins {
     java
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(22)
-    }
-}
+//java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(22)
+//    }
+//}
 
 repositories {
     mavenCentral()
@@ -82,6 +82,22 @@ tasks.withType<Test> {
     this.testLogging {
         showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
+
+        // set options for log level LIFECYCLE
+        events = setOf(TestLogEvent.FAILED,
+               TestLogEvent.PASSED,
+               TestLogEvent.SKIPPED,
+               TestLogEvent.STANDARD_OUT)
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+
+        beforeTest(closureOf<TestDescriptor> {
+            logger.lifecycle("Test: ${this.className} > ${this.displayName}: ...")
+        })
+        afterTest(KotlinClosure2({ descriptor: TestDescriptor, result: TestResult ->
+            logger.lifecycle("Test: ${descriptor.className} > ${descriptor.displayName}: ${result.resultType}")
+        }))
     }
 }
 
