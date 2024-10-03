@@ -44,8 +44,8 @@ jobs:
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: make jextract-run
-      - name: Gradle build
-        run: ./gradlew build --no-daemon
+      - name: Gradle test
+        run: ./gradlew test --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -71,3 +71,25 @@ jobs:
         run: "make jextract-run"
       - name: Test Swift
         run: "swift test"
+
+  make:
+    name: Make build (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: [ 'nightly-main' ]
+        os_version: [ 'jammy' ]
+        jdk_vendor: [ 'Corretto' ]
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Make
+        run: apt-get -qq update && apt-get -qq install -y make
+      - name: Install JDK
+        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
+      - name: Make (default target)
+        run: "make"
