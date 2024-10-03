@@ -18,7 +18,11 @@ import com.example.swift.generated.JavaKitExample;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.example.swift.generated.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.opentest4j.TestSkippedException;
+import org.swift.swiftkit.SwiftKit;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GlobalFunctionsTest {
@@ -33,30 +37,22 @@ public class GlobalFunctionsTest {
     }
 
     @Test
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_helloWorld() {
+        if (SwiftKit.isLinux())
+            throw new TestSkippedException("Currently we don't obtain mangled names in Linux so all 'call' tests will fail");
+
         JavaKitExample.helloWorld();
 
         assertNotNull(JavaKitExample.helloWorld$address());
     }
 
     @Test
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_globalTakeInt() {
         JavaKitExample.globalTakeInt(12);
 
         assertNotNull(JavaKitExample.globalTakeInt$address());
     }
 
-//    @Test
-//    void call_globalCallJavaCallback() {
-//        var num = 0;
-//
-//        JavaKitExample.globalCallJavaCallback(new Runnable() {
-//            @Override
-//            public void run() {
-//                num += 1;
-//            }
-//        });
-//
-//        assertEquals(1, num);
-//    }
 }

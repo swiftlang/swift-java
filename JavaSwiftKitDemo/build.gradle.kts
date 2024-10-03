@@ -1,5 +1,3 @@
-import java.util.*
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -13,6 +11,8 @@ import java.util.*
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+import java.util.*
 
 plugins {
     id("build-logic.java-application-conventions")

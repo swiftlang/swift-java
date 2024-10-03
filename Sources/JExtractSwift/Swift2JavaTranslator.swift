@@ -119,11 +119,15 @@ extension Swift2JavaTranslator {
     )
 
     // FIXME: the use of dylibs to get symbols is a hack we need to remove and replace with interfaces containing mangled names
-    let dylibPath = ".build/arm64-apple-macosx/debug/lib\(swiftModuleName).dylib"
-    guard var dylib = SwiftDylib(path: dylibPath) else {
+    #if os(Linux)
+    let libPath = ".build/aarch64-unknown-linux-gnu/debug/lib\(swiftModuleName).so"
+    #else
+    let libPath = ".build/arm64-apple-macosx/debug/lib\(swiftModuleName).dylib"
+    #endif
+    guard var dylib = SwiftDylib(path: libPath) else {
       log.warning(
         """
-        Unable to find mangled names for imported symbols. Dylib not found: \(dylibPath) This method of obtaining symbols is a workaround; it will be removed.
+        Unable to find mangled names for imported symbols. Dylib not found: \(libPath) This method of obtaining symbols is a workaround; it will be removed.
         """
       )
       return

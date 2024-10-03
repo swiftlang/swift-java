@@ -1,6 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import java.util.*
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -14,6 +11,9 @@ import java.util.*
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import java.util.*
 
 plugins {
     java

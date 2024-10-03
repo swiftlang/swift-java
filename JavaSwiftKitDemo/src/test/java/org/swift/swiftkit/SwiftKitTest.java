@@ -12,13 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.example.swift;
+package org.swift.swiftkit;
 
 import com.example.swift.generated.MySwiftClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.SwiftKit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

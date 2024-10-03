@@ -33,15 +33,21 @@ public class SwiftKit {
         System.loadLibrary(STDLIB_DYLIB_NAME);
     }
 
-    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
-            .withTargetLayout(MemoryLayout.sequenceLayout(java.lang.Long.MAX_VALUE, JAVA_BYTE));
-
     static final SymbolLookup SYMBOL_LOOKUP =
-            // FIXME: why does this not find just by name?
+            getSymbolLookup();
+
+    private static SymbolLookup getSymbolLookup() {
+        if (isMacOS()) {
+            // FIXME: why does this not find just by name on macOS?
             // SymbolLookup.libraryLookup(System.mapLibraryName(STDLIB_DYLIB_NAME), LIBRARY_ARENA)
-            SymbolLookup.libraryLookup(STDLIB_DYLIB_PATH, LIBRARY_ARENA)
+            return SymbolLookup.libraryLookup(STDLIB_DYLIB_PATH, LIBRARY_ARENA)
                     .or(SymbolLookup.loaderLookup())
                     .or(Linker.nativeLinker().defaultLookup());
+        } else {
+            return SymbolLookup.loaderLookup()
+                    .or(Linker.nativeLinker().defaultLookup());
+        }
+    }
 
     public SwiftKit() {
     }

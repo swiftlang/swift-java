@@ -239,12 +239,23 @@ extension Swift2JavaTranslator {
         """
       )
 
+      // SymbolLookup.libraryLookup is platform dependent and does not take into account java.library.path
+      // https://bugs.openjdk.org/browse/JDK-8311090
       printer.print(
         """
         static final SymbolLookup SYMBOL_LOOKUP =
-                SymbolLookup.libraryLookup(System.mapLibraryName(DYLIB_NAME), LIBRARY_ARENA)
+                getSymbolLookup();
+
+        private static SymbolLookup getSymbolLookup() {
+            if (SwiftKit.isMacOS()) {
+                return SymbolLookup.libraryLookup(System.mapLibraryName(DYLIB_NAME), LIBRARY_ARENA)
                         .or(SymbolLookup.loaderLookup())
                         .or(Linker.nativeLinker().defaultLookup());
+            } else {
+                return SymbolLookup.loaderLookup()
+                        .or(Linker.nativeLinker().defaultLookup());
+            }
+        }
         """
       )
 
