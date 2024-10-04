@@ -17,6 +17,7 @@ package org.swift.javakit;
 import org.swift.swiftkit.SwiftHeapObject;
 
 import java.lang.foreign.*;
+import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -200,7 +201,7 @@ public class SwiftKit {
      */
     private static class swift_getTypeByMangledNameInEnvironment {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-                /*returns=*/ValueLayout.ADDRESS,
+                /*returns=*/SWIFT_POINTER,
                 ValueLayout.ADDRESS,
                 ValueLayout.JAVA_INT,
                 ValueLayout.ADDRESS,
@@ -229,5 +230,122 @@ public class SwiftKit {
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
+    }
+
+    /**
+     * The value layout for Swift's Int type, which is a signed type that follows
+     * the size of a pointer (aka C's ptrdiff_t).
+     */
+    public static ValueLayout SWIFT_INT = (ValueLayout.ADDRESS.byteSize() == 4) ?
+        ValueLayout.JAVA_INT : ValueLayout.JAVA_LONG;
+
+    /**
+     * The value layout for Swift's UInt type, which is an unsigned type that follows
+     * the size of a pointer (aka C's size_t). Java does not have unsigned integer
+     * types in general, so we use the layout for Swift's Int.
+     */
+    public static ValueLayout SWIFT_UINT = SWIFT_INT;
+
+    /**
+     * Read a Swift.Int value from memory at the given offset and translate it into a Java long.
+     *
+     * This function copes with the fact that a Swift.Int might be 32 or 64 bits.
+     */
+    public static final long getSwiftInt(MemorySegment memorySegment, long offset) {
+        if (SWIFT_INT == ValueLayout.JAVA_LONG) {
+            return memorySegment.get(ValueLayout.JAVA_LONG, offset);
+        } else {
+            return memorySegment.get(ValueLayout.JAVA_INT, offset);
+        }
+    }
+
+    /**
+     * Value witness table layout.
+     */
+    public static final MemoryLayout valueWitnessTableLayout = MemoryLayout.structLayout(
+        ValueLayout.ADDRESS.withName("initializeBufferWithCopyOfBuffer"),
+        ValueLayout.ADDRESS.withName("destroy"),
+        ValueLayout.ADDRESS.withName("initializeWithCopy"),
+        ValueLayout.ADDRESS.withName("assignWithCopy"),
+        ValueLayout.ADDRESS.withName("initializeWithTake"),
+        ValueLayout.ADDRESS.withName("assignWithTake"),
+        ValueLayout.ADDRESS.withName("getEnumTagSinglePayload"),
+        ValueLayout.ADDRESS.withName("storeEnumTagSinglePayload"),
+        SwiftKit.SWIFT_INT.withName("size"),
+        SwiftKit.SWIFT_INT.withName("stride"),
+        SwiftKit.SWIFT_UINT.withName("flags"),
+        SwiftKit.SWIFT_UINT.withName("extraInhabitantCount")
+    ).withName("SwiftValueWitnessTable");
+
+    /**
+     * Offset for the "size" field within the value witness table.
+     */
+    static final long valueWitnessTable$size$offset =
+        valueWitnessTableLayout.byteOffset(PathElement.groupElement("size"));
+
+    /**
+     * Offset for the "stride" field within the value witness table.
+     */
+    static final long valueWitnessTable$stride$offset =
+        valueWitnessTableLayout.byteOffset(PathElement.groupElement("stride"));
+
+    /**
+     * Offset for the "flags" field within the value witness table.
+     */
+    static final long valueWitnessTable$flags$offset =
+        valueWitnessTableLayout.byteOffset(PathElement.groupElement("flags"));
+
+    /**
+     * Type metadata pointer.
+     */
+    public static final StructLayout fullTypeMetadataLayout = MemoryLayout.structLayout(
+        SWIFT_POINTER.withName("vwt")
+    ).withName("SwiftFullTypeMetadata");
+
+    /**
+     * Offset for the "vwt" field within the full type metadata.
+     */
+    static final long fullTypeMetadata$vwt$offset =
+        fullTypeMetadataLayout.byteOffset(PathElement.groupElement("vwt"));
+
+    /**
+     * Given the address of Swift type metadata for a type, return the addres
+     * of the "full" type metadata that can be accessed via fullTypeMetadataLayout.
+     */
+    public static MemorySegment fullTypeMetadata(MemorySegment typeMetadata) {
+        return MemorySegment.ofAddress(typeMetadata.address() - SWIFT_POINTER.byteSize())
+            .reinterpret(fullTypeMetadataLayout.byteSize());
+    }
+
+    /**
+     * Given the address of Swift type's metadata, return the address that
+     * references the value witness table for the type.
+     */
+    public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
+        return fullTypeMetadata(typeMetadata).get(SWIFT_POINTER, fullTypeMetadata$vwt$offset);
+    }
+
+    /**
+     * Determine the size of a Swift type given its type metadata.
+     */
+    public static long sizeOfSwiftType(MemorySegment typeMetadata) {
+        return getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$size$offset);
+    }
+
+    /**
+     * Determine the stride of a Swift type given its type metadata, which is
+     * how many bytes are between successive elements of this type within an
+     * array. It is >= the size.
+     */
+    public static long strideOfSwiftType(MemorySegment typeMetadata) {
+        return getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$stride$offset);
+    }
+
+    /**
+     * Determine the alignment of the given Swift type.
+     */
+    public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
+        long flags = getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$flags$offset);
+        return (flags & 0xFF) + 1;
     }
 }

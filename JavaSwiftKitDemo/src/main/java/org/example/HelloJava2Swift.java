@@ -68,5 +68,11 @@ public class HelloJava2Swift {
 
         obj.voidMethod();
         obj.takeIntMethod(42);
+
+        MemorySegment swiftType = SwiftKit.getTypeByMangledNameInEnvironment("SiSg");
+        System.out.println("Memory layout for Swift.Int?:");
+        System.out.println("  size = " + SwiftKit.sizeOfSwiftType(swiftType));
+        System.out.println("  stride = " + SwiftKit.strideOfSwiftType(swiftType));
+        System.out.println("  alignment = " + SwiftKit.alignmentOfSwiftType(swiftType));
     }
 }
