@@ -74,5 +74,6 @@ public class HelloJava2Swift {
         System.out.println("  size = " + SwiftKit.sizeOfSwiftType(swiftType));
         System.out.println("  stride = " + SwiftKit.strideOfSwiftType(swiftType));
         System.out.println("  alignment = " + SwiftKit.alignmentOfSwiftType(swiftType));
+        System.out.println("  Java layout = " + SwiftKit.layoutOfSwiftType(swiftType));
     }
 }

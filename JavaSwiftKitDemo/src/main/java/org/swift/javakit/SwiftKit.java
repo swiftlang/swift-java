@@ -348,4 +348,23 @@ public class SwiftKit {
         long flags = getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$flags$offset);
         return (flags & 0xFF) + 1;
     }
+
+    /**
+     * Produce a layout that describes a Swift type based on its
+     * type metadata. The resulting layout is completely opaque to Java, but
+     * has appropriate size/alignment to model the memory associated with a
+     * Swift type.
+     *
+     * In the future, this layout could be extended to provide more detail,
+     * such as the fields of a Swift struct.
+     */
+    public static MemoryLayout layoutOfSwiftType(MemorySegment typeMetadata) {
+        long size = sizeOfSwiftType(typeMetadata);
+        long stride = strideOfSwiftType(typeMetadata);
+        return MemoryLayout.structLayout(
+            MemoryLayout.sequenceLayout(size, JAVA_BYTE)
+              .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
+            MemoryLayout.paddingLayout(stride - size)
+        );
+    }
 }
