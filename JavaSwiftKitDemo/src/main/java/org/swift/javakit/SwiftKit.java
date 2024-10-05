@@ -22,6 +22,7 @@ import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 
 public class SwiftKit {
@@ -350,6 +351,46 @@ public class SwiftKit {
     }
 
     /**
+     * Descriptor for the swift_getTypeName runtime function.
+     */
+    public static final FunctionDescriptor swift_getTypeName$descriptor = FunctionDescriptor.of(
+        /*returns=*/MemoryLayout.structLayout(
+            SWIFT_POINTER.withName("utf8Chars"),
+            SWIFT_INT.withName("length")
+        ),
+        ValueLayout.ADDRESS,
+        ValueLayout.JAVA_BOOLEAN
+    );
+
+    /**
+     * Address of the swift_getTypeName runtime function.
+     */
+    public static final MemorySegment swift_getTypeName$addr = findOrThrow("swift_getTypeName");
+
+    /**
+     * Handle for the swift_getTypeName runtime function.
+     */
+    public static final MethodHandle swift_getTypeName$handle = Linker.nativeLinker().downcallHandle(swift_getTypeName$addr, swift_getTypeName$descriptor);
+
+    /**
+     * Produce the name of the Swift type given its Swift type metadata.
+     *
+     * If 'qualified' is true, leave all of the qualification in place to
+     * disambiguate the type, producing a more complete (but longer) type name.
+     */
+    public static String nameOfSwiftType(MemorySegment typeMetadata, boolean qualified) {
+        try {
+            try (Arena arena = Arena.ofConfined()) {
+              MemorySegment charsAndLength = (MemorySegment)swift_getTypeName$handle.invokeExact((SegmentAllocator)arena, typeMetadata, qualified);
+              MemorySegment utf8Chars = charsAndLength.get(SWIFT_POINTER, 0);
+              return utf8Chars.getString(0);
+            }
+        } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    /**
      * Produce a layout that describes a Swift type based on its
      * type metadata. The resulting layout is completely opaque to Java, but
      * has appropriate size/alignment to model the memory associated with a
@@ -365,6 +406,6 @@ public class SwiftKit {
             MemoryLayout.sequenceLayout(size, JAVA_BYTE)
               .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
             MemoryLayout.paddingLayout(stride - size)
-        );
+        ).withName(nameOfSwiftType(typeMetadata, true));
     }
 }
