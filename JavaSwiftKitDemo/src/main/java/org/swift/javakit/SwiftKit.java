@@ -64,6 +64,36 @@ public class SwiftKit {
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
+    // free
+    /**
+     * Descriptor for the free C runtime function.
+     */
+    public static final FunctionDescriptor free$descriptor = FunctionDescriptor.ofVoid(
+        ValueLayout.ADDRESS
+    );
+
+    /**
+     * Address of the free C runtime function.
+     */
+    public static final MemorySegment free$addr = findOrThrow("free");
+
+    /**
+     * Handle for the free C runtime function.
+     */
+    public static final MethodHandle free$handle = Linker.nativeLinker().downcallHandle(free$addr, free$descriptor);
+
+    /**
+     * free the given pointer
+     */
+    public static void cFree(MemorySegment pointer) {
+        try {
+            free$handle.invokeExact(pointer);
+        } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    // ==== ------------------------------------------------------------------------------------------------------------
     // swift_retainCount
 
     private static class swift_retainCount {
@@ -383,7 +413,9 @@ public class SwiftKit {
             try (Arena arena = Arena.ofConfined()) {
               MemorySegment charsAndLength = (MemorySegment)swift_getTypeName$handle.invokeExact((SegmentAllocator)arena, typeMetadata, qualified);
               MemorySegment utf8Chars = charsAndLength.get(SWIFT_POINTER, 0);
-              return utf8Chars.getString(0);
+              String typeName = utf8Chars.getString(0);
+              cFree(utf8Chars);
+              return typeName;
             }
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
