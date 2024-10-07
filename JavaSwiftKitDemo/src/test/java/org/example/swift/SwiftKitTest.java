@@ -42,7 +42,7 @@ public class SwiftKitTest {
 
     @Test
     void call_retain_retainCount_release() {
-        var obj = MySwiftClass.init(1, 2);
+        var obj = new MySwiftClass(1, 2);
 
         assertEquals(1, SwiftKit.retainCount(obj.$memorySegment()));
         // TODO: test directly on SwiftHeapObject inheriting obj
