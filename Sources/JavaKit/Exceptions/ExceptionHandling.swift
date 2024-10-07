@@ -42,7 +42,7 @@ extension JNIEnvironment {
     // Otherwise, create a exception with a message.
     _ = interface.ThrowNew(
       self,
-      JavaClass<Exception>.getJNIClass(in: self),
+      try! JavaClass<Exception>.getJNIClass(in: self),
       String(describing: error)
     )
   }

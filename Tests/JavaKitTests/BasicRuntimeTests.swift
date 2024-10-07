@@ -59,15 +59,23 @@ struct BasicRuntimeTests {
   }
 
   @Test("Static methods")
-  func staticMethods() {
-    let urlConnectionClass = JavaClass<URLConnection>(
-      javaThis: URLConnection.getJNIClass(in: jvm.environment)!,
-      environment: jvm.environment
-    )
-
+  func staticMethods() throws {
+    let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
     #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
+
+  @Test("Class instance lookup")
+  func classInstanceLookup() throws {
+    do {
+      _ = try JavaClass<Nonexistent>(in: jvm.environment)
+    } catch {
+      #expect(String(describing: error) == "org/swift/javakit/Nonexistent")
+    }
+  }
 }
+
+@JavaClass("org.swift.javakit.Nonexistent")
+struct Nonexistent { }
 
 /// Whether we're running on Linux.
 var isLinux: Bool {

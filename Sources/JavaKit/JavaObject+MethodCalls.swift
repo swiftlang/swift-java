@@ -247,7 +247,7 @@ extension AnyJavaObject {
     in environment: JNIEnvironment,
     arguments: repeat each Param
   ) throws -> Self {
-    let thisClass = Self.getJNIClass(in: environment)!
+    let thisClass = try Self.getJNIClass(in: environment)
 
     // Compute the method signature so we can find the right method, then look up the
     // method within the class.
