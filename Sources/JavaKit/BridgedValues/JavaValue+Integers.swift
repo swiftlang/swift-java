@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
 import JavaTypes
 
 extension Int8: JavaValue {

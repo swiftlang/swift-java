@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaRuntime
 
 typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
 

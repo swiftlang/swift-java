@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
 import JavaTypes
 
 extension Array: JavaValue where Element: JavaValue {

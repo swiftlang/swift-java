@@ -15,7 +15,6 @@
 import JavaKit
 import JavaKitNetwork
 import JavaKitVM
-import JavaRuntime
 import Testing
 
 @MainActor
