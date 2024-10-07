@@ -41,7 +41,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     var jvm: JavaVMPointer? = nil
     var environment: UnsafeMutableRawPointer? = nil
     var vmArgs = JavaVMInitArgs()
-    vmArgs.version = JNI_VERSION_21
+    vmArgs.version = JNI_VERSION_1_6
     vmArgs.ignoreUnrecognized = jboolean(ignoreUnrecognized ? JNI_TRUE : JNI_FALSE)
 
     // Construct the complete list of VM options.
