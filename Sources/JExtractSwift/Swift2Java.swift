@@ -36,7 +36,7 @@ public struct SwiftToJava: AsyncParsableCommand {
 
   // TODO: Once we ship this, make this `.warning` by default
   @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
-  var logLevel: Logger.Level = .trace
+  var logLevel: Logger.Level = .notice
 
   @Argument(help: "The Swift interface files to export to Java.")
   var swiftInterfaceFiles: [String]

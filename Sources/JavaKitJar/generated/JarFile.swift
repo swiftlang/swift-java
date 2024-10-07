@@ -29,6 +29,9 @@ public struct JarFile {
   public func size() -> Int32
 
   @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
   public func close() throws
 
   @JavaMethod
@@ -36,9 +39,6 @@ public struct JarFile {
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
 
   @JavaMethod
   public func hashCode() -> Int32

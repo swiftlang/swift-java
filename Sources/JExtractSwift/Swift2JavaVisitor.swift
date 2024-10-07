@@ -78,7 +78,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.log.info("Import function: \(node.kind) \(node.name)")
+    self.log.debug("Import function: \(node.kind) \(node.name)")
 
     // TODO: this must handle inout and other stuff, strip it off etc
     let returnTy: TypeSyntax
@@ -129,7 +129,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     if let currentTypeName {
-      log.info("Record method in \(currentTypeName)")
+      log.debug("Record method in \(currentTypeName)")
       translator.importedTypes[currentTypeName]?.methods.append(funcDecl)
     } else {
       translator.importedGlobalFuncs.append(funcDecl)

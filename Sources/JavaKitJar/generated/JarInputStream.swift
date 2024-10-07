@@ -26,10 +26,10 @@ public struct JarInputStream {
   public func readAllBytes() throws -> [Int8]
 
   @JavaMethod
-  public func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  public func readNBytes(_ arg0: Int32) throws -> [Int8]
 
   @JavaMethod
-  public func readNBytes(_ arg0: Int32) throws -> [Int8]
+  public func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   @JavaMethod
   public func skip(_ arg0: Int64) throws -> Int64

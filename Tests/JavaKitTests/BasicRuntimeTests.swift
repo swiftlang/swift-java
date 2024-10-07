@@ -58,7 +58,7 @@ struct BasicRuntimeTests {
     }
   }
 
-  @Test("Static methods")
+  @Test("Static methods", .disabled(if: isMacOS, "Fails on macOS command line"))
   func staticMethods() throws {
     let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
     #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)

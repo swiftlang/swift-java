@@ -18,7 +18,7 @@ func findJavaHome() -> String {
   // This is a workaround for envs (some IDEs) which have trouble with
   // picking up env variables during the build process
   let path = "\(FileManager.default.homeDirectoryForCurrentUser.path()).java_home"
-  if let home = try? String(contentsOfFile: path) {
+  if let home = try? String(contentsOfFile: path, encoding: .utf8) {
     if let lastChar = home.last, lastChar.isNewline {
       return String(home.dropLast())
     }
@@ -36,8 +36,8 @@ let javaIncludePath = "\(javaHome)/include"
 #elseif os(macOS)
   let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #else
+  // TODO: Handle windows as well
   #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
-// TODO: Handle windows as well
 #endif
 
 let package = Package(
@@ -50,6 +50,7 @@ let package = Package(
     .macCatalyst(.v13),
   ],
   products: [
+    // ==== JavaKit (i.e. calling Java directly Swift utilities)
     .library(
       name: "JavaKit",
       targets: ["JavaKit"]
@@ -71,12 +72,6 @@ let package = Package(
     ),
 
     .library(
-      name: "JavaKitExample",
-      type: .dynamic,
-      targets: ["JavaKitExample"]
-    ),
-
-    .library(
       name: "JavaKitVM",
       targets: ["JavaKitVM"]
     ),
@@ -86,20 +81,43 @@ let package = Package(
       targets: ["JavaTypes"]
     ),
 
-    .library(
-      name: "JExtractSwift",
-      targets: ["JExtractSwift"]
-    ),
-
     .executable(
       name: "Java2Swift",
       targets: ["Java2Swift"]
     ),
 
+    // ==== jextract-swift (extract Java accessors from Swift interface files)
+
     .executable(
       name: "jextract-swift",
       targets: ["JExtractSwiftTool"]
     ),
+
+    // Support library written in Swift for SwiftKit "Java"
+    .library(
+      name: "SwiftKitSwift",
+      type: .dynamic,
+      targets: ["SwiftKitSwift"]
+    ),
+
+    .library(
+      name: "JExtractSwift",
+      targets: ["JExtractSwift"]
+    ),
+
+    // ==== Examples
+
+    .library(
+      name: "JavaKitExample",
+      type: .dynamic,
+      targets: ["JavaKitExample"]
+    ),
+    .library(
+      name: "ExampleSwiftLibrary",
+      type: .dynamic,
+      targets: ["ExampleSwiftLibrary"]
+    ),
+
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
@@ -182,6 +200,22 @@ let package = Package(
     .target(
       name: "JavaKitExample",
       dependencies: ["JavaKit"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "ExampleSwiftLibrary",
+      dependencies: [],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "SwiftKitSwift",
+      dependencies: [],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
