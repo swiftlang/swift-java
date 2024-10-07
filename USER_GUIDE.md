@@ -57,7 +57,6 @@ Now, in the `HelloSwift` Swift library, define a `struct` that provides the `mai
 
 ```swift
 import JavaKit
-import JavaRuntime
 
 @JavaClass("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
@@ -87,7 +86,6 @@ The easiest way to build a command-line program in Swift is with the [Swift argu
 ```swift
 import ArgumentParser
 import JavaKit
-import JavaRuntime
 
 @JavaClass("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain: ParsableCommand {
