@@ -70,7 +70,7 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
 
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
     return { environment, size in
-      let jniClass = Wrapped.getJNIClass(in: environment)
+      let jniClass = try! Wrapped.getJNIClass(in: environment)
       return environment.interface.NewObjectArray(environment, size, jniClass, nil)
     }
   }

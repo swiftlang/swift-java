@@ -27,7 +27,7 @@ extension AnyJavaObject {
   private func isInstanceOf<OtherClass: AnyJavaObject>(
     _ otherClass: OtherClass.Type
   ) -> jclass? {
-    guard let otherJavaClass = otherClass.getJNIClass(in: javaEnvironment) else {
+    guard let otherJavaClass = try? otherClass.getJNIClass(in: javaEnvironment) else {
       return nil
     }
 

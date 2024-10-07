@@ -81,10 +81,12 @@ extension AnyJavaObject {
   }
 
   /// Retrieve the Java class for this type.
-  public static func getJNIClass(in environment: JNIEnvironment) -> jclass? {
-    return environment.interface.FindClass(
-      environment,
-      fullJavaClassNameWithSlashes
-    )
+  public static func getJNIClass(in environment: JNIEnvironment) throws -> jclass {
+    try environment.translatingJNIExceptions {
+      environment.interface.FindClass(
+        environment,
+        fullJavaClassNameWithSlashes
+      )
+    }!
   }
 }
