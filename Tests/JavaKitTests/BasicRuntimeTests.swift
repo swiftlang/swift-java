@@ -24,11 +24,7 @@ let jvm = try! JavaVirtualMachine(vmOptions: [])
 @Suite
 @MainActor
 struct BasicRuntimeTests {
-  #if os(Linux)
-  @Test("Object management", .disabled("Attempts to refcount a null pointer on Linux"))
-  #else
-  @Test("Object management", .disabled("Bad pointer de-reference on Linux"))
-  #endif
+  @Test("Object management", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
   func javaObjectManagement() throws {
     let sneakyJavaThis: jobject
     do {
@@ -54,12 +50,8 @@ struct BasicRuntimeTests {
     #expect(url.javaHolder === urlAgain.javaHolder)
   }
 
-  #if os(Linux)
-  @Test("Java exceptions", .disabled("Attempts to refcount a null pointer on Linux"))
-  #else
-  @Test("Java exceptions")
-  #endif
-  func javaExceptionsInSwift() async throws {
+  @Test("Java exceptions", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
+  func javaExceptionsInSwift() throws {
     do {
       _ = try URL("bad url", environment: jvm.environment)
     } catch {
@@ -76,4 +68,13 @@ struct BasicRuntimeTests {
 
     #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
+}
+
+/// Whether we're running on Linux.
+var isLinux: Bool {
+  #if os(Linux)
+  return true
+  #else
+  return false
+  #endif
 }
