@@ -52,25 +52,21 @@ let package = Package(
   products: [
     .library(
       name: "JavaKit",
-      type: .dynamic,
       targets: ["JavaKit"]
     ),
 
     .library(
       name: "JavaKitJar",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
     .library(
       name: "JavaKitNetwork",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
     .library(
       name: "JavaKitReflection",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
@@ -82,19 +78,16 @@ let package = Package(
 
     .library(
       name: "JavaKitVM",
-      type: .dynamic,
       targets: ["JavaKitVM"]
     ),
 
     .library(
       name: "JavaTypes",
-      type: .dynamic,
       targets: ["JavaTypes"]
     ),
 
     .library(
       name: "JExtractSwift",
-      type: .dynamic,
       targets: ["JExtractSwift"]
     ),
 
