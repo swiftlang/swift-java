@@ -117,6 +117,50 @@ final class VariableImportTests {
       public static MemorySegment counterInt$set$address() {
           return counterInt.ADDR_SET;
       }
+      /**
+       * Downcall to Swift:
+       * 
+       */
+      public static long getCounterInt(java.lang.foreign.MemorySegment self$) {
+          var mh$ = counterInt.HANDLE_GET;
+          try {
+              if (TRACE_DOWNCALLS) {
+                  traceDowncall(self$);
+              }
+              return (long) mh$.invokeExact(self$);
+          } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+          }
+      }
+      /**
+       * Downcall to Swift:
+       *
+       */
+      public long getCounterInt() {
+        return (long) getCounterInt($memorySegment());
+      }
+      /**
+       * Downcall to Swift:
+       *
+       */
+      public static void setCounterInt(long newValue, java.lang.foreign.MemorySegment self$) {
+        var mh$ = counterInt.HANDLE_SET;
+        try {
+          if (TRACE_DOWNCALLS) {
+             traceDowncall(newValue, self$);
+          }
+           mh$.invokeExact(newValue, self$);
+        } catch (Throwable ex$) {
+          throw new AssertionError("should not reach here", ex$);
+        }
+      }
+      /**
+       * Downcall to Swift:
+       *
+       */
+      public void setCounterInt(long newValue) {
+         setCounterInt(newValue, $memorySegment());
+      }
       """
     )
   }

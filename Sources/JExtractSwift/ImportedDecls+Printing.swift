@@ -62,4 +62,33 @@ extension VariableAccessorKind {
     case .set: "$set"
     }
   }
+
+  func renderMethodName(_ decl: ImportedFunc) -> String? {
+    switch self {
+    case .get: "get\(decl.identifier.toCamelCase)"
+    case .set: "set\(decl.identifier.toCamelCase)"
+    }
+  }
+}
+
+extension Optional where Wrapped == VariableAccessorKind {
+  public var renderDescFieldName: String {
+    self?.renderDescFieldName ?? "DESC"
+  }
+
+  public var renderAddrFieldName: String {
+    self?.renderAddrFieldName ?? "ADDR"
+  }
+
+  public var renderHandleFieldName: String {
+    self?.renderHandleFieldName ?? "HANDLE"
+  }
+
+  public var renderMethodNameSegment: String {
+    self?.renderMethodNameSegment ?? ""
+  }
+
+  func renderMethodName(_ decl: ImportedFunc) -> String {
+    self?.renderMethodName(decl) ?? decl.baseIdentifier
+  }
 }
