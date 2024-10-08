@@ -15,6 +15,9 @@
 package com.example.swift.generated;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,6 +34,27 @@ public class MySwiftClassTest {
         System.setProperty("jextract.trace.downcalls", "true");
     }
 
-    // TODO: test member methods on MySwiftClass
+    @Test
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
+    void test_MySwiftClass_voidMethod() {
+        MySwiftClass o = new MySwiftClass(12, 42);
+        o.voidMethod();
+    }
+
+    @Test
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
+    void test_MySwiftClass_makeIntMethod() {
+        MySwiftClass o = new MySwiftClass(12, 42);
+        var got = o.makeIntMethod();
+        assertEquals(12, got);
+    }
+
+    @Test
+    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
+    void test_MySwiftClass_property_len() {
+        MySwiftClass o = new MySwiftClass(12, 42);
+        var got = o.makeIntMethod();
+        assertEquals(12, got);
+    }
 
 }

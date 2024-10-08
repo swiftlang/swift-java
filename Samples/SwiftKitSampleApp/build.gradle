@@ -95,7 +95,11 @@ application {
 task jextract(type: Exec) {
     description = "Extracts Java accessor sources using jextract"
     outputs.dir(layout.buildDirectory.dir("generated"))
-    inputs.dir("$rootDir/Sources/ExampleSwiftLibrary")
+    inputs.dir("$rootDir/Sources/ExampleSwiftLibrary") // monitored library
+
+    // any changes in the source generator sources also mean the resulting output might change
+    inputs.dir("$rootDir/Sources/JExtractSwift")
+    inputs.dir("$rootDir/Sources/JExtractSwiftTool")
 
     workingDir = rootDir
     commandLine "make"

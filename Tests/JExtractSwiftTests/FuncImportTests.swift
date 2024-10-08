@@ -62,7 +62,7 @@ final class MethodImportTests {
     }
     """
 
-  @Test
+  @Test("Import: public func helloWorld()")
   func method_helloWorld() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
@@ -83,6 +83,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloWorld()
          * }
@@ -102,8 +103,8 @@ final class MethodImportTests {
     )
   }
 
-  @Test
-  func method_globalTakeInt() async throws {
+  @Test("Import: public func globalTakeInt(i: Int)")
+  func func_globalTakeInt() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -125,6 +126,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift: 
          * {@snippet lang=swift :
          * public func globalTakeInt(i: Int)
          * }
@@ -144,8 +146,8 @@ final class MethodImportTests {
     )
   }
 
-  @Test
-  func method_globalTakeIntLongString() async throws {
+  @Test("Import: public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)")
+  func func_globalTakeIntLongString() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
@@ -167,6 +169,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
          * }
@@ -209,6 +212,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -251,6 +255,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberInExtension()
          * }
@@ -293,6 +298,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -335,6 +341,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -369,6 +376,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func makeInt() -> Int
          * }

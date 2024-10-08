@@ -55,6 +55,8 @@ public class MySwiftClass {
     p("Deinit, self = 0x\(String(addr, radix: 16, uppercase: true))")
   }
 
+  public var counter: Int32 = 0
+
   public func voidMethod() {
     p("")
   }

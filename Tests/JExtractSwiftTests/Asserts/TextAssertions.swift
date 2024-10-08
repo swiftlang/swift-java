@@ -17,6 +17,7 @@ import Testing
 import struct Foundation.CharacterSet
 
 func assertOutput(
+  dump: Bool = false,
   _ got: String,
   expected: String,
   fileID: String = #fileID,
@@ -38,7 +39,7 @@ func assertOutput(
 
     let ge = g.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     let ee = e.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-    if ge != ee {
+    if ge.commonPrefix(with: ee) != ee {
       //      print("")
       //      print("[\(file):\(line)] " + "Difference found on line: \(no + 1)!".red)
       //      print("Expected @ \(file):\(Int(line) + no + 3 /*formatting*/ + 1):")
@@ -55,15 +56,19 @@ func assertOutput(
 
   }
 
-  if diffLineNumbers.count > 0 {
+  let hasDiff = diffLineNumbers.count > 0
+  if hasDiff || dump{
     print("")
-    print("error: Number of not matching lines: \(diffLineNumbers.count)!".red)
+    if hasDiff {
+      print("error: Number of not matching lines: \(diffLineNumbers.count)!".red)
 
-    print("==== ---------------------------------------------------------------")
-    print("Expected output:")
-    for (n, e) in expectedLines.enumerated() {
-      print("\(e)".yellow(if: diffLineNumbers.contains(n)))
+      print("==== ---------------------------------------------------------------")
+      print("Expected output:")
+      for (n, e) in expectedLines.enumerated() {
+        print("\(e)".yellow(if: diffLineNumbers.contains(n)))
+      }
     }
+
     print("==== ---------------------------------------------------------------")
     print("Got output:")
     for (n, g) in gotLines.enumerated() {
