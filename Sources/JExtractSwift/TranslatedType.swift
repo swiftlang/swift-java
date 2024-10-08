@@ -234,6 +234,17 @@ public struct TranslatedType {
   }
 }
 
+extension TranslatedType {
+  public static var void: Self {
+    TranslatedType(
+      cCompatibleConvention: .direct,
+      originalSwiftType: "Void",
+      cCompatibleSwiftType: "Swift.Void",
+      cCompatibleJavaMemoryLayout: .primitive(.void),
+      javaType: JavaType.void)
+  }
+}
+
 /// Describes the C-compatible layout as it should be referenced from Java.
 enum CCompatibleJavaMemoryLayout {
   /// A primitive Java type that has a direct counterpart in C.

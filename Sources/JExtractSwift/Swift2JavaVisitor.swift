@@ -80,7 +80,6 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     self.log.debug("Import function: \(node.kind) \(node.name)")
 
-    // TODO: this must handle inout and other stuff, strip it off etc
     let returnTy: TypeSyntax
     if let returnClause = node.signature.returnClause {
       returnTy = returnClause.type
@@ -106,14 +105,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    let argumentLabels = node.signature.parameterClause.parameters.map { param in
-      param.firstName.identifier?.name ?? "_"
-    }
-    let argumentLabelsStr = String(argumentLabels.flatMap { label in
-      label + ":"
-    })
-
-    let fullName = "\(node.name.text)(\(argumentLabelsStr))"
+    let fullName = "\(node.name.text)"
 
     var funcDecl = ImportedFunc(
       parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
@@ -121,7 +113,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       returnType: javaResultType,
       parameters: params
     )
-    funcDecl.swiftDeclRaw = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
+    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
 
     // Retrieve the mangled name, if available.
     if let mangledName = node.mangledNameFromComment {
@@ -133,6 +125,56 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       translator.importedTypes[currentTypeName]?.methods.append(funcDecl)
     } else {
       translator.importedGlobalFuncs.append(funcDecl)
+    }
+
+    return .skipChildren
+  }
+
+  override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+    self.log.warning("NODE: \(node.debugDescription)")
+
+    guard let binding = node.bindings.first else {
+      return .skipChildren
+    }
+
+    let fullName = "\(binding.pattern.trimmed)"
+
+    // TODO filter out kinds of variables we cannot import
+
+    self.log.info("Import variable: \(node.kind) \(fullName)")
+
+    let returnTy: TypeSyntax
+    if let typeAnnotation = binding.typeAnnotation{
+      returnTy = typeAnnotation.type
+    } else {
+      returnTy = "Swift.Void"
+    }
+
+    let javaResultType: TranslatedType
+    do {
+      javaResultType = try cCompatibleType(for: returnTy)
+    } catch {
+      self.log.info("Unable to import variable \(node.debugDescription) - \(error)")
+      return .skipChildren
+    }
+
+    var varDecl = ImportedVariable(
+      parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
+      identifier: fullName,
+      returnType: javaResultType
+    )
+    varDecl.syntax = node.trimmed
+
+    // Retrieve the mangled name, if available.
+    if let mangledName = node.mangledNameFromComment {
+      varDecl.swiftMangledName = mangledName
+    }
+
+    if let currentTypeName {
+      log.info("Record variable in \(currentTypeName)")
+      translator.importedTypes[currentTypeName]!.variables.append(varDecl)
+    } else {
+      fatalError("Global variables are not supported yet: \(node.debugDescription)")
     }
 
     return .skipChildren
@@ -173,7 +215,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       parameters: params
     )
     funcDecl.isInit = true
-    funcDecl.swiftDeclRaw = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
+    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
 
     // Retrieve the mangled name, if available.
     if let mangledName = node.mangledNameFromComment {

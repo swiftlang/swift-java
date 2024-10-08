@@ -45,34 +45,13 @@ final class FunctionDescriptorTests {
       // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC3len3capACSi_SitcfC
       public init(len: Swift.Int, cap: Swift.Int)
       @objc deinit
+
+      //  #MySwiftClass.counter!getter: (MySwiftClass) -> () -> Int32 : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvg\t// MySwiftClass.counter.getter
+      //  #MySwiftClass.counter!setter: (MySwiftClass) -> (Int32) -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvs\t// MySwiftClass.counter.setter
+      //  #MySwiftClass.counter!modify: (MySwiftClass) -> () -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32VvM\t// MySwiftClass.counter.modify 
+      var counter: Int32 
     }
     """
-
-  func functionDescriptorTest(
-    _ methodIdentifier: String,
-    javaPackage: String = "com.example.swift",
-    swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .warning,
-    body: (String) async throws -> ()
-  ) async throws {
-    let st = Swift2JavaTranslator(
-      javaPackage: javaPackage,
-      swiftModuleName: swiftModuleName
-    )
-    st.log.logLevel = logLevel
-
-    try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
-
-    let funcDecl = st.importedGlobalFuncs.first {
-      $0.baseIdentifier == methodIdentifier
-    }!
-
-    let output = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(&printer, funcDecl)
-    }
-
-    try await body(output)
-  }
 
   @Test
   func FunctionDescriptor_globalTakeInt() async throws {
@@ -119,6 +98,100 @@ final class FunctionDescriptorTests {
           """
       )
     }
+  }
+
+  @Test
+  func FunctionDescriptor_class_counter_get() async throws {
+    try await variableAccessorDescriptorTest("counter", .get) { output in
+      assertOutput(
+        output,
+        expected:
+          """
+          public static final FunctionDescriptor DESC_GET = FunctionDescriptor.of(
+            /* -> */SWIFT_INT32,
+            SWIFT_POINTER
+          );
+          """
+      )
+    }
+  }
+  @Test
+  func FunctionDescriptor_class_counter_set() async throws {
+    try await variableAccessorDescriptorTest("counter", .set) { output in
+      assertOutput(
+        output,
+        expected:
+          """
+          public static final FunctionDescriptor DESC_SET = FunctionDescriptor.ofVoid(
+            SWIFT_INT32,
+            SWIFT_POINTER
+          );
+          """
+      )
+    }
+  }
+
+}
+
+extension FunctionDescriptorTests {
+
+  func functionDescriptorTest(
+    _ methodIdentifier: String,
+    javaPackage: String = "com.example.swift",
+    swiftModuleName: String = "SwiftModule",
+    logLevel: Logger.Level = .trace,
+    body: (String) async throws -> ()
+  ) async throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: javaPackage,
+      swiftModuleName: swiftModuleName
+    )
+    st.log.logLevel = logLevel
+
+    try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+
+    let funcDecl = st.importedGlobalFuncs.first {
+      $0.baseIdentifier == methodIdentifier
+    }!
+
+    let output = CodePrinter.toString { printer in
+      st.printFunctionDescriptorValue(&printer, funcDecl)
+    }
+
+    try await body(output)
+  }
+
+  func variableAccessorDescriptorTest(
+    _ methodIdentifier: String,
+    _ kind: VariableAccessorKind,
+    javaPackage: String = "com.example.swift",
+    swiftModuleName: String = "SwiftModule",
+    logLevel: Logger.Level = .trace,
+    body: (String) async throws -> ()
+  ) async throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: javaPackage,
+      swiftModuleName: swiftModuleName
+    )
+    st.log.logLevel = logLevel
+
+    try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+
+    let varDecl: ImportedVariable? =
+      st.importedTypes.values.compactMap {
+          $0.variables.first {
+            $0.identifier == methodIdentifier
+          }
+        }.first
+    guard let varDecl else {
+      fatalError("Cannot find descriptor of: \(methodIdentifier)") as! ImportedVariable
+    }
+
+    let getOutput = CodePrinter.toString { printer in
+      st.printPropertyAccessorDescriptorValue(&printer, varDecl, kind)
+    }
+
+    try await body(getOutput)
   }
 
 }

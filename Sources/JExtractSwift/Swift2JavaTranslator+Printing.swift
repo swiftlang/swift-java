@@ -437,7 +437,7 @@ extension Swift2JavaTranslator {
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        *
        * {@snippet lang=swift :
-       * \(decl.swiftDeclRaw ?? "")
+       * \(decl.syntax ?? "")
        * }
        */
       public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
@@ -470,7 +470,7 @@ extension Swift2JavaTranslator {
       /**
        * Function descriptor for:
        * {@snippet lang=swift :
-       * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
+       * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
        * }
        */
       public static FunctionDescriptor \(decl.baseIdentifier)$descriptor() {
@@ -484,7 +484,7 @@ extension Swift2JavaTranslator {
       /**
        * Downcall method handle for:
        * {@snippet lang=swift :
-       * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
+       * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
        * }
        */
       public static MethodHandle \(decl.baseIdentifier)$handle() {
@@ -498,7 +498,7 @@ extension Swift2JavaTranslator {
       /**
        * Address for:
        * {@snippet lang=swift :
-       * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
+       * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
        * }
        */
       public static MemorySegment \(decl.baseIdentifier)$address() {
@@ -557,7 +557,7 @@ extension Swift2JavaTranslator {
         """
         /**
          * {@snippet lang=swift :
-         * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
+         * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
          * }
          */
         public \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
@@ -572,7 +572,60 @@ extension Swift2JavaTranslator {
       """
       /**
        * {@snippet lang=swift :
-       * \(/*TODO: make a printSnippet func*/decl.swiftDeclRaw ?? "")
+       * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
+       * }
+       */
+      public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
+        var mh$ = \(decl.baseIdentifier).HANDLE;
+        try {
+          if (TRACE_DOWNCALLS) {
+             traceDowncall(\(renderForwardParams(decl, selfVariant: .memorySegment)));
+          }
+          \(maybeReturnCast) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: selfVariant)));
+        } catch (Throwable ex$) {
+          throw new AssertionError("should not reach here", ex$);
+        }
+      }
+      """
+    )
+  }
+
+  public func printPropertyAccessorDowncallMethod(
+    _ printer: inout CodePrinter,
+    decl: ImportedFunc,
+    selfVariant: SelfParameterVariant?
+  ) {
+    let returnTy = decl.returnType.javaType
+
+    let maybeReturnCast: String
+    if decl.returnType.javaType == .void {
+      maybeReturnCast = ""  // nothing to return or cast to
+    } else {
+      maybeReturnCast = "return (\(returnTy))"
+    }
+
+    if selfVariant == SelfParameterVariant.wrapper {
+      // delegate to the MemorySegment "self" accepting overload
+      printer.print(
+        """
+        /**
+         * {@snippet lang=swift :
+         * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
+         * }
+         */
+        public \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
+          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardParams(decl, selfVariant: .wrapper)));
+        }
+        """
+      )
+      return
+    }
+
+    printer.print(
+      """
+      /**
+       * {@snippet lang=swift :
+       * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
        * }
        */
       public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
@@ -656,8 +709,11 @@ extension Swift2JavaTranslator {
     return ps.joined(separator: ", ")
   }
 
-  public func printFunctionDescriptorValue(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    printer.start("public static final FunctionDescriptor DESC = ")
+  public func printFunctionDescriptorValue(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc,
+    fieldName: String = "DESC") {
+    printer.start("public static final FunctionDescriptor \(fieldName) = ")
 
     let parameterLayoutDescriptors = javaMemoryLayoutDescriptors(
       forParametersOf: decl,
@@ -691,5 +747,16 @@ extension Swift2JavaTranslator {
 
     printer.outdent();
     printer.print(");");
+  }
+
+  public func printPropertyAccessorDescriptorValue(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedVariable,
+    _ kind: VariableAccessorKind) {
+    guard let funcDecl = decl.accessorFunc(kind: kind) else {
+      return
+    }
+
+    printFunctionDescriptorValue(&printer, funcDecl, fieldName: kind.renderDescFieldName)
   }
 }
