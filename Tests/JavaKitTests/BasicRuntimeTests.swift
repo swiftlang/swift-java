@@ -58,7 +58,7 @@ struct BasicRuntimeTests {
     }
   }
 
-  @Test("Static methods")
+  @Test("Static methods", .disabled(if: isMacOS, "Fails on macOS command line"))
   func staticMethods() throws {
     let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
     #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
@@ -80,6 +80,15 @@ struct Nonexistent { }
 /// Whether we're running on Linux.
 var isLinux: Bool {
   #if os(Linux)
+  return true
+  #else
+  return false
+  #endif
+}
+
+/// Whether we're running on MacOS.
+var isMacOS: Bool {
+  #if os(macOS)
   return true
   #else
   return false

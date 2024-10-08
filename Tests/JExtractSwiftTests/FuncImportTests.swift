@@ -62,12 +62,13 @@ final class MethodImportTests {
     }
     """
 
-  @Test func method_helloWorld() async throws {
+  @Test
+  func method_helloWorld() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try await st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
 
@@ -101,12 +102,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeInt() async throws {
+  @Test
+  func method_globalTakeInt() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -142,12 +144,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeIntLongString() async throws {
+  @Test
+  func method_globalTakeIntLongString() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -183,12 +186,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_memorySegment() async throws {
+  @Test
+  func method_class_helloMemberFunction_self_memorySegment() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -224,12 +228,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_wrapper() async throws {
+  @Test
+  func method_class_helloMemberFunction_self_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -265,12 +270,13 @@ final class MethodImportTests {
     )
   }
 
+  @Test
   func test_method_class_helloMemberFunction_self_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -306,12 +312,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_wrapper() async throws {
+  @Test
+  func method_class_helloMemberFunction_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -339,12 +346,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_makeInt_wrapper() async throws {
+  @Test
+  func method_class_makeInt_wrapper() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -372,12 +380,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func class_constructor() async throws {
+  @Test
+  func class_constructor() async throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try await st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 

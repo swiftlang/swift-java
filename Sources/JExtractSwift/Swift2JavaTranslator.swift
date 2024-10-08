@@ -22,7 +22,7 @@ import SwiftSyntax
 public final class Swift2JavaTranslator {
   static let SWIFT_INTERFACE_SUFFIX = ".swiftinterface"
 
-  public var log = Logger(label: "translator", logLevel: .info)
+  package var log = Logger(label: "translator", logLevel: .info)
 
   // ==== Input configuration
   let swiftModuleName: String
@@ -110,7 +110,7 @@ extension Swift2JavaTranslator {
   }
 
   public func postProcessImportedDecls() async throws {
-    log.info(
+    log.debug(
       "Post process imported decls...",
       metadata: [
         "types": "\(importedTypes.count)",
@@ -143,7 +143,7 @@ extension Swift2JavaTranslator {
 
       log.info("Mapping members of: \(tyDecl.swiftTypeName)")
       tyDecl.initializers = try await tyDecl.initializers._mapAsync { initDecl in
-        dylib.log.logLevel = .trace
+        dylib.log.logLevel = .info
 
         let initDecl = try await dylib.fillInAllocatingInitMangledName(initDecl)
         log.info("Mapped initializer '\(initDecl.identifier)' -> '\(initDecl.swiftMangledName)'")
@@ -171,7 +171,7 @@ extension Swift2JavaTranslator {
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
     // Support library in Java
-    "org.swift.javakit.SwiftKit",
+    "org.swift.swiftkit.SwiftKit",
 
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",

@@ -52,7 +52,7 @@ final class FunctionDescriptorTests {
     _ methodIdentifier: String,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .trace,
+    logLevel: Logger.Level = .warning,
     body: (String) async throws -> ()
   ) async throws {
     let st = Swift2JavaTranslator(

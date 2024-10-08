@@ -41,11 +41,8 @@ jobs:
         #          distribution: 'zulu'
         #          java-version: '22'
         #          cache: 'gradle'
-      - name: Generate sources (make) (Temporary)
-        # TODO: this should be triggered by the respective builds
-        run: make jextract-run
       - name: Gradle build
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --info --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})

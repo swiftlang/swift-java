@@ -23,18 +23,18 @@ final class SwiftDylibTests {
   @Test
   #endif
   func test_nm() async throws {
-    let dylib = SwiftDylib(path: ".build/arm64-apple-macosx/debug/libJavaKitExample.dylib")!
+    let dylib = SwiftDylib(path: ".build/arm64-apple-macosx/debug/libExampleSwiftLibrary.dylib")!
 
     let names = try await dylib.nmSymbolNames(grepDemangled: ["MySwiftClass", "len"])
 
     #expect(
       names.contains {
-        $0.descriptiveName.contains("JavaKitExample.MySwiftClass.len.getter")
+        $0.descriptiveName.contains("ExampleSwiftLibrary.MySwiftClass.len.getter")
       }
     )
 
     let getter = names.findPropertyGetter()
-    #expect(getter?.mangledName == "$s14JavaKitExample12MySwiftClassC3lenSivg")
-    #expect(getter?.descriptiveName == "JavaKitExample.MySwiftClass.len.getter : Swift.Int")
+    #expect(getter?.mangledName == "$s19ExampleSwiftLibrary02MyB5ClassC3lenSivg")
+    #expect(getter?.descriptiveName == "ExampleSwiftLibrary.MySwiftClass.len.getter : Swift.Int")
   }
 }
