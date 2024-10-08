@@ -56,28 +56,28 @@ docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.
 docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test 
 ```
 
-### Examples
+### Sample Apps
+
+Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
 
 #### JavaKit (Swift -> Java)
 
 To run a simple app showcasing a Swift process calling into a Java library you can run: 
 
 ```bash
-make run
+./gradlew Samples:JavaKitSampleApp:run
 ```
-
-Which executes a small Java app (`com.example.swift.HelloSwift`).
 
 #### jextract (Java -> Swift)
 
 To run a simple example app showcasing the jextract (Java calling Swift) approach you can:
 
 ```bash
-make jextract-run
-./gradlew run
+./gradlew Samples:SwiftKitSampleApp:run
 ```
 
-which will run `JavaSwiftKitDemo` sample app.
+This will also generate the necessary sources (by invoking jextract, extracting the `Sources/ExampleSwiftLibrary`) 
+and generating Java sources in `src/generated/java`.
 
 ## User Guide
 
