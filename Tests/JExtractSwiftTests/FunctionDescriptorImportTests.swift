@@ -184,7 +184,7 @@ extension FunctionDescriptorTests {
           }
         }.first
     guard let varDecl else {
-      fatalError("Cannot find descriptor of: \(methodIdentifier)") as! ImportedVariable
+      fatalError("Cannot find descriptor of: \(methodIdentifier)")
     }
 
     let getOutput = CodePrinter.toString { printer in

@@ -15,6 +15,7 @@
 import Foundation
 import JavaTypes
 import SwiftSyntax
+import OrderedCollections
 
 /// Any imported (Swift) declaration
 protocol ImportedDecl {
@@ -232,13 +233,6 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
 public enum VariableAccessorKind {
   case get
   case set
-
-  public var renderDescFieldName: String {
-    switch self {
-    case .get: "DESC_GET"
-    case .set: "DESC_SET"
-    }
-  }
 }
 
 public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
@@ -257,7 +251,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
   /// Usually this will be all the accessors the variable declares,
   /// however if the getter is async or throwing we may not be able to import it
   /// (yet), and therefore would skip it from the supported set.
-  public var supportedAccessorKinds: Set<VariableAccessorKind> = [.get, .set]
+  public var supportedAccessorKinds: OrderedSet<VariableAccessorKind> = [.get, .set]
 
   /// This is the base identifier for the function, e.g., "init" for an
   /// initializer or "f" for "f(a:b:)".
