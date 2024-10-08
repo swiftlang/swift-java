@@ -34,6 +34,14 @@ extension ImportedFunc {
 }
 
 extension VariableAccessorKind {
+
+  public var fieldSuffix: String {
+    switch self {
+      case .get: "_GET"
+      case .set: "_SET"
+    }
+  }
+
   public var renderDescFieldName: String {
     switch self {
     case .get: "DESC_GET"

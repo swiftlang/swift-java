@@ -162,8 +162,8 @@ extension FunctionDescriptorTests {
   }
 
   func variableAccessorDescriptorTest(
-    _ methodIdentifier: String,
-    _ kind: VariableAccessorKind,
+    _ identifier: String,
+    _ accessorKind: VariableAccessorKind,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
@@ -180,15 +180,15 @@ extension FunctionDescriptorTests {
     let varDecl: ImportedVariable? =
       st.importedTypes.values.compactMap {
           $0.variables.first {
-            $0.identifier == methodIdentifier
+            $0.identifier == identifier
           }
         }.first
     guard let varDecl else {
-      fatalError("Cannot find descriptor of: \(methodIdentifier)")
+      fatalError("Cannot find descriptor of: \(identifier)")
     }
 
     let getOutput = CodePrinter.toString { printer in
-      st.printPropertyAccessorDescriptorValue(&printer, varDecl, kind)
+      st.printFunctionDescriptorValue(&printer, varDecl.accessorFunc(kind: accessorKind)!, accessorKind: accessorKind)
     }
 
     try await body(getOutput)

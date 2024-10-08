@@ -83,6 +83,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloWorld()
          * }
@@ -125,6 +126,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift: 
          * {@snippet lang=swift :
          * public func globalTakeInt(i: Int)
          * }
@@ -167,6 +169,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
          * }
@@ -209,6 +212,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -251,6 +255,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberInExtension()
          * }
@@ -293,6 +298,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -335,6 +341,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -369,6 +376,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func makeInt() -> Int
          * }

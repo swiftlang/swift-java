@@ -67,13 +67,17 @@ final class VariableImportTests {
       // counterInt
       private static class counterInt {
         public static final FunctionDescriptor DESC_GET =   FunctionDescriptor.of(
-            /* -> */SWIFT_INT,
-            SWIFT_POINTER
-        );
-        public static final FunctionDescriptor DESC_SET =   FunctionDescriptor.ofVoid(
-            SWIFT_INT,
+              /* -> */SWIFT_INT,
             SWIFT_POINTER
           );
+        public static final MemorySegment ADDR_GET = __FakeModule.findOrThrow("g");
+        public static final MethodHandle HANDLE_GET = Linker.nativeLinker().downcallHandle(ADDR_GET, DESC_GET);
+        public static final FunctionDescriptor DESC_SET =   FunctionDescriptor.ofVoid(
+          SWIFT_INT,
+            SWIFT_POINTER
+          );
+        public static final MemorySegment ADDR_SET = __FakeModule.findOrThrow("s");
+        public static final MethodHandle HANDLE_SET = Linker.nativeLinker().downcallHandle(ADDR_SET, DESC_SET);
       }
       /**
        * Function descriptor for:

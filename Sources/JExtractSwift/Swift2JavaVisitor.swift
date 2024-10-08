@@ -131,15 +131,13 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   }
 
   override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
-    self.log.warning("NODE: \(node.debugDescription)")
-
     guard let binding = node.bindings.first else {
       return .skipChildren
     }
 
     let fullName = "\(binding.pattern.trimmed)"
 
-    // TODO filter out kinds of variables we cannot import
+    // TODO: filter out kinds of variables we cannot import
 
     self.log.info("Import variable: \(node.kind) \(fullName)")
 
