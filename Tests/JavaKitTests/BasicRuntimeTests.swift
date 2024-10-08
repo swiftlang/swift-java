@@ -85,3 +85,12 @@ var isLinux: Bool {
   return false
   #endif
 }
+
+/// Whether we're running on MacOS.
+var isMacOS: Bool {
+  #if os(macOS)
+  return true
+  #else
+  return false
+  #endif
+}
