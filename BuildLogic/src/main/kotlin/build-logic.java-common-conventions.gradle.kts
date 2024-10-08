@@ -43,19 +43,24 @@ tasks.withType(JavaCompile::class).forEach {
 }
 
 
+// FIXME: cannot share definition with 'buildSrc' so we duplicated the impl here
 fun javaLibraryPaths(): List<String> {
     val osName = System.getProperty("os.name")
     val osArch = System.getProperty("os.arch")
     val isLinux = osName.lowercase(Locale.getDefault()).contains("linux")
 
     return listOf(
-        if (osName.lowercase(Locale.getDefault()).contains("linux")) {
-            """$rootDir/.build/$osArch-unknown-linux-gnu/debug/"""
+        if (isLinux) {
+            if (osArch.equals("x86_64") || osArch.equals("amd64")) {
+                "$rootDir/.build/x86_64-unknown-linux-gnu/debug/"
+            } else {
+                "$rootDir/.build/$osArch-unknown-linux-gnu/debug/"
+            }
         } else {
             if (osArch.equals("aarch64")) {
-                """$rootDir/.build/arm64-apple-macosx/debug/"""
+                "$rootDir/.build/arm64-apple-macosx/debug/"
             } else {
-                """$rootDir/.build/$osArch-apple-macosx/debug/"""
+                "$rootDir/.build/$osArch-apple-macosx/debug/"
             }
         },
         if (isLinux) {
