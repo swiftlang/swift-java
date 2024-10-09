@@ -81,29 +81,31 @@ public class SwiftKit {
     // ==== ------------------------------------------------------------------------------------------------------------
     // free
 
-    /**
-     * Descriptor for the free C runtime function.
-     */
-    public static final FunctionDescriptor free$descriptor = FunctionDescriptor.ofVoid(
-            ValueLayout.ADDRESS
-    );
+    static abstract class free {
+        /**
+         * Descriptor for the free C runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+                ValueLayout.ADDRESS
+        );
 
-    /**
-     * Address of the free C runtime function.
-     */
-    public static final MemorySegment free$addr = findOrThrow("free");
+        /**
+         * Address of the free C runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("free");
 
-    /**
-     * Handle for the free C runtime function.
-     */
-    public static final MethodHandle free$handle = Linker.nativeLinker().downcallHandle(free$addr, free$descriptor);
+        /**
+         * Handle for the free C runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
 
     /**
      * free the given pointer
      */
     public static void cFree(MemorySegment pointer) {
         try {
-            free$handle.invokeExact(pointer);
+            free.HANDLE.invokeExact(pointer);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -137,7 +139,7 @@ public class SwiftKit {
     }
 
     public static long retainCount(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -167,7 +169,7 @@ public class SwiftKit {
     }
 
     public static long retain(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -197,7 +199,7 @@ public class SwiftKit {
     }
 
     public static long release(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
