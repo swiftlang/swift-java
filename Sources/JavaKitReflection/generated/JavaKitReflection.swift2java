@@ -6,6 +6,7 @@
     "java.lang.reflect.AnnotatedType" : "AnnotatedType",
     "java.lang.reflect.Constructor" : "Constructor",
     "java.lang.reflect.Executable" : "Executable",
+    "java.lang.reflect.Field" : "Field",
     "java.lang.reflect.GenericArrayType" : "GenericArrayType",
     "java.lang.reflect.GenericDeclaration" : "GenericDeclaration",
     "java.lang.reflect.Method" : "Method",

@@ -257,6 +257,25 @@ extension JavaTranslator {
         }
       }
     )
+    
+    var staticFields: [Field] = []
+    members.append(
+      contentsOf: javaClass.getFields().compactMap {
+        $0.flatMap { field in
+          if field.isStatic {
+            staticFields.append(field)
+            return nil
+          }
+          
+          do {
+            return try translateField(field)
+          } catch {
+            logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+            return nil
+          }
+        }
+      }
+    )
 
     // Methods
     var staticMethods: [Method] = []
@@ -280,25 +299,6 @@ extension JavaTranslator {
         }
       }
     )
-      
-      var staticFields: [Field] = []
-      members.append(
-        contentsOf: javaClass.getFields().compactMap {
-            $0.flatMap { field in
-                if field.isStatic {
-                    staticFields.append(field)
-                    return nil
-                }
-                
-                do {
-                    return try translateField(field)
-                } catch {
-                    logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
-                    return nil
-                }
-            }
-        }
-      )
 
     // Map the generic parameters.
     let genericParameterClause: String
@@ -449,7 +449,7 @@ extension JavaTranslator {
         let fieldAttribute: AttributeSyntax = "@JavaField";
         return """
         \(fieldAttribute)
-        public func \(raw: javaField.getName()): \(raw: typeName)
+        public var \(raw: javaField.getName()): \(raw: typeName)
         """
     }
 
