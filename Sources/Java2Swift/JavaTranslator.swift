@@ -280,6 +280,25 @@ extension JavaTranslator {
         }
       }
     )
+      
+      var staticFields: [Field] = []
+      members.append(
+        contentsOf: javaClass.getFields().compactMap {
+            $0.flatMap { field in
+                if field.isStatic {
+                    staticFields.append(field)
+                    return nil
+                }
+                
+                do {
+                    return try translateField(field)
+                } catch {
+                    logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+                    return nil
+                }
+            }
+        }
+      )
 
     // Map the generic parameters.
     let genericParameterClause: String
@@ -327,6 +346,8 @@ extension JavaTranslator {
 
     // Format the class declaration.
     classDecl = classDecl.formatted(using: format).cast(DeclSyntax.self)
+      
+    // TODO: Handle static fields in https://github.com/swiftlang/swift-java/issues/39
 
     if staticMethods.isEmpty {
       return [classDecl]
@@ -422,6 +443,15 @@ extension JavaTranslator {
       public func \(raw: javaMethod.getName())\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
+    
+    func translateField(_ javaField: Field) throws -> DeclSyntax {
+        let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
+        let fieldAttribute: AttributeSyntax = "@JavaField";
+        return """
+        \(fieldAttribute)
+        public func \(raw: javaField.getName()): \(raw: typeName)
+        """
+    }
 
   // Translate a Java parameter list into Swift parameters.
   private func translateParameters(_ parameters: [Parameter?]) throws -> [FunctionParameterSyntax] {

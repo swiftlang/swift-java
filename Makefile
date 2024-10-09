@@ -55,7 +55,7 @@ generate-JavaKit: Java2Swift
 
 generate-JavaKitReflection: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitReflection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitReflection/generated java.lang.reflect.Method java.lang.reflect.Type java.lang.reflect.Constructor java.lang.reflect.Parameter java.lang.reflect.ParameterizedType java.lang.reflect.Executable java.lang.reflect.AnnotatedType java.lang.reflect.TypeVariable java.lang.reflect.WildcardType java.lang.reflect.GenericArrayType java.lang.reflect.AccessibleObject java.lang.annotation.Annotation java.lang.reflect.GenericDeclaration
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitReflection/generated java.lang.reflect.Method java.lang.reflect.Type java.lang.reflect.Constructor java.lang.reflect.Parameter java.lang.reflect.ParameterizedType java.lang.reflect.Executable java.lang.reflect.AnnotatedType java.lang.reflect.TypeVariable java.lang.reflect.WildcardType java.lang.reflect.GenericArrayType java.lang.reflect.AccessibleObject java.lang.annotation.Annotation java.lang.reflect.GenericDeclaration java.lang.reflect.Field
 
 generate-JavaKitJar: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitJar/generated
