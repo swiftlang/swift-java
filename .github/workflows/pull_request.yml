@@ -31,8 +31,8 @@ jobs:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
-      - name: Install Make
-        run: apt-get -qq update && apt-get -qq install -y make
+      - name: Install System Dependencies
+        run: apt-get -qq update && apt-get -qq install -y make curl wget
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
@@ -41,6 +41,8 @@ jobs:
         #          distribution: 'zulu'
         #          java-version: '22'
         #          cache: 'gradle'
+      - name: Install Nightly Swift
+        run: "bash -xc './docker/install_nightly_untested_swift.sh'"
       - name: Gradle build
         run: ./gradlew build --info --no-daemon
 
@@ -59,8 +61,8 @@ jobs:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
-      - name: Install Make
-        run: apt-get -qq update && apt-get -qq install -y make
+      - name: Install System Dependencies
+        run: apt-get -qq update && apt-get -qq install -y make curl wget
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
       - name: Generate sources (make) (Temporary)
