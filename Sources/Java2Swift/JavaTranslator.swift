@@ -445,14 +445,14 @@ extension JavaTranslator {
       """
   }
     
-    func translateField(_ javaField: Field) throws -> DeclSyntax {
-        let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
-        let fieldAttribute: AttributeSyntax = "@JavaField";
-        return """
-        \(fieldAttribute)
-        public var \(raw: javaField.getName()): \(raw: typeName)
-        """
-    }
+  func translateField(_ javaField: Field) throws -> DeclSyntax {
+    let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
+    let fieldAttribute: AttributeSyntax = "@JavaField";
+    return """
+      \(fieldAttribute)
+      public var \(raw: javaField.getName()): \(raw: typeName)
+      """
+  }
 
   // Translate a Java parameter list into Swift parameters.
   private func translateParameters(_ parameters: [Parameter?]) throws -> [FunctionParameterSyntax] {
