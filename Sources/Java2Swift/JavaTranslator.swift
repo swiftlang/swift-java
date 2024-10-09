@@ -243,6 +243,26 @@ extension JavaTranslator {
 
     // Members
     var members: [DeclSyntax] = []
+    
+    // Fields
+    var staticFields: [Field] = []
+    members.append(
+      contentsOf: javaClass.getFields().compactMap {
+        $0.flatMap { field in
+          if field.isStatic {
+            staticFields.append(field)
+            return nil
+          }
+          
+          do {
+            return try translateField(field)
+          } catch {
+            logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+            return nil
+          }
+        }
+      }
+    )
 
     // Constructors
     members.append(
@@ -327,6 +347,8 @@ extension JavaTranslator {
 
     // Format the class declaration.
     classDecl = classDecl.formatted(using: format).cast(DeclSyntax.self)
+      
+    // TODO: Handle static fields in https://github.com/swiftlang/swift-java/issues/39
 
     if staticMethods.isEmpty {
       return [classDecl]
@@ -420,6 +442,15 @@ extension JavaTranslator {
     return """
       \(methodAttribute)
       public func \(raw: javaMethod.getName())\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      """
+  }
+    
+  func translateField(_ javaField: Field) throws -> DeclSyntax {
+    let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
+    let fieldAttribute: AttributeSyntax = "@JavaField";
+    return """
+      \(fieldAttribute)
+      public var \(raw: javaField.getName()): \(raw: typeName)
       """
   }
 
