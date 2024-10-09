@@ -243,21 +243,8 @@ extension JavaTranslator {
 
     // Members
     var members: [DeclSyntax] = []
-
-    // Constructors
-    members.append(
-      contentsOf: javaClass.getConstructors().compactMap {
-        $0.flatMap { constructor in
-          do {
-            return try translateConstructor(constructor)
-          } catch {
-            logUntranslated("Unable to translate '\(fullName)' constructor: \(error)")
-            return nil
-          }
-        }
-      }
-    )
     
+    // Fields
     var staticFields: [Field] = []
     members.append(
       contentsOf: javaClass.getFields().compactMap {
@@ -271,6 +258,20 @@ extension JavaTranslator {
             return try translateField(field)
           } catch {
             logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+            return nil
+          }
+        }
+      }
+    )
+
+    // Constructors
+    members.append(
+      contentsOf: javaClass.getConstructors().compactMap {
+        $0.flatMap { constructor in
+          do {
+            return try translateConstructor(constructor)
+          } catch {
+            logUntranslated("Unable to translate '\(fullName)' constructor: \(error)")
             return nil
           }
         }
