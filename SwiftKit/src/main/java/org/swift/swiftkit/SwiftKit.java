@@ -80,29 +80,32 @@ public class SwiftKit {
 
     // ==== ------------------------------------------------------------------------------------------------------------
     // free
-    /**
-     * Descriptor for the free C runtime function.
-     */
-    public static final FunctionDescriptor free$descriptor = FunctionDescriptor.ofVoid(
-            ValueLayout.ADDRESS
-    );
 
-    /**
-     * Address of the free C runtime function.
-     */
-    public static final MemorySegment free$addr = findOrThrow("free");
+    static abstract class free {
+        /**
+         * Descriptor for the free C runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+                ValueLayout.ADDRESS
+        );
 
-    /**
-     * Handle for the free C runtime function.
-     */
-    public static final MethodHandle free$handle = Linker.nativeLinker().downcallHandle(free$addr, free$descriptor);
+        /**
+         * Address of the free C runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("free");
+
+        /**
+         * Handle for the free C runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
 
     /**
      * free the given pointer
      */
     public static void cFree(MemorySegment pointer) {
         try {
-            free$handle.invokeExact(pointer);
+            free.HANDLE.invokeExact(pointer);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -136,7 +139,7 @@ public class SwiftKit {
     }
 
     public static long retainCount(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -166,7 +169,7 @@ public class SwiftKit {
     }
 
     public static long retain(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -196,10 +199,11 @@ public class SwiftKit {
     }
 
     public static long release(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
+    // getTypeByName
 
     /**
      * {@snippet lang = swift:
@@ -395,38 +399,41 @@ public class SwiftKit {
         return (flags & 0xFF) + 1;
     }
 
-    /**
-     * Descriptor for the swift_getTypeName runtime function.
-     */
-    public static final FunctionDescriptor swift_getTypeName$descriptor = FunctionDescriptor.of(
-            /*returns=*/MemoryLayout.structLayout(
-                    SWIFT_POINTER.withName("utf8Chars"),
-                    SWIFT_INT.withName("length")
-            ),
-            ValueLayout.ADDRESS,
-            ValueLayout.JAVA_BOOLEAN
-    );
+    private static class swift_getTypeName {
 
-    /**
-     * Address of the swift_getTypeName runtime function.
-     */
-    public static final MemorySegment swift_getTypeName$addr = findOrThrow("swift_getTypeName");
+        /**
+         * Descriptor for the swift_getTypeName runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /*returns=*/MemoryLayout.structLayout(
+                        SWIFT_POINTER.withName("utf8Chars"),
+                        SWIFT_INT.withName("length")
+                ),
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_BOOLEAN
+        );
 
-    /**
-     * Handle for the swift_getTypeName runtime function.
-     */
-    public static final MethodHandle swift_getTypeName$handle = Linker.nativeLinker().downcallHandle(swift_getTypeName$addr, swift_getTypeName$descriptor);
+        /**
+         * Address of the swift_getTypeName runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("swift_getTypeName");
+
+        /**
+         * Handle for the swift_getTypeName runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
 
     /**
      * Produce the name of the Swift type given its Swift type metadata.
      * <p>
-     * If 'qualified' is true, leave all of the qualification in place to
+     * If 'qualified' is true, leave all the qualification in place to
      * disambiguate the type, producing a more complete (but longer) type name.
      */
     public static String nameOfSwiftType(MemorySegment typeMetadata, boolean qualified) {
         try {
             try (Arena arena = Arena.ofConfined()) {
-                MemorySegment charsAndLength = (MemorySegment) swift_getTypeName$handle.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
+                MemorySegment charsAndLength = (MemorySegment) swift_getTypeName.HANDLE.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
                 MemorySegment utf8Chars = charsAndLength.get(SWIFT_POINTER, 0);
                 String typeName = utf8Chars.getString(0);
                 cFree(utf8Chars);
