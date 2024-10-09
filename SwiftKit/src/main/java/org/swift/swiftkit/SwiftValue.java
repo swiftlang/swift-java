@@ -14,10 +14,5 @@
 
 package org.swift.swiftkit;
 
-import java.lang.foreign.MemorySegment;
-
-/**
- * Represents a wrapper around a Swift heap object, e.g. a {@code class} or an {@code actor}.
- */
-public interface SwiftHeapObject extends SwiftMemoryResource {
+public interface SwiftValue extends SwiftMemoryResource {
 }

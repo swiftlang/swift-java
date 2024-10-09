@@ -168,7 +168,7 @@ extension Swift2JavaTranslator {
   }
 
   public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
-    printer.printTypeDecl("public final class \(decl.javaClassName)") { printer in
+    printer.printTypeDecl("public final class \(decl.javaClassName) implements SwiftHeapObject") { printer in
       // ==== Storage of the class
       // FIXME: implement the self storage for the memory address and accessors
       printClassSelfProperty(&printer, decl)
