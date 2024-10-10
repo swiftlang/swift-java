@@ -35,14 +35,12 @@ public class MySwiftClassTest {
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void test_MySwiftClass_voidMethod() {
         MySwiftClass o = new MySwiftClass(12, 42);
         o.voidMethod();
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void test_MySwiftClass_makeIntMethod() {
         MySwiftClass o = new MySwiftClass(12, 42);
         var got = o.makeIntMethod();
@@ -50,7 +48,6 @@ public class MySwiftClassTest {
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void test_MySwiftClass_property_len() {
         MySwiftClass o = new MySwiftClass(12, 42);
         var got = o.makeIntMethod();

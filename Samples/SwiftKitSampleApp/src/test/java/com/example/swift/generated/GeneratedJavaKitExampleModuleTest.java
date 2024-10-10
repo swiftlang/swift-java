@@ -34,7 +34,6 @@ public class GeneratedJavaKitExampleModuleTest {
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_helloWorld() {
         ExampleSwiftLibrary.helloWorld();
 
@@ -42,7 +41,6 @@ public class GeneratedJavaKitExampleModuleTest {
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_globalTakeInt() {
         ExampleSwiftLibrary.globalTakeInt(12);
 
