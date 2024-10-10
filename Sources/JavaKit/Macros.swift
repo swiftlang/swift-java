@@ -93,6 +93,21 @@ public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.
 @attached(accessor)
 public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
 
+
+/// Attached macro that turns a Swift property into one that accesses a Java static field on the underlying Java object.
+///
+/// The macro must be used within a specific JavaClass instance.
+///
+/// ```swift
+/// @JavaClass("org.swift.example.HelloSwift")
+/// struct HelloSwift {
+///     @JavaField
+///     var counter: Int32
+/// }
+/// ```
+@attached(accessor)
+public macro StaticJavaField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
+
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
 /// The macro must be used in an AnyJavaObject-conforming type.
