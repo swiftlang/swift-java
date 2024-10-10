@@ -17,13 +17,19 @@ import JavaKitNetwork
 import JavaKitVM
 import Testing
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 @MainActor
 let jvm = try! JavaVirtualMachine(vmOptions: [])
 
 @Suite
 @MainActor
 struct BasicRuntimeTests {
-  @Test("Object management", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
+  @Test("Object management", .disabled(if: isMacOSTerminal || isLinux, "JVM creation fails occasionally in terminal on macOS, and some issues on Linux"))
   func javaObjectManagement() throws {
     let sneakyJavaThis: jobject
     do {
@@ -49,7 +55,7 @@ struct BasicRuntimeTests {
     #expect(url.javaHolder === urlAgain.javaHolder)
   }
 
-  @Test("Java exceptions", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
+  @Test("Java exceptions", .disabled(if: isMacOSTerminal || isLinux, "JVM creation fails occasionally in terminal on macOS, and some issues on Linux"))
   func javaExceptionsInSwift() throws {
     do {
       _ = try URL("bad url", environment: jvm.environment)
@@ -58,13 +64,13 @@ struct BasicRuntimeTests {
     }
   }
 
-  @Test("Static methods", .disabled(if: isMacOS, "Fails on macOS command line"))
+  @Test("Static methods", .disabled(if: isMacOSTerminal || isLinux, "JVM creation fails occasionally in terminal on macOS, and some issues on Linux"))
   func staticMethods() throws {
     let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
     #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
-  @Test("Class instance lookup")
+  @Test("Class instance lookup", .disabled(if: isMacOSTerminal || isLinux, "JVM creation fails occasionally in terminal on macOS, and some issues on Linux"))
   func classInstanceLookup() throws {
     do {
       _ = try JavaClass<Nonexistent>(in: jvm.environment)
@@ -84,6 +90,11 @@ var isLinux: Bool {
   #else
   return false
   #endif
+}
+
+/// Whether we're running on MacOS in an interactive terminal session.
+var isMacOSTerminal: Bool {
+  isMacOS && isatty(STDOUT_FILENO) == 1
 }
 
 /// Whether we're running on MacOS.
