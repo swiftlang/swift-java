@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -230,6 +231,17 @@ public struct TranslatedType {
     case .class(package: _, name: let name): name
     default: javaType.description
     }
+  }
+}
+
+extension TranslatedType {
+  public static var void: Self {
+    TranslatedType(
+      cCompatibleConvention: .direct,
+      originalSwiftType: "Void",
+      cCompatibleSwiftType: "Swift.Void",
+      cCompatibleJavaMemoryLayout: .primitive(.void),
+      javaType: JavaType.void)
   }
 }
 

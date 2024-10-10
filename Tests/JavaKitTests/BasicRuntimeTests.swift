@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,7 +15,6 @@
 import JavaKit
 import JavaKitNetwork
 import JavaKitVM
-import JavaRuntime
 import Testing
 
 @MainActor
@@ -23,7 +23,7 @@ let jvm = try! JavaVirtualMachine(vmOptions: [])
 @Suite
 @MainActor
 struct BasicRuntimeTests {
-  @Test("Object management")
+  @Test("Object management", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
   func javaObjectManagement() throws {
     let sneakyJavaThis: jobject
     do {
@@ -49,7 +49,7 @@ struct BasicRuntimeTests {
     #expect(url.javaHolder === urlAgain.javaHolder)
   }
 
-  @Test("Java exceptions")
+  @Test("Java exceptions", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
   func javaExceptionsInSwift() throws {
     do {
       _ = try URL("bad url", environment: jvm.environment)
@@ -57,4 +57,40 @@ struct BasicRuntimeTests {
       #expect(String(describing: error) == "no protocol: bad url")
     }
   }
+
+  @Test("Static methods", .disabled(if: isMacOS, "Fails on macOS command line"))
+  func staticMethods() throws {
+    let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
+    #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
+  }
+
+  @Test("Class instance lookup")
+  func classInstanceLookup() throws {
+    do {
+      _ = try JavaClass<Nonexistent>(in: jvm.environment)
+    } catch {
+      #expect(String(describing: error) == "org/swift/javakit/Nonexistent")
+    }
+  }
+}
+
+@JavaClass("org.swift.javakit.Nonexistent")
+struct Nonexistent { }
+
+/// Whether we're running on Linux.
+var isLinux: Bool {
+  #if os(Linux)
+  return true
+  #else
+  return false
+  #endif
+}
+
+/// Whether we're running on MacOS.
+var isMacOS: Bool {
+  #if os(macOS)
+  return true
+  #else
+  return false
+  #endif
 }

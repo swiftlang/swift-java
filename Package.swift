@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
@@ -18,7 +18,7 @@ func findJavaHome() -> String {
   // This is a workaround for envs (some IDEs) which have trouble with
   // picking up env variables during the build process
   let path = "\(FileManager.default.homeDirectoryForCurrentUser.path()).java_home"
-  if let home = try? String(contentsOfFile: path) {
+  if let home = try? String(contentsOfFile: path, encoding: .utf8) {
     if let lastChar = home.last, lastChar.isNewline {
       return String(home.dropLast())
     }
@@ -30,6 +30,16 @@ func findJavaHome() -> String {
 }
 let javaHome = findJavaHome()
 
+let javaIncludePath = "\(javaHome)/include"
+#if os(Linux)
+  let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+#elseif os(macOS)
+  let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+#else
+  // TODO: Handle windows as well
+  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+#endif
+
 let package = Package(
   name: "JavaKit",
   platforms: [
@@ -40,52 +50,35 @@ let package = Package(
     .macCatalyst(.v13),
   ],
   products: [
+    // ==== JavaKit (i.e. calling Java directly Swift utilities)
     .library(
       name: "JavaKit",
-      type: .dynamic,
       targets: ["JavaKit"]
     ),
 
     .library(
       name: "JavaKitJar",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
     .library(
       name: "JavaKitNetwork",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
     .library(
       name: "JavaKitReflection",
-      type: .dynamic,
       targets: ["JavaKitReflection"]
     ),
 
     .library(
-      name: "JavaKitExample",
-      type: .dynamic,
-      targets: ["JavaKitExample"]
-    ),
-
-    .library(
       name: "JavaKitVM",
-      type: .dynamic,
       targets: ["JavaKitVM"]
     ),
 
     .library(
       name: "JavaTypes",
-      type: .dynamic,
       targets: ["JavaTypes"]
-    ),
-
-    .library(
-      name: "JExtractSwift",
-      type: .dynamic,
-      targets: ["JExtractSwift"]
     ),
 
     .executable(
@@ -93,14 +86,43 @@ let package = Package(
       targets: ["Java2Swift"]
     ),
 
+    // ==== jextract-swift (extract Java accessors from Swift interface files)
+
     .executable(
       name: "jextract-swift",
       targets: ["JExtractSwiftTool"]
     ),
+
+    // Support library written in Swift for SwiftKit "Java"
+    .library(
+      name: "SwiftKitSwift",
+      type: .dynamic,
+      targets: ["SwiftKitSwift"]
+    ),
+
+    .library(
+      name: "JExtractSwift",
+      targets: ["JExtractSwift"]
+    ),
+
+    // ==== Examples
+
+    .library(
+      name: "JavaKitExample",
+      type: .dynamic,
+      targets: ["JavaKitExample"]
+    ),
+    .library(
+      name: "ExampleSwiftLibrary",
+      type: .dynamic,
+      targets: ["ExampleSwiftLibrary"]
+    ),
+
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+    .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(from: "1.1.0")),
   ],
   targets: [
     .macro(
@@ -108,17 +130,24 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
-      name: "JavaTypes"
+      name: "JavaTypes",
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
     ),
     .target(
       name: "JavaKit",
       dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
       exclude: ["generated/JavaKit.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -126,7 +155,8 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitJar.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -134,7 +164,8 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitNetwork.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
@@ -142,14 +173,16 @@ let package = Package(
       dependencies: ["JavaKit"],
       exclude: ["generated/JavaKitReflection.swift2java"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
     .target(
       name: "JavaKitVM",
       dependencies: ["JavaKit"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ],
       linkerSettings: [
         .unsafeFlags(
@@ -168,14 +201,32 @@ let package = Package(
       name: "JavaKitExample",
       dependencies: ["JavaKit"],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "ExampleSwiftLibrary",
+      dependencies: [],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "SwiftKitSwift",
+      dependencies: [],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 
     .target(
       name: "JavaRuntime",
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 
@@ -194,6 +245,7 @@ let package = Package(
         "JavaTypes",
       ],
       swiftSettings: [
+        .swiftLanguageMode(.v5),
         .enableUpcomingFeature("BareSlashRegexLiterals")
       ]
     ),
@@ -205,7 +257,11 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "Collections", package: "swift-collections"),
         "JavaTypes",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -213,26 +269,47 @@ let package = Package(
       name: "JExtractSwiftTool",
       dependencies: [
         "JExtractSwift",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
       ]
     ),
 
     .testTarget(
       name: "JavaKitTests",
-      dependencies: ["JavaKit", "JavaKitNetwork", "JavaKitVM"]
+      dependencies: ["JavaKit", "JavaKitNetwork", "JavaKitVM"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
     ),
 
     .testTarget(
       name: "JavaTypesTests",
-      dependencies: ["JavaTypes"]
+      dependencies: ["JavaTypes"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
     ),
 
+    .testTarget(
+      name: "JavaKitMacroTests",
+      dependencies: [
+        "JavaKitMacros",
+        .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+    
     .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [
         "JExtractSwift"
       ],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaHome)/include", "-I\(javaHome)/include/darwin"])
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
   ]

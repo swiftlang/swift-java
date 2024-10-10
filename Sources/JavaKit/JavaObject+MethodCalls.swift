@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -246,7 +247,7 @@ extension AnyJavaObject {
     in environment: JNIEnvironment,
     arguments: repeat each Param
   ) throws -> Self {
-    let thisClass = Self.getJNIClass(in: environment)!
+    let thisClass = try Self.getJNIClass(in: environment)
 
     // Compute the method signature so we can find the right method, then look up the
     // method within the class.
@@ -300,9 +301,10 @@ extension AnyJavaObject {
 extension JavaClass {
   /// Call a Java static method with the given name and arguments, which must be
   /// of the correct type, that produces the given result type.
-  public func dynamicJavaMethodCall<each Param: JavaValue, Result: JavaValue>(
+  public func dynamicJavaStaticMethodCall<each Param: JavaValue, Result: JavaValue>(
     methodName: String,
-    args: repeat each Param
+    arguments: repeat each Param,
+    resultType: Result.Type
   ) throws -> Result {
     let thisClass = javaThis
     let environment = javaEnvironment
@@ -324,7 +326,7 @@ extension JavaClass {
 
     // Retrieve the method that performs this call, then
     let jniMethod = Result.jniStaticMethodCall(in: environment)
-    let jniArgs = getJValues(repeat each args, in: environment)
+    let jniArgs = getJValues(repeat each arguments, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
       jniMethod(environment, thisClass, methodID, jniArgs)
     }
@@ -334,9 +336,9 @@ extension JavaClass {
 
   /// Call a Java static method with the given name and arguments, which must be
   /// of the correct type, that produces the given result type.
-  public func dynamicJavaMethodCall<each Param: JavaValue>(
+  public func dynamicJavaStaticMethodCall<each Param: JavaValue>(
     methodName: String,
-    args: repeat each Param
+    arguments: repeat each Param
   ) throws {
     let thisClass = javaThis
     let environment = javaEnvironment
@@ -358,7 +360,7 @@ extension JavaClass {
 
     // Retrieve the method that performs this call, then
     let jniMethod = environment.interface.CallStaticVoidMethodA
-    let jniArgs = getJValues(repeat each args, in: environment)
+    let jniArgs = getJValues(repeat each arguments, in: environment)
     try environment.translatingJNIExceptions {
       jniMethod!(environment, thisClass, methodID, jniArgs)
     }

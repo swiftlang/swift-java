@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -26,7 +27,7 @@ extension AnyJavaObject {
   private func isInstanceOf<OtherClass: AnyJavaObject>(
     _ otherClass: OtherClass.Type
   ) -> jclass? {
-    guard let otherJavaClass = otherClass.getJNIClass(in: javaEnvironment) else {
+    guard let otherJavaClass = try? otherClass.getJNIClass(in: javaEnvironment) else {
       return nil
     }
 

@@ -1,0 +1,111 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+plugins {
+    id("build-logic.java-application-conventions")
+}
+
+group = "org.swift.swiftkit"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(22))
+    }
+}
+
+sourceSets {
+    generated {
+        java.srcDir "${buildDir}/generated/src/java/"
+    }
+
+    // Make the 'main' and 'test' source sets depend on the generated sources
+    main {
+        compileClasspath += sourceSets.generated.output
+        runtimeClasspath += sourceSets.generated.output
+    }
+    test {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+
+        compileClasspath += sourceSets.generated.output
+        runtimeClasspath += sourceSets.generated.output
+    }
+}
+
+dependencies {
+    implementation(project(':SwiftKit'))
+    generatedImplementation(project(':SwiftKit'))
+
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+configurations {
+    generatedImplementation.extendsFrom(mainImplementation)
+    generatedRuntimeOnly.extendsFrom(mainRuntimeOnly)
+}
+
+tasks.named("compileJava").configure {
+    dependsOn("jextract")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = "com.example.swift.HelloJava2Swift"
+
+    // In order to silence:
+    //   WARNING: A restricted method in java.lang.foreign.SymbolLookup has been called
+    //   WARNING: java.lang.foreign.SymbolLookup::libraryLookup has been called by org.example.swift.JavaKitExample in an unnamed module
+    //   WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+    //   WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+    // FIXME: Find out the proper solution to this
+    applicationDefaultJvmArgs = [
+        "--enable-native-access=ALL-UNNAMED",
+
+        // Include the library paths where our dylibs are that we want to load and call
+        "-Djava.library.path=" + [
+            "$rootDir/.build/arm64-apple-macosx/debug/",
+            "/usr/lib/swift/"
+        ].join(":"),
+
+        // Enable tracing downcalls (to Swift)
+        "-Djextract.trace.downcalls=true"
+    ]
+}
+
+task jextract(type: Exec) {
+    description = "Extracts Java accessor sources using jextract"
+    outputs.dir(layout.buildDirectory.dir("generated"))
+    inputs.dir("$rootDir/Sources/ExampleSwiftLibrary") // monitored library
+
+    // any changes in the source generator sources also mean the resulting output might change
+    inputs.dir("$rootDir/Sources/JExtractSwift")
+    inputs.dir("$rootDir/Sources/JExtractSwiftTool")
+
+    workingDir = rootDir
+    commandLine "make"
+    args "jextract-run"
+}
+
+tasks.named("compileGeneratedJava").configure {
+    dependsOn jextract
+}

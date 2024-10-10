@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -35,7 +36,7 @@ public struct SwiftToJava: ParsableCommand {
 
   // TODO: Once we ship this, make this `.warning` by default
   @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
-  var logLevel: Logger.Level = .trace
+  var logLevel: Logger.Level = .notice
 
   @Argument(help: "The Swift interface files to export to Java.")
   var swiftInterfaceFiles: [String]

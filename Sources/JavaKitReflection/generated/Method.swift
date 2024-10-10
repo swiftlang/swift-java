@@ -137,6 +137,6 @@ public struct Method {
   public func wait() throws
 }
 extension JavaClass<Method> {
-  @JavaMethod
+  @JavaStaticMethod
   public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
 }

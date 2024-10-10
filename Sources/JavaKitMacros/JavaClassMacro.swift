@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,11 +15,12 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import Foundation // for e.g. replacingOccurrences
 
-enum JavaClassMacro {}
+package enum JavaClassMacro {}
 
 extension JavaClassMacro: MemberMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingMembersOf declaration: some DeclGroupSyntax,
     conformingTo protocols: [TypeSyntax],
@@ -97,7 +99,7 @@ extension JavaClassMacro: MemberMacro {
 }
 
 extension JavaClassMacro: ExtensionMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     attachedTo declaration: some DeclGroupSyntax,
     providingExtensionsOf type: some TypeSyntaxProtocol,
@@ -118,7 +120,7 @@ extension JavaClassMacro: ExtensionMacro {
 }
 
 extension JavaClassMacro: PeerMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext

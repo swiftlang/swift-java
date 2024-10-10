@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -94,7 +95,7 @@ public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: 
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
-/// The macro must be used within either a AnyJavaObject-conforming type or a specific JavaClass instance.
+/// The macro must be used in an AnyJavaObject-conforming type.
 ///
 /// ```swift
 /// @JavaMethod
@@ -113,6 +114,18 @@ public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: 
 /// corresponds to the Java constructor `HelloSwift(String name)`.
 @attached(body)
 public macro JavaMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaMethodMacro")
+
+/// Attached macro that turns a Swift method on JavaClass into one that wraps
+/// a Java static method on the underlying Java class object.
+///
+/// The macro must be used within a specific JavaClass instance.
+///
+/// ```swift
+/// @JavaMethod
+/// func sayHelloBack(_ i: Int32) -> Double
+/// ```
+@attached(body)
+public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaMethodMacro")
 
 /// Macro that exposes the given Swift method as a native method in Java.
 ///

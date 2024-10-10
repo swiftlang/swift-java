@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -80,10 +81,12 @@ extension AnyJavaObject {
   }
 
   /// Retrieve the Java class for this type.
-  public static func getJNIClass(in environment: JNIEnvironment) -> jclass? {
-    return environment.interface.FindClass(
-      environment,
-      fullJavaClassNameWithSlashes
-    )
+  public static func getJNIClass(in environment: JNIEnvironment) throws -> jclass {
+    try environment.translatingJNIExceptions {
+      environment.interface.FindClass(
+        environment,
+        fullJavaClassNameWithSlashes
+      )
+    }!
   }
 }

@@ -15,24 +15,37 @@
 .PHONY: run clean all
 
 ARCH := $(shell arch)
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+ifeq ($(ARCH), 'i386')
+  ARCH_SUBDIR := x86_64
+else
+  ARCH_SUBDIR := aarch64
+endif
+BUILD_DIR := .build/$(ARCH_SUBDIR)-unknown-linux-gnu
+LIB_SUFFIX := so
+endif
+
+ifeq ($(UNAME), Darwin)
 ifeq ($(ARCH), 'i386')
   ARCH_SUBDIR := x86_64
 else
   ARCH_SUBDIR := arm64
 endif
+BUILD_DIR := .build/$(ARCH_SUBDIR)-apple-macosx
+LIB_SUFFIX := dylib
+endif
 
-BUILD_DIR=".build/$(ARCH_SUBDIR)-apple-macosx"
+SAMPLES_DIR := "Samples"
 
 all: generate-all
 
-$(BUILD_DIR)/debug/libJavaKit.dylib $(BUILD_DIR)/debug/libJavaKitExample.dylib $(BUILD_DIR)/debug/Java2Swift:
+$(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
 
-./JavaSwiftKitDemo/build/classes/java/main/com/example/swift/HelloSubclass.class: JavaSwiftKitDemo/src/main/java/com/example/swift
-	./gradlew build
-
-run: $(BUILD_DIR)/debug/libJavaKit.dylib $(BUILD_DIR)/debug/libJavaKitExample.dylib JavaSwiftKitDemo/src/main/java/com/example/swift
-	java -cp JavaSwiftKitDemo/build/classes/java/main -Djava.library.path=$(BUILD_DIR)/debug/ com.example.swift.HelloSwift
+run: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libExampleSwiftLibrary.$(LIB_SUFFIX)
+	./gradlew Samples:JavaKitSampleApp:run
 
 Java2Swift: $(BUILD_DIR)/debug/Java2Swift
 
@@ -42,7 +55,7 @@ generate-JavaKit: Java2Swift
 
 generate-JavaKitReflection: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitReflection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitReflection/generated java.lang.reflect.Method java.lang.reflect.Type java.lang.reflect.Constructor java.lang.reflect.Parameter java.lang.reflect.ParameterizedType java.lang.reflect.Executable java.lang.reflect.AnnotatedType java.lang.reflect.TypeVariable java.lang.reflect.WildcardType java.lang.reflect.GenericArrayType java.lang.reflect.AccessibleObject java.lang.annotation.Annotation java.lang.reflect.GenericDeclaration
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitReflection/generated java.lang.reflect.Method java.lang.reflect.Type java.lang.reflect.Constructor java.lang.reflect.Parameter java.lang.reflect.ParameterizedType java.lang.reflect.Executable java.lang.reflect.AnnotatedType java.lang.reflect.TypeVariable java.lang.reflect.WildcardType java.lang.reflect.GenericArrayType java.lang.reflect.AccessibleObject java.lang.annotation.Annotation java.lang.reflect.GenericDeclaration java.lang.reflect.Field
 
 generate-JavaKitJar: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitJar/generated
@@ -55,7 +68,8 @@ generate-JavaKitNetwork: Java2Swift generate-JavaKit
 generate-all: generate-JavaKit generate-JavaKitReflection generate-JavaKitJar generate-JavaKitNetwork \
 			  jextract-swift
 clean:
-	rm -rf .build
+	rm -rf .build; \
+	rm -rf Samples/SwiftKitExampleApp/src/generated/java/*
 
 format:
 	swift format --recursive . -i
@@ -66,7 +80,6 @@ format:
 
 JEXTRACT_BUILD_DIR="$(BUILD_DIR)/jextract"
 
-# Parameter: Swift source file
 define make_swiftinterface
     $(eval $@_MODULE = $(1))
     $(eval $@_FILENAME = $(2))
@@ -84,19 +97,23 @@ endef
 jextract-swift: generate-JExtract-interface-files
 	swift build
 
-generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.dylib
+generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX)
 	echo "Generate .swiftinterface files..."
-	@$(call make_swiftinterface, "JavaKitExample", "MySwiftLibrary")
-	@$(call make_swiftinterface, "JavaKitExample", "SwiftKit")
+	@$(call make_swiftinterface, "ExampleSwiftLibrary", "MySwiftLibrary")
+	@$(call make_swiftinterface, "SwiftKitSwift", "SwiftKit")
 
 jextract-run: jextract-swift generate-JExtract-interface-files
 	swift run jextract-swift  \
 		--package-name com.example.swift.generated \
-		--swift-module JavaKitExample \
-		--output-directory JavaSwiftKitDemo/src/main/java \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/MySwiftLibrary.swiftinterface \
-		.build/arm64-apple-macosx/jextract/JavaKitExample/SwiftKit.swiftinterface
+		--swift-module ExampleSwiftLibrary \
+		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/src/generated/java \
+		$(BUILD_DIR)/jextract/ExampleSwiftLibrary/MySwiftLibrary.swiftinterface; \
+	swift run jextract-swift \
+		--package-name org.swift.swiftkit.generated \
+		--swift-module SwiftKitSwift \
+		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/src/generated/java \
+		$(BUILD_DIR)/jextract/SwiftKitSwift/SwiftKit.swiftinterface
 
 
 jextract-run-java: jextract-swift generate-JExtract-interface-files
-	./gradlew run
+	./gradlew Samples:SwiftKitSampleApp:run

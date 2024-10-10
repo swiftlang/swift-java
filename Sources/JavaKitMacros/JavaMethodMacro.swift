@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,10 +17,10 @@ import SwiftSyntaxBuilder
 @_spi(Testing) import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
 
-enum JavaMethodMacro {}
+package enum JavaMethodMacro {}
 
 extension JavaMethodMacro: BodyMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingBodyFor declaration: some DeclSyntaxProtocol & WithOptionalCodeBlockSyntax,
     in context: some MacroExpansionContext
@@ -33,6 +34,7 @@ extension JavaMethodMacro: BodyMacro {
       fatalError("not a function")
     }
 
+    let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
     let funcName = funcDecl.name.text
     let params = funcDecl.signature.parameterClause.parameters
     let resultType: String =
@@ -53,7 +55,7 @@ extension JavaMethodMacro: BodyMacro {
       ? "try" : "try!"
 
     return [
-      "return \(raw: tryKeyword) dynamicJavaMethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
+      "return \(raw: tryKeyword) dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
     ]
   }
 

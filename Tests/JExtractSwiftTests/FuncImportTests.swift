@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -61,12 +62,13 @@ final class MethodImportTests {
     }
     """
 
-  @Test func method_helloWorld() throws {
+  @Test("Import: public func helloWorld()")
+  func method_helloWorld() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
 
@@ -81,6 +83,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloWorld()
          * }
@@ -100,12 +103,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeInt() throws {
+  @Test("Import: public func globalTakeInt(i: Int)")
+  func func_globalTakeInt() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -122,6 +126,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift: 
          * {@snippet lang=swift :
          * public func globalTakeInt(i: Int)
          * }
@@ -141,12 +146,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_globalTakeIntLongString() throws {
+  @Test("Import: public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)")
+  func func_globalTakeIntLongString() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -163,6 +169,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
          * }
@@ -182,12 +189,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_memorySegment() throws {
+  @Test
+  func method_class_helloMemberFunction_self_memorySegment() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -204,6 +212,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -223,12 +232,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_self_wrapper() throws {
+  @Test
+  func method_class_helloMemberFunction_self_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -245,6 +255,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberInExtension()
          * }
@@ -264,12 +275,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func test_method_class_helloMemberFunction_self_wrapper() throws {
+  @Test
+  func test_method_class_helloMemberFunction_self_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -286,6 +298,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -305,12 +318,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_helloMemberFunction_wrapper() throws {
+  @Test
+  func method_class_helloMemberFunction_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -327,6 +341,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloMemberFunction()
          * }
@@ -338,12 +353,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func method_class_makeInt_wrapper() throws {
+  @Test
+  func method_class_makeInt_wrapper() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 
@@ -360,6 +376,7 @@ final class MethodImportTests {
       expected:
         """
         /**
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func makeInt() -> Int
          * }
@@ -371,12 +388,13 @@ final class MethodImportTests {
     )
   }
 
-  @Test func class_constructor() throws {
+  @Test
+  func class_constructor() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .info
 
     try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
 

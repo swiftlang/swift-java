@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -27,6 +28,9 @@ extension JavaClass {
 
   @JavaMethod
   public func getMethods() -> [Method?]
+    
+  @JavaMethod
+  public func getFields() -> [Field?]
 
   @JavaMethod
   public func getConstructors() -> [Constructor<ObjectType>?]

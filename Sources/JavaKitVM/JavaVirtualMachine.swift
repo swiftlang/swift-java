@@ -6,13 +6,13 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaRuntime
 
 typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
 
@@ -23,19 +23,41 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// The JNI environment for the JVM.
   public let environment: JNIEnvironment
 
-  public init(vmOptions: [String] = []) throws {
+  /// Initialize a new Java virtual machine instance.
+  ///
+  /// - Parameters:
+  ///   - classPath: The directories, JAR files, and ZIP files in which the JVM
+  ///     should look to find classes. This maps to the VM option
+  ///     `-Djava.class.path=`.
+  ///   - vmOptions: Options that should be passed along to the JVM, which will
+  ///     be prefixed by the class-path argument described above.
+  ///   - ignoreUnrecognized: Whether the JVM should ignore any VM options it
+  ///     does not recognize.
+  public init(
+    classPath: [String] = [],
+    vmOptions: [String] = [],
+    ignoreUnrecognized: Bool = true
+  ) throws {
     var jvm: JavaVMPointer? = nil
     var environment: UnsafeMutableRawPointer? = nil
     var vmArgs = JavaVMInitArgs()
-    vmArgs.version = JNI_VERSION_21
-    vmArgs.ignoreUnrecognized = jboolean(JNI_TRUE)
+    vmArgs.version = JNI_VERSION_1_6
+    vmArgs.ignoreUnrecognized = jboolean(ignoreUnrecognized ? JNI_TRUE : JNI_FALSE)
+
+    // Construct the complete list of VM options.
+    var allVMOptions: [String] = []
+    if !classPath.isEmpty {
+      let colonSeparatedClassPath = classPath.joined(separator: ":")
+      allVMOptions.append("-Djava.class.path=\(colonSeparatedClassPath)")
+    }
+    allVMOptions.append(contentsOf: vmOptions)
 
     // Convert the options
-    let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(capacity: vmOptions.count)
+    let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(capacity: allVMOptions.count)
     defer {
       optionsBuffer.deallocate()
     }
-    for (index, vmOption) in vmOptions.enumerated() {
+    for (index, vmOption) in allVMOptions.enumerated() {
       let optionString = vmOption.utf8CString.withUnsafeBufferPointer { buffer in
         let cString = UnsafeMutableBufferPointer<CChar>.allocate(capacity: buffer.count + 1)
         _ = cString.initialize(from: buffer)

@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -21,7 +22,7 @@ import SwiftSyntax
 public final class Swift2JavaTranslator {
   static let SWIFT_INTERFACE_SUFFIX = ".swiftinterface"
 
-  public var log = Logger(label: "translator", logLevel: .info)
+  package var log = Logger(label: "translator", logLevel: .info)
 
   // ==== Input configuration
   let swiftModuleName: String
@@ -104,6 +105,59 @@ extension Swift2JavaTranslator {
       translator: self
     )
     visitor.walk(sourceFileSyntax)
+
+    try await self.postProcessImportedDecls()
+  }
+
+  public func postProcessImportedDecls() async throws {
+    log.debug(
+      "Post process imported decls...",
+      metadata: [
+        "types": "\(importedTypes.count)",
+        "global/funcs": "\(importedGlobalFuncs.count)",
+      ]
+    )
+
+    // FIXME: the use of dylibs to get symbols is a hack we need to remove and replace with interfaces containing mangled names
+    let dylibPath = ".build/arm64-apple-macosx/debug/lib\(swiftModuleName).dylib"
+    guard var dylib = SwiftDylib(path: dylibPath) else {
+      log.warning(
+        """
+        Unable to find mangled names for imported symbols. Dylib not found: \(dylibPath) This method of obtaining symbols is a workaround; it will be removed.
+        """
+      )
+      return
+    }
+
+    importedGlobalFuncs = try await importedGlobalFuncs._mapAsync { funcDecl in
+      let funcDecl = try await dylib.fillInMethodMangledName(funcDecl)
+      log.info("Mapped method '\(funcDecl.identifier)' -> '\(funcDecl.swiftMangledName)'")
+      return funcDecl
+    }
+
+    importedTypes = Dictionary(uniqueKeysWithValues: try await importedTypes._mapAsync { (tyName, tyDecl) in
+      var tyDecl = tyDecl
+      log.info("Mapping type: \(tyDecl.swiftTypeName)")
+
+      tyDecl = try await dylib.fillInTypeMangledName(tyDecl)
+
+      log.info("Mapping members of: \(tyDecl.swiftTypeName)")
+      tyDecl.initializers = try await tyDecl.initializers._mapAsync { initDecl in
+        dylib.log.logLevel = .info
+
+        let initDecl = try await dylib.fillInAllocatingInitMangledName(initDecl)
+        log.info("Mapped initializer '\(initDecl.identifier)' -> '\(initDecl.swiftMangledName)'")
+        return initDecl
+      }
+
+      tyDecl.methods = try await tyDecl.methods._mapAsync { funcDecl in
+        let funcDecl = try await dylib.fillInMethodMangledName(funcDecl)
+        log.info("Mapped method '\(funcDecl.identifier)' -> '\(funcDecl.swiftMangledName)'")
+        return funcDecl
+      }
+
+      return (tyName, tyDecl)
+    })
   }
 }
 
@@ -117,7 +171,7 @@ extension Swift2JavaTranslator {
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
     // Support library in Java
-    "org.swift.javakit.SwiftKit",
+    "org.swift.swiftkit.SwiftKit",
 
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",

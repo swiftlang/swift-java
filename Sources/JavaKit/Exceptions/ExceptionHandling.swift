@@ -6,6 +6,7 @@
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -41,7 +42,7 @@ extension JNIEnvironment {
     // Otherwise, create a exception with a message.
     _ = interface.ThrowNew(
       self,
-      JavaClass<Exception>.getJNIClass(in: self),
+      try! JavaClass<Exception>.getJNIClass(in: self),
       String(describing: error)
     )
   }

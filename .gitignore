@@ -8,10 +8,16 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 *.class
+bin/
+BuildLogic/out/
 
 # Ignore gradle build artifacts
 .gradle
 **/build/
+lib/
+
+# Ignore package resolved
+Package.resolved
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -23,4 +29,4 @@ DerivedData/
 .gradletasknamecache
 
 # Ignore generated sources
-JavaSwiftKitDemo/src/main/java/com/example/swift/generated/*
+**/generated/
