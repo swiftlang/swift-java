@@ -36,25 +36,31 @@ jobs:
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-        #      - uses: actions/setup-java@v4
-        #        with:
-        #          distribution: 'zulu'
-        #          java-version: '22'
-        #          cache: 'gradle'
-      - name: Install Nightly Swift
+      - name: Install Untested Nightly Swift
         run: "bash -xc './docker/install_untested_nightly_swift.sh'"
-      # Cache .m2/repository
+      # setup caches
       - name: Cache local Gradle repository
         uses: actions/cache@v4
         continue-on-error: true
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/build.gradle.kts') }}
+          path: |
+            /root/.gradle/caches
+            /root/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-cache
             ${{ runner.os }}-gradle-
+      - name: Cache local SwiftPM repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: /__w/swift-java/swift-java/.build/checkouts
+          key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-cache
+            ${{ runner.os }}-swiftpm-
+      # run the actual build
       - name: Gradle build
-        run: ./gradlew build --info --no-daemon
+        run: ./gradlew update --info --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -75,8 +81,29 @@ jobs:
         run: apt-get -qq update && apt-get -qq install -y make curl wget
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
-      - name: Install Nightly Swift
+      - name: Install Untested Nightly Swift
         run: "bash -xc './docker/install_untested_nightly_swift.sh'"
+      # setup caches
+      - name: Cache local Gradle repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: |
+            /root/.gradle/caches
+            /root/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Cache local SwiftPM repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: /__w/swift-java/swift-java/.build/checkouts
+          key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-cache
+            ${{ runner.os }}-swiftpm-
+      # run the actual build
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: "make jextract-run"
