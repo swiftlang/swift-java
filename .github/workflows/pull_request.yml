@@ -43,6 +43,16 @@ jobs:
         #          cache: 'gradle'
       - name: Install Nightly Swift
         run: "bash -xc './docker/install_nightly_untested_swift.sh'"
+      # Cache .m2/repository
+      - name: Cache local Gradle repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/build.gradle') }}-${{ ${{ hashFiles('**/build.gradle.kts') }} }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-cache
+            ${{ runner.os }}-gradle-
       - name: Gradle build
         run: ./gradlew build --info --no-daemon
 
