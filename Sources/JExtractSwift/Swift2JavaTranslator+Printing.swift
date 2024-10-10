@@ -100,6 +100,9 @@ extension Swift2JavaTranslator {
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
+
+      printStaticLibraryLoad(&printer)
+
       // TODO: print all "static" methods
       for decl in importedGlobalFuncs {
         printFunctionDowncallMethods(&printer, decl)
@@ -116,16 +119,17 @@ extension Swift2JavaTranslator {
       // Metadata
       printer.print(
         """
-        // FIXME: this detecting is somewhat off
-        public static final String TYPE_METADATA_NAME = "\(decl.swiftMangledName ?? "")";
-        static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_METADATA_NAME);
+        public static final String TYPE_MANGLED_NAME = "\(decl.swiftMangledName ?? "")";
+        static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_MANGLED_NAME);
         """
       )
       printer.print("")
 
+      printStaticLibraryLoad(&printer)
+
       // Initializers
       for initDecl in decl.initializers {
-        printClassInitializer(&printer, initDecl)
+        printClassConstructors(&printer, initDecl)
       }
 
       // Properties
@@ -170,18 +174,13 @@ extension Swift2JavaTranslator {
   public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
     printer.printTypeDecl("public final class \(decl.javaClassName) implements SwiftHeapObject") { printer in
       // ==== Storage of the class
-      // FIXME: implement the self storage for the memory address and accessors
       printClassSelfProperty(&printer, decl)
-
-      // Constructor
-      printClassMemorySegmentConstructor(&printer, decl)
 
       // Constants
       printClassConstants(printer: &printer)
       printTypeMappingDecls(&printer)
 
       // Layout of the class
-      // TODO: this is missing information until we can get @layout from Swift
       printClassMemoryLayout(&printer, decl)
 
       // Render the 'trace' functions etc
@@ -247,8 +246,8 @@ extension Swift2JavaTranslator {
         """
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
-            if (SwiftKit.isMacOS()) {
-                return SymbolLookup.libraryLookup(System.mapLibraryName(DYLIB_NAME), LIBRARY_ARENA)
+            if (PlatformUtils.isMacOS()) {
+                return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)
                         .or(SymbolLookup.loaderLookup())
                         .or(Linker.nativeLinker().defaultLookup());
             } else {
@@ -266,7 +265,7 @@ extension Swift2JavaTranslator {
   private func printClassConstants(printer: inout CodePrinter) {
     printer.print(
       """
-      static final String DYLIB_NAME = "\(swiftModuleName)";
+      static final String LIB_NAME = "\(swiftModuleName)";
       static final Arena LIBRARY_ARENA = Arena.ofAuto();
       """
     )
@@ -277,17 +276,6 @@ extension Swift2JavaTranslator {
       """
       private \(typeName)() {
         // Should not be called directly
-      }
-      """
-    )
-  }
-
-  private func printClassMemorySegmentConstructor(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.print(
-      """
-      /** Instances are created using static {@code init} methods rather than through the constructor directly. */
-      private \(decl.javaClassName)(MemorySegment selfMemorySegment) {
-        this.selfMemorySegment = selfMemorySegment;
       }
       """
     )
@@ -308,30 +296,15 @@ extension Swift2JavaTranslator {
   }
 
   private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    // TODO: make use of the swift runtime to get the layout
     printer.print(
       """
       private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         SWIFT_POINTER
-      );
+      ).withName("\(decl.swiftMangledName ?? decl.swiftTypeName)");
 
-      // TODO: depends on @layout in Swift, so we can't do these yet
-      private static final GroupLayout $CLASS_LAYOUT = MemoryLayout.structLayout(
-        // SWIFT_INT.withName("heapObject"),
-        // ...
-        // SWIFT_INT.withName("cap")
-      ).withName("\(decl.javaType)"); // TODO: is the name right?
-
-      /**
-       * When other types refer to this type, they refer to by a pointer,
-       * so the layout of a class is just a pointer
-       */
-      public static final GroupLayout $layout() {
+      public final GroupLayout $layout() {
           return $LAYOUT;
-      }
-
-      /** The in-memory layout of this type */
-      public static final GroupLayout $instanceLayout() {
-          return $CLASS_LAYOUT;
       }
       """
     )
@@ -411,7 +384,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  public func printClassInitializer(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+  public func printClassConstructors(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     guard let parentName = decl.parentName else {
       fatalError("init must be inside a parent type! Was: \(decl)")
     }
@@ -424,25 +397,38 @@ extension Swift2JavaTranslator {
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
-    printClassInitializerConstructor(&printer, decl, parentName: parentName)
+    printClassInitializerConstructors(&printer, decl, parentName: parentName)
   }
 
-  public func printClassInitializerConstructor(
+  public func printClassInitializerConstructors(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
     parentName: TranslatedType
   ) {
     let descClassIdentifier = renderDescClassName(decl)
+
     printer.print(
       """
       /**
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        *
-       * {@snippet lang=swift :
-       * \(decl.syntax ?? "")
-       * }
+       * \(decl.renderCommentSnippet ?? " *")
        */
       public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
+        this(/*arena=*/null, \(renderForwardParams(decl, selfVariant: .wrapper)));
+      }
+      """
+    )
+
+    printer.print(
+      """
+      /**
+       * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
+       * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
+       *
+       * \(decl.renderCommentSnippet ?? " *")
+       */
+      public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
         var mh$ = \(descClassIdentifier).HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
@@ -450,9 +436,23 @@ extension Swift2JavaTranslator {
             }
 
             this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA);
+            if (arena != null) {
+                arena.register(this);
+            }
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
+      }
+      """
+    )
+  }
+
+  public func printStaticLibraryLoad(_ printer: inout CodePrinter) {
+    printer.print(
+      """
+      static {
+          System.loadLibrary("swiftCore");
+          System.loadLibrary(LIB_NAME);
       }
       """
     )

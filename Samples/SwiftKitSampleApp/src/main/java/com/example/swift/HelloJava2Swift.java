@@ -15,16 +15,13 @@
 package com.example.swift;
 
 // Import swift-extract generated sources
-import com.example.swift.generated.ExampleSwiftLibrary;
 import com.example.swift.generated.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
 import org.swift.swiftkit.SwiftKit;
-
+import org.swift.swiftkit.SwiftValueWitnessTable;
 
 import java.lang.foreign.*;
-import java.util.List;
-
 
 public class HelloJava2Swift {
 
@@ -32,34 +29,39 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        final var dylibNames = List.of(
-                "swiftCore",
-                "ExampleSwiftLibrary"
-        );
-
-
-        System.out.println("Loading libraries...");
-
-        for (var lib : dylibNames) {
-            System.out.printf("Loading: %s... ", lib);
-            System.loadLibrary(lib);
-            System.out.println("ok.");
-        }
-
         examples();
     }
 
     static void examples() {
-        ExampleSwiftLibrary.helloWorld();
+//         ExampleSwiftLibrary.helloWorld();
+//
+//         ExampleSwiftLibrary.globalTakeInt(1337);
+//
+//         MySwiftClass obj = new MySwiftClass(2222, 7777);
+//
+//         SwiftKit.retain(obj.$memorySegment());
+//         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+//
+//         obj.voidMethod();
+//         obj.takeIntMethod(42);
 
-        ExampleSwiftLibrary.globalTakeInt(1337);
+//        try (var arena = SwiftArena.ofConfined()) {
+            var instance = new MySwiftClass(
+//                    arena,
+                    1111, 2222);
 
-        MySwiftClass obj = new MySwiftClass(2222, 7777);
+            System.out.println("MySwiftClass.TYPE_MANGLED_NAME = " + MySwiftClass.TYPE_MANGLED_NAME);
+            var swiftType = SwiftKit.getTypeByMangledNameInEnvironment(MySwiftClass.TYPE_MANGLED_NAME);
+            System.out.println("swiftType = " + swiftType);
+//           MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(swiftType.$memorySegment());
+//           System.out.println("typeMetadata = " + typeMetadata);
+//
+//
+//            System.out.printf("size of type      = %d%n", SwiftValueWitnessTable.sizeOfSwiftType(swiftType.$memorySegment()));
+//            System.out.printf("stride of type    = %d%n", SwiftValueWitnessTable.strideOfSwiftType(swiftType.$memorySegment()));
+//            System.out.printf("alignment of type = %d%n", SwiftValueWitnessTable.alignmentOfSwiftType(swiftType.$memorySegment()));
+//            System.out.printf("layout of type    = %s%n", SwiftValueWitnessTable.layoutOfSwiftType(swiftType.$memorySegment()).toString());
 
-        SwiftKit.retain(obj.$memorySegment());
-        System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
-
-        obj.voidMethod();
-        obj.takeIntMethod(42);
+//        } // instance should be deallocated
     }
 }

@@ -14,8 +14,20 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
 
 public interface SwiftMemoryResource {
+
+    /**
+     * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
+     */
     MemorySegment $memorySegment();
+
+    /** The in memory layout of an instance of this Swift type. */
+    GroupLayout $layout();
+
+    default boolean immortal() {
+        return false;
+    }
 }

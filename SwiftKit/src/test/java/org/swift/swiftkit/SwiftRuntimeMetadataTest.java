@@ -27,16 +27,16 @@ public class SwiftRuntimeMetadataTest {
 
         if (SwiftValueLayout.addressByteSize() == 4) {
             // 32-bit platform
-            Assertions.assertEquals(8, SwiftKit.sizeOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.strideOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.alignmentOfSwiftType(swiftType));
-            Assertions.assertEquals("[8%[9:b1]x7](Swift.Int)", SwiftKit.layoutOfSwiftType(swiftType).toString());
+            Assertions.assertEquals(8, SwiftValueWitnessTable.sizeOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.strideOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.alignmentOfSwiftType(swiftType));
+            Assertions.assertEquals("[8%[9:b1]x7](Swift.Int)", SwiftValueWitnessTable.layoutOfSwiftType(swiftType).toString());
         } else {
             // 64-bit platform
-            Assertions.assertEquals(8, SwiftKit.sizeOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.strideOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.alignmentOfSwiftType(swiftType));
-            Assertions.assertEquals("[8%[8:b1]](Swift.Int)", SwiftKit.layoutOfSwiftType(swiftType).toString());
+            Assertions.assertEquals(8, SwiftValueWitnessTable.sizeOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.strideOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.alignmentOfSwiftType(swiftType));
+            Assertions.assertEquals("[8%[8:b1]](Swift.Int)", SwiftValueWitnessTable.layoutOfSwiftType(swiftType).toString());
         }
     }
 
@@ -46,16 +46,16 @@ public class SwiftRuntimeMetadataTest {
 
         if (SwiftValueLayout.addressByteSize() == 4) {
             // 64-bit platform
-            Assertions.assertEquals(9, SwiftKit.sizeOfSwiftType(swiftType));
-            Assertions.assertEquals(16, SwiftKit.strideOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.alignmentOfSwiftType(swiftType));
-            Assertions.assertEquals("[8%[9:b1]x7](Swift.Optional<Swift.Int>)", SwiftKit.layoutOfSwiftType(swiftType).toString());
+            Assertions.assertEquals(9, SwiftValueWitnessTable.sizeOfSwiftType(swiftType));
+            Assertions.assertEquals(16, SwiftValueWitnessTable.strideOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.alignmentOfSwiftType(swiftType));
+            Assertions.assertEquals("[8%[9:b1]x7](Swift.Optional<Swift.Int>)", SwiftValueWitnessTable.layoutOfSwiftType(swiftType).toString());
         } else {
             // 64-bit platform
-            Assertions.assertEquals(9, SwiftKit.sizeOfSwiftType(swiftType));
-            Assertions.assertEquals(16, SwiftKit.strideOfSwiftType(swiftType));
-            Assertions.assertEquals(8, SwiftKit.alignmentOfSwiftType(swiftType));
-            Assertions.assertEquals("[8%[9:b1]x7](Swift.Optional<Swift.Int>)", SwiftKit.layoutOfSwiftType(swiftType).toString());
+            Assertions.assertEquals(9, SwiftValueWitnessTable.sizeOfSwiftType(swiftType));
+            Assertions.assertEquals(16, SwiftValueWitnessTable.strideOfSwiftType(swiftType));
+            Assertions.assertEquals(8, SwiftValueWitnessTable.alignmentOfSwiftType(swiftType));
+            Assertions.assertEquals("[8%[9:b1]x7](Swift.Optional<Swift.Int>)", SwiftValueWitnessTable.layoutOfSwiftType(swiftType).toString());
         }
     }
 

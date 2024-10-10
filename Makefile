@@ -106,7 +106,8 @@ JEXTRACT_BUILD_DIR="$(BUILD_DIR)/jextract"
 define make_swiftinterface
     $(eval $@_MODULE = $(1))
     $(eval $@_FILENAME = $(2))
-	eval ${SWIFTC} \
+	# eval ${SWIFTC} \
+	eval /Library/Developer/Toolchains/swift-PR-76905-1539.xctoolchain/usr/bin/swiftc \
 		-emit-module-interface-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface \
 		-emit-module-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftmodule \
 		-enable-library-evolution \

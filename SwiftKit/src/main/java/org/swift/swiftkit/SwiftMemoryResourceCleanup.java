@@ -19,24 +19,27 @@ import java.lang.foreign.MemorySegment;
 /**
  * A Swift memory resource cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
  */
-interface SwiftMemoryResourceCleanup extends Runnable {
+sealed interface SwiftMemoryResourceCleanup extends Runnable {
 }
 
 record SwiftHeapObjectCleanup(MemorySegment resource) implements SwiftMemoryResourceCleanup {
 
     @Override
-    public void run() {
+    public void run() throws UnexpectedRetainCountException {
         long retainedCount = SwiftKit.retainCount(this.resource);
         if (retainedCount > 1) {
             throw new UnexpectedRetainCountException(this.resource, retainedCount, 1);
         }
 
+        SwiftKit.log.info("Destroy heap object: " + this.resource);
+
+        SwiftValueWitnessTable.destroy(this.resource);
     }
 }
 
 record SwiftValueCleanup(MemorySegment resource) implements SwiftMemoryResourceCleanup {
     @Override
     public void run() {
-        SwiftKit.retainCount(this.resource);
+        throw new RuntimeException("not implemented yet");
     }
 }

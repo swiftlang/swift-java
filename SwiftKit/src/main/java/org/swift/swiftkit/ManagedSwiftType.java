@@ -19,7 +19,6 @@ import java.lang.foreign.MemorySegment;
 public interface ManagedSwiftType {
     /**
      * The memory segment of `self` of the managed Swift object/value.
-     * @return
      */
     public MemorySegment $memorySegment();
 

@@ -16,7 +16,6 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.AddressLayout;
 import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.StructLayout;
 import java.lang.foreign.ValueLayout;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
@@ -25,14 +24,24 @@ import static java.lang.foreign.ValueLayout.JAVA_BYTE;
  * Similar to {@link java.lang.foreign.ValueLayout} however with some Swift specifics.
  */
 public class SwiftValueLayout {
+
+    /**
+     * The width of a pointer on the current platform.
+     */
+    public static long addressByteSize() {
+        return ValueLayout.ADDRESS.byteSize();
+    }
+
     public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
             .withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
+
     /**
      * The value layout for Swift's {@code Int} type, which is a signed type that follows
      * the size of a pointer (aka C's {@code ptrdiff_t}).
      */
     public static ValueLayout SWIFT_INT = (ValueLayout.ADDRESS.byteSize() == 4) ?
             ValueLayout.JAVA_INT : ValueLayout.JAVA_LONG;
+
 
     /**
      * The value layout for Swift's {@code UInt} type, which is an unsigned type that follows
