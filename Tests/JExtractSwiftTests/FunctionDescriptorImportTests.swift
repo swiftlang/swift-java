@@ -141,15 +141,15 @@ extension FunctionDescriptorTests {
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
-    body: (String) async throws -> ()
-  ) async throws {
+    body: (String) throws -> ()
+  ) throws {
     let st = Swift2JavaTranslator(
       javaPackage: javaPackage,
       swiftModuleName: swiftModuleName
     )
     st.log.logLevel = logLevel
 
-    try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == methodIdentifier
@@ -159,7 +159,7 @@ extension FunctionDescriptorTests {
       st.printFunctionDescriptorValue(&printer, funcDecl)
     }
 
-    try await body(output)
+    try body(output)
   }
 
   func variableAccessorDescriptorTest(
@@ -168,15 +168,15 @@ extension FunctionDescriptorTests {
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
-    body: (String) async throws -> ()
-  ) async throws {
+    body: (String) throws -> ()
+  ) throws {
     let st = Swift2JavaTranslator(
       javaPackage: javaPackage,
       swiftModuleName: swiftModuleName
     )
     st.log.logLevel = logLevel
 
-    try await st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let varDecl: ImportedVariable? =
       st.importedTypes.values.compactMap {
@@ -192,7 +192,7 @@ extension FunctionDescriptorTests {
       st.printFunctionDescriptorValue(&printer, varDecl.accessorFunc(kind: accessorKind)!, accessorKind: accessorKind)
     }
 
-    try await body(getOutput)
+    try body(getOutput)
   }
 
 }
