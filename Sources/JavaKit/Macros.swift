@@ -99,10 +99,9 @@ public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: 
 /// The macro must be used within a specific JavaClass instance.
 ///
 /// ```swift
-/// @JavaClass("org.swift.example.HelloSwift")
-/// struct HelloSwift {
-///     @JavaField
-///     var counter: Int32
+/// extension JavaClass<HelloSwift> {
+///   @JavaStaticField
+///   var initialValue: Double
 /// }
 /// ```
 @attached(accessor)

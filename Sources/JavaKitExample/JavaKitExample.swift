@@ -103,13 +103,13 @@ struct HelloSwift {
 }
 
 extension JavaClass<HelloSwift> {
-  @JavaField
+  @JavaStaticField
   var initialValue: Double
 }
 
 @JavaClass("com.example.swift.HelloSubclass", extends: HelloSwift.self)
 struct HelloSubclass {
-  @JavaStaticField
+  @JavaField
   var greeting: String
 
   @JavaMethod
