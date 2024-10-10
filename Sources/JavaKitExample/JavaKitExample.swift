@@ -109,7 +109,7 @@ extension JavaClass<HelloSwift> {
 
 @JavaClass("com.example.swift.HelloSubclass", extends: HelloSwift.self)
 struct HelloSubclass {
-  @JavaField
+  @JavaStaticField
   var greeting: String
 
   @JavaMethod

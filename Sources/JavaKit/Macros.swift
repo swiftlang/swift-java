@@ -106,7 +106,7 @@ public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: 
 /// }
 /// ```
 @attached(accessor)
-public macro StaticJavaField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
+public macro JavaStaticField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
