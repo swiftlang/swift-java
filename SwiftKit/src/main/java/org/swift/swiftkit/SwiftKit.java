@@ -48,6 +48,7 @@ public class SwiftKit {
                     .or(Linker.nativeLinker().defaultLookup());
         }
     }
+
     public SwiftKit() {
     }
 
@@ -313,6 +314,9 @@ public class SwiftKit {
 
     /**
      * Determine the size of a Swift type given its type metadata.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link SwiftKit.swift_getTypeByMangledNameInEnvironment} call
      */
     public static long sizeOfSwiftType(MemorySegment typeMetadata) {
         return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$size$offset);
@@ -321,7 +325,12 @@ public class SwiftKit {
     /**
      * Determine the stride of a Swift type given its type metadata, which is
      * how many bytes are between successive elements of this type within an
-     * array. It is >= the size.
+     * array.
+     *
+     * It is >= the size.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link SwiftKit.swift_getTypeByMangledNameInEnvironment} call
      */
     public static long strideOfSwiftType(MemorySegment typeMetadata) {
         return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$stride$offset);
@@ -329,6 +338,9 @@ public class SwiftKit {
 
     /**
      * Determine the alignment of the given Swift type.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link SwiftKit.swift_getTypeByMangledNameInEnvironment} call
      */
     public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
         long flags = getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$flags$offset);
@@ -365,6 +377,9 @@ public class SwiftKit {
      * <p>
      * If 'qualified' is true, leave all the qualification in place to
      * disambiguate the type, producing a more complete (but longer) type name.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link SwiftKit.swift_getTypeByMangledNameInEnvironment} call
      */
     public static String nameOfSwiftType(MemorySegment typeMetadata, boolean qualified) {
         try {
@@ -388,14 +403,29 @@ public class SwiftKit {
      * <p>
      * In the future, this layout could be extended to provide more detail,
      * such as the fields of a Swift struct.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link SwiftKit.swift_getTypeByMangledNameInEnvironment} call
      */
     public static MemoryLayout layoutOfSwiftType(MemorySegment typeMetadata) {
         long size = sizeOfSwiftType(typeMetadata);
         long stride = strideOfSwiftType(typeMetadata);
+        long padding = stride - size;
+
+        // constructing a zero-length paddingLayout is illegal, so we avoid doing so
+        MemoryLayout[] layouts = padding == 0 ?
+                new MemoryLayout[]{
+                        MemoryLayout.sequenceLayout(size, JAVA_BYTE)
+                                .withByteAlignment(alignmentOfSwiftType(typeMetadata))
+                } :
+                new MemoryLayout[]{
+                        MemoryLayout.sequenceLayout(size, JAVA_BYTE)
+                                .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
+                        MemoryLayout.paddingLayout(stride - size)
+                };
+
         return MemoryLayout.structLayout(
-                MemoryLayout.sequenceLayout(size, JAVA_BYTE)
-                        .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
-                MemoryLayout.paddingLayout(stride - size)
+                layouts
         ).withName(nameOfSwiftType(typeMetadata, true));
     }
 }
