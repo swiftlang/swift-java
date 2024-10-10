@@ -32,20 +32,6 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        final var dylibNames = List.of(
-                "swiftCore",
-                "ExampleSwiftLibrary"
-        );
-
-
-        System.out.println("Loading libraries...");
-
-        for (var lib : dylibNames) {
-            System.out.printf("Loading: %s... ", lib);
-            System.loadLibrary(lib);
-            System.out.println("ok.");
-        }
-
         examples();
     }
 

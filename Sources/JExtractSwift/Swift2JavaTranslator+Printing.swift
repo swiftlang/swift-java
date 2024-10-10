@@ -100,6 +100,9 @@ extension Swift2JavaTranslator {
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
+
+      printStaticLibraryLoad(&printer)
+
       // TODO: print all "static" methods
       for decl in importedGlobalFuncs {
         printFunctionDowncallMethods(&printer, decl)
@@ -266,7 +269,7 @@ extension Swift2JavaTranslator {
   private func printClassConstants(printer: inout CodePrinter) {
     printer.print(
       """
-      static final String DYLIB_NAME = "\(swiftModuleName)";
+      static final String LIB_NAME = "\(swiftModuleName)";
       static final Arena LIBRARY_ARENA = Arena.ofAuto();
       """
     )
@@ -453,6 +456,17 @@ extension Swift2JavaTranslator {
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
+      }
+      """
+    )
+  }
+
+  public func printStaticLibraryLoad(_ printer: inout CodePrinter) {
+    printer.print(
+      """
+      static {
+          System.loadLibrary("swiftCore");
+          System.loadLibrary(LIB_NAME);
       }
       """
     )
