@@ -21,7 +21,7 @@ import SwiftSyntaxBuilder
 
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
-class JavaTranslator {
+package class JavaTranslator {
   /// The name of the Swift module that we are translating into.
   let swiftModuleName: String
 
@@ -36,18 +36,18 @@ class JavaTranslator {
   /// which is absolutely not scalable. We need a better way to be able to
   /// discover already-translated Java classes to get their corresponding
   /// Swift types and modules.
-  var translatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
+  package var translatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
     defaultTranslatedClasses
 
   /// The set of Swift modules that need to be imported to make the generated
   /// code compile. Use `getImportDecls()` to format this into a list of
   /// import declarations.
-  var importedSwiftModules: Set<String> = JavaTranslator.defaultImportedSwiftModules
+  package var importedSwiftModules: Set<String> = JavaTranslator.defaultImportedSwiftModules
 
   /// The manifest for the module being translated.
-  var manifest: TranslationManifest
+  package var manifest: TranslationManifest
 
-  init(
+  package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
     format: BasicFormat = JavaTranslator.defaultFormat
@@ -59,7 +59,7 @@ class JavaTranslator {
   }
 
   /// Clear out any per-file state when we want to start a new file.
-  func startNewFile() {
+  package func startNewFile() {
     importedSwiftModules = Self.defaultImportedSwiftModules
   }
 
@@ -83,7 +83,7 @@ extension JavaTranslator {
   /// The default set of translated classes that do not come from JavaKit
   /// itself. This should only be used to refer to types that are built-in to
   /// JavaKit and therefore aren't captured in any manifest.
-  private static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
+  package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
     "java.lang.Class": ("JavaClass", "JavaKit", true),
     "java.lang.String": ("String", "JavaKit", false),
   ]
@@ -92,7 +92,7 @@ extension JavaTranslator {
 // MARK: Import translation
 extension JavaTranslator {
   /// Retrieve the import declarations.
-  func getImportDecls() -> [DeclSyntax] {
+  package func getImportDecls() -> [DeclSyntax] {
     importedSwiftModules.filter {
       $0 != swiftModuleName
     }.sorted().map {
@@ -166,7 +166,7 @@ extension JavaTranslator {
   }
 
   /// Translate a Java class into its corresponding Swift type name.
-  func getSwiftTypeName(_ javaClass: JavaClass<JavaObject>) throws -> (swiftName: String, isOptional: Bool) {
+  package func getSwiftTypeName(_ javaClass: JavaClass<JavaObject>) throws -> (swiftName: String, isOptional: Bool) {
     let javaType = try JavaType(javaTypeName: javaClass.getName())
     let isSwiftOptional = javaType.isSwiftOptional
     return (
@@ -195,7 +195,7 @@ extension JavaTranslator {
   /// Translates the given Java class into the corresponding Swift type. This
   /// can produce multiple declarations, such as a separate extension of
   /// JavaClass to house static methods.
-  func translateClass(_ javaClass: JavaClass<JavaObject>) -> [DeclSyntax] {
+  package func translateClass(_ javaClass: JavaClass<JavaObject>) -> [DeclSyntax] {
     let fullName = javaClass.getCanonicalName()
     let swiftTypeName = try! getSwiftTypeNameFromJavaClassName(fullName)
 
@@ -409,7 +409,7 @@ extension JavaTranslator {
 // MARK: Method and constructor translation
 extension JavaTranslator {
   /// Translates the given Java constructor into a Swift declaration.
-  func translateConstructor(_ javaConstructor: Constructor<some AnyJavaObject>) throws -> DeclSyntax {
+  package func translateConstructor(_ javaConstructor: Constructor<some AnyJavaObject>) throws -> DeclSyntax {
     let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment"]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
@@ -421,7 +421,7 @@ extension JavaTranslator {
   }
 
   /// Translates the given Java method into a Swift declaration.
-  func translateMethod(
+  package func translateMethod(
     _ javaMethod: Method,
     genericParameterClause: String = "",
     whereClause: String = ""
@@ -449,7 +449,7 @@ extension JavaTranslator {
       """
   }
     
-  func translateField(_ javaField: Field) throws -> DeclSyntax {
+  package func translateField(_ javaField: Field) throws -> DeclSyntax {
     let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     return """

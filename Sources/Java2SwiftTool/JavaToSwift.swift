@@ -14,6 +14,7 @@
 
 import ArgumentParser
 import Foundation
+import Java2SwiftLib
 import JavaKit
 import JavaKitJar
 import JavaKitNetwork
