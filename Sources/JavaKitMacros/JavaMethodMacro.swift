@@ -17,10 +17,10 @@ import SwiftSyntaxBuilder
 @_spi(Testing) import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
 
-enum JavaMethodMacro {}
+package enum JavaMethodMacro {}
 
 extension JavaMethodMacro: BodyMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingBodyFor declaration: some DeclSyntaxProtocol & WithOptionalCodeBlockSyntax,
     in context: some MacroExpansionContext
