@@ -15,23 +15,25 @@
 import JavaKit
 import JavaKitNetwork
 import JavaKitVM
-import Testing
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 @MainActor
 let jvm = try! JavaVirtualMachine(vmOptions: [])
 
-@Suite
 @MainActor
-struct BasicRuntimeTests {
-  @Test("Object management", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
-  func javaObjectManagement() throws {
+class BasicRuntimeTests: XCTestCase {
+  func testJavaObjectManagement() throws {
+    if isLinux {
+      throw XCTSkip("Attempts to refcount a null pointer on Linux")
+    }
+
     let sneakyJavaThis: jobject
     do {
       let object = JavaObject(environment: jvm.environment)
-      #expect(object.toString().starts(with: "java.lang.Object"))
+      XCTAssert(object.toString().starts(with: "java.lang.Object"))
 
       // Make sure this object was promoted to a global reference.
-      #expect(object.javaEnvironment.pointee?.pointee.GetObjectRefType(object.javaEnvironment, object.javaThis) == JNIGlobalRefType)
+      XCTAssertEqual(object.javaEnvironment.pointee?.pointee.GetObjectRefType(object.javaEnvironment, object.javaThis), JNIGlobalRefType)
 
       // Keep track of the Java object.
       sneakyJavaThis = object.javaThis
@@ -39,37 +41,42 @@ struct BasicRuntimeTests {
 
     // The reference should now be invalid, because we've deleted the
     // global reference.
-    #expect(jvm.environment.pointee?.pointee.GetObjectRefType(jvm.environment, sneakyJavaThis) == JNIInvalidRefType)
+    XCTAssertEqual(jvm.environment.pointee?.pointee.GetObjectRefType(jvm.environment, sneakyJavaThis), JNIInvalidRefType)
 
     // 'super' and 'as' don't require allocating a new holder.
     let url = try URL("http://swift.org", environment: jvm.environment)
     let superURL = url.super
-    #expect(url.javaHolder === superURL.javaHolder)
+    XCTAssert(url.javaHolder === superURL.javaHolder)
     let urlAgain = superURL.as(URL.self)!
-    #expect(url.javaHolder === urlAgain.javaHolder)
+    XCTAssert(url.javaHolder === urlAgain.javaHolder)
   }
 
-  @Test("Java exceptions", .disabled(if: isLinux, "Attempts to refcount a null pointer on Linux"))
-  func javaExceptionsInSwift() throws {
+  func testJavaExceptionsInSwift() throws {
+    if isLinux {
+      throw XCTSkip("Attempts to refcount a null pointer on Linux")
+    }
+
     do {
       _ = try URL("bad url", environment: jvm.environment)
     } catch {
-      #expect(String(describing: error) == "no protocol: bad url")
+      XCTAssert(String(describing: error) == "no protocol: bad url")
     }
   }
 
-  @Test("Static methods", .disabled(if: isMacOS, "Fails on macOS command line"))
-  func staticMethods() throws {
+  func testStaticMethods() throws {
+    if isLinux {
+      throw XCTSkip("Attempts to refcount a null pointer on Linux")
+    }
+
     let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
-    #expect(urlConnectionClass.getDefaultAllowUserInteraction() == false)
+    XCTAssert(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
-  @Test("Class instance lookup")
-  func classInstanceLookup() throws {
+  func testClassInstanceLookup() throws {
     do {
       _ = try JavaClass<Nonexistent>(in: jvm.environment)
     } catch {
-      #expect(String(describing: error) == "org/swift/javakit/Nonexistent")
+      XCTAssertEqual(String(describing: error), "org/swift/javakit/Nonexistent")
     }
   }
 }
@@ -80,15 +87,6 @@ struct Nonexistent { }
 /// Whether we're running on Linux.
 var isLinux: Bool {
   #if os(Linux)
-  return true
-  #else
-  return false
-  #endif
-}
-
-/// Whether we're running on MacOS.
-var isMacOS: Bool {
-  #if os(macOS)
   return true
   #else
   return false
