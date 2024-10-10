@@ -24,15 +24,15 @@ if [[ "$(grep "22.04" /etc/lsb-release)" = "" ]]; then
 fi
 
 UNTESTED_TOOLCHAIN_URL=$(curl -s $SWIFT_UNTESTED_TOOLCHAIN_JOB_URL | grep 'Toolchain: ' | sed 's/Toolchain: //g')
-UNTESTED_TOOLCHAIN_FILENAME=$(echo "$UNTESTED_TOOLCHAIN_URL" | awk '
-                                           function basename(file) {
-                                             sub(".*/", "", file)
-                                             return file
-                                           }
-                                           {print FILENAME, basename(FILENAME)}')
+UNTESTED_TOOLCHAIN_FILENAME=$"toolchain.tar.gz"
+
+echo "Download toolchain: $UNTESTED_TOOLCHAIN_URL"
 
 cd /
-curl "$UNTESTED_TOOLCHAIN_URL" > "$UNTESTED_TOOLCHAIN_FILENAME"
+curl -s "$UNTESTED_TOOLCHAIN_URL" > "$UNTESTED_TOOLCHAIN_FILENAME"
 
+swift -version
+
+echo "Extract toolchain: $UNTESTED_TOOLCHAIN_FILENAME"
 tar xzf "$UNTESTED_TOOLCHAIN_FILENAME"
 swift -version
