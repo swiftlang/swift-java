@@ -10,7 +10,8 @@ ARG ubuntu_version
 RUN apt-get update && apt-get install -y \
     locales locales-all \
     make \
-    libc6-dev
+    libc6-dev \
+    curl
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
@@ -23,4 +24,5 @@ ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"
 
 # Install "untested" nightly 'main' Swift
 # TODO: Only do this if the released Swift is older than what we require
-RUN bash -xc './install_nightly_untested_swift.sh'
+COPY install_untested_nightly_swift.sh .
+RUN bash -xc './install_untested_nightly_swift.sh'
