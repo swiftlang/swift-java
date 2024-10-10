@@ -37,6 +37,20 @@ BUILD_DIR := .build/$(ARCH_SUBDIR)-apple-macosx
 LIB_SUFFIX := dylib
 endif
 
+ifeq ($(UNAME), Darwin)
+ifeq ("${TOOLCHAINS}", "")
+	SWIFTC := "xcrun swiftc"
+else
+	SWIFTC := "xcrun ${TOOLCHAINS}/usr/bin/swiftc"
+endif
+else
+ifeq ("${TOOLCHAINS}", "")
+	SWIFTC := "swiftc"
+else
+	SWIFTC := "${TOOLCHAINS}/usr/bin/swiftc"
+endif
+endif
+
 SAMPLES_DIR := "Samples"
 
 all: generate-all
@@ -83,11 +97,13 @@ JEXTRACT_BUILD_DIR="$(BUILD_DIR)/jextract"
 define make_swiftinterface
     $(eval $@_MODULE = $(1))
     $(eval $@_FILENAME = $(2))
-	eval swiftc \
+	eval ${SWIFTC} \
 		-emit-module-interface-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface \
 		-emit-module-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftmodule \
 		-enable-library-evolution \
+		-Xfrontend -abi-comments-in-module-interface \
 		-module-name ${$@_MODULE} \
+		-Xfrontend -abi-comments-in-module-interface \
 		Sources/${$@_MODULE}/${$@_FILENAME}.swift
 	echo "Generated: ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface"
 endef

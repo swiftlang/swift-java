@@ -16,10 +16,15 @@ set -euo pipefail
 
 echo "Download [nightly] [untested] Swift toolchain for: $(uname -m)"
 
-declare -r SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText"
+ARCH="$(arch)"
+if [[ "$ARCH" = "i386" || "$ARCH" = "x86_64" ]]; then
+  SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText"
+else
+  SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04-aarch64/lastSuccessfulBuild/consoleText"
+fi
 
 if [[ "$(grep "22.04" /etc/lsb-release)" = "" ]]; then
-  echo "This script specifically only supports Ubuntu 20.04 due to nightly toolchain availability"
+  echo "This script specifically only supports Ubuntu 22.04 due to nightly toolchain availability"
   exit 1
 fi
 

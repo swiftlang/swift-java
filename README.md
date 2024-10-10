@@ -16,6 +16,35 @@ The primary purpose of this repository is to create an environment for collabora
 
 ## Dependencies
 
+### Required Swift Development Toolchains
+
+To build and use this project, currently, you will need to download a custom toolchain which includes some improvements in Swift that this project relies on:
+
+**Required toolchain download:**
+
+- Go to https://www.swift.org/download/
+- Find the "latest" `Trunk Development (main)` toolchain for your OS
+
+If these are too old, you can resort to one of these fallback toolchains:
+
+Fallback development toolchain on **macOS**:
+
+- https://ci.swift.org/job/swift-PR-toolchain-macos/1539/artifact/branch-main/swift-PR-76905-1539-osx.tar.gz
+
+Fallback development toolchain on **Linux (Ubuntu 22.04)**:
+
+```
+URL=$(curl -s "https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText" | grep 'Toolchain: ' | sed 's/Toolchain: //g')
+wget ${URL} 
+```
+
+or just use the provided docker image (explained below).
+
+https://www.swift.org/download/
+
+
+### Required JDK versions
+
 This project consists of different modules which have different Swift and Java runtime requirements.
 
 **JavaKit** – the Swift macros allowing the invocation of Java libraries from Swift

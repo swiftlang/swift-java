@@ -122,7 +122,6 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
-    .package(url: "https://github.com/apple/swift-system", from: "1.0.0"), // TODO: remove, we should not need 'nm' or process callouts
     .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(from: "1.1.0")),
   ],
   targets: [
@@ -251,31 +250,6 @@ let package = Package(
       ]
     ),
 
-    // FIXME: This is swift-foundation's proposed Subprocess; remove when available
-    //  https://github.com/apple/swift-foundation/pull/439
-    .target(
-      name: "_Subprocess",
-      dependencies: [
-        "_SubprocessCShims",
-        .product(name: "SystemPackage", package: "swift-system"),
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-    .target(
-      name: "_SubprocessCShims",
-      cSettings: [
-        .define(
-          "_CRT_SECURE_NO_WARNINGS",
-          .when(platforms: [.windows])
-        )
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-
     .target(
       name: "JExtractSwift",
       dependencies: [
@@ -284,7 +258,6 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Collections", package: "swift-collections"),
-        "_Subprocess",
         "JavaTypes",
       ],
       swiftSettings: [

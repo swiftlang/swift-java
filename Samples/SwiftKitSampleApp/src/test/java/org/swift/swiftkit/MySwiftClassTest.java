@@ -36,7 +36,6 @@ public class MySwiftClassTest {
     }
 
     @Test
-    @DisabledOnOs(OS.LINUX) // FIXME: enable on Linux when we get new compiler with mangled names in swift interfaces
     void call_retain_retainCount_release() {
         var obj = new MySwiftClass(1, 2);
 

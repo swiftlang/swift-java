@@ -18,7 +18,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 /// Command-line utility, similar to `jextract` to export Swift types to Java.
-public struct SwiftToJava: AsyncParsableCommand {
+public struct SwiftToJava: ParsableCommand {
   public init() {}
 
   public static var _commandName: String {
@@ -41,7 +41,7 @@ public struct SwiftToJava: AsyncParsableCommand {
   @Argument(help: "The Swift interface files to export to Java.")
   var swiftInterfaceFiles: [String]
 
-  public func run() async throws {
+  public func run() throws {
     let interfaceFiles = self.swiftInterfaceFiles.dropFirst()
     print("Interface files: \(interfaceFiles)")
 
@@ -56,7 +56,7 @@ public struct SwiftToJava: AsyncParsableCommand {
       print("[\(fileNo)/\(interfaceFiles.count)] Importing module '\(swiftModule)', interface file: \(interfaceFile)")
       defer { fileNo += 1 }
 
-      try await translator.analyze(swiftInterfacePath: interfaceFile)
+      try translator.analyze(swiftInterfacePath: interfaceFile)
       try translator.writeImportedTypesTo(outputDirectory: outputDirectory)
 
       print("[\(fileNo)/\(interfaceFiles.count)] Imported interface file: \(interfaceFile) " + "done.".green)
