@@ -22,7 +22,7 @@ let jvm = try! JavaVirtualMachine(vmOptions: [])
 
 @MainActor
 class BasicRuntimeTests: XCTestCase {
-  func testJavaObjectManagement() throws {
+  func testJavaObjectManagement() async throws {
     if isLinux {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
@@ -51,7 +51,7 @@ class BasicRuntimeTests: XCTestCase {
     XCTAssert(url.javaHolder === urlAgain.javaHolder)
   }
 
-  func testJavaExceptionsInSwift() throws {
+  func testJavaExceptionsInSwift() async throws {
     if isLinux {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
@@ -63,7 +63,7 @@ class BasicRuntimeTests: XCTestCase {
     }
   }
 
-  func testStaticMethods() throws {
+  func testStaticMethods() async throws {
     if isLinux {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
@@ -72,7 +72,7 @@ class BasicRuntimeTests: XCTestCase {
     XCTAssert(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
-  func testClassInstanceLookup() throws {
+  func testClassInstanceLookup() async throws {
     do {
       _ = try JavaClass<Nonexistent>(in: jvm.environment)
     } catch {
