@@ -18,13 +18,13 @@ echo "Download [nightly] [untested] Swift toolchain for: $(uname -m)"
 
 declare -r SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText"
 
-if [[ "$(cat /etc/lsb-release | grep "22.04")" = "" ]]; then
+if [[ "$(grep "22.04" /etc/lsb-release)" = "" ]]; then
   echo "This script specifically only supports Ubuntu 20.04 due to nightly toolchain availability"
   exit 1
 fi
 
-declare -r UNTESTED_TOOLCHAIN_URL=$(curl -s $SWIFT_UNTESTED_TOOLCHAIN_JOB_URL | grep 'Toolchain: ' | sed 's/Toolchain: //g')
-declare -r UNTESTED_TOOLCHAIN_FILENAME=$(echo "$UNTESTED_TOOLCHAIN_URL" | awk '
+UNTESTED_TOOLCHAIN_URL=$(curl -s $SWIFT_UNTESTED_TOOLCHAIN_JOB_URL | grep 'Toolchain: ' | sed 's/Toolchain: //g')
+UNTESTED_TOOLCHAIN_FILENAME=$(echo "$UNTESTED_TOOLCHAIN_URL" | awk '
                                            function basename(file) {
                                              sub(".*/", "", file)
                                              return file
@@ -32,7 +32,7 @@ declare -r UNTESTED_TOOLCHAIN_FILENAME=$(echo "$UNTESTED_TOOLCHAIN_URL" | awk '
                                            {print FILENAME, basename(FILENAME)}')
 
 cd /
-curl $UNTESTED_TOOLCHAIN_URL > $UNTESTED_TOOLCHAIN_FILENAME
+curl "$UNTESTED_TOOLCHAIN_URL" > "$UNTESTED_TOOLCHAIN_FILENAME"
 
-tar xzf $UNTESTED_TOOLCHAIN_FILENAME
+tar xzf "$UNTESTED_TOOLCHAIN_FILENAME"
 swift -version
