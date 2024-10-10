@@ -17,7 +17,7 @@ set -euo pipefail
 echo "Download [nightly] [untested] Swift toolchain for: $(uname -m)"
 
 ARCH="$(arch)"
-if [[ "$ARCH" = "i386" ]]; then
+if [[ "$ARCH" = "i386" || "$ARCH" = "x86_64" ]]; then
   SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText"
 else
   SWIFT_UNTESTED_TOOLCHAIN_JOB_URL="https://ci.swift.org/job/oss-swift-package-ubuntu-22_04-aarch64/lastSuccessfulBuild/consoleText"
