@@ -319,6 +319,17 @@ let package = Package(
     ),
 
     .testTarget(
+      name: "JavaKitMacroTests",
+      dependencies: [
+        "JavaKitMacros",
+        .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+    
+    .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [
         "JExtractSwift"

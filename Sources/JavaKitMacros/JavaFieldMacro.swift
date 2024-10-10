@@ -16,10 +16,10 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-enum JavaFieldMacro {}
+package enum JavaFieldMacro {}
 
 extension JavaFieldMacro: AccessorMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingAccessorsOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
