@@ -16,6 +16,7 @@ import JavaKit
 import JavaKitNetwork
 import JavaKitVM
 import Testing
+import Foundation
 
 #if os(Linux)
 import Glibc
@@ -94,7 +95,10 @@ var isLinux: Bool {
 
 /// Whether we're running on MacOS in an interactive terminal session.
 var isMacOSTerminal: Bool {
-  isMacOS && isatty(STDOUT_FILENO) == 1
+  isMacOS && (
+    isatty(STDOUT_FILENO) == 1 ||
+    ProcessInfo.processInfo.environment["IS_TTY"] != nil // since 'swift test' still sometimes hides the fact we're in tty
+  )
 }
 
 /// Whether we're running on MacOS.
