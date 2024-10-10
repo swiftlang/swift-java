@@ -42,14 +42,14 @@ jobs:
         #          java-version: '22'
         #          cache: 'gradle'
       - name: Install Nightly Swift
-        run: "bash -xc './docker/install_nightly_untested_swift.sh'"
+        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
       # Cache .m2/repository
       - name: Cache local Gradle repository
         uses: actions/cache@v4
         continue-on-error: true
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/build.gradle') }}-${{ ${{ hashFiles('**/build.gradle.kts') }} }}
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/build.gradle.kts') }}
           restore-keys: |
             ${{ runner.os }}-gradle-cache
             ${{ runner.os }}-gradle-
@@ -75,6 +75,8 @@ jobs:
         run: apt-get -qq update && apt-get -qq install -y make curl wget
       - name: Install JDK
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
+      - name: Install Nightly Swift
+        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
         run: "make jextract-run"
