@@ -103,7 +103,7 @@ struct HelloSwift {
 }
 
 extension JavaClass<HelloSwift> {
-  @JavaField
+  @JavaStaticField
   var initialValue: Double
 }
 

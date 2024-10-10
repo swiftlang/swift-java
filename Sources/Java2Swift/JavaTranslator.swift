@@ -257,7 +257,7 @@ extension JavaTranslator {
           do {
             return try translateField(field)
           } catch {
-            logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+            logUntranslated("Unable to translate '\(fullName)' static field '\(field.getName())': \(error)")
             return nil
           }
         }
@@ -347,23 +347,28 @@ extension JavaTranslator {
 
     // Format the class declaration.
     classDecl = classDecl.formatted(using: format).cast(DeclSyntax.self)
-      
-    // TODO: Handle static fields in https://github.com/swiftlang/swift-java/issues/39
-
-    if staticMethods.isEmpty {
+    
+    if staticMethods.isEmpty && staticFields.isEmpty {
       return [classDecl]
     }
 
     // Translate static members.
     var staticMembers: [DeclSyntax] = []
-    staticMembers.append(
-      contentsOf: javaClass.getMethods().compactMap {
-        $0.flatMap { method in
-          // Skip the instance methods; they were handled above.
-          if !method.isStatic {
-            return nil
-          }
 
+    staticMembers.append(
+      contentsOf: staticFields.compactMap { field in
+        // Translate each static field.
+        do {
+          return try translateField(field)
+        } catch {
+          logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+          return nil
+        }
+      }
+    )
+    
+    staticMembers.append(
+      contentsOf: staticMethods.compactMap { method in
           // Translate each static method.
           do {
             return try translateMethod(
@@ -376,7 +381,6 @@ extension JavaTranslator {
             return nil
           }
         }
-      }
     )
 
     if staticMembers.isEmpty {
@@ -447,7 +451,7 @@ extension JavaTranslator {
     
   func translateField(_ javaField: Field) throws -> DeclSyntax {
     let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
-    let fieldAttribute: AttributeSyntax = "@JavaField";
+    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     return """
       \(fieldAttribute)
       public var \(raw: javaField.getName()): \(raw: typeName)
