@@ -257,7 +257,7 @@ extension JavaTranslator {
           do {
             return try translateField(field)
           } catch {
-            logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
+            logUntranslated("Unable to translate '\(fullName)' static field '\(field.getName())': \(error)")
             return nil
           }
         }
