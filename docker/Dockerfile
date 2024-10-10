@@ -20,3 +20,7 @@ COPY install_jdk.sh .
 RUN bash -xc 'JDK_VENDOR=Corretto ./install_jdk.sh'
 ENV JAVA_HOME="/usr/lib/jvm/default-jdk"
 ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"
+
+# Install "untested" nightly 'main' Swift
+# TODO: Only do this if the released Swift is older than what we require
+RUN bash -xc './install_nightly_untested_swift.sh'
