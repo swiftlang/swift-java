@@ -103,7 +103,7 @@ task jextract(type: Exec) {
 
     workingDir = rootDir
     commandLine "make"
-    args "jextract-run"
+    args "jextract-generate"
 }
 
 tasks.named("compileGeneratedJava").configure {
