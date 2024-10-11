@@ -134,5 +134,5 @@ jextract-generate: jextract-swift generate-JExtract-interface-files
 		$(BUILD_DIR)/jextract/SwiftKitSwift/SwiftKit.swiftinterface
 
 
-jextract-run: jextract-generate generate-JExtract-interface-files
+jextract-run: jextract-generate
 	./gradlew Samples:SwiftKitSampleApp:run

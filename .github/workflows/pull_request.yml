@@ -106,6 +106,6 @@ jobs:
       # run the actual build
       - name: Generate sources (make) (Temporary)
         # TODO: this should be triggered by the respective builds
-        run: "make jextract-run"
+        run: "make jextract-generate"
       - name: Test Swift
         run: "swift test"
