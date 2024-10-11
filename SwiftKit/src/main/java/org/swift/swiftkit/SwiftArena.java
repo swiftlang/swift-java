@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * A Swift arena manages Swift allocated memory for classes, structs, enums etc.
@@ -37,8 +38,6 @@ public interface SwiftArena extends Arena {
     /**
      * Register a struct, enum or other non-reference counted Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
-     *
-     * @param object
      */
     void register(SwiftHeapObject object);
 
@@ -84,6 +83,7 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     @Override
     public void register(SwiftHeapObject object) {
+        SwiftKit.log.info("Registered " + object.$memorySegment() + " in " + this);
         this.resources.add(new SwiftHeapObjectCleanup(object.$memorySegment()));
     }
 
@@ -94,6 +94,7 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     @Override
     public void close() {
+        System.out.println("CLOSE ARENA ...");
         checkValid();
 
         // Cleanup all resources

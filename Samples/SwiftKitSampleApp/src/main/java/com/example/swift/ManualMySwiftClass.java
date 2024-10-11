@@ -27,7 +27,7 @@ public final class ManualMySwiftClass extends Manual_MySwiftClass implements Man
     // 000000000003f4a8 S type metadata for JavaKitExample.MySwiftSlice
     // strip the _$s
     // drop the N
-    public static final String TYPE_METADATA_NAME = "14JavaKitExample12MySwiftClassC";
+    public static final String TYPE_MANGLED_NAME = "14JavaKitExample12MySwiftClassC";
 
     private final MemorySegment self;
 
@@ -167,13 +167,13 @@ public final class ManualMySwiftClass extends Manual_MySwiftClass implements Man
             if (ManualJavaKitExample.TRACE_DOWNCALLS) {
                 ManualJavaKitExample.traceDowncall("MySwiftClass.__allocating_init(len:cap:)", len, cap);
             }
-            ManualJavaKitExample.trace("type name = " + TYPE_METADATA_NAME);
+            ManualJavaKitExample.trace("type name = " + TYPE_MANGLED_NAME);
 
             // FIXME: problems with _getTypeByName because of the String memory repr
-            //  final MemorySegment type = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_METADATA_NAME);
+            //  final MemorySegment type = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_MANGLED_NAME);
             //  we must get a method we can call like this into SwiftKit:
 
-            MemorySegment type = ManualJavaKitExample.swiftkit_getTypeByStringByteArray(TYPE_METADATA_NAME);
+            MemorySegment type = ManualJavaKitExample.swiftkit_getTypeByStringByteArray(TYPE_MANGLED_NAME);
             ManualJavaKitExample.trace("type = " + type);
 
             var address = (MemorySegment) mh$.invokeExact(len, cap, type);

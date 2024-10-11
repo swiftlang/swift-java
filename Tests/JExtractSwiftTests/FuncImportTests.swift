@@ -403,7 +403,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printClassInitializerConstructor(&printer, initDecl, parentName: initDecl.parentName!)
+      st.printClassInitializerConstructors(&printer, initDecl, parentName: initDecl.parentName!)
     }
 
     assertOutput(
