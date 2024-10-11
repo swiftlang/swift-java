@@ -30,6 +30,8 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
+        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
+
         examples();
     }
 
@@ -51,13 +53,13 @@ public class HelloJava2Swift {
             var instance = new MySwiftClass(arena, 1111, 2222);
             unsafelyEscaped = instance;
 
-            var num = instance.makeIntMethod();
+//            var num = instance.makeIntMethod();
+
+            System.out.println("SwiftKit.retainCount(instance) = " + SwiftKit.retainCount(instance));
 
             System.out.println("MySwiftClass.TYPE_MANGLED_NAME = " + MySwiftClass.TYPE_MANGLED_NAME);
            MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(MySwiftClass.TYPE_METADATA.$memorySegment());
            System.out.println("typeMetadata = " + typeMetadata);
-
-           SwiftKit.release(instance);
         } // instance should be deallocated
 
         var num = unsafelyEscaped.makeIntMethod();
