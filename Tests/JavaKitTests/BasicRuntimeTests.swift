@@ -17,8 +17,12 @@ import JavaKitNetwork
 import JavaKitVM
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
-@MainActor
-let jvm = try! JavaVirtualMachine(vmOptions: [])
+/// Handy reference to the JVM abstraction.
+var jvm: JavaVirtualMachine {
+  get throws {
+    try .shared()
+  }
+}
 
 class BasicRuntimeTests: XCTestCase {
   func testJavaObjectManagement() async throws {
@@ -26,7 +30,7 @@ class BasicRuntimeTests: XCTestCase {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
-    let environment = try await jvm.environment()
+    let environment = try jvm.environment()
     let sneakyJavaThis: jobject
     do {
       let object = JavaObject(environment: environment)
@@ -56,7 +60,7 @@ class BasicRuntimeTests: XCTestCase {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
-    let environment = try await jvm.environment()
+    let environment = try jvm.environment()
 
     do {
       _ = try URL("bad url", environment: environment)
@@ -70,14 +74,14 @@ class BasicRuntimeTests: XCTestCase {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
-    let environment = try await jvm.environment()
+    let environment = try jvm.environment()
 
     let urlConnectionClass = try JavaClass<URLConnection>(in: environment)
     XCTAssert(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
   func testClassInstanceLookup() async throws {
-    let environment = try await jvm.environment()
+    let environment = try jvm.environment()
 
     do {
       _ = try JavaClass<Nonexistent>(in: environment)

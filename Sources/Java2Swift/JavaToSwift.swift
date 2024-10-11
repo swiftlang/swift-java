@@ -22,9 +22,6 @@ import JavaKitVM
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-/// Global instance of the Java virtual machine that we keep alive forever.
-var javaVirtualMachine: JavaVirtualMachine? = nil
-
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
 struct JavaToSwift: ParsableCommand {
@@ -68,9 +65,7 @@ struct JavaToSwift: ParsableCommand {
       vmOptions.append(contentsOf: classpath)
     }
 
-    let jvm = try JavaVirtualMachine(vmOptions: vmOptions)
-    javaVirtualMachine = jvm
-
+    let jvm = try JavaVirtualMachine.shared(vmOptions: vmOptions)
     try run(environment: jvm.environment())
   }
 

@@ -23,6 +23,11 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
 
+  /// Adopt an existing JVM pointer.
+  private init(adoptingJVM jvm: JavaVMPointer) {
+    self.jvm = jvm
+  }
+
   /// Initialize a new Java virtual machine instance.
   ///
   /// - Parameters:
@@ -33,7 +38,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   ///     be prefixed by the class-path argument described above.
   ///   - ignoreUnrecognized: Whether the JVM should ignore any VM options it
   ///     does not recognize.
-  public init(
+  private init(
     classPath: [String] = [],
     vmOptions: [String] = [],
     ignoreUnrecognized: Bool = true
@@ -74,8 +79,13 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     vmArgs.options = optionsBuffer.baseAddress
     vmArgs.nOptions = jint(optionsBuffer.count)
 
-    // Create the JVM.
-    if JNI_CreateJavaVM(&jvm, &environment, &vmArgs) != JNI_OK {
+    // Create the JVM instance.
+    let createResult = JNI_CreateJavaVM(&jvm, &environment, &vmArgs)
+    if createResult != JNI_OK {
+      if createResult == JNI_EEXIST {
+        throw VMError.existingVM
+      }
+
       throw VMError.failedToCreateVM
     }
 
@@ -88,7 +98,10 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       fatalError("Failed to destroy the JVM.")
     }
   }
+}
 
+// MARK: Java thread management.
+extension JavaVirtualMachine {
   /// Produce the JNI environment for the active thread, attaching this
   /// thread to the JVM if it isn't already.
   ///
@@ -133,10 +146,92 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   }
 }
 
+// MARK: Shared Java Virtual Machine management.
+extension JavaVirtualMachine {
+  /// The globally shared JavaVirtualMachine instance, behind a lock.
+  ///
+  /// TODO: If the use of the lock itself ends up being slow, we could
+  /// use an atomic here instead because our access pattern is fairly
+  /// simple.
+  private static let sharedJVM: LockedState<JavaVirtualMachine?> = .init(initialState: nil)
+
+  /// Access the shared Java Virtual Machine instance.
+  ///
+  /// If there is no shared Java Virtual Machine, create one with the given
+  /// arguments. Note that this function makes no attempt to try to augment
+  /// an existing virtual machine instance with the options given, so it is
+  /// up to clients to ensure that consistent arguments are provided to all
+  /// calls.
+  ///
+  /// - Parameters:
+  ///   - classPath: The directories, JAR files, and ZIP files in which the JVM
+  ///     should look to find classes. This maps to the VM option
+  ///     `-Djava.class.path=`.
+  ///   - vmOptions: Options that should be passed along to the JVM, which will
+  ///     be prefixed by the class-path argument described above.
+  ///   - ignoreUnrecognized: Whether the JVM should ignore any VM options it
+  ///     does not recognize.
+  public static func shared(
+    classPath: [String] = [],
+    vmOptions: [String] = [],
+    ignoreUnrecognized: Bool = true
+  ) throws -> JavaVirtualMachine {
+    try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
+      // If we already have a JavaVirtualMachine instance, return it.
+      if let existingInstance = sharedJVMPointer {
+        return existingInstance
+      }
+
+      while true {
+        var wasExistingVM: Bool = false
+        while true {
+          // Query the JVM itself to determine whether there is a JVM
+          // instance that we don't yet know about.
+          var jvm: UnsafeMutablePointer<JavaVM?>? = nil
+          var numJVMs: jsize = 0
+          if JNI_GetCreatedJavaVMs(&jvm, 1, &numJVMs) == JNI_OK, numJVMs >= 1 {
+            // Adopt this JVM into a new instance of the JavaVirtualMachine
+            // wrapper.
+            let javaVirtualMachine = JavaVirtualMachine(adoptingJVM: jvm!)
+            sharedJVMPointer = javaVirtualMachine
+            return javaVirtualMachine
+          }
+
+          precondition(
+            !wasExistingVM,
+            "JVM reports that an instance of the JVM was already created, but we didn't see it."
+          )
+
+          // Create a new instance of the JVM.
+          let javaVirtualMachine: JavaVirtualMachine
+          do {
+            javaVirtualMachine = try JavaVirtualMachine(
+              classPath: classPath,
+              vmOptions: vmOptions,
+              ignoreUnrecognized: ignoreUnrecognized
+            )
+          } catch VMError.existingVM {
+            // We raced with code outside of this JavaVirtualMachine instance
+            // that created a VM while we were trying to do the same. Go
+            // through the loop again to pick up the underlying JVM pointer.
+            wasExistingVM = true
+            continue
+          }
+
+          sharedJVMPointer = javaVirtualMachine
+          return javaVirtualMachine
+        }
+      }
+    }
+  }
+}
+
 extension JavaVirtualMachine {
   enum VMError: Error {
     case failedToCreateVM
     case failedToAttachThread
     case failedToDetachThread
+    case failedToQueryVM
+    case existingVM
   }
 }
