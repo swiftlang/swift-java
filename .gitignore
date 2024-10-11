@@ -16,6 +16,9 @@ BuildLogic/out/
 **/build/
 lib/
 
+# Ignore JVM crash logs
+**/*.log
+
 # Ignore package resolved
 Package.resolved
 
