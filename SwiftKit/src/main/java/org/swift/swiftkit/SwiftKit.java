@@ -20,7 +20,6 @@ import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.swift.swiftkit.util.StringUtils.stripPrefix;
@@ -35,6 +34,7 @@ public class SwiftKit {
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
     static {
+        System.load(STDLIB_MACOS_DYLIB_PATH);
         System.loadLibrary(STDLIB_DYLIB_NAME);
         System.loadLibrary("SwiftKitSwift");
     }
@@ -159,8 +159,8 @@ public class SwiftKit {
         }
     }
 
-    public static long retain(SwiftHeapObject object) {
-        return retainCount(object.$memorySegment());
+    public static void retain(SwiftHeapObject object) {
+        retain(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ public class SwiftKit {
         var mh$ = swift_release.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("swift_release_retain", object);
+                traceDowncall("swift_release", object);
             }
             mh$.invokeExact(object);
         } catch (Throwable ex$) {

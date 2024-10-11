@@ -19,6 +19,7 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.ValueLayout;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
+import static java.lang.foreign.ValueLayout.JAVA_LONG;
 
 /**
  * Similar to {@link java.lang.foreign.ValueLayout} however with some Swift specifics.
@@ -31,9 +32,6 @@ public class SwiftValueLayout {
     public static long addressByteSize() {
         return ValueLayout.ADDRESS.byteSize();
     }
-
-    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
-            .withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
 
     /**
      * The value layout for Swift's {@code Int} type, which is a signed type that follows
@@ -51,5 +49,8 @@ public class SwiftValueLayout {
      */
     public static ValueLayout SWIFT_UINT = SWIFT_INT;
 
+
+    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
+            .withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
 
 }

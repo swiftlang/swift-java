@@ -16,10 +16,11 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import org.swift.swiftkit.util.StringUtils;
 
+import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
+import static org.swift.swiftkit.util.StringUtils.hexString;
 
 public abstract class SwiftValueWitnessTable {
 
@@ -162,7 +163,7 @@ public abstract class SwiftValueWitnessTable {
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("flags"));
 
     /**
-     * {@snippet lang=C :
+     * {@snippet lang = C:
      * ///void(*destroy)(T *object, witness_t *self);
      * ///
      * /// Given a valid object of this type, destroy it, leaving it as an
@@ -173,7 +174,7 @@ public abstract class SwiftValueWitnessTable {
      *   Destroy,
      *   VOID_TYPE,
      *   (MUTABLE_VALUE_TYPE, TYPE_TYPE))
-     * }
+     *}
      */
     private static class destroy {
 
@@ -181,7 +182,8 @@ public abstract class SwiftValueWitnessTable {
                 $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
 
         static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-                SwiftValueLayout.SWIFT_POINTER
+                ValueLayout.ADDRESS
+                // SwiftValueLayout.SWIFT_POINTER // should be a "pointer to the self pointer"
 //                , // the object
 //                SwiftValueLayout.SWIFT_POINTER // the type
         );
@@ -189,7 +191,7 @@ public abstract class SwiftValueWitnessTable {
         /**
          * Function pointer for the destroy operation
          */
-        static MemorySegment addr(SwiftAnyType ty, MemorySegment memory) {
+        static MemorySegment addr(SwiftAnyType ty) {
             // Get the value witness table of the type
             final var vwt = SwiftValueWitnessTable.valueWitnessTable(ty.$memorySegment());
 
@@ -198,8 +200,8 @@ public abstract class SwiftValueWitnessTable {
             return MemorySegment.ofAddress(funcAddress);
         }
 
-        static MethodHandle handle(SwiftAnyType ty, MemorySegment memory) {
-            return Linker.nativeLinker().downcallHandle(addr(ty, memory), DESC);
+        static MethodHandle handle(SwiftAnyType ty) {
+            return Linker.nativeLinker().downcallHandle(addr(ty), DESC);
         }
     }
 
@@ -213,14 +215,32 @@ public abstract class SwiftValueWitnessTable {
         System.out.println("Destroy object: " + object);
         System.out.println("Destroy object type: " + type);
 
-        var handle = destroy.handle(type, object);
+        var handle = destroy.handle(type);
         System.out.println("Destroy object handle: " + handle);
 
-        try {
-             handle.invokeExact(object);
-//            handle.invokeExact(object, type.$memorySegment());
+        try (var arena = Arena.ofConfined()) {
+            // we need to make a pointer to the self pointer when calling witness table functions:
+            MemorySegment indirect = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+
+            // Write the address of as the value of the newly created pointer.
+            // We need to type-safely set the pointer value which may be 64 or 32-bit.
+            if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
+                indirect.set(ValueLayout.JAVA_LONG, /*offset=*/0, object.address());
+            } else {
+                indirect.set(ValueLayout.JAVA_INT, /*offset=*/0, (int) object.address());
+            }
+
+            System.out.println("indirect = " + indirect);
+            if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
+                System.out.println("indirect.get(ValueLayout.JAVA_LONG, 0) = " + hexString(indirect.get(ValueLayout.JAVA_LONG, 0)));
+            } else {
+                System.out.println("indirect.get(ValueLayout.JAVA_INT, 0) = " + hexString(indirect.get(ValueLayout.JAVA_INT, 0)));
+            }
+
+//             handle.invokeExact(object); // NOTE: This does "nothing"
+            handle.invokeExact(indirect);
         } catch (Throwable th) {
-            throw new AssertionError("Failed to destroy '"+type+"' at " + object, th);
+            throw new AssertionError("Failed to destroy '" + type + "' at " + object, th);
         }
     }
 
