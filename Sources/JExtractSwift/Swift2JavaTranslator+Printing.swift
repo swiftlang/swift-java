@@ -113,19 +113,23 @@ extension Swift2JavaTranslator {
   public func printImportedClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
-    printImports(&printer)  // TODO print any imports the file may need, it we talk to other Swift modules
+    printImports(&printer)
 
     printClass(&printer, decl) { printer in
-      // Metadata
+      // Ensure we have loaded the library where the Swift type was declared before we attempt to resolve types in Swift
+      printStaticLibraryLoad(&printer)
+
+      // Prepare type metadata, we're going to need these when invoking e.g. initializers so cache them in a static
       printer.print(
         """
         public static final String TYPE_MANGLED_NAME = "\(decl.swiftMangledName ?? "")";
-        static final MemorySegment TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_MANGLED_NAME);
+        public static final SwiftAnyType TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_MANGLED_NAME).get();
+        public final SwiftAnyType $swiftType() {
+            return TYPE_METADATA;
+        }
         """
       )
       printer.print("")
-
-      printStaticLibraryLoad(&printer)
 
       // Initializers
       for initDecl in decl.initializers {
@@ -141,6 +145,9 @@ extension Swift2JavaTranslator {
       for funcDecl in decl.methods {
         printFunctionDowncallMethods(&printer, funcDecl)
       }
+
+      // Helper methods and default implementations
+      printHeapObjectToStringMethod(&printer, decl)
     }
   }
 
@@ -345,7 +352,6 @@ extension Swift2JavaTranslator {
       public static final ValueLayout.OfLong SWIFT_UINT = SWIFT_INT64;
 
       public static final AddressLayout SWIFT_SELF = SWIFT_POINTER;
-      public static final AddressLayout SWIFT_TYPE_METADATA_PTR = SWIFT_POINTER;
       """
     )
   }
@@ -412,7 +418,7 @@ extension Swift2JavaTranslator {
       /**
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        *
-       * \(decl.renderCommentSnippet ?? " *")
+       \(decl.renderCommentSnippet ?? " *")
        */
       public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
         this(/*arena=*/null, \(renderForwardParams(decl, selfVariant: .wrapper)));
@@ -426,7 +432,7 @@ extension Swift2JavaTranslator {
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
        *
-       * \(decl.renderCommentSnippet ?? " *")
+       \(decl.renderCommentSnippet ?? " *")
        */
       public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
         var mh$ = \(descClassIdentifier).HANDLE;
@@ -435,7 +441,7 @@ extension Swift2JavaTranslator {
               traceDowncall(\(renderForwardParams(decl, selfVariant: nil)));
             }
 
-            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA);
+            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA.$memorySegment());
             if (arena != null) {
                 arena.register(this);
             }
@@ -824,7 +830,7 @@ extension Swift2JavaTranslator {
   public func printHeapObjectToStringMethod(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
-      @Override 
+      @Override
       public String toString() {
           return getClass().getSimpleName() + "(" +
                   SwiftKit.nameOfSwiftType($swiftType().$memorySegment(), true) +

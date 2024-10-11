@@ -24,7 +24,7 @@ public final class SwiftAnyType implements SwiftMemoryResource {
             SwiftValueLayout.SWIFT_POINTER
     );
 
-    final MemorySegment memorySegment;
+    private final MemorySegment memorySegment;
 
     public SwiftAnyType(MemorySegment memorySegment) {
         if (memorySegment.byteSize() == 0) {
@@ -40,11 +40,11 @@ public final class SwiftAnyType implements SwiftMemoryResource {
         }
 
         String mangledName = object.$layout().name().get();
-        var tySegment = SwiftKit.getTypeByMangledNameInEnvironment(mangledName);
-//        if (tySegment.isEmpty()) {
-//            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
-//        }
-        this.memorySegment = tySegment; //.get().memorySegment;
+        var type = SwiftKit.getTypeByMangledNameInEnvironment(mangledName);
+        if (type.isEmpty()) {
+            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
+        }
+        this.memorySegment = type.get().memorySegment;
     }
 
 
@@ -68,7 +68,7 @@ public final class SwiftAnyType implements SwiftMemoryResource {
     public String toString() {
         return "AnySwiftType{" +
                 "name=" + SwiftKit.nameOfSwiftType(memorySegment, true) +
-                "memorySegment=" + memorySegment +
+                ", memorySegment=" + memorySegment +
                 '}';
     }
 }

@@ -47,7 +47,7 @@ public interface SwiftArena extends Arena {
 
 final class ConfinedSwiftMemorySession implements SwiftArena {
 
-    final Arena underlying;
+//    final Arena underlying;
     final Thread owner;
     final SwiftResourceList resources;
 
@@ -58,19 +58,21 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
-        underlying = Arena.ofConfined();
+//        underlying = Arena.ofConfined();
         resources = new ConfinedResourceList();
         state = new AtomicInteger(ACTIVE);
     }
 
     @Override
     public MemorySegment allocate(long byteSize, long byteAlignment) {
-        return underlying.allocate(byteSize, byteAlignment);
+//        return underlying.allocate(byteSize, byteAlignment);
+        return null;
     }
 
     @Override
     public MemorySegment.Scope scope() {
-        return underlying.scope();
+        return null;
+//        return underlying.scope();
     }
 
     public void checkValid() throws RuntimeException {
@@ -83,13 +85,13 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     @Override
     public void register(SwiftHeapObject object) {
-        SwiftKit.log.info("Registered " + object.$memorySegment() + " in " + this);
-        this.resources.add(new SwiftHeapObjectCleanup(object.$memorySegment()));
+        System.out.println("Registered " + object.$memorySegment() + " in " + this);
+        this.resources.add(new SwiftHeapObjectCleanup(object));
     }
 
     @Override
     public void register(SwiftValue value) {
-        this.resources.add(new SwiftHeapObjectCleanup(value.$memorySegment()));
+        this.resources.add(new SwiftValueCleanup(value.$memorySegment()));
     }
 
     @Override
@@ -104,10 +106,10 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
 
         // Those the underlying arena
-        this.underlying.close();
+//        this.underlying.close();
 
         // After this method returns normally, the scope must be not alive anymore
-        assert (!this.scope().isAlive());
+//        assert (!this.scope().isAlive());
     }
 
     /**
@@ -142,7 +144,7 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 }
 
 final class UnexpectedRetainCountException extends RuntimeException {
-    public UnexpectedRetainCountException(MemorySegment resource, long retainCount, int expectedRetainCount) {
+    public UnexpectedRetainCountException(Object resource, long retainCount, int expectedRetainCount) {
         super(("Attempting to cleanup managed memory segment %s, but it's retain count was different than [%d] (was %d)! " +
                 "This would result in destroying a swift object that is still retained by other code somewhere."
         ).formatted(resource, expectedRetainCount, retainCount));

@@ -16,6 +16,7 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+import org.swift.swiftkit.util.StringUtils;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
@@ -160,6 +161,20 @@ public abstract class SwiftValueWitnessTable {
     static final long $flags$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("flags"));
 
+    /**
+     * {@snippet lang=C :
+     * ///void(*destroy)(T *object, witness_t *self);
+     * ///
+     * /// Given a valid object of this type, destroy it, leaving it as an
+     * /// invalid object. This is useful when generically destroying
+     * /// an object which has been allocated in-line, such as an array,
+     * /// struct,or tuple element.
+     * FUNCTION_VALUE_WITNESS(destroy,
+     *   Destroy,
+     *   VOID_TYPE,
+     *   (MUTABLE_VALUE_TYPE, TYPE_TYPE))
+     * }
+     */
     private static class destroy {
 
         static final long $offset =
@@ -167,39 +182,45 @@ public abstract class SwiftValueWitnessTable {
 
         static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
                 SwiftValueLayout.SWIFT_POINTER
+//                , // the object
+//                SwiftValueLayout.SWIFT_POINTER // the type
         );
 
         /**
          * Function pointer for the destroy operation
          */
-        static MemorySegment addr(MemorySegment base) {
-            SwiftKit.log.info("$offset = " + $offset);
-            SwiftKit.log.info("base.address() = " + base.address());
-            SwiftKit.log.info("fullTypeMetadata$vwt$offset = " + fullTypeMetadata$vwt$offset);
-            return MemorySegment.ofAddress(base.address() + fullTypeMetadata$vwt$offset + $offset);
+        static MemorySegment addr(SwiftAnyType ty, MemorySegment memory) {
+            // Get the value witness table of the type
+            final var vwt = SwiftValueWitnessTable.valueWitnessTable(ty.$memorySegment());
+
+            // Get the address of the destroy function stored at the offset of the witness table
+            long funcAddress = getSwiftInt(vwt, destroy.$offset);
+            return MemorySegment.ofAddress(funcAddress);
         }
 
-        static MethodHandle handle(MemorySegment base) {
-            return Linker.nativeLinker().downcallHandle(addr(base), DESC);
+        static MethodHandle handle(SwiftAnyType ty, MemorySegment memory) {
+            return Linker.nativeLinker().downcallHandle(addr(ty, memory), DESC);
         }
     }
+
 
     /**
      * Destroy the value/object.
      * <p>
      * This includes deallocating the Swift managed memory for the object.
      */
-    public static void destroy(MemorySegment object) {
-        SwiftKit.log.info("Destroy object: " + object);
+    public static void destroy(SwiftAnyType type, MemorySegment object) {
+        System.out.println("Destroy object: " + object);
+        System.out.println("Destroy object type: " + type);
 
-//        SwiftKit.getTypeByMangledNameInEnvironment()
+        var handle = destroy.handle(type, object);
+        System.out.println("Destroy object handle: " + handle);
 
-        var handle = destroy.handle(object);
-        SwiftKit.log.info("Destroy object handle: " + handle);
         try {
-            handle.invokeExact(object);
+             handle.invokeExact(object);
+//            handle.invokeExact(object, type.$memorySegment());
         } catch (Throwable th) {
-            throw new AssertionError("Failed to destroy heap object: " + object, th);
+            throw new AssertionError("Failed to destroy '"+type+"' at " + object, th);
         }
     }
 
