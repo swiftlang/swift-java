@@ -18,6 +18,7 @@ package com.example.swift;
 import com.example.swift.generated.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
+import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 import org.swift.swiftkit.SwiftValueWitnessTable;
 
@@ -45,23 +46,22 @@ public class HelloJava2Swift {
 //         obj.voidMethod();
 //         obj.takeIntMethod(42);
 
-//        try (var arena = SwiftArena.ofConfined()) {
-            var instance = new MySwiftClass(
-//                    arena,
-                    1111, 2222);
+        MySwiftClass unsafelyEscaped = null;
+        try (var arena = SwiftArena.ofConfined()) {
+            var instance = new MySwiftClass(arena, 1111, 2222);
+            unsafelyEscaped = instance;
+
+            var num = instance.makeIntMethod();
 
             System.out.println("MySwiftClass.TYPE_MANGLED_NAME = " + MySwiftClass.TYPE_MANGLED_NAME);
-            var swiftType = SwiftKit.getTypeByMangledNameInEnvironment(MySwiftClass.TYPE_MANGLED_NAME);
-            System.out.println("swiftType = " + swiftType);
-//           MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(swiftType.$memorySegment());
-//           System.out.println("typeMetadata = " + typeMetadata);
-//
-//
-//            System.out.printf("size of type      = %d%n", SwiftValueWitnessTable.sizeOfSwiftType(swiftType.$memorySegment()));
-//            System.out.printf("stride of type    = %d%n", SwiftValueWitnessTable.strideOfSwiftType(swiftType.$memorySegment()));
-//            System.out.printf("alignment of type = %d%n", SwiftValueWitnessTable.alignmentOfSwiftType(swiftType.$memorySegment()));
-//            System.out.printf("layout of type    = %s%n", SwiftValueWitnessTable.layoutOfSwiftType(swiftType.$memorySegment()).toString());
+           MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(MySwiftClass.TYPE_METADATA.$memorySegment());
+           System.out.println("typeMetadata = " + typeMetadata);
 
-//        } // instance should be deallocated
+           SwiftKit.release(instance);
+        } // instance should be deallocated
+
+        var num = unsafelyEscaped.makeIntMethod();
+
+        System.out.println("DONE.");
     }
 }

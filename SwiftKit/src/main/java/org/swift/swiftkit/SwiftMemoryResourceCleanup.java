@@ -22,7 +22,7 @@ import java.lang.foreign.MemorySegment;
 sealed interface SwiftMemoryResourceCleanup extends Runnable {
 }
 
-record SwiftHeapObjectCleanup(MemorySegment resource) implements SwiftMemoryResourceCleanup {
+record SwiftHeapObjectCleanup(SwiftHeapObject resource) implements SwiftMemoryResourceCleanup {
 
     @Override
     public void run() throws UnexpectedRetainCountException {
@@ -31,9 +31,10 @@ record SwiftHeapObjectCleanup(MemorySegment resource) implements SwiftMemoryReso
             throw new UnexpectedRetainCountException(this.resource, retainedCount, 1);
         }
 
-        SwiftKit.log.info("Destroy heap object: " + this.resource);
+        System.out.println("Cleanup heap object: " + this.resource);
+        var ty = this.resource.$swiftType();
 
-        SwiftValueWitnessTable.destroy(this.resource);
+        SwiftValueWitnessTable.destroy(ty, this.resource.$memorySegment());
     }
 }
 

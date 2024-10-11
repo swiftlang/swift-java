@@ -19,6 +19,7 @@ import org.swift.swiftkit.util.PlatformUtils;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -32,8 +33,6 @@ public class SwiftKit {
 
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
-
-    static final Logger log = Logger.getLogger("SwiftKit");
 
     static {
         System.loadLibrary(STDLIB_DYLIB_NAME);
@@ -272,8 +271,8 @@ public class SwiftKit {
      * @param mangledName The mangled type name (often prefixed with {@code $s}).
      * @return the Swift Type wrapper object
      */
-    public static MemorySegment getTypeByMangledNameInEnvironment(String mangledName) {
-        log.info("Get Any.Type for mangled name: " + mangledName);
+    public static Optional<SwiftAnyType> getTypeByMangledNameInEnvironment(String mangledName) {
+        System.out.println("Get Any.Type for mangled name: " + mangledName);
 
         var mh$ = swift_getTypeByMangledNameInEnvironment.HANDLE;
         try {
@@ -289,19 +288,14 @@ public class SwiftKit {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment stringMemorySegment = arena.allocateFrom(mangledName);
 
-                var ty = (MemorySegment) mh$.invokeExact(stringMemorySegment, mangledName.length(), MemorySegment.NULL, MemorySegment.NULL);
+                var memorySegment = (MemorySegment) mh$.invokeExact(stringMemorySegment, mangledName.length(), MemorySegment.NULL, MemorySegment.NULL);
 
-                return ty;
+                if (memorySegment.address() == 0) {
+                    return Optional.empty();
+                }
 
-//                if (ty.address() == 0) {
-//                    return Optional.empty();
-//                }
-//
-//                var wrapper = new SwiftAnyType(ty);
-//                log.info("Resolved type '"+mangledName+"' as: " + wrapper);
-//
-//                return Optional.of(wrapper);
-
+                var wrapper = new SwiftAnyType(memorySegment);
+                return Optional.of(wrapper);
             }
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
@@ -313,7 +307,7 @@ public class SwiftKit {
      * <p>
      * This function copes with the fact that a Swift.Int might be 32 or 64 bits.
      */
-    public static final long getSwiftInt(MemorySegment memorySegment, long offset) {
+    public static long getSwiftInt(MemorySegment memorySegment, long offset) {
         if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
             return memorySegment.get(ValueLayout.JAVA_LONG, offset);
         } else {
@@ -358,14 +352,18 @@ public class SwiftKit {
      *                     e.g. the result of a {@link swift_getTypeByMangledNameInEnvironment} call
      */
     public static String nameOfSwiftType(MemorySegment typeMetadata, boolean qualified) {
-        try {
-            try (Arena arena = Arena.ofConfined()) {
-                MemorySegment charsAndLength = (MemorySegment) swift_getTypeName.HANDLE.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
-                MemorySegment utf8Chars = charsAndLength.get(SwiftValueLayout.SWIFT_POINTER, 0);
-                String typeName = utf8Chars.getString(0);
-                cFree(utf8Chars);
-                return typeName;
-            }
+        MethodHandle mh = swift_getTypeName.HANDLE;
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment charsAndLength = (MemorySegment) mh.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
+            MemorySegment utf8Chars = charsAndLength.get(SwiftValueLayout.SWIFT_POINTER, 0);
+            String typeName = utf8Chars.getString(0);
+
+            // FIXME: this free is not always correct:
+            //      java(80175,0x17008f000) malloc: *** error for object 0x600000362610: pointer being freed was not allocated
+            // cFree(utf8Chars);
+
+            return typeName;
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }

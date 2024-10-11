@@ -29,4 +29,8 @@ public class StringUtils {
         return mangledName;
     }
 
+    public static String hexString(long number) {
+        return String.format("0x%02x", number);
+    }
+
 }
