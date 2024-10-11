@@ -84,13 +84,8 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     vmArgs.nOptions = jint(optionsBuffer.count)
 
     // Create the JVM instance.
-    let createResult = JNI_CreateJavaVM(&jvm, &environment, &vmArgs)
-    if createResult != JNI_OK {
-      if createResult == JNI_EEXIST {
-        throw VMError.existingVM
-      }
-
-      throw VMError.failedToCreateVM
+    if let createError = VMError(fromJNIError: JNI_CreateJavaVM(&jvm, &environment, &vmArgs)) {
+      throw createError
     }
 
     self.jvm = jvm!
@@ -100,8 +95,8 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   deinit {
     if destroyOnDeinit {
       // Destroy the JVM.
-      if jvm.pointee!.pointee.DestroyJavaVM(jvm) != JNI_OK {
-        fatalError("Failed to destroy the JVM.")
+      if let resultError = VMError(fromJNIError: jvm.pointee!.pointee.DestroyJavaVM(jvm)) {
+        fatalError("Failed to destroy the JVM: \(resultError)")
       }
     }
   }
@@ -136,19 +131,19 @@ extension JavaVirtualMachine {
       attachResult = jvm.pointee!.pointee.AttachCurrentThread(jvm, &environment, nil)
     }
 
-    if attachResult == JNI_OK, let environment {
-      return environment.assumingMemoryBound(to: JNIEnv?.self)
+    // If we failed to attach, report that.
+    if let attachError = VMError(fromJNIError: attachResult) {
+      throw attachError
     }
 
-    throw VMError.failedToAttachThread
+    return environment!.assumingMemoryBound(to: JNIEnv?.self)
   }
 
   /// Detach the current thread from the Java Virtual Machine. All Java
   /// threads waiting for this thread to die are notified.
   public func detachCurrentThread() throws {
-    let result = jvm.pointee!.pointee.DetachCurrentThread(jvm)
-    if result != JNI_OK {
-      throw VMError.failedToDetachThread
+    if let resultError = VMError(fromJNIError: jvm.pointee!.pointee.DetachCurrentThread(jvm)) {
+      throw resultError
     }
   }
 }
@@ -234,11 +229,36 @@ extension JavaVirtualMachine {
 }
 
 extension JavaVirtualMachine {
+  /// Describes the kinds of errors that can occur when interacting with JNI.
   enum VMError: Error {
-    case failedToCreateVM
-    case failedToAttachThread
-    case failedToDetachThread
-    case failedToQueryVM
+    /// There is already a Java Virtual Machine.
     case existingVM
+
+    /// JNI version mismatch error.
+    case jniVersion
+
+    /// Thread is detached from the VM.
+    case threadDetached
+
+    /// Out of memory.
+    case outOfMemory
+
+    /// Invalid arguments.
+    case invalidArguments
+
+    /// Unknown JNI error.
+    case unknown(jint)
+
+    init?(fromJNIError error: jint) {
+      switch error {
+      case JNI_OK: return nil
+      case JNI_EDETACHED: self = .threadDetached
+      case JNI_EVERSION: self = .jniVersion
+      case JNI_ENOMEM: self = .outOfMemory
+      case JNI_EEXIST: self = .existingVM
+      case JNI_EINVAL: self = .invalidArguments
+      default: self = .unknown(error)
+      }
+    }
   }
 }
