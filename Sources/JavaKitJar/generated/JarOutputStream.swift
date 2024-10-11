@@ -61,3 +61,130 @@ public struct JarOutputStream {
   @JavaMethod
   public func wait() throws
 }
+extension JavaClass<JarOutputStream> {
+  @JavaStaticField
+  public var STORED: Int32
+
+  @JavaStaticField
+  public var DEFLATED: Int32
+
+  @JavaStaticField
+  public var LOCSIG: Int64
+
+  @JavaStaticField
+  public var EXTSIG: Int64
+
+  @JavaStaticField
+  public var CENSIG: Int64
+
+  @JavaStaticField
+  public var ENDSIG: Int64
+
+  @JavaStaticField
+  public var LOCHDR: Int32
+
+  @JavaStaticField
+  public var EXTHDR: Int32
+
+  @JavaStaticField
+  public var CENHDR: Int32
+
+  @JavaStaticField
+  public var ENDHDR: Int32
+
+  @JavaStaticField
+  public var LOCVER: Int32
+
+  @JavaStaticField
+  public var LOCFLG: Int32
+
+  @JavaStaticField
+  public var LOCHOW: Int32
+
+  @JavaStaticField
+  public var LOCTIM: Int32
+
+  @JavaStaticField
+  public var LOCCRC: Int32
+
+  @JavaStaticField
+  public var LOCSIZ: Int32
+
+  @JavaStaticField
+  public var LOCLEN: Int32
+
+  @JavaStaticField
+  public var LOCNAM: Int32
+
+  @JavaStaticField
+  public var LOCEXT: Int32
+
+  @JavaStaticField
+  public var EXTCRC: Int32
+
+  @JavaStaticField
+  public var EXTSIZ: Int32
+
+  @JavaStaticField
+  public var EXTLEN: Int32
+
+  @JavaStaticField
+  public var CENVEM: Int32
+
+  @JavaStaticField
+  public var CENVER: Int32
+
+  @JavaStaticField
+  public var CENFLG: Int32
+
+  @JavaStaticField
+  public var CENHOW: Int32
+
+  @JavaStaticField
+  public var CENTIM: Int32
+
+  @JavaStaticField
+  public var CENCRC: Int32
+
+  @JavaStaticField
+  public var CENSIZ: Int32
+
+  @JavaStaticField
+  public var CENLEN: Int32
+
+  @JavaStaticField
+  public var CENNAM: Int32
+
+  @JavaStaticField
+  public var CENEXT: Int32
+
+  @JavaStaticField
+  public var CENCOM: Int32
+
+  @JavaStaticField
+  public var CENDSK: Int32
+
+  @JavaStaticField
+  public var CENATT: Int32
+
+  @JavaStaticField
+  public var CENATX: Int32
+
+  @JavaStaticField
+  public var CENOFF: Int32
+
+  @JavaStaticField
+  public var ENDSUB: Int32
+
+  @JavaStaticField
+  public var ENDTOT: Int32
+
+  @JavaStaticField
+  public var ENDSIZ: Int32
+
+  @JavaStaticField
+  public var ENDOFF: Int32
+
+  @JavaStaticField
+  public var ENDCOM: Int32
+}

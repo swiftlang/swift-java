@@ -122,6 +122,12 @@ public struct Constructor<T: AnyJavaObject> {
   public func wait() throws
 }
 extension JavaClass {
+  @JavaStaticField
+  public var PUBLIC: Int32
+
+  @JavaStaticField
+  public var DECLARED: Int32
+
   @JavaStaticMethod
   public func setAccessible<T: AnyJavaObject>(_ arg0: [AccessibleObject?], _ arg1: Bool) where ObjectType == Constructor<T>
 }
