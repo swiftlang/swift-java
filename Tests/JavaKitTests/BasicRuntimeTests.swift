@@ -20,16 +20,16 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 @MainActor
 let jvm = try! JavaVirtualMachine(vmOptions: [])
 
-@MainActor
 class BasicRuntimeTests: XCTestCase {
   func testJavaObjectManagement() async throws {
     if isLinux {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
+    let environment = try await jvm.environment()
     let sneakyJavaThis: jobject
     do {
-      let object = JavaObject(environment: jvm.environment)
+      let object = JavaObject(environment: environment)
       XCTAssert(object.toString().starts(with: "java.lang.Object"))
 
       // Make sure this object was promoted to a global reference.
@@ -41,10 +41,10 @@ class BasicRuntimeTests: XCTestCase {
 
     // The reference should now be invalid, because we've deleted the
     // global reference.
-    XCTAssertEqual(jvm.environment.pointee?.pointee.GetObjectRefType(jvm.environment, sneakyJavaThis), JNIInvalidRefType)
+    XCTAssertEqual(environment.pointee?.pointee.GetObjectRefType(environment, sneakyJavaThis), JNIInvalidRefType)
 
     // 'super' and 'as' don't require allocating a new holder.
-    let url = try URL("http://swift.org", environment: jvm.environment)
+    let url = try URL("http://swift.org", environment: environment)
     let superURL = url.super
     XCTAssert(url.javaHolder === superURL.javaHolder)
     let urlAgain = superURL.as(URL.self)!
@@ -56,8 +56,10 @@ class BasicRuntimeTests: XCTestCase {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
+    let environment = try await jvm.environment()
+
     do {
-      _ = try URL("bad url", environment: jvm.environment)
+      _ = try URL("bad url", environment: environment)
     } catch {
       XCTAssert(String(describing: error) == "no protocol: bad url")
     }
@@ -68,13 +70,17 @@ class BasicRuntimeTests: XCTestCase {
       throw XCTSkip("Attempts to refcount a null pointer on Linux")
     }
 
-    let urlConnectionClass = try JavaClass<URLConnection>(in: jvm.environment)
+    let environment = try await jvm.environment()
+
+    let urlConnectionClass = try JavaClass<URLConnection>(in: environment)
     XCTAssert(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
   func testClassInstanceLookup() async throws {
+    let environment = try await jvm.environment()
+
     do {
-      _ = try JavaClass<Nonexistent>(in: jvm.environment)
+      _ = try JavaClass<Nonexistent>(in: environment)
     } catch {
       XCTAssertEqual(String(describing: error), "org/swift/javakit/Nonexistent")
     }

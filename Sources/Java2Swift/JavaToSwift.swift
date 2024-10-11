@@ -71,7 +71,7 @@ struct JavaToSwift: ParsableCommand {
     let jvm = try JavaVirtualMachine(vmOptions: vmOptions)
     javaVirtualMachine = jvm
 
-    try run(environment: jvm.environment)
+    try run(environment: jvm.environment())
   }
 
   mutating func run(environment: JNIEnvironment) throws {

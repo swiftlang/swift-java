@@ -17,11 +17,11 @@ import JavaKit
 typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
 
 public final class JavaVirtualMachine: @unchecked Sendable {
+  /// The JNI version that we depend on.
+  static let jniVersion = JNI_VERSION_1_6
+
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
-
-  /// The JNI environment for the JVM.
-  public let environment: JNIEnvironment
 
   /// Initialize a new Java virtual machine instance.
   ///
@@ -41,7 +41,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     var jvm: JavaVMPointer? = nil
     var environment: UnsafeMutableRawPointer? = nil
     var vmArgs = JavaVMInitArgs()
-    vmArgs.version = JNI_VERSION_1_6
+    vmArgs.version = JavaVirtualMachine.jniVersion
     vmArgs.ignoreUnrecognized = jboolean(ignoreUnrecognized ? JNI_TRUE : JNI_FALSE)
 
     // Construct the complete list of VM options.
@@ -80,7 +80,6 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     }
 
     self.jvm = jvm!
-    self.environment = environment!.assumingMemoryBound(to: JNIEnv?.self)
   }
 
   deinit {
@@ -89,10 +88,55 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       fatalError("Failed to destroy the JVM.")
     }
   }
+
+  /// Produce the JNI environment for the active thread, attaching this
+  /// thread to the JVM if it isn't already.
+  ///
+  /// - Parameter
+  ///   - asDaemon: Whether this thread should be treated as a daemon
+  ///     thread in the Java Virtual Machine.
+  public func environment(asDaemon: Bool = false) throws -> JNIEnvironment {
+    // Check whether this thread is already attached. If so, return the
+    // corresponding environment.
+    var environment: UnsafeMutableRawPointer? = nil
+    let getEnvResult = jvm.pointee!.pointee.GetEnv(
+      jvm,
+      &environment,
+      JavaVirtualMachine.jniVersion
+    )
+    if getEnvResult == JNI_OK, let environment {
+      return environment.assumingMemoryBound(to: JNIEnv?.self)
+    }
+
+    // Attach the current thread to the JVM.
+    let attachResult: jint
+    if asDaemon {
+      attachResult = jvm.pointee!.pointee.AttachCurrentThreadAsDaemon(jvm, &environment, nil)
+    } else {
+      attachResult = jvm.pointee!.pointee.AttachCurrentThread(jvm, &environment, nil)
+    }
+
+    if attachResult == JNI_OK, let environment {
+      return environment.assumingMemoryBound(to: JNIEnv?.self)
+    }
+
+    throw VMError.failedToAttachThread
+  }
+
+  /// Detach the current thread from the Java Virtual Machine. All Java
+  /// threads waiting for this thread to die are notified.
+  public func detachCurrentThread() throws {
+    let result = jvm.pointee!.pointee.DetachCurrentThread(jvm)
+    if result != JNI_OK {
+      throw VMError.failedToDetachThread
+    }
+  }
 }
 
 extension JavaVirtualMachine {
   enum VMError: Error {
     case failedToCreateVM
+    case failedToAttachThread
+    case failedToDetachThread
   }
 }
