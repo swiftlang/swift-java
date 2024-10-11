@@ -23,9 +23,13 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
 
+  /// Whether to destroy the JVM on deinit.
+  private let destroyOnDeinit: Bool
+
   /// Adopt an existing JVM pointer.
   private init(adoptingJVM jvm: JavaVMPointer) {
     self.jvm = jvm
+    self.destroyOnDeinit = false
   }
 
   /// Initialize a new Java virtual machine instance.
@@ -90,12 +94,15 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     }
 
     self.jvm = jvm!
+    self.destroyOnDeinit = true
   }
 
   deinit {
-    // Destroy the JVM.
-    if jvm.pointee!.pointee.DestroyJavaVM(jvm) != JNI_OK {
-      fatalError("Failed to destroy the JVM.")
+    if destroyOnDeinit {
+      // Destroy the JVM.
+      if jvm.pointee!.pointee.DestroyJavaVM(jvm) != JNI_OK {
+        fatalError("Failed to destroy the JVM.")
+      }
     }
   }
 }
