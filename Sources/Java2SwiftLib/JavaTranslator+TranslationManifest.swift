@@ -17,7 +17,7 @@ import Foundation
 extension JavaTranslator {
   /// Load the manifest file with the given name to populate the known set of
   /// translated Java classes.
-  func loadTranslationManifest(from url: URL) throws {
+  package func loadTranslationManifest(from url: URL) throws {
     let contents = try Data(contentsOf: url)
     let manifest = try JSONDecoder().decode(TranslationManifest.self, from: contents)
     for (javaClassName, swiftName) in manifest.translatedClasses {
@@ -30,7 +30,7 @@ extension JavaTranslator {
   }
 
   /// Emit the translation manifest for this source file
-  func encodeTranslationManifest() throws -> String {
+  package func encodeTranslationManifest() throws -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     var contents = String(data: try encoder.encode(manifest), encoding: .utf8)!

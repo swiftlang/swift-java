@@ -83,7 +83,7 @@ let package = Package(
 
     .executable(
       name: "Java2Swift",
-      targets: ["Java2Swift"]
+      targets: ["Java2SwiftTool"]
     ),
 
     // ==== jextract-swift (extract Java accessors from Swift interface files)
@@ -230,13 +230,12 @@ let package = Package(
       ]
     ),
 
-    .executableTarget(
-      name: "Java2Swift",
+    .target(
+      name: "Java2SwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaKit",
         "JavaKitJar",
         "JavaKitReflection",
@@ -244,6 +243,26 @@ let package = Package(
         "JavaKitVM",
         "JavaTypes",
       ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .enableUpcomingFeature("BareSlashRegexLiterals")
+      ]
+    ),
+
+    .executableTarget(
+      name: "Java2SwiftTool",
+      dependencies: [
+        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        "JavaKit",
+        "JavaKitJar",
+        "JavaKitNetwork",
+        "JavaKitVM",
+        "Java2SwiftLib",
+      ],
+
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .enableUpcomingFeature("BareSlashRegexLiterals")
@@ -301,7 +320,15 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ]
     ),
-    
+
+    .testTarget(
+      name: "Java2SwiftTests",
+      dependencies: ["Java2SwiftLib"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+
     .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [

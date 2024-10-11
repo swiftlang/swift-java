@@ -14,7 +14,7 @@
 
 /// Manifest describing the a Swift module containing translations of
 /// Java classes into Swift types.
-struct TranslationManifest: Codable {
+package struct TranslationManifest: Codable {
   /// The Swift module name.
   var swiftModule: String
 
