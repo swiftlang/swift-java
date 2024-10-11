@@ -119,6 +119,12 @@ public struct Executable {
   public func wait() throws
 }
 extension JavaClass<Executable> {
+  @JavaStaticField
+  public var PUBLIC: Int32
+
+  @JavaStaticField
+  public var DECLARED: Int32
+
   @JavaStaticMethod
   public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
 }
