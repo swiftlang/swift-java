@@ -821,4 +821,16 @@ extension Swift2JavaTranslator {
     printer.print(");");
   }
 
+  public func printHeapObjectToStringMethod(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print(
+      """
+      @Override 
+      public String toString() {
+          return getClass().getSimpleName() + "(" +
+                  SwiftKit.nameOfSwiftType($swiftType().$memorySegment(), true) +
+                  ")@" + $memorySegment();
+      }
+      """)
+  }
+
 }
