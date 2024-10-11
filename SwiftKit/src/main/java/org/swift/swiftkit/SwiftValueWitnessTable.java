@@ -14,12 +14,14 @@
 
 package org.swift.swiftkit;
 
-import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.StructLayout;
-import java.lang.foreign.ValueLayout;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
+
+import static java.lang.foreign.ValueLayout.JAVA_BYTE;
+import static org.swift.swiftkit.SwiftKit.getSwiftInt;
 
 public abstract class SwiftValueWitnessTable {
+
     /**
      * Value witness table layout.
      */
@@ -40,10 +42,53 @@ public abstract class SwiftValueWitnessTable {
 
 
     /**
+     * Type metadata pointer.
+     */
+    private static final StructLayout fullTypeMetadataLayout = MemoryLayout.structLayout(
+            SwiftValueLayout.SWIFT_POINTER.withName("vwt")
+    ).withName("SwiftFullTypeMetadata");
+
+    /**
+     * Offset for the "vwt" field within the full type metadata.
+     */
+    private static final long fullTypeMetadata$vwt$offset =
+            fullTypeMetadataLayout.byteOffset(
+                    MemoryLayout.PathElement.groupElement("vwt"));
+
+    /**
+     * Given the address of Swift type metadata for a type, return the addres
+     * of the "full" type metadata that can be accessed via fullTypeMetadataLayout.
+     */
+    public static MemorySegment fullTypeMetadata(MemorySegment typeMetadata) {
+        return MemorySegment.ofAddress(typeMetadata.address() - SwiftValueLayout.SWIFT_POINTER.byteSize())
+                .reinterpret(fullTypeMetadataLayout.byteSize());
+    }
+
+    /**
+     * Given the address of Swift type's metadata, return the address that
+     * references the value witness table for the type.
+     */
+    public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
+        return fullTypeMetadata(typeMetadata)
+                .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+    }
+
+
+    /**
      * Offset for the "size" field within the value witness table.
      */
     static final long $size$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("size"));
+
+    /**
+     * Determine the size of a Swift type given its type metadata.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata
+     */
+    public static long sizeOfSwiftType(MemorySegment typeMetadata) {
+        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$size$offset);
+    }
+
 
     /**
      * Offset for the "stride" field within the value witness table.
@@ -52,27 +97,110 @@ public abstract class SwiftValueWitnessTable {
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("stride"));
 
     /**
+     * Determine the stride of a Swift type given its type metadata, which is
+     * how many bytes are between successive elements of this type within an
+     * array.
+     * <p>
+     * It is >= the size.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata
+     */
+    public static long strideOfSwiftType(MemorySegment typeMetadata) {
+        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$stride$offset);
+    }
+
+
+    /**
+     * Determine the alignment of the given Swift type.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata
+     */
+    public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
+        long flags = getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$flags$offset);
+        return (flags & 0xFF) + 1;
+    }
+
+    /**
+     * Produce a layout that describes a Swift type based on its
+     * type metadata. The resulting layout is completely opaque to Java, but
+     * has appropriate size/alignment to model the memory associated with a
+     * Swift type.
+     * <p>
+     * In the future, this layout could be extended to provide more detail,
+     * such as the fields of a Swift struct.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata
+     */
+    public static MemoryLayout layoutOfSwiftType(MemorySegment typeMetadata) {
+        long size = sizeOfSwiftType(typeMetadata);
+        long stride = strideOfSwiftType(typeMetadata);
+        long padding = stride - size;
+
+        // constructing a zero-length paddingLayout is illegal, so we avoid doing so
+        MemoryLayout[] layouts = padding == 0 ?
+                new MemoryLayout[]{
+                        MemoryLayout.sequenceLayout(size, JAVA_BYTE)
+                                .withByteAlignment(alignmentOfSwiftType(typeMetadata))
+                } :
+                new MemoryLayout[]{
+                        MemoryLayout.sequenceLayout(size, JAVA_BYTE)
+                                .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
+                        MemoryLayout.paddingLayout(stride - size)
+                };
+
+        return MemoryLayout.structLayout(
+                layouts
+        ).withName(SwiftKit.nameOfSwiftType(typeMetadata, true));
+    }
+
+
+    /**
      * Offset for the "flags" field within the value witness table.
      */
     static final long $flags$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("flags"));
 
-    /**
-     * Type metadata pointer.
-     */
-    static final StructLayout fullTypeMetadataLayout = MemoryLayout.structLayout(
-            SwiftValueLayout.SWIFT_POINTER.withName("vwt")
-    ).withName("SwiftFullTypeMetadata");
-
-    /**
-     * Offset for the "vwt" field within the full type metadata.
-     */
-    static final long fullTypeMetadata$vwt$offset =
-            fullTypeMetadataLayout.byteOffset(MemoryLayout.PathElement.groupElement("vwt"));
-
     private static class destroy {
+
         static final long $offset =
                 $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
+
+        static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+                SwiftValueLayout.SWIFT_POINTER
+        );
+
+        /**
+         * Function pointer for the destroy operation
+         */
+        static MemorySegment addr(MemorySegment base) {
+            SwiftKit.log.info("$offset = " + $offset);
+            SwiftKit.log.info("base.address() = " + base.address());
+            SwiftKit.log.info("fullTypeMetadata$vwt$offset = " + fullTypeMetadata$vwt$offset);
+            return MemorySegment.ofAddress(base.address() + fullTypeMetadata$vwt$offset + $offset);
+        }
+
+        static MethodHandle handle(MemorySegment base) {
+            return Linker.nativeLinker().downcallHandle(addr(base), DESC);
+        }
+    }
+
+    /**
+     * Destroy the value/object.
+     * <p>
+     * This includes deallocating the Swift managed memory for the object.
+     */
+    public static void destroy(MemorySegment object) {
+        SwiftKit.log.info("Destroy object: " + object);
+
+//        SwiftKit.getTypeByMangledNameInEnvironment()
+
+        var handle = destroy.handle(object);
+        SwiftKit.log.info("Destroy object handle: " + handle);
+        try {
+            handle.invokeExact(object);
+        } catch (Throwable th) {
+            throw new AssertionError("Failed to destroy heap object: " + object, th);
+        }
     }
 
 }
