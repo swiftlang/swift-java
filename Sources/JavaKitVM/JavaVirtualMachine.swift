@@ -226,6 +226,15 @@ extension JavaVirtualMachine {
       }
     }
   }
+
+  /// "Forget" the shared JavaVirtualMachine instance.
+  ///
+  /// This will allow the shared JavaVirtualMachine instance to be deallocated.
+  public static func forgetShared() {
+    sharedJVM.withLock { sharedJVMPointer in
+      sharedJVMPointer = nil
+    }
+  }
 }
 
 extension JavaVirtualMachine {
