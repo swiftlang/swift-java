@@ -33,11 +33,11 @@ services:
 
   test-java:
     <<: *common
-    command: /bin/bash -xcl "uname -a && swift -version && java -version && make jextract-run && ./gradlew test --debug"
+    command: /bin/bash -xcl "uname -a && swift -version && java -version && make jextract-generate && ./gradlew test --debug"
 
   test:
     <<: *common
-    command: /bin/bash -xcl "uname -a && swift -version && java -version && make jextract-run && swift $${SWIFT_TEST_VERB-test} $${WARN_AS_ERROR_ARG-} $${SANITIZER_ARG-} $${IMPORT_CHECK_ARG-} && ./gradlew test --debug"
+    command: /bin/bash -xcl "uname -a && swift -version && java -version && make jextract-generate && swift $${SWIFT_TEST_VERB-test} $${WARN_AS_ERROR_ARG-} $${SANITIZER_ARG-} $${IMPORT_CHECK_ARG-} && ./gradlew test --debug"
 
   # util
 
