@@ -67,7 +67,8 @@ This project contains quite a few builds, Swift, Java, and depends on some custo
 Easiest way to get going is to:
 
 ```bash
-make
+make javakit-run # Run the JavaKit example of Swift code using Java libraries
+make jextract-run # Run the jextract-swift example of Java code using Swift libraries
 swift test # test all Swift code, e.g. jextract-swift
 ./gradlew test # test all Java code, including integration tests that actually use jextract-ed sources
 ```

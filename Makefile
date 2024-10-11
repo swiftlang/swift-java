@@ -53,12 +53,17 @@ endif
 
 SAMPLES_DIR := "Samples"
 
-all: generate-all
+all:
+	@echo "Welcome to swift-java! There are several makefile targets to choose from:"
+	@echo "  javakit-run: Run the JavaKit example program that uses Java libraries from Swift."
+	@echo "  javakit-generate: Regenerate the Swift wrapper code for the various JavaKit libraries from Java. This only has to be done when changing the Java2Swift tool."
+	@echo "  jextract-run: Run the Java example code that uses the wrapped Swift library. NOTE: this requires development toolchain described in the README."
+	@echo "  jextract-generate: Generate Java wrapper code for the example Swift library allowing Swift to be called from Java. NOTE: this requires development toolchain described in the README."
 
 $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
 
-run: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libExampleSwiftLibrary.$(LIB_SUFFIX)
+javakit-run: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libExampleSwiftLibrary.$(LIB_SUFFIX)
 	./gradlew Samples:JavaKitSampleApp:run
 
 Java2Swift: $(BUILD_DIR)/debug/Java2Swift
@@ -79,8 +84,8 @@ generate-JavaKitNetwork: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitNetwork/generated
 	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitNetwork --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitNetwork/generated java.net.URI java.net.URL java.net.URLClassLoader
 
-generate-all: generate-JavaKit generate-JavaKitReflection generate-JavaKitJar generate-JavaKitNetwork \
-			  jextract-swift
+javakit-generate: generate-JavaKit generate-JavaKitReflection generate-JavaKitJar generate-JavaKitNetwork
+
 clean:
 	rm -rf .build; \
 	rm -rf Samples/SwiftKitExampleApp/src/generated/java/*
@@ -112,11 +117,11 @@ jextract-swift: generate-JExtract-interface-files
 	swift build
 
 generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX)
-	echo "Generate .swiftinterface files..."
+	@echo "Generate .swiftinterface files..."
 	@$(call make_swiftinterface, "ExampleSwiftLibrary", "MySwiftLibrary")
 	@$(call make_swiftinterface, "SwiftKitSwift", "SwiftKit")
 
-jextract-run: jextract-swift generate-JExtract-interface-files
+jextract-generate: jextract-swift generate-JExtract-interface-files
 	swift run jextract-swift  \
 		--package-name com.example.swift.generated \
 		--swift-module ExampleSwiftLibrary \
@@ -129,5 +134,5 @@ jextract-run: jextract-swift generate-JExtract-interface-files
 		$(BUILD_DIR)/jextract/SwiftKitSwift/SwiftKit.swiftinterface
 
 
-jextract-run-java: jextract-swift generate-JExtract-interface-files
+jextract-run: jextract-generate generate-JExtract-interface-files
 	./gradlew Samples:SwiftKitSampleApp:run
