@@ -87,6 +87,12 @@ extension JavaClassMacro: MemberMacro {
       }
       """
 
+    let nonOptionalAs: DeclSyntax = """
+      public func `as`<OtherClass: AnyJavaObject>(_: OtherClass.Type) -> OtherClass {
+          return OtherClass(javaHolder: javaHolder)
+      }
+      """
+
     return [
       fullJavaClassNameMember,
       superclassTypealias,
@@ -94,6 +100,7 @@ extension JavaClassMacro: MemberMacro {
       javaThisMember,
       javaEnvironmentMember,
       initMember,
+      nonOptionalAs,
     ]
   }
 }

@@ -78,6 +78,10 @@ class JavaKitMacroTests: XCTestCase {
             public init(javaHolder: JavaObjectHolder) {
                 self.javaHolder = javaHolder
             }
+
+            public func `as`<OtherClass: AnyJavaObject>(_: OtherClass.Type) -> OtherClass {
+                return OtherClass(javaHolder: javaHolder)
+            }
         }
       """,
       macros: Self.javaKitMacros
