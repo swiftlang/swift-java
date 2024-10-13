@@ -79,6 +79,7 @@ class JavaKitMacroTests: XCTestCase {
                 self.javaHolder = javaHolder
             }
 
+            /// It's not checking anything.
             public func `as`<OtherClass: AnyJavaObject>(_: OtherClass.Type) -> OtherClass {
                 return OtherClass(javaHolder: javaHolder)
             }

@@ -88,6 +88,7 @@ extension JavaClassMacro: MemberMacro {
       """
 
     let nonOptionalAs: DeclSyntax = """
+      /// It's not checking anything.
       public func `as`<OtherClass: AnyJavaObject>(_: OtherClass.Type) -> OtherClass {
           return OtherClass(javaHolder: javaHolder)
       }
