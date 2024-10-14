@@ -116,11 +116,6 @@ let package = Package(
     // ==== Examples
 
     .library(
-      name: "JavaKitExample",
-      type: .dynamic,
-      targets: ["JavaKitExample"]
-    ),
-    .library(
       name: "ExampleSwiftLibrary",
       type: .dynamic,
       targets: ["ExampleSwiftLibrary"]
@@ -209,18 +204,6 @@ let package = Package(
     .plugin(
         name: "JavaCompilerPlugin",
         capability: .buildTool()
-    ),
-
-    .target(
-      name: "JavaKitExample",
-      dependencies: ["JavaKit"],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-      ],
-      plugins: [
-        .plugin(name: "JavaCompilerPlugin")
-      ]
     ),
 
     .target(
