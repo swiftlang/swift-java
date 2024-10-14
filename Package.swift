@@ -86,6 +86,14 @@ let package = Package(
       targets: ["Java2SwiftTool"]
     ),
 
+    // ==== Plugin for building Java code
+    .plugin(
+        name: "JavaCompilerPlugin",
+        targets: [
+            "JavaCompilerPlugin"
+        ]
+    ),
+
     // ==== jextract-swift (extract Java accessors from Swift interface files)
 
     .executable(
@@ -197,14 +205,24 @@ let package = Package(
         .linkedLibrary("jvm"),
       ]
     ),
+
+    .plugin(
+        name: "JavaCompilerPlugin",
+        capability: .buildTool()
+    ),
+
     .target(
       name: "JavaKitExample",
       dependencies: ["JavaKit"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      plugins: [
+        .plugin(name: "JavaCompilerPlugin")
       ]
     ),
+
     .target(
       name: "ExampleSwiftLibrary",
       dependencies: [],
