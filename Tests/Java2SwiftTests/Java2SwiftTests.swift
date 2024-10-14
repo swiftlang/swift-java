@@ -24,6 +24,11 @@ var jvm: JavaVirtualMachine {
   }
 }
 
+@JavaClass("java.time.Month")
+public struct JavaMonth {
+
+}
+
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
     try assertTranslatedClass(
@@ -45,6 +50,20 @@ class Java2SwiftTests: XCTestCase {
         """
       ]
     )
+  }
+
+  func testEnum() async throws {
+    try assertTranslatedClass(
+      JavaMonth.self,
+      swiftTypeName: "Month",
+      expectedChunks: [
+        "import JavaKit",
+        "public static let APRIL = try! JavaClass<Self>(environment: JavaVirtualMachine.environment()).APRIL",
+        """
+          @JavaStaticField
+          public var APRIL: Month
+        """
+      ])
   }
 
   func testGenericCollections() throws {
