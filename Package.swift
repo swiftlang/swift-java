@@ -57,6 +57,11 @@ let package = Package(
     ),
 
     .library(
+      name: "JavaRuntime",
+      targets: [ "JavaRuntime"]
+    ),
+
+    .library(
       name: "JavaKitJar",
       targets: ["JavaKitReflection"]
     ),
@@ -83,7 +88,7 @@ let package = Package(
 
     .executable(
       name: "Java2Swift",
-      targets: ["Java2SwiftTool"]
+      targets: ["Java2Swift"]
     ),
 
     // ==== Plugin for building Java code
@@ -91,6 +96,14 @@ let package = Package(
         name: "JavaCompilerPlugin",
         targets: [
             "JavaCompilerPlugin"
+        ]
+    ),
+
+    // ==== Plugin for wrapping Java classes in Swift
+    .plugin(
+        name: "Java2SwiftPlugin",
+        targets: [
+            "Java2SwiftPlugin"
         ]
     ),
 
@@ -206,6 +219,14 @@ let package = Package(
         capability: .buildTool()
     ),
 
+    .plugin(
+        name: "Java2SwiftPlugin",
+        capability: .buildTool(),
+        dependencies: [
+          "Java2Swift"
+        ]
+    ),
+
     .target(
       name: "ExampleSwiftLibrary",
       dependencies: [],
@@ -251,7 +272,7 @@ let package = Package(
     ),
 
     .executableTarget(
-      name: "Java2SwiftTool",
+      name: "Java2Swift",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),

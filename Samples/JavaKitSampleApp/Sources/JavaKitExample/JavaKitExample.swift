@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaRuntime
 
 enum SwiftWrappedError: Error {
   case message(String)
@@ -117,4 +116,9 @@ struct HelloSubclass {
 
   @JavaMethod
   init(greeting: String, environment: JNIEnvironment)
+}
+
+
+func returnNilVector() -> Vector<JavaClass<HelloSwift>>? {
+  nil
 }
