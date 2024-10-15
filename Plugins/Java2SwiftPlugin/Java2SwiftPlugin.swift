@@ -15,6 +15,8 @@
 import Foundation
 import PackagePlugin
 
+fileprivate let Java2SwiftConfigFileName = "Java2Swift.config"
+
 @main
 struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
@@ -24,8 +26,8 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
 
-    // Read a configuration file JavaKit.config from the target that provides
-    // information needed to call Java2Swift.
+    // The name of the configuration file JavaKit.config from the target for
+    // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
       .appending(path: "Java2Swift.config")
     let configData = try Data(contentsOf: configFile)
@@ -33,33 +35,30 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
 
     /// Find the manifest files from other Java2Swift executions in any targets
     /// this target depends on.
-    var manifestFiles: [URL] = []
-    func searchForManifestFiles(in target: any Target) {
+    var dependentConfigFiles: [(String, URL)] = []
+    func searchForConfigFiles(in target: any Target) {
       let dependencyURL = URL(filePath: target.directory.string)
 
-      // Look for a checked-in manifest file.
-      let generatedManifestURL = dependencyURL
-        .appending(path: "generated")
-        .appending(path: "\(target.name).swift2java")
-      let generatedManifestString = generatedManifestURL
+      // Look for a config file within this target.
+      let dependencyConfigURL = dependencyURL
+        .appending(path: Java2SwiftConfigFileName)
+      let dependencyConfigString = dependencyConfigURL
         .path(percentEncoded: false)
 
-      if FileManager.default.fileExists(atPath: generatedManifestString) {
-        manifestFiles.append(generatedManifestURL)
+      if FileManager.default.fileExists(atPath: dependencyConfigString) {
+        dependentConfigFiles.append((target.name, dependencyConfigURL))
       }
-
-      // TODO: Look for a manifest file that was built by the plugin itself.
     }
 
     // Process direct dependencies of this target.
     for dependency in target.dependencies {
       switch dependency {
       case .target(let target):
-        searchForManifestFiles(in: target)
+        searchForConfigFiles(in: target)
 
       case .product(let product):
         for target in product.targets {
-          searchForManifestFiles(in: target)
+          searchForConfigFiles(in: target)
         }
 
       @unknown default:
@@ -69,16 +68,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
 
     // Process indirect target dependencies.
     for dependency in target.recursiveTargetDependencies {
-      searchForManifestFiles(in: dependency)
-    }
-
-    /// Determine the list of Java classes that will be translated into Swift,
-    /// along with the names of the corresponding Swift types. This will be
-    /// passed along to the Java2Swift tool.
-    let classes = config.classes.map { (javaClassName, swiftName) in
-      (javaClassName, swiftName ?? javaClassName.defaultSwiftNameForJavaClass)
-    }.sorted { (lhs, rhs) in
-      lhs.0 < rhs.0
+      searchForConfigFiles(in: dependency)
     }
 
     let outputDirectory = context.pluginWorkDirectoryURL
@@ -88,19 +78,18 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
       "--module-name", sourceModule.name,
       "--output-directory", outputDirectory.path(percentEncoded: false),
     ]
-    if let classPath = config.classPath {
-      arguments += ["-cp", classPath]
+    arguments += dependentConfigFiles.flatMap { moduleAndConfigFile in
+      let (moduleName, configFile) = moduleAndConfigFile
+      return [
+        "--depends-on",
+        "\(moduleName)=\(configFile.path(percentEncoded: false))"
+      ]
     }
-    arguments += manifestFiles.flatMap { manifestFile in
-      [ "--manifests", manifestFile.path(percentEncoded: false) ]
-    }
-    arguments += classes.map { (javaClassName, swiftName) in
-      "\(javaClassName)=\(swiftName)"
-    }
+    arguments.append(configFile.path(percentEncoded: false))
 
     /// Determine the set of Swift files that will be emitted by the Java2Swift
     /// tool.
-    let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
+    let outputSwiftFiles = config.classes.map { (javaClassName, swiftName) in
       outputDirectory.appending(path: "\(swiftName).swift")
     } + [
       outputDirectory.appending(path: "\(sourceModule.name).swift2java")
@@ -108,7 +97,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
 
     return [
       .buildCommand(
-        displayName: "Wrapping \(classes.count) Java classes target \(sourceModule.name) in Swift",
+        displayName: "Wrapping \(config.classes.count) Java classes target \(sourceModule.name) in Swift",
         executable: try context.tool(named: "Java2Swift").url,
         arguments: arguments,
         inputFiles: [ configFile ],
@@ -138,17 +127,4 @@ func findJavaHome() -> String {
   }
 
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
-}
-
-extension String {
-  /// For a String that's of the form java.util.Vector, return the "Vector"
-  /// part.
-  fileprivate var defaultSwiftNameForJavaClass: String {
-    if let dotLoc = lastIndex(of: ".") {
-      let afterDot = index(after: dotLoc)
-      return String(self[afterDot...])
-    }
-
-    return self
-  }
 }

@@ -70,19 +70,19 @@ Java2Swift: $(BUILD_DIR)/debug/Java2Swift
 
 generate-JavaKit: Java2Swift
 	mkdir -p Sources/JavaKit/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKit -o Sources/JavaKit/generated java.lang.Object=JavaObject java.util.Enumeration java.lang.Throwable java.lang.Exception java.lang.RuntimeException java.lang.Error=JavaError
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKit -o Sources/JavaKit/generated Sources/JavaKit/Java2Swift.config
 
 generate-JavaKitReflection: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitReflection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitReflection/generated java.lang.reflect.Method java.lang.reflect.Type java.lang.reflect.Constructor java.lang.reflect.Parameter java.lang.reflect.ParameterizedType java.lang.reflect.Executable java.lang.reflect.AnnotatedType java.lang.reflect.TypeVariable java.lang.reflect.WildcardType java.lang.reflect.GenericArrayType java.lang.reflect.AccessibleObject java.lang.annotation.Annotation java.lang.reflect.GenericDeclaration java.lang.reflect.Field
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitReflection/generated Sources/JavaKitReflection/Java2Swift.config
 
 generate-JavaKitJar: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitJar/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitJar --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitJar/generated java.util.jar.Attributes java.util.jar.JarEntry	java.util.jar.JarFile java.util.jar.JarInputStream java.util.jar.JarOutputStream java.util.jar.Manifest
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitJar --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/Java2Swift.config
 
 generate-JavaKitNetwork: Java2Swift generate-JavaKit
 	mkdir -p Sources/JavaKitNetwork/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitNetwork --manifests Sources/JavaKit/generated/JavaKit.swift2java -o Sources/JavaKitNetwork/generated java.net.URI java.net.URL java.net.URLClassLoader
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitNetwork --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitNetwork/generated Sources/JavaKitNetwork/Java2Swift.config
 
 javakit-generate: generate-JavaKit generate-JavaKitReflection generate-JavaKitJar generate-JavaKitNetwork
 
