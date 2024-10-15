@@ -108,4 +108,4 @@ jobs:
         run: "swift test"
       - name: Build (Swift) Sample Apps
         run: |
-          find Samples/ -name Package.swift -depth 2 -exec swift build --package-path $(dirname {}) \;;
+          find Samples/ -name Package.swift -maxdepth 2 -exec swift build --package-path $(dirname {}) \;;
