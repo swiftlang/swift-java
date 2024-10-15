@@ -20,7 +20,6 @@ struct Configuration: Codable {
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
-  /// the corresponding Swift names (e.g., JavaVector). If the value is `nil`,
-  /// then the Java class name will be used for the Swift name, too.
-  var classes: [String: String?] = [:]
+  /// the corresponding Swift names (e.g., JavaVector).
+  var classes: [String: String] = [:]
 }

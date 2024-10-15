@@ -75,9 +75,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     /// Determine the list of Java classes that will be translated into Swift,
     /// along with the names of the corresponding Swift types. This will be
     /// passed along to the Java2Swift tool.
-    let classes = config.classes.map { (javaClassName, swiftName) in
-      (javaClassName, swiftName ?? javaClassName.defaultSwiftNameForJavaClass)
-    }.sorted { (lhs, rhs) in
+    let classes = config.classes.sorted { (lhs, rhs) in
       lhs.0 < rhs.0
     }
 
@@ -138,17 +136,4 @@ func findJavaHome() -> String {
   }
 
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
-}
-
-extension String {
-  /// For a String that's of the form java.util.Vector, return the "Vector"
-  /// part.
-  fileprivate var defaultSwiftNameForJavaClass: String {
-    if let dotLoc = lastIndex(of: ".") {
-      let afterDot = index(after: dotLoc)
-      return String(self[afterDot...])
-    }
-
-    return self
-  }
 }
