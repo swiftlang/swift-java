@@ -58,7 +58,14 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Month",
       expectedChunks: [
         "import JavaKit",
-        "public static let APRIL = try! JavaClass<Self>(in: JavaVirtualMachine.shared().environment()).APRIL!",
+        "enum MonthCases: Equatable",
+        "case APRIL",
+        "public var enumValue: MonthCases?",
+        """
+            } else if self.equals(self.javaClass.APRIL?.as(JavaObject.self)) {
+              return MonthCases.APRIL
+            }
+        """,
         """
           @JavaStaticField
           public var APRIL: Month?
