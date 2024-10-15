@@ -58,7 +58,7 @@ all:
 	@echo "  javakit-run: Run the JavaKit example program that uses Java libraries from Swift."
 	@echo "  javakit-generate: Regenerate the Swift wrapper code for the various JavaKit libraries from Java. This only has to be done when changing the Java2Swift tool."
 	@echo "  jextract-run: Run the Java example code that uses the wrapped Swift library. NOTE: this requires development toolchain described in the README."
-	@echo "  jextract-generate: Generate Java wrapper code for the example Swift library allowing Swift to be called from Java. NOTE: this requires development toolchain described ein the README."
+	@echo "  jextract-generate: Generate Java wrapper code for the example Swift library allowing Swift to be called from Java. NOTE: this requires development toolchain described in the README."
 
 $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
