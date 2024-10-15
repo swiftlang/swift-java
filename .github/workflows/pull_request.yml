@@ -2,7 +2,7 @@ name: pull_request
 
 on:
   pull_request:
-    types: [ opened, reopened, synchronize ]
+    types: [opened, reopened, synchronize]
 
 jobs:
   soundness:
@@ -12,9 +12,6 @@ jobs:
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
       format_check_enabled: false
       license_header_check_project_name: Swift.org
-      # FIXME: we're about to remove _Subprocess immediately anyway, so rather than fixing it one by one remove this adjusted list and use the default again ASAP
-      # swift-subprocess includes the word "kill" because SIGKILL signal handling so we allow it
-      unacceptable_language_check_word_list: "blacklist whitelist slave master sane sanity insane insanity killed killing hang hung hanged hanging" #ignore-unacceptable-language
 
   test-java:
     name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -22,9 +19,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        swift_version: [ 'nightly-main' ]
-        os_version: [ 'jammy' ]
-        jdk_vendor: [ 'Corretto' ]
+        swift_version: ['nightly-main']
+        os_version: ['jammy']
+        jdk_vendor: ['Corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -68,9 +65,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: [ 'nightly-main' ]
-        os_version: [ 'jammy' ]
-        jdk_vendor: [ 'Corretto' ]
+        swift_version: ['nightly-main']
+        os_version: ['jammy']
+        jdk_vendor: ['Corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:

@@ -44,4 +44,3 @@ services:
   shell:
     <<: *common
     entrypoint: /bin/bash
-
