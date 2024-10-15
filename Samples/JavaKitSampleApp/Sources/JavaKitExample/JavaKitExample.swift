@@ -119,6 +119,8 @@ struct HelloSubclass {
 }
 
 
-func returnNilVector() -> ArrayList<JavaClass<HelloSwift>>? {
-  nil
+func removeLast(arrayList: ArrayList<JavaClass<HelloSwift>>) {
+  if let lastObject = arrayList.getLast() {
+    _ = arrayList.remove(lastObject)
+  }
 }
