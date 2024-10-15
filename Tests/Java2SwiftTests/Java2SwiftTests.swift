@@ -24,9 +24,9 @@ var jvm: JavaVirtualMachine {
 }
 
 @JavaClass("java.time.Month")
-public struct JavaMonth {
-
-}
+public struct JavaMonth {}
+@JavaClass("java.lang.ProcessBuilder")
+struct ProcessBuilder {}
 
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
@@ -114,6 +114,18 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testNestedSubclasses() async throws {
+    try assertTranslatedClass(
+      ProcessBuilder.self,
+      swiftTypeName: "ProcessBuilder",
+      expectedChunks: [
+        "import JavaKit",
+        ""
+      ]
+    )
+  }
+
 }
 
 @JavaClass("java.util.ArrayList")
@@ -145,6 +157,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   translator.translatedClasses = translatedClasses
   translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil, true)
 
+
   translator.startNewFile()
   let translatedDecls = translator.translateClass(
     try JavaClass<JavaObject>(
@@ -160,6 +173,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
     """
 
   for expectedChunk in expectedChunks {
+    print(swiftFileText)
     if swiftFileText.contains(expectedChunk) {
       continue
     }
