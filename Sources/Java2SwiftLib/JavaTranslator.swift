@@ -241,14 +241,14 @@ extension JavaTranslator {
             staticFields.append(field)
 
             if field.isEnumConstant() {
-              return "public static let \(raw: field.getName()) = try! JavaClass<Self>(environment: JavaVirtualMachine.environment()).\(raw: field.getName())"
+              return "public static let \(raw: field.getName()) = try! JavaClass<Self>(in: JavaVirtualMachine.shared().environment()).\(raw: field.getName())!"
             } else {
               return nil
             }
           }
           
           do {
-            return try translateField(field, isOptional: true)
+            return try translateField(field)
           } catch {
             logUntranslated("Unable to translate '\(fullName)' static field '\(field.getName())': \(error)")
             return nil
@@ -353,7 +353,7 @@ extension JavaTranslator {
         // Translate each static field.
         do {
           // Enum constants are guaranteed to not be optional
-          return try translateField(field, isOptional: !field.isEnumConstant())
+          return try translateField(field)
         } catch {
           logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
           return nil
@@ -443,8 +443,8 @@ extension JavaTranslator {
       """
   }
     
-  package func translateField(_ javaField: Field, isOptional: Bool) throws -> DeclSyntax {
-    let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: isOptional)
+  package func translateField(_ javaField: Field) throws -> DeclSyntax {
+    let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
     return """

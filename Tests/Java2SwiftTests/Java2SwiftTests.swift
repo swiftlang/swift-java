@@ -58,10 +58,10 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Month",
       expectedChunks: [
         "import JavaKit",
-        "public static let APRIL = try! JavaClass<Self>(environment: JavaVirtualMachine.environment()).APRIL",
+        "public static let APRIL = try! JavaClass<Self>(in: JavaVirtualMachine.shared().environment()).APRIL!",
         """
           @JavaStaticField
-          public var APRIL: Month
+          public var APRIL: Month?
         """
       ])
   }
@@ -145,6 +145,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
     """
 
   for expectedChunk in expectedChunks {
+    print(swiftFileText)
     if swiftFileText.contains(expectedChunk) {
       continue
     }
