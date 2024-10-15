@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaRuntime
 
 enum SwiftWrappedError: Error {
   case message(String)
@@ -117,4 +116,11 @@ struct HelloSubclass {
 
   @JavaMethod
   init(greeting: String, environment: JNIEnvironment)
+}
+
+
+func removeLast(arrayList: ArrayList<JavaClass<HelloSwift>>) {
+  if let lastObject = arrayList.getLast() {
+    _ = arrayList.remove(lastObject)
+  }
 }

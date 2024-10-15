@@ -30,12 +30,14 @@ let package = Package(
     .target(
       name: "JavaKitExample",
       dependencies: [
-        .product(name: "JavaKit", package: "swift-java")
+        .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaKitJar", package: "swift-java"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ],
       plugins: [
+        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
         .plugin(name: "JavaCompilerPlugin", package: "swift-java")
       ]
     ),
