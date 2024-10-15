@@ -145,7 +145,6 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
     """
 
   for expectedChunk in expectedChunks {
-    print(swiftFileText)
     if swiftFileText.contains(expectedChunk) {
       continue
     }
