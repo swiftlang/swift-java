@@ -119,6 +119,6 @@ struct HelloSubclass {
 }
 
 
-func returnNilVector() -> Vector<JavaClass<HelloSwift>>? {
+func returnNilVector() -> ArrayList<JavaClass<HelloSwift>>? {
   nil
 }

@@ -58,7 +58,7 @@ let package = Package(
 
     .library(
       name: "JavaRuntime",
-      targets: [ "JavaRuntime"]
+      targets: ["JavaRuntime"]
     ),
 
     .library(

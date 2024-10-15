@@ -5,6 +5,7 @@
 .swift-format
 .github/*
 *.md
+**/*.config
 CONTRIBUTORS.txt
 LICENSE.txt
 NOTICE.txt
