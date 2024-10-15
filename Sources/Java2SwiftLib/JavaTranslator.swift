@@ -31,11 +31,6 @@ package class JavaTranslator {
   /// A mapping from the canonical name of Java classes to the corresponding
   /// Swift type name, its Swift module, and whether we need to be working
   /// with optionals.
-  ///
-  /// FIXME: This is currently prepopulated with known translated classes,
-  /// which is absolutely not scalable. We need a better way to be able to
-  /// discover already-translated Java classes to get their corresponding
-  /// Swift types and modules.
   package var translatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
     defaultTranslatedClasses
 
@@ -43,9 +38,6 @@ package class JavaTranslator {
   /// code compile. Use `getImportDecls()` to format this into a list of
   /// import declarations.
   package var importedSwiftModules: Set<String> = JavaTranslator.defaultImportedSwiftModules
-
-  /// The manifest for the module being translated.
-  package var manifest: TranslationManifest
 
   package init(
     swiftModuleName: String,
@@ -55,7 +47,6 @@ package class JavaTranslator {
     self.swiftModuleName = swiftModuleName
     self.environment = environment
     self.format = format
-    self.manifest = TranslationManifest(swiftModule: swiftModuleName)
   }
 
   /// Clear out any per-file state when we want to start a new file.
@@ -82,7 +73,7 @@ extension JavaTranslator {
 
   /// The default set of translated classes that do not come from JavaKit
   /// itself. This should only be used to refer to types that are built-in to
-  /// JavaKit and therefore aren't captured in any manifest.
+  /// JavaKit and therefore aren't captured in any configuration file.
   package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
     "java.lang.Class": ("JavaClass", "JavaKit", true),
     "java.lang.String": ("String", "JavaKit", false),
@@ -198,9 +189,6 @@ extension JavaTranslator {
   package func translateClass(_ javaClass: JavaClass<JavaObject>) -> [DeclSyntax] {
     let fullName = javaClass.getCanonicalName()
     let swiftTypeName = try! getSwiftTypeNameFromJavaClassName(fullName)
-
-    // Record this translated class into the manifest.
-    manifest.translatedClasses[fullName] = swiftTypeName
 
     // Superclass.
     let extends: String

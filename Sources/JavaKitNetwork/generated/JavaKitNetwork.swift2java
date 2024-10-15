@@ -1,8 +1,0 @@
-{
-  "swiftModule" : "JavaKitNetwork",
-  "translatedClasses" : {
-    "java.net.URI" : "URI",
-    "java.net.URL" : "URL",
-    "java.net.URLClassLoader" : "URLClassLoader"
-  }
-}

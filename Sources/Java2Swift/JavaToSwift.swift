@@ -31,23 +31,17 @@ struct JavaToSwift: ParsableCommand {
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
   var moduleName: String
 
-  @Argument(
-    help:
-      "The Java classes to translate into Swift written with their canonical names (e.g., java.lang.Object). If the Swift name of the type should be different from simple name of the type, it can appended to the class name with '=<swift name>'."
-  )
-  var classes: [String] = []
-
   @Option(
     help:
-      "The Java-to-Swift module manifest files for any Swift module containing Swift types created to wrap Java classes."
+      "A Java2Swift configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/Java2Swift.config. There should be one of these options for each Swift module that this module depends on (transitively) that contains wrapped Java sources."
   )
-  var manifests: [String] = []
+  var dependsOn: [String] = []
 
-  @Option(
+  @Flag(
     help:
-      "The Jar file from which the set of class names should be loaded, if the classes weren't explicitly listed."
+      "Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to generate wrappers for those public classes."
   )
-  var jarFile: String? = nil
+  var jarFile: Bool = false
 
   @Option(
     name: [.customLong("cp"), .customLong("classpath")],
@@ -55,8 +49,14 @@ struct JavaToSwift: ParsableCommand {
   )
   var classpath: [String] = []
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files and manifest.")
+  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
   var outputDirectory: String = "."
+
+  @Argument(
+    help:
+      "The input file, which is either a Java2Swift configuration file or (if '-jar-file' was specified) a Jar file."
+  )
+  var input: String
 
   mutating func run() throws {
     var vmOptions: [String] = []
@@ -76,62 +76,39 @@ struct JavaToSwift: ParsableCommand {
       environment: environment
     )
 
-    // Load all of the translation manifests this depends on.
-    for manifest in manifests {
-      try translator.loadTranslationManifest(from: URL(filePath: manifest))
-    }
-
-    if jarFile == nil && classes.isEmpty {
-      throw JavaToSwiftError.noClasses
-    }
-
-    // If we have a Jar file but no classes were listed, find all of the
-    // classes in the Jar file.
-    if let jarFileName = jarFile, classes.isEmpty {
-      let jarFile = try JarFile(jarFileName, false, environment: environment)
-      classes = jarFile.entries()!.compactMap { (entry) -> String? in
-        guard entry.getName().hasSuffix(".class") else {
-          return nil
-        }
-
-        // If any of the segments of the Java name start with a number, it's a
-        // local class that cannot be mapped into Swift.
-        for segment in entry.getName().split(separator: "$") {
-          if segment.starts(with: /\d/) {
-            return nil
-          }
-        }
-
-        return String(entry.getName().replacing("/", with: ".")
-          .dropLast(".class".count))
+    // Load all of the configurations this depends on.
+    for config in dependsOn {
+      guard let equalLoc = config.firstIndex(of: "=") else {
+        throw JavaToSwiftError.badConfigOption(config)
       }
+
+      let afterEqual = config.index(after: equalLoc)
+      let swiftModuleName = String(config[..<equalLoc])
+      let configFileName = String(config[afterEqual...])
+
+      try translator.loadDependentConfiguration(
+        forSwiftModule: swiftModuleName,
+        from: URL(filePath: configFileName)
+      )
     }
+
+    // Jar file mode: read a Jar file and output a configuration.
+    if jarFile {
+      return try emitConfiguration(forJarFile: input, environment: environment)
+    }
+
+    // Load the configuration file.
+    let config = try translator.readConfiguration(from: URL(filePath: input))
 
     // Load all of the requested classes.
     let classLoader = URLClassLoader(
-      try classPathWithJarFile.map { try URL("file://\($0)", environment: environment) },
+      try classPathWithJarFile.map {
+        try URL("file://\($0)", environment: environment)
+      },
       environment: environment
     )
     var javaClasses: [JavaClass<JavaObject>] = []
-    for javaClassNameOpt in self.classes {
-      // Determine the Java class name and its resulting Swift name.
-      let javaClassName: String
-      let swiftName: String
-      if let equalLoc = javaClassNameOpt.firstIndex(of: "=") {
-        let afterEqual = javaClassNameOpt.index(after: equalLoc)
-        javaClassName = String(javaClassNameOpt[..<equalLoc])
-        swiftName = String(javaClassNameOpt[afterEqual...])
-      } else {
-        if let dotLoc = javaClassNameOpt.lastIndex(of: ".") {
-          let afterDot = javaClassNameOpt.index(after: dotLoc)
-          swiftName = String(javaClassNameOpt[afterDot...])
-        } else {
-          swiftName = javaClassNameOpt
-        }
-
-        javaClassName = javaClassNameOpt
-      }
-
+    for (javaClassName, swiftName) in config.classes {
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
         print("warning: could not find Java class '\(javaClassName)'")
         continue
@@ -167,18 +144,15 @@ struct JavaToSwift: ParsableCommand {
         description: "Java class '\(javaClass.getCanonicalName())' translation"
       )
     }
-
-    // Translation manifest.
-    let manifestFileName = "\(moduleName).swift2java"
-    let manifestContents = try translator.encodeTranslationManifest()
-    try writeContents(manifestContents, to: manifestFileName, description: "translation manifest")
   }
 
   /// Return the class path augmented with the Jar file, if there is one.
   var classPathWithJarFile: [String] {
-    guard let jarFile else { return classpath }
+    if jarFile {
+      return [input] + classpath
+    }
 
-    return [jarFile] + classpath
+    return classpath
   }
 
   func writeContents(_ contents: String, to filename: String, description: String) throws {
@@ -196,17 +170,71 @@ struct JavaToSwift: ParsableCommand {
     )
     print(" done.")
   }
+
+  func emitConfiguration(forJarFile jarFileName: String, environment: JNIEnvironment) throws {
+    var configuration = Configuration(
+      classPath: classPathWithJarFile.joined(separator: ":")
+    )
+    let jarFile = try JarFile(jarFileName, false, environment: environment)
+    for entry in jarFile.entries()! {
+      // We only look at class files in the Jar file.
+      guard entry.getName().hasSuffix(".class") else {
+        continue
+      }
+
+      // If any of the segments of the Java name start with a number, it's a
+      // local class that cannot be mapped into Swift.
+      for segment in entry.getName().split(separator: "$") {
+        if segment.starts(with: /\d/) {
+          continue
+        }
+      }
+
+      let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
+        .dropLast(".class".count))
+      configuration.classes[javaCanonicalName] =
+        javaCanonicalName.defaultSwiftNameForJavaClass
+    }
+
+    // Encode the configuration.
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    var contents = String(data: try encoder.encode(configuration), encoding: .utf8)!
+    contents.append("\n")
+
+    // Write the file.
+    try writeContents(
+      contents,
+      to: URL(filePath: outputDirectory)
+        .appending(path: "Java2Swift.config")
+        .path(percentEncoded: false),
+      description: "Java2Swift configuration file"
+    )
+  }
 }
 
 enum JavaToSwiftError: Error {
-  case noClasses
+  case badConfigOption(String)
 }
 
 extension JavaToSwiftError: CustomStringConvertible {
   var description: String {
     switch self {
-    case .noClasses:
-      "no classes to translate: either list Java classes or provide a Jar file"
+    case .badConfigOption(_):
+      "configuration option must be of the form '<swift module name>=<path to config file>"
     }
+  }
+}
+
+extension String {
+  /// For a String that's of the form java.util.Vector, return the "Vector"
+  /// part.
+  fileprivate var defaultSwiftNameForJavaClass: String {
+    if let dotLoc = lastIndex(of: ".") {
+      let afterDot = index(after: dotLoc)
+      return String(self[afterDot...])
+    }
+
+    return self
   }
 }
