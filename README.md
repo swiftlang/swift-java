@@ -95,7 +95,9 @@ Sample apps are located in the `Samples/` directory, and they showcase full "rou
 To run a simple app showcasing a Swift process calling into a Java library you can run: 
 
 ```bash
-./gradlew Samples:JavaKitSampleApp:run
+cd Samples/JavaKitSampleApp
+swift build
+java -cp .build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java -Djava.library.path=.build/debug com.example.swift.JavaKitSampleMain
 ```
 
 #### jextract (Java -> Swift)

@@ -63,8 +63,8 @@ all:
 $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
 
-javakit-run: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/libExampleSwiftLibrary.$(LIB_SUFFIX)
-	./gradlew Samples:JavaKitSampleApp:run
+javakit-run:
+	cd Samples/JavaKitSampleApp && swift build && java -cp .build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java -Djava.library.path=.build/debug com.example.swift.JavaKitSampleMain
 
 Java2Swift: $(BUILD_DIR)/debug/Java2Swift
 
