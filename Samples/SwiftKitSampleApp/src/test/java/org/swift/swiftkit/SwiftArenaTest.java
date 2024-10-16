@@ -35,7 +35,7 @@ public class SwiftArenaTest {
     }
 
     @Test
-    void arena_releaseClassOnClose_class_ok() {
+    public void arena_releaseClassOnClose_class_ok() {
         MySwiftClass unsafelyEscaped = null;
 
         try (var arena = SwiftArena.ofConfined()) {
@@ -53,7 +53,7 @@ public class SwiftArenaTest {
     }
 
     @Test
-    void arena_releaseClassOnClose_class_leaked() {
+    public void arena_releaseClassOnClose_class_leaked() {
         String memorySegmentDescription = "<none>";
 
         try {

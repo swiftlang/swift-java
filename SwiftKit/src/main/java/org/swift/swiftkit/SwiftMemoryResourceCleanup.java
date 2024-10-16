@@ -15,26 +15,32 @@
 package org.swift.swiftkit;
 
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+import static org.swift.swiftkit.MemorySegmentUtils.setSwiftPointerAddress;
 
 /**
- * A Swift memory resource cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
+ * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
  */
 sealed interface SwiftMemoryResourceCleanup extends Runnable {
 }
 
-record SwiftHeapObjectCleanup(SwiftHeapObject resource) implements SwiftMemoryResourceCleanup {
+record SwiftHeapObjectCleanup(SwiftHeapObject instance) implements SwiftMemoryResourceCleanup {
 
     @Override
     public void run() throws UnexpectedRetainCountException {
-        long retainedCount = SwiftKit.retainCount(this.resource);
+        // Verify we're only destroying an object that's indeed not retained by anyone else:
+        long retainedCount = SwiftKit.retainCount(this.instance);
         if (retainedCount > 1) {
-            throw new UnexpectedRetainCountException(this.resource, retainedCount, 1);
+            throw new UnexpectedRetainCountException(this.instance, retainedCount, 1);
         }
 
-        System.out.println("Cleanup heap object: " + this.resource);
-        var ty = this.resource.$swiftType();
+        // Destroy (and deinit) the object:
+        var ty = this.instance.$swiftType();
+        SwiftValueWitnessTable.destroy(ty, this.instance.$memorySegment());
 
-        SwiftValueWitnessTable.destroy(ty, this.resource.$memorySegment());
+        // Invalidate the Java wrapper class, in order to prevent effectively use-after-free issues.
+        // FIXME: some trouble with setting the pointer to null, need to figure out an appropriate way to do this
     }
 }
 

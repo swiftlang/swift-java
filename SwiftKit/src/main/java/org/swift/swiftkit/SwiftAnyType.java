@@ -18,7 +18,7 @@ import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 
-public final class SwiftAnyType implements SwiftMemoryResource {
+public final class SwiftAnyType {
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
             SwiftValueLayout.SWIFT_POINTER
@@ -48,20 +48,12 @@ public final class SwiftAnyType implements SwiftMemoryResource {
     }
 
 
-    @Override
     public MemorySegment $memorySegment() {
         return memorySegment;
     }
 
-    @Override
     public GroupLayout $layout() {
         return $LAYOUT;
-    }
-
-    @Override
-    public boolean immortal() {
-        // Don't ever try to destroy a type memory segment.
-        return true;
     }
 
     @Override

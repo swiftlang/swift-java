@@ -17,17 +17,26 @@ package org.swift.swiftkit;
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
 
-public interface SwiftMemoryResource {
+public interface SwiftInstance {
 
     /**
      * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
      */
     MemorySegment $memorySegment();
 
-    /** The in memory layout of an instance of this Swift type. */
+    /**
+     * The in memory layout of an instance of this Swift type.
+     */
     GroupLayout $layout();
 
-    default boolean immortal() {
-        return false;
+    SwiftAnyType $swiftType();
+
+    /**
+     * Returns `true` if this swift instance is a reference type, i.e. a `class` or (`distributed`) `actor`.
+     *
+     * @return `true` if this instance is a reference type, `false` otherwise.
+     */
+    default boolean isReferenceType() {
+        return this instanceof SwiftHeapObject;
     }
 }
