@@ -37,10 +37,4 @@ extension JavaClass {
 
   @JavaMethod
   public func getGenericInterfaces() -> [Type?]
-
-  @JavaMethod
-  public func isInterface() -> Bool
-
-  @JavaMethod
-  public func getClasses() -> [JavaClass<JavaObject>?]
 }

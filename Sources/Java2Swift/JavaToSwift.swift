@@ -228,6 +228,13 @@ struct JavaToSwift: ParsableCommand {
 
       // Note that we will be translating this Java class, so it is a known class.
       translator.translatedClasses[javaClassName] = (translatedSwiftName, nil, true)
+
+      for internalClass in javaClass.getClasses() {
+        if let internalClass {
+          let (javaName, swiftName) = names(from: internalClass.getCanonicalName())
+          translator.translatedClasses[internalClass.getCanonicalName()] = (swiftName.replacing("$", with: "."), nil, true)
+        }
+      }
     }
 
     // Translate all of the Java classes into Swift classes.
@@ -250,6 +257,36 @@ struct JavaToSwift: ParsableCommand {
         description: "Java class '\(javaClass.getCanonicalName())' translation"
       )
     }
+  }
+
+  private func names(from javaClassNameOpt: String) -> (javaClassName: String, swiftName: String) {
+    let javaClassName: String
+    let swiftName: String
+    if let equalLoc = javaClassNameOpt.firstIndex(of: "=") {
+      let afterEqual = javaClassNameOpt.index(after: equalLoc)
+      javaClassName = String(javaClassNameOpt[..<equalLoc])
+      swiftName = String(javaClassNameOpt[afterEqual...])
+    } else {
+      if let dotLoc = javaClassNameOpt.lastIndex(of: ".") {
+        let afterDot = javaClassNameOpt.index(after: dotLoc)
+        swiftName = String(javaClassNameOpt[afterDot...])
+      } else {
+        swiftName = javaClassNameOpt
+      }
+
+      javaClassName = javaClassNameOpt
+    }
+
+    return (javaClassName, swiftName)
+  }
+
+  /// Return the class path augmented with the Jar file, if there is one.
+  var classPathWithJarFile: [String] {
+    if jarFile {
+      return [input] + classpath
+    }
+
+    return classpath
   }
 
   mutating func writeContents(_ contents: String, to filename: String, description: String) throws {
