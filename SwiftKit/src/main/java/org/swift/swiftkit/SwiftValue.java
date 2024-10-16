@@ -14,5 +14,6 @@
 
 package org.swift.swiftkit;
 
-public interface SwiftValue extends SwiftMemoryResource {
+public interface SwiftValue extends SwiftInstance {
+    SwiftAnyType $swiftType();
 }
