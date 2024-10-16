@@ -17,10 +17,8 @@ package org.swift.swiftkit;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 
-import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
-import static org.swift.swiftkit.util.StringUtils.hexString;
 
 public abstract class SwiftValueWitnessTable {
 
@@ -182,10 +180,8 @@ public abstract class SwiftValueWitnessTable {
                 $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
 
         static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-                ValueLayout.ADDRESS
-                // SwiftValueLayout.SWIFT_POINTER // should be a "pointer to the self pointer"
-//                , // the object
-//                SwiftValueLayout.SWIFT_POINTER // the type
+                ValueLayout.ADDRESS, // witness table functions expect a pointer to self pointer
+                ValueLayout.ADDRESS // pointer to the witness table
         );
 
         /**
@@ -212,33 +208,17 @@ public abstract class SwiftValueWitnessTable {
      * This includes deallocating the Swift managed memory for the object.
      */
     public static void destroy(SwiftAnyType type, MemorySegment object) {
-        System.out.println("Destroy object: " + object);
-        System.out.println("Destroy object type: " + type);
+        var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
+        var wtable = valueWitnessTable(fullTypeMetadata);
 
-        var handle = destroy.handle(type);
-        System.out.println("Destroy object handle: " + handle);
+        var mh = destroy.handle(type);
 
         try (var arena = Arena.ofConfined()) {
             // we need to make a pointer to the self pointer when calling witness table functions:
-            MemorySegment indirect = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegment indirect = arena.allocate(SwiftValueLayout.SWIFT_POINTER); // TODO: remove this and just have classes have this always anyway
+            MemorySegmentUtils.setSwiftPointerAddress(indirect, object);
 
-            // Write the address of as the value of the newly created pointer.
-            // We need to type-safely set the pointer value which may be 64 or 32-bit.
-            if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
-                indirect.set(ValueLayout.JAVA_LONG, /*offset=*/0, object.address());
-            } else {
-                indirect.set(ValueLayout.JAVA_INT, /*offset=*/0, (int) object.address());
-            }
-
-            System.out.println("indirect = " + indirect);
-            if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
-                System.out.println("indirect.get(ValueLayout.JAVA_LONG, 0) = " + hexString(indirect.get(ValueLayout.JAVA_LONG, 0)));
-            } else {
-                System.out.println("indirect.get(ValueLayout.JAVA_INT, 0) = " + hexString(indirect.get(ValueLayout.JAVA_INT, 0)));
-            }
-
-//             handle.invokeExact(object); // NOTE: This does "nothing"
-            handle.invokeExact(indirect);
+            mh.invokeExact(indirect, wtable);
         } catch (Throwable th) {
             throw new AssertionError("Failed to destroy '" + type + "' at " + object, th);
         }
