@@ -34,7 +34,6 @@ public class SwiftKit {
     static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
     static {
-        System.load(STDLIB_MACOS_DYLIB_PATH);
         System.loadLibrary(STDLIB_DYLIB_NAME);
         System.loadLibrary("SwiftKitSwift");
     }
@@ -43,8 +42,7 @@ public class SwiftKit {
 
     private static SymbolLookup getSymbolLookup() {
         if (PlatformUtils.isMacOS()) {
-            // FIXME: why does this not find just by name on macOS?
-            // SymbolLookup.libraryLookup(System.mapLibraryName(STDLIB_DYLIB_NAME), LIBRARY_ARENA)
+            // On Apple platforms we need to lookup using the complete path
             return SymbolLookup.libraryLookup(STDLIB_MACOS_DYLIB_PATH, LIBRARY_ARENA)
                     .or(SymbolLookup.loaderLookup())
                     .or(Linker.nativeLinker().defaultLookup());
