@@ -62,9 +62,18 @@ class Java2SwiftTests: XCTestCase {
         "case APRIL",
         "public var enumValue: MonthCases?",
         """
-            } else if self.equals(self.javaClass.APRIL?.as(JavaObject.self)) {
+            } else if self.equals(classObj.APRIL?.as(JavaObject.self)) {
               return MonthCases.APRIL
             }
+        """,
+        "public init?(_ enumValue: MonthCases, environment: JNIEnvironment) throws {",
+        """
+              case .APRIL:
+                if let APRIL = classObj.APRIL {
+                  self = APRIL
+                } else {
+                  return nil
+                }
         """,
         """
           @JavaStaticField

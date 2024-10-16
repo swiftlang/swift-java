@@ -360,7 +360,6 @@ extension JavaTranslator {
       contentsOf: staticFields.compactMap { field in
         // Translate each static field.
         do {
-          // Enum constants are guaranteed to not be optional
           return try translateField(field)
         } catch {
           logUntranslated("Unable to translate '\(fullName)' field '\(field.getName())': \(error)")
@@ -470,10 +469,11 @@ extension JavaTranslator {
 
     let mappingSyntax: DeclSyntax = """
       public var enumValue: \(raw: name)? {
+        let classObj = self.javaClass
         \(raw: enumFields.map {
           // The equals method takes a java object, so we need to cast it here
           """
-          if self.equals(self.javaClass.\($0.getName())?.as(JavaObject.self)) {
+          if self.equals(classObj.\($0.getName())?.as(JavaObject.self)) {
                 return \(name).\($0.getName())
           }
           """
@@ -483,7 +483,26 @@ extension JavaTranslator {
       }
     """
 
-    return [extensionSyntax, mappingSyntax]
+    let initSyntax: DeclSyntax = """
+    public init?(_ enumValue: \(raw: name), environment: JNIEnvironment) throws {
+      let classObj = try JavaClass<Self>(in: environment)
+      switch enumValue {
+    \(raw: enumFields.map {
+      let caseName = $0.getName()
+      return """
+          case .\(caseName):
+            if let \(caseName) = classObj.\(caseName) {
+              self = \(caseName)
+            } else {
+              return nil
+            }
+      """
+    }.joined(separator: "\n"))
+      }
+    }
+    """
+
+    return [extensionSyntax, mappingSyntax, initSyntax]
   }
 
   // Translate a Java parameter list into Swift parameters.
