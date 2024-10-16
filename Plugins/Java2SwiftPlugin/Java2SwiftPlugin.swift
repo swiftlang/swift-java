@@ -91,9 +91,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     /// tool.
     let outputSwiftFiles = config.classes.map { (javaClassName, swiftName) in
       outputDirectory.appending(path: "\(swiftName).swift")
-    } + [
-      outputDirectory.appending(path: "\(sourceModule.name).swift2java")
-    ]
+    }
 
     return [
       .buildCommand(
