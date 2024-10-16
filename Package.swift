@@ -160,7 +160,6 @@ let package = Package(
     .target(
       name: "JavaKit",
       dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
-      exclude: ["generated/JavaKit.swift2java"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -169,7 +168,6 @@ let package = Package(
     .target(
       name: "JavaKitJar",
       dependencies: ["JavaKit"],
-      exclude: ["generated/JavaKitJar.swift2java"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -178,7 +176,6 @@ let package = Package(
     .target(
       name: "JavaKitNetwork",
       dependencies: ["JavaKit"],
-      exclude: ["generated/JavaKitNetwork.swift2java"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -187,7 +184,6 @@ let package = Package(
     .target(
       name: "JavaKitReflection",
       dependencies: ["JavaKit"],
-      exclude: ["generated/JavaKitReflection.swift2java"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
