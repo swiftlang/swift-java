@@ -48,30 +48,6 @@ public class MySwiftClass {
     p("\(MySwiftClass.self).cap = \(self.cap)")
     let addr = unsafeBitCast(self, to: UInt64.self)
     p("initializer done, self = 0x\(String(addr, radix: 16, uppercase: true))")
-
-    p("    ty = \(MySwiftClass.self) @ \(ObjectIdentifier(MySwiftClass.self))")
-
-    let s = "19ExampleSwiftLibrary02MyB5ClassC"
-    if let ty = _typeByName(s) {
-        p("any ty (\(s) = \(ty) @ \(ObjectIdentifier(ty))")
-        assert(ObjectIdentifier(ty) == ObjectIdentifier(MySwiftClass.self))
-    } else {
-        p("any ty (\(s) = @ nil")
-    }
-
-    let s2 = "$s19ExampleSwiftLibrary02MyB5ClassC"
-    if let ty = _typeByName(s2) {
-        p("any ty (\(s2) = \(ty) @ \(ObjectIdentifier(ty))")
-    } else {
-        p("any ty (\(s2) = @ nil")
-    }
-    p("USE THE swift_getTypeByMangledNameInEnvironment -----")
-    if let ty = _getTypeByMangledNameInEnvironment(s, UInt(s.count), genericEnvironment: nil, genericArguments: nil) {
-      p("any ty (\(s) = \(ty) @ \(ObjectIdentifier(ty))")
-      assert(ObjectIdentifier(ty) == ObjectIdentifier(MySwiftClass.self))
-    } else {
-      p("any ty (\(s) = @ nil")
-    }
   }
 
   deinit {

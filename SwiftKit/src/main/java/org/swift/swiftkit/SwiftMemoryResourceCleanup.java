@@ -15,9 +15,6 @@
 package org.swift.swiftkit;
 
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-
-import static org.swift.swiftkit.MemorySegmentUtils.setSwiftPointerAddress;
 
 /**
  * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
