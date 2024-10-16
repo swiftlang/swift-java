@@ -229,10 +229,26 @@ struct JavaToSwift: ParsableCommand {
       // Note that we will be translating this Java class, so it is a known class.
       translator.translatedClasses[javaClassName] = (translatedSwiftName, nil, true)
 
-      for internalClass in javaClass.getClasses() {
+      var classes: [(classToImport: JavaClass<JavaObject>?, prefix: String)] = javaClass.getClasses().map { ($0, translatedSwiftName) }
+
+      // Go through all subclasses to find all of the classes to translate
+      while let (internalClass, prefix) = classes.popLast() {
         if let internalClass {
           let (javaName, swiftName) = names(from: internalClass.getCanonicalName())
-          translator.translatedClasses[internalClass.getCanonicalName()] = (swiftName.replacing("$", with: "."), nil, true)
+          // If we have already been through this class, don't go through it again
+          guard translator.translatedClasses[javaName] == nil else { continue }
+          let currentClassName: String
+          // If the prefix is the part of the canonical name, continue (else use the same)
+          // This is needed since `java.lang.Enum.EnumDesc` is one of the declared classes of all of the enums
+          if (internalClass.getCanonicalName().contains(prefix)) {
+            currentClassName = "\(prefix).\(swiftName)"
+          } else {
+            currentClassName = swiftName
+          }
+
+          let currentSanitizedClassName = currentClassName.replacing("$", with: ".")
+          classes.append(contentsOf: internalClass.getClasses().map { ($0, currentSanitizedClassName) })
+          translator.translatedClasses[javaName] = (currentSanitizedClassName, nil, true)
         }
       }
     }
