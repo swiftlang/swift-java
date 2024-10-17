@@ -75,7 +75,7 @@ struct JavaToSwift: ParsableCommand {
     if jarFile {
       generationMode = .configuration(jarFile: input)
     } else {
-      let config = try JavaTranslator.readConfiguration(from: URL(filePath: input))
+      let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
       generationMode = .classWrappers(config)
     }
 
@@ -90,7 +90,7 @@ struct JavaToSwift: ParsableCommand {
       let swiftModuleName = String(dependentConfig[..<equalLoc])
       let configFileName = String(dependentConfig[afterEqual...])
 
-      let config = try JavaTranslator.readConfiguration(from: URL(filePath: configFileName))
+      let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: configFileName))
 
       return (swiftModuleName, config)
     }
@@ -218,7 +218,7 @@ struct JavaToSwift: ParsableCommand {
 
     print("Writing \(description) to '\(filename)'...", terminator: "")
     try contents.write(
-      to: Foundation.URL(filePath: outputDirectory).appending(path: filename),
+      to: Foundation.URL(fileURLWithPath: outputDirectory).appendingPathComponent(filename),
       atomically: true,
       encoding: .utf8
     )
@@ -242,7 +242,7 @@ struct JavaToSwift: ParsableCommand {
       // If any of the segments of the Java name start with a number, it's a
       // local class that cannot be mapped into Swift.
       for segment in entry.getName().split(separator: "$") {
-        if segment.starts(with: /\d/) {
+        if let firstChar = segment.first, firstChar.isNumber {
           continue
         }
       }
