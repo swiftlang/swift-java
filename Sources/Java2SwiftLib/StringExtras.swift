@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+import SwiftParser
 
 extension String {
   /// Split the Swift type name into parent type + innermost type name.
@@ -23,5 +24,14 @@ extension String {
       parentType: String(self[startIndex..<lastDot]),
       name: String(suffix(from: index(after: lastDot)))
     )
+  }
+
+  /// Escape a name with backticks if it's a Swift keyword.
+  var escapedSwiftName: String {
+    if isValidSwiftIdentifier(for: .variableName) {
+      return self
+    }
+
+    return "`\(self)`"
   }
 }

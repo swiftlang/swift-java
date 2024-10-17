@@ -45,7 +45,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   private init(
     classPath: [String] = [],
     vmOptions: [String] = [],
-    ignoreUnrecognized: Bool = true
+    ignoreUnrecognized: Bool = false
   ) throws {
     var jvm: JavaVMPointer? = nil
     var environment: UnsafeMutableRawPointer? = nil
@@ -176,7 +176,7 @@ extension JavaVirtualMachine {
   public static func shared(
     classPath: [String] = [],
     vmOptions: [String] = [],
-    ignoreUnrecognized: Bool = true
+    ignoreUnrecognized: Bool = false
   ) throws -> JavaVirtualMachine {
     try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
       // If we already have a JavaVirtualMachine instance, return it.
