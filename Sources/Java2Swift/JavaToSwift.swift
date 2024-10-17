@@ -58,55 +58,118 @@ struct JavaToSwift: ParsableCommand {
   )
   var input: String
 
-  mutating func run() throws {
-    var vmOptions: [String] = []
-    let classpath = classPathWithJarFile
-    if !classpath.isEmpty {
-      vmOptions.append("-cp")
-      vmOptions.append(contentsOf: classpath)
-    }
+  /// Describes what kind of generation action is being performed by
+  /// Java2Swift.
+  enum GenerationMode {
+    /// Generate a configuration file given a Jar file.
+    case configuration(jarFile: String)
 
-    let jvm = try JavaVirtualMachine.shared(vmOptions: vmOptions)
-    try run(environment: jvm.environment())
+    /// Generate Swift wrappers for Java classes based on the given
+    /// configuration.
+    case classWrappers(Configuration)
   }
 
-  mutating func run(environment: JNIEnvironment) throws {
+  mutating func run() throws {
+    // Determine the mode in which we'll execute.
+    let generationMode: GenerationMode
+    if jarFile {
+      generationMode = .configuration(jarFile: input)
+    } else {
+      let config = try JavaTranslator.readConfiguration(from: URL(filePath: input))
+      generationMode = .classWrappers(config)
+    }
+
+    // Load all of the dependent configurations and associate them with Swift
+    // modules.
+    let dependentConfigs = try dependsOn.map { dependentConfig in
+      guard let equalLoc = dependentConfig.firstIndex(of: "=") else {
+        throw JavaToSwiftError.badConfigOption(dependentConfig)
+      }
+
+      let afterEqual = dependentConfig.index(after: equalLoc)
+      let swiftModuleName = String(dependentConfig[..<equalLoc])
+      let configFileName = String(dependentConfig[afterEqual...])
+
+      let config = try JavaTranslator.readConfiguration(from: URL(filePath: configFileName))
+
+      return (swiftModuleName, config)
+    }
+
+    // Form a class path from all of our input sources:
+    //   * Command-line option --classpath
+    var classPathPieces: [String] = classpath
+    switch generationMode {
+    case .configuration(jarFile: let jarFile):
+      //   * Jar file (in `-jar-file` mode)
+      classPathPieces.append(jarFile)
+    case .classWrappers(let config):
+      //   * Class path specified in the configuration file (if any)
+      config.classPath.map { classPathPieces.append($0) }
+    }
+
+    //   * Classes paths from all dependent configuration files
+    for (_, config) in dependentConfigs {
+      config.classPath.map { classPathPieces.append($0) }
+    }
+
+    // Bring up the Java VM.
+    let jvm = try JavaVirtualMachine.shared(classPath: classPathPieces)
+
+    // Run the generation step.
+    let classPath = classPathPieces.joined(separator: ":")
+    switch generationMode {
+    case .configuration(jarFile: let jarFile):
+      try emitConfiguration(
+        forJarFile: jarFile,
+        classPath: classPath,
+        environment: jvm.environment()
+      )
+
+    case .classWrappers(let config):
+      try generateWrappers(
+        config: config,
+        classPath: classPath,
+        dependentConfigs: dependentConfigs,
+        environment: jvm.environment()
+      )
+    }
+  }
+
+  /// Generate wrapper
+  mutating func generateWrappers(
+    config: Configuration,
+    classPath: String,
+    dependentConfigs: [(String, Configuration)],
+    environment: JNIEnvironment
+  ) throws {
     let translator = JavaTranslator(
       swiftModuleName: moduleName,
       environment: environment
     )
 
-    // Load all of the configurations this depends on.
-    for config in dependsOn {
-      guard let equalLoc = config.firstIndex(of: "=") else {
-        throw JavaToSwiftError.badConfigOption(config)
-      }
-
-      let afterEqual = config.index(after: equalLoc)
-      let swiftModuleName = String(config[..<equalLoc])
-      let configFileName = String(config[afterEqual...])
-
-      try translator.loadDependentConfiguration(
-        forSwiftModule: swiftModuleName,
-        from: URL(filePath: configFileName)
+    // Note all of the dependent configurations.
+    for (swiftModuleName, dependentConfig) in dependentConfigs {
+      translator.addConfiguration(
+        dependentConfig,
+        forSwiftModule: swiftModuleName
       )
     }
 
-    // Jar file mode: read a Jar file and output a configuration.
-    if jarFile {
-      return try emitConfiguration(forJarFile: input, environment: environment)
-    }
-
-    // Load the configuration file.
-    let config = try translator.readConfiguration(from: URL(filePath: input))
+    // Add the configuration for this module.
+    translator.addConfiguration(config, forSwiftModule: moduleName)
 
     // Load all of the requested classes.
+    #if false
     let classLoader = URLClassLoader(
-      try classPathWithJarFile.map {
-        try URL("file://\($0)", environment: environment)
-      },
+      [
+        try URL("file://\(classPath)", environment: environment)
+      ],
       environment: environment
     )
+    #else
+    let classLoader = try JavaClass<ClassLoader>(in: environment)
+      .getSystemClassLoader()!
+    #endif
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, swiftName) in config.classes {
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
@@ -146,15 +209,6 @@ struct JavaToSwift: ParsableCommand {
     }
   }
 
-  /// Return the class path augmented with the Jar file, if there is one.
-  var classPathWithJarFile: [String] {
-    if jarFile {
-      return [input] + classpath
-    }
-
-    return classpath
-  }
-
   func writeContents(_ contents: String, to filename: String, description: String) throws {
     if outputDirectory == "-" {
       print("// \(filename) - \(description)")
@@ -171,10 +225,13 @@ struct JavaToSwift: ParsableCommand {
     print(" done.")
   }
 
-  func emitConfiguration(forJarFile jarFileName: String, environment: JNIEnvironment) throws {
-    var configuration = Configuration(
-      classPath: classPathWithJarFile.joined(separator: ":")
-    )
+  func emitConfiguration(
+    forJarFile jarFileName: String,
+    classPath: String,
+    environment: JNIEnvironment
+  ) throws {
+    var configuration = Configuration(classPath: classPath)
+
     let jarFile = try JarFile(jarFileName, false, environment: environment)
     for entry in jarFile.entries()! {
       // We only look at class files in the Jar file.
@@ -205,9 +262,7 @@ struct JavaToSwift: ParsableCommand {
     // Write the file.
     try writeContents(
       contents,
-      to: URL(filePath: outputDirectory)
-        .appending(path: "Java2Swift.config")
-        .path(percentEncoded: false),
+      to: "Java2Swift.config",
       description: "Java2Swift configuration file"
     )
   }
@@ -237,4 +292,15 @@ extension String {
 
     return self
   }
+}
+
+@JavaClass("java.lang.ClassLoader")
+public struct ClassLoader {
+  @JavaMethod
+  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
+}
+
+extension JavaClass<ClassLoader> {
+  @JavaStaticMethod
+  public func getSystemClassLoader() -> ClassLoader?
 }

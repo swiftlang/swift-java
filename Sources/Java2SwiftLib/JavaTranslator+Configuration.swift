@@ -16,18 +16,14 @@ import Foundation
 
 extension JavaTranslator {
   /// Read a configuration file from the given URL.
-  package func readConfiguration(from url: URL) throws -> Configuration {
+  package static func readConfiguration(from url: URL) throws -> Configuration {
     let contents = try Data(contentsOf: url)
     return try JSONDecoder().decode(Configuration.self, from: contents)
   }
 
   /// Load the configuration file with the given name to populate the known set of
   /// translated Java classes.
-  package func loadDependentConfiguration(forSwiftModule swiftModule: String, from url: URL) throws {
-    let config = try readConfiguration(from: url)
-
-    // TODO: Should we merge the class path from our dependencies?
-
+  package func addConfiguration(_ config: Configuration, forSwiftModule swiftModule: String) {
     for (javaClassName, swiftName) in config.classes {
       translatedClasses[javaClassName] = (
         swiftType: swiftName,
