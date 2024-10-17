@@ -78,7 +78,7 @@ extension Swift2JavaTranslator {
     let targetFilePath = [javaPackagePath, filename].joined(separator: PATH_SEPARATOR)
     print("Writing '\(targetFilePath)'...", terminator: "")
     try contents.write(
-      to: Foundation.URL(filePath: targetDirectory).appending(path: filename),
+      to: Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename),
       atomically: true,
       encoding: .utf8
     )
