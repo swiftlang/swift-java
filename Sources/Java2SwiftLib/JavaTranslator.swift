@@ -429,20 +429,21 @@ extension JavaTranslator {
     }
 
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
-
+    let swiftMethodName = javaMethod.getName().escapedSwiftName
     let methodAttribute: AttributeSyntax = javaMethod.isStatic ? "@JavaStaticMethod" : "@JavaMethod";
     return """
       \(methodAttribute)
-      public func \(raw: javaMethod.getName())\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      public func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
     
   package func translateField(_ javaField: Field) throws -> DeclSyntax {
     let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
+    let swiftFieldName = javaField.getName().escapedSwiftName
     return """
       \(fieldAttribute)
-      public var \(raw: javaField.getName()): \(raw: typeName)
+      public var \(raw: swiftFieldName): \(raw: typeName)
       """
   }
 
