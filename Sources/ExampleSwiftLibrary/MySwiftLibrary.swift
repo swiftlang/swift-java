@@ -76,6 +76,15 @@ public class MySwiftClass {
   }
 }
 
+@_silgen_name("swift_getTypeByMangledNameInEnvironment")
+public func _getTypeByMangledNameInEnvironment(
+  _ name: UnsafePointer<UInt8>,
+  _ nameLength: UInt,
+  genericEnvironment: UnsafeRawPointer?,
+  genericArguments: UnsafeRawPointer?)
+  -> Any.Type?
+
+
 // ==== Internal helpers
 
 private func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
