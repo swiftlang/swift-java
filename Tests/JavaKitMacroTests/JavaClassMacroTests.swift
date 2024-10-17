@@ -79,9 +79,9 @@ class JavaKitMacroTests: XCTestCase {
                 self.javaHolder = javaHolder
             }
 
-            /// It's not checking anything.
-            public func `as`<OtherClass: AnyJavaObject>(_: OtherClass.Type) -> OtherClass {
-                return OtherClass(javaHolder: javaHolder)
+            /// Casting to <JavaObject> will never be nil because <HelloWorld> extends it.
+            public func `as`(_: JavaObject) -> JavaObject {
+                return JavaObject(javaHolder: javaHolder)
             }
         }
       """,
