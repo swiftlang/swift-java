@@ -50,13 +50,48 @@ struct JavaToSwift: ParsableCommand {
   var classpath: [String] = []
 
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
-  var outputDirectory: String = "."
+  var outputDirectory: String? = nil
 
   @Argument(
     help:
       "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
+
+  /// Whether we have ensured that the output directory exists.
+  var createdOutputDirectory: Bool = false
+
+  /// The output directory in which to place the generated files, which will
+  /// be the specified directory (--output-directory or -o option) if given,
+  /// or a default directory derived from the other command-line arguments.
+  ///
+  /// Returns `nil` only when we should emit the files to standard output.
+  var actualOutputDirectory: Foundation.URL? {
+    if let outputDirectory {
+      if outputDirectory == "-" {
+        return nil
+      }
+
+      return URL(fileURLWithPath: outputDirectory)
+    }
+
+    // Put the result into Sources/\(moduleName).
+    let baseDir = URL(fileURLWithPath: ".")
+      .appendingPathComponent("Sources", isDirectory: true)
+      .appendingPathComponent(moduleName, isDirectory: true)
+
+    // For generated Swift sources, put them into a "generated" subdirectory.
+    // The configuration file goes at the top level.
+    let outputDir: Foundation.URL
+    if jar {
+      outputDir = baseDir
+    } else {
+      outputDir = baseDir
+        .appendingPathComponent("generated", isDirectory: true)
+    }
+
+    return outputDir
+  }
 
   /// Describes what kind of generation action is being performed by
   /// Java2Swift.
@@ -209,23 +244,31 @@ struct JavaToSwift: ParsableCommand {
     }
   }
 
-  func writeContents(_ contents: String, to filename: String, description: String) throws {
-    if outputDirectory == "-" {
+  mutating func writeContents(_ contents: String, to filename: String, description: String) throws {
+    guard let outputDir = actualOutputDirectory else {
       print("// \(filename) - \(description)")
       print(contents)
       return
     }
 
-    print("Writing \(description) to '\(filename)'...", terminator: "")
-    try contents.write(
-      to: Foundation.URL(fileURLWithPath: outputDirectory).appendingPathComponent(filename),
-      atomically: true,
-      encoding: .utf8
-    )
+    // If we haven't tried to create the output directory yet, do so now before
+    // we write any files to it.
+    if !createdOutputDirectory {
+      try FileManager.default.createDirectory(
+        at: outputDir,
+        withIntermediateDirectories: true
+      )
+      createdOutputDirectory = true
+    }
+
+    // Write the file:
+    let file = outputDir.appendingPathComponent(filename)
+    print("Writing \(description) to '\(file.path)'...", terminator: "")
+    try contents.write(to: file, atomically: true, encoding: .utf8)
     print(" done.")
   }
 
-  func emitConfiguration(
+  mutating func emitConfiguration(
     forJarFile jarFileName: String,
     classPath: String,
     environment: JNIEnvironment
