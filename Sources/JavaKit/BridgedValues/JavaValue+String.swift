@@ -64,7 +64,7 @@ extension String: JavaValue {
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
     return { environment, size in
       // FIXME: Introduce a JavaString class that we can use for this.
-      let stringClass = environment.interface.FindClass(environment, "java.lang.String")
+      let stringClass = environment.interface.FindClass(environment, "java/lang/String")
       return environment.interface.NewObjectArray(environment, size, stringClass, nil)
     }
   }
