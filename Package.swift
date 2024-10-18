@@ -196,7 +196,7 @@ let package = Package(
     ),
     .target(
       name: "JavaKitReflection",
-      dependencies: ["JavaKit"],
+      dependencies: ["JavaKit", "JavaKitCollection"],
       exclude: ["Java2Swift.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
