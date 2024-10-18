@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import org.swift.swiftkit.gradle.BuildUtils
+
 plugins {
     id("build-logic.java-application-conventions")
 }
@@ -82,10 +84,7 @@ application {
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + [
-            "$rootDir/.build/arm64-apple-macosx/debug/",
-            "/usr/lib/swift/"
-        ].join(":"),
+        "-Djava.library.path=" + BuildUtils.javaLibraryPaths().join(":"),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"
