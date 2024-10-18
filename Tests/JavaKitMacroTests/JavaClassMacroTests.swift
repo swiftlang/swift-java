@@ -79,8 +79,8 @@ class JavaKitMacroTests: XCTestCase {
                 self.javaHolder = javaHolder
             }
 
-            /// Casting to <JavaObject> will never be nil because <HelloWorld> extends it.
-            public func `as`(_: JavaObject) -> JavaObject {
+            /// Casting to ``JavaObject`` will never be nil because ``HelloWorld`` extends it.
+            public func `as`(_: JavaObject.type) -> JavaObject {
                 return JavaObject(javaHolder: javaHolder)
             }
         }
