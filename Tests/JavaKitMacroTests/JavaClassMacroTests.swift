@@ -78,6 +78,11 @@ class JavaKitMacroTests: XCTestCase {
             public init(javaHolder: JavaObjectHolder) {
                 self.javaHolder = javaHolder
             }
+
+            /// Casting to ``JavaObject`` will never be nil because ``HelloWorld`` extends it.
+            public func `as`(_: JavaObject.Type) -> JavaObject {
+                return JavaObject(javaHolder: javaHolder)
+            }
         }
       """,
       macros: Self.javaKitMacros

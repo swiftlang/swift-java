@@ -37,7 +37,8 @@
   named(javaThis),
   named(javaEnvironment),
   named(init(javaHolder:)),
-  named(JavaSuperclass)
+  named(JavaSuperclass),
+  named(`as`)
 )
 @attached(extension, conformances: AnyJavaObject)
 @attached(peer)
@@ -73,7 +74,8 @@ public macro JavaClass(
   named(javaThis),
   named(javaEnvironment),
   named(init(javaHolder:)),
-  named(JavaSuperclass)
+  named(JavaSuperclass),
+  named(`as`)
 )
 @attached(extension, conformances: AnyJavaObject)
 public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.Type)?...) =
