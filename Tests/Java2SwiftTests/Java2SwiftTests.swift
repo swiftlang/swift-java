@@ -25,7 +25,7 @@ var jvm: JavaVirtualMachine {
 }
 
 class Java2SwiftTests: XCTestCase {
-  func testJavaLangObjectMapping() async throws {
+  func testJavaLangObjectMapping() throws {
     try assertTranslatedClass(
       JavaObject.self,
       swiftTypeName: "MyJavaObject",
@@ -46,6 +46,48 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testGenericCollections() throws {
+    try assertTranslatedClass(
+      MyArrayList<JavaObject>.self,
+      swiftTypeName: "JavaArrayList",
+      translatedClasses: [
+        "java.lang.Object": ("JavaObject", nil, true),
+        "java.util.List": ("JavaList", nil, true),
+      ],
+      expectedChunks: [
+        """
+          @JavaMethod
+          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>?
+        """
+      ]
+    )
+  }
+
+  func testLinkedList() throws {
+    try assertTranslatedClass(
+      MyLinkedList<JavaObject>.self,
+      swiftTypeName: "JavaLinkedList",
+      translatedClasses: [
+        "java.lang.Object": ("JavaObject", nil, true),
+        "java.util.List": ("JavaList", nil, true),
+      ],
+      expectedChunks: [
+        """
+          @JavaMethod
+          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>?
+        """
+      ]
+    )
+  }
+}
+
+@JavaClass("java.util.ArrayList")
+public struct MyArrayList<E: AnyJavaObject> {
+}
+
+@JavaClass("java.util.LinkedList")
+public struct MyLinkedList<E: AnyJavaObject> {
 }
 
 /// Translate a Java class and assert that the translated output contains

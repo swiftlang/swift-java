@@ -27,6 +27,3 @@ Package.resolved
 
 # Cache of project
 .gradletasknamecache
-
-# Ignore generated sources
-**/generated/

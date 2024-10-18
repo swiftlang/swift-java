@@ -93,7 +93,7 @@ extension Array: JavaValue where Element: JavaValue {
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
     return { environment, size in
       // FIXME: We should have a bridged JavaArray that we can use here.
-      let arrayClass = environment.interface.FindClass(environment, "java.lang.Array")
+      let arrayClass = environment.interface.FindClass(environment, "java/lang/Array")
       return environment.interface.NewObjectArray(environment, size, arrayClass, nil)
     }
   }

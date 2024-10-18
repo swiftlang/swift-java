@@ -33,15 +33,7 @@ Makefile
 **/*.html
 **/CMakeLists.txt
 **/*.jar
+**/generated/*.swift
 gradle/wrapper/gradle-wrapper.properties
 gradlew
 gradlew.bat
-**/*.swift2java
-Sources/JavaKit/generated/*
-Sources/JavaKitJar/generated/*
-Sources/JavaKitNetwork/generated/*
-Sources/JavaKitReflection/generated/*
-Sources/_Subprocess/*
-Sources/_Subprocess/**/*
-Sources/_SubprocessCShims/*
-Sources/_SubprocessCShims/**/*
