@@ -89,7 +89,7 @@ extension JavaClassMacro: MemberMacro {
 
     let nonOptionalAs: DeclSyntax = """
       /// Casting to ``\(raw: superclass)`` will never be nil because ``\(raw: className.split(separator: ".").last!)`` extends it.
-      public func `as`(_: \(raw: superclass).type) -> \(raw: superclass) {
+      public func `as`(_: \(raw: superclass).Type) -> \(raw: superclass) {
           return \(raw: superclass)(javaHolder: javaHolder)
       }
       """

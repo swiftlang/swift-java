@@ -80,7 +80,7 @@ class JavaKitMacroTests: XCTestCase {
             }
 
             /// Casting to ``JavaObject`` will never be nil because ``HelloWorld`` extends it.
-            public func `as`(_: JavaObject.type) -> JavaObject {
+            public func `as`(_: JavaObject.Type) -> JavaObject {
                 return JavaObject(javaHolder: javaHolder)
             }
         }
