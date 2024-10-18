@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.ArrayList", implements: RandomAccess.self)
+@JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
 public struct ArrayList<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment)
@@ -51,6 +51,9 @@ public struct ArrayList<E: AnyJavaObject> {
 
   @JavaMethod
   public func add(_ arg0: Int32, _ arg1: JavaObject?)
+
+  @JavaMethod
+  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>?
 
   @JavaMethod
   public func toArray() -> [JavaObject?]
@@ -132,4 +135,7 @@ public struct ArrayList<E: AnyJavaObject> {
 
   @JavaMethod
   public func wait() throws
+
+  @JavaMethod
+  public func reversed() -> List<JavaObject>?
 }

@@ -95,6 +95,9 @@ public struct Stack<E: AnyJavaObject> {
   public func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
+  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>?
+
+  @JavaMethod
   public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
 
   @JavaMethod
@@ -186,4 +189,7 @@ public struct Stack<E: AnyJavaObject> {
 
   @JavaMethod
   public func removeLast() -> JavaObject?
+
+  @JavaMethod
+  public func reversed() -> List<JavaObject>?
 }
