@@ -57,7 +57,10 @@ jobs:
             ${{ runner.os }}-swiftpm-
       # run the actual build
       - name: Gradle build
-        run: ./gradlew build --info --no-daemon
+        run: |
+          ./gradlew build -x test --no-daemon # skip tests
+          find .
+          ./gradlew build --info --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
