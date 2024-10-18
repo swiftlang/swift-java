@@ -41,7 +41,7 @@ struct JavaToSwift: ParsableCommand {
     help:
       "Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to generate wrappers for those public classes."
   )
-  var jarFile: Bool = false
+  var jar: Bool = false
 
   @Option(
     name: [.customLong("cp"), .customLong("classpath")],
@@ -54,7 +54,7 @@ struct JavaToSwift: ParsableCommand {
 
   @Argument(
     help:
-      "The input file, which is either a Java2Swift configuration file or (if '-jar-file' was specified) a Jar file."
+      "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
 
@@ -72,7 +72,7 @@ struct JavaToSwift: ParsableCommand {
   mutating func run() throws {
     // Determine the mode in which we'll execute.
     let generationMode: GenerationMode
-    if jarFile {
+    if jar {
       generationMode = .configuration(jarFile: input)
     } else {
       let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
@@ -100,7 +100,7 @@ struct JavaToSwift: ParsableCommand {
     var classPathPieces: [String] = classpath
     switch generationMode {
     case .configuration(jarFile: let jarFile):
-      //   * Jar file (in `-jar-file` mode)
+      //   * Jar file (in `-jar` mode)
       classPathPieces.append(jarFile)
     case .classWrappers(let config):
       //   * Class path specified in the configuration file (if any)

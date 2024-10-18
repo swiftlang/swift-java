@@ -297,11 +297,11 @@ swift run Java2Swift
 to produce help output like the following:
 
 ```
-USAGE: Java2Swift --module-name <module-name> [--depends-on <depends-on> ...] [--jar-file] [--cp <cp> ...] [--output-directory <output-directory>] <input>
+USAGE: Java2Swift --module-name <module-name> [--depends-on <depends-on> ...] [--jar] [--cp <cp> ...] [--output-directory <output-directory>] <input>
 
 ARGUMENTS:
   <input>                 The input file, which is either a Java2Swift
-                          configuration file or (if '-jar-file' was specified)
+                          configuration file or (if '-jar' was specified)
                           a Jar file.
 
 OPTIONS:
@@ -315,7 +315,7 @@ OPTIONS:
                           There should be one of these options for each Swift
                           module that this module depends on (transitively)
                           that contains wrapped Java sources.
-  --jar-file              Specifies that the input is a Jar file whose public
+  --jar                   Specifies that the input is a Jar file whose public
                           classes will be loaded. The output of Java2Swift will
                           be a configuration file (Java2Swift.config) that can
                           be used as input to a subsequent Java2Swift
@@ -354,7 +354,7 @@ warning: Unable to translate 'java.util.jar.JarInputStream' method 'transferTo':
 
 The result of such warnings is that certain information won't be statically available in Swift, e.g., the superclass won't be known (so we will assume it is `JavaObject`), or the specified constructors or methods won't be translated. If you don't need these APIs, the warnings can be safely ignored. The APIs can still be called dynamically via JNI.
 
-The `--jar-file` option changes the operation of `Java2Swift`. Instead of wrapping Java classes in Swift, it scans the given input Jar file to find all public classes and outputs a configuration file `Java2Swift.config` mapping all of the Java classes in the Jar file to Swift types. The `--jar-file` mode is expected to be used to help import a Java library into Swift wholesale, after which Java2Swift should invoked again given the generated configuration file.
+The `--jar` option changes the operation of `Java2Swift`. Instead of wrapping Java classes in Swift, it scans the given input Jar file to find all public classes and outputs a configuration file `Java2Swift.config` mapping all of the Java classes in the Jar file to Swift types. The `--jar` mode is expected to be used to help import a Java library into Swift wholesale, after which Java2Swift should invoked again given the generated configuration file.
 
 ### Under construction: Create a Java class to wrap the Swift library
 
