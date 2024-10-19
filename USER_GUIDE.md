@@ -11,7 +11,7 @@ Before using this package, set the `JAVA_HOME` environment variable to point at 
 Existing Java libraries can be wrapped for use in Swift with the `Java2Swift`
 tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `Java2Swift.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
 
-```
+```json
 {
   "classes" : {
     "java.math.BigInteger" : "BigInteger"
@@ -90,6 +90,132 @@ if bigInt.isProbablePrime(10) {
 ```
 
 Swift ensures that the Java garbage collector will keep the object alive until `bigInt` (and any copies of it) are been destroyed. 
+
+### Importing a Jar file into Swift
+
+Java libraries are often distributed as Jar files. The `Java2Swift` tool can inspect a Jar file to create a `Java2Swift.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
+
+```swift
+swift run Java2Swift --module-name JavaSieve --jar QuadraticSieve-1.0.jar
+```
+
+The resulting configuration file will look something like this:
+
+```json
+{
+  "classPath" : "QuadraticSieve-1.0.jar",
+  "classes" : {
+    "com.gazman.quadratic_sieve.QuadraticSieve" : "QuadraticSieve",
+    "com.gazman.quadratic_sieve.core.BaseFact" : "BaseFact",
+    "com.gazman.quadratic_sieve.core.matrix.GaussianEliminationMatrix" : "GaussianEliminationMatrix",
+    "com.gazman.quadratic_sieve.core.matrix.Matrix" : "Matrix",
+    "com.gazman.quadratic_sieve.core.poly.PolyMiner" : "PolyMiner",
+    "com.gazman.quadratic_sieve.core.poly.WheelPool" : "WheelPool",
+    "com.gazman.quadratic_sieve.core.siever.BSmoothData" : "BSmoothData",
+    "com.gazman.quadratic_sieve.core.siever.BSmoothDataPool" : "BSmoothDataPool",
+    "com.gazman.quadratic_sieve.core.siever.Siever" : "Siever",
+    "com.gazman.quadratic_sieve.core.siever.VectorExtractor" : "VectorExtractor",
+    "com.gazman.quadratic_sieve.data.BSmooth" : "BSmooth",
+    "com.gazman.quadratic_sieve.data.DataQueue" : "DataQueue",
+    "com.gazman.quadratic_sieve.data.MagicNumbers" : "MagicNumbers",
+    "com.gazman.quadratic_sieve.data.PolynomialData" : "PolynomialData",
+    "com.gazman.quadratic_sieve.data.PrimeBase" : "PrimeBase",
+    "com.gazman.quadratic_sieve.data.VectorData" : "VectorData",
+    "com.gazman.quadratic_sieve.data.VectorWorkData" : "VectorWorkData",
+    "com.gazman.quadratic_sieve.debug.Analytics" : "Analytics",
+    "com.gazman.quadratic_sieve.debug.AssertUtils" : "AssertUtils",
+    "com.gazman.quadratic_sieve.debug.Logger" : "Logger",
+    "com.gazman.quadratic_sieve.fact.TrivialDivision" : "TrivialDivision",
+    "com.gazman.quadratic_sieve.primes.BigPrimes" : "BigPrimes",
+    "com.gazman.quadratic_sieve.primes.SieveOfEratosthenes" : "SieveOfEratosthenes",
+    "com.gazman.quadratic_sieve.utils.MathUtils" : "MathUtils",
+    "com.gazman.quadratic_sieve.wheel.Wheel" : "Wheel"
+  }
+}
+```
+
+As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`, `JavaKitVM`) and apply the `Java2Swift` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
+
+If you inspect the build output, there are a number of warnings that look like this:
+
+```swift
+warning: Unable to translate 'com.gazman.quadratic_sieve.QuadraticSieve' method 'generateN': Java class 'java.math.BigInteger' has not been translated into Swift
+```
+
+These warnings mean that some of the APIs in the Java library aren't available in Swift because their prerequisite types are missing. To address these warnings and get access to these APIs from Swift, we can wrap those Java classes. Expanding on the prior `JavaProbablyPrime` example, we define a new SwiftPM target `JavaMath` for the various types in the `java.math` package:
+
+```swift
+        .target(
+            name: "JavaMath",
+            dependencies: [
+              .product(name: "JavaKit", package: "swift-java"),
+            ],
+            plugins: [
+              .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+            ]
+        ),
+```
+
+Then define a a Java2Swift configuration file in `Sources/JavaMath/Java2Swift.config` to bring in the types we need:
+
+```json
+{
+  "classes" : {
+    "java.math.BigDecimal" : "BigDecimal",
+    "java.math.BigInteger" : "BigInteger",
+    "java.math.MathContext" : "MathContext",
+    "java.math.RoundingMode" : "RoundingMode",
+    "java.lang.Integer" : "JavaInteger",
+  }
+}
+```
+
+Finally, make the `JavaSieve` target depend on `JavaMath` and rebuild: the warnings related to `java.math.BigInteger` and friends will go away, and Java APIs that depend on them will now be available in Swift!
+
+### Calling Java static methods from Swift
+
+There are a number of prime-generation facilities in the Java library we imported. However, we are going to focus on the simple Sieve of Eratosthenes, which is declared like this in Java:
+
+```java
+public class SieveOfEratosthenes {
+  public static List<Integer> findPrimes(int limit) { ... }
+}
+```
+
+In Java, static methods are called as members of the class itself. For Swift to call a Java static method, it needs a representation of the Java class. This is expressed as an instance of the generic type `JavaClass`, which can be created in a particular JNI environment like this:
+
+```swift
+let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+```
+
+Now we can call Java's static methods on that class as instance methods on the `JavaClass` instance, e.g.,
+
+```swift
+let primes = sieveClass.findPrimes(100) // returns a List<JavaInteger>?
+```
+
+Putting it all together, we can define a main program in `Sources/JavaSieve/main.swift` that looks like this:
+
+```swift
+import JavaKit
+import JavaKitVM
+
+let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
+do {
+  let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+  for prime in sieveClass.findPrimes(100)! {
+    print("Found prime: \(prime.intValue())")
+  }
+} catch {
+  print("Failure: \(error)")
+}
+```
+
+Note that we are passing the Jar file in the `classPath` argument when initializing the `JavaVirtualMachine` instance. Otherwise, the program will fail with an error because it cannot find the Java class `com.gazman.quadratic_sieve.primes.SieveOfEratosthenes`.
+
+## Using Java libraries from Swift
+
+This section describes how Java libraries and mapped into Swift and their use from Swift.
 
 ### Translation from Java classes into Swift
 
@@ -521,6 +647,3 @@ public final class SomeModule ... {
     public static void globalFunction() { ... }
 }
 ```
-
- 
-
