@@ -24,6 +24,11 @@ var jvm: JavaVirtualMachine {
   }
 }
 
+@JavaClass("java.time.Month")
+public struct JavaMonth {
+
+}
+
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
     try assertTranslatedClass(
@@ -45,6 +50,36 @@ class Java2SwiftTests: XCTestCase {
         """
       ]
     )
+  }
+
+  func testEnum() async throws {
+    try assertTranslatedClass(
+      JavaMonth.self,
+      swiftTypeName: "Month",
+      expectedChunks: [
+        "import JavaKit",
+        "enum MonthCases: Equatable",
+        "case APRIL",
+        "public var enumValue: MonthCases?",
+        """
+            } else if self.equals(classObj.APRIL?.as(JavaObject.self)) {
+              return MonthCases.APRIL
+            }
+        """,
+        "public init(_ enumValue: MonthCases, environment: JNIEnvironment) {",
+        """
+              case .APRIL:
+                if let APRIL = classObj.APRIL {
+                  self = APRIL
+                } else {
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                }
+        """,
+        """
+          @JavaStaticField
+          public var APRIL: Month?
+        """
+      ])
   }
 
   func testGenericCollections() throws {

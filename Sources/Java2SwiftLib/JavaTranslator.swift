@@ -234,11 +234,16 @@ extension JavaTranslator {
     
     // Fields
     var staticFields: [Field] = []
+    var enumConstants: [Field] = []
     members.append(
       contentsOf: javaClass.getFields().compactMap {
         $0.flatMap { field in
           if field.isStatic {
             staticFields.append(field)
+
+            if field.isEnumConstant() {
+              enumConstants.append(field)
+            }
             return nil
           }
           
@@ -251,6 +256,13 @@ extension JavaTranslator {
         }
       }
     )
+
+    if !enumConstants.isEmpty {
+      let enumName = "\(swiftTypeName)Cases"
+      members.append(
+        contentsOf: translateToEnumValue(name: enumName, enumFields: enumConstants)
+      )
+    }
 
     // Constructors
     members.append(
@@ -445,6 +457,50 @@ extension JavaTranslator {
       \(fieldAttribute)
       public var \(raw: swiftFieldName): \(raw: typeName)
       """
+  }
+
+  package func translateToEnumValue(name: String, enumFields: [Field]) -> [DeclSyntax] {
+    let extensionSyntax: DeclSyntax = """
+      public enum \(raw: name): Equatable {
+        \(raw: enumFields.map { "case \($0.getName())" }.joined(separator: "\n"))
+      }
+    """
+
+    let mappingSyntax: DeclSyntax = """
+      public var enumValue: \(raw: name)? {
+        let classObj = self.javaClass
+        \(raw: enumFields.map {
+          // The equals method takes a java object, so we need to cast it here
+          """
+          if self.equals(classObj.\($0.getName())?.as(JavaObject.self)) {
+                return \(name).\($0.getName())
+          }
+          """
+        }.joined(separator: " else ")) else {
+          return nil
+        }
+      }
+    """
+
+    let initSyntax: DeclSyntax = """
+    public init(_ enumValue: \(raw: name), environment: JNIEnvironment) {
+      let classObj = try! JavaClass<Self>(in: environment)
+      switch enumValue {
+    \(raw: enumFields.map {
+      return """
+          case .\($0.getName()):
+            if let \($0.getName()) = classObj.\($0.getName()) {
+              self = \($0.getName())
+            } else {
+              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
+            }
+      """
+    }.joined(separator: "\n"))
+      }
+    }
+    """
+
+    return [extensionSyntax, mappingSyntax, initSyntax]
   }
 
   // Translate a Java parameter list into Swift parameters.
