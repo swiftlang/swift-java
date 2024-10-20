@@ -484,17 +484,16 @@ extension JavaTranslator {
     """
 
     let initSyntax: DeclSyntax = """
-    public init?(_ enumValue: \(raw: name), environment: JNIEnvironment) throws {
-      let classObj = try JavaClass<Self>(in: environment)
+    public init(_ enumValue: \(raw: name), environment: JNIEnvironment) {
+      let classObj = try! JavaClass<Self>(in: environment)
       switch enumValue {
     \(raw: enumFields.map {
-      let caseName = $0.getName()
       return """
-          case .\(caseName):
-            if let \(caseName) = classObj.\(caseName) {
-              self = \(caseName)
+          case .\($0.getName()):
+            if let \($0.getName()) = classObj.\($0.getName()) {
+              self = \($0.getName())
             } else {
-              return nil
+              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
             }
       """
     }.joined(separator: "\n"))

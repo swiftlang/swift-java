@@ -66,13 +66,13 @@ class Java2SwiftTests: XCTestCase {
               return MonthCases.APRIL
             }
         """,
-        "public init?(_ enumValue: MonthCases, environment: JNIEnvironment) throws {",
+        "public init(_ enumValue: MonthCases, environment: JNIEnvironment) {",
         """
               case .APRIL:
                 if let APRIL = classObj.APRIL {
                   self = APRIL
                 } else {
-                  return nil
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
                 }
         """,
         """
