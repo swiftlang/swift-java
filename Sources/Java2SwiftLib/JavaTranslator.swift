@@ -77,7 +77,6 @@ extension JavaTranslator {
   package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
     "java.lang.Class": ("JavaClass", "JavaKit", true),
     "java.lang.String": ("String", "JavaKit", false),
-    "java.lang.Object": ("JavaObject", "JavaKit", true)
   ]
 }
 
