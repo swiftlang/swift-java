@@ -174,8 +174,8 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
 
 
   translator.startNewFile()
-  let translatedDecls = translator.translateClass(
-    try JavaClass<JavaObject>(
+  let translatedDecls = try translator.translateClass(
+    JavaClass<JavaObject>(
       javaThis: javaType.getJNIClass(in: environment),
       environment: environment)
   )

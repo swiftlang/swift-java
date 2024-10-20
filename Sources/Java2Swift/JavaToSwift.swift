@@ -243,7 +243,7 @@ struct JavaToSwift: ParsableCommand {
           if (internalClass.getCanonicalName().contains(prefix)) {
             currentClassName = "\(prefix).\(swiftName)"
           } else {
-            currentClassName = swiftName
+            continue // If we have a class that is not a nested one, ignore it
           }
 
           let currentSanitizedClassName = currentClassName.replacing("$", with: ".")
@@ -256,7 +256,7 @@ struct JavaToSwift: ParsableCommand {
     // Translate all of the Java classes into Swift classes.
     for javaClass in javaClasses {
       translator.startNewFile()
-      let swiftClassDecls = translator.translateClass(javaClass)
+      let swiftClassDecls = try! translator.translateClass(javaClass)
       let importDecls = translator.getImportDecls()
 
       let swiftFileText = """
@@ -294,15 +294,6 @@ struct JavaToSwift: ParsableCommand {
     }
 
     return (javaClassName, swiftName)
-  }
-
-  /// Return the class path augmented with the Jar file, if there is one.
-  var classPathWithJarFile: [String] {
-    if jarFile {
-      return [input] + classpath
-    }
-
-    return classpath
   }
 
   mutating func writeContents(_ contents: String, to filename: String, description: String) throws {

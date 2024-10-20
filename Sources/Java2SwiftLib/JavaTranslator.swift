@@ -190,9 +190,9 @@ extension JavaTranslator {
   /// Translates the given Java class into the corresponding Swift type. This
   /// can produce multiple declarations, such as a separate extension of
   /// JavaClass to house static methods.
-  package func translateClass(_ javaClass: JavaClass<JavaObject>) -> [DeclSyntax] {
+  package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
     let fullName = javaClass.getCanonicalName()
-    let swiftTypeName = try! getSwiftTypeNameFromJavaClassName(fullName)
+    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName)
     let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
 
     // If the swift parent type has not been translated, don't try to translate this one
@@ -393,7 +393,12 @@ extension JavaTranslator {
 
     let subClassDecls = javaClass.getClasses().compactMap {
       $0.flatMap { clazz in
-        return translateClass(clazz)
+        do {
+          return try translateClass(clazz)
+        } catch {
+          logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
+          return nil
+        }
       }
     }.flatMap(\.self)
 
