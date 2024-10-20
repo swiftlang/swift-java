@@ -18,6 +18,7 @@
 // No annotations are necessary on the Swift side to perform the export.
 
 // FIXME: this is a workaround until we can pass String to Swift directly
+@_silgen_name("getTypeByStringByteArray")
 public func getTypeByStringByteArray(_ name: UnsafePointer<UInt8>) -> Any.Type? {
   let string = String(cString: name)
   let type = _typeByName(string)

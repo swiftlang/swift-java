@@ -15,16 +15,14 @@
 package com.example.swift;
 
 // Import swift-extract generated sources
-import com.example.swift.generated.ExampleSwiftLibrary;
 import com.example.swift.generated.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
+import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
-
+import org.swift.swiftkit.SwiftValueWitnessTable;
 
 import java.lang.foreign.*;
-import java.util.List;
-
 
 public class HelloJava2Swift {
 
@@ -32,41 +30,40 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        final var dylibNames = List.of(
-                "swiftCore",
-                "JavaKitExample"
-        );
-
-
-        System.out.println("Loading libraries...");
-
-        for (var lib : dylibNames) {
-            System.out.printf("Loading: %s... ", lib);
-            System.loadLibrary(lib);
-            System.out.println("ok.");
-        }
+        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
 
         examples();
     }
 
     static void examples() {
-        ExampleSwiftLibrary.helloWorld();
+//         ExampleSwiftLibrary.helloWorld();
+//
+//         ExampleSwiftLibrary.globalTakeInt(1337);
+//
+//         MySwiftClass obj = new MySwiftClass(2222, 7777);
+//
+//         SwiftKit.retain(obj.$memorySegment());
+//         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+//
+//         obj.voidMethod();
+//         obj.takeIntMethod(42);
 
-        ExampleSwiftLibrary.globalTakeInt(1337);
+        MySwiftClass unsafelyEscaped = null;
+        try (var arena = SwiftArena.ofConfined()) {
+            var instance = new MySwiftClass(arena, 1111, 2222);
+            unsafelyEscaped = instance;
 
-        MySwiftClass obj = new MySwiftClass(2222, 7777);
+//            var num = instance.makeIntMethod();
 
-        SwiftKit.retain(obj.$memorySegment());
-        System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+            System.out.println("SwiftKit.retainCount(instance) = " + SwiftKit.retainCount(instance));
 
-        obj.voidMethod();
-        obj.takeIntMethod(42);
+            System.out.println("MySwiftClass.TYPE_MANGLED_NAME = " + MySwiftClass.TYPE_MANGLED_NAME);
+           MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(MySwiftClass.TYPE_METADATA.$memorySegment());
+           System.out.println("typeMetadata = " + typeMetadata);
+        } // instance should be deallocated
 
-        MemorySegment swiftType = SwiftKit.getTypeByMangledNameInEnvironment("SiSg");
-        System.out.println("Memory layout for Swift.Int?:");
-        System.out.println("  size = " + SwiftKit.sizeOfSwiftType(swiftType));
-        System.out.println("  stride = " + SwiftKit.strideOfSwiftType(swiftType));
-        System.out.println("  alignment = " + SwiftKit.alignmentOfSwiftType(swiftType));
-        System.out.println("  Java layout = " + SwiftKit.layoutOfSwiftType(swiftType));
+        var num = unsafelyEscaped.makeIntMethod();
+
+        System.out.println("DONE.");
     }
 }

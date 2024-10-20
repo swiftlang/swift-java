@@ -15,6 +15,7 @@
 package com.example.swift.generated;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -48,9 +49,10 @@ public class MySwiftClassTest {
     }
 
     @Test
+    @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_len() {
         MySwiftClass o = new MySwiftClass(12, 42);
-        var got = o.makeIntMethod();
+        var got = o.getLen();
         assertEquals(12, got);
     }
 

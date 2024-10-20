@@ -12,31 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-plugins {
-    id("build-logic.java-application-conventions")
-}
+package org.swift.swiftkit.util;
 
-group = "org.swift.swiftkit"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(22))
+public class PlatformUtils {
+    public static boolean isLinux() {
+        return System.getProperty("os.name").toLowerCase().contains("linux");
     }
-}
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-}
+    public static boolean isMacOS() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 }
