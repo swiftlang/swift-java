@@ -30,7 +30,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
         run: apt-get -qq update && apt-get -qq install -y make curl wget
+      - name: Cache JDK
+        id: cache-jdk
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: /usr/lib/jvm/default-jdk/
+          key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
+          restore-keys: |
+            ${{ runner.os }}-jdk-
       - name: Install JDK
+        if: steps.cache-jdk.outputs.cache-hit != 'true'
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
       - name: Install Untested Nightly Swift
