@@ -484,7 +484,11 @@ extension JavaTranslator {
 
     let initSyntax: DeclSyntax = """
     public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
-      let _environment = environment == nil ? try! JavaVirtualMachine.shared().environment() : environment!
+      let _environment = if let environment {
+        environment
+      } else {
+        try! JavaVirtualMachine.shared().environment()
+      }
       let classObj = try! JavaClass<Self>(in: _environment)
       switch enumValue {
     \(raw: enumFields.map {

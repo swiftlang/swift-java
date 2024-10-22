@@ -94,7 +94,11 @@ extension JavaMethodMacro: BodyMacro {
 
     return [
       """
-      let _environment = environment == nil ? \(raw: tryKeyword) JavaVirtualMachine.shared().environment() : environment!
+      let _environment = if let environment {
+          environment
+      } else {
+          \(raw: tryKeyword) JavaVirtualMachine.shared().environment()
+      }
       self = \(raw: tryKeyword) Self.dynamicJavaNewObject(in: _environment\(raw: arguments))
       """
     ]

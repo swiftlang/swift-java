@@ -47,11 +47,19 @@ class JavaKitMacroTests: XCTestCase {
 
         public struct HelloWorld {
           public init(environment: JNIEnvironment? = nil) {
-              let _environment = environment == nil ? try! JavaVirtualMachine.shared().environment() : environment!
+              let _environment = if let environment {
+                  environment
+              } else {
+                  try! JavaVirtualMachine.shared().environment()
+              }
               self = try! Self.dynamicJavaNewObject(in: _environment)
           }
           public init(_ value: Int32, environment: JNIEnvironment? = nil) {
-              let _environment = environment == nil ? try! JavaVirtualMachine.shared().environment() : environment!
+              let _environment = if let environment {
+                  environment
+              } else {
+                  try! JavaVirtualMachine.shared().environment()
+              }
               self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
           }
           public func isBigEnough(_: Int32) -> Bool {
