@@ -14,52 +14,124 @@
 
 package org.swift.swiftkit;
 
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public interface SwiftArena extends Arena {
+/**
+ * A Swift arena manages Swift allocated memory for classes, structs, enums etc.
+ * When an arena is closed, it will destroy all managed swift objects in a way appropriate to their type.
+ * <p>
+ * A confined arena has an associated owner thread that confines some operations to
+ * associated owner thread such as {@link #close()}.
+ */
+public interface SwiftArena extends AutoCloseable {
 
-    void release(MemorySegment segment);
+    static SwiftArena ofConfined() {
+        return new ConfinedSwiftMemorySession(Thread.currentThread());
+    }
 
-    void retain(MemorySegment segment);
+    /**
+     * Register a Swift reference counted heap object with this arena (such as a {@code class} or {@code actor}).
+     * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
+     */
+    void register(SwiftHeapObject object);
 
-    long retainCount(MemorySegment segment);
+    /**
+     * Register a struct, enum or other non-reference counted Swift object.
+     * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
+     */
+    void register(SwiftValue value);
+
+    /**
+     * Close the arena and make sure all objects it managed are released.
+     * Throws if unable to verify all resources have been release (e.g. over retained Swift classes)
+     */
+    void close();
 
 }
 
-final class AutoSwiftArena implements SwiftArena {
-    Arena underlying;
+final class ConfinedSwiftMemorySession implements SwiftArena {
 
-    ConcurrentSkipListSet<MemorySegment> managedMemorySegments;
+//    final Arena underlying;
+    final Thread owner;
+    final SwiftResourceList resources;
 
-    @Override
-    public MemorySegment allocate(long byteSize, long byteAlignment) {
-        return null;
+    final int CLOSED = 0;
+    final int ACTIVE = 1;
+    final AtomicInteger state;
+
+    public ConfinedSwiftMemorySession(Thread owner) {
+        this.owner = owner;
+        resources = new ConfinedResourceList();
+        state = new AtomicInteger(ACTIVE);
+    }
+
+    public void checkValid() throws RuntimeException {
+        if (this.owner != null && this.owner != Thread.currentThread()) {
+            throw new WrongThreadException("ConfinedSwift arena is confined to %s but was closed from %s!".formatted(this.owner, Thread.currentThread()));
+        } else if (this.state.get() < ACTIVE) {
+            throw new RuntimeException("Arena is already closed!");
+        }
     }
 
     @Override
-    public MemorySegment.Scope scope() {
-        return null;
+    public void register(SwiftHeapObject object) {
+        this.resources.add(new SwiftHeapObjectCleanup(object));
+    }
+
+    @Override
+    public void register(SwiftValue value) {
+        this.resources.add(new SwiftValueCleanup(value.$memorySegment()));
     }
 
     @Override
     public void close() {
+        checkValid();
 
+        // Cleanup all resources
+        if (this.state.compareAndExchange(ACTIVE, CLOSED) == ACTIVE) {
+            this.resources.cleanup();
+        } // else, was already closed; do nothing
     }
 
-    @Override
-    public void release(MemorySegment segment) {
-        SwiftKit.release(segment);
+    /**
+     * Represents a list of resources that need a cleanup, e.g. allocated classes/structs.
+     */
+    static abstract class SwiftResourceList implements Runnable {
+        // TODO: Could use intrusive linked list to avoid one indirection here
+        final List<SwiftInstanceCleanup> resourceCleanups = new LinkedList<>();
+
+        abstract void add(SwiftInstanceCleanup cleanup);
+
+        public abstract void cleanup();
+
+        public final void run() {
+            cleanup(); // cleaner interop
+        }
     }
 
-    @Override
-    public void retain(MemorySegment segment) {
-        SwiftKit.retain(segment);
+    static final class ConfinedResourceList extends SwiftResourceList {
+        @Override
+        void add(SwiftInstanceCleanup cleanup) {
+            resourceCleanups.add(cleanup);
+        }
+
+        @Override
+        public void cleanup() {
+            for (SwiftInstanceCleanup cleanup : resourceCleanups) {
+                cleanup.run();
+            }
+        }
     }
 
-    @Override
-    public long retainCount(MemorySegment segment) {
-        return SwiftKit.retainCount(segment);
+
+}
+
+final class UnexpectedRetainCountException extends RuntimeException {
+    public UnexpectedRetainCountException(Object resource, long retainCount, int expectedRetainCount) {
+        super(("Attempting to cleanup managed memory segment %s, but it's retain count was different than [%d] (was %d)! " +
+                "This would result in destroying a swift object that is still retained by other code somewhere."
+        ).formatted(resource, expectedRetainCount, retainCount));
     }
 }

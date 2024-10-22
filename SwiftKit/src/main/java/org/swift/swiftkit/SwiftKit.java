@@ -14,13 +14,16 @@
 
 package org.swift.swiftkit;
 
+import org.swift.swiftkit.util.PlatformUtils;
+
 import java.lang.foreign.*;
-import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.lang.foreign.ValueLayout.JAVA_BYTE;
+import static org.swift.swiftkit.util.StringUtils.stripPrefix;
+import static org.swift.swiftkit.util.StringUtils.stripSuffix;
 
 public class SwiftKit {
 
@@ -32,17 +35,14 @@ public class SwiftKit {
 
     static {
         System.loadLibrary(STDLIB_DYLIB_NAME);
+        System.loadLibrary("SwiftKitSwift");
     }
-
-    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
-            .withTargetLayout(MemoryLayout.sequenceLayout(java.lang.Long.MAX_VALUE, JAVA_BYTE));
 
     static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
 
     private static SymbolLookup getSymbolLookup() {
-        if (isMacOS()) {
-            // FIXME: why does this not find just by name on macOS?
-            // SymbolLookup.libraryLookup(System.mapLibraryName(STDLIB_DYLIB_NAME), LIBRARY_ARENA)
+        if (PlatformUtils.isMacOS()) {
+            // On Apple platforms we need to lookup using the complete path
             return SymbolLookup.libraryLookup(STDLIB_MACOS_DYLIB_PATH, LIBRARY_ARENA)
                     .or(SymbolLookup.loaderLookup())
                     .or(Linker.nativeLinker().defaultLookup());
@@ -51,26 +51,15 @@ public class SwiftKit {
                     .or(Linker.nativeLinker().defaultLookup());
         }
     }
+
     public SwiftKit() {
-    }
-
-    public static boolean isLinux() {
-        return System.getProperty("os.name").toLowerCase().contains("linux");
-    }
-
-    public static boolean isMacOS() {
-        return System.getProperty("os.name").toLowerCase().contains("mac");
-    }
-
-    public static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     static void traceDowncall(String name, Object... args) {
         String traceArgs = Arrays.stream(args)
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
-        System.out.printf("%s(%s)\n", name, traceArgs);
+        System.out.printf("[java] Downcall: %s(%s)\n", name, traceArgs);
     }
 
     static MemorySegment findOrThrow(String symbol) {
@@ -78,31 +67,42 @@ public class SwiftKit {
                 .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
     }
 
+    public static String getJavaLibraryPath() {
+        return System.getProperty("java.library.path");
+    }
+
+    public static boolean getJextractTraceDowncalls() {
+        return Boolean.getBoolean("jextract.trace.downcalls");
+    }
+
     // ==== ------------------------------------------------------------------------------------------------------------
     // free
-    /**
-     * Descriptor for the free C runtime function.
-     */
-    public static final FunctionDescriptor free$descriptor = FunctionDescriptor.ofVoid(
-            ValueLayout.ADDRESS
-    );
 
-    /**
-     * Address of the free C runtime function.
-     */
-    public static final MemorySegment free$addr = findOrThrow("free");
+    static abstract class free {
+        /**
+         * Descriptor for the free C runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+                ValueLayout.ADDRESS
+        );
 
-    /**
-     * Handle for the free C runtime function.
-     */
-    public static final MethodHandle free$handle = Linker.nativeLinker().downcallHandle(free$addr, free$descriptor);
+        /**
+         * Address of the free C runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("free");
+
+        /**
+         * Handle for the free C runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
 
     /**
      * free the given pointer
      */
     public static void cFree(MemorySegment pointer) {
         try {
-            free$handle.invokeExact(pointer);
+            free.HANDLE.invokeExact(pointer);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -136,7 +136,7 @@ public class SwiftKit {
     }
 
     public static long retainCount(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -165,8 +165,8 @@ public class SwiftKit {
         }
     }
 
-    public static long retain(SwiftHeapObject object) {
-        return retainCount(object.$self());
+    public static void retain(SwiftHeapObject object) {
+        retain(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ public class SwiftKit {
         var mh$ = swift_release.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("swift_release_retain", object);
+                traceDowncall("swift_release", object);
             }
             mh$.invokeExact(object);
         } catch (Throwable ex$) {
@@ -196,10 +196,11 @@ public class SwiftKit {
     }
 
     public static long release(SwiftHeapObject object) {
-        return retainCount(object.$self());
+        return retainCount(object.$memorySegment());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
+    // getTypeByName
 
     /**
      * {@snippet lang = swift:
@@ -222,7 +223,7 @@ public class SwiftKit {
         var mh$ = swift_getTypeByName.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("_swift_getTypeByName");
+                traceDowncall("_typeByName");
             }
             // TODO: A bit annoying to generate, we need an arena for the conversion...
             try (Arena arena = Arena.ofConfined()) {
@@ -247,7 +248,7 @@ public class SwiftKit {
      */
     private static class swift_getTypeByMangledNameInEnvironment {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-                /*returns=*/SWIFT_POINTER,
+                /*returns=*/SwiftValueLayout.SWIFT_POINTER,
                 ValueLayout.ADDRESS,
                 ValueLayout.JAVA_INT,
                 ValueLayout.ADDRESS,
@@ -259,200 +260,119 @@ public class SwiftKit {
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
 
-    public static MemorySegment getTypeByMangledNameInEnvironment(String string) {
+    private static class getTypeByStringByteArray {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /*returns=*/SwiftValueLayout.SWIFT_POINTER,
+                ValueLayout.ADDRESS
+        );
+
+        public static final MemorySegment ADDR = findOrThrow("getTypeByStringByteArray");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Get a Swift {@code Any.Type} wrapped by {@link SwiftAnyType} which represents the type metadata available at runtime.
+     *
+     * @param mangledName The mangled type name (often prefixed with {@code $s}).
+     * @return the Swift Type wrapper object
+     */
+    public static Optional<SwiftAnyType> getTypeByMangledNameInEnvironment(String mangledName) {
+        System.out.println("Get Any.Type for mangled name: " + mangledName);
+
         var mh$ = swift_getTypeByMangledNameInEnvironment.HANDLE;
         try {
-            if (string.endsWith("CN")) {
-                string = string.substring(0, string.length() - 2);
-            }
+            // Strip the generic "$s" prefix always
+            mangledName = stripPrefix(mangledName, "$s");
+            // Ma is the "metadata accessor" mangled names of types we get from swiftinterface
+            // contain this, but we don't need it for type lookup
+            mangledName = stripSuffix(mangledName, "Ma");
+            mangledName = stripSuffix(mangledName, "CN");
             if (TRACE_DOWNCALLS) {
-                traceDowncall(string);
+                traceDowncall("swift_getTypeByMangledNameInEnvironment", mangledName);
             }
             try (Arena arena = Arena.ofConfined()) {
-                MemorySegment stringMemorySegment = arena.allocateFrom(string);
+                MemorySegment stringMemorySegment = arena.allocateFrom(mangledName);
 
-                return (MemorySegment) mh$.invokeExact(stringMemorySegment, string.length(), MemorySegment.NULL, MemorySegment.NULL);
+                var memorySegment = (MemorySegment) mh$.invokeExact(stringMemorySegment, mangledName.length(), MemorySegment.NULL, MemorySegment.NULL);
+
+                if (memorySegment.address() == 0) {
+                    return Optional.empty();
+                }
+
+                var wrapper = new SwiftAnyType(memorySegment);
+                return Optional.of(wrapper);
             }
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
-
-    /**
-     * The value layout for Swift's Int type, which is a signed type that follows
-     * the size of a pointer (aka C's ptrdiff_t).
-     */
-    public static ValueLayout SWIFT_INT = (ValueLayout.ADDRESS.byteSize() == 4) ?
-            ValueLayout.JAVA_INT : ValueLayout.JAVA_LONG;
-
-    /**
-     * The value layout for Swift's UInt type, which is an unsigned type that follows
-     * the size of a pointer (aka C's size_t). Java does not have unsigned integer
-     * types in general, so we use the layout for Swift's Int.
-     */
-    public static ValueLayout SWIFT_UINT = SWIFT_INT;
 
     /**
      * Read a Swift.Int value from memory at the given offset and translate it into a Java long.
      * <p>
      * This function copes with the fact that a Swift.Int might be 32 or 64 bits.
      */
-    public static final long getSwiftInt(MemorySegment memorySegment, long offset) {
-        if (SWIFT_INT == ValueLayout.JAVA_LONG) {
+    public static long getSwiftInt(MemorySegment memorySegment, long offset) {
+        if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
             return memorySegment.get(ValueLayout.JAVA_LONG, offset);
         } else {
             return memorySegment.get(ValueLayout.JAVA_INT, offset);
         }
     }
 
-    /**
-     * Value witness table layout.
-     */
-    public static final MemoryLayout valueWitnessTableLayout = MemoryLayout.structLayout(
-            ValueLayout.ADDRESS.withName("initializeBufferWithCopyOfBuffer"),
-            ValueLayout.ADDRESS.withName("destroy"),
-            ValueLayout.ADDRESS.withName("initializeWithCopy"),
-            ValueLayout.ADDRESS.withName("assignWithCopy"),
-            ValueLayout.ADDRESS.withName("initializeWithTake"),
-            ValueLayout.ADDRESS.withName("assignWithTake"),
-            ValueLayout.ADDRESS.withName("getEnumTagSinglePayload"),
-            ValueLayout.ADDRESS.withName("storeEnumTagSinglePayload"),
-            SwiftKit.SWIFT_INT.withName("size"),
-            SwiftKit.SWIFT_INT.withName("stride"),
-            SwiftKit.SWIFT_UINT.withName("flags"),
-            SwiftKit.SWIFT_UINT.withName("extraInhabitantCount")
-    ).withName("SwiftValueWitnessTable");
 
-    /**
-     * Offset for the "size" field within the value witness table.
-     */
-    static final long valueWitnessTable$size$offset =
-            valueWitnessTableLayout.byteOffset(PathElement.groupElement("size"));
 
-    /**
-     * Offset for the "stride" field within the value witness table.
-     */
-    static final long valueWitnessTable$stride$offset =
-            valueWitnessTableLayout.byteOffset(PathElement.groupElement("stride"));
+    private static class swift_getTypeName {
 
-    /**
-     * Offset for the "flags" field within the value witness table.
-     */
-    static final long valueWitnessTable$flags$offset =
-            valueWitnessTableLayout.byteOffset(PathElement.groupElement("flags"));
+        /**
+         * Descriptor for the swift_getTypeName runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /*returns=*/MemoryLayout.structLayout(
+                        SwiftValueLayout.SWIFT_POINTER.withName("utf8Chars"),
+                        SwiftValueLayout.SWIFT_INT.withName("length")
+                ),
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_BOOLEAN
+        );
 
-    /**
-     * Type metadata pointer.
-     */
-    public static final StructLayout fullTypeMetadataLayout = MemoryLayout.structLayout(
-            SWIFT_POINTER.withName("vwt")
-    ).withName("SwiftFullTypeMetadata");
+        /**
+         * Address of the swift_getTypeName runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("swift_getTypeName");
 
-    /**
-     * Offset for the "vwt" field within the full type metadata.
-     */
-    static final long fullTypeMetadata$vwt$offset =
-            fullTypeMetadataLayout.byteOffset(PathElement.groupElement("vwt"));
-
-    /**
-     * Given the address of Swift type metadata for a type, return the addres
-     * of the "full" type metadata that can be accessed via fullTypeMetadataLayout.
-     */
-    public static MemorySegment fullTypeMetadata(MemorySegment typeMetadata) {
-        return MemorySegment.ofAddress(typeMetadata.address() - SWIFT_POINTER.byteSize())
-                .reinterpret(fullTypeMetadataLayout.byteSize());
+        /**
+         * Handle for the swift_getTypeName runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
-
-    /**
-     * Given the address of Swift type's metadata, return the address that
-     * references the value witness table for the type.
-     */
-    public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
-        return fullTypeMetadata(typeMetadata).get(SWIFT_POINTER, fullTypeMetadata$vwt$offset);
-    }
-
-    /**
-     * Determine the size of a Swift type given its type metadata.
-     */
-    public static long sizeOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$size$offset);
-    }
-
-    /**
-     * Determine the stride of a Swift type given its type metadata, which is
-     * how many bytes are between successive elements of this type within an
-     * array. It is >= the size.
-     */
-    public static long strideOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$stride$offset);
-    }
-
-    /**
-     * Determine the alignment of the given Swift type.
-     */
-    public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
-        long flags = getSwiftInt(valueWitnessTable(typeMetadata), valueWitnessTable$flags$offset);
-        return (flags & 0xFF) + 1;
-    }
-
-    /**
-     * Descriptor for the swift_getTypeName runtime function.
-     */
-    public static final FunctionDescriptor swift_getTypeName$descriptor = FunctionDescriptor.of(
-            /*returns=*/MemoryLayout.structLayout(
-                    SWIFT_POINTER.withName("utf8Chars"),
-                    SWIFT_INT.withName("length")
-            ),
-            ValueLayout.ADDRESS,
-            ValueLayout.JAVA_BOOLEAN
-    );
-
-    /**
-     * Address of the swift_getTypeName runtime function.
-     */
-    public static final MemorySegment swift_getTypeName$addr = findOrThrow("swift_getTypeName");
-
-    /**
-     * Handle for the swift_getTypeName runtime function.
-     */
-    public static final MethodHandle swift_getTypeName$handle = Linker.nativeLinker().downcallHandle(swift_getTypeName$addr, swift_getTypeName$descriptor);
 
     /**
      * Produce the name of the Swift type given its Swift type metadata.
      * <p>
-     * If 'qualified' is true, leave all of the qualification in place to
+     * If 'qualified' is true, leave all the qualification in place to
      * disambiguate the type, producing a more complete (but longer) type name.
+     *
+     * @param typeMetadata the memory segment must point to a Swift metadata,
+     *                     e.g. the result of a {@link swift_getTypeByMangledNameInEnvironment} call
      */
     public static String nameOfSwiftType(MemorySegment typeMetadata, boolean qualified) {
-        try {
-            try (Arena arena = Arena.ofConfined()) {
-                MemorySegment charsAndLength = (MemorySegment) swift_getTypeName$handle.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
-                MemorySegment utf8Chars = charsAndLength.get(SWIFT_POINTER, 0);
-                String typeName = utf8Chars.getString(0);
-                cFree(utf8Chars);
-                return typeName;
-            }
+        MethodHandle mh = swift_getTypeName.HANDLE;
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment charsAndLength = (MemorySegment) mh.invokeExact((SegmentAllocator) arena, typeMetadata, qualified);
+            MemorySegment utf8Chars = charsAndLength.get(SwiftValueLayout.SWIFT_POINTER, 0);
+            String typeName = utf8Chars.getString(0);
+
+            // FIXME: this free is not always correct:
+            //      java(80175,0x17008f000) malloc: *** error for object 0x600000362610: pointer being freed was not allocated
+            // cFree(utf8Chars);
+
+            return typeName;
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 
-    /**
-     * Produce a layout that describes a Swift type based on its
-     * type metadata. The resulting layout is completely opaque to Java, but
-     * has appropriate size/alignment to model the memory associated with a
-     * Swift type.
-     * <p>
-     * In the future, this layout could be extended to provide more detail,
-     * such as the fields of a Swift struct.
-     */
-    public static MemoryLayout layoutOfSwiftType(MemorySegment typeMetadata) {
-        long size = sizeOfSwiftType(typeMetadata);
-        long stride = strideOfSwiftType(typeMetadata);
-        return MemoryLayout.structLayout(
-                MemoryLayout.sequenceLayout(size, JAVA_BYTE)
-                        .withByteAlignment(alignmentOfSwiftType(typeMetadata)),
-                MemoryLayout.paddingLayout(stride - size)
-        ).withName(nameOfSwiftType(typeMetadata, true));
-    }
 }

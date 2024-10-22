@@ -403,7 +403,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printClassInitializerConstructor(&printer, initDecl, parentName: initDecl.parentName!)
+      st.printClassInitializerConstructors(&printer, initDecl, parentName: initDecl.parentName!)
     }
 
     assertOutput(
@@ -418,15 +418,28 @@ final class MethodImportTests {
          * }
          */
         public MySwiftClass(long len, long cap) {
+          this(/*arena=*/null, len, cap);
+        }
+        /**
+         * Create an instance of {@code MySwiftClass}.
+         * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
+         *
+         * {@snippet lang=swift :
+         * public init(len: Swift.Int, cap: Swift.Int)
+         * }
+         */
+        public MySwiftClass(SwiftArena arena, long len, long cap) {
           var mh$ = init_len_cap.HANDLE;
           try {
-            if (TRACE_DOWNCALLS) {
-              traceDowncall(len, cap);
-            }
-
-            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(len, cap, TYPE_METADATA);
+              if (TRACE_DOWNCALLS) {
+                traceDowncall(len, cap);
+              }
+              this.selfMemorySegment = (MemorySegment) mh$.invokeExact(len, cap, TYPE_METADATA.$memorySegment());
+              if (arena != null) {
+                  arena.register(this);
+              }
           } catch (Throwable ex$) {
-            throw new AssertionError(\"should not reach here\", ex$);
+              throw new AssertionError("should not reach here", ex$);
           }
         }
         """

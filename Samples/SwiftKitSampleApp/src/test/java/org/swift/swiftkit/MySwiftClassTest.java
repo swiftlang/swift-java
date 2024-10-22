@@ -27,17 +27,14 @@ public class MySwiftClassTest {
 
     @BeforeAll
     static void beforeAll() {
-        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
-
-        System.loadLibrary("swiftCore");
-        System.loadLibrary("ExampleSwiftLibrary");
-
-        System.setProperty("jextract.trace.downcalls", "true");
+        System.out.printf("java.library.path = %s\n", SwiftKit.getJavaLibraryPath());
+        System.out.printf("jextract.trace.downcalls = %s\n", SwiftKit.getJextractTraceDowncalls());
     }
 
     @Test
     void call_retain_retainCount_release() {
-        var obj = new MySwiftClass(1, 2);
+        var arena = SwiftArena.ofConfined();
+        var obj = new MySwiftClass(arena, 1, 2);
 
         assertEquals(1, SwiftKit.retainCount(obj.$memorySegment()));
         // TODO: test directly on SwiftHeapObject inheriting obj
