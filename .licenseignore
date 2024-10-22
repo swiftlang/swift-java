@@ -27,12 +27,12 @@ docker/*
 **/docker-compose.yaml
 **/docker/*
 **/.dockerignore
-JavaSwiftKitDemo/src/main/java/com/example/swift/generated/*
 Makefile
 **/Makefile
 **/*.html
 **/CMakeLists.txt
 **/*.jar
+**/generated/*.java
 **/generated/*.swift
 gradle/wrapper/gradle-wrapper.properties
 gradlew
