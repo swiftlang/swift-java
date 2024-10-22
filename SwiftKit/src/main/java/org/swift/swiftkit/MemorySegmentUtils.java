@@ -29,10 +29,8 @@ public class MemorySegmentUtils {
         // Write the address of as the value of the newly created pointer.
         // We need to type-safely set the pointer value which may be 64 or 32-bit.
         if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
-            System.out.println("[setSwiftPointerAddress] address is long = " + memorySegment.address());
             target.set(ValueLayout.JAVA_LONG, /*offset=*/0, memorySegment.address());
         } else {
-            System.out.println("[setSwiftPointerAddress] address is int = " + memorySegment.address());
             target.set(ValueLayout.JAVA_INT, /*offset=*/0, (int) memorySegment.address());
         }
     }
