@@ -15,6 +15,7 @@
 package com.example.swift;
 
 // Import swift-extract generated sources
+import com.example.swift.generated.ExampleSwiftLibrary;
 import com.example.swift.generated.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
@@ -36,33 +37,17 @@ public class HelloJava2Swift {
     }
 
     static void examples() {
-//         ExampleSwiftLibrary.helloWorld();
-//
-//         ExampleSwiftLibrary.globalTakeInt(1337);
-//
-//         MySwiftClass obj = new MySwiftClass(2222, 7777);
-//
-//         SwiftKit.retain(obj.$memorySegment());
-//         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
-//
-//         obj.voidMethod();
-//         obj.takeIntMethod(42);
+         ExampleSwiftLibrary.helloWorld();
 
-        MySwiftClass unsafelyEscaped = null;
-        try (var arena = SwiftArena.ofConfined()) {
-            var instance = new MySwiftClass(arena, 1111, 2222);
-            unsafelyEscaped = instance;
+         ExampleSwiftLibrary.globalTakeInt(1337);
 
-//            var num = instance.makeIntMethod();
+         MySwiftClass obj = new MySwiftClass(2222, 7777);
 
-            System.out.println("SwiftKit.retainCount(instance) = " + SwiftKit.retainCount(instance));
+         SwiftKit.retain(obj.$memorySegment());
+         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
 
-            System.out.println("MySwiftClass.TYPE_MANGLED_NAME = " + MySwiftClass.TYPE_MANGLED_NAME);
-           MemorySegment typeMetadata = SwiftValueWitnessTable.fullTypeMetadata(MySwiftClass.TYPE_METADATA.$memorySegment());
-           System.out.println("typeMetadata = " + typeMetadata);
-        } // instance should be deallocated
-
-        var num = unsafelyEscaped.makeIntMethod();
+         obj.voidMethod();
+         obj.takeIntMethod(42);
 
         System.out.println("DONE.");
     }

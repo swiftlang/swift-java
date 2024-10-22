@@ -21,20 +21,28 @@ final class BuildUtils {
         def osName = System.getProperty("os.name")
         def osArch = System.getProperty("os.arch")
         def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")
+        def base = rootDir == null ? "" : "${rootDir}/"
+        System.out.println("Root dir is = ${rootDir}")
 
         return [
                 isLinux ?
-                        /* Linux */(osArch == "amd64" || osArch == "amd64" ?
-                                "${rootDir}/.build/x86_64-unknown-linux-gnu/debug/" :
-                                "${rootDir}/.build/${osArch}-unknown-linux-gnu/debug/") :
-                        /* macOS */(osArch == "aarch64" ?
-                                "${rootDir}/.build/arm64-apple-macosx/debug/" :
-                                "${rootDir}/.build/${osArch}-apple-macosx/debug/"),
+                        /* Linux */ (osArch == "amd64" || osArch == "x86_64" ?
+                        "${base}.build/x86_64-unknown-linux-gnu/debug/" :
+                        "${base}.build/${osArch}-unknown-linux-gnu/debug/") :
+                        /* macOS */ (osArch == "aarch64" ?
+                        "${base}.build/arm64-apple-macosx/debug/" :
+                        "${base}.build/${osArch}-apple-macosx/debug/"),
+                isLinux ?
+                        /* Linux */ (osArch == "amd64" || osArch == "x86_64" ?
+                        "${base}../../.build/x86_64-unknown-linux-gnu/debug/" :
+                        "${base}../../.build/${osArch}-unknown-linux-gnu/debug/") :
+                        /* macOS */ (osArch == "aarch64" ?
+                        "${base}../../.build/arm64-apple-macosx/debug/" :
+                        "${base}../../.build/${osArch}-apple-macosx/debug/"),
                 isLinux ?
                         "/usr/lib/swift/linux" :
                         // assume macOS
                         "/usr/lib/swift/"
         ]
     }
-
 }

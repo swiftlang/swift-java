@@ -70,7 +70,8 @@ public abstract class SwiftValueWitnessTable {
      */
     public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
         return fullTypeMetadata(typeMetadata)
-                .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+                 .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+//                .get(ValueLayout.ADDRESS, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
     }
 
 
@@ -209,9 +210,7 @@ public abstract class SwiftValueWitnessTable {
      */
     public static void destroy(SwiftAnyType type, MemorySegment object) {
         var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
-        System.out.println("fullTypeMetadata = " + fullTypeMetadata);
         var wtable = valueWitnessTable(fullTypeMetadata);
-        System.out.println("wtable = " + wtable);
 
         var mh = destroy.handle(type);
 

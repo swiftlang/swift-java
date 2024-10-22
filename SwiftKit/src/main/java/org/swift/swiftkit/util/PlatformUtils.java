@@ -26,4 +26,13 @@ public class PlatformUtils {
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
     }
+
+    public static boolean isAarch64() {
+        return System.getProperty("os.arch").equals("aarm64");
+    }
+
+    public static boolean isAmd64() {
+        String arch = System.getProperty("os.arch");
+        return arch.equals("amd64") || arch.equals("x86_64");
+    }
 }

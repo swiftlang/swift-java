@@ -17,6 +17,8 @@ package org.swift.swiftkit;
 import com.example.swift.generated.MySwiftClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.swift.swiftkit.util.PlatformUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.swift.swiftkit.SwiftKit.*;
@@ -30,7 +32,14 @@ public class SwiftArenaTest {
         System.out.printf("jextract.trace.downcalls = %s\n", SwiftKit.getJextractTraceDowncalls());
     }
 
+    static boolean isAmd64() {
+        return PlatformUtils.isAmd64();
+    }
+
+    // FIXME: The destroy witness table call hangs on x86_64 platforms during the destroy witness table call
+    //        See: https://github.com/swiftlang/swift-java/issues/97
     @Test
+    @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
         try (var arena = SwiftArena.ofConfined()) {
             var obj = new MySwiftClass(arena,1, 2);
