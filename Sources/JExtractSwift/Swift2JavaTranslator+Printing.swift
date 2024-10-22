@@ -648,13 +648,20 @@ extension Swift2JavaTranslator {
       return
     }
 
+    let needsArena = downcallNeedsConfinedArena(decl)
     let handleName = accessorKind.renderHandleFieldName
-    printer.print(
+
+    printer.printParts(
       """
       \(javaDocComment)
       public static \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
         var mh$ = \(decl.baseIdentifier).\(handleName);
-        try {
+        \(renderTry(withArena: needsArena))
+      """,
+      """
+          \(renderUpcallHandles(decl))
+      """,
+      """
           if (TRACE_DOWNCALLS) {
              traceDowncall(\(renderForwardParams(decl, selfVariant: .memorySegment)));
           }
@@ -739,6 +746,27 @@ extension Swift2JavaTranslator {
     return res
   }
 
+  /// Do we need to construct an inline confined arena for the duration of the downcall?
+  public func downcallNeedsConfinedArena(_ decl: ImportedFunc) -> Bool {
+    for p in decl.parameters {
+      // We need to detect if any of the parameters is a closure we need to prepare
+      // an upcall handle for.
+      if p.type.javaType.isSwiftClosure {
+        return true
+      }
+    }
+
+    return false
+  }
+  
+  public func renderTry(withArena: Bool) -> String {
+    if withArena {
+      "try (Arena arena = Arena.ofConfined()) {"
+    } else {
+      "try {"
+    }
+  }
+
   public func renderJavaParamDecls(_ decl: ImportedFunc, selfVariant: SelfParameterVariant?) -> String {
     var ps: [String] = []
     var pCounter = 0
@@ -755,6 +783,19 @@ extension Swift2JavaTranslator {
 
     let res = ps.joined(separator: ", ")
     return res
+  }
+
+  public func renderUpcallHandles(_ decl: ImportedFunc) -> String {
+    var printer = CodePrinter()
+    for p in decl.parameters where p.type.javaType.isSwiftClosure {
+      if p.type.javaType == .javaLangRunnable {
+        let paramName = p.secondName ?? p.firstName ?? "_"
+        let handleDesc = p.type.javaType.prepareClosureDowncallHandle(decl: decl, parameter: paramName)
+        printer.print(handleDesc)
+      }
+    }
+
+    return printer.contents
   }
 
   public func renderForwardParams(_ decl: ImportedFunc, selfVariant: SelfParameterVariant?) -> String {

@@ -18,6 +18,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.swift.swiftkit.SwiftKit;
+
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,12 +28,8 @@ public class GeneratedJavaKitExampleModuleTest {
 
     @BeforeAll
     static void beforeAll() {
-        System.out.println("java.library.path = " + System.getProperty("java.library.path"));
-
-        System.loadLibrary("swiftCore");
-        System.loadLibrary("ExampleSwiftLibrary");
-
-        System.setProperty("jextract.trace.downcalls", "true");
+        System.out.println("java.library.path = " + SwiftKit.getJavaLibraryPath());
+        System.out.println("java.library.path = " + SwiftKit.getJextractTraceDowncalls());
     }
 
     @Test
@@ -45,6 +44,26 @@ public class GeneratedJavaKitExampleModuleTest {
         ExampleSwiftLibrary.globalTakeInt(12);
 
         assertNotNull(ExampleSwiftLibrary.globalTakeInt$address());
+    }
+
+    @Test
+    @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
+    void call_globalCallMeRunnable() {
+        CountDownLatch countDownLatch = new CountDownLatch(3);
+
+        ExampleSwiftLibrary.globalCallMeRunnable(new Runnable() {
+            @Override
+            public void run() {
+                countDownLatch.countDown();
+            }
+        });
+        assertEquals(2, countDownLatch.getCount());
+
+        ExampleSwiftLibrary.globalCallMeRunnable(() -> countDownLatch.countDown());
+        assertEquals(1, countDownLatch.getCount());
+
+        ExampleSwiftLibrary.globalCallMeRunnable(countDownLatch::countDown);
+        assertEquals(0, countDownLatch.getCount());
     }
 
 }

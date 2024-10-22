@@ -106,10 +106,13 @@ public struct ImportedParam {
 extension ImportedParam {
   func renderParameterForwarding() -> String? {
     if type.javaType.isPrimitive {
-      return effectiveName
+      effectiveName
+    } else if type.javaType.isSwiftClosure {
+      // use the name of the upcall handle we'll have emitted by now
+      "\(effectiveName!)$"
+    } else {
+      "\(effectiveName!).$memorySegment()"
     }
-
-    return "\(effectiveName!).$memorySegment()"
   }
 }
 

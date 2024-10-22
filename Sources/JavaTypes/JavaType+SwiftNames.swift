@@ -30,6 +30,18 @@ extension JavaType {
     }
   }
 
+  public var isSwiftClosure: Bool {
+    switch self {
+    case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
+         .array:
+      return false
+    case .class(package: "java.lang", name: "Runnable"):
+      return true
+    case .class:
+      return false
+    }
+  }
+
   /// Produce the Swift type name for this Java type.
   public func swiftTypeName(resolver: JavaToSwiftClassNameResolver) rethrows -> String {
     switch self {
