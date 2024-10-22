@@ -13,8 +13,8 @@ jobs:
       format_check_enabled: false
       license_header_check_project_name: Swift.org
 
-  test-java:
-    name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+  build:
+    name: Build (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -35,7 +35,45 @@ jobs:
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
       - name: Install Untested Nightly Swift
         run: "bash -xc './docker/install_untested_nightly_swift.sh'"
-      # setup caches
+      - name: Cache local Gradle repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: |
+            /root/.gradle/caches
+            /root/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Cache local SwiftPM repository
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: /__w/swift-java/swift-java/.build/checkouts
+          key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-cache
+            ${{ runner.os }}-swiftpm-
+      - name: Gradle build
+        run: |
+          ./gradlew build -x test --no-daemon # skip tests
+
+  test-java:
+    name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        swift_version: ['nightly-main']
+        os_version: ['jammy']
+        jdk_vendor: ['Corretto']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
       - name: Cache local Gradle repository
         uses: actions/cache@v4
         continue-on-error: true
@@ -56,15 +94,14 @@ jobs:
             ${{ runner.os }}-swiftpm-cache
             ${{ runner.os }}-swiftpm-
       # run the actual build
-      - name: Gradle build
+      - name: Gradle test
         run: |
-          ./gradlew build -x test --no-daemon # skip tests
-          find .
           ./gradlew build --info --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -77,23 +114,6 @@ jobs:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
-      - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget
-      - name: Install JDK
-        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
-      - name: Install Untested Nightly Swift
-        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
-      # setup caches
-      - name: Cache local Gradle repository
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: |
-            /root/.gradle/caches
-            /root/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
       - name: Cache local SwiftPM repository
         uses: actions/cache@v4
         continue-on-error: true
@@ -104,9 +124,6 @@ jobs:
             ${{ runner.os }}-swiftpm-cache
             ${{ runner.os }}-swiftpm-
       # run the actual build
-      - name: Generate sources (make) (Temporary)
-        # TODO: this should be triggered by the respective builds
-        run: "make jextract-generate"
       - name: Test Swift
         run: "swift test"
       - name: Build (Swift) Sample Apps
