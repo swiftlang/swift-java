@@ -67,8 +67,7 @@ jobs:
       # run the actual build
       - name: Gradle build
         run: |
-          ./gradlew build -x test --no-daemon # skip tests
-          find .
+          ./gradlew build -x test --no-daemon # just build
           ./gradlew build --info --no-daemon
 
   test-swift:

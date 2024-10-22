@@ -75,6 +75,22 @@ public struct CodePrinter {
     print("}", .sloc, function: function, file: file, line: line)
   }
 
+  public mutating func printParts(
+    _ parts: String...,
+    terminator: PrinterTerminator = .newLine,
+    function: String = #function,
+    file: String = #fileID,
+    line: UInt = #line
+  ) {
+    for part in parts {
+      guard part.trimmingCharacters(in: .whitespacesAndNewlines).count != 0 else {
+        continue
+      }
+
+      self.print(part, terminator, function: function, file: file, line: line)
+    }
+  }
+
   public mutating func print(
     _ text: Any,
     _ terminator: PrinterTerminator = .newLine,

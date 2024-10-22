@@ -22,7 +22,6 @@ final class BuildUtils {
         def osArch = System.getProperty("os.arch")
         def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")
         def base = rootDir == null ? "" : "${rootDir}/"
-        System.out.println("Root dir is = ${rootDir}")
 
         return [
                 isLinux ?

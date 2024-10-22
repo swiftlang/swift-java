@@ -35,6 +35,10 @@ public func globalTakeIntInt(i: Int, j: Int) {
   p("i:\(i), j:\(j)")
 }
 
+public func globalCallMeRunnable(run: () -> ()) {
+  run()
+}
+
 public class MySwiftClass {
 
   public var len: Int
