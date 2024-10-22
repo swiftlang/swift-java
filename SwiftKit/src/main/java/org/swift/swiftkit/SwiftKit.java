@@ -59,12 +59,20 @@ public class SwiftKit {
         String traceArgs = Arrays.stream(args)
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
-        System.out.printf("%s(%s)\n", name, traceArgs);
+        System.out.printf("[java] Downcall: %s(%s)\n", name, traceArgs);
     }
 
     static MemorySegment findOrThrow(String symbol) {
         return SYMBOL_LOOKUP.find(symbol)
                 .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
+    }
+
+    public static String getJavaLibraryPath() {
+        return System.getProperty("java.library.path");
+    }
+
+    public static boolean getJextractTraceDowncalls() {
+        return Boolean.getBoolean("jextract.trace.downcalls");
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------

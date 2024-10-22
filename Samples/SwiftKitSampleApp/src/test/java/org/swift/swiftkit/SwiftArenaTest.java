@@ -26,21 +26,14 @@ public class SwiftArenaTest {
 
     @BeforeAll
     static void beforeAll() {
-        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
-
-        System.loadLibrary("swiftCore");
-        System.loadLibrary("ExampleSwiftLibrary");
-
-        System.setProperty("jextract.trace.downcalls", "true");
+        System.out.printf("java.library.path = %s\n", SwiftKit.getJavaLibraryPath());
+        System.out.printf("jextract.trace.downcalls = %s\n", SwiftKit.getJextractTraceDowncalls());
     }
 
     @Test
     public void arena_releaseClassOnClose_class_ok() {
-        MySwiftClass unsafelyEscaped = null;
-
         try (var arena = SwiftArena.ofConfined()) {
             var obj = new MySwiftClass(arena,1, 2);
-            unsafelyEscaped = obj; // also known as "don't do this" (outliving the arena)
 
             retain(obj.$memorySegment());
             assertEquals(2, retainCount(obj.$memorySegment()));

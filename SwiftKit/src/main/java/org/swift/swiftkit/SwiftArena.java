@@ -14,13 +14,9 @@
 
 package org.swift.swiftkit;
 
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 /**
  * A Swift arena manages Swift allocated memory for classes, structs, enums etc.
@@ -29,19 +25,29 @@ import java.util.logging.Logger;
  * A confined arena has an associated owner thread that confines some operations to
  * associated owner thread such as {@link #close()}.
  */
-public interface SwiftArena extends Arena {
+public interface SwiftArena extends AutoCloseable {
 
     static SwiftArena ofConfined() {
         return new ConfinedSwiftMemorySession(Thread.currentThread());
     }
 
     /**
-     * Register a struct, enum or other non-reference counted Swift object.
+     * Register a Swift reference counted heap object with this arena (such as a {@code class} or {@code actor}).
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
      */
     void register(SwiftHeapObject object);
 
+    /**
+     * Register a struct, enum or other non-reference counted Swift object.
+     * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
+     */
     void register(SwiftValue value);
+
+    /**
+     * Close the arena and make sure all objects it managed are released.
+     * Throws if unable to verify all resources have been release (e.g. over retained Swift classes)
+     */
+    void close();
 
 }
 
@@ -51,28 +57,14 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
     final Thread owner;
     final SwiftResourceList resources;
 
-    // TODO: just int and volatile updates
     final int CLOSED = 0;
     final int ACTIVE = 1;
     final AtomicInteger state;
 
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
-//        underlying = Arena.ofConfined();
         resources = new ConfinedResourceList();
         state = new AtomicInteger(ACTIVE);
-    }
-
-    @Override
-    public MemorySegment allocate(long byteSize, long byteAlignment) {
-//        return underlying.allocate(byteSize, byteAlignment);
-        return null;
-    }
-
-    @Override
-    public MemorySegment.Scope scope() {
-        return null;
-//        return underlying.scope();
     }
 
     public void checkValid() throws RuntimeException {
@@ -85,7 +77,6 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     @Override
     public void register(SwiftHeapObject object) {
-        System.out.println("Registered " + object.$memorySegment() + " in " + this);
         this.resources.add(new SwiftHeapObjectCleanup(object));
     }
 
@@ -96,20 +87,12 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     @Override
     public void close() {
-        System.out.println("CLOSE ARENA ...");
         checkValid();
 
         // Cleanup all resources
         if (this.state.compareAndExchange(ACTIVE, CLOSED) == ACTIVE) {
             this.resources.cleanup();
         } // else, was already closed; do nothing
-
-
-        // Those the underlying arena
-//        this.underlying.close();
-
-        // After this method returns normally, the scope must be not alive anymore
-//        assert (!this.scope().isAlive());
     }
 
     /**
@@ -117,9 +100,9 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
      */
     static abstract class SwiftResourceList implements Runnable {
         // TODO: Could use intrusive linked list to avoid one indirection here
-        final List<SwiftMemoryResourceCleanup> resourceCleanups = new LinkedList<>();
+        final List<SwiftInstanceCleanup> resourceCleanups = new LinkedList<>();
 
-        abstract void add(SwiftMemoryResourceCleanup cleanup);
+        abstract void add(SwiftInstanceCleanup cleanup);
 
         public abstract void cleanup();
 
@@ -130,17 +113,19 @@ final class ConfinedSwiftMemorySession implements SwiftArena {
 
     static final class ConfinedResourceList extends SwiftResourceList {
         @Override
-        void add(SwiftMemoryResourceCleanup cleanup) {
+        void add(SwiftInstanceCleanup cleanup) {
             resourceCleanups.add(cleanup);
         }
 
         @Override
         public void cleanup() {
-            for (SwiftMemoryResourceCleanup cleanup : resourceCleanups) {
+            for (SwiftInstanceCleanup cleanup : resourceCleanups) {
                 cleanup.run();
             }
         }
     }
+
+
 }
 
 final class UnexpectedRetainCountException extends RuntimeException {
