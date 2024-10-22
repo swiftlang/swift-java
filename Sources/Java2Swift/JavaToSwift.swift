@@ -19,7 +19,6 @@ import JavaKit
 import JavaKitJar
 import JavaKitNetwork
 import JavaKitReflection
-import JavaKitVM
 import SwiftSyntax
 import SwiftSyntaxBuilder
 

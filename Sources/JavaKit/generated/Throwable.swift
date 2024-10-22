@@ -4,16 +4,16 @@ import JavaRuntime
 @JavaClass("java.lang.Throwable")
 public struct Throwable {
   @JavaMethod
-  public init(_ arg0: Throwable?, environment: JNIEnvironment)
+  public init(_ arg0: Throwable?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Throwable?, environment: JNIEnvironment)
+  public init(_ arg0: String, _ arg1: Throwable?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment)
+  public init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func printStackTrace()

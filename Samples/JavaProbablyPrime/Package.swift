@@ -27,7 +27,6 @@ let package = Package(
       name: "JavaProbablyPrime",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
-        .product(name: "JavaKitVM", package: "swift-java"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ],
       swiftSettings: [

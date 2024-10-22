@@ -47,7 +47,7 @@ If you build the project, there will be a generated file `BigInteger.swift` that
 @JavaClass("java.math.BigInteger")
 public struct BigInteger {
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment)
+  public init(_ arg0: String, environment: JNIEnvironment? = nil)
   
   @JavaMethod
   public func toString() -> String
@@ -225,7 +225,7 @@ Each Java class that can be used from Swift is translated to a Swift `struct` th
 @JavaClass("java.util.jar.JarFile", extends: ZipFile.self, implements: AutoCloseable.self)
 public struct JarFile {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment)
+  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func entries() -> Enumeration<JarEntry>?
@@ -259,7 +259,7 @@ Each of the public Java constructors, methods, and fields in the Java class will
 
 ```swift
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment)
+  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil)
 ```
 
 corresponds to the Java constructor:
@@ -268,7 +268,9 @@ corresponds to the Java constructor:
 public JarFile(String arg0, bool arg1)
 ```
 
-The `environment` parameter is the pointer to the JNI environment (`JNIEnv*` in C) in which the underlying Java object lives. It is available to all methods that are written in or exposed to Java, either directly as a parameter (as in constructors) or on an instance of any type that's projected from Java through the `javaEnvironment` property of the `AnyJavaObject` conformance. Given a
+The `environment` parameter is the pointer to the JNI environment (`JNIEnv*` in C) in which the underlying Java object lives. It is available to all methods that are written in or exposed to Java, 
+either directly as a parameter (as in constructors - in case of nil, the `JavaVirtualMachine.shared().environment()` value will be used) 
+or on an instance of any type that's projected from Java through the `javaEnvironment` property of the `AnyJavaObject` conformance. Given a
 Java environment, one can create a `JarFile` instance in Swift with, e.g.,
 
 ```swift
@@ -409,7 +411,7 @@ extension HelloSwift {
 
 Java native methods that throw any checked exception should be marked as `throws` in Swift. Swift will translate any thrown error into a Java exception.
 
-The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment`, which will receive the JNI environment in which the function is being executed.
+The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment? = nil`, which will receive the JNI environment in which the function is being executed. In case of nil, the `JavaVirtualMachine.shared().environment()` value will be used.
 
 ## Translating Java classes with `Java2Swift`
 
@@ -541,7 +543,7 @@ import JavaKit
 @JavaClass("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
   @ImplementsJava
-  static func main(arguments: [String], environment: JNIEnvironment) {
+  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
     print("Command line arguments are: \(arguments)")
   }
 }
@@ -573,12 +575,12 @@ struct HelloSwiftMain: ParsableCommand {
   var verbose: Bool = false
 
   @ImplementsJava
-  static func main(arguments: [String], environment: JNIEnvironment) {
+  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
     let command = Self.parseOrExit(arguments)
     command.run(environment: environment)
   }
   
-  func run(environment: JNIEnvironment) {
+  func run(environment: JNIEnvironment? = nil) {
     print("Verbose = \(verbose)")
   }
 }

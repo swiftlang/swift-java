@@ -70,7 +70,6 @@ let package = Package(
                 "JavaMath",
                 .product(name: "JavaKit", package: "swift-java"),
                 .product(name: "JavaKitCollection", package: "swift-java"),
-                .product(name: "JavaKitVM", package: "swift-java"),
             ],
             swiftSettings: [
               .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])

@@ -4,7 +4,7 @@ import JavaRuntime
 @JavaClass("java.lang.Object")
 public struct JavaObject {
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool

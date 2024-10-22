@@ -5,13 +5,13 @@ import JavaRuntime
 @JavaClass("java.util.HashMap")
 public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment)
+  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, _ arg1: Float, environment: JNIEnvironment)
+  public init(_ arg0: Int32, _ arg1: Float, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> JavaObject?

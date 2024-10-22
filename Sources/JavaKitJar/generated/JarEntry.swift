@@ -5,10 +5,10 @@ import JavaRuntime
 @JavaClass("java.util.jar.JarEntry")
 public struct JarEntry {
   @JavaMethod
-  public init(_ arg0: JarEntry?, environment: JNIEnvironment)
+  public init(_ arg0: JarEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment)
+  public init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func getRealName() -> String

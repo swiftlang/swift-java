@@ -5,7 +5,7 @@ import JavaRuntime
 @JavaClass("java.util.Dictionary")
 public struct JavaDictionary<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> JavaObject?

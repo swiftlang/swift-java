@@ -14,7 +14,6 @@
 
 import ArgumentParser
 import JavaKit
-import JavaKitVM
 
 @main
 struct ProbablyPrime: ParsableCommand {

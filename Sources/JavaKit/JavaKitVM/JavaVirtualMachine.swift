@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
-
 typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
 
 public final class JavaVirtualMachine: @unchecked Sendable {

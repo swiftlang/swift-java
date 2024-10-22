@@ -31,7 +31,10 @@ class JavaKitMacroTests: XCTestCase {
         @JavaClass("org.swift.example.HelloWorld")
         public struct HelloWorld {
           @JavaMethod
-          public init(_ value: Int32, environment: JNIEnvironment) 
+          public init(environment: JNIEnvironment? = nil)
+      
+          @JavaMethod
+          public init(_ value: Int32, environment: JNIEnvironment? = nil)
 
           @JavaMethod
           public func isBigEnough(_: Int32) -> Bool
@@ -43,8 +46,13 @@ class JavaKitMacroTests: XCTestCase {
       expandedSource: """
 
         public struct HelloWorld {
-          public init(_ value: Int32, environment: JNIEnvironment)  {
-              self = try! Self.dynamicJavaNewObject(in: environment, arguments: value.self)
+          public init(environment: JNIEnvironment? = nil) {
+              let _environment = environment == nil ? try! JavaVirtualMachine.shared().environment() : environment!
+              self = try! Self.dynamicJavaNewObject(in: _environment)
+          }
+          public init(_ value: Int32, environment: JNIEnvironment? = nil) {
+              let _environment = environment == nil ? try! JavaVirtualMachine.shared().environment() : environment!
+              self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
           }
           public func isBigEnough(_: Int32) -> Bool {
               return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
