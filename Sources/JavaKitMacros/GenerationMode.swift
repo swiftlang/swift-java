@@ -26,7 +26,7 @@ enum GenerationMode {
 
   /// This macro is describing an extension that is implementing the native
   /// methods of a Java class.
-  case JavaImplements
+  case javaImplementation
 
   /// Determine the mode for Java class generation based on an attribute.
   init?(attribute: AttributeSyntax) {
@@ -37,8 +37,8 @@ enum GenerationMode {
     case "ExportToJavaClass":
       self = .exportToJava
 
-    case "JavaImplements":
-      self = .JavaImplements
+    case "JavaImplementation":
+      self = .javaImplementation
 
     default:
       return nil

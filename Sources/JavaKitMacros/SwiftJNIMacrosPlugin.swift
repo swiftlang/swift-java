@@ -18,7 +18,7 @@ import SwiftSyntaxMacros
 @main
 struct JavaKitMacrosPlugin: CompilerPlugin {
   var providingMacros: [Macro.Type] = [
-    JavaImplementsMacro.self,
+    JavaImplementationMacro.self,
     JavaClassMacro.self,
     JavaFieldMacro.self,
     JavaMethodMacro.self,

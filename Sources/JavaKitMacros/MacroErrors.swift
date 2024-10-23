@@ -14,7 +14,7 @@
 
 enum MacroErrors: Error {
   case unrecognizedJavaClassMacro(String)
-  case JavaImplementsRequiresExtension
+  case javaImplementationRequiresExtension
   case classNameNotStringLiteral
   case classNameNotFullyQualified(String)
   case javaClassNotOnType

@@ -156,7 +156,7 @@ public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: 
 /// the method can be implemented in Swift with the following:
 ///
 /// ```swift
-/// @JavaImplements
+/// @JavaImplementation
 /// extension Hello {
 ///   @JavaMethod
 ///   func sayHello(i: Int32, _ j: Int32) -> Int32 {
@@ -165,4 +165,4 @@ public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: 
 /// }
 /// ```
 @attached(peer)
-public macro JavaImplements(_ fullClassName: String) = #externalMacro(module: "JavaKitMacros", type: "JavaImplementsMacro")
+public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "JavaKitMacros", type: "JavaImplementationMacro")

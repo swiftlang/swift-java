@@ -18,7 +18,7 @@ enum SwiftWrappedError: Error {
   case message(String)
 }
 
-@JavaImplements("com.example.swift.HelloSwift")
+@JavaImplementation("com.example.swift.HelloSwift")
 extension HelloSwift: HelloSwiftNativeMethods {
   @JavaMethod
   func sayHello(_ i: Int32, _ j: Int32) -> Int32 {

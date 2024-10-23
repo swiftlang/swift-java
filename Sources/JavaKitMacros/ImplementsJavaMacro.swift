@@ -16,16 +16,16 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-enum JavaImplementsMacro {}
+enum JavaImplementationMacro {}
 
-extension JavaImplementsMacro: PeerMacro {
+extension JavaImplementationMacro: PeerMacro {
   static func expansion(
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
     guard let extensionDecl = declaration.as(ExtensionDeclSyntax.self) else {
-      throw MacroErrors.JavaImplementsRequiresExtension
+      throw MacroErrors.javaImplementationRequiresExtension
     }
 
     // Dig out the Java class name.

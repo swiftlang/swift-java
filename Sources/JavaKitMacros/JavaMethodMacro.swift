@@ -34,7 +34,7 @@ extension JavaMethodMacro: BodyMacro {
     // MacroErrors.macroOutOfContext(node.attributeName.trimmedDescription)
 
     switch mode {
-    case .JavaImplements, .exportToJava:
+    case .javaImplementation, .exportToJava:
       return declaration.body.map { Array($0.statements) } ?? []
 
     case .importFromJava, nil:

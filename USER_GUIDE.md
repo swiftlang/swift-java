@@ -235,7 +235,7 @@ if let url = myObject.as(URL.self) {
 
 ### Implementing Java `native` methods in Swift
 
-JavaKit supports implementing Java `native` methods in Swift using JNI with the `@JavaImplements` macro. In Java, the method must be declared as `native`, e.g.,
+JavaKit supports implementing Java `native` methods in Swift using JNI with the `@JavaImplementation` macro. In Java, the method must be declared as `native`, e.g.,
 
 ```java
 package org.swift.javakit.example;
@@ -259,10 +259,10 @@ On the Swift side, the Java class needs to be exposed to Swift through `Java2Swi
 }
 ```
 
-Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplements`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, JavaKit produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
+Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplementation`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, JavaKit produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
 
 ```swift
-@JavaImplements("org.swift.javakit.HelloSwift")
+@JavaImplementation("org.swift.javakit.HelloSwift")
 extension Hello: HelloNativeMethods {
   @JavaMethod
   func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
@@ -532,15 +532,10 @@ Now, in the `HelloSwift` Swift library, define a `struct` that provides the `mai
 ```swift
 import JavaKit
 
-@JavaImplements("org.swift.javakit.HelloSwiftMain")
+@JavaImplementation("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
-<<<<<<< HEAD
-  @JavaImplements
-  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
-=======
   @JavaStaticMethod
-  static func main(arguments: [String], environment: JNIEnvironment) {
->>>>>>> 148e53c (JavaKit: Rework `@JavaImplements` to be more like `@implements` language feature)
+  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
     print("Command line arguments are: \(arguments)")
   }
 }
@@ -571,7 +566,7 @@ struct HelloSwiftMain: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable verbose output")
   var verbose: Bool = false
 
-  @JavaImplements
+  @JavaImplementation
   static func main(arguments: [String], environment: JNIEnvironment? = nil) {
     let command = Self.parseOrExit(arguments)
     command.run(environment: environment)
