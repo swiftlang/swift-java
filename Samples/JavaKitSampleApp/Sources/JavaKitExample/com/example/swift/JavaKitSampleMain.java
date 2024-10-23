@@ -19,7 +19,6 @@ package com.example.swift;
  * For the Swift implementation refer to
  */
 public class JavaKitSampleMain {
-
     public static void main(String[] args) {
         int result = new HelloSubclass("Swift").sayHello(17, 25);
         System.out.println("sayHello(17, 25) = " + result);

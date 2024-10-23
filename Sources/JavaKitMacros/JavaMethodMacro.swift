@@ -25,6 +25,22 @@ extension JavaMethodMacro: BodyMacro {
     providingBodyFor declaration: some DeclSyntaxProtocol & WithOptionalCodeBlockSyntax,
     in context: some MacroExpansionContext
   ) throws -> [CodeBlockItemSyntax] {
+    // @JavaMethod only provides an implementation when the method was
+    // imported from Java.
+    let mode = GenerationMode(expansionContext: context)
+
+    // FIXME: nil is a workaround for the fact that extension JavaClass doesn't
+    // currently have the annotations we need. We should throw
+    // MacroErrors.macroOutOfContext(node.attributeName.trimmedDescription)
+
+    switch mode {
+    case .JavaImplements, .exportToJava:
+      return declaration.body.map { Array($0.statements) } ?? []
+
+    case .importFromJava, nil:
+      break
+    }
+
     // Handle initializers separately.
     if let initDecl = declaration.as(InitializerDeclSyntax.self) {
       return try bridgeInitializer(initDecl, in: context)

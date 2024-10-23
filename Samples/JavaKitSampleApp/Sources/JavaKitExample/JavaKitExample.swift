@@ -18,30 +18,9 @@ enum SwiftWrappedError: Error {
   case message(String)
 }
 
-@JavaClass("com.example.swift.HelloSwift")
-struct HelloSwift {
+@JavaImplements("com.example.swift.HelloSwift")
+extension HelloSwift {
   @JavaMethod
-  init(environment: JNIEnvironment)
-
-  @JavaMethod
-  func sayHelloBack(_ i: Int32) -> Double
-
-  @JavaMethod
-  func greet(_ name: String)
-
-  @JavaMethod
-  func doublesToStrings(doubles: [Double]) -> [String]
-
-  @JavaMethod
-  func throwMessage(message: String) throws
-
-  @JavaField
-  var value: Double
-
-  @JavaField
-  var name: String
-
-  @ImplementsJava
   func sayHello(i: Int32, _ j: Int32) -> Int32 {
     print("Hello from Swift!")
     let answer = self.sayHelloBack(i + j)
@@ -65,7 +44,7 @@ struct HelloSwift {
     self.name = "a 🗑️-collected language"
     _ = self.sayHelloBack(42)
 
-    let strings = doublesToStrings(doubles: [3.14159, 2.71828])
+    let strings = doublesToStrings([3.14159, 2.71828])
     print("Converting doubles to strings: \(strings)")
 
     // Try downcasting
@@ -83,11 +62,11 @@ struct HelloSwift {
     assert(!newHello.is(HelloSubclass.self))
 
     // Create a new instance.
-    let helloSubFromSwift = HelloSubclass(greeting: "Hello from Swift", environment: javaEnvironment)
+    let helloSubFromSwift = HelloSubclass("Hello from Swift", environment: javaEnvironment)
     helloSubFromSwift.greetMe()
 
     do {
-      try throwMessage(message: "I am an error")
+      try throwMessage("I am an error")
     } catch {
       print("Caught Java error: \(error)")
     }
@@ -95,29 +74,11 @@ struct HelloSwift {
     return i * j
   }
 
-  @ImplementsJava
+  @JavaMethod
   func throwMessageFromSwift(message: String) throws -> String {
     throw SwiftWrappedError.message(message)
   }
 }
-
-extension JavaClass<HelloSwift> {
-  @JavaStaticField
-  var initialValue: Double
-}
-
-@JavaClass("com.example.swift.HelloSubclass", extends: HelloSwift.self)
-struct HelloSubclass {
-  @JavaField
-  var greeting: String
-
-  @JavaMethod
-  func greetMe()
-
-  @JavaMethod
-  init(greeting: String, environment: JNIEnvironment)
-}
-
 
 func removeLast(arrayList: ArrayList<JavaClass<HelloSwift>>) {
   if let lastObject = arrayList.getLast() {

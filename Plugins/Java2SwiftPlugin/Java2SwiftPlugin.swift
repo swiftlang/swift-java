@@ -93,6 +93,21 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
       outputDirectory.appending(path: "\(swiftName).swift")
     }
 
+    // Find the Java .class files generated from prior plugins.
+    let compiledClassFiles = sourceModule.pluginGeneratedResources.filter { url in
+      url.pathExtension == "class"
+    }
+
+    if let firstClassFile = compiledClassFiles.first {
+      // Keep stripping off parts of the path until we hit the "Java" part.
+      // That's where the class path starts.
+      var classpath = firstClassFile
+      while classpath.lastPathComponent != "Java" {
+        classpath.deleteLastPathComponent()
+      }
+      arguments += [ "--classpath", classpath.path() ]
+    }
+
     return [
       .buildCommand(
         displayName: "Wrapping \(config.classes.count) Java classes target \(sourceModule.name) in Swift",

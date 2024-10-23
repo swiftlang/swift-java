@@ -268,6 +268,10 @@ extension JavaTranslator {
     members.append(
       contentsOf: javaClass.getConstructors().compactMap {
         $0.flatMap { constructor in
+          if constructor.isNative {
+            return nil
+          }
+
           do {
             return try translateConstructor(constructor)
           } catch {
@@ -283,6 +287,11 @@ extension JavaTranslator {
     members.append(
       contentsOf: javaClass.getMethods().compactMap {
         $0.flatMap { method in
+          if method.isNative {
+            return nil
+          }
+
+
           // Save the static methods; they need to go on an extension of
           // JavaClass.
           if method.isStatic {

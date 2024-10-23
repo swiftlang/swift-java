@@ -213,6 +213,69 @@ do {
 
 Note that we are passing the Jar file in the `classPath` argument when initializing the `JavaVirtualMachine` instance. Otherwise, the program will fail with an error because it cannot find the Java class `com.gazman.quadratic_sieve.primes.SieveOfEratosthenes`.
 
+### Up and downcasting
+
+All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checkin whether a given object is of the specified type, e.g.,
+
+```swift
+if myObject.is(URL.self) {
+  // myObject is a Java URL.
+}
+```
+
+Often, one also wants to cast to that type. The `as` method returns an optional of the specified type, so it works well with `if let`:
+
+```swift
+if let url = myObject.as(URL.self) {
+  // okay, url is a Java URL
+}
+```
+
+> *Note*: The Swift `is`, `as?`, and `as!` operators do *not* work correctly with the Swift projections of Java types. Use the `is` and `as` methods consistently.
+
+### Implementing Java `native` methods in Swift
+
+JavaKit supports implementing Java `native` methods in Swift using JNI with the `@JavaImplements` macro. In Java, the method must be declared as `native`, e.g.,
+
+```java
+package org.swift.javakit.example;
+
+public class HelloSwift {
+    static {
+        System.loadLibrary("HelloSwiftLib");
+    }
+
+    public native String reportStatistics(String meaning, double[] numbers);
+}
+```
+
+On the Swift side, the Java class needs to have been exposed to Swift through `Java2Swift.config`, e.g.,:
+
+```swift
+{
+  "classes" : {
+    "org.swift.javakit.example.HelloSwift" : "Hello",
+  }
+}
+```
+
+Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplements`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well.  For example:
+
+```swift
+@JavaImplements("org.swift.javakit.HelloSwift")
+extension Hello {
+  @JavaMethod
+  func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
+    let average = numbers.isEmpty ? 0.0 : numbers.reduce(0.0) { $0 + $1 } / Double(numbers.count)
+    return "Average of \(meaning) is \(average)"
+  }
+}
+```
+
+Java native methods that throw any checked exception should be marked as `throws` in Swift. Swift will translate any thrown error into a Java exception.
+
+The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment? = nil`, which will receive the JNI environment in which the function is being executed. In case of nil, the `JavaVirtualMachine.shared().environment()` value will be used.
+
 ## Using Java libraries from Swift
 
 This section describes how Java libraries and mapped into Swift and their use from Swift.
@@ -324,27 +387,7 @@ A number of JavaKit modules provide Swift projections of Java classes and interf
 | `java.lang.Throwable` | `Throwable`    | `JavaKit`        |
 | `java.net.URL`        | `URL`          | `JavaKitNetwork` |
 
-The `Java2Swift` tool can translate any other Java classes into Swift projections. The easiest way to use `Java2Swift` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document.
-
-### Up and downcasting
-
-All `AnyJavaObject` instances provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checkin whether a given object is of the specified type, e.g.,
-
-```swift
-if myObject.is(URL.self) {
-  // myObject is a Java URL.
-}
-```
-
-Often, one also wants to cast to that type. The `as` method returns an optional of the specified type, so it works well with `if let`:
-
-```swift
-if let url = myObject.as(URL.self) {
-  // okay, url is a Java URL
-}
-```
-
-> *Note*: The Swift `is`, `as?`, and `as!` operators do *not* work correctly with the Swift projections of Java types. Use the `is` and `as` methods consistently.
+The `Java2Swift` tool can translate any other Java classes into Swift projections. The easiest way to use `Java2Swift` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document
 
 ### Class objects and static methods
 
@@ -361,57 +404,6 @@ extension JavaClass<URLConnection> {
 ### Interfaces
 
 Java interfaces are similar to classes, and are projected into Swift in much the same way, but with the macro `JavaInterface`. The `JavaInterface` macro takes the Java interface name as well as any Java interfaces that this interface extends. As an example, here is the Swift projection of the [`java.util.Enumeration`](https://docs.oracle.com/javase/8/docs/api/java/util/Enumeration.html) generic interface:
-
-```swift
-@JavaInterface("java.util.Enumeration")
-public struct Enumeration<E: AnyJavaObject> {
-  @JavaMethod
-  public func hasMoreElements() -> Bool
-
-  @JavaMethod
-  public func nextElement() -> JavaObject?
-}
-```
-
-## Implementing Java `native` methods in Swift
-
-JavaKit supports implementing Java `native` methods in Swift using JNI. In Java, the method must be declared as `native`, e.g.,
-
-```java
-package org.swift.javakit;
-
-public class HelloSwift {
-    static {
-        System.loadLibrary("HelloSwiftLib");
-    }
-
-    public native String reportStatistics(String meaning, double[] numbers);
-}
-```
-
-On the Swift side, the Java class needs to have been exposed to Swift:
-
-```swift
-@JavaClass("org.swift.javakit.HelloSwift")
-struct HelloSwift { ... }
-```
-
-Implementations of `native` methods can be written within the Swift type or an extension thereof, and should be marked with `@ImplementsJava`. For example:
-
-```swift
-@JavaClass("org.swift.javakit.HelloSwift")
-extension HelloSwift {
-  @ImplementsJava
-  func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
-    let average = numbers.isEmpty ? 0.0 : numbers.reduce(0.0) { $0 + $1 } / Double(numbers.count)
-    return "Average of \(meaning) is \(average)"
-  }
-}
-```
-
-Java native methods that throw any checked exception should be marked as `throws` in Swift. Swift will translate any thrown error into a Java exception.
-
-The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment? = nil`, which will receive the JNI environment in which the function is being executed. In case of nil, the `JavaVirtualMachine.shared().environment()` value will be used.
 
 ## Translating Java classes with `Java2Swift`
 
@@ -540,10 +532,15 @@ Now, in the `HelloSwift` Swift library, define a `struct` that provides the `mai
 ```swift
 import JavaKit
 
-@JavaClass("org.swift.javakit.HelloSwiftMain")
+@JavaImplements("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
-  @ImplementsJava
+<<<<<<< HEAD
+  @JavaImplements
   static func main(arguments: [String], environment: JNIEnvironment? = nil) {
+=======
+  @JavaStaticMethod
+  static func main(arguments: [String], environment: JNIEnvironment) {
+>>>>>>> 148e53c (JavaKit: Rework `@JavaImplements` to be more like `@implements` language feature)
     print("Command line arguments are: \(arguments)")
   }
 }
@@ -574,7 +571,7 @@ struct HelloSwiftMain: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable verbose output")
   var verbose: Bool = false
 
-  @ImplementsJava
+  @JavaImplements
   static func main(arguments: [String], environment: JNIEnvironment? = nil) {
     let command = Self.parseOrExit(arguments)
     command.run(environment: environment)
