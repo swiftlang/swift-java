@@ -480,7 +480,7 @@ extension JavaTranslator {
       : "@JavaMethod\n"
     let accessModifier = implementedInSwift ? "" : "public "
     return """
-      \(raw: javaMethodAttribute)\(raw: accessModifier) init(\(raw: parametersStr))\(raw: throwsStr)
+      \(raw: javaMethodAttribute)\(raw: accessModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
 
