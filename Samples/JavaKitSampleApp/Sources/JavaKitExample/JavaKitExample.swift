@@ -19,9 +19,9 @@ enum SwiftWrappedError: Error {
 }
 
 @JavaImplements("com.example.swift.HelloSwift")
-extension HelloSwift {
+extension HelloSwift: HelloSwiftNativeMethods {
   @JavaMethod
-  func sayHello(i: Int32, _ j: Int32) -> Int32 {
+  func sayHello(_ i: Int32, _ j: Int32) -> Int32 {
     print("Hello from Swift!")
     let answer = self.sayHelloBack(i + j)
     print("Swift got back \(answer) from Java")
@@ -75,7 +75,7 @@ extension HelloSwift {
   }
 
   @JavaMethod
-  func throwMessageFromSwift(message: String) throws -> String {
+  func throwMessageFromSwift(_ message: String) throws -> String {
     throw SwiftWrappedError.message(message)
   }
 }

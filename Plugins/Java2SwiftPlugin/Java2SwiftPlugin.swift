@@ -106,6 +106,23 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
         classpath.deleteLastPathComponent()
       }
       arguments += [ "--classpath", classpath.path() ]
+
+      // For each of the class files, note that it can have Swift-native
+      // implementations. We figure this out based on the path.
+      for classFile in compiledClassFiles {
+        var classFile = classFile.deletingPathExtension()
+        var classNameComponents: [String] = []
+
+        while classFile.lastPathComponent != "Java" {
+          classNameComponents.append(classFile.lastPathComponent)
+          classFile.deleteLastPathComponent()
+        }
+
+        let className = classNameComponents
+          .reversed()
+          .joined(separator: ".")
+        arguments += [ "--swift-native-implementation", className]
+      }
     }
 
     return [

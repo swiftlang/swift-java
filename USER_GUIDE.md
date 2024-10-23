@@ -249,7 +249,7 @@ public class HelloSwift {
 }
 ```
 
-On the Swift side, the Java class needs to have been exposed to Swift through `Java2Swift.config`, e.g.,:
+On the Swift side, the Java class needs to be exposed to Swift through `Java2Swift.config`, e.g.,:
 
 ```swift
 {
@@ -259,11 +259,11 @@ On the Swift side, the Java class needs to have been exposed to Swift through `J
 }
 ```
 
-Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplements`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well.  For example:
+Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplements`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, JavaKit produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
 
 ```swift
 @JavaImplements("org.swift.javakit.HelloSwift")
-extension Hello {
+extension Hello: HelloNativeMethods {
   @JavaMethod
   func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
     let average = numbers.isEmpty ? 0.0 : numbers.reduce(0.0) { $0 + $1 } / Double(numbers.count)
