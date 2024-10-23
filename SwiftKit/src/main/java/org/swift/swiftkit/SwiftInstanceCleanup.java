@@ -34,8 +34,6 @@ record SwiftHeapObjectCleanup(SwiftHeapObject instance) implements SwiftInstance
 
         // Destroy (and deinit) the object:
         var ty = this.instance.$swiftType();
-        System.out.println("x destroy instance = " + this.instance);
-        System.out.println("x destroy ty = " + ty);
 
         SwiftValueWitnessTable.destroy(ty, this.instance.$memorySegment());
 
