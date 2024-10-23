@@ -5,7 +5,7 @@ import JavaRuntime
 @JavaClass("java.util.Stack")
 public struct Stack<E: AnyJavaObject> {
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func empty() -> Bool

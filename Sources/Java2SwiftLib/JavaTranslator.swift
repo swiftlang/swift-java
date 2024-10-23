@@ -410,7 +410,7 @@ extension JavaTranslator {
 extension JavaTranslator {
   /// Translates the given Java constructor into a Swift declaration.
   package func translateConstructor(_ javaConstructor: Constructor<some AnyJavaObject>) throws -> DeclSyntax {
-    let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment"]
+    let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
 
@@ -483,8 +483,13 @@ extension JavaTranslator {
     """
 
     let initSyntax: DeclSyntax = """
-    public init(_ enumValue: \(raw: name), environment: JNIEnvironment) {
-      let classObj = try! JavaClass<Self>(in: environment)
+    public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
+      let _environment = if let environment {
+        environment
+      } else {
+        try! JavaVirtualMachine.shared().environment()
+      }
+      let classObj = try! JavaClass<Self>(in: _environment)
       switch enumValue {
     \(raw: enumFields.map {
       return """

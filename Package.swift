@@ -78,11 +78,6 @@ let package = Package(
     ),
 
     .library(
-      name: "JavaKitVM",
-      targets: ["JavaKitVM"]
-    ),
-
-    .library(
       name: "JavaTypes",
       targets: ["JavaTypes"]
     ),
@@ -165,6 +160,18 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      linkerSettings: [
+        .unsafeFlags(
+          [
+            "-L\(javaHome)/lib/server",
+            "-Xlinker",
+            "-rpath",
+            "-Xlinker",
+            "\(javaHome)/lib/server",
+          ]
+        ),
+        .linkedLibrary("jvm"),
       ]
     ),
     .target(
@@ -203,27 +210,6 @@ let package = Package(
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
-    .target(
-      name: "JavaKitVM",
-      dependencies: ["JavaKit"],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-      ],
-      linkerSettings: [
-        .unsafeFlags(
-          [
-            "-L\(javaHome)/lib/server",
-            "-Xlinker",
-            "-rpath",
-            "-Xlinker",
-            "\(javaHome)/lib/server",
-          ]
-        ),
-        .linkedLibrary("jvm"),
-      ]
-    ),
-
     .plugin(
         name: "JavaCompilerPlugin",
         capability: .buildTool()
@@ -272,7 +258,6 @@ let package = Package(
         "JavaKitJar",
         "JavaKitReflection",
         "JavaKitNetwork",
-        "JavaKitVM",
         "JavaTypes",
       ],
       swiftSettings: [
@@ -291,7 +276,6 @@ let package = Package(
         "JavaKit",
         "JavaKitJar",
         "JavaKitNetwork",
-        "JavaKitVM",
         "Java2SwiftLib",
       ],
 
@@ -328,7 +312,7 @@ let package = Package(
 
     .testTarget(
       name: "JavaKitTests",
-      dependencies: ["JavaKit", "JavaKitNetwork", "JavaKitVM"],
+      dependencies: ["JavaKit", "JavaKitNetwork"],
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ]

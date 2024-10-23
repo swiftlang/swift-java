@@ -5,10 +5,10 @@ import JavaRuntime
 @JavaClass("java.util.BitSet")
 public struct BitSet {
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment)
+  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func cardinality() -> Int32

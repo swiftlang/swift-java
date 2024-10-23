@@ -6,7 +6,7 @@ import JavaRuntime
 @JavaClass("java.net.URLClassLoader")
 public struct URLClassLoader {
   @JavaMethod
-  public init(_ arg0: [URL?], environment: JNIEnvironment)
+  public init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func findResource(_ arg0: String) -> URL?

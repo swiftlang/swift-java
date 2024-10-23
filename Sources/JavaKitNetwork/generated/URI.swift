@@ -5,19 +5,19 @@ import JavaRuntime
 @JavaClass("java.net.URI")
 public struct URI {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, _ arg4: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, _ arg4: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: Int32, _ arg4: String, _ arg5: String, _ arg6: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: Int32, _ arg4: String, _ arg5: String, _ arg6: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool

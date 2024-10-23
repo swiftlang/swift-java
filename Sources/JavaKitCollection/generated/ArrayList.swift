@@ -5,13 +5,13 @@ import JavaRuntime
 @JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
 public struct ArrayList<E: AnyJavaObject> {
   @JavaMethod
-  public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment)
+  public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment)
+  public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment)
+  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool

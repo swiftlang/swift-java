@@ -5,16 +5,16 @@ import JavaRuntime
 @JavaClass("java.net.URL")
 public struct URL {
   @JavaMethod
-  public init(_ arg0: URL?, _ arg1: String, environment: JNIEnvironment) throws
+  public init(_ arg0: URL?, _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool

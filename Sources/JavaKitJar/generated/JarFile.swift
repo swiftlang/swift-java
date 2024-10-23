@@ -6,10 +6,10 @@ import JavaRuntime
 @JavaClass("java.util.jar.JarFile")
 public struct JarFile {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment) throws
+  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment) throws
+  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   public func entries() -> Enumeration<JarEntry>?

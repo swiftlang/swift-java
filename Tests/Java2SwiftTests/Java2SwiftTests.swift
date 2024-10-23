@@ -14,7 +14,6 @@
 
 import JavaKit
 import Java2SwiftLib
-import JavaKitVM
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 /// Handy reference to the JVM abstraction.
@@ -66,7 +65,7 @@ class Java2SwiftTests: XCTestCase {
               return MonthCases.APRIL
             }
         """,
-        "public init(_ enumValue: MonthCases, environment: JNIEnvironment) {",
+        "public init(_ enumValue: MonthCases, environment: JNIEnvironment? = nil) {",
         """
               case .APRIL:
                 if let APRIL = classObj.APRIL {
