@@ -34,14 +34,14 @@ final class VariableImportTests {
     """
 
   @Test("Import: var counter: Int")
-  func variable_() async throws {
+  func variable_() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
 
-    try await st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
+    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
 
     let identifier = "counterInt"
     let varDecl: ImportedVariable? =
