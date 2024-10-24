@@ -30,10 +30,6 @@ public struct JavaMonth {
 
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
-    if isLinux {
-      throw XCTSkip("Crashes for unexplained reasons on Linux")
-    }
-
     try assertTranslatedClass(
       JavaObject.self,
       swiftTypeName: "MyJavaObject",
@@ -56,10 +52,6 @@ class Java2SwiftTests: XCTestCase {
   }
 
   func testEnum() throws {
-    if isLinux {
-      throw XCTSkip("Crashes for unexplained reasons on Linux")
-    }
-
     try assertTranslatedClass(
       JavaMonth.self,
       swiftTypeName: "Month",
@@ -90,10 +82,6 @@ class Java2SwiftTests: XCTestCase {
   }
 
   func testGenericCollections() throws {
-    if isLinux {
-      throw XCTSkip("Crashes for unexplained reasons on Linux")
-    }
-
     try assertTranslatedClass(
       MyArrayList<JavaObject>.self,
       swiftTypeName: "JavaArrayList",
@@ -111,10 +99,6 @@ class Java2SwiftTests: XCTestCase {
   }
 
   func testLinkedList() throws {
-    if isLinux {
-      throw XCTSkip("Crashes for unexplained reasons on Linux")
-    }
-
     try assertTranslatedClass(
       MyLinkedList<JavaObject>.self,
       swiftTypeName: "JavaLinkedList",
@@ -182,13 +166,4 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
 
     XCTFail("Expected chunk '\(expectedChunk)' not found in '\(swiftFileText)'", file: file, line: line)
   }
-}
-
-/// Whether we're running on Linux.
-var isLinux: Bool {
-  #if os(Linux)
-  return true
-  #else
-  return false
-  #endif
 }
