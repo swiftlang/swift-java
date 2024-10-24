@@ -20,13 +20,9 @@ private func methodMangling<each Param: JavaValue>(
   parameterTypes: repeat (each Param).Type,
   resultType: JavaType
 ) -> String {
-  let parameterTypesArray = [JavaType].init(unsafeUninitializedCapacity: countArgs(repeat each parameterTypes)) {
-    buffer,
-    initializedCount in
-    for parameterType in repeat each parameterTypes {
-      buffer[initializedCount] = parameterType.javaType
-      initializedCount += 1
-    }
+  var parameterTypesArray: [JavaType] = []
+  for parameterType in repeat each parameterTypes {
+    parameterTypesArray.append(parameterType.javaType)
   }
   return MethodSignature(
     resultType: resultType,
