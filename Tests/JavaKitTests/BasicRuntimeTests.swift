@@ -25,10 +25,6 @@ var jvm: JavaVirtualMachine {
 
 class BasicRuntimeTests: XCTestCase {
   func testJavaObjectManagement() throws {
-    if isLinux {
-      throw XCTSkip("Attempts to refcount a null pointer on Linux")
-    }
-
     let environment = try jvm.environment()
     let sneakyJavaThis: jobject
     do {
@@ -55,10 +51,6 @@ class BasicRuntimeTests: XCTestCase {
   }
 
   func testJavaExceptionsInSwift() throws {
-    if isLinux {
-      throw XCTSkip("Attempts to refcount a null pointer on Linux")
-    }
-
     let environment = try jvm.environment()
 
     do {
@@ -69,10 +61,6 @@ class BasicRuntimeTests: XCTestCase {
   }
 
   func testStaticMethods() throws {
-    if isLinux {
-      throw XCTSkip("Attempts to refcount a null pointer on Linux")
-    }
-
     let environment = try jvm.environment()
 
     let urlConnectionClass = try JavaClass<URLConnection>(in: environment)
@@ -80,10 +68,6 @@ class BasicRuntimeTests: XCTestCase {
   }
 
   func testClassInstanceLookup() throws {
-    if isLinux {
-      throw XCTSkip("Attempts to refcount a null pointer on Linux")
-    }
-
     let environment = try jvm.environment()
 
     do {
@@ -96,12 +80,3 @@ class BasicRuntimeTests: XCTestCase {
 
 @JavaClass("org.swift.javakit.Nonexistent")
 struct Nonexistent { }
-
-/// Whether we're running on Linux.
-var isLinux: Bool {
-  #if os(Linux)
-  return true
-  #else
-  return false
-  #endif
-}
