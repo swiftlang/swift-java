@@ -80,6 +80,10 @@ class BasicRuntimeTests: XCTestCase {
   }
 
   func testClassInstanceLookup() throws {
+    if isLinux {
+      throw XCTSkip("Attempts to refcount a null pointer on Linux")
+    }
+
     let environment = try jvm.environment()
 
     do {
