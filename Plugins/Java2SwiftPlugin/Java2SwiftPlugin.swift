@@ -130,7 +130,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
         displayName: "Wrapping \(config.classes.count) Java classes target \(sourceModule.name) in Swift",
         executable: try context.tool(named: "Java2Swift").url,
         arguments: arguments,
-        inputFiles: [ configFile ],
+        inputFiles: [ configFile ] + compiledClassFiles,
         outputFiles: outputSwiftFiles
       )
     ]
