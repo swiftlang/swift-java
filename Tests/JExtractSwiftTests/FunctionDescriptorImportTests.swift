@@ -102,8 +102,8 @@ final class FunctionDescriptorTests {
   }
 
   @Test
-  func FunctionDescriptor_class_counter_get() async throws {
-    try await variableAccessorDescriptorTest("counter", .get) { output in
+  func FunctionDescriptor_class_counter_get() throws {
+    try variableAccessorDescriptorTest("counter", .get) { output in
       assertOutput(
         output,
         expected:
@@ -117,8 +117,8 @@ final class FunctionDescriptorTests {
     }
   }
   @Test
-  func FunctionDescriptor_class_counter_set() async throws {
-    try await variableAccessorDescriptorTest("counter", .set) { output in
+  func FunctionDescriptor_class_counter_set() throws {
+    try variableAccessorDescriptorTest("counter", .set) { output in
       assertOutput(
         output,
         expected:

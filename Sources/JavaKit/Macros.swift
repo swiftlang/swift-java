@@ -41,7 +41,6 @@
   named(`as`)
 )
 @attached(extension, conformances: AnyJavaObject)
-@attached(peer)
 public macro JavaClass(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
@@ -143,23 +142,27 @@ public macro JavaMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaM
 @attached(body)
 public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaMethodMacro")
 
-/// Macro that exposes the given Swift method as a native method in Java.
+/// Macro that marks extensions to specify that all of the @JavaMethod
+/// methods are implementations of Java methods spelled as `native`.
 ///
-/// The macro must be used within a struct type marked with `@JavaClass`, and there
-/// must be a corresponding Java method declared as `native` for it to be called from
-/// Java. For example, given this Swift method:
-///
-/// ```swift
-/// @ImplementsJava
-/// func sayHello(i: Int32, _ j: Int32) -> Int32 {
-///   // swift implementation
-/// }
-///
-/// inside a struct with `@JavaClass("com.example.swift.HelloSwift")`, the
-/// corresponding `HelloSwift` Java class should have:
+/// For example, given a Java native method such as the following in
+/// a Java class `org.swift.example.Hello`:
 ///
 /// ```java
 /// public native int sayHello(int i, int j);
 /// ```
+///
+/// Assuming that the Java class with imported into Swift as `Hello`, t
+/// the method can be implemented in Swift with the following:
+///
+/// ```swift
+/// @JavaImplementation
+/// extension Hello {
+///   @JavaMethod
+///   func sayHello(i: Int32, _ j: Int32) -> Int32 {
+///     // swift implementation
+///   }
+/// }
+/// ```
 @attached(peer)
-public macro ImplementsJava() = #externalMacro(module: "JavaKitMacros", type: "ImplementsJavaMacro")
+public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "JavaKitMacros", type: "JavaImplementationMacro")

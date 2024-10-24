@@ -13,9 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 enum MacroErrors: Error {
+  case unrecognizedJavaClassMacro(String)
+  case javaImplementationRequiresExtension
   case classNameNotStringLiteral
   case classNameNotFullyQualified(String)
   case javaClassNotOnType
   case methodNotOnFunction
   case missingEnvironment
+  case macroOutOfContext(String)
 }

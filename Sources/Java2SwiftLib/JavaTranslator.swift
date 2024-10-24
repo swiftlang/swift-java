@@ -39,6 +39,10 @@ package class JavaTranslator {
   /// import declarations.
   package var importedSwiftModules: Set<String> = JavaTranslator.defaultImportedSwiftModules
 
+  /// The canonical names of Java classes whose declared 'native'
+  /// methods will be implemented in Swift.
+  package var swiftNativeImplementations: Set<String> = []
+
   package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
@@ -229,9 +233,16 @@ extension JavaTranslator {
       interfacesStr = ", \(prefix): \(interfaces.joined(separator: ", "))"
     }
 
+    // The top-level declarations we will be returning.
+    var topLevelDecls: [DeclSyntax] = []
+
     // Members
     var members: [DeclSyntax] = []
-    
+
+    // Members that are native and will instead go into a NativeMethods
+    // protocol.
+    var nativeMembers: [DeclSyntax] = []
+
     // Fields
     var staticFields: [Field] = []
     var enumConstants: [Field] = []
@@ -269,7 +280,21 @@ extension JavaTranslator {
       contentsOf: javaClass.getConstructors().compactMap {
         $0.flatMap { constructor in
           do {
-            return try translateConstructor(constructor)
+            let implementedInSwift = constructor.isNative &&
+              constructor.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
+              swiftNativeImplementations.contains(javaClass.getCanonicalName())
+
+            let translated = try translateConstructor(
+              constructor,
+              implementedInSwift: implementedInSwift
+            )
+
+            if implementedInSwift {
+              nativeMembers.append(translated)
+              return nil
+            }
+
+            return translated
           } catch {
             logUntranslated("Unable to translate '\(fullName)' constructor: \(error)")
             return nil
@@ -282,7 +307,7 @@ extension JavaTranslator {
     var staticMethods: [Method] = []
     members.append(
       contentsOf: javaClass.getMethods().compactMap {
-        $0.flatMap { method in
+        $0.flatMap { (method) -> DeclSyntax? in
           // Save the static methods; they need to go on an extension of
           // JavaClass.
           if method.isStatic {
@@ -290,9 +315,23 @@ extension JavaTranslator {
             return nil
           }
 
+          let implementedInSwift = method.isNative &&
+            method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
+            swiftNativeImplementations.contains(javaClass.getCanonicalName())
+
           // Translate the method if we can.
           do {
-            return try translateMethod(method)
+            let translated = try translateMethod(
+              method,
+              implementedInSwift: implementedInSwift
+            )
+
+            if implementedInSwift {
+              nativeMembers.append(translated)
+              return nil
+            }
+
+            return translated
           } catch {
             logUntranslated("Unable to translate '\(fullName)' method '\(method.getName())': \(error)")
             return nil
@@ -347,10 +386,8 @@ extension JavaTranslator {
 
     // Format the class declaration.
     classDecl = classDecl.formatted(using: format).cast(DeclSyntax.self)
-    
-    if staticMethods.isEmpty && staticFields.isEmpty {
-      return [classDecl]
-    }
+
+    topLevelDecls.append(classDecl)
 
     // Translate static members.
     var staticMembers: [DeclSyntax] = []
@@ -372,7 +409,7 @@ extension JavaTranslator {
           // Translate each static method.
           do {
             return try translateMethod(
-              method,
+              method, implementedInSwift: /*FIXME:*/false,
               genericParameterClause: genericParameterClause,
               whereClause: staticMemberWhereClause
             )
@@ -383,46 +420,74 @@ extension JavaTranslator {
         }
     )
 
-    if staticMembers.isEmpty {
-      return [classDecl]
+    if !staticMembers.isEmpty {
+      // Specify the specialization arguments when needed.
+      let extSpecialization: String
+      if genericParameterClause.isEmpty {
+        extSpecialization = "<\(swiftTypeName)>"
+      } else {
+        extSpecialization = ""
+      }
+
+      let extDecl: DeclSyntax =
+        """
+        extension JavaClass\(raw: extSpecialization) {
+        \(raw: staticMembers.map { $0.description }.joined(separator: "\n\n"))
+        }
+        """
+
+      topLevelDecls.append(
+        extDecl.formatted(using: format).cast(DeclSyntax.self)
+      )
     }
 
-    // Specify the specialization arguments when needed.
-    let extSpecialization: String
-    if genericParameterClause.isEmpty {
-      extSpecialization = "<\(swiftTypeName)>"
-    } else {
-      extSpecialization = ""
+    if !nativeMembers.isEmpty {
+      let protocolDecl: DeclSyntax =
+        """
+        /// Describes the Java `native` methods for ``\(raw: swiftTypeName)``.
+        ///
+        /// To implement all of the `native` methods for \(raw: swiftTypeName) in Swift,
+        /// extend \(raw: swiftTypeName) to conform to this protocol and mark
+        /// each implementation of the protocol requirement with
+        /// `@JavaMethod`.
+        protocol \(raw: swiftTypeName)NativeMethods {
+          \(raw: nativeMembers.map { $0.description }.joined(separator: "\n\n"))
+        }
+        """
+
+      topLevelDecls.append(
+        protocolDecl.formatted(using: format).cast(DeclSyntax.self)
+      )
     }
 
-    let extDecl =
-      ("""
-    extension JavaClass\(raw: extSpecialization) {
-    \(raw: staticMembers.map { $0.description }.joined(separator: "\n\n"))
-    }
-    """ as DeclSyntax).formatted(using: format).cast(DeclSyntax.self)
-
-    return [classDecl, extDecl]
+    return topLevelDecls
   }
 }
 
 // MARK: Method and constructor translation
 extension JavaTranslator {
   /// Translates the given Java constructor into a Swift declaration.
-  package func translateConstructor(_ javaConstructor: Constructor<some AnyJavaObject>) throws -> DeclSyntax {
+  package func translateConstructor(
+    _ javaConstructor: Constructor<some AnyJavaObject>,
+    implementedInSwift: Bool
+  ) throws -> DeclSyntax {
     let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
 
+    let javaMethodAttribute = implementedInSwift
+      ? ""
+      : "@JavaMethod\n"
+    let accessModifier = implementedInSwift ? "" : "public "
     return """
-      @JavaMethod
-      public init(\(raw: parametersStr))\(raw: throwsStr)
+      \(raw: javaMethodAttribute)\(raw: accessModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
 
   /// Translates the given Java method into a Swift declaration.
   package func translateMethod(
     _ javaMethod: Method,
+    implementedInSwift: Bool,
     genericParameterClause: String = "",
     whereClause: String = ""
   ) throws -> DeclSyntax {
@@ -442,10 +507,12 @@ extension JavaTranslator {
 
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
-    let methodAttribute: AttributeSyntax = javaMethod.isStatic ? "@JavaStaticMethod" : "@JavaMethod";
+    let methodAttribute: AttributeSyntax = implementedInSwift
+      ? ""
+      : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
+    let accessModifier = implementedInSwift ? "" : "public "
     return """
-      \(methodAttribute)
-      public func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      \(methodAttribute)\(raw: accessModifier)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
     

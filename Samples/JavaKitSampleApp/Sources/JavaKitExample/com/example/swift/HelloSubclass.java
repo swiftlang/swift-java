@@ -21,7 +21,7 @@ public class HelloSubclass extends HelloSwift {
         this.greeting = greeting;
     }
 
-    private void greetMe() {
+    public void greetMe() {
         super.greet(greeting);
     }
 }

@@ -13,6 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 extension Constructor {
+  /// Whether this is a 'native' method.
+  public var isNative: Bool {
+    return (getModifiers() & 256) != 0
+  }
+
   /// Whether this executable throws any checked exception.
   public var throwsCheckedException: Bool {
     return self.as(Executable.self)!.throwsCheckedException

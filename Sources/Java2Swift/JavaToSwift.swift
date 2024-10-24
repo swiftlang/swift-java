@@ -48,6 +48,11 @@ struct JavaToSwift: ParsableCommand {
   )
   var classpath: [String] = []
 
+  @Option(
+    help: "The names of Java classes whose declared native methods will be implemented in Swift."
+  )
+  var swiftNativeImplementation: [String] = []
+
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
   var outputDirectory: String? = nil
 
@@ -180,6 +185,10 @@ struct JavaToSwift: ParsableCommand {
       swiftModuleName: moduleName,
       environment: environment
     )
+
+    // Keep track of all of the Java classes that will have
+    // Swift-native implementations.
+    translator.swiftNativeImplementations = Set(swiftNativeImplementation)
 
     // Note all of the dependent configurations.
     for (swiftModuleName, dependentConfig) in dependentConfigs {
