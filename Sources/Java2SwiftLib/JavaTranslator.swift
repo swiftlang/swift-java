@@ -239,10 +239,6 @@ extension JavaTranslator {
     // Members
     var members: [DeclSyntax] = []
 
-    // Members that are native and will instead go into a NativeMethods
-    // protocol.
-    var nativeMembers: [DeclSyntax] = []
-
     // Fields
     var staticFields: [Field] = []
     var enumConstants: [Field] = []
@@ -290,7 +286,6 @@ extension JavaTranslator {
             )
 
             if implementedInSwift {
-              nativeMembers.append(translated)
               return nil
             }
 
@@ -327,7 +322,6 @@ extension JavaTranslator {
             )
 
             if implementedInSwift {
-              nativeMembers.append(translated)
               return nil
             }
 
@@ -438,6 +432,37 @@ extension JavaTranslator {
 
       topLevelDecls.append(
         extDecl.formatted(using: format).cast(DeclSyntax.self)
+      )
+    }
+
+    // Members that are native and will instead go into a NativeMethods
+    // protocol.
+    var nativeMembers: [DeclSyntax] = []
+    if swiftNativeImplementations.contains(javaClass.getCanonicalName()) {
+      nativeMembers.append(
+        contentsOf: javaClass.getDeclaredMethods().compactMap {
+          $0.flatMap { method in
+            // FIXME: For now, ignore static methods
+            if method.isStatic {
+              return nil
+            }
+
+            if !method.isNative {
+              return nil
+            }
+
+            // Translate the method if we can.
+            do {
+              return try translateMethod(
+                method,
+                implementedInSwift: true
+              )
+            } catch {
+              logUntranslated("Unable to translate '\(fullName)' method '\(method.getName())': \(error)")
+              return nil
+            }
+          }
+        }
       )
     }
 
