@@ -18,6 +18,9 @@ import JavaKit
 // knowing that JavaClass was defined elsewhere.
 extension JavaClass {
   @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
   public func getName() -> String
 
   @JavaMethod

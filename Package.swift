@@ -262,7 +262,8 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
-        .enableUpcomingFeature("BareSlashRegexLiterals")
+        .enableUpcomingFeature("BareSlashRegexLiterals"),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
       ]
     ),
 
@@ -281,7 +282,8 @@ let package = Package(
 
       swiftSettings: [
         .swiftLanguageMode(.v5),
-        .enableUpcomingFeature("BareSlashRegexLiterals")
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+        .enableUpcomingFeature("BareSlashRegexLiterals"),
       ]
     ),
 
@@ -296,7 +298,8 @@ let package = Package(
         "JavaTypes",
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
       ]
     ),
 
@@ -314,7 +317,8 @@ let package = Package(
       name: "JavaKitTests",
       dependencies: ["JavaKit", "JavaKitNetwork"],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 
@@ -341,7 +345,8 @@ let package = Package(
       name: "Java2SwiftTests",
       dependencies: ["Java2SwiftLib"],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
 

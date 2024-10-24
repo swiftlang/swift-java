@@ -51,7 +51,7 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
-  func testEnum() async throws {
+  func testEnum() throws {
     try assertTranslatedClass(
       JavaMonth.self,
       swiftTypeName: "Month",

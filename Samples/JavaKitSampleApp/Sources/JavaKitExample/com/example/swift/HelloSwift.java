@@ -15,9 +15,9 @@
 package com.example.swift;
 
 public class HelloSwift {
-    private double value;
-    private static double initialValue = 3.14159;
-    private String name = "Java";
+    public double value;
+    public static double initialValue = 3.14159;
+    public String name = "Java";
 
     static {
         System.loadLibrary("JavaKitExample");
@@ -31,7 +31,7 @@ public class HelloSwift {
     public native String throwMessageFromSwift(String message) throws Exception;
 
     // To be called back by the native code
-    private double sayHelloBack(int i) {
+    public double sayHelloBack(int i) {
         System.out.println("And hello back from " + name + "! You passed me " + i);
         return value;
     }
@@ -40,7 +40,7 @@ public class HelloSwift {
         System.out.println("Salutations, " + name);
     }
 
-    String[] doublesToStrings(double[] doubles) {
+    public String[] doublesToStrings(double[] doubles) {
         int size = doubles.length;
         String[] strings = new String[size];
 
