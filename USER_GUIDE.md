@@ -326,6 +326,19 @@ A number of JavaKit modules provide Swift projections of Java classes and interf
 
 The `Java2Swift` tool can translate any other Java classes into Swift projections. The easiest way to use `Java2Swift` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document.
 
+#### Improve parameter names of imported Java methods
+When building Java libraries you can pass the `-parameters` option to javac
+in your build system (Gradle, Maven, sbt, etc) in order to retain the parameter names in the resulting byte code.
+
+This way the imported methods will keep their original parameter names, and you'd get e.g.:
+```swift
+// public func hello(String name)
+func hello(_ name: String)
+```
+rather than just `arg0` parameters.
+
+When building Java sources using the JavaCompilerPlugin this option is passed by default.
+
 ### Up and downcasting
 
 All `AnyJavaObject` instances provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checkin whether a given object is of the specified type, e.g.,
