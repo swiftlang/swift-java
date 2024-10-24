@@ -444,7 +444,7 @@ extension JavaTranslator {
     if !nativeMembers.isEmpty {
       let protocolDecl: DeclSyntax =
         """
-        /// Describes the Java `native` methods for \(raw: swiftTypeName).
+        /// Describes the Java `native` methods for ``\(raw: swiftTypeName)``.
         ///
         /// To implement all of the `native` methods for \(raw: swiftTypeName) in Swift,
         /// extend \(raw: swiftTypeName) to conform to this protocol and mark
