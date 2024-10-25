@@ -26,6 +26,7 @@ let package = Package(
     .executableTarget(
       name: "JavaProbablyPrime",
       dependencies: [
+        .product(name: "JavaKitCollection", package: "swift-java"),
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ],

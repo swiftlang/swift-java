@@ -24,10 +24,7 @@ struct ProbablyPrime: ParsableCommand {
   var certainty: Int32 = 10
 
   func run() throws {
-    let javaVirtualMachine = try JavaVirtualMachine.shared()
-    let jniEnvironment = try javaVirtualMachine.environment()
-
-    let bigInt = BigInteger(number, environment: jniEnvironment)
+    let bigInt = BigInteger(number)
     if bigInt.isProbablePrime(certainty) {
       print("\(number) is probably prime")
     } else {
