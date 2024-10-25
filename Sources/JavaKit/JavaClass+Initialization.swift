@@ -14,10 +14,9 @@
 
 import JavaRuntime
 
-/// Wrapper around a Java class that provides access to the static members of
-/// the class.
-@JavaClass("java.lang.Class")
-public struct JavaClass<ObjectType: AnyJavaObject> {
+extension JavaClass {
+  public typealias ObjectType = T
+
   /// Lookup this Java class within the given environment.
   public init(environment: JNIEnvironment? = nil) throws {
     let environment = try environment ?? JavaVirtualMachine.shared().environment()

@@ -18,18 +18,6 @@ import JavaKit
 // knowing that JavaClass was defined elsewhere.
 extension JavaClass {
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func getName() -> String
-
-  @JavaMethod
-  public func getSimpleName() -> String
-
-  @JavaMethod
-  public func getCanonicalName() -> String
-
-  @JavaMethod
   public func getDeclaredMethods() -> [Method?]
 
   @JavaMethod
@@ -45,14 +33,8 @@ extension JavaClass {
   public func getParameters() -> [Parameter?]
 
   @JavaMethod
-  public func getSuperclass() -> JavaClass<JavaSuperclass>?
-
-  @JavaMethod
   public func getTypeParameters() -> [TypeVariable<JavaClass<JavaObject>>?]
 
   @JavaMethod
   public func getGenericInterfaces() -> [Type?]
-
-  @JavaMethod
-  public func isInterface() -> Bool
 }
