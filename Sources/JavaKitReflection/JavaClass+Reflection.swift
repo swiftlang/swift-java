@@ -30,6 +30,9 @@ extension JavaClass {
   public func getCanonicalName() -> String
 
   @JavaMethod
+  public func getDeclaredMethods() -> [Method?]
+
+  @JavaMethod
   public func getMethods() -> [Method?]
     
   @JavaMethod

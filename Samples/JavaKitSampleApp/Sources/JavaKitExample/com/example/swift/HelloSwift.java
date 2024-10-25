@@ -27,8 +27,8 @@ public class HelloSwift {
         this.value = initialValue;
     }
 
-    public native int sayHello(int x, int y);
-    public native String throwMessageFromSwift(String message) throws Exception;
+    native int sayHello(int x, int y);
+    native String throwMessageFromSwift(String message) throws Exception;
 
     // To be called back by the native code
     public double sayHelloBack(int i) {
