@@ -35,7 +35,7 @@ extension JavaType {
     case .short: "S"
     case .void: "V"
     case .array(let elementType): "[" + elementType.mangledName
-    case .class(package: let package, name: let name):
+    case .class(let package, let name):
       "L\(package!).\(name);".replacingPeriodsWithSlashes()
     }
   }
@@ -88,15 +88,33 @@ extension JavaType {
     }
 
     switch firstChar {
-    case "Z": string = string.dropFirst(); return .boolean
-    case "B": string = string.dropFirst(); return .byte
-    case "C": string = string.dropFirst(); return .char
-    case "D": string = string.dropFirst(); return .double
-    case "F": string = string.dropFirst(); return .float
-    case "I": string = string.dropFirst(); return .int
-    case "J": string = string.dropFirst(); return .long
-    case "S": string = string.dropFirst(); return .short
-    case "V": string = string.dropFirst(); return .void
+    case "Z":
+      string = string.dropFirst()
+      return .boolean
+    case "B":
+      string = string.dropFirst()
+      return .byte
+    case "C":
+      string = string.dropFirst()
+      return .char
+    case "D":
+      string = string.dropFirst()
+      return .double
+    case "F":
+      string = string.dropFirst()
+      return .float
+    case "I":
+      string = string.dropFirst()
+      return .int
+    case "J":
+      string = string.dropFirst()
+      return .long
+    case "S":
+      string = string.dropFirst()
+      return .short
+    case "V":
+      string = string.dropFirst()
+      return .void
     case "[":
       // Count the brackets to determine array depth.
       var arrayDepth = 1

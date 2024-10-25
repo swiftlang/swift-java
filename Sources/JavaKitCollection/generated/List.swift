@@ -102,41 +102,68 @@ public struct List<E: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> List<JavaObject>? where ObjectType == List<E>
+  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> List<JavaObject>?
+  where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> List<JavaObject>?
+  where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> List<JavaObject>?
+  where ObjectType == List<E>
 
   @JavaStaticMethod
   public func of<E: AnyJavaObject>() -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?,
+    _ arg8: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?)
+    -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?, _ arg5: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> List<JavaObject>?
+  where ObjectType == List<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?, _ arg9: JavaObject?) -> List<JavaObject>? where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(
+    _ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?,
+    _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?,
+    _ arg8: JavaObject?, _ arg9: JavaObject?
+  ) -> List<JavaObject>? where ObjectType == List<E>
 }

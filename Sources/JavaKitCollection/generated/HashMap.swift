@@ -90,5 +90,7 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<JavaObject, JavaObject>? where ObjectType == HashMap<K, V>
+  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<
+    JavaObject, JavaObject
+  >? where ObjectType == HashMap<K, V>
 }

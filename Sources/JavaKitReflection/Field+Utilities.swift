@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 extension Field {
-    /// Whether this is a 'static' field.
-    public var isStatic: Bool {
-      return (getModifiers() & 0x08) != 0
-    }
+  /// Whether this is a 'static' field.
+  public var isStatic: Bool {
+    return (getModifiers() & 0x08) != 0
+  }
 }

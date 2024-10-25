@@ -60,11 +60,13 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
     environment.interface.CallStaticObjectMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticObjectField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticObjectField
   }
 
@@ -75,7 +77,8 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
     }
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     return { environment, array, start, length, outPointer in
       let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {
@@ -87,7 +90,8 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
     }
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     return { environment, array, start, length, outPointer in
       let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {

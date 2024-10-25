@@ -92,8 +92,8 @@ public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.
 /// }
 /// ```
 @attached(accessor)
-public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
-
+public macro JavaField(_ javaFieldName: String? = nil) =
+  #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift property into one that accesses a Java static field on the underlying Java object.
 ///
@@ -106,7 +106,8 @@ public macro JavaField(_ javaFieldName: String? = nil) = #externalMacro(module: 
 /// }
 /// ```
 @attached(accessor)
-public macro JavaStaticField(_ javaFieldName: String? = nil) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
+public macro JavaStaticField(_ javaFieldName: String? = nil) =
+  #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
@@ -165,4 +166,5 @@ public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: 
 /// }
 /// ```
 @attached(peer)
-public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "JavaKitMacros", type: "JavaImplementationMacro")
+public macro JavaImplementation(_ fullClassName: String) =
+  #externalMacro(module: "JavaKitMacros", type: "JavaImplementationMacro")

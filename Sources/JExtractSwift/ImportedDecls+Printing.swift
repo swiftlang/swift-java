@@ -14,8 +14,8 @@
 
 import Foundation
 import JavaTypes
-import SwiftSyntax
 import OrderedCollections
+import SwiftSyntax
 
 extension ImportedFunc {
   /// Render a `@{@snippet ... }` comment section that can be put inside a JavaDoc comment
@@ -37,8 +37,8 @@ extension VariableAccessorKind {
 
   public var fieldSuffix: String {
     switch self {
-      case .get: "_GET"
-      case .set: "_SET"
+    case .get: "_GET"
+    case .set: "_SET"
     }
   }
 

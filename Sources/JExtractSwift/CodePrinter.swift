@@ -34,7 +34,7 @@ public struct CodePrinter {
   }
   public var indentationText: String = ""
 
-  public static func toString(_ block: (inout CodePrinter) -> ()) -> String {
+  public static func toString(_ block: (inout CodePrinter) -> Void) -> String {
     var printer = CodePrinter()
     block(&printer)
     return printer.finalize()
@@ -66,7 +66,7 @@ public struct CodePrinter {
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
-    body: (inout CodePrinter) -> ()
+    body: (inout CodePrinter) -> Void
   ) {
     indent()
     print("\(text) {")
@@ -145,12 +145,16 @@ public struct CodePrinter {
     return contents
   }
 
-  public mutating func indent(file: String = #fileID, line: UInt = #line, function: String = #function) {
+  public mutating func indent(
+    file: String = #fileID, line: UInt = #line, function: String = #function
+  ) {
     indentationDepth += 1
     log.trace("Indent => \(indentationDepth)", file: file, line: line, function: function)
   }
 
-  public mutating func outdent(file: String = #fileID, line: UInt = #line, function: String = #function) {
+  public mutating func outdent(
+    file: String = #fileID, line: UInt = #line, function: String = #function
+  ) {
     indentationDepth -= 1
     log.trace("Outdent => \(indentationDepth)", file: file, line: line, function: function)
     assert(indentationDepth >= 0, "Outdent beyond zero at [\(file):\(line)](\(function))")

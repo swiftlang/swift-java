@@ -33,7 +33,7 @@ extension JavaType {
   public var isSwiftClosure: Bool {
     switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
-         .array:
+      .array:
       return false
     case .class(package: "java.lang", name: "Runnable"):
       return true

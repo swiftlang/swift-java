@@ -47,11 +47,13 @@ extension Bool: JavaValue {
     environment.interface.CallStaticBooleanMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticBooleanField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticBooleanField
   }
 
@@ -59,11 +61,13 @@ extension Bool: JavaValue {
     environment.interface.NewBooleanArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetBooleanArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetBooleanArrayRegion
   }
 

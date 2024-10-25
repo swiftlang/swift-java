@@ -26,7 +26,7 @@ package struct Configuration: Codable {
   /// the corresponding Swift names (e.g., JavaVector).
   package var classes: [String: String] = [:]
 
-  package init(classPath: String? = nil, classes: [String : String] = [:]) {
+  package init(classPath: String? = nil, classes: [String: String] = [:]) {
     self.classPath = classPath
     self.classes = classes
   }

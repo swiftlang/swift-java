@@ -59,7 +59,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
     guard let nominal = translator.nominalResolution.extendedType(of: node),
-          let importedNominalType = translator.importedNominalType(nominal) else {
+      let importedNominalType = translator.importedNominalType(nominal)
+    else {
       return .skipChildren
     }
 
@@ -142,7 +143,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     self.log.info("Import variable: \(node.kind) \(fullName)")
 
     let returnTy: TypeSyntax
-    if let typeAnnotation = binding.typeAnnotation{
+    if let typeAnnotation = binding.typeAnnotation {
       returnTy = typeAnnotation.type
     } else {
       returnTy = "Swift.Void"
@@ -180,7 +181,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
     guard let currentTypeName,
-            let currentType = translator.importedTypes[currentTypeName] else {
+      let currentType = translator.importedTypes[currentTypeName]
+    else {
       fatalError("Initializer must be within a current type, was: \(node)")
     }
     guard node.shouldImport(log: log) else {
@@ -220,7 +222,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       funcDecl.swiftMangledName = mangledName
     }
 
-    log.info("Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
+    log.info(
+      "Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
     return .skipChildren

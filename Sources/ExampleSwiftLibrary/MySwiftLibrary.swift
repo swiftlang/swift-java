@@ -18,9 +18,9 @@
 // No annotations are necessary on the Swift side to perform the export.
 
 #if os(Linux)
-import Glibc
+  import Glibc
 #else
-import Darwin.C
+  import Darwin.C
 #endif
 
 public func helloWorld() {
@@ -35,7 +35,7 @@ public func globalTakeIntInt(i: Int, j: Int) {
   p("i:\(i), j:\(j)")
 }
 
-public func globalCallMeRunnable(run: () -> ()) {
+public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
@@ -85,13 +85,15 @@ public func _getTypeByMangledNameInEnvironment(
   _ name: UnsafePointer<UInt8>,
   _ nameLength: UInt,
   genericEnvironment: UnsafeRawPointer?,
-  genericArguments: UnsafeRawPointer?)
+  genericArguments: UnsafeRawPointer?
+)
   -> Any.Type?
-
 
 // ==== Internal helpers
 
-private func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
+private func p(
+  _ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function
+) {
   print("[swift][\(file):\(line)](\(function)) \(msg)")
   fflush(stdout)
 }

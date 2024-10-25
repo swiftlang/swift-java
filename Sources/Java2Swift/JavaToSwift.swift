@@ -27,7 +27,8 @@ import SwiftSyntaxBuilder
 struct JavaToSwift: ParsableCommand {
   static var _commandName: String { "Java2Swift" }
 
-  @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
+  @Option(
+    help: "The name of the Swift module into which the resulting Swift types will be generated.")
   var moduleName: String
 
   @Option(
@@ -44,7 +45,8 @@ struct JavaToSwift: ParsableCommand {
 
   @Option(
     name: [.customLong("cp"), .customLong("classpath")],
-    help: "Class search path of directories and zip/jar files from which Java classes can be loaded."
+    help:
+      "Class search path of directories and zip/jar files from which Java classes can be loaded."
   )
   var classpath: [String] = []
 
@@ -53,7 +55,11 @@ struct JavaToSwift: ParsableCommand {
   )
   var swiftNativeImplementation: [String] = []
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
+  @Option(
+    name: .shortAndLong,
+    help:
+      "The directory in which to output the generated Swift files or the Java2Swift configuration file."
+  )
   var outputDirectory: String? = nil
 
   @Argument(
@@ -90,7 +96,8 @@ struct JavaToSwift: ParsableCommand {
     if jar {
       outputDir = baseDir
     } else {
-      outputDir = baseDir
+      outputDir =
+        baseDir
         .appendingPathComponent("generated", isDirectory: true)
     }
 
@@ -138,7 +145,7 @@ struct JavaToSwift: ParsableCommand {
     //   * Command-line option --classpath
     var classPathPieces: [String] = classpath
     switch generationMode {
-    case .configuration(jarFile: let jarFile):
+    case .configuration(let jarFile):
       //   * Jar file (in `-jar` mode)
       classPathPieces.append(jarFile)
     case .classWrappers(let config):
@@ -157,7 +164,7 @@ struct JavaToSwift: ParsableCommand {
     // Run the generation step.
     let classPath = classPathPieces.joined(separator: ":")
     switch generationMode {
-    case .configuration(jarFile: let jarFile):
+    case .configuration(let jarFile):
       try emitConfiguration(
         forJarFile: jarFile,
         classPath: classPath,
@@ -203,15 +210,15 @@ struct JavaToSwift: ParsableCommand {
 
     // Load all of the requested classes.
     #if false
-    let classLoader = URLClassLoader(
-      [
-        try URL("file://\(classPath)", environment: environment)
-      ],
-      environment: environment
-    )
+      let classLoader = URLClassLoader(
+        [
+          try URL("file://\(classPath)", environment: environment)
+        ],
+        environment: environment
+      )
     #else
-    let classLoader = try JavaClass<ClassLoader>(in: environment)
-      .getSystemClassLoader()!
+      let classLoader = try JavaClass<ClassLoader>(in: environment)
+        .getSystemClassLoader()!
     #endif
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, swiftName) in config.classes {
@@ -243,7 +250,8 @@ struct JavaToSwift: ParsableCommand {
 
         """
 
-      let swiftFileName = try! translator.getSwiftTypeName(javaClass).swiftName.replacing(".", with: "+") + ".swift"
+      let swiftFileName =
+        try! translator.getSwiftTypeName(javaClass).swiftName.replacing(".", with: "+") + ".swift"
       try writeContents(
         swiftFileText,
         to: swiftFileName,
@@ -303,8 +311,9 @@ struct JavaToSwift: ParsableCommand {
         continue
       }
 
-      let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
-        .dropLast(".class".count))
+      let javaCanonicalName = String(
+        entry.getName().replacing("/", with: ".")
+          .dropLast(".class".count))
       configuration.classes[javaCanonicalName] =
         javaCanonicalName.defaultSwiftNameForJavaClass
     }

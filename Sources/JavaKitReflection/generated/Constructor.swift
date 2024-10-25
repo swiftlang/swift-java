@@ -130,5 +130,6 @@ extension JavaClass {
   public var DECLARED: Int32
 
   @JavaStaticMethod
-  public func setAccessible<T: AnyJavaObject>(_ arg0: [AccessibleObject?], _ arg1: Bool) where ObjectType == Constructor<T>
+  public func setAccessible<T: AnyJavaObject>(_ arg0: [AccessibleObject?], _ arg1: Bool)
+  where ObjectType == Constructor<T>
 }

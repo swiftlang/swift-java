@@ -31,8 +31,9 @@ package class JavaTranslator {
   /// A mapping from the canonical name of Java classes to the corresponding
   /// Swift type name, its Swift module, and whether we need to be working
   /// with optionals.
-  package var translatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
-    defaultTranslatedClasses
+  package var translatedClasses:
+    [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
+      defaultTranslatedClasses
 
   /// The set of Swift modules that need to be imported to make the generated
   /// code compile. Use `getImportDecls()` to format this into a list of
@@ -78,10 +79,11 @@ extension JavaTranslator {
   /// The default set of translated classes that do not come from JavaKit
   /// itself. This should only be used to refer to types that are built-in to
   /// JavaKit and therefore aren't captured in any configuration file.
-  package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
-    "java.lang.Class": ("JavaClass", "JavaKit", true),
-    "java.lang.String": ("String", "JavaKit", false),
-  ]
+  package static let defaultTranslatedClasses:
+    [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
+      "java.lang.Class": ("JavaClass", "JavaKit", true),
+      "java.lang.String": ("String", "JavaKit", false),
+    ]
 }
 
 // MARK: Import translation
@@ -119,7 +121,8 @@ extension JavaTranslator {
 
     // Handle array types by recursing into the component type.
     if let arrayType = javaType.as(GenericArrayType.self) {
-      let elementType = try getSwiftTypeNameAsString(arrayType.getGenericComponentType()!, outerOptional: true)
+      let elementType = try getSwiftTypeNameAsString(
+        arrayType.getGenericComponentType()!, outerOptional: true)
       return "[\(elementType)]"
     }
 
@@ -161,7 +164,9 @@ extension JavaTranslator {
   }
 
   /// Translate a Java class into its corresponding Swift type name.
-  package func getSwiftTypeName(_ javaClass: JavaClass<JavaObject>) throws -> (swiftName: String, isOptional: Bool) {
+  package func getSwiftTypeName(_ javaClass: JavaClass<JavaObject>) throws -> (
+    swiftName: String, isOptional: Bool
+  ) {
     let javaType = try JavaType(javaTypeName: javaClass.getName())
     let isSwiftOptional = javaType.isSwiftOptional
     return (
@@ -221,7 +226,8 @@ extension JavaTranslator {
         let typeName = try getSwiftTypeNameAsString(javaType, outerOptional: false)
         return "\(typeName).self"
       } catch {
-        logUntranslated("Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
+        logUntranslated(
+          "Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
         return nil
       }
     }
@@ -257,11 +263,12 @@ extension JavaTranslator {
             }
             return nil
           }
-          
+
           do {
             return try translateField(field)
           } catch {
-            logUntranslated("Unable to translate '\(fullName)' static field '\(field.getName())': \(error)")
+            logUntranslated(
+              "Unable to translate '\(fullName)' static field '\(field.getName())': \(error)")
             return nil
           }
         }
@@ -280,9 +287,10 @@ extension JavaTranslator {
       contentsOf: javaClass.getConstructors().compactMap {
         $0.flatMap { constructor in
           do {
-            let implementedInSwift = constructor.isNative &&
-              constructor.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-              swiftNativeImplementations.contains(javaClass.getCanonicalName())
+            let implementedInSwift =
+              constructor.isNative
+              && constructor.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!)
+              && swiftNativeImplementations.contains(javaClass.getCanonicalName())
 
             let translated = try translateConstructor(
               constructor,
@@ -315,9 +323,9 @@ extension JavaTranslator {
             return nil
           }
 
-          let implementedInSwift = method.isNative &&
-            method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-            swiftNativeImplementations.contains(javaClass.getCanonicalName())
+          let implementedInSwift =
+            method.isNative && method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!)
+            && swiftNativeImplementations.contains(javaClass.getCanonicalName())
 
           // Translate the method if we can.
           do {
@@ -333,7 +341,8 @@ extension JavaTranslator {
 
             return translated
           } catch {
-            logUntranslated("Unable to translate '\(fullName)' method '\(method.getName())': \(error)")
+            logUntranslated(
+              "Unable to translate '\(fullName)' method '\(method.getName())': \(error)")
             return nil
           }
         }
@@ -364,7 +373,7 @@ extension JavaTranslator {
 
     // Emit the struct declaration describing the java class.
     let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
-    let classOrInterface: String = javaClass.isInterface() ? "JavaInterface" : "JavaClass";
+    let classOrInterface: String = javaClass.isInterface() ? "JavaInterface" : "JavaClass"
     var classDecl =
       """
       @\(raw:classOrInterface)(\(literal: fullName)\(raw: extends)\(raw: interfacesStr))
@@ -403,21 +412,22 @@ extension JavaTranslator {
         }
       }
     )
-    
+
     staticMembers.append(
       contentsOf: staticMethods.compactMap { method in
-          // Translate each static method.
-          do {
-            return try translateMethod(
-              method, implementedInSwift: /*FIXME:*/false,
-              genericParameterClause: genericParameterClause,
-              whereClause: staticMemberWhereClause
-            )
-          } catch {
-            logUntranslated("Unable to translate '\(fullName)' static method '\(method.getName())': \(error)")
-            return nil
-          }
+        // Translate each static method.
+        do {
+          return try translateMethod(
+            method, implementedInSwift: /*FIXME:*/ false,
+            genericParameterClause: genericParameterClause,
+            whereClause: staticMemberWhereClause
+          )
+        } catch {
+          logUntranslated(
+            "Unable to translate '\(fullName)' static method '\(method.getName())': \(error)")
+          return nil
         }
+      }
     )
 
     if !staticMembers.isEmpty {
@@ -471,11 +481,15 @@ extension JavaTranslator {
     _ javaConstructor: Constructor<some AnyJavaObject>,
     implementedInSwift: Bool
   ) throws -> DeclSyntax {
-    let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
+    let parameters =
+      try translateParameters(javaConstructor.getParameters()) + [
+        "environment: JNIEnvironment? = nil"
+      ]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
 
-    let javaMethodAttribute = implementedInSwift
+    let javaMethodAttribute =
+      implementedInSwift
       ? ""
       : "@JavaMethod\n"
     let accessModifier = implementedInSwift ? "" : "public "
@@ -498,7 +512,8 @@ extension JavaTranslator {
 
     // Map the result type.
     let resultTypeStr: String
-    let resultType = try getSwiftTypeNameAsString(javaMethod.getGenericReturnType()!, outerOptional: true)
+    let resultType = try getSwiftTypeNameAsString(
+      javaMethod.getGenericReturnType()!, outerOptional: true)
     if resultType != "Void" {
       resultTypeStr = " -> \(resultType)"
     } else {
@@ -507,18 +522,19 @@ extension JavaTranslator {
 
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
-    let methodAttribute: AttributeSyntax = implementedInSwift
+    let methodAttribute: AttributeSyntax =
+      implementedInSwift
       ? ""
-      : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
+      : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n"
     let accessModifier = implementedInSwift ? "" : "public "
     return """
       \(methodAttribute)\(raw: accessModifier)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
-    
+
   package func translateField(_ javaField: Field) throws -> DeclSyntax {
     let typeName = try getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
-    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
+    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField"
     let swiftFieldName = javaField.getName().escapedSwiftName
     return """
       \(fieldAttribute)
@@ -528,15 +544,15 @@ extension JavaTranslator {
 
   package func translateToEnumValue(name: String, enumFields: [Field]) -> [DeclSyntax] {
     let extensionSyntax: DeclSyntax = """
-      public enum \(raw: name): Equatable {
-        \(raw: enumFields.map { "case \($0.getName())" }.joined(separator: "\n"))
-      }
-    """
+        public enum \(raw: name): Equatable {
+          \(raw: enumFields.map { "case \($0.getName())" }.joined(separator: "\n"))
+        }
+      """
 
     let mappingSyntax: DeclSyntax = """
-      public var enumValue: \(raw: name)? {
-        let classObj = self.javaClass
-        \(raw: enumFields.map {
+        public var enumValue: \(raw: name)? {
+          let classObj = self.javaClass
+          \(raw: enumFields.map {
           // The equals method takes a java object, so we need to cast it here
           """
           if self.equals(classObj.\($0.getName())?.as(JavaObject.self)) {
@@ -544,21 +560,21 @@ extension JavaTranslator {
           }
           """
         }.joined(separator: " else ")) else {
-          return nil
+            return nil
+          }
         }
-      }
-    """
+      """
 
     let initSyntax: DeclSyntax = """
-    public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
-      let _environment = if let environment {
-        environment
-      } else {
-        try! JavaVirtualMachine.shared().environment()
-      }
-      let classObj = try! JavaClass<Self>(in: _environment)
-      switch enumValue {
-    \(raw: enumFields.map {
+      public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
+        let _environment = if let environment {
+          environment
+        } else {
+          try! JavaVirtualMachine.shared().environment()
+        }
+        let classObj = try! JavaClass<Self>(in: _environment)
+        switch enumValue {
+      \(raw: enumFields.map {
       return """
           case .\($0.getName()):
             if let \($0.getName()) = classObj.\($0.getName()) {
@@ -568,9 +584,9 @@ extension JavaTranslator {
             }
       """
     }.joined(separator: "\n"))
+        }
       }
-    }
-    """
+      """
 
     return [extensionSyntax, mappingSyntax, initSyntax]
   }
@@ -580,7 +596,8 @@ extension JavaTranslator {
     return try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 
-      let typeName = try getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: true)
+      let typeName = try getSwiftTypeNameAsString(
+        javaParameter.getParameterizedType()!, outerOptional: true)
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
     }

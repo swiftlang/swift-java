@@ -31,7 +31,7 @@ extension JavaClass {
 
   @JavaMethod
   public func getMethods() -> [Method?]
-    
+
   @JavaMethod
   public func getFields() -> [Field?]
 

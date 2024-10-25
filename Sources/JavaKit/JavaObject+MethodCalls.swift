@@ -40,7 +40,9 @@ private func countArgs<each Arg>(_ arg: repeat each Arg) -> Int {
 }
 
 /// Create an array of jvalue instances from the provided Java-compatible values.
-private func getJValues<each Arg: JavaValue>(_ arg: repeat each Arg, in environment: JNIEnvironment) -> [jvalue] {
+private func getJValues<each Arg: JavaValue>(_ arg: repeat each Arg, in environment: JNIEnvironment)
+  -> [jvalue]
+{
   .init(unsafeUninitializedCapacity: countArgs(repeat each arg)) { (buffer, initializedCount) in
     for arg in repeat each arg {
       buffer[initializedCount] = arg.getJValue(in: environment)
@@ -199,7 +201,8 @@ extension AnyJavaObject {
     methodName: String,
     arguments: repeat each Param
   ) throws {
-    let methodID = try javaMethodLookup(methodName: methodName, parameterTypes: repeat (each Param).self)
+    let methodID = try javaMethodLookup(
+      methodName: methodName, parameterTypes: repeat (each Param).self)
     return try javaMethodCall(
       method: methodID,
       args: repeat each arguments
@@ -265,7 +268,8 @@ extension AnyJavaObject {
   }
 
   /// Retrieve the JNI field ID for a field with the given name and type.
-  private func getJNIFieldID<FieldType: JavaValue>(_ fieldName: String, fieldType: FieldType.Type) -> jfieldID?
+  private func getJNIFieldID<FieldType: JavaValue>(_ fieldName: String, fieldType: FieldType.Type)
+    -> jfieldID?
   where FieldType: ~Copyable {
     let this = javaThis
     let environment = javaEnvironment
@@ -273,7 +277,8 @@ extension AnyJavaObject {
     // Retrieve the Java class instance from the object.
     let thisClass = environment.interface.GetObjectClass(environment, this)!
 
-    return environment.interface.GetFieldID(environment, thisClass, fieldName, FieldType.jniMangling)
+    return environment.interface.GetFieldID(
+      environment, thisClass, fieldName, FieldType.jniMangling)
   }
 
   public subscript<FieldType: JavaValue>(
@@ -363,10 +368,13 @@ extension JavaClass {
   }
 
   /// Retrieve the JNI field ID for a field with the given name and type.
-  private func getJNIStaticFieldID<FieldType: JavaValue>(_ fieldName: String, fieldType: FieldType.Type) -> jfieldID? {
+  private func getJNIStaticFieldID<FieldType: JavaValue>(
+    _ fieldName: String, fieldType: FieldType.Type
+  ) -> jfieldID? {
     let environment = javaEnvironment
 
-    return environment.interface.GetStaticFieldID(environment, javaThis, fieldName, FieldType.jniMangling)
+    return environment.interface.GetStaticFieldID(
+      environment, javaThis, fieldName, FieldType.jniMangling)
   }
 
   public subscript<FieldType: JavaValue>(

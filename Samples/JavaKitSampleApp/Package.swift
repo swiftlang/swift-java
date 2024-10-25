@@ -55,7 +55,7 @@ let package = Package(
       name: "JavaKitExample",
       type: .dynamic,
       targets: ["JavaKitExample"]
-    ),
+    )
   ],
 
   dependencies: [
@@ -71,12 +71,12 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
       ],
       plugins: [
         .plugin(name: "JavaCompilerPlugin", package: "swift-java"),
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
-    ),
+    )
   ]
 )

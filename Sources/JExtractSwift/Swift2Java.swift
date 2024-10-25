@@ -28,10 +28,14 @@ public struct SwiftToJava: ParsableCommand {
   @Option(help: "The package the generated Java code should be emitted into.")
   var packageName: String
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files and manifest.")
+  @Option(
+    name: .shortAndLong,
+    help: "The directory in which to output the generated Swift files and manifest.")
   var outputDirectory: String = ".build/jextract-swift/generated"
 
-  @Option(name: .long, help: "Name of the Swift module to import (and the swift interface files belong to)")
+  @Option(
+    name: .long,
+    help: "Name of the Swift module to import (and the swift interface files belong to)")
   var swiftModule: String
 
   // TODO: Once we ship this, make this `.warning` by default
@@ -53,13 +57,17 @@ public struct SwiftToJava: ParsableCommand {
 
     var fileNo = 1
     for interfaceFile in interfaceFiles {
-      print("[\(fileNo)/\(interfaceFiles.count)] Importing module '\(swiftModule)', interface file: \(interfaceFile)")
+      print(
+        "[\(fileNo)/\(interfaceFiles.count)] Importing module '\(swiftModule)', interface file: \(interfaceFile)"
+      )
       defer { fileNo += 1 }
 
       try translator.analyze(swiftInterfacePath: interfaceFile)
       try translator.writeImportedTypesTo(outputDirectory: outputDirectory)
 
-      print("[\(fileNo)/\(interfaceFiles.count)] Imported interface file: \(interfaceFile) " + "done.".green)
+      print(
+        "[\(fileNo)/\(interfaceFiles.count)] Imported interface file: \(interfaceFile) "
+          + "done.".green)
     }
 
     try translator.writeModuleTo(outputDirectory: outputDirectory)

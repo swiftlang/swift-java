@@ -33,7 +33,7 @@ public class NominalTypeResolution {
   /// Mapping from qualified nominal type names to their syntax nodes.
   private var topLevelNominalTypes: [String: NominalTypeDeclSyntaxNode] = [:]
 
-  @_spi(Testing) public init() { }
+  @_spi(Testing) public init() {}
 }
 
 /// A syntax node for a nominal type declaration.
@@ -59,13 +59,15 @@ extension NominalTypeResolution {
     while true {
       // If it's a nominal type, add its name.
       if let nominal = currentNode.asProtocol(SyntaxProtocol.self) as? NominalTypeDeclSyntaxNode,
-         let nominalName = nominal.name.identifier?.name {
+        let nominalName = nominal.name.identifier?.name
+      {
         nameComponents.append(nominalName)
       }
 
       // If it's an extension, add the full name of the extended type.
       if let extensionDecl = currentNode.as(ExtensionDeclSyntax.self),
-         let extendedNominal = extendedType(of: extensionDecl) {
+        let extendedNominal = extendedType(of: extensionDecl)
+      {
         let extendedNominalNameComponents = fullyQualifiedNameComponents(of: extendedNominal)
         return extendedNominalNameComponents + nameComponents.reversed()
       }
@@ -90,7 +92,9 @@ extension NominalTypeResolution {
 
   /// Resolve a nominal type name to its syntax node, or nil if it cannot be
   /// resolved for any reason.
-  private func resolveNominalType(_ nameComponents: some Sequence<some StringProtocol>) -> NominalTypeDeclSyntaxNode? {
+  private func resolveNominalType(_ nameComponents: some Sequence<some StringProtocol>)
+    -> NominalTypeDeclSyntaxNode?
+  {
     // Resolve the name components in order.
     var currentNode: NominalTypeDeclSyntaxNode? = nil
     for nameComponentStr in nameComponents {
@@ -126,8 +130,8 @@ extension NominalTypeResolution {
       // If we have a member with the given name that is a nominal type
       // declaration, we found what we're looking for.
       if let namedMemberDecl = memberDecl.asProtocol(NamedDeclSyntax.self),
-         namedMemberDecl.name.identifier?.name == name,
-         let nominalTypeDecl = memberDecl as? NominalTypeDeclSyntaxNode
+        namedMemberDecl.name.identifier?.name == name,
+        let nominalTypeDecl = memberDecl as? NominalTypeDeclSyntaxNode
       {
         return nominalTypeDecl
       }
@@ -241,13 +245,13 @@ extension ExtensionDeclSyntax {
         return ["Dictionary"]
 
       case .implicitlyUnwrappedOptionalType, .optionalType:
-        return [ "Optional" ]
+        return ["Optional"]
 
       // Types that never involve nominals.
 
       case .classRestrictionType, .compositionType, .functionType, .metatypeType,
-          .missingType, .namedOpaqueReturnType, .packElementType,
-          .packExpansionType, .someOrAnyType, .suppressedType, .tupleType:
+        .missingType, .namedOpaqueReturnType, .packElementType,
+        .packExpansionType, .someOrAnyType, .suppressedType, .tupleType:
         return []
       }
     }

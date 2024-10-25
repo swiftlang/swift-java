@@ -96,7 +96,9 @@ public protocol JavaValue: ~Copyable {
 public typealias JNIEnvironment = UnsafeMutablePointer<JNIEnv?>
 
 /// Type of an operation that performs a JNI method call.
-public typealias JNIMethodCall<Result> = (JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> Result
+public typealias JNIMethodCall<Result> = (
+  JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?
+) -> Result
 
 /// Type of an operation that gets a field's value via JNI.
 public typealias JNIFieldGet<FieldType> = (JNIEnvironment, jobject, jfieldID) -> FieldType
@@ -105,13 +107,16 @@ public typealias JNIFieldGet<FieldType> = (JNIEnvironment, jobject, jfieldID) ->
 public typealias JNIFieldSet<FieldType> = (JNIEnvironment, jobject, jfieldID, FieldType) -> Void
 
 /// Type of an operation that performs a JNI static method call.
-public typealias JNIStaticMethodCall<Result> = (JNIEnvironment, jclass, jmethodID, UnsafePointer<jvalue>?) -> Result
+public typealias JNIStaticMethodCall<Result> = (
+  JNIEnvironment, jclass, jmethodID, UnsafePointer<jvalue>?
+) -> Result
 
 /// Type of an operation that gets a static field's value via JNI.
 public typealias JNIStaticFieldGet<FieldType> = (JNIEnvironment, jclass, jfieldID) -> FieldType
 
 /// Type of an operation that sets a static field's value via JNI.
-public typealias JNIStaticFieldSet<FieldType> = (JNIEnvironment, jclass, jfieldID, FieldType) -> Void
+public typealias JNIStaticFieldSet<FieldType> = (JNIEnvironment, jclass, jfieldID, FieldType) ->
+  Void
 
 /// The type of an operation that produces a new Java array of type ArrayType
 /// via JNI.
@@ -127,7 +132,9 @@ public typealias JNIGetArrayRegion<ElementType> = (
 /// The type of an operation that fills in a Java array with elements from
 /// a buffer.
 /// array via JNI.
-public typealias JNISetArrayRegion<ElementType> = (JNIEnvironment, jobject, jsize, jsize, UnsafePointer<ElementType>?)
+public typealias JNISetArrayRegion<ElementType> = (
+  JNIEnvironment, jobject, jsize, jsize, UnsafePointer<ElementType>?
+)
   -> Void
 
 extension JavaValue where Self: ~Copyable {

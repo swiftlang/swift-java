@@ -60,7 +60,8 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     allVMOptions.append(contentsOf: vmOptions)
 
     // Convert the options
-    let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(capacity: allVMOptions.count)
+    let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(
+      capacity: allVMOptions.count)
     defer {
       optionsBuffer.deallocate()
     }

@@ -64,7 +64,8 @@ enum GenerationMode {
       // return that.
       for attribute in attributes {
         if case .attribute(let attribute) = attribute,
-           let mode = GenerationMode(attribute: attribute) {
+          let mode = GenerationMode(attribute: attribute)
+        {
           self = mode
           return
         }

@@ -20,4 +20,3 @@ extension List: Sequence {
     return self.iterator()!.as(JavaIterator<E>.self)!
   }
 }
-

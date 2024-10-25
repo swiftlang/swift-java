@@ -3,7 +3,9 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.lang.reflect.Executable", extends: AccessibleObject.self, implements: GenericDeclaration.self)
+@JavaClass(
+  "java.lang.reflect.Executable", extends: AccessibleObject.self,
+  implements: GenericDeclaration.self)
 public struct Executable {
   @JavaMethod
   public func getName() -> String

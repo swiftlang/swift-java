@@ -88,7 +88,8 @@ extension JavaImplementationMacro: PeerMacro {
         }
 
       // Map the arguments.
-      let swiftArguments: [ExprSyntax] = memberFunc.signature.parameterClause.parameters.map { param in
+      let swiftArguments: [ExprSyntax] = memberFunc.signature.parameterClause.parameters.map {
+        param in
         let label =
           if let argumentName = param.argumentName {
             "\(argumentName):"
@@ -97,11 +98,14 @@ extension JavaImplementationMacro: PeerMacro {
           }
 
         // The "environment" is passed through directly.
-        if let environmentIndex, memberFunc.signature.parameterClause.parameters[environmentIndex] == param {
+        if let environmentIndex,
+          memberFunc.signature.parameterClause.parameters[environmentIndex] == param
+        {
           return "\(raw: label)\(param.secondName ?? param.firstName)"
         }
 
-        return "\(raw: label)\(param.type)(fromJNI: \(param.secondName ?? param.firstName), in: environment!)"
+        return
+          "\(raw: label)\(param.type)(fromJNI: \(param.secondName ?? param.firstName), in: environment!)"
       }
 
       // Map the return type, if there is one.

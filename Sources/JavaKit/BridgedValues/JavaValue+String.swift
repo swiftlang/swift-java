@@ -49,15 +49,19 @@ extension String: JavaValue {
     environment.interface.SetObjectField
   }
 
-  public static func jniStaticMethodCall(in environment: JNIEnvironment) -> JNIStaticMethodCall<JNIType> {
+  public static func jniStaticMethodCall(in environment: JNIEnvironment) -> JNIStaticMethodCall<
+    JNIType
+  > {
     environment.interface.CallStaticObjectMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticObjectField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticObjectField
   }
 
@@ -69,7 +73,8 @@ extension String: JavaValue {
     }
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     return { environment, array, start, length, outPointer in
       let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
       for i in 0..<length {
@@ -81,7 +86,8 @@ extension String: JavaValue {
     }
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     return { environment, array, start, length, outPointer in
       let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {

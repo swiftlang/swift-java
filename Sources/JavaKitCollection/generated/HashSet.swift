@@ -87,5 +87,6 @@ public struct HashSet<E: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>? where ObjectType == HashSet<E>
+  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>?
+  where ObjectType == HashSet<E>
 }

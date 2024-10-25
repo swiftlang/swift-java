@@ -41,11 +41,13 @@ extension Int8: JavaValue {
     environment.interface.CallStaticByteMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticByteField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticByteField
   }
 
@@ -53,11 +55,13 @@ extension Int8: JavaValue {
     environment.interface.NewByteArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetByteArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetByteArrayRegion
   }
 
@@ -93,11 +97,13 @@ extension UInt16: JavaValue {
     environment.interface.CallStaticCharMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticCharField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticCharField
   }
 
@@ -105,11 +111,13 @@ extension UInt16: JavaValue {
     environment.interface.NewCharArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetCharArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetCharArrayRegion
   }
 
@@ -145,11 +153,13 @@ extension Int16: JavaValue {
     environment.interface.CallStaticShortMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticShortField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticShortField
   }
 
@@ -157,11 +167,13 @@ extension Int16: JavaValue {
     environment.interface.NewShortArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetShortArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetShortArrayRegion
   }
 
@@ -203,11 +215,13 @@ extension Int32: JavaValue {
     environment.interface.CallStaticIntMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticIntField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticIntField
   }
 
@@ -215,11 +229,13 @@ extension Int32: JavaValue {
     environment.interface.NewIntArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetIntArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetIntArrayRegion
   }
 
@@ -261,11 +277,13 @@ extension Int64: JavaValue {
     environment.interface.CallStaticLongMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticLongField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticLongField
   }
 
@@ -273,11 +291,13 @@ extension Int64: JavaValue {
     environment.interface.NewLongArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetLongArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetLongArrayRegion
   }
 

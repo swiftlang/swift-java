@@ -41,11 +41,13 @@ extension Float: JavaValue {
     environment.interface.CallStaticFloatMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticFloatField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticFloatField
   }
 
@@ -53,11 +55,13 @@ extension Float: JavaValue {
     environment.interface.NewFloatArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetFloatArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetFloatArrayRegion
   }
 
@@ -93,11 +97,13 @@ extension Double: JavaValue {
     environment.interface.CallStaticDoubleMethodA
   }
 
-  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>
+  {
     environment.interface.GetStaticDoubleField
   }
 
-  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>
+  {
     environment.interface.SetStaticDoubleField
   }
 
@@ -105,11 +111,13 @@ extension Double: JavaValue {
     environment.interface.NewDoubleArray
   }
 
-  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>
+  {
     environment.interface.GetDoubleArrayRegion
   }
 
-  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>
+  {
     environment.interface.SetDoubleArrayRegion
   }
 

@@ -79,11 +79,8 @@ extension DeclSyntaxProtocol {
 extension DeclModifierSyntax {
   var isAccessControl: Bool {
     switch self.name.tokenKind {
-    case .keyword(.private): fallthrough
-    case .keyword(.fileprivate): fallthrough
-    case .keyword(.internal): fallthrough
-    case .keyword(.package): fallthrough
-    case .keyword(.public):
+    case .keyword(.private), .keyword(.fileprivate), .keyword(.internal), .keyword(.package),
+      .keyword(.public):
       return true
     default:
       return false

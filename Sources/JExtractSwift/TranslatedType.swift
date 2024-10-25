@@ -21,10 +21,10 @@ extension Swift2JavaVisitor {
   func cCompatibleType(for type: TypeSyntax) throws -> TranslatedType {
     switch type.as(TypeSyntaxEnum.self) {
     case .arrayType, .attributedType, .classRestrictionType, .compositionType,
-        .dictionaryType, .implicitlyUnwrappedOptionalType, .metatypeType,
-        .missingType, .namedOpaqueReturnType,
-        .optionalType, .packElementType, .packExpansionType, .someOrAnyType,
-        .suppressedType, .tupleType:
+      .dictionaryType, .implicitlyUnwrappedOptionalType, .metatypeType,
+      .missingType, .namedOpaqueReturnType,
+      .optionalType, .packElementType, .packExpansionType, .someOrAnyType,
+      .suppressedType, .tupleType:
       throw TypeTranslationError.unimplementedType(type)
 
     case .functionType(let functionType):
@@ -146,9 +146,10 @@ extension Swift2JavaVisitor {
     }
 
     // Look up the imported types by name to resolve it to a nominal type.
-    let swiftTypeName = type.trimmedDescription // FIXME: This is a hack.
+    let swiftTypeName = type.trimmedDescription  // FIXME: This is a hack.
     guard let resolvedNominal = translator.nominalResolution.resolveNominalType(swiftTypeName),
-          let importedNominal = translator.importedNominalType(resolvedNominal) else {
+      let importedNominal = translator.importedNominalType(resolvedNominal)
+    else {
       throw TypeTranslationError.unknown(type)
     }
 
@@ -165,7 +166,8 @@ extension String {
   ///     2. Whether the memory referenced by the pointer is mutable.
   ///     3. Whether the pointer type has a `count` property describing how
   ///        many elements it points to.
-  fileprivate var isNameOfSwiftPointerType: (requiresArgument: Bool, mutable: Bool, hasCount: Bool)? {
+  fileprivate var isNameOfSwiftPointerType: (requiresArgument: Bool, mutable: Bool, hasCount: Bool)?
+  {
     switch self {
     case "COpaquePointer", "UnsafeRawPointer":
       return (requiresArgument: false, mutable: true, hasCount: false)
@@ -228,7 +230,7 @@ public struct TranslatedType {
   /// Produce the "unqualified" Java type name.
   var unqualifiedJavaTypeName: String {
     switch javaType {
-    case .class(package: _, name: let name): name
+    case .class(package: _, let name): name
     default: javaType.description
     }
   }

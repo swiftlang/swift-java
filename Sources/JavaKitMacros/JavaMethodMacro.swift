@@ -81,7 +81,9 @@ extension JavaMethodMacro: BodyMacro {
     in context: some MacroExpansionContext
   ) throws -> [CodeBlockItemSyntax] {
     // Extract the "environment" parameter.
-    guard let environmentIndex = initDecl.signature.parameterClause.parameters.indexOfParameter(named: "environment")
+    guard
+      let environmentIndex = initDecl.signature.parameterClause.parameters.indexOfParameter(
+        named: "environment")
     else {
       throw MacroErrors.missingEnvironment
     }

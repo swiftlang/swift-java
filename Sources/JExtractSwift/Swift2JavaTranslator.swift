@@ -117,7 +117,7 @@ extension Swift2JavaTranslator {
   static let defaultFormat = BasicFormat(indentationWidth: .spaces(2))
 
   /// Default set Java imports for every generated file
-  static let defaultJavaImports: Array<String> = [
+  static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.*",
     "org.swift.swiftkit.SwiftKit",
     "org.swift.swiftkit.util.*",
@@ -155,9 +155,9 @@ extension Swift2JavaTranslator {
     // Determine the nominal type kind.
     let kind: NominalTypeKind
     switch Syntax(nominal).as(SyntaxEnum.self) {
-    case .actorDecl:  kind = .actor
-    case .classDecl:  kind = .class
-    case .enumDecl:   kind = .enum
+    case .actorDecl: kind = .actor
+    case .classDecl: kind = .class
+    case .enumDecl: kind = .enum
     case .structDecl: kind = .struct
     default: return nil
     }

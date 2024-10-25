@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import JavaTypes
 import SwiftBasicFormat
 import SwiftParser
 import SwiftSyntax
-import JavaTypes
 
 extension JavaType {
   /// Returns a 'handle' name to pass to the `invoke` call as well as the
@@ -42,6 +42,7 @@ extension JavaType {
         """
     }
 
-    fatalError("Cannot render closure downcall handle for: \(self), in: \(decl), parameter: \(parameter)")
+    fatalError(
+      "Cannot render closure downcall handle for: \(self), in: \(decl), parameter: \(parameter)")
   }
 }

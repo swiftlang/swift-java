@@ -14,8 +14,8 @@
 
 import Foundation
 import JavaTypes
-import SwiftSyntax
 import OrderedCollections
+import SwiftSyntax
 
 /// Any imported (Swift) declaration
 protocol ImportedDecl {
@@ -36,7 +36,10 @@ public struct ImportedNominalType: ImportedDecl {
   public var methods: [ImportedFunc] = []
   public var variables: [ImportedVariable] = []
 
-  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil, kind: NominalTypeKind) {
+  public init(
+    swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil,
+    kind: NominalTypeKind
+  ) {
     self.swiftTypeName = swiftTypeName
     self.javaType = javaType
     self.swiftMangledName = swiftMangledName
@@ -56,7 +59,7 @@ public struct ImportedNominalType: ImportedDecl {
   /// The Java class name without the package.
   public var javaClassName: String {
     switch javaType {
-    case .class(package: _, name: let name): name
+    case .class(package: _, let name): name
     default: javaType.description
     }
   }
@@ -250,7 +253,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
   public var identifier: String
 
   /// Which accessors are we able to expose.
-  /// 
+  ///
   /// Usually this will be all the accessors the variable declares,
   /// however if the getter is async or throwing we may not be able to import it
   /// (yet), and therefore would skip it from the supported set.
@@ -285,13 +288,14 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
 
     switch kind {
     case .set:
-      let newValueParam: FunctionParameterSyntax = "_ newValue: \(self.returnType.cCompatibleSwiftType)"
+      let newValueParam: FunctionParameterSyntax =
+        "_ newValue: \(self.returnType.cCompatibleSwiftType)"
       var funcDecl = ImportedFunc(
         parentName: self.parentName,
         identifier: self.identifier,
         returnType: TranslatedType.void,
         parameters: [.init(param: newValueParam, type: self.returnType)])
-      funcDecl.swiftMangledName = self.swiftMangledName + "s" // form mangled name of the getter by adding the suffix
+      funcDecl.swiftMangledName = self.swiftMangledName + "s"  // form mangled name of the getter by adding the suffix
       return funcDecl
 
     case .get:
@@ -300,21 +304,24 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         identifier: self.identifier,
         returnType: self.returnType,
         parameters: [])
-      funcDecl.swiftMangledName = self.swiftMangledName + "g" // form mangled name of the getter by adding the suffix
+      funcDecl.swiftMangledName = self.swiftMangledName + "g"  // form mangled name of the getter by adding the suffix
       return funcDecl
     }
   }
 
-  public func effectiveAccessorParameters(_ kind: VariableAccessorKind, selfVariant: SelfParameterVariant?) -> [ImportedParam] {
+  public func effectiveAccessorParameters(
+    _ kind: VariableAccessorKind, selfVariant: SelfParameterVariant?
+  ) -> [ImportedParam] {
     var params: [ImportedParam] = []
 
     if kind == .set {
-      let newValueParam: FunctionParameterSyntax = "_ newValue: \(raw: self.returnType.swiftTypeName)"
+      let newValueParam: FunctionParameterSyntax =
+        "_ newValue: \(raw: self.returnType.swiftTypeName)"
       params.append(
         ImportedParam(
           param: newValueParam,
           type: self.returnType)
-        )
+      )
     }
 
     if let parentName {
