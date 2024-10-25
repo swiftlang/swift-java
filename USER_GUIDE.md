@@ -61,24 +61,12 @@ public struct BigInteger {
 
 This Swift type wraps `java.math.BigInteger`, exposing its constructors, methods, and fields for use directly to Swift. Let's try using it!
 
-### Creating a Java Virtual Machine instance from Swift
+### Creating a `BigInteger` and determine whether it is probably prime
 
-The `JavaVirtualMachine` class, which is part of the `JavaKitVM` module, provides the ability to create and query the Java Virtual Machine. One can create a shared instance of `JavaVirtualMachine` by calling `JavaVirtualMachine.shared()`, optionally passing along extra options to the JVM (such as the class path):
-
-```swift
-let javaVirtualMachine = try JavaVirtualMachine.shared()
-```
-
-If the JVM is already running, a `JavaVirtualMachine` instance will be created to reference that existing JVM. Given a `JavaVirtualMachine` instance, one can query the JNI environment for the currently-active thread by calling `environment()`, e.g.,
+Now, we can go ahead and create a `BigInteger` instance from a Swift string like this:
 
 ```swift
-let jniEnvironment = try javaVirtualMachine.environment()
-```
-
-This JNI environment can be used to create instances of Java objects. For example, we can create a `BigInteger` instance from a Swift string like this:
-
-```swift
-let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
+let bigInt = BigInteger(veryBigNumber)
 ```
 
 And then call methods on it. For example, check whether the big integer is a probable prime with some certainty:
@@ -90,6 +78,26 @@ if bigInt.isProbablePrime(10) {
 ```
 
 Swift ensures that the Java garbage collector will keep the object alive until `bigInt` (and any copies of it) are been destroyed. 
+
+### Creating a Java Virtual Machine instance from Swift
+
+When JavaKit requires a running Java Virtual Machine to use an operation (for example, to create an instance of `BigInteger`), it will query to determine if one is running and, if not, create one. To exercise more control over the creation and configuration of the Java virtual machine, use the `JavaVirtualMachine` class, which provides creation and query operations. One can create a shared instance by calling `JavaVirtualMachine.shared()`, optionally passing along extra options to the JVM (such as the class path):
+
+```swift
+let javaVirtualMachine = try JavaVirtualMachine.shared()
+```
+
+If the JVM is already running, a `JavaVirtualMachine` instance will be created to reference that existing JVM. Given a `JavaVirtualMachine` instance, one can query the JNI environment for the currently-active thread by calling `environment()`, e.g.,
+
+```swift
+let jniEnvironment = try javaVirtualMachine.environment()
+```
+
+This JNI environment can be used to create instances of Java objects in a specific JNI environment. For example, we can pass this environment along when we create the `BigInteger` instance from a Swift string, like this:
+
+```swift
+let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
+```
 
 ### Importing a Jar file into Swift
 
@@ -134,7 +142,7 @@ The resulting configuration file will look something like this:
 }
 ```
 
-As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`, `JavaKitVM`) and apply the `Java2Swift` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
+As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `Java2Swift` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
 
 If you inspect the build output, there are a number of warnings that look like this:
 
@@ -164,8 +172,7 @@ Then define a a Java2Swift configuration file in `Sources/JavaMath/Java2Swift.co
     "java.math.BigDecimal" : "BigDecimal",
     "java.math.BigInteger" : "BigInteger",
     "java.math.MathContext" : "MathContext",
-    "java.math.RoundingMode" : "RoundingMode",
-    "java.lang.Integer" : "JavaInteger",
+    "java.math.RoundingMode" : "RoundingMode"
   }
 }
 ```
@@ -185,7 +192,7 @@ public class SieveOfEratosthenes {
 In Java, static methods are called as members of the class itself. For Swift to call a Java static method, it needs a representation of the Java class. This is expressed as an instance of the generic type `JavaClass`, which can be created in a particular JNI environment like this:
 
 ```swift
-let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
 ```
 
 Now we can call Java's static methods on that class as instance methods on the `JavaClass` instance, e.g.,
@@ -198,11 +205,10 @@ Putting it all together, we can define a main program in `Sources/JavaSieve/main
 
 ```swift
 import JavaKit
-import JavaKitVM
 
 let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
 do {
-  let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
   for prime in sieveClass.findPrimes(100)! {
     print("Found prime: \(prime.intValue())")
   }

@@ -581,7 +581,7 @@ extension JavaTranslator {
       } else {
         try! JavaVirtualMachine.shared().environment()
       }
-      let classObj = try! JavaClass<Self>(in: _environment)
+      let classObj = try! JavaClass<Self>(environment: _environment)
       switch enumValue {
     \(raw: enumFields.map {
       return """

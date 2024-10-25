@@ -210,7 +210,7 @@ struct JavaToSwift: ParsableCommand {
       environment: environment
     )
     #else
-    let classLoader = try JavaClass<ClassLoader>(in: environment)
+    let classLoader = try JavaClass<ClassLoader>(environment: environment)
       .getSystemClassLoader()!
     #endif
     var javaClasses: [JavaClass<JavaObject>] = []
