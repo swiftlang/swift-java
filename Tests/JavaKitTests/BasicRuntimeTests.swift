@@ -63,7 +63,7 @@ class BasicRuntimeTests: XCTestCase {
   func testStaticMethods() throws {
     let environment = try jvm.environment()
 
-    let urlConnectionClass = try JavaClass<URLConnection>(in: environment)
+    let urlConnectionClass = try JavaClass<URLConnection>(environment: environment)
     XCTAssert(urlConnectionClass.getDefaultAllowUserInteraction() == false)
   }
 
@@ -71,7 +71,7 @@ class BasicRuntimeTests: XCTestCase {
     let environment = try jvm.environment()
 
     do {
-      _ = try JavaClass<Nonexistent>(in: environment)
+      _ = try JavaClass<Nonexistent>(environment: environment)
     } catch {
       XCTAssertEqual(String(describing: error), "org/swift/javakit/Nonexistent")
     }

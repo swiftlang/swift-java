@@ -185,7 +185,7 @@ public class SieveOfEratosthenes {
 In Java, static methods are called as members of the class itself. For Swift to call a Java static method, it needs a representation of the Java class. This is expressed as an instance of the generic type `JavaClass`, which can be created in a particular JNI environment like this:
 
 ```swift
-let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
 ```
 
 Now we can call Java's static methods on that class as instance methods on the `JavaClass` instance, e.g.,
@@ -202,7 +202,7 @@ import JavaKitVM
 
 let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
 do {
-  let sieveClass = try JavaClass<SieveOfEratosthenes>(in: jvm.environment())
+  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
   for prime in sieveClass.findPrimes(100)! {
     print("Found prime: \(prime.intValue())")
   }

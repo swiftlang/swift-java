@@ -19,7 +19,8 @@ import JavaRuntime
 @JavaClass("java.lang.Class")
 public struct JavaClass<ObjectType: AnyJavaObject> {
   /// Lookup this Java class within the given environment.
-  public init(in environment: JNIEnvironment) throws {
+  public init(environment: JNIEnvironment? = nil) throws {
+    let environment = try environment ?? JavaVirtualMachine.shared().environment()
     self.init(
       javaThis: try ObjectType.getJNIClass(in: environment),
       environment: environment
