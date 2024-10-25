@@ -164,8 +164,7 @@ Then define a a Java2Swift configuration file in `Sources/JavaMath/Java2Swift.co
     "java.math.BigDecimal" : "BigDecimal",
     "java.math.BigInteger" : "BigInteger",
     "java.math.MathContext" : "MathContext",
-    "java.math.RoundingMode" : "RoundingMode",
-    "java.lang.Integer" : "JavaInteger",
+    "java.math.RoundingMode" : "RoundingMode"
   }
 }
 ```
