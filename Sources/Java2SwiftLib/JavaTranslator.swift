@@ -565,6 +565,18 @@ extension JavaTranslator {
         }
       """
 
+    let enumCases =
+      enumFields.map {
+        return """
+              case .\($0.getName()):
+                if let \($0.getName()) = classObj.\($0.getName()) {
+                  self = \($0.getName())
+                } else {
+                  fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                }
+          """
+      }.joined(separator: "\n")
+
     let initSyntax: DeclSyntax = """
       public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
         let _environment = if let environment {
@@ -574,16 +586,7 @@ extension JavaTranslator {
         }
         let classObj = try! JavaClass<Self>(in: _environment)
         switch enumValue {
-      \(raw: enumFields.map {
-      return """
-          case .\($0.getName()):
-            if let \($0.getName()) = classObj.\($0.getName()) {
-              self = \($0.getName())
-            } else {
-              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
-            }
-      """
-    }.joined(separator: "\n"))
+        \(raw: enumCases)
         }
       }
       """
