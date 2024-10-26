@@ -202,17 +202,8 @@ struct JavaToSwift: ParsableCommand {
     translator.addConfiguration(config, forSwiftModule: moduleName)
 
     // Load all of the requested classes.
-    #if false
-    let classLoader = URLClassLoader(
-      [
-        try URL("file://\(classPath)", environment: environment)
-      ],
-      environment: environment
-    )
-    #else
     let classLoader = try JavaClass<ClassLoader>(environment: environment)
       .getSystemClassLoader()!
-    #endif
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, swiftName) in config.classes {
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
