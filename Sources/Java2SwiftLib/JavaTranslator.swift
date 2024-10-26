@@ -191,7 +191,7 @@ extension JavaTranslator {
   /// can produce multiple declarations, such as a separate extension of
   /// JavaClass to house static methods.
   package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
-    let fullName = javaClass.getCanonicalName()
+    let fullName = javaClass.getName()
     let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName)
     let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
 
@@ -207,7 +207,7 @@ extension JavaTranslator {
     let extends: String
     if !javaClass.isInterface(),
       let superclass = javaClass.getSuperclass(),
-      superclass.getCanonicalName() != "java.lang.Object"
+       superclass.getName() != "java.lang.Object"
     {
       do {
         extends = ", extends: \(try getSwiftTypeName(superclass).swiftName).self"
@@ -287,7 +287,7 @@ extension JavaTranslator {
           do {
             let implementedInSwift = constructor.isNative &&
               constructor.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-              swiftNativeImplementations.contains(javaClass.getCanonicalName())
+              swiftNativeImplementations.contains(javaClass.getName())
 
             let translated = try translateConstructor(
               constructor,
@@ -321,7 +321,7 @@ extension JavaTranslator {
 
           let implementedInSwift = method.isNative &&
             method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-            swiftNativeImplementations.contains(javaClass.getCanonicalName())
+            swiftNativeImplementations.contains(javaClass.getName())
 
           // Translate the method if we can.
           do {
@@ -460,7 +460,7 @@ extension JavaTranslator {
     // Members that are native and will instead go into a NativeMethods
     // protocol.
     var nativeMembers: [DeclSyntax] = []
-    if swiftNativeImplementations.contains(javaClass.getCanonicalName()) {
+    if swiftNativeImplementations.contains(javaClass.getName()) {
       nativeMembers.append(
         contentsOf: javaClass.getDeclaredMethods().compactMap {
           $0.flatMap { method in
