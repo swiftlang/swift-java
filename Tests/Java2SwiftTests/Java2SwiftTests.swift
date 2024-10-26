@@ -51,6 +51,28 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
+  func testJavaLangClassMapping() throws {
+    try assertTranslatedClass(
+      JavaClass<JavaObject>.self,
+      swiftTypeName: "MyJavaClass",
+      translatedClasses: [
+        "java.lang.Object": ("JavaObject", nil, true),
+        "java.lang.String": ("JavaString", nil, true),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Class")
+        public struct MyJavaClass<T: AnyJavaObject> {
+        """,
+        """
+          @JavaStaticMethod
+          public func forName<T: AnyJavaObject>(_ arg0: JavaString) throws -> MyJavaClass<JavaObject>? where ObjectType == MyJavaClass<T>
+        """,
+      ]
+    )
+  }
+
   func testEnum() throws {
     try assertTranslatedClass(
       JavaMonth.self,
