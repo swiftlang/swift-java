@@ -207,7 +207,7 @@ extension JavaTranslator {
     let extends: String
     if !javaClass.isInterface(),
       let superclass = javaClass.getSuperclass(),
-       superclass.getName() != "java.lang.Object"
+      superclass.getName() != "java.lang.Object"
     {
       do {
         extends = ", extends: \(try getSwiftTypeName(superclass).swiftName).self"
@@ -365,7 +365,7 @@ extension JavaTranslator {
       staticMemberWhereClause = ""
     }
 
-    // Emit the struct declaration describing the java class. Add backticks to the name since the type might interfere with Swift type names
+    // Emit the struct declaration describing the java class.
     let classOrInterface: String = javaClass.isInterface() ? "JavaInterface" : "JavaClass";
     var classDecl =
       """
