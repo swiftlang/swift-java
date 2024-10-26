@@ -125,7 +125,7 @@ extension JavaType {
       string = string[string.index(after: semicolonIndex)...]
 
       return JavaType(
-        canonicalClassName: canonicalNameWithSlashes.replacingSlashesWithPeriods()
+        className: canonicalNameWithSlashes.replacingSlashesWithPeriods()
       )
 
     default:
