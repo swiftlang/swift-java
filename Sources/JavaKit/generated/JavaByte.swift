@@ -61,19 +61,19 @@ public struct JavaByte {
   public func wait() throws
 }
 extension JavaClass<JavaByte> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaByte>?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
   @JavaStaticMethod

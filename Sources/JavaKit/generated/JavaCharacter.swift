@@ -43,214 +43,214 @@ public struct JavaCharacter {
   public func wait() throws
 }
 extension JavaClass<JavaCharacter> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_RADIX: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_RADIX: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaCharacter>?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var UNASSIGNED: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var UPPERCASE_LETTER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var LOWERCASE_LETTER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TITLECASE_LETTER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MODIFIER_LETTER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var OTHER_LETTER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var NON_SPACING_MARK: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var ENCLOSING_MARK: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var COMBINING_SPACING_MARK: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DECIMAL_DIGIT_NUMBER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var LETTER_NUMBER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var OTHER_NUMBER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SPACE_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var LINE_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PARAGRAPH_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var CONTROL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var FORMAT: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PRIVATE_USE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SURROGATE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DASH_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var START_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var END_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var CONNECTOR_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var OTHER_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MATH_SYMBOL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var CURRENCY_SYMBOL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MODIFIER_SYMBOL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var OTHER_SYMBOL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var INITIAL_QUOTE_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var FINAL_QUOTE_PUNCTUATION: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_UNDEFINED: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_LEFT_TO_RIGHT: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_RIGHT_TO_LEFT: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_EUROPEAN_NUMBER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_ARABIC_NUMBER: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_COMMON_NUMBER_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_NONSPACING_MARK: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_BOUNDARY_NEUTRAL: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_PARAGRAPH_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_SEGMENT_SEPARATOR: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_WHITESPACE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_OTHER_NEUTRALS: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_POP_DIRECTIONAL_FORMAT: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_LEFT_TO_RIGHT_ISOLATE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_RIGHT_TO_LEFT_ISOLATE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_FIRST_STRONG_ISOLATE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DIRECTIONALITY_POP_DIRECTIONAL_ISOLATE: Int8
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_HIGH_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_HIGH_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_LOW_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_LOW_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_SURROGATE: UInt16
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_SUPPLEMENTARY_CODE_POINT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_CODE_POINT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_CODE_POINT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
   @JavaStaticMethod

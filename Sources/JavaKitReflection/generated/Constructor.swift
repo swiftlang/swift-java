@@ -123,10 +123,10 @@ public struct Constructor<T: AnyJavaObject> {
   public func wait() throws
 }
 extension JavaClass {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PUBLIC: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 
   @JavaStaticMethod

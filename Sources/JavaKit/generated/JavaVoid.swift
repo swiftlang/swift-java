@@ -31,6 +31,6 @@ public struct JavaVoid {
   public func wait() throws
 }
 extension JavaClass<JavaVoid> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaVoid>?
 }

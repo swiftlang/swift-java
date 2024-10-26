@@ -70,40 +70,40 @@ public struct JavaFloat {
   public func wait() throws
 }
 extension JavaClass<JavaFloat> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var POSITIVE_INFINITY: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var NEGATIVE_INFINITY: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var NaN: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_NORMAL: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: Float
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PRECISION: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_EXPONENT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_EXPONENT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaFloat>?
 
   @JavaStaticMethod

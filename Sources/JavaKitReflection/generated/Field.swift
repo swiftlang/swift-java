@@ -147,10 +147,10 @@ public struct Field {
   public func wait() throws
 }
 extension JavaClass<Field> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PUBLIC: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 
   @JavaStaticMethod

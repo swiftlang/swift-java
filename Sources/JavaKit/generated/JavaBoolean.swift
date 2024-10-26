@@ -46,13 +46,13 @@ public struct JavaBoolean {
   public func wait() throws
 }
 extension JavaClass<JavaBoolean> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TRUE: JavaBoolean?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var FALSE: JavaBoolean?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaBoolean>?
 
   @JavaStaticMethod
