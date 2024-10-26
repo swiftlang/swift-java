@@ -546,7 +546,7 @@ extension JavaTranslator {
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
     return """
-      \(fieldAttribute)
+      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
       public var \(raw: swiftFieldName): \(raw: typeName)
       """
   }
