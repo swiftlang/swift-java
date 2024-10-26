@@ -370,7 +370,7 @@ extension JavaTranslator {
     var classDecl =
       """
       @\(raw:classOrInterface)(\(literal: fullName)\(raw: extends)\(raw: interfacesStr))
-      public struct `\(raw: swiftInnermostTypeName)`\(raw: genericParameterClause) {
+      public struct \(raw: swiftInnermostTypeName)\(raw: genericParameterClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """ as DeclSyntax
