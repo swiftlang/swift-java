@@ -45,6 +45,9 @@ public struct Attributes {
   public func getValue(_ arg0: String) -> String
 
   @JavaMethod
+  public func getValue(_ arg0: Attributes.Name?) -> String
+
+  @JavaMethod
   public func isEmpty() -> Bool
 
   @JavaMethod
@@ -94,4 +97,93 @@ public struct Attributes {
 
   @JavaMethod
   public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+}
+extension Attributes {
+  @JavaClass("java.util.jar.Attributes$Name")
+  public struct Name {
+  @JavaMethod
+  public init(_ arg0: String, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension JavaClass<Attributes.Name> {
+  @JavaStaticField
+  public var MANIFEST_VERSION: Attributes.Name?
+
+  @JavaStaticField
+  public var SIGNATURE_VERSION: Attributes.Name?
+
+  @JavaStaticField
+  public var CONTENT_TYPE: Attributes.Name?
+
+  @JavaStaticField
+  public var CLASS_PATH: Attributes.Name?
+
+  @JavaStaticField
+  public var MAIN_CLASS: Attributes.Name?
+
+  @JavaStaticField
+  public var SEALED: Attributes.Name?
+
+  @JavaStaticField
+  public var EXTENSION_LIST: Attributes.Name?
+
+  @JavaStaticField
+  public var EXTENSION_NAME: Attributes.Name?
+
+  @JavaStaticField
+  public var EXTENSION_INSTALLATION: Attributes.Name?
+
+  @JavaStaticField
+  public var IMPLEMENTATION_TITLE: Attributes.Name?
+
+  @JavaStaticField
+  public var IMPLEMENTATION_VERSION: Attributes.Name?
+
+  @JavaStaticField
+  public var IMPLEMENTATION_VENDOR: Attributes.Name?
+
+  @JavaStaticField
+  public var IMPLEMENTATION_VENDOR_ID: Attributes.Name?
+
+  @JavaStaticField
+  public var IMPLEMENTATION_URL: Attributes.Name?
+
+  @JavaStaticField
+  public var SPECIFICATION_TITLE: Attributes.Name?
+
+  @JavaStaticField
+  public var SPECIFICATION_VERSION: Attributes.Name?
+
+  @JavaStaticField
+  public var SPECIFICATION_VENDOR: Attributes.Name?
+
+  @JavaStaticField
+  public var MULTI_RELEASE: Attributes.Name?
 }

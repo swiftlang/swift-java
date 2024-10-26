@@ -24,9 +24,9 @@ var jvm: JavaVirtualMachine {
 }
 
 @JavaClass("java.time.Month")
-public struct JavaMonth {
-
-}
+public struct JavaMonth {}
+@JavaClass("java.lang.ProcessBuilder")
+struct ProcessBuilder {}
 
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
@@ -114,6 +114,36 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testNestedSubclasses() throws {
+    try assertTranslatedClass(
+      ProcessBuilder.self,
+      swiftTypeName: "ProcessBuilder",
+      translatedClasses: [
+        "java.lang.ProcessBuilder": ("ProcessBuilder", nil, true),
+        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.Redirect", nil, true),
+        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.Redirect.Type", nil, true),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+          @JavaMethod
+          public func redirectInput() -> ProcessBuilder.Redirect?
+        """,
+        """
+        extension ProcessBuilder {
+          @JavaClass("java.lang.ProcessBuilder$Redirect")
+          public struct Redirect {
+        """,
+        """
+        extension ProcessBuilder.Redirect {
+          @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
+          public struct Type {
+        """
+      ]
+    )
+  }
+
 }
 
 @JavaClass("java.util.ArrayList")
@@ -145,9 +175,10 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   translator.translatedClasses = translatedClasses
   translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil, true)
 
+
   translator.startNewFile()
-  let translatedDecls = translator.translateClass(
-    try JavaClass<JavaObject>(
+  let translatedDecls = try translator.translateClass(
+    JavaClass<JavaObject>(
       javaThis: javaType.getJNIClass(in: environment),
       environment: environment)
   )

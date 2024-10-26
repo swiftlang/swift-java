@@ -190,15 +190,24 @@ extension JavaTranslator {
   /// Translates the given Java class into the corresponding Swift type. This
   /// can produce multiple declarations, such as a separate extension of
   /// JavaClass to house static methods.
-  package func translateClass(_ javaClass: JavaClass<JavaObject>) -> [DeclSyntax] {
-    let fullName = javaClass.getCanonicalName()
-    let swiftTypeName = try! getSwiftTypeNameFromJavaClassName(fullName)
+  package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
+    let fullName = javaClass.getName()
+    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName)
+    let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
+
+    // If the swift parent type has not been translated, don't try to translate this one
+    if let swiftParentType,
+       !translatedClasses.contains(where: { _, value in value.swiftType == swiftParentType })
+    {
+      logUntranslated("Unable to translate '\(fullName)' parent class: \(swiftParentType) not found")
+      return []
+    }
 
     // Superclass.
     let extends: String
     if !javaClass.isInterface(),
       let superclass = javaClass.getSuperclass(),
-      superclass.getCanonicalName() != "java.lang.Object"
+      superclass.getName() != "java.lang.Object"
     {
       do {
         extends = ", extends: \(try getSwiftTypeName(superclass).swiftName).self"
@@ -265,7 +274,7 @@ extension JavaTranslator {
     )
 
     if !enumConstants.isEmpty {
-      let enumName = "\(swiftTypeName)Cases"
+      let enumName = "\(swiftInnermostTypeName)Cases"
       members.append(
         contentsOf: translateToEnumValue(name: enumName, enumFields: enumConstants)
       )
@@ -278,7 +287,7 @@ extension JavaTranslator {
           do {
             let implementedInSwift = constructor.isNative &&
               constructor.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-              swiftNativeImplementations.contains(javaClass.getCanonicalName())
+              swiftNativeImplementations.contains(javaClass.getName())
 
             let translated = try translateConstructor(
               constructor,
@@ -312,7 +321,7 @@ extension JavaTranslator {
 
           let implementedInSwift = method.isNative &&
             method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-            swiftNativeImplementations.contains(javaClass.getCanonicalName())
+            swiftNativeImplementations.contains(javaClass.getName())
 
           // Translate the method if we can.
           do {
@@ -357,7 +366,6 @@ extension JavaTranslator {
     }
 
     // Emit the struct declaration describing the java class.
-    let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
     let classOrInterface: String = javaClass.isInterface() ? "JavaInterface" : "JavaClass";
     var classDecl =
       """
@@ -383,6 +391,20 @@ extension JavaTranslator {
 
     topLevelDecls.append(classDecl)
 
+    let subClassDecls = javaClass.getClasses().compactMap {
+      $0.flatMap { clazz in
+        do {
+          return try translateClass(clazz)
+        } catch {
+          logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
+          return nil
+        }
+      }
+    }.flatMap(\.self)
+
+    topLevelDecls.append(
+      contentsOf: subClassDecls
+    )
     // Translate static members.
     var staticMembers: [DeclSyntax] = []
 
@@ -438,7 +460,7 @@ extension JavaTranslator {
     // Members that are native and will instead go into a NativeMethods
     // protocol.
     var nativeMembers: [DeclSyntax] = []
-    if swiftNativeImplementations.contains(javaClass.getCanonicalName()) {
+    if swiftNativeImplementations.contains(javaClass.getName()) {
       nativeMembers.append(
         contentsOf: javaClass.getDeclaredMethods().compactMap {
           $0.flatMap { method in

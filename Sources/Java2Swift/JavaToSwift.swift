@@ -228,12 +228,27 @@ struct JavaToSwift: ParsableCommand {
 
       // Note that we will be translating this Java class, so it is a known class.
       translator.translatedClasses[javaClassName] = (translatedSwiftName, nil, true)
+
+      var classes: [JavaClass<JavaObject>?] = javaClass.getClasses()
+
+      // Go through all subclasses to find all of the classes to translate
+      while let internalClass = classes.popLast() {
+        if let internalClass {
+          let (javaName, swiftName) = names(from: internalClass.getName())
+          // If we have already been through this class, don't go through it again
+          guard translator.translatedClasses[javaName] == nil else { continue }
+          let currentClassName = swiftName
+          let currentSanitizedClassName = currentClassName.replacing("$", with: ".")
+          classes.append(contentsOf: internalClass.getClasses())
+          translator.translatedClasses[javaName] = (currentSanitizedClassName, nil, true)
+        }
+      }
     }
 
     // Translate all of the Java classes into Swift classes.
     for javaClass in javaClasses {
       translator.startNewFile()
-      let swiftClassDecls = translator.translateClass(javaClass)
+      let swiftClassDecls = try translator.translateClass(javaClass)
       let importDecls = translator.getImportDecls()
 
       let swiftFileText = """
@@ -247,9 +262,30 @@ struct JavaToSwift: ParsableCommand {
       try writeContents(
         swiftFileText,
         to: swiftFileName,
-        description: "Java class '\(javaClass.getCanonicalName())' translation"
+        description: "Java class '\(javaClass.getName())' translation"
       )
     }
+  }
+
+  private func names(from javaClassNameOpt: String) -> (javaClassName: String, swiftName: String) {
+    let javaClassName: String
+    let swiftName: String
+    if let equalLoc = javaClassNameOpt.firstIndex(of: "=") {
+      let afterEqual = javaClassNameOpt.index(after: equalLoc)
+      javaClassName = String(javaClassNameOpt[..<equalLoc])
+      swiftName = String(javaClassNameOpt[afterEqual...])
+    } else {
+      if let dotLoc = javaClassNameOpt.lastIndex(of: ".") {
+        let afterDot = javaClassNameOpt.index(after: dotLoc)
+        swiftName = String(javaClassNameOpt[afterDot...])
+      } else {
+        swiftName = javaClassNameOpt
+      }
+
+      javaClassName = javaClassNameOpt
+    }
+
+    return (javaClassName, swiftName)
   }
 
   mutating func writeContents(_ contents: String, to filename: String, description: String) throws {
@@ -296,11 +332,6 @@ struct JavaToSwift: ParsableCommand {
         if let firstChar = segment.first, firstChar.isNumber {
           continue
         }
-      }
-
-      // TODO: For now, skip all nested classes.
-      if entry.getName().contains("$") {
-        continue
       }
 
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
