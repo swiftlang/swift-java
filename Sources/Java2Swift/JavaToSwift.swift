@@ -342,11 +342,6 @@ struct JavaToSwift: ParsableCommand {
         }
       }
 
-      // TODO: For now, skip all nested classes.
-      if entry.getName().contains("$") {
-        continue
-      }
-
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
         .dropLast(".class".count))
       configuration.classes[javaCanonicalName] =

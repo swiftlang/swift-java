@@ -123,7 +123,6 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.ProcessBuilder": ("ProcessBuilder", nil, true),
         "java.lang.ProcessBuilder.Redirect": ("ProcessBuilder.Redirect", nil, true),
         "java.lang.ProcessBuilder.Redirect.Type": ("ProcessBuilder.Redirect.Type", nil, true),
-        "java.lang.Enum.EnumDesc": ("Enum.EnumDesc", nil, true)
       ],
       expectedChunks: [
         "import JavaKit",
