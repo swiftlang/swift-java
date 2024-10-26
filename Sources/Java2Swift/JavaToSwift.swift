@@ -248,7 +248,7 @@ struct JavaToSwift: ParsableCommand {
     // Translate all of the Java classes into Swift classes.
     for javaClass in javaClasses {
       translator.startNewFile()
-      let swiftClassDecls = try! translator.translateClass(javaClass)
+      let swiftClassDecls = try translator.translateClass(javaClass)
       let importDecls = translator.getImportDecls()
 
       let swiftFileText = """

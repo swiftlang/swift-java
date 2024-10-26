@@ -115,7 +115,7 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
-  func testNestedSubclasses() async throws {
+  func testNestedSubclasses() throws {
     try assertTranslatedClass(
       ProcessBuilder.self,
       swiftTypeName: "ProcessBuilder",

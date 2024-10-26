@@ -274,7 +274,7 @@ extension JavaTranslator {
     )
 
     if !enumConstants.isEmpty {
-      let enumName = "\(swiftTypeName.splitSwiftTypeName().name)Cases"
+      let enumName = "\(swiftInnermostTypeName)Cases"
       members.append(
         contentsOf: translateToEnumValue(name: enumName, enumFields: enumConstants)
       )
