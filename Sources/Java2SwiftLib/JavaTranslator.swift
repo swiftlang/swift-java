@@ -43,6 +43,12 @@ package class JavaTranslator {
   /// methods will be implemented in Swift.
   package var swiftNativeImplementations: Set<String> = []
 
+  /// The set of nested classes that we should traverse from the given class,
+  /// indexed by the name of the class.
+  ///
+  /// TODO: Make JavaClass Hashable so we can index by the object?
+  package var nestedClasses: [String: [JavaClass<JavaObject>]] = [:]
+
   package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
@@ -79,7 +85,6 @@ extension JavaTranslator {
   /// itself. This should only be used to refer to types that are built-in to
   /// JavaKit and therefore aren't captured in any configuration file.
   package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
-    "java.lang.Class": ("JavaClass", "JavaKit", true),
     "java.lang.String": ("String", "JavaKit", false),
   ]
 }
@@ -391,14 +396,12 @@ extension JavaTranslator {
 
     topLevelDecls.append(classDecl)
 
-    let subClassDecls = javaClass.getClasses().compactMap {
-      $0.flatMap { clazz in
-        do {
-          return try translateClass(clazz)
-        } catch {
-          logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
-          return nil
-        }
+    let subClassDecls = (nestedClasses[fullName] ?? []).compactMap { clazz in
+      do {
+        return try translateClass(clazz)
+      } catch {
+        logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
+        return nil
       }
     }.flatMap(\.self)
 
