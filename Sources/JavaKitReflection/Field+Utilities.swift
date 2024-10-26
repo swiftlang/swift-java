@@ -17,4 +17,9 @@ extension Field {
     public var isStatic: Bool {
       return (getModifiers() & 0x08) != 0
     }
+
+  /// Whether this is a 'final' field.
+  public var isFinal: Bool {
+    return (getModifiers() & 16) != 0
+  }
 }

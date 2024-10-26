@@ -46,14 +46,31 @@ extension JavaFieldMacro: AccessorMacro {
         fieldNameAsWritten
       }
 
+    let createSetter =
+    if case .argumentList(let arguments) = node.arguments,
+       let wrapperIsBoolean = arguments.first(where: { $0.label?.text == "isFinal" })?.expression,
+        let booleanLiteral = wrapperIsBoolean.as(BooleanLiteralExprSyntax.self)
+    {
+      booleanLiteral.literal.text == "false" // Create the setter if we are not final
+    } else {
+      true
+    }
+
     let getter: AccessorDeclSyntax = """
       get { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] }
       """
 
-    let setter: AccessorDeclSyntax = """
-      nonmutating set { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] = newValue }
-      """
+    var accessors: [AccessorDeclSyntax] = [
+      getter
+    ]
 
-    return [getter, setter]
+    if createSetter {
+      let setter: AccessorDeclSyntax = """
+        nonmutating set { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] = newValue }
+        """
+      accessors.append(setter)
+    }
+
+    return accessors
   }
 }

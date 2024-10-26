@@ -75,7 +75,7 @@ class Java2SwiftTests: XCTestCase {
                 }
         """,
         """
-          @JavaStaticField
+          @JavaStaticField(isFinal: true)
           public var APRIL: Month?
         """
       ])

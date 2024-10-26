@@ -67,40 +67,40 @@ public struct JavaDouble {
   public func wait() throws
 }
 extension JavaClass<JavaDouble> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var POSITIVE_INFINITY: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var NEGATIVE_INFINITY: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var NaN: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_NORMAL: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: Double
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var PRECISION: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_EXPONENT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_EXPONENT: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaDouble>?
 
   @JavaStaticMethod

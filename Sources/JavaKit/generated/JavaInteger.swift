@@ -61,19 +61,19 @@ public struct JavaInteger {
   public func wait() throws
 }
 extension JavaClass<JavaInteger> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaInteger>?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
   @JavaStaticMethod

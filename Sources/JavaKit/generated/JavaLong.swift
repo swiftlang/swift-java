@@ -61,19 +61,19 @@ public struct JavaLong {
   public func wait() throws
 }
 extension JavaClass<JavaLong> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MIN_VALUE: Int64
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAX_VALUE: Int64
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaLong>?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIZE: Int32
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
   @JavaStaticMethod
