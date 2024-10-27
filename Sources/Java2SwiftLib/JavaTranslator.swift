@@ -170,17 +170,26 @@ extension JavaTranslator {
     let javaType = try JavaType(javaTypeName: javaClass.getName())
     let isSwiftOptional = javaType.isSwiftOptional
     return (
-      try javaType.swiftTypeName(resolver: self.getSwiftTypeNameFromJavaClassName(_:)),
+      try javaType.swiftTypeName { javaClassName in
+        try self.getSwiftTypeNameFromJavaClassName(javaClassName)
+      },
       isSwiftOptional
     )
   }
 
   /// Map a Java class name to its corresponding Swift type.
-  private func getSwiftTypeNameFromJavaClassName(_ name: String) throws -> String {
+  private func getSwiftTypeNameFromJavaClassName(
+    _ name: String,
+    escapeMemberNames: Bool = true
+  ) throws -> String {
     if let translated = translatedClasses[name] {
       // Note that we need to import this Swift module.
       if let swiftModule = translated.swiftModule, swiftModule != swiftModuleName {
         importedSwiftModules.insert(swiftModule)
+      }
+
+      if escapeMemberNames {
+        return translated.swiftType.escapingSwiftMemberNames
       }
 
       return translated.swiftType
@@ -197,7 +206,7 @@ extension JavaTranslator {
   /// JavaClass to house static methods.
   package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
     let fullName = javaClass.getName()
-    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName)
+    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName, escapeMemberNames: false)
     let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
 
     // If the swift parent type has not been translated, don't try to translate this one
@@ -633,6 +642,33 @@ extension JavaTranslator {
       let typeName = try getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: true)
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
+    }
+  }
+}
+
+extension String {
+  /// Escape Swift types that involve member name references like '.Type'
+  fileprivate var escapingSwiftMemberNames: String {
+    var count = 0
+    return split(separator: ".").map { component in
+      defer {
+        count += 1
+      }
+
+      if count > 0 && component.memberRequiresBackticks {
+        return "`\(component)`"
+      }
+
+      return String(component)
+    }.joined(separator: ".")
+  }
+}
+
+extension Substring {
+  fileprivate var memberRequiresBackticks: Bool {
+    switch self {
+    case "Type": return true
+    default: return false
     }
   }
 }

@@ -176,6 +176,10 @@ class Java2SwiftTests: XCTestCase {
           @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
           public struct Type {
         """,
+        """
+          @JavaMethod
+          public func type() -> ProcessBuilder.Redirect.`Type`?
+        """,
       ]
     )
   }
