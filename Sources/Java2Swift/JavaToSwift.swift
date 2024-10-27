@@ -249,6 +249,8 @@ struct JavaToSwift: ParsableCommand {
         // Record this as a translated class.
         let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
           .defaultSwiftNameForJavaClass
+
+
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
         translator.translatedClasses[javaClassName] = (swiftName, nil, true)
         return nestedClass
@@ -390,10 +392,10 @@ extension String {
   fileprivate var defaultSwiftNameForJavaClass: String {
     if let dotLoc = lastIndex(of: ".") {
       let afterDot = index(after: dotLoc)
-      return String(self[afterDot...]).javaClassNameToCanonicalName
+      return String(self[afterDot...]).javaClassNameToCanonicalName.adjustedSwiftTypeName
     }
 
-    return javaClassNameToCanonicalName
+    return javaClassNameToCanonicalName.adjustedSwiftTypeName
   }
 }
 
@@ -424,5 +426,13 @@ extension String {
     }
 
     return false
+  }
+
+  /// Adjust type name for "bad" type names that don't work well in Swift.
+  fileprivate var adjustedSwiftTypeName: String {
+    switch self {
+    case "Type": return "JavaType"
+    default: return self
+    }
   }
 }
