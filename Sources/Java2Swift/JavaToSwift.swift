@@ -224,9 +224,14 @@ struct JavaToSwift: ParsableCommand {
         currentClassIndex += 1
       }
 
+      // The current class we're in.
+      let currentClass = allClassesToVisit[currentClassIndex]
+      guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType else {
+        continue
+      }
+
       // Find all of the nested classes that weren't explicitly translated
       // already.
-      let currentClass = allClassesToVisit[currentClassIndex]
       let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap { nestedClass in
         guard let nestedClass else { return nil }
 
@@ -242,7 +247,9 @@ struct JavaToSwift: ParsableCommand {
         }
 
         // Record this as a translated class.
-        let swiftName = javaClassName.defaultSwiftNameForJavaClass
+        let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
+          .defaultSwiftNameForJavaClass
+        let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
         translator.translatedClasses[javaClassName] = (swiftName, nil, true)
         return nestedClass
       }
