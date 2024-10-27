@@ -76,6 +76,10 @@ generate-JavaKitCollection: Java2Swift
 	mkdir -p Sources/JavaKitCollection/generated
 	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitCollection  --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitCollection/generated Sources/JavaKitCollection/Java2Swift.config
 
+generate-JavaKitFunction: Java2Swift
+	mkdir -p Sources/JavaKitFunction/generated
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitFunction  --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitFunction/generated Sources/JavaKitFunction/Java2Swift.config
+
 generate-JavaKitReflection: Java2Swift generate-JavaKit generate-JavaKitCollection
 	mkdir -p Sources/JavaKitReflection/generated
 	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --depends-on JavaKit=Sources/JavaKit/Java2Swift.config --depends-on JavaKitCollection=Sources/JavaKitCollection/Java2Swift.config -o Sources/JavaKitReflection/generated Sources/JavaKitReflection/Java2Swift.config

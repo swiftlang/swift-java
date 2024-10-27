@@ -63,6 +63,11 @@ let package = Package(
     ),
 
     .library(
+      name: "JavaKitFunction",
+      targets: ["JavaKitFunction"]
+    ),
+
+    .library(
       name: "JavaKitJar",
       targets: ["JavaKitReflection"]
     ),
@@ -176,6 +181,15 @@ let package = Package(
     ),
     .target(
       name: "JavaKitCollection",
+      dependencies: ["JavaKit"],
+      exclude: ["Java2Swift.config"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "JavaKitFunction",
       dependencies: ["JavaKit"],
       exclude: ["Java2Swift.config"],
       swiftSettings: [
