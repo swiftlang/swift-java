@@ -43,6 +43,12 @@ package class JavaTranslator {
   /// methods will be implemented in Swift.
   package var swiftNativeImplementations: Set<String> = []
 
+  /// The set of nested classes that we should traverse from the given class,
+  /// indexed by the name of the class.
+  ///
+  /// TODO: Make JavaClass Hashable so we can index by the object?
+  package var nestedClasses: [String: [JavaClass<JavaObject>]] = [:]
+
   package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
@@ -79,7 +85,6 @@ extension JavaTranslator {
   /// itself. This should only be used to refer to types that are built-in to
   /// JavaKit and therefore aren't captured in any configuration file.
   package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
-    "java.lang.Class": ("JavaClass", "JavaKit", true),
     "java.lang.String": ("String", "JavaKit", false),
   ]
 }
@@ -165,17 +170,26 @@ extension JavaTranslator {
     let javaType = try JavaType(javaTypeName: javaClass.getName())
     let isSwiftOptional = javaType.isSwiftOptional
     return (
-      try javaType.swiftTypeName(resolver: self.getSwiftTypeNameFromJavaClassName(_:)),
+      try javaType.swiftTypeName { javaClassName in
+        try self.getSwiftTypeNameFromJavaClassName(javaClassName)
+      },
       isSwiftOptional
     )
   }
 
   /// Map a Java class name to its corresponding Swift type.
-  private func getSwiftTypeNameFromJavaClassName(_ name: String) throws -> String {
+  private func getSwiftTypeNameFromJavaClassName(
+    _ name: String,
+    escapeMemberNames: Bool = true
+  ) throws -> String {
     if let translated = translatedClasses[name] {
       // Note that we need to import this Swift module.
       if let swiftModule = translated.swiftModule, swiftModule != swiftModuleName {
         importedSwiftModules.insert(swiftModule)
+      }
+
+      if escapeMemberNames {
+        return translated.swiftType.escapingSwiftMemberNames
       }
 
       return translated.swiftType
@@ -192,7 +206,7 @@ extension JavaTranslator {
   /// JavaClass to house static methods.
   package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
     let fullName = javaClass.getName()
-    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName)
+    let swiftTypeName = try getSwiftTypeNameFromJavaClassName(fullName, escapeMemberNames: false)
     let (swiftParentType, swiftInnermostTypeName) = swiftTypeName.splitSwiftTypeName()
 
     // If the swift parent type has not been translated, don't try to translate this one
@@ -391,14 +405,12 @@ extension JavaTranslator {
 
     topLevelDecls.append(classDecl)
 
-    let subClassDecls = javaClass.getClasses().compactMap {
-      $0.flatMap { clazz in
-        do {
-          return try translateClass(clazz)
-        } catch {
-          logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
-          return nil
-        }
+    let subClassDecls = (nestedClasses[fullName] ?? []).compactMap { clazz in
+      do {
+        return try translateClass(clazz)
+      } catch {
+        logUntranslated("Unable to translate '\(fullName)' subclass '\(clazz.getName())': \(error)")
+        return nil
       }
     }.flatMap(\.self)
 
@@ -630,6 +642,33 @@ extension JavaTranslator {
       let typeName = try getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: true)
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
+    }
+  }
+}
+
+extension String {
+  /// Escape Swift types that involve member name references like '.Type'
+  fileprivate var escapingSwiftMemberNames: String {
+    var count = 0
+    return split(separator: ".").map { component in
+      defer {
+        count += 1
+      }
+
+      if count > 0 && component.memberRequiresBackticks {
+        return "`\(component)`"
+      }
+
+      return String(component)
+    }.joined(separator: ".")
+  }
+}
+
+extension Substring {
+  fileprivate var memberRequiresBackticks: Bool {
+    switch self {
+    case "Type": return true
+    default: return false
     }
   }
 }

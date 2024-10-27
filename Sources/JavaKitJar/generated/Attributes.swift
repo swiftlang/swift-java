@@ -133,57 +133,57 @@ extension Attributes {
   }
 }
 extension JavaClass<Attributes.Name> {
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MANIFEST_VERSION: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SIGNATURE_VERSION: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var CONTENT_TYPE: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var CLASS_PATH: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MAIN_CLASS: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SEALED: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var EXTENSION_LIST: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var EXTENSION_NAME: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var EXTENSION_INSTALLATION: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var IMPLEMENTATION_TITLE: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var IMPLEMENTATION_VERSION: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var IMPLEMENTATION_VENDOR: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var IMPLEMENTATION_VENDOR_ID: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var IMPLEMENTATION_URL: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SPECIFICATION_TITLE: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SPECIFICATION_VERSION: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var SPECIFICATION_VENDOR: Attributes.Name?
 
-  @JavaStaticField
+  @JavaStaticField(isFinal: true)
   public var MULTI_RELEASE: Attributes.Name?
 }

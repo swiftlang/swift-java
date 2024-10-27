@@ -90,7 +90,8 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     /// Determine the set of Swift files that will be emitted by the Java2Swift
     /// tool.
     let outputSwiftFiles = config.classes.map { (javaClassName, swiftName) in
-      outputDirectory.appending(path: "\(swiftName).swift")
+      let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
+      return outputDirectory.appending(path: "\(swiftNestedName).swift")
     }
 
     // Find the Java .class files generated from prior plugins.

@@ -201,18 +201,9 @@ struct JavaToSwift: ParsableCommand {
     // Add the configuration for this module.
     translator.addConfiguration(config, forSwiftModule: moduleName)
 
-    // Load all of the requested classes.
-    #if false
-    let classLoader = URLClassLoader(
-      [
-        try URL("file://\(classPath)", environment: environment)
-      ],
-      environment: environment
-    )
-    #else
+    // Load all of the explicitly-requested classes.
     let classLoader = try JavaClass<ClassLoader>(environment: environment)
       .getSystemClassLoader()!
-    #endif
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, swiftName) in config.classes {
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
@@ -220,29 +211,59 @@ struct JavaToSwift: ParsableCommand {
         continue
       }
 
+      // Add this class to the list of classes we'll translate.
       javaClasses.append(javaClass)
+    }
 
-      // Replace any $'s within the Java class name (which separate nested
-      // classes) with .'s (which represent nesting in Swift).
-      let translatedSwiftName = swiftName.replacing("$", with: ".")
-
-      // Note that we will be translating this Java class, so it is a known class.
-      translator.translatedClasses[javaClassName] = (translatedSwiftName, nil, true)
-
-      var classes: [JavaClass<JavaObject>?] = javaClass.getClasses()
-
-      // Go through all subclasses to find all of the classes to translate
-      while let internalClass = classes.popLast() {
-        if let internalClass {
-          let (javaName, swiftName) = names(from: internalClass.getName())
-          // If we have already been through this class, don't go through it again
-          guard translator.translatedClasses[javaName] == nil else { continue }
-          let currentClassName = swiftName
-          let currentSanitizedClassName = currentClassName.replacing("$", with: ".")
-          classes.append(contentsOf: internalClass.getClasses())
-          translator.translatedClasses[javaName] = (currentSanitizedClassName, nil, true)
-        }
+    // Find all of the nested classes for each class, adding them to the list
+    // of classes to be translated if they were already specified.
+    var allClassesToVisit = javaClasses
+    var currentClassIndex: Int = 0
+    while currentClassIndex < allClassesToVisit.count {
+      defer {
+        currentClassIndex += 1
       }
+
+      // The current class we're in.
+      let currentClass = allClassesToVisit[currentClassIndex]
+      guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType else {
+        continue
+      }
+
+      // Find all of the nested classes that weren't explicitly translated
+      // already.
+      let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap { nestedClass in
+        guard let nestedClass else { return nil }
+
+        // If this is a local class, we're done.
+        let javaClassName = nestedClass.getName()
+        if javaClassName.isLocalJavaClass {
+          return nil
+        }
+
+        // If this class has been explicitly mentioned, we're done.
+        if translator.translatedClasses[javaClassName] != nil {
+          return nil
+        }
+
+        // Record this as a translated class.
+        let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
+          .defaultSwiftNameForJavaClass
+
+
+        let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
+        translator.translatedClasses[javaClassName] = (swiftName, nil, true)
+        return nestedClass
+      }
+
+      // If there were no new nested classes, there's nothing to do.
+      if nestedClasses.isEmpty {
+        continue
+      }
+
+      // Record all of the nested classes that we will visit.
+      translator.nestedClasses[currentClass.getName()] = nestedClasses
+      allClassesToVisit.append(contentsOf: nestedClasses)
     }
 
     // Translate all of the Java classes into Swift classes.
@@ -285,7 +306,7 @@ struct JavaToSwift: ParsableCommand {
       javaClassName = javaClassNameOpt
     }
 
-    return (javaClassName, swiftName)
+    return (javaClassName, swiftName.javaClassNameToCanonicalName)
   }
 
   mutating func writeContents(_ contents: String, to filename: String, description: String) throws {
@@ -326,12 +347,9 @@ struct JavaToSwift: ParsableCommand {
         continue
       }
 
-      // If any of the segments of the Java name start with a number, it's a
-      // local class that cannot be mapped into Swift.
-      for segment in entry.getName().split(separator: "$") {
-        if let firstChar = segment.first, firstChar.isNumber {
-          continue
-        }
+      // If this is a local class, it cannot be mapped into Swift.
+      if entry.getName().isLocalJavaClass {
+        continue
       }
 
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
@@ -374,10 +392,10 @@ extension String {
   fileprivate var defaultSwiftNameForJavaClass: String {
     if let dotLoc = lastIndex(of: ".") {
       let afterDot = index(after: dotLoc)
-      return String(self[afterDot...])
+      return String(self[afterDot...]).javaClassNameToCanonicalName.adjustedSwiftTypeName
     }
 
-    return self
+    return javaClassNameToCanonicalName.adjustedSwiftTypeName
   }
 }
 
@@ -390,4 +408,31 @@ public struct ClassLoader {
 extension JavaClass<ClassLoader> {
   @JavaStaticMethod
   public func getSystemClassLoader() -> ClassLoader?
+}
+
+extension String {
+  /// Replace all of the $'s for nested names with "." to turn a Java class
+  /// name into a Java canonical class name,
+  fileprivate var javaClassNameToCanonicalName: String {
+    return replacing("$", with: ".")
+  }
+
+  /// Whether this is the name of an anonymous class.
+  fileprivate var isLocalJavaClass: Bool {
+    for segment in split(separator: "$") {
+      if let firstChar = segment.first, firstChar.isNumber {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /// Adjust type name for "bad" type names that don't work well in Swift.
+  fileprivate var adjustedSwiftTypeName: String {
+    switch self {
+    case "Type": return "JavaType"
+    default: return self
+    }
+  }
 }

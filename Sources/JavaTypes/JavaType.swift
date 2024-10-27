@@ -31,9 +31,9 @@ public enum JavaType: Equatable, Hashable {
   /// A Java array.
   indirect case array(JavaType)
 
-  /// Given a canonical class name such as "java.lang.Object", split it into
+  /// Given a class name such as "java.lang.Object", split it into
   /// its package and class name to form a class instance.
-  public init(canonicalClassName name: some StringProtocol) {
+  public init(className name: some StringProtocol) {
     if let lastDot = name.lastIndex(of: ".") {
       self = .class(
         package: String(name[..<lastDot]),

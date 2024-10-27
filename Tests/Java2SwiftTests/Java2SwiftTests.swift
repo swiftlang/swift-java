@@ -25,8 +25,15 @@ var jvm: JavaVirtualMachine {
 
 @JavaClass("java.time.Month")
 public struct JavaMonth {}
+
 @JavaClass("java.lang.ProcessBuilder")
-struct ProcessBuilder {}
+struct ProcessBuilder {
+  @JavaClass("java.lang.ProcessBuilder$Redirect")
+  struct Redirect {
+    @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
+    struct JavaType { }
+  }
+}
 
 class Java2SwiftTests: XCTestCase {
   func testJavaLangObjectMapping() throws {
@@ -47,6 +54,28 @@ class Java2SwiftTests: XCTestCase {
           @JavaMethod
           public func wait() throws
         """
+      ]
+    )
+  }
+
+  func testJavaLangClassMapping() throws {
+    try assertTranslatedClass(
+      JavaClass<JavaObject>.self,
+      swiftTypeName: "MyJavaClass",
+      translatedClasses: [
+        "java.lang.Object": ("JavaObject", nil, true),
+        "java.lang.String": ("JavaString", nil, true),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Class")
+        public struct MyJavaClass<T: AnyJavaObject> {
+        """,
+        """
+          @JavaStaticMethod
+          public func forName<T: AnyJavaObject>(_ arg0: JavaString) throws -> MyJavaClass<JavaObject>? where ObjectType == MyJavaClass<T>
+        """,
       ]
     )
   }
@@ -124,6 +153,10 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.Redirect", nil, true),
         "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.Redirect.Type", nil, true),
       ],
+      nestedClasses: [
+        "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
+        "java.lang.ProcessBuilder$Redirect": [JavaClass<ProcessBuilder.Redirect.JavaType>().as(JavaClass<JavaObject>.self)!],
+      ],
       expectedChunks: [
         "import JavaKit",
         """
@@ -136,14 +169,60 @@ class Java2SwiftTests: XCTestCase {
           public struct Redirect {
         """,
         """
+        public func redirectError() -> ProcessBuilder.Redirect?
+        """,
+        """
         extension ProcessBuilder.Redirect {
           @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
           public struct Type {
+        """,
         """
+          @JavaMethod
+          public func type() -> ProcessBuilder.Redirect.`Type`?
+        """,
       ]
     )
   }
 
+  func testNestedRenamedSubclasses() throws {
+    try assertTranslatedClass(
+      ProcessBuilder.self,
+      swiftTypeName: "ProcessBuilder",
+      translatedClasses: [
+        "java.lang.ProcessBuilder": ("ProcessBuilder", nil, true),
+        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.PBRedirect", nil, true),
+        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.PBRedirect.JavaType", nil, true),
+      ],
+      nestedClasses: [
+        "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
+        "java.lang.ProcessBuilder$Redirect": [JavaClass<ProcessBuilder.Redirect.JavaType>().as(JavaClass<JavaObject>.self)!],
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+          @JavaMethod
+          public func redirectInput() -> ProcessBuilder.PBRedirect?
+        """,
+        """
+        extension ProcessBuilder {
+          @JavaClass("java.lang.ProcessBuilder$Redirect")
+          public struct PBRedirect {
+        """,
+        """
+        public func redirectError() -> ProcessBuilder.PBRedirect?
+        """,
+        """
+        extension ProcessBuilder.PBRedirect {
+          @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
+          public struct JavaType {
+        """,
+        """
+          @JavaMethod
+          public func type() -> ProcessBuilder.PBRedirect.JavaType?
+        """
+      ]
+    )
+  }
 }
 
 @JavaClass("java.util.ArrayList")
@@ -162,6 +241,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   translatedClasses: [
     String: (swiftType: String, swiftModule: String?, isOptional: Bool)
   ] = JavaTranslator.defaultTranslatedClasses,
+  nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
   file: StaticString = #filePath,
   line: UInt = #line
@@ -174,8 +254,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
 
   translator.translatedClasses = translatedClasses
   translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil, true)
-
-
+  translator.nestedClasses = nestedClasses
   translator.startNewFile()
   let translatedDecls = try translator.translateClass(
     JavaClass<JavaObject>(

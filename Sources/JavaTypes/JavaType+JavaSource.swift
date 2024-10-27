@@ -32,7 +32,7 @@ extension JavaType {
       self = try JavaType(mangledName: name)
 
     case let className:
-      self = JavaType(canonicalClassName: className)
+      self = JavaType(className: className)
     }
   }
 }

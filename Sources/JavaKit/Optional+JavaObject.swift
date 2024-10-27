@@ -37,7 +37,7 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   }
 
   public static var javaType: JavaType {
-    JavaType(canonicalClassName: Wrapped.fullJavaClassName)
+    JavaType(className: Wrapped.fullJavaClassName)
   }
 
   public static func jniMethodCall(
