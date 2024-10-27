@@ -14,6 +14,8 @@
 
 package com.example.swift;
 
+import java.util.function.Predicate;
+
 public class HelloSwift {
     public double value;
     public static double initialValue = 3.14159;
@@ -38,6 +40,11 @@ public class HelloSwift {
 
     public void greet(String name) {
         System.out.println("Salutations, " + name);
+    }
+
+    public Predicate<Integer> lessThanTen() {
+        Predicate<Integer> predicate = i -> (i < 10);
+        return predicate;
     }
 
     public String[] doublesToStrings(double[] doubles) {
