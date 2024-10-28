@@ -67,6 +67,7 @@ let package = Package(
       name: "JavaKitExample",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaKitFunction", package: "swift-java"),
         .product(name: "JavaKitJar", package: "swift-java"),
       ],
       swiftSettings: [

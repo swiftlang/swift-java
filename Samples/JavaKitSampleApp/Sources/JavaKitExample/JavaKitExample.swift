@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
+import JavaKitFunction
 
 enum SwiftWrappedError: Error {
   case message(String)
@@ -43,6 +44,10 @@ extension HelloSwift: HelloSwiftNativeMethods {
 
     self.name = "a 🗑️-collected language"
     _ = self.sayHelloBack(42)
+
+    let predicate: JavaPredicate<JavaInteger> = self.lessThanTen()!
+    let value = predicate.test(JavaInteger(3).as(JavaObject.self))
+    print("Running a JavaPredicate from swift 3 < 10 = \(value)")
 
     let strings = doublesToStrings([3.14159, 2.71828])
     print("Converting doubles to strings: \(strings)")
