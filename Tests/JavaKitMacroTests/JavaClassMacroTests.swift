@@ -102,14 +102,6 @@ class JavaKitMacroTests: XCTestCase {
 
             public var javaHolder: JavaObjectHolder
 
-            public var javaThis: jobject {
-              javaHolder.object!
-            }
-
-            public var javaEnvironment: JNIEnvironment {
-              javaHolder.environment
-            }
-
             public init(javaHolder: JavaObjectHolder) {
                 self.javaHolder = javaHolder
             }

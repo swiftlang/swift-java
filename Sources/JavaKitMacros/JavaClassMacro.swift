@@ -69,18 +69,6 @@ extension JavaClassMacro: MemberMacro {
       public var javaHolder: JavaObjectHolder
       """
 
-    let javaThisMember: DeclSyntax = """
-      public var javaThis: jobject {
-        javaHolder.object!
-      }
-      """
-
-    let javaEnvironmentMember: DeclSyntax = """
-      public var javaEnvironment: JNIEnvironment {
-        javaHolder.environment
-      }
-      """
-
     let initMember: DeclSyntax = """
       public init(javaHolder: JavaObjectHolder) {
           self.javaHolder = javaHolder
@@ -98,8 +86,6 @@ extension JavaClassMacro: MemberMacro {
       fullJavaClassNameMember,
       superclassTypealias,
       javaHolderMember,
-      javaThisMember,
-      javaEnvironmentMember,
       initMember,
       nonOptionalAs,
     ]
