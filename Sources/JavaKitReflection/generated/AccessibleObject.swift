@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.lang.reflect.AccessibleObject")
+@JavaClass("java.lang.reflect.AccessibleObject", extends: JavaObject.self)
 public struct AccessibleObject {
   @JavaMethod
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool

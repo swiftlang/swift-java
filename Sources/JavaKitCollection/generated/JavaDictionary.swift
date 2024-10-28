@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.Dictionary")
+@JavaClass("java.util.Dictionary", extends: JavaObject.self)
 public struct JavaDictionary<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
   public init(environment: JNIEnvironment? = nil)
