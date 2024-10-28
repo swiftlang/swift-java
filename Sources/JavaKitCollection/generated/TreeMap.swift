@@ -106,3 +106,89 @@ public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
   public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
 }
+extension TreeMap {
+  @JavaClass("java.util.AbstractMap$SimpleImmutableEntry")
+  public struct SimpleImmutableEntry<K: AnyJavaObject, V: AnyJavaObject> {
+  @JavaMethod
+  public init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getValue() -> JavaObject?
+
+  @JavaMethod
+  public func getKey() -> JavaObject?
+
+  @JavaMethod
+  public func setValue(_ arg0: JavaObject?) -> JavaObject?
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension TreeMap {
+  @JavaClass("java.util.AbstractMap$SimpleEntry")
+  public struct SimpleEntry<K: AnyJavaObject, V: AnyJavaObject> {
+  @JavaMethod
+  public init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getValue() -> JavaObject?
+
+  @JavaMethod
+  public func getKey() -> JavaObject?
+
+  @JavaMethod
+  public func setValue(_ arg0: JavaObject?) -> JavaObject?
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
