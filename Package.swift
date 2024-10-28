@@ -69,12 +69,12 @@ let package = Package(
 
     .library(
       name: "JavaKitJar",
-      targets: ["JavaKitReflection"]
+      targets: ["JavaKitJar"]
     ),
 
     .library(
       name: "JavaKitNetwork",
-      targets: ["JavaKitReflection"]
+      targets: ["JavaKitNetwork"]
     ),
 
     .library(
