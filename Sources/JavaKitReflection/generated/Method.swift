@@ -6,7 +6,7 @@ import JavaRuntime
 @JavaClass("java.lang.reflect.Method", extends: Executable.self)
 public struct Method {
   @JavaMethod
-  public func invoke(_ arg0: JavaObject?, _ arg1: [JavaObject?]) throws -> JavaObject?
+  public func invoke(_ arg0: JavaObject?, _ arg1: [JavaObject?]) throws -> JavaObject!
 
   @JavaMethod
   public func getName() -> String
@@ -27,7 +27,7 @@ public struct Method {
   public func getTypeParameters() -> [TypeVariable<Method>?]
 
   @JavaMethod
-  public func getReturnType() -> JavaClass<JavaObject>?
+  public func getReturnType() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func getParameterTypes() -> [JavaClass<JavaObject>?]
@@ -39,10 +39,10 @@ public struct Method {
   public func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getDeclaringClass() -> JavaClass<JavaObject>?
+  public func getDeclaringClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotations() -> [Annotation?]
@@ -69,7 +69,7 @@ public struct Method {
   public func isDefault() -> Bool
 
   @JavaMethod
-  public func getGenericReturnType() -> Type?
+  public func getGenericReturnType() -> Type!
 
   @JavaMethod
   public func getExceptionTypes() -> [JavaClass<JavaObject>?]
@@ -78,10 +78,10 @@ public struct Method {
   public func isBridge() -> Bool
 
   @JavaMethod
-  public func getDefaultValue() -> JavaObject?
+  public func getDefaultValue() -> JavaObject!
 
   @JavaMethod
-  public func getAnnotatedReturnType() -> AnnotatedType?
+  public func getAnnotatedReturnType() -> AnnotatedType!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -93,7 +93,7 @@ public struct Method {
   public func getParameters() -> [Parameter?]
 
   @JavaMethod
-  public func getAnnotatedReceiverType() -> AnnotatedType?
+  public func getAnnotatedReceiverType() -> AnnotatedType!
 
   @JavaMethod
   public func getAnnotatedExceptionTypes() -> [AnnotatedType?]
@@ -105,7 +105,7 @@ public struct Method {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -120,7 +120,7 @@ public struct Method {
   public func isAccessible() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

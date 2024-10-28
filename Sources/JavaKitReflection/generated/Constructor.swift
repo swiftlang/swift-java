@@ -24,7 +24,7 @@ public struct Constructor<T: AnyJavaObject> {
   public func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
 
   @JavaMethod
-  public func newInstance(_ arg0: [JavaObject?]) throws -> JavaObject?
+  public func newInstance(_ arg0: [JavaObject?]) throws -> JavaObject!
 
   @JavaMethod
   public func getParameterTypes() -> [JavaClass<JavaObject>?]
@@ -36,10 +36,10 @@ public struct Constructor<T: AnyJavaObject> {
   public func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getDeclaringClass() -> JavaClass<JavaObject>?
+  public func getDeclaringClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotations() -> [Annotation?]
@@ -66,10 +66,10 @@ public struct Constructor<T: AnyJavaObject> {
   public func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
   @JavaMethod
-  public func getAnnotatedReturnType() -> AnnotatedType?
+  public func getAnnotatedReturnType() -> AnnotatedType!
 
   @JavaMethod
-  public func getAnnotatedReceiverType() -> AnnotatedType?
+  public func getAnnotatedReceiverType() -> AnnotatedType!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -90,7 +90,7 @@ public struct Constructor<T: AnyJavaObject> {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -105,7 +105,7 @@ public struct Constructor<T: AnyJavaObject> {
   public func isAccessible() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

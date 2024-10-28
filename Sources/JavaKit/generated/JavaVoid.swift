@@ -13,7 +13,7 @@ public struct JavaVoid {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -32,5 +32,5 @@ public struct JavaVoid {
 }
 extension JavaClass<JavaVoid> {
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaVoid>?
+  public var TYPE: JavaClass<JavaVoid>!
 }

@@ -32,7 +32,7 @@ public struct JavaSet<E: AnyJavaObject> {
   public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
@@ -51,41 +51,41 @@ public struct JavaSet<E: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>() -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>() -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?, _ arg9: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?, _ arg9: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaSet<JavaObject>? where ObjectType == JavaSet<E>
+  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 }

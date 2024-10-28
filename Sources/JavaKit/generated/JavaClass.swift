@@ -31,16 +31,16 @@ public struct JavaClass<T: AnyJavaObject> {
   public func isHidden() -> Bool
 
   @JavaMethod
-  public func getSuperclass() -> JavaClass<JavaObject>?
+  public func getSuperclass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func cast(_ arg0: JavaObject?) -> JavaObject?
+  public func cast(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func componentType() -> JavaClass<JavaObject>?
+  public func componentType() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getComponentType() -> JavaClass<JavaObject>?
+  public func getComponentType() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func isAnnotation() -> Bool
@@ -52,7 +52,7 @@ public struct JavaClass<T: AnyJavaObject> {
   public func isRecord() -> Bool
 
   @JavaMethod
-  public func newInstance() throws -> JavaObject?
+  public func newInstance() throws -> JavaObject!
 
   @JavaMethod
   public func getInterfaces() -> [JavaClass<JavaObject>?]
@@ -67,10 +67,10 @@ public struct JavaClass<T: AnyJavaObject> {
   public func isAnonymousClass() -> Bool
 
   @JavaMethod
-  public func getEnclosingClass() throws -> JavaClass<JavaObject>?
+  public func getEnclosingClass() throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func arrayType() -> JavaClass<JavaObject>?
+  public func arrayType() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func getSimpleName() -> String
@@ -85,7 +85,7 @@ public struct JavaClass<T: AnyJavaObject> {
   public func desiredAssertionStatus() -> Bool
 
   @JavaMethod
-  public func getNestHost() -> JavaClass<JavaObject>?
+  public func getNestHost() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func descriptorString() -> String
@@ -103,7 +103,7 @@ public struct JavaClass<T: AnyJavaObject> {
   public func getSigners() -> [JavaObject?]
 
   @JavaMethod
-  public func getDeclaringClass() throws -> JavaClass<JavaObject>?
+  public func getDeclaringClass() throws -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func getTypeName() -> String
@@ -118,7 +118,7 @@ public struct JavaClass<T: AnyJavaObject> {
   public func getEnumConstants() -> [JavaObject?]
 
   @JavaMethod
-  public func asSubclass(_ arg0: JavaClass<JavaObject>?) -> JavaClass<JavaObject>?
+  public func asSubclass(_ arg0: JavaClass<JavaObject>?) -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func isNestmateOf(_ arg0: JavaClass<JavaObject>?) -> Bool
@@ -136,7 +136,7 @@ public struct JavaClass<T: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -155,8 +155,8 @@ public struct JavaClass<T: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func forName<T: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>? where ObjectType == JavaClass<T>
+  public func forName<T: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
 
   @JavaStaticMethod
-  public func forPrimitiveName<T: AnyJavaObject>(_ arg0: String) -> JavaClass<JavaObject>? where ObjectType == JavaClass<T>
+  public func forPrimitiveName<T: AnyJavaObject>(_ arg0: String) -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
 }

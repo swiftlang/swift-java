@@ -38,10 +38,10 @@ public struct URI {
   public func isAbsolute() -> Bool
 
   @JavaMethod
-  public func resolve(_ arg0: String) -> URI?
+  public func resolve(_ arg0: String) -> URI!
 
   @JavaMethod
-  public func resolve(_ arg0: URI?) -> URI?
+  public func resolve(_ arg0: URI?) -> URI!
 
   @JavaMethod
   public func getScheme() -> String
@@ -80,19 +80,19 @@ public struct URI {
   public func getUserInfo() -> String
 
   @JavaMethod
-  public func toURL() throws -> URL?
+  public func toURL() throws -> URL!
 
   @JavaMethod
-  public func normalize() -> URI?
+  public func normalize() -> URI!
 
   @JavaMethod
-  public func relativize(_ arg0: URI?) -> URI?
+  public func relativize(_ arg0: URI?) -> URI!
 
   @JavaMethod
   public func getRawSchemeSpecificPart() -> String
 
   @JavaMethod
-  public func parseServerAuthority() throws -> URI?
+  public func parseServerAuthority() throws -> URI!
 
   @JavaMethod
   public func getSchemeSpecificPart() -> String
@@ -107,7 +107,7 @@ public struct URI {
   public func toASCIIString() -> String
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -126,5 +126,5 @@ public struct URI {
 }
 extension JavaClass<URI> {
   @JavaStaticMethod
-  public func create(_ arg0: String) -> URI?
+  public func create(_ arg0: String) -> URI!
 }

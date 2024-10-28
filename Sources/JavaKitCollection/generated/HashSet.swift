@@ -23,7 +23,7 @@ public struct HashSet<E: AnyJavaObject> {
   public func size() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear()
@@ -41,7 +41,7 @@ public struct HashSet<E: AnyJavaObject> {
   public func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
@@ -68,7 +68,7 @@ public struct HashSet<E: AnyJavaObject> {
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -87,5 +87,5 @@ public struct HashSet<E: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>? where ObjectType == HashSet<E>
+  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>! where ObjectType == HashSet<E>
 }

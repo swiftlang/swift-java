@@ -43,7 +43,7 @@ public struct JavaShort {
   public func doubleValue() -> Double
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -68,7 +68,7 @@ extension JavaClass<JavaShort> {
   public var MAX_VALUE: Int16
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaShort>?
+  public var TYPE: JavaClass<JavaShort>!
 
   @JavaStaticField(isFinal: true)
   public var SIZE: Int32
@@ -92,16 +92,16 @@ extension JavaClass<JavaShort> {
   public func compare(_ arg0: Int16, _ arg1: Int16) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaShort?
+  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaShort!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaShort?
+  public func valueOf(_ arg0: String) throws -> JavaShort!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int16) -> JavaShort?
+  public func valueOf(_ arg0: Int16) -> JavaShort!
 
   @JavaStaticMethod
-  public func decode(_ arg0: String) throws -> JavaShort?
+  public func decode(_ arg0: String) throws -> JavaShort!
 
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int16) -> Int64

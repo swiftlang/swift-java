@@ -32,7 +32,7 @@ public struct BitSet {
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: Int32, _ arg1: Int32) -> BitSet?
+  public func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
 
   @JavaMethod
   public func get(_ arg0: Int32) -> Bool
@@ -50,7 +50,7 @@ public struct BitSet {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear(_ arg0: Int32)
@@ -101,7 +101,7 @@ public struct BitSet {
   public func andNot(_ arg0: BitSet?)
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -120,8 +120,8 @@ public struct BitSet {
 }
 extension JavaClass<BitSet> {
   @JavaStaticMethod
-  public func valueOf(_ arg0: [Int64]) -> BitSet?
+  public func valueOf(_ arg0: [Int64]) -> BitSet!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: [Int8]) -> BitSet?
+  public func valueOf(_ arg0: [Int8]) -> BitSet!
 }

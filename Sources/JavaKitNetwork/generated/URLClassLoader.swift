@@ -9,10 +9,10 @@ public struct URLClassLoader {
   public init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func findResource(_ arg0: String) -> URL?
+  public func findResource(_ arg0: String) -> URL!
 
   @JavaMethod
-  public func findResources(_ arg0: String) throws -> Enumeration<URL>?
+  public func findResources(_ arg0: String) throws -> Enumeration<URL>!
 
   @JavaMethod
   public func close() throws
@@ -24,13 +24,13 @@ public struct URLClassLoader {
   public func getName() -> String
 
   @JavaMethod
-  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
+  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getResource(_ arg0: String) -> URL?
+  public func getResource(_ arg0: String) -> URL!
 
   @JavaMethod
-  public func getResources(_ arg0: String) throws -> Enumeration<URL>?
+  public func getResources(_ arg0: String) throws -> Enumeration<URL>!
 
   @JavaMethod
   public func isRegisteredAsParallelCapable() -> Bool
@@ -57,7 +57,7 @@ public struct URLClassLoader {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -76,11 +76,11 @@ public struct URLClassLoader {
 }
 extension JavaClass<URLClassLoader> {
   @JavaStaticMethod
-  public func newInstance(_ arg0: [URL?]) -> URLClassLoader?
+  public func newInstance(_ arg0: [URL?]) -> URLClassLoader!
 
   @JavaStaticMethod
-  public func getSystemResource(_ arg0: String) -> URL?
+  public func getSystemResource(_ arg0: String) -> URL!
 
   @JavaStaticMethod
-  public func getSystemResources(_ arg0: String) throws -> Enumeration<URL>?
+  public func getSystemResources(_ arg0: String) throws -> Enumeration<URL>!
 }

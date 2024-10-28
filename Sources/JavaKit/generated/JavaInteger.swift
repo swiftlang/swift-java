@@ -43,7 +43,7 @@ public struct JavaInteger {
   public func doubleValue() -> Double
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -68,7 +68,7 @@ extension JavaClass<JavaInteger> {
   public var MAX_VALUE: Int32
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaInteger>?
+  public var TYPE: JavaClass<JavaInteger>!
 
   @JavaStaticField(isFinal: true)
   public var SIZE: Int32
@@ -128,19 +128,19 @@ extension JavaClass<JavaInteger> {
   public func compare(_ arg0: Int32, _ arg1: Int32) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaInteger?
+  public func valueOf(_ arg0: String) throws -> JavaInteger!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaInteger?
+  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaInteger!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int32) -> JavaInteger?
+  public func valueOf(_ arg0: Int32) -> JavaInteger!
 
   @JavaStaticMethod
   public func toHexString(_ arg0: Int32) -> String
 
   @JavaStaticMethod
-  public func decode(_ arg0: String) throws -> JavaInteger?
+  public func decode(_ arg0: String) throws -> JavaInteger!
 
   @JavaStaticMethod
   public func parseInt(_ arg0: String) throws -> Int32
@@ -167,13 +167,13 @@ extension JavaClass<JavaInteger> {
   public func parseUnsignedInt(_ arg0: String, _ arg1: Int32) throws -> Int32
 
   @JavaStaticMethod
-  public func getInteger(_ arg0: String, _ arg1: JavaInteger?) -> JavaInteger?
+  public func getInteger(_ arg0: String, _ arg1: JavaInteger?) -> JavaInteger!
 
   @JavaStaticMethod
-  public func getInteger(_ arg0: String, _ arg1: Int32) -> JavaInteger?
+  public func getInteger(_ arg0: String, _ arg1: Int32) -> JavaInteger!
 
   @JavaStaticMethod
-  public func getInteger(_ arg0: String) -> JavaInteger?
+  public func getInteger(_ arg0: String) -> JavaInteger!
 
   @JavaStaticMethod
   public func toOctalString(_ arg0: Int32) -> String

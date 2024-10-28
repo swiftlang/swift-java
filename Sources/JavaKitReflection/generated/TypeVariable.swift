@@ -5,7 +5,7 @@ import JavaRuntime
 @JavaInterface("java.lang.reflect.TypeVariable", extends: Type.self)
 public struct TypeVariable<D: AnyJavaObject> {
   @JavaMethod
-  public func getGenericDeclaration() -> GenericDeclaration?
+  public func getGenericDeclaration() -> GenericDeclaration!
 
   @JavaMethod
   public func getAnnotatedBounds() -> [AnnotatedType?]
@@ -23,7 +23,7 @@ public struct TypeVariable<D: AnyJavaObject> {
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -32,7 +32,7 @@ public struct TypeVariable<D: AnyJavaObject> {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]

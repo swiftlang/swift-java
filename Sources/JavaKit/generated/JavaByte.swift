@@ -43,7 +43,7 @@ public struct JavaByte {
   public func doubleValue() -> Double
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -68,7 +68,7 @@ extension JavaClass<JavaByte> {
   public var MAX_VALUE: Int8
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaByte>?
+  public var TYPE: JavaClass<JavaByte>!
 
   @JavaStaticField(isFinal: true)
   public var SIZE: Int32
@@ -89,16 +89,16 @@ extension JavaClass<JavaByte> {
   public func compare(_ arg0: Int8, _ arg1: Int8) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaByte?
+  public func valueOf(_ arg0: String) throws -> JavaByte!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaByte?
+  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaByte!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int8) -> JavaByte?
+  public func valueOf(_ arg0: Int8) -> JavaByte!
 
   @JavaStaticMethod
-  public func decode(_ arg0: String) throws -> JavaByte?
+  public func decode(_ arg0: String) throws -> JavaByte!
 
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int8) -> Int64

@@ -14,7 +14,7 @@ public struct ListIterator<E: AnyJavaObject> {
   public func hasNext() -> Bool
 
   @JavaMethod
-  public func next() -> JavaObject?
+  public func next() -> JavaObject!
 
   @JavaMethod
   public func set(_ arg0: JavaObject?)
@@ -29,5 +29,5 @@ public struct ListIterator<E: AnyJavaObject> {
   public func hasPrevious() -> Bool
 
   @JavaMethod
-  public func previous() -> JavaObject?
+  public func previous() -> JavaObject!
 }

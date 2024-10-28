@@ -28,7 +28,7 @@ public struct JavaBoolean {
   public func booleanValue() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -47,13 +47,13 @@ public struct JavaBoolean {
 }
 extension JavaClass<JavaBoolean> {
   @JavaStaticField(isFinal: true)
-  public var TRUE: JavaBoolean?
+  public var TRUE: JavaBoolean!
 
   @JavaStaticField(isFinal: true)
-  public var FALSE: JavaBoolean?
+  public var FALSE: JavaBoolean!
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaBoolean>?
+  public var TYPE: JavaClass<JavaBoolean>!
 
   @JavaStaticMethod
   public func toString(_ arg0: Bool) -> String
@@ -68,10 +68,10 @@ extension JavaClass<JavaBoolean> {
   public func compare(_ arg0: Bool, _ arg1: Bool) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) -> JavaBoolean?
+  public func valueOf(_ arg0: String) -> JavaBoolean!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Bool) -> JavaBoolean?
+  public func valueOf(_ arg0: Bool) -> JavaBoolean!
 
   @JavaStaticMethod
   public func parseBoolean(_ arg0: String) -> Bool

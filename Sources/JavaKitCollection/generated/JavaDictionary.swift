@@ -8,25 +8,25 @@ public struct JavaDictionary<K: AnyJavaObject, V: AnyJavaObject> {
   public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject?
+  public func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject?
+  public func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func isEmpty() -> Bool
 
   @JavaMethod
-  public func elements() -> Enumeration<JavaObject>?
+  public func elements() -> Enumeration<JavaObject>!
 
   @JavaMethod
-  public func keys() -> Enumeration<JavaObject>?
+  public func keys() -> Enumeration<JavaObject>!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -38,7 +38,7 @@ public struct JavaDictionary<K: AnyJavaObject, V: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

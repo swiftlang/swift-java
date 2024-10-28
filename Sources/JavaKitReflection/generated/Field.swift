@@ -9,7 +9,7 @@ public struct Field {
   public func getName() -> String
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) throws -> JavaObject?
+  public func get(_ arg0: JavaObject?) throws -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -54,10 +54,10 @@ public struct Field {
   public func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getDeclaringClass() -> JavaClass<JavaObject>?
+  public func getDeclaringClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -72,10 +72,10 @@ public struct Field {
   public func setAccessible(_ arg0: Bool)
 
   @JavaMethod
-  public func getGenericType() -> Type?
+  public func getGenericType() -> Type!
 
   @JavaMethod
-  public func getType() -> JavaClass<JavaObject>?
+  public func getType() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func setBoolean(_ arg0: JavaObject?, _ arg1: Bool) throws
@@ -105,7 +105,7 @@ public struct Field {
   public func isEnumConstant() -> Bool
 
   @JavaMethod
-  public func getAnnotatedType() -> AnnotatedType?
+  public func getAnnotatedType() -> AnnotatedType!
 
   @JavaMethod
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
@@ -114,7 +114,7 @@ public struct Field {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -129,7 +129,7 @@ public struct Field {
   public func isAccessible() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

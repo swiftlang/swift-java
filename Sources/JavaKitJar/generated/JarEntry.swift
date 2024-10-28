@@ -14,7 +14,7 @@ public struct JarEntry {
   public func getRealName() -> String
 
   @JavaMethod
-  public func getAttributes() throws -> Attributes?
+  public func getAttributes() throws -> Attributes!
 
   @JavaMethod
   public func getName() -> String
@@ -26,7 +26,7 @@ public struct JarEntry {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func getMethod() -> Int32
@@ -77,7 +77,7 @@ public struct JarEntry {
   public func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

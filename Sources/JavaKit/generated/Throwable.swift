@@ -19,13 +19,13 @@ public struct Throwable {
   public func printStackTrace()
 
   @JavaMethod
-  public func fillInStackTrace() -> Throwable?
+  public func fillInStackTrace() -> Throwable!
 
   @JavaMethod
-  public func getCause() -> Throwable?
+  public func getCause() -> Throwable!
 
   @JavaMethod
-  public func initCause(_ arg0: Throwable?) -> Throwable?
+  public func initCause(_ arg0: Throwable?) -> Throwable!
 
   @JavaMethod
   public func toString() -> String
@@ -49,7 +49,7 @@ public struct Throwable {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

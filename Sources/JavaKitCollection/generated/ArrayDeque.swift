@@ -14,7 +14,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove() -> JavaObject?
+  public func remove() -> JavaObject!
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool
@@ -23,7 +23,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func size() -> Int32
 
   @JavaMethod
-  public func clone() -> ArrayDeque<JavaObject>?
+  public func clone() -> ArrayDeque<JavaObject>!
 
   @JavaMethod
   public func clear()
@@ -41,7 +41,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
@@ -50,16 +50,16 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func peek() -> JavaObject?
+  public func peek() -> JavaObject!
 
   @JavaMethod
-  public func getFirst() -> JavaObject?
+  public func getFirst() -> JavaObject!
 
   @JavaMethod
-  public func getLast() -> JavaObject?
+  public func getLast() -> JavaObject!
 
   @JavaMethod
-  public func element() -> JavaObject?
+  public func element() -> JavaObject!
 
   @JavaMethod
   public func addFirst(_ arg0: JavaObject?)
@@ -68,10 +68,10 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func addLast(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func removeFirst() -> JavaObject?
+  public func removeFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeLast() -> JavaObject?
+  public func removeLast() -> JavaObject!
 
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
@@ -80,25 +80,25 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func poll() -> JavaObject?
+  public func poll() -> JavaObject!
 
   @JavaMethod
   public func push(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func pop() -> JavaObject?
+  public func pop() -> JavaObject!
 
   @JavaMethod
-  public func pollFirst() -> JavaObject?
+  public func pollFirst() -> JavaObject!
 
   @JavaMethod
-  public func pollLast() -> JavaObject?
+  public func pollLast() -> JavaObject!
 
   @JavaMethod
   public func offerLast(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peekFirst() -> JavaObject?
+  public func peekFirst() -> JavaObject!
 
   @JavaMethod
   public func removeFirstOccurrence(_ arg0: JavaObject?) -> Bool
@@ -107,7 +107,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func offerFirst(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peekLast() -> JavaObject?
+  public func peekLast() -> JavaObject!
 
   @JavaMethod
   public func removeLastOccurrence(_ arg0: JavaObject?) -> Bool
@@ -116,7 +116,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func offer(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func descendingIterator() -> JavaIterator<JavaObject>?
+  public func descendingIterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func toString() -> String
@@ -131,7 +131,7 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
