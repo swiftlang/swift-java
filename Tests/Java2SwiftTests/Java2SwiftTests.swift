@@ -74,7 +74,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaStaticMethod
-          public func forName<T: AnyJavaObject>(_ arg0: JavaString) throws -> MyJavaClass<JavaObject>? where ObjectType == MyJavaClass<T>
+          public func forName<T: AnyJavaObject>(_ arg0: JavaString) throws -> MyJavaClass<JavaObject>! where ObjectType == MyJavaClass<T>
         """,
       ]
     )
@@ -88,7 +88,7 @@ class Java2SwiftTests: XCTestCase {
         "import JavaKit",
         "enum MonthCases: Equatable",
         "case APRIL",
-        "public var enumValue: MonthCases?",
+        "public var enumValue: MonthCases!",
         """
             } else if self.equals(classObj.APRIL?.as(JavaObject.self)) {
               return MonthCases.APRIL
@@ -105,7 +105,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaStaticField(isFinal: true)
-          public var APRIL: Month?
+          public var APRIL: Month!
         """
       ])
   }
@@ -121,7 +121,7 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         """
           @JavaMethod
-          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>?
+          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>!
         """
       ]
     )
@@ -138,7 +138,7 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         """
           @JavaMethod
-          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>?
+          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>!
         """
       ]
     )
@@ -161,7 +161,7 @@ class Java2SwiftTests: XCTestCase {
         "import JavaKit",
         """
           @JavaMethod
-          public func redirectInput() -> ProcessBuilder.Redirect?
+          public func redirectInput() -> ProcessBuilder.Redirect!
         """,
         """
         extension ProcessBuilder {
@@ -169,7 +169,7 @@ class Java2SwiftTests: XCTestCase {
           public struct Redirect {
         """,
         """
-        public func redirectError() -> ProcessBuilder.Redirect?
+        public func redirectError() -> ProcessBuilder.Redirect!
         """,
         """
         extension ProcessBuilder.Redirect {
@@ -178,7 +178,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaMethod
-          public func type() -> ProcessBuilder.Redirect.`Type`?
+          public func type() -> ProcessBuilder.Redirect.`Type`!
         """,
       ]
     )
@@ -201,7 +201,7 @@ class Java2SwiftTests: XCTestCase {
         "import JavaKit",
         """
           @JavaMethod
-          public func redirectInput() -> ProcessBuilder.PBRedirect?
+          public func redirectInput() -> ProcessBuilder.PBRedirect!
         """,
         """
         extension ProcessBuilder {
@@ -209,7 +209,7 @@ class Java2SwiftTests: XCTestCase {
           public struct PBRedirect {
         """,
         """
-        public func redirectError() -> ProcessBuilder.PBRedirect?
+        public func redirectError() -> ProcessBuilder.PBRedirect!
         """,
         """
         extension ProcessBuilder.PBRedirect {
@@ -218,7 +218,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaMethod
-          public func type() -> ProcessBuilder.PBRedirect.JavaType?
+          public func type() -> ProcessBuilder.PBRedirect.JavaType!
         """
       ]
     )

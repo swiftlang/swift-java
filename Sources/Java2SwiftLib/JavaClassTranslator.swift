@@ -131,7 +131,7 @@ struct JavaClassTranslator {
       }
 
       do {
-        let typeName = try translator.getSwiftTypeNameAsString(javaType, outerOptional: false)
+        let typeName = try translator.getSwiftTypeNameAsString(javaType, outerOptional: .nonoptional)
         return "\(typeName)"
       } catch {
         translator.logUntranslated("Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
@@ -459,7 +459,7 @@ extension JavaClassTranslator {
 
     // Map the result type.
     let resultTypeStr: String
-    let resultType = try translator.getSwiftTypeNameAsString(javaMethod.getGenericReturnType()!, outerOptional: true)
+    let resultType = try translator.getSwiftTypeNameAsString(javaMethod.getGenericReturnType()!, outerOptional: .implicitlyUnwrappedOptional)
     if resultType != "Void" {
       resultTypeStr = " -> \(resultType)"
     } else {
@@ -480,7 +480,7 @@ extension JavaClassTranslator {
   /// Render a single Java field into the corresponding Swift property, or
   /// throw an error if that is not possible for any reason.
   package func renderField(_ javaField: Field) throws -> DeclSyntax {
-    let typeName = try translator.getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: true)
+    let typeName = try translator.getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: .implicitlyUnwrappedOptional)
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
     return """
@@ -501,7 +501,7 @@ extension JavaClassTranslator {
     """
 
     let mappingSyntax: DeclSyntax = """
-      public var enumValue: \(raw: name)? {
+      public var enumValue: \(raw: name)! {
         let classObj = self.javaClass
         \(raw: enumConstants.map {
           // The equals method takes a java object, so we need to cast it here
@@ -547,7 +547,7 @@ extension JavaClassTranslator {
     return try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 
-      let typeName = try translator.getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: true)
+      let typeName = try translator.getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: .optional)
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
     }

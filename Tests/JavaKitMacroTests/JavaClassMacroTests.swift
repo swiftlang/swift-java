@@ -42,6 +42,9 @@ class JavaKitMacroTests: XCTestCase {
           @JavaField
           public var myField: Int64
       
+          @JavaField
+          public var objectField: JavaObject!
+
           @JavaField(isFinal: true)
           public var myFinalField: Int64
         }
@@ -74,6 +77,14 @@ class JavaKitMacroTests: XCTestCase {
               }
               nonmutating set {
                   self[javaFieldName: "myField", fieldType: Int64.self] = newValue
+              }
+          }
+          public var objectField: JavaObject! {
+              get {
+                  self[javaFieldName: "objectField", fieldType: JavaObject?.self]
+              }
+              nonmutating set {
+                  self[javaFieldName: "objectField", fieldType: JavaObject?.self] = newValue
               }
           }
           public var myFinalField: Int64 {

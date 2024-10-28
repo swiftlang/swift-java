@@ -55,7 +55,7 @@ extension JavaMethodMacro: BodyMacro {
     let params = funcDecl.signature.parameterClause.parameters
     let resultType: String =
       funcDecl.signature.returnClause.map { result in
-        ", resultType: \(result.type.trimmedDescription).self"
+        ", resultType: \(result.type.typeReferenceString).self"
       } ?? ""
     let paramNames = params.map { param in param.parameterName?.text ?? "" }.joined(separator: ", ")
 
@@ -124,5 +124,27 @@ extension JavaMethodMacro: BodyMacro {
 extension FunctionParameterListSyntax {
   func indexOfParameter(named name: String) -> Index? {
     return firstIndex { $0.parameterName?.text == name }
+  }
+}
+
+extension TypeSyntaxProtocol {
+  /// Produce a reference to the given type syntax node with any adjustments
+  /// needed to pretty-print it back into source.
+  var typeReference: TypeSyntax {
+    if let iuoType = self.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
+      return TypeSyntax(
+        OptionalTypeSyntax(
+          wrappedType: iuoType.wrappedType.trimmed
+        )
+      )
+    }
+
+    return TypeSyntax(trimmed)
+  }
+
+  /// Produce a reference to the given type syntax node with any adjustments
+  /// needed to pretty-print it back into source, as a string.
+  var typeReferenceString: String {
+    typeReference.description
   }
 }
