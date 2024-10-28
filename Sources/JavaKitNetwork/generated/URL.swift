@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.net.URL")
+@JavaClass("java.net.URL", extends: JavaObject.self)
 public struct URL {
   @JavaMethod
   public init(_ arg0: URL?, _ arg1: String, environment: JNIEnvironment? = nil) throws

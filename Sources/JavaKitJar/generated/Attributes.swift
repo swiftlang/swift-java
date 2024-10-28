@@ -3,7 +3,7 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.util.jar.Attributes")
+@JavaClass("java.util.jar.Attributes", extends: JavaObject.self)
 public struct Attributes {
   @JavaMethod
   public init(_ arg0: Attributes?, environment: JNIEnvironment? = nil)
@@ -99,7 +99,7 @@ public struct Attributes {
   public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 }
 extension Attributes {
-  @JavaClass("java.util.jar.Attributes$Name")
+  @JavaClass("java.util.jar.Attributes$Name", extends: JavaObject.self)
   public struct Name {
   @JavaMethod
   public init(_ arg0: String, environment: JNIEnvironment? = nil)

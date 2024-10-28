@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.Manifest")
+@JavaClass("java.util.jar.Manifest", extends: JavaObject.self)
 public struct Manifest {
   @JavaMethod
   public init(_ arg0: Manifest?, environment: JNIEnvironment? = nil)

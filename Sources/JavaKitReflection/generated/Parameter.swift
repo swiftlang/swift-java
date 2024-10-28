@@ -3,7 +3,7 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.lang.reflect.Parameter")
+@JavaClass("java.lang.reflect.Parameter", extends: JavaObject.self)
 public struct Parameter {
   @JavaMethod
   public func getName() -> String

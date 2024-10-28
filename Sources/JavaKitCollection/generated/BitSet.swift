@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.BitSet")
+@JavaClass("java.util.BitSet", extends: JavaObject.self)
 public struct BitSet {
   @JavaMethod
   public init(environment: JNIEnvironment? = nil)
