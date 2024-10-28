@@ -50,15 +50,19 @@ public protocol AnyJavaObject {
 
   /// The Swift instance that keeps the Java holder alive.
   var javaHolder: JavaObjectHolder { get }
-
-  /// Retrieve the underlying Java object.
-  var javaThis: jobject { get }
-
-  /// Retrieve the environment in which this Java object resides.
-  var javaEnvironment: JNIEnvironment { get }
 }
 
 extension AnyJavaObject {
+  /// Retrieve the underlying Java object.
+  public var javaThis: jobject {
+    javaHolder.object!
+  }
+
+  /// Retrieve the environment in which this Java object resides.
+  public var javaEnvironment: JNIEnvironment {
+    javaHolder.environment
+  }
+
   /// The full Java class name, where each component is separated by a "/".
   static var fullJavaClassNameWithSlashes: String {
     let seq = fullJavaClassName.map { $0 == "." ? "/" as Character : $0 }

@@ -34,8 +34,6 @@
   member,
   names: named(fullJavaClassName),
   named(javaHolder),
-  named(javaThis),
-  named(javaEnvironment),
   named(init(javaHolder:)),
   named(JavaSuperclass),
   named(`as`)
@@ -70,8 +68,6 @@ public macro JavaClass(
   member,
   names: named(fullJavaClassName),
   named(javaHolder),
-  named(javaThis),
-  named(javaEnvironment),
   named(init(javaHolder:)),
   named(JavaSuperclass),
   named(`as`)
