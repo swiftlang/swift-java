@@ -57,10 +57,10 @@ struct JavaClassTranslator {
   var constructors: [Constructor<JavaObject>] = []
 
   /// The (instance) methods of the Java class.
-  var methods: [Method] = []
+  var methods: MethodCollector = MethodCollector()
 
   /// The static methods of the Java class.
-  var staticMethods: [Method] = []
+  var staticMethods: MethodCollector = MethodCollector()
 
   /// The native instance methods of the Java class, which are also reflected
   /// in a `*NativeMethods` protocol so they can be implemented in Swift.
@@ -215,8 +215,8 @@ extension JavaClassTranslator {
   /// Add a method to the appropriate list for later translation.
   private mutating func addMethod(_ method: Method, isNative: Bool) {
     switch (method.isStatic, isNative) {
-    case (false, false): methods.append(method)
-    case (true, false): staticMethods.append(method)
+    case (false, false): methods.add(method)
+    case (true, false): staticMethods.add(method)
     case (false, true): nativeMethods.append(method)
     case (true, true): nativeStaticMethods.append(method)
     }
@@ -266,7 +266,7 @@ extension JavaClassTranslator {
     }
 
     // Render all of the instance methods in Swift.
-    let instanceMethods = methods.compactMap { method in
+    let instanceMethods = methods.methods.compactMap { method in
       do {
         return try renderMethod(method, implementedInSwift: false)
       } catch {
@@ -355,7 +355,7 @@ extension JavaClassTranslator {
     }
 
     // Render static methods.
-    let methods = staticMethods.compactMap { method in
+    let methods = staticMethods.methods.compactMap { method in
       // Translate each static method.
       do {
         return try renderMethod(
@@ -551,5 +551,43 @@ extension JavaClassTranslator {
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
     }
+  }
+}
+
+/// Helper struct that collects methods, removing any that have been overridden
+/// by a covariant method.
+struct MethodCollector {
+  var methods: [Method] = []
+
+  /// Mapping from method names to the indices of each method within the
+  /// list of methods.
+  var methodsByName: [String: [Int]] = [:]
+
+  /// Add this method to the collector.
+  mutating func add(_ method: Method) {
+    // Compare against existing methods with this same name.
+    for existingMethodIndex in methodsByName[method.getName()] ?? [] {
+      let existingMethod = methods[existingMethodIndex]
+      switch MethodVariance(method, existingMethod) {
+      case .equivalent, .unrelated:
+        // Nothing to do.
+        continue
+
+      case .contravariantResult:
+        // This method is worse than what we have; there is nothing to do.
+        return
+
+      case .covariantResult:
+        // This method is better than the one we have; replace the one we
+        // have with it.
+        methods[existingMethodIndex] = method
+        return
+      }
+    }
+
+    // If we get here, there is no related method in the list. Add this
+    // new method.
+    methodsByName[method.getName(), default: []].append(methods.count)
+    methods.append(method)
   }
 }
