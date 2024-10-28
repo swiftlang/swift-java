@@ -13,6 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 extension Method {
+  /// Whether this is a 'public' method.
+  public var isPublic: Bool {
+    return (getModifiers() & 1) != 0
+  }
+
   /// Whether this is a 'static' method.
   public var isStatic: Bool {
     return (getModifiers() & 0x08) != 0
