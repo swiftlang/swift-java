@@ -11,16 +11,16 @@ public struct Stack<E: AnyJavaObject> {
   public func empty() -> Bool
 
   @JavaMethod
-  public func peek() -> JavaObject?
+  public func peek() -> JavaObject!
 
   @JavaMethod
   public func search(_ arg0: JavaObject?) -> Int32
 
   @JavaMethod
-  public func push(_ arg0: JavaObject?) -> JavaObject?
+  public func push(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func pop() -> JavaObject?
+  public func pop() -> JavaObject!
 
   @JavaMethod
   public func addElement(_ arg0: JavaObject?)
@@ -38,16 +38,16 @@ public struct Stack<E: AnyJavaObject> {
   public func removeAllElements()
 
   @JavaMethod
-  public func firstElement() -> JavaObject?
+  public func firstElement() -> JavaObject!
 
   @JavaMethod
-  public func lastElement() -> JavaObject?
+  public func lastElement() -> JavaObject!
 
   @JavaMethod
   public func setElementAt(_ arg0: JavaObject?, _ arg1: Int32)
 
   @JavaMethod
-  public func remove(_ arg0: Int32) -> JavaObject?
+  public func remove(_ arg0: Int32) -> JavaObject!
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool
@@ -56,7 +56,7 @@ public struct Stack<E: AnyJavaObject> {
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: Int32) -> JavaObject?
+  public func get(_ arg0: Int32) -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -68,7 +68,7 @@ public struct Stack<E: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func indexOf(_ arg0: JavaObject?, _ arg1: Int32) -> Int32
@@ -95,7 +95,7 @@ public struct Stack<E: AnyJavaObject> {
   public func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>?
+  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
 
   @JavaMethod
   public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
@@ -104,13 +104,13 @@ public struct Stack<E: AnyJavaObject> {
   public func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func elements() -> Enumeration<JavaObject>?
+  public func elements() -> Enumeration<JavaObject>!
 
   @JavaMethod
   public func addAll(_ arg0: Int32, _ arg1: JavaCollection<JavaObject>?) -> Bool
@@ -119,7 +119,7 @@ public struct Stack<E: AnyJavaObject> {
   public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject?
+  public func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func capacity() -> Int32
@@ -131,7 +131,7 @@ public struct Stack<E: AnyJavaObject> {
   public func trimToSize()
 
   @JavaMethod
-  public func elementAt(_ arg0: Int32) -> JavaObject?
+  public func elementAt(_ arg0: Int32) -> JavaObject!
 
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
@@ -140,10 +140,10 @@ public struct Stack<E: AnyJavaObject> {
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func listIterator() -> ListIterator<JavaObject>?
+  public func listIterator() -> ListIterator<JavaObject>!
 
   @JavaMethod
-  public func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>?
+  public func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>!
 
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
@@ -155,7 +155,7 @@ public struct Stack<E: AnyJavaObject> {
   public func copyInto(_ arg0: [JavaObject?])
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -173,10 +173,10 @@ public struct Stack<E: AnyJavaObject> {
   public func wait() throws
 
   @JavaMethod
-  public func getFirst() -> JavaObject?
+  public func getFirst() -> JavaObject!
 
   @JavaMethod
-  public func getLast() -> JavaObject?
+  public func getLast() -> JavaObject!
 
   @JavaMethod
   public func addFirst(_ arg0: JavaObject?)
@@ -185,11 +185,11 @@ public struct Stack<E: AnyJavaObject> {
   public func addLast(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func removeFirst() -> JavaObject?
+  public func removeFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeLast() -> JavaObject?
+  public func removeLast() -> JavaObject!
 
   @JavaMethod
-  public func reversed() -> List<JavaObject>?
+  public func reversed() -> List<JavaObject>!
 }

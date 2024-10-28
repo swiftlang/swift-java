@@ -8,22 +8,22 @@ public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject?
+  public func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject?
+  public func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>?
+  public func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear()
@@ -32,43 +32,43 @@ public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>?
+  public func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
   public func containsValue(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func firstKey() -> JavaObject?
+  public func firstKey() -> JavaObject!
 
   @JavaMethod
-  public func putFirst(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func putFirst(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func putLast(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func putLast(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func lowerKey(_ arg0: JavaObject?) -> JavaObject?
+  public func lowerKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func floorKey(_ arg0: JavaObject?) -> JavaObject?
+  public func floorKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func ceilingKey(_ arg0: JavaObject?) -> JavaObject?
+  public func ceilingKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func higherKey(_ arg0: JavaObject?) -> JavaObject?
+  public func higherKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func lastKey() -> JavaObject?
+  public func lastKey() -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -83,7 +83,7 @@ public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func isEmpty() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -104,7 +104,7 @@ public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
 
   @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 }
 extension TreeMap {
   @JavaClass("java.util.AbstractMap$SimpleImmutableEntry")
@@ -122,16 +122,16 @@ extension TreeMap {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getValue() -> JavaObject?
+  public func getValue() -> JavaObject!
 
   @JavaMethod
-  public func getKey() -> JavaObject?
+  public func getKey() -> JavaObject!
 
   @JavaMethod
-  public func setValue(_ arg0: JavaObject?) -> JavaObject?
+  public func setValue(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -165,16 +165,16 @@ extension TreeMap {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getValue() -> JavaObject?
+  public func getValue() -> JavaObject!
 
   @JavaMethod
-  public func getKey() -> JavaObject?
+  public func getKey() -> JavaObject!
 
   @JavaMethod
-  public func setValue(_ arg0: JavaObject?) -> JavaObject?
+  public func setValue(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

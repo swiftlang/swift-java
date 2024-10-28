@@ -24,10 +24,10 @@ public struct Executable {
   public func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getDeclaringClass() -> JavaClass<JavaObject>?
+  public func getDeclaringClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -57,13 +57,13 @@ public struct Executable {
   public func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
   @JavaMethod
-  public func getAnnotatedReturnType() -> AnnotatedType?
+  public func getAnnotatedReturnType() -> AnnotatedType!
 
   @JavaMethod
   public func getParameters() -> [Parameter?]
 
   @JavaMethod
-  public func getAnnotatedReceiverType() -> AnnotatedType?
+  public func getAnnotatedReceiverType() -> AnnotatedType!
 
   @JavaMethod
   public func getAnnotatedExceptionTypes() -> [AnnotatedType?]
@@ -75,7 +75,7 @@ public struct Executable {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -102,7 +102,7 @@ public struct Executable {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

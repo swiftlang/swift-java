@@ -17,10 +17,10 @@ public struct TreeSet<E: AnyJavaObject> {
   public func size() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
-  public func floor(_ arg0: JavaObject?) -> JavaObject?
+  public func floor(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func clear()
@@ -32,19 +32,19 @@ public struct TreeSet<E: AnyJavaObject> {
   public func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func last() -> JavaObject?
+  public func last() -> JavaObject!
 
   @JavaMethod
   public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func first() -> JavaObject?
+  public func first() -> JavaObject!
 
   @JavaMethod
   public func addFirst(_ arg0: JavaObject?)
@@ -53,22 +53,22 @@ public struct TreeSet<E: AnyJavaObject> {
   public func addLast(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func lower(_ arg0: JavaObject?) -> JavaObject?
+  public func lower(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func pollFirst() -> JavaObject?
+  public func pollFirst() -> JavaObject!
 
   @JavaMethod
-  public func pollLast() -> JavaObject?
+  public func pollLast() -> JavaObject!
 
   @JavaMethod
-  public func descendingIterator() -> JavaIterator<JavaObject>?
+  public func descendingIterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
-  public func ceiling(_ arg0: JavaObject?) -> JavaObject?
+  public func ceiling(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func higher(_ arg0: JavaObject?) -> JavaObject?
+  public func higher(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -95,7 +95,7 @@ public struct TreeSet<E: AnyJavaObject> {
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -113,14 +113,14 @@ public struct TreeSet<E: AnyJavaObject> {
   public func wait() throws
 
   @JavaMethod
-  public func removeFirst() -> JavaObject?
+  public func removeFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeLast() -> JavaObject?
+  public func removeLast() -> JavaObject!
 
   @JavaMethod
-  public func getFirst() -> JavaObject?
+  public func getFirst() -> JavaObject!
 
   @JavaMethod
-  public func getLast() -> JavaObject?
+  public func getLast() -> JavaObject!
 }

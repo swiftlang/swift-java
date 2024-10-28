@@ -14,7 +14,7 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject?
+  public func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
@@ -23,16 +23,16 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject?
+  public func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>?
+  public func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear()
@@ -41,25 +41,25 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func isEmpty() -> Bool
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
 
   @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>?
+  public func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
   public func containsValue(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
@@ -71,7 +71,7 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -90,5 +90,5 @@ public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<JavaObject, JavaObject>? where ObjectType == HashMap<K, V>
+  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<JavaObject, JavaObject>! where ObjectType == HashMap<K, V>
 }

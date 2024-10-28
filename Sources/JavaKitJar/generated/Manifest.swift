@@ -17,22 +17,22 @@ public struct Manifest {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear()
 
   @JavaMethod
-  public func getMainAttributes() -> Attributes?
+  public func getMainAttributes() -> Attributes!
 
   @JavaMethod
-  public func getAttributes(_ arg0: String) -> Attributes?
+  public func getAttributes(_ arg0: String) -> Attributes!
 
   @JavaMethod
   public func toString() -> String
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

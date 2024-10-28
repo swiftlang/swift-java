@@ -52,7 +52,7 @@ public struct JavaFloat {
   public func isNaN() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -104,7 +104,7 @@ extension JavaClass<JavaFloat> {
   public var BYTES: Int32
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaFloat>?
+  public var TYPE: JavaClass<JavaFloat>!
 
   @JavaStaticMethod
   public func toString(_ arg0: Float) -> String
@@ -143,10 +143,10 @@ extension JavaClass<JavaFloat> {
   public func compare(_ arg0: Float, _ arg1: Float) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Float) -> JavaFloat?
+  public func valueOf(_ arg0: Float) -> JavaFloat!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaFloat?
+  public func valueOf(_ arg0: String) throws -> JavaFloat!
 
   @JavaStaticMethod
   public func toHexString(_ arg0: Float) -> String

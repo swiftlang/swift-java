@@ -24,7 +24,7 @@ public struct Parameter {
   public func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -33,7 +33,7 @@ public struct Parameter {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -42,13 +42,13 @@ public struct Parameter {
   public func getDeclaredAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getType() -> JavaClass<JavaObject>?
+  public func getType() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotatedType() -> AnnotatedType?
+  public func getAnnotatedType() -> AnnotatedType!
 
   @JavaMethod
-  public func getParameterizedType() -> Type?
+  public func getParameterizedType() -> Type!
 
   @JavaMethod
   public func isVarArgs() -> Bool
@@ -57,13 +57,13 @@ public struct Parameter {
   public func isNamePresent() -> Bool
 
   @JavaMethod
-  public func getDeclaringExecutable() -> Executable?
+  public func getDeclaringExecutable() -> Executable!
 
   @JavaMethod
   public func isImplicit() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

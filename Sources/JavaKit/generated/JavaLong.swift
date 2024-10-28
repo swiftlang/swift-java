@@ -43,7 +43,7 @@ public struct JavaLong {
   public func doubleValue() -> Double
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -68,7 +68,7 @@ extension JavaClass<JavaLong> {
   public var MAX_VALUE: Int64
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaLong>?
+  public var TYPE: JavaClass<JavaLong>!
 
   @JavaStaticField(isFinal: true)
   public var SIZE: Int32
@@ -125,31 +125,31 @@ extension JavaClass<JavaLong> {
   public func compress(_ arg0: Int64, _ arg1: Int64) -> Int64
 
   @JavaStaticMethod
-  public func getLong(_ arg0: String, _ arg1: JavaLong?) -> JavaLong?
+  public func getLong(_ arg0: String, _ arg1: JavaLong?) -> JavaLong!
 
   @JavaStaticMethod
-  public func getLong(_ arg0: String) -> JavaLong?
+  public func getLong(_ arg0: String) -> JavaLong!
 
   @JavaStaticMethod
-  public func getLong(_ arg0: String, _ arg1: Int64) -> JavaLong?
+  public func getLong(_ arg0: String, _ arg1: Int64) -> JavaLong!
 
   @JavaStaticMethod
   public func compare(_ arg0: Int64, _ arg1: Int64) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaLong?
+  public func valueOf(_ arg0: String) throws -> JavaLong!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int64) -> JavaLong?
+  public func valueOf(_ arg0: Int64) -> JavaLong!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaLong?
+  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaLong!
 
   @JavaStaticMethod
   public func toHexString(_ arg0: Int64) -> String
 
   @JavaStaticMethod
-  public func decode(_ arg0: String) throws -> JavaLong?
+  public func decode(_ arg0: String) throws -> JavaLong!
 
   @JavaStaticMethod
   public func sum(_ arg0: Int64, _ arg1: Int64) -> Int64

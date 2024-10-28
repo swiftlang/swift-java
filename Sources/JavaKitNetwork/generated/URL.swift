@@ -41,10 +41,10 @@ public struct URL {
   public func toExternalForm() -> String
 
   @JavaMethod
-  public func getContent() throws -> JavaObject?
+  public func getContent() throws -> JavaObject!
 
   @JavaMethod
-  public func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject?
+  public func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
 
   @JavaMethod
   public func getProtocol() -> String
@@ -68,10 +68,10 @@ public struct URL {
   public func getUserInfo() -> String
 
   @JavaMethod
-  public func toURI() throws -> URI?
+  public func toURI() throws -> URI!
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

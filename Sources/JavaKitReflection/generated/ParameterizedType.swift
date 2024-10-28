@@ -5,10 +5,10 @@ import JavaRuntime
 @JavaInterface("java.lang.reflect.ParameterizedType", extends: Type.self)
 public struct ParameterizedType {
   @JavaMethod
-  public func getOwnerType() -> Type?
+  public func getOwnerType() -> Type!
 
   @JavaMethod
-  public func getRawType() -> Type?
+  public func getRawType() -> Type!
 
   @JavaMethod
   public func getActualTypeArguments() -> [Type?]

@@ -15,28 +15,28 @@ public struct Attributes {
   public init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject?
+  public func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject?
+  public func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>?
+  public func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject?
+  public func clone() -> JavaObject!
 
   @JavaMethod
   public func clear()
@@ -54,7 +54,7 @@ public struct Attributes {
   public func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>?
+  public func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
   public func containsValue(_ arg0: JavaObject?) -> Bool
@@ -66,7 +66,7 @@ public struct Attributes {
   public func toString() -> String
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -90,13 +90,13 @@ public struct Attributes {
   public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 }
 extension Attributes {
   @JavaClass("java.util.jar.Attributes$Name")
@@ -114,7 +114,7 @@ extension Attributes {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -134,56 +134,56 @@ extension Attributes {
 }
 extension JavaClass<Attributes.Name> {
   @JavaStaticField(isFinal: true)
-  public var MANIFEST_VERSION: Attributes.Name?
+  public var MANIFEST_VERSION: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var SIGNATURE_VERSION: Attributes.Name?
+  public var SIGNATURE_VERSION: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var CONTENT_TYPE: Attributes.Name?
+  public var CONTENT_TYPE: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var CLASS_PATH: Attributes.Name?
+  public var CLASS_PATH: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var MAIN_CLASS: Attributes.Name?
+  public var MAIN_CLASS: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var SEALED: Attributes.Name?
+  public var SEALED: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var EXTENSION_LIST: Attributes.Name?
+  public var EXTENSION_LIST: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var EXTENSION_NAME: Attributes.Name?
+  public var EXTENSION_NAME: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var EXTENSION_INSTALLATION: Attributes.Name?
+  public var EXTENSION_INSTALLATION: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_TITLE: Attributes.Name?
+  public var IMPLEMENTATION_TITLE: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VERSION: Attributes.Name?
+  public var IMPLEMENTATION_VERSION: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VENDOR: Attributes.Name?
+  public var IMPLEMENTATION_VENDOR: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VENDOR_ID: Attributes.Name?
+  public var IMPLEMENTATION_VENDOR_ID: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_URL: Attributes.Name?
+  public var IMPLEMENTATION_URL: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_TITLE: Attributes.Name?
+  public var SPECIFICATION_TITLE: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_VERSION: Attributes.Name?
+  public var SPECIFICATION_VERSION: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_VENDOR: Attributes.Name?
+  public var SPECIFICATION_VENDOR: Attributes.Name!
 
   @JavaStaticField(isFinal: true)
-  public var MULTI_RELEASE: Attributes.Name?
+  public var MULTI_RELEASE: Attributes.Name!
 }

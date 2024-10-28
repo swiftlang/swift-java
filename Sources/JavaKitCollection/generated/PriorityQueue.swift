@@ -35,13 +35,13 @@ public struct PriorityQueue<E: AnyJavaObject> {
   public func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peek() -> JavaObject?
+  public func peek() -> JavaObject!
 
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
@@ -50,19 +50,19 @@ public struct PriorityQueue<E: AnyJavaObject> {
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func poll() -> JavaObject?
+  public func poll() -> JavaObject!
 
   @JavaMethod
   public func offer(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func remove() -> JavaObject?
+  public func remove() -> JavaObject!
 
   @JavaMethod
   public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func element() -> JavaObject?
+  public func element() -> JavaObject!
 
   @JavaMethod
   public func toString() -> String
@@ -80,7 +80,7 @@ public struct PriorityQueue<E: AnyJavaObject> {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

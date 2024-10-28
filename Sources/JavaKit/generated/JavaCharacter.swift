@@ -25,7 +25,7 @@ public struct JavaCharacter {
   public func charValue() -> UInt16
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -55,7 +55,7 @@ extension JavaCharacter {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -75,1000 +75,1000 @@ extension JavaCharacter {
 }
 extension JavaClass<JavaCharacter.UnicodeBlock> {
   @JavaStaticField(isFinal: true)
-  public var BASIC_LATIN: JavaCharacter.UnicodeBlock?
+  public var BASIC_LATIN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_1_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var LATIN_1_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var IPA_EXTENSIONS: JavaCharacter.UnicodeBlock?
+  public var IPA_EXTENSIONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SPACING_MODIFIER_LETTERS: JavaCharacter.UnicodeBlock?
+  public var SPACING_MODIFIER_LETTERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMBINING_DIACRITICAL_MARKS: JavaCharacter.UnicodeBlock?
+  public var COMBINING_DIACRITICAL_MARKS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GREEK: JavaCharacter.UnicodeBlock?
+  public var GREEK: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARMENIAN: JavaCharacter.UnicodeBlock?
+  public var ARMENIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HEBREW: JavaCharacter.UnicodeBlock?
+  public var HEBREW: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC: JavaCharacter.UnicodeBlock?
+  public var ARABIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DEVANAGARI: JavaCharacter.UnicodeBlock?
+  public var DEVANAGARI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BENGALI: JavaCharacter.UnicodeBlock?
+  public var BENGALI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GURMUKHI: JavaCharacter.UnicodeBlock?
+  public var GURMUKHI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GUJARATI: JavaCharacter.UnicodeBlock?
+  public var GUJARATI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ORIYA: JavaCharacter.UnicodeBlock?
+  public var ORIYA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAMIL: JavaCharacter.UnicodeBlock?
+  public var TAMIL: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TELUGU: JavaCharacter.UnicodeBlock?
+  public var TELUGU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANNADA: JavaCharacter.UnicodeBlock?
+  public var KANNADA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MALAYALAM: JavaCharacter.UnicodeBlock?
+  public var MALAYALAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var THAI: JavaCharacter.UnicodeBlock?
+  public var THAI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LAO: JavaCharacter.UnicodeBlock?
+  public var LAO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TIBETAN: JavaCharacter.UnicodeBlock?
+  public var TIBETAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GEORGIAN: JavaCharacter.UnicodeBlock?
+  public var GEORGIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL_JAMO: JavaCharacter.UnicodeBlock?
+  public var HANGUL_JAMO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_ADDITIONAL: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_ADDITIONAL: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GREEK_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var GREEK_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GENERAL_PUNCTUATION: JavaCharacter.UnicodeBlock?
+  public var GENERAL_PUNCTUATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPERSCRIPTS_AND_SUBSCRIPTS: JavaCharacter.UnicodeBlock?
+  public var SUPERSCRIPTS_AND_SUBSCRIPTS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CURRENCY_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var CURRENCY_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMBINING_MARKS_FOR_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var COMBINING_MARKS_FOR_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LETTERLIKE_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var LETTERLIKE_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NUMBER_FORMS: JavaCharacter.UnicodeBlock?
+  public var NUMBER_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARROWS: JavaCharacter.UnicodeBlock?
+  public var ARROWS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock?
+  public var MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_TECHNICAL: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_TECHNICAL: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CONTROL_PICTURES: JavaCharacter.UnicodeBlock?
+  public var CONTROL_PICTURES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OPTICAL_CHARACTER_RECOGNITION: JavaCharacter.UnicodeBlock?
+  public var OPTICAL_CHARACTER_RECOGNITION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ENCLOSED_ALPHANUMERICS: JavaCharacter.UnicodeBlock?
+  public var ENCLOSED_ALPHANUMERICS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BOX_DRAWING: JavaCharacter.UnicodeBlock?
+  public var BOX_DRAWING: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BLOCK_ELEMENTS: JavaCharacter.UnicodeBlock?
+  public var BLOCK_ELEMENTS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GEOMETRIC_SHAPES: JavaCharacter.UnicodeBlock?
+  public var GEOMETRIC_SHAPES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DINGBATS: JavaCharacter.UnicodeBlock?
+  public var DINGBATS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+  public var CJK_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HIRAGANA: JavaCharacter.UnicodeBlock?
+  public var HIRAGANA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KATAKANA: JavaCharacter.UnicodeBlock?
+  public var KATAKANA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BOPOMOFO: JavaCharacter.UnicodeBlock?
+  public var BOPOMOFO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL_COMPATIBILITY_JAMO: JavaCharacter.UnicodeBlock?
+  public var HANGUL_COMPATIBILITY_JAMO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANBUN: JavaCharacter.UnicodeBlock?
+  public var KANBUN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ENCLOSED_CJK_LETTERS_AND_MONTHS: JavaCharacter.UnicodeBlock?
+  public var ENCLOSED_CJK_LETTERS_AND_MONTHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_COMPATIBILITY: JavaCharacter.UnicodeBlock?
+  public var CJK_COMPATIBILITY: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL_SYLLABLES: JavaCharacter.UnicodeBlock?
+  public var HANGUL_SYLLABLES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PRIVATE_USE_AREA: JavaCharacter.UnicodeBlock?
+  public var PRIVATE_USE_AREA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_COMPATIBILITY_IDEOGRAPHS: JavaCharacter.UnicodeBlock?
+  public var CJK_COMPATIBILITY_IDEOGRAPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ALPHABETIC_PRESENTATION_FORMS: JavaCharacter.UnicodeBlock?
+  public var ALPHABETIC_PRESENTATION_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_PRESENTATION_FORMS_A: JavaCharacter.UnicodeBlock?
+  public var ARABIC_PRESENTATION_FORMS_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMBINING_HALF_MARKS: JavaCharacter.UnicodeBlock?
+  public var COMBINING_HALF_MARKS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_COMPATIBILITY_FORMS: JavaCharacter.UnicodeBlock?
+  public var CJK_COMPATIBILITY_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SMALL_FORM_VARIANTS: JavaCharacter.UnicodeBlock?
+  public var SMALL_FORM_VARIANTS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_PRESENTATION_FORMS_B: JavaCharacter.UnicodeBlock?
+  public var ARABIC_PRESENTATION_FORMS_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HALFWIDTH_AND_FULLWIDTH_FORMS: JavaCharacter.UnicodeBlock?
+  public var HALFWIDTH_AND_FULLWIDTH_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SPECIALS: JavaCharacter.UnicodeBlock?
+  public var SPECIALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SURROGATES_AREA: JavaCharacter.UnicodeBlock?
+  public var SURROGATES_AREA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SYRIAC: JavaCharacter.UnicodeBlock?
+  public var SYRIAC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var THAANA: JavaCharacter.UnicodeBlock?
+  public var THAANA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SINHALA: JavaCharacter.UnicodeBlock?
+  public var SINHALA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MYANMAR: JavaCharacter.UnicodeBlock?
+  public var MYANMAR: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC: JavaCharacter.UnicodeBlock?
+  public var ETHIOPIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHEROKEE: JavaCharacter.UnicodeBlock?
+  public var CHEROKEE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS: JavaCharacter.UnicodeBlock?
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OGHAM: JavaCharacter.UnicodeBlock?
+  public var OGHAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var RUNIC: JavaCharacter.UnicodeBlock?
+  public var RUNIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHMER: JavaCharacter.UnicodeBlock?
+  public var KHMER: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MONGOLIAN: JavaCharacter.UnicodeBlock?
+  public var MONGOLIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BRAILLE_PATTERNS: JavaCharacter.UnicodeBlock?
+  public var BRAILLE_PATTERNS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_RADICALS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var CJK_RADICALS_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANGXI_RADICALS: JavaCharacter.UnicodeBlock?
+  public var KANGXI_RADICALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var IDEOGRAPHIC_DESCRIPTION_CHARACTERS: JavaCharacter.UnicodeBlock?
+  public var IDEOGRAPHIC_DESCRIPTION_CHARACTERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BOPOMOFO_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var BOPOMOFO_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var YI_SYLLABLES: JavaCharacter.UnicodeBlock?
+  public var YI_SYLLABLES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var YI_RADICALS: JavaCharacter.UnicodeBlock?
+  public var YI_RADICALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC_SUPPLEMENTARY: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC_SUPPLEMENTARY: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAGALOG: JavaCharacter.UnicodeBlock?
+  public var TAGALOG: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANUNOO: JavaCharacter.UnicodeBlock?
+  public var HANUNOO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BUHID: JavaCharacter.UnicodeBlock?
+  public var BUHID: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAGBANWA: JavaCharacter.UnicodeBlock?
+  public var TAGBANWA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LIMBU: JavaCharacter.UnicodeBlock?
+  public var LIMBU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_LE: JavaCharacter.UnicodeBlock?
+  public var TAI_LE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHMER_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var KHMER_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+  public var PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_ARROWS_A: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_ARROWS_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_ARROWS_B: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_ARROWS_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_SYMBOLS_AND_ARROWS: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_SYMBOLS_AND_ARROWS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KATAKANA_PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+  public var KATAKANA_PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var YIJING_HEXAGRAM_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var YIJING_HEXAGRAM_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VARIATION_SELECTORS: JavaCharacter.UnicodeBlock?
+  public var VARIATION_SELECTORS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LINEAR_B_SYLLABARY: JavaCharacter.UnicodeBlock?
+  public var LINEAR_B_SYLLABARY: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LINEAR_B_IDEOGRAMS: JavaCharacter.UnicodeBlock?
+  public var LINEAR_B_IDEOGRAMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var AEGEAN_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var AEGEAN_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_ITALIC: JavaCharacter.UnicodeBlock?
+  public var OLD_ITALIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GOTHIC: JavaCharacter.UnicodeBlock?
+  public var GOTHIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var UGARITIC: JavaCharacter.UnicodeBlock?
+  public var UGARITIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DESERET: JavaCharacter.UnicodeBlock?
+  public var DESERET: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SHAVIAN: JavaCharacter.UnicodeBlock?
+  public var SHAVIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OSMANYA: JavaCharacter.UnicodeBlock?
+  public var OSMANYA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYPRIOT_SYLLABARY: JavaCharacter.UnicodeBlock?
+  public var CYPRIOT_SYLLABARY: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BYZANTINE_MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var BYZANTINE_MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_XUAN_JING_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var TAI_XUAN_JING_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MATHEMATICAL_ALPHANUMERIC_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var MATHEMATICAL_ALPHANUMERIC_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAGS: JavaCharacter.UnicodeBlock?
+  public var TAGS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VARIATION_SELECTORS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var VARIATION_SELECTORS_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTARY_PRIVATE_USE_AREA_A: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTARY_PRIVATE_USE_AREA_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTARY_PRIVATE_USE_AREA_B: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTARY_PRIVATE_USE_AREA_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HIGH_SURROGATES: JavaCharacter.UnicodeBlock?
+  public var HIGH_SURROGATES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HIGH_PRIVATE_USE_SURROGATES: JavaCharacter.UnicodeBlock?
+  public var HIGH_PRIVATE_USE_SURROGATES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LOW_SURROGATES: JavaCharacter.UnicodeBlock?
+  public var LOW_SURROGATES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var ARABIC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NKO: JavaCharacter.UnicodeBlock?
+  public var NKO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SAMARITAN: JavaCharacter.UnicodeBlock?
+  public var SAMARITAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MANDAIC: JavaCharacter.UnicodeBlock?
+  public var MANDAIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var ETHIOPIC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NEW_TAI_LUE: JavaCharacter.UnicodeBlock?
+  public var NEW_TAI_LUE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BUGINESE: JavaCharacter.UnicodeBlock?
+  public var BUGINESE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_THAM: JavaCharacter.UnicodeBlock?
+  public var TAI_THAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BALINESE: JavaCharacter.UnicodeBlock?
+  public var BALINESE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUNDANESE: JavaCharacter.UnicodeBlock?
+  public var SUNDANESE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BATAK: JavaCharacter.UnicodeBlock?
+  public var BATAK: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LEPCHA: JavaCharacter.UnicodeBlock?
+  public var LEPCHA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OL_CHIKI: JavaCharacter.UnicodeBlock?
+  public var OL_CHIKI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VEDIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+  public var VEDIC_EXTENSIONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PHONETIC_EXTENSIONS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var PHONETIC_EXTENSIONS_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMBINING_DIACRITICAL_MARKS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var COMBINING_DIACRITICAL_MARKS_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GLAGOLITIC: JavaCharacter.UnicodeBlock?
+  public var GLAGOLITIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_C: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_C: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COPTIC: JavaCharacter.UnicodeBlock?
+  public var COPTIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GEORGIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var GEORGIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TIFINAGH: JavaCharacter.UnicodeBlock?
+  public var TIFINAGH: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var ETHIOPIC_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_PUNCTUATION: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_PUNCTUATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_STROKES: JavaCharacter.UnicodeBlock?
+  public var CJK_STROKES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LISU: JavaCharacter.UnicodeBlock?
+  public var LISU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VAI: JavaCharacter.UnicodeBlock?
+  public var VAI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BAMUM: JavaCharacter.UnicodeBlock?
+  public var BAMUM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MODIFIER_TONE_LETTERS: JavaCharacter.UnicodeBlock?
+  public var MODIFIER_TONE_LETTERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_D: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_D: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SYLOTI_NAGRI: JavaCharacter.UnicodeBlock?
+  public var SYLOTI_NAGRI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMMON_INDIC_NUMBER_FORMS: JavaCharacter.UnicodeBlock?
+  public var COMMON_INDIC_NUMBER_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PHAGS_PA: JavaCharacter.UnicodeBlock?
+  public var PHAGS_PA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SAURASHTRA: JavaCharacter.UnicodeBlock?
+  public var SAURASHTRA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DEVANAGARI_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var DEVANAGARI_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KAYAH_LI: JavaCharacter.UnicodeBlock?
+  public var KAYAH_LI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var REJANG: JavaCharacter.UnicodeBlock?
+  public var REJANG: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL_JAMO_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var HANGUL_JAMO_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var JAVANESE: JavaCharacter.UnicodeBlock?
+  public var JAVANESE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHAM: JavaCharacter.UnicodeBlock?
+  public var CHAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MYANMAR_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var MYANMAR_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_VIET: JavaCharacter.UnicodeBlock?
+  public var TAI_VIET: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var ETHIOPIC_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MEETEI_MAYEK: JavaCharacter.UnicodeBlock?
+  public var MEETEI_MAYEK: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL_JAMO_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var HANGUL_JAMO_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VERTICAL_FORMS: JavaCharacter.UnicodeBlock?
+  public var VERTICAL_FORMS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ANCIENT_GREEK_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var ANCIENT_GREEK_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ANCIENT_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var ANCIENT_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PHAISTOS_DISC: JavaCharacter.UnicodeBlock?
+  public var PHAISTOS_DISC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LYCIAN: JavaCharacter.UnicodeBlock?
+  public var LYCIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CARIAN: JavaCharacter.UnicodeBlock?
+  public var CARIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_PERSIAN: JavaCharacter.UnicodeBlock?
+  public var OLD_PERSIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeBlock?
+  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PHOENICIAN: JavaCharacter.UnicodeBlock?
+  public var PHOENICIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LYDIAN: JavaCharacter.UnicodeBlock?
+  public var LYDIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHAROSHTHI: JavaCharacter.UnicodeBlock?
+  public var KHAROSHTHI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeBlock?
+  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var AVESTAN: JavaCharacter.UnicodeBlock?
+  public var AVESTAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeBlock?
+  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeBlock?
+  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_TURKIC: JavaCharacter.UnicodeBlock?
+  public var OLD_TURKIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var RUMI_NUMERAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var RUMI_NUMERAL_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BRAHMI: JavaCharacter.UnicodeBlock?
+  public var BRAHMI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KAITHI: JavaCharacter.UnicodeBlock?
+  public var KAITHI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CUNEIFORM: JavaCharacter.UnicodeBlock?
+  public var CUNEIFORM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CUNEIFORM_NUMBERS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+  public var CUNEIFORM_NUMBERS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BAMUM_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var BAMUM_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANA_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var KANA_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ANCIENT_GREEK_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock?
+  public var ANCIENT_GREEK_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COUNTING_ROD_NUMERALS: JavaCharacter.UnicodeBlock?
+  public var COUNTING_ROD_NUMERALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MAHJONG_TILES: JavaCharacter.UnicodeBlock?
+  public var MAHJONG_TILES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DOMINO_TILES: JavaCharacter.UnicodeBlock?
+  public var DOMINO_TILES: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PLAYING_CARDS: JavaCharacter.UnicodeBlock?
+  public var PLAYING_CARDS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ENCLOSED_ALPHANUMERIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var ENCLOSED_ALPHANUMERIC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ENCLOSED_IDEOGRAPHIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var ENCLOSED_IDEOGRAPHIC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock?
+  public var MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var EMOTICONS: JavaCharacter.UnicodeBlock?
+  public var EMOTICONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TRANSPORT_AND_MAP_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var TRANSPORT_AND_MAP_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ALCHEMICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var ALCHEMICAL_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var ARABIC_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUNDANESE_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var SUNDANESE_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MEETEI_MAYEK_EXTENSIONS: JavaCharacter.UnicodeBlock?
+  public var MEETEI_MAYEK_EXTENSIONS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeBlock?
+  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SORA_SOMPENG: JavaCharacter.UnicodeBlock?
+  public var SORA_SOMPENG: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHAKMA: JavaCharacter.UnicodeBlock?
+  public var CHAKMA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SHARADA: JavaCharacter.UnicodeBlock?
+  public var SHARADA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAKRI: JavaCharacter.UnicodeBlock?
+  public var TAKRI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MIAO: JavaCharacter.UnicodeBlock?
+  public var MIAO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COMBINING_DIACRITICAL_MARKS_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var COMBINING_DIACRITICAL_MARKS_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MYANMAR_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var MYANMAR_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_E: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_E: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var COPTIC_EPACT_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var COPTIC_EPACT_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_PERMIC: JavaCharacter.UnicodeBlock?
+  public var OLD_PERMIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ELBASAN: JavaCharacter.UnicodeBlock?
+  public var ELBASAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeBlock?
+  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LINEAR_A: JavaCharacter.UnicodeBlock?
+  public var LINEAR_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PALMYRENE: JavaCharacter.UnicodeBlock?
+  public var PALMYRENE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NABATAEAN: JavaCharacter.UnicodeBlock?
+  public var NABATAEAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeBlock?
+  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MANICHAEAN: JavaCharacter.UnicodeBlock?
+  public var MANICHAEAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeBlock?
+  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MAHAJANI: JavaCharacter.UnicodeBlock?
+  public var MAHAJANI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SINHALA_ARCHAIC_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var SINHALA_ARCHAIC_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHOJKI: JavaCharacter.UnicodeBlock?
+  public var KHOJKI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHUDAWADI: JavaCharacter.UnicodeBlock?
+  public var KHUDAWADI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GRANTHA: JavaCharacter.UnicodeBlock?
+  public var GRANTHA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TIRHUTA: JavaCharacter.UnicodeBlock?
+  public var TIRHUTA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SIDDHAM: JavaCharacter.UnicodeBlock?
+  public var SIDDHAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MODI: JavaCharacter.UnicodeBlock?
+  public var MODI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var WARANG_CITI: JavaCharacter.UnicodeBlock?
+  public var WARANG_CITI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PAU_CIN_HAU: JavaCharacter.UnicodeBlock?
+  public var PAU_CIN_HAU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MRO: JavaCharacter.UnicodeBlock?
+  public var MRO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BASSA_VAH: JavaCharacter.UnicodeBlock?
+  public var BASSA_VAH: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var PAHAWH_HMONG: JavaCharacter.UnicodeBlock?
+  public var PAHAWH_HMONG: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DUPLOYAN: JavaCharacter.UnicodeBlock?
+  public var DUPLOYAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SHORTHAND_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock?
+  public var SHORTHAND_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MENDE_KIKAKUI: JavaCharacter.UnicodeBlock?
+  public var MENDE_KIKAKUI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ORNAMENTAL_DINGBATS: JavaCharacter.UnicodeBlock?
+  public var ORNAMENTAL_DINGBATS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GEOMETRIC_SHAPES_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var GEOMETRIC_SHAPES_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_ARROWS_C: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_ARROWS_C: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHEROKEE_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var CHEROKEE_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HATRAN: JavaCharacter.UnicodeBlock?
+  public var HATRAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_HUNGARIAN: JavaCharacter.UnicodeBlock?
+  public var OLD_HUNGARIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MULTANI: JavaCharacter.UnicodeBlock?
+  public var MULTANI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var AHOM: JavaCharacter.UnicodeBlock?
+  public var AHOM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var EARLY_DYNASTIC_CUNEIFORM: JavaCharacter.UnicodeBlock?
+  public var EARLY_DYNASTIC_CUNEIFORM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUTTON_SIGNWRITING: JavaCharacter.UnicodeBlock?
+  public var SUTTON_SIGNWRITING: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock?
+  public var SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_E: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_E: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SYRIAC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var SYRIAC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC_EXTENDED_C: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC_EXTENDED_C: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OSAGE: JavaCharacter.UnicodeBlock?
+  public var OSAGE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NEWA: JavaCharacter.UnicodeBlock?
+  public var NEWA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MONGOLIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var MONGOLIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MARCHEN: JavaCharacter.UnicodeBlock?
+  public var MARCHEN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var IDEOGRAPHIC_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+  public var IDEOGRAPHIC_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TANGUT: JavaCharacter.UnicodeBlock?
+  public var TANGUT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TANGUT_COMPONENTS: JavaCharacter.UnicodeBlock?
+  public var TANGUT_COMPONENTS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANA_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var KANA_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GLAGOLITIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var GLAGOLITIC_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ADLAM: JavaCharacter.UnicodeBlock?
+  public var ADLAM: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MASARAM_GONDI: JavaCharacter.UnicodeBlock?
+  public var MASARAM_GONDI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeBlock?
+  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NUSHU: JavaCharacter.UnicodeBlock?
+  public var NUSHU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SOYOMBO: JavaCharacter.UnicodeBlock?
+  public var SOYOMBO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var BHAIKSUKI: JavaCharacter.UnicodeBlock?
+  public var BHAIKSUKI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GEORGIAN_EXTENDED: JavaCharacter.UnicodeBlock?
+  public var GEORGIAN_EXTENDED: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeBlock?
+  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_SOGDIAN: JavaCharacter.UnicodeBlock?
+  public var OLD_SOGDIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SOGDIAN: JavaCharacter.UnicodeBlock?
+  public var SOGDIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DOGRA: JavaCharacter.UnicodeBlock?
+  public var DOGRA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var GUNJALA_GONDI: JavaCharacter.UnicodeBlock?
+  public var GUNJALA_GONDI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MAKASAR: JavaCharacter.UnicodeBlock?
+  public var MAKASAR: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MEDEFAIDRIN: JavaCharacter.UnicodeBlock?
+  public var MEDEFAIDRIN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var MAYAN_NUMERALS: JavaCharacter.UnicodeBlock?
+  public var MAYAN_NUMERALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var INDIC_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var INDIC_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHESS_SYMBOLS: JavaCharacter.UnicodeBlock?
+  public var CHESS_SYMBOLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ELYMAIC: JavaCharacter.UnicodeBlock?
+  public var ELYMAIC: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NANDINAGARI: JavaCharacter.UnicodeBlock?
+  public var NANDINAGARI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TAMIL_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var TAMIL_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock?
+  public var EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SMALL_KANA_EXTENSION: JavaCharacter.UnicodeBlock?
+  public var SMALL_KANA_EXTENSION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeBlock?
+  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var WANCHO: JavaCharacter.UnicodeBlock?
+  public var WANCHO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OTTOMAN_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock?
+  public var OTTOMAN_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var YEZIDI: JavaCharacter.UnicodeBlock?
+  public var YEZIDI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CHORASMIAN: JavaCharacter.UnicodeBlock?
+  public var CHORASMIAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DIVES_AKURU: JavaCharacter.UnicodeBlock?
+  public var DIVES_AKURU: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LISU_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var LISU_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeBlock?
+  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TANGUT_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+  public var TANGUT_SUPPLEMENT: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var SYMBOLS_FOR_LEGACY_COMPUTING: JavaCharacter.UnicodeBlock?
+  public var SYMBOLS_FOR_LEGACY_COMPUTING: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var ARABIC_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var VITHKUQI: JavaCharacter.UnicodeBlock?
+  public var VITHKUQI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_F: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_F: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_UYGHUR: JavaCharacter.UnicodeBlock?
+  public var OLD_UYGHUR: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYPRO_MINOAN: JavaCharacter.UnicodeBlock?
+  public var CYPRO_MINOAN: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TANGSA: JavaCharacter.UnicodeBlock?
+  public var TANGSA: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KANA_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var KANA_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ZNAMENNY_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock?
+  public var ZNAMENNY_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN_EXTENDED_G: JavaCharacter.UnicodeBlock?
+  public var LATIN_EXTENDED_G: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var TOTO: JavaCharacter.UnicodeBlock?
+  public var TOTO: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+  public var ETHIOPIC_EXTENDED_B: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC_EXTENDED_C: JavaCharacter.UnicodeBlock?
+  public var ARABIC_EXTENDED_C: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var DEVANAGARI_EXTENDED_A: JavaCharacter.UnicodeBlock?
+  public var DEVANAGARI_EXTENDED_A: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KAWI: JavaCharacter.UnicodeBlock?
+  public var KAWI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var KAKTOVIK_NUMERALS: JavaCharacter.UnicodeBlock?
+  public var KAKTOVIK_NUMERALS: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC_EXTENDED_D: JavaCharacter.UnicodeBlock?
+  public var CYRILLIC_EXTENDED_D: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var NAG_MUNDARI: JavaCharacter.UnicodeBlock?
+  public var NAG_MUNDARI: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_H: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_H: JavaCharacter.UnicodeBlock!
 
   @JavaStaticField(isFinal: true)
-  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I: JavaCharacter.UnicodeBlock?
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I: JavaCharacter.UnicodeBlock!
 
   @JavaStaticMethod
-  public func forName(_ arg0: String) -> JavaCharacter.UnicodeBlock?
+  public func forName(_ arg0: String) -> JavaCharacter.UnicodeBlock!
 
   @JavaStaticMethod
-  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeBlock?
+  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeBlock!
 
   @JavaStaticMethod
-  public func of(_ arg0: UInt16) -> JavaCharacter.UnicodeBlock?
+  public func of(_ arg0: UInt16) -> JavaCharacter.UnicodeBlock!
 }
 extension JavaCharacter {
   @JavaClass("java.lang.Character$UnicodeScript")
@@ -1240,7 +1240,7 @@ extension JavaCharacter {
   case UNKNOWN
     }
 
-    public var enumValue: UnicodeScriptCases? {
+    public var enumValue: UnicodeScriptCases! {
       let classObj = self.javaClass
       if self.equals(classObj.COMMON?.as(JavaObject.self)) {
         return UnicodeScriptCases.COMMON
@@ -2589,7 +2589,7 @@ extension JavaCharacter {
   public func ordinal() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -2623,7 +2623,7 @@ extension JavaCharacter.UnicodeScript {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -2643,508 +2643,508 @@ extension JavaCharacter.UnicodeScript {
 }
 extension JavaClass<JavaCharacter.UnicodeScript> {
   @JavaStaticField(isFinal: true)
-  public var COMMON: JavaCharacter.UnicodeScript?
+  public var COMMON: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LATIN: JavaCharacter.UnicodeScript?
+  public var LATIN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GREEK: JavaCharacter.UnicodeScript?
+  public var GREEK: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CYRILLIC: JavaCharacter.UnicodeScript?
+  public var CYRILLIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ARMENIAN: JavaCharacter.UnicodeScript?
+  public var ARMENIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HEBREW: JavaCharacter.UnicodeScript?
+  public var HEBREW: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ARABIC: JavaCharacter.UnicodeScript?
+  public var ARABIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SYRIAC: JavaCharacter.UnicodeScript?
+  public var SYRIAC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var THAANA: JavaCharacter.UnicodeScript?
+  public var THAANA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var DEVANAGARI: JavaCharacter.UnicodeScript?
+  public var DEVANAGARI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BENGALI: JavaCharacter.UnicodeScript?
+  public var BENGALI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GURMUKHI: JavaCharacter.UnicodeScript?
+  public var GURMUKHI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GUJARATI: JavaCharacter.UnicodeScript?
+  public var GUJARATI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ORIYA: JavaCharacter.UnicodeScript?
+  public var ORIYA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAMIL: JavaCharacter.UnicodeScript?
+  public var TAMIL: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TELUGU: JavaCharacter.UnicodeScript?
+  public var TELUGU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KANNADA: JavaCharacter.UnicodeScript?
+  public var KANNADA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MALAYALAM: JavaCharacter.UnicodeScript?
+  public var MALAYALAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SINHALA: JavaCharacter.UnicodeScript?
+  public var SINHALA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var THAI: JavaCharacter.UnicodeScript?
+  public var THAI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LAO: JavaCharacter.UnicodeScript?
+  public var LAO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TIBETAN: JavaCharacter.UnicodeScript?
+  public var TIBETAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MYANMAR: JavaCharacter.UnicodeScript?
+  public var MYANMAR: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GEORGIAN: JavaCharacter.UnicodeScript?
+  public var GEORGIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HANGUL: JavaCharacter.UnicodeScript?
+  public var HANGUL: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ETHIOPIC: JavaCharacter.UnicodeScript?
+  public var ETHIOPIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CHEROKEE: JavaCharacter.UnicodeScript?
+  public var CHEROKEE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CANADIAN_ABORIGINAL: JavaCharacter.UnicodeScript?
+  public var CANADIAN_ABORIGINAL: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OGHAM: JavaCharacter.UnicodeScript?
+  public var OGHAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var RUNIC: JavaCharacter.UnicodeScript?
+  public var RUNIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KHMER: JavaCharacter.UnicodeScript?
+  public var KHMER: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MONGOLIAN: JavaCharacter.UnicodeScript?
+  public var MONGOLIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HIRAGANA: JavaCharacter.UnicodeScript?
+  public var HIRAGANA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KATAKANA: JavaCharacter.UnicodeScript?
+  public var KATAKANA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BOPOMOFO: JavaCharacter.UnicodeScript?
+  public var BOPOMOFO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HAN: JavaCharacter.UnicodeScript?
+  public var HAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var YI: JavaCharacter.UnicodeScript?
+  public var YI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_ITALIC: JavaCharacter.UnicodeScript?
+  public var OLD_ITALIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GOTHIC: JavaCharacter.UnicodeScript?
+  public var GOTHIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var DESERET: JavaCharacter.UnicodeScript?
+  public var DESERET: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var INHERITED: JavaCharacter.UnicodeScript?
+  public var INHERITED: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAGALOG: JavaCharacter.UnicodeScript?
+  public var TAGALOG: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HANUNOO: JavaCharacter.UnicodeScript?
+  public var HANUNOO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BUHID: JavaCharacter.UnicodeScript?
+  public var BUHID: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAGBANWA: JavaCharacter.UnicodeScript?
+  public var TAGBANWA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LIMBU: JavaCharacter.UnicodeScript?
+  public var LIMBU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_LE: JavaCharacter.UnicodeScript?
+  public var TAI_LE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LINEAR_B: JavaCharacter.UnicodeScript?
+  public var LINEAR_B: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var UGARITIC: JavaCharacter.UnicodeScript?
+  public var UGARITIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SHAVIAN: JavaCharacter.UnicodeScript?
+  public var SHAVIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OSMANYA: JavaCharacter.UnicodeScript?
+  public var OSMANYA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CYPRIOT: JavaCharacter.UnicodeScript?
+  public var CYPRIOT: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BRAILLE: JavaCharacter.UnicodeScript?
+  public var BRAILLE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BUGINESE: JavaCharacter.UnicodeScript?
+  public var BUGINESE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var COPTIC: JavaCharacter.UnicodeScript?
+  public var COPTIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NEW_TAI_LUE: JavaCharacter.UnicodeScript?
+  public var NEW_TAI_LUE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GLAGOLITIC: JavaCharacter.UnicodeScript?
+  public var GLAGOLITIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TIFINAGH: JavaCharacter.UnicodeScript?
+  public var TIFINAGH: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SYLOTI_NAGRI: JavaCharacter.UnicodeScript?
+  public var SYLOTI_NAGRI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_PERSIAN: JavaCharacter.UnicodeScript?
+  public var OLD_PERSIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KHAROSHTHI: JavaCharacter.UnicodeScript?
+  public var KHAROSHTHI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BALINESE: JavaCharacter.UnicodeScript?
+  public var BALINESE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CUNEIFORM: JavaCharacter.UnicodeScript?
+  public var CUNEIFORM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PHOENICIAN: JavaCharacter.UnicodeScript?
+  public var PHOENICIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PHAGS_PA: JavaCharacter.UnicodeScript?
+  public var PHAGS_PA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NKO: JavaCharacter.UnicodeScript?
+  public var NKO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SUNDANESE: JavaCharacter.UnicodeScript?
+  public var SUNDANESE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BATAK: JavaCharacter.UnicodeScript?
+  public var BATAK: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LEPCHA: JavaCharacter.UnicodeScript?
+  public var LEPCHA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OL_CHIKI: JavaCharacter.UnicodeScript?
+  public var OL_CHIKI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var VAI: JavaCharacter.UnicodeScript?
+  public var VAI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SAURASHTRA: JavaCharacter.UnicodeScript?
+  public var SAURASHTRA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KAYAH_LI: JavaCharacter.UnicodeScript?
+  public var KAYAH_LI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var REJANG: JavaCharacter.UnicodeScript?
+  public var REJANG: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LYCIAN: JavaCharacter.UnicodeScript?
+  public var LYCIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CARIAN: JavaCharacter.UnicodeScript?
+  public var CARIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LYDIAN: JavaCharacter.UnicodeScript?
+  public var LYDIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CHAM: JavaCharacter.UnicodeScript?
+  public var CHAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_THAM: JavaCharacter.UnicodeScript?
+  public var TAI_THAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAI_VIET: JavaCharacter.UnicodeScript?
+  public var TAI_VIET: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var AVESTAN: JavaCharacter.UnicodeScript?
+  public var AVESTAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SAMARITAN: JavaCharacter.UnicodeScript?
+  public var SAMARITAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MANDAIC: JavaCharacter.UnicodeScript?
+  public var MANDAIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LISU: JavaCharacter.UnicodeScript?
+  public var LISU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BAMUM: JavaCharacter.UnicodeScript?
+  public var BAMUM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var JAVANESE: JavaCharacter.UnicodeScript?
+  public var JAVANESE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MEETEI_MAYEK: JavaCharacter.UnicodeScript?
+  public var MEETEI_MAYEK: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeScript?
+  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeScript?
+  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeScript?
+  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeScript?
+  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_TURKIC: JavaCharacter.UnicodeScript?
+  public var OLD_TURKIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BRAHMI: JavaCharacter.UnicodeScript?
+  public var BRAHMI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KAITHI: JavaCharacter.UnicodeScript?
+  public var KAITHI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeScript?
+  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SORA_SOMPENG: JavaCharacter.UnicodeScript?
+  public var SORA_SOMPENG: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CHAKMA: JavaCharacter.UnicodeScript?
+  public var CHAKMA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SHARADA: JavaCharacter.UnicodeScript?
+  public var SHARADA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TAKRI: JavaCharacter.UnicodeScript?
+  public var TAKRI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MIAO: JavaCharacter.UnicodeScript?
+  public var MIAO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeScript?
+  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BASSA_VAH: JavaCharacter.UnicodeScript?
+  public var BASSA_VAH: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var DUPLOYAN: JavaCharacter.UnicodeScript?
+  public var DUPLOYAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ELBASAN: JavaCharacter.UnicodeScript?
+  public var ELBASAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GRANTHA: JavaCharacter.UnicodeScript?
+  public var GRANTHA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PAHAWH_HMONG: JavaCharacter.UnicodeScript?
+  public var PAHAWH_HMONG: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KHOJKI: JavaCharacter.UnicodeScript?
+  public var KHOJKI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var LINEAR_A: JavaCharacter.UnicodeScript?
+  public var LINEAR_A: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MAHAJANI: JavaCharacter.UnicodeScript?
+  public var MAHAJANI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MANICHAEAN: JavaCharacter.UnicodeScript?
+  public var MANICHAEAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MENDE_KIKAKUI: JavaCharacter.UnicodeScript?
+  public var MENDE_KIKAKUI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MODI: JavaCharacter.UnicodeScript?
+  public var MODI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MRO: JavaCharacter.UnicodeScript?
+  public var MRO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeScript?
+  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NABATAEAN: JavaCharacter.UnicodeScript?
+  public var NABATAEAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PALMYRENE: JavaCharacter.UnicodeScript?
+  public var PALMYRENE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PAU_CIN_HAU: JavaCharacter.UnicodeScript?
+  public var PAU_CIN_HAU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_PERMIC: JavaCharacter.UnicodeScript?
+  public var OLD_PERMIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeScript?
+  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SIDDHAM: JavaCharacter.UnicodeScript?
+  public var SIDDHAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KHUDAWADI: JavaCharacter.UnicodeScript?
+  public var KHUDAWADI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TIRHUTA: JavaCharacter.UnicodeScript?
+  public var TIRHUTA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var WARANG_CITI: JavaCharacter.UnicodeScript?
+  public var WARANG_CITI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var AHOM: JavaCharacter.UnicodeScript?
+  public var AHOM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HATRAN: JavaCharacter.UnicodeScript?
+  public var HATRAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MULTANI: JavaCharacter.UnicodeScript?
+  public var MULTANI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_HUNGARIAN: JavaCharacter.UnicodeScript?
+  public var OLD_HUNGARIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SIGNWRITING: JavaCharacter.UnicodeScript?
+  public var SIGNWRITING: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ADLAM: JavaCharacter.UnicodeScript?
+  public var ADLAM: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var BHAIKSUKI: JavaCharacter.UnicodeScript?
+  public var BHAIKSUKI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MARCHEN: JavaCharacter.UnicodeScript?
+  public var MARCHEN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NEWA: JavaCharacter.UnicodeScript?
+  public var NEWA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OSAGE: JavaCharacter.UnicodeScript?
+  public var OSAGE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TANGUT: JavaCharacter.UnicodeScript?
+  public var TANGUT: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MASARAM_GONDI: JavaCharacter.UnicodeScript?
+  public var MASARAM_GONDI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NUSHU: JavaCharacter.UnicodeScript?
+  public var NUSHU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SOYOMBO: JavaCharacter.UnicodeScript?
+  public var SOYOMBO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeScript?
+  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeScript?
+  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_SOGDIAN: JavaCharacter.UnicodeScript?
+  public var OLD_SOGDIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var SOGDIAN: JavaCharacter.UnicodeScript?
+  public var SOGDIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var DOGRA: JavaCharacter.UnicodeScript?
+  public var DOGRA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var GUNJALA_GONDI: JavaCharacter.UnicodeScript?
+  public var GUNJALA_GONDI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MAKASAR: JavaCharacter.UnicodeScript?
+  public var MAKASAR: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var MEDEFAIDRIN: JavaCharacter.UnicodeScript?
+  public var MEDEFAIDRIN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var ELYMAIC: JavaCharacter.UnicodeScript?
+  public var ELYMAIC: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NANDINAGARI: JavaCharacter.UnicodeScript?
+  public var NANDINAGARI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeScript?
+  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var WANCHO: JavaCharacter.UnicodeScript?
+  public var WANCHO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var YEZIDI: JavaCharacter.UnicodeScript?
+  public var YEZIDI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CHORASMIAN: JavaCharacter.UnicodeScript?
+  public var CHORASMIAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var DIVES_AKURU: JavaCharacter.UnicodeScript?
+  public var DIVES_AKURU: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeScript?
+  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var VITHKUQI: JavaCharacter.UnicodeScript?
+  public var VITHKUQI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var OLD_UYGHUR: JavaCharacter.UnicodeScript?
+  public var OLD_UYGHUR: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var CYPRO_MINOAN: JavaCharacter.UnicodeScript?
+  public var CYPRO_MINOAN: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TANGSA: JavaCharacter.UnicodeScript?
+  public var TANGSA: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var TOTO: JavaCharacter.UnicodeScript?
+  public var TOTO: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var KAWI: JavaCharacter.UnicodeScript?
+  public var KAWI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var NAG_MUNDARI: JavaCharacter.UnicodeScript?
+  public var NAG_MUNDARI: JavaCharacter.UnicodeScript!
 
   @JavaStaticField(isFinal: true)
-  public var UNKNOWN: JavaCharacter.UnicodeScript?
+  public var UNKNOWN: JavaCharacter.UnicodeScript!
 
   @JavaStaticMethod
-  public func forName(_ arg0: String) -> JavaCharacter.UnicodeScript?
+  public func forName(_ arg0: String) -> JavaCharacter.UnicodeScript!
 
   @JavaStaticMethod
   public func values() -> [JavaCharacter.UnicodeScript?]
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) -> JavaCharacter.UnicodeScript?
+  public func valueOf(_ arg0: String) -> JavaCharacter.UnicodeScript!
 
   @JavaStaticMethod
-  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeScript?
+  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeScript!
 }
 extension JavaCharacter {
   @JavaClass("java.lang.Character$Subset")
@@ -3159,7 +3159,7 @@ extension JavaCharacter {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -3191,7 +3191,7 @@ extension JavaClass<JavaCharacter> {
   public var MAX_VALUE: UInt16
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaCharacter>?
+  public var TYPE: JavaClass<JavaCharacter>!
 
   @JavaStaticField(isFinal: true)
   public var UNASSIGNED: Int8
@@ -3443,7 +3443,7 @@ extension JavaClass<JavaCharacter> {
   public func compare(_ arg0: UInt16, _ arg1: UInt16) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: UInt16) -> JavaCharacter?
+  public func valueOf(_ arg0: UInt16) -> JavaCharacter!
 
   @JavaStaticMethod
   public func toChars(_ arg0: Int32) -> [UInt16]

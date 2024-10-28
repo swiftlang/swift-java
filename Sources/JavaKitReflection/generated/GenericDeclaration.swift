@@ -11,7 +11,7 @@ public struct GenericDeclaration {
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
@@ -20,7 +20,7 @@ public struct GenericDeclaration {
   public func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]

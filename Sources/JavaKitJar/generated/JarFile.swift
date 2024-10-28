@@ -12,13 +12,13 @@ public struct JarFile {
   public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func entries() -> Enumeration<JarEntry>?
+  public func entries() -> Enumeration<JarEntry>!
 
   @JavaMethod
-  public func getManifest() throws -> Manifest?
+  public func getManifest() throws -> Manifest!
 
   @JavaMethod
-  public func getJarEntry(_ arg0: String) -> JarEntry?
+  public func getJarEntry(_ arg0: String) -> JarEntry!
 
   @JavaMethod
   public func isMultiRelease() -> Bool
@@ -45,7 +45,7 @@ public struct JarFile {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

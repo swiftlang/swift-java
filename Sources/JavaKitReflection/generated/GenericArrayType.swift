@@ -5,7 +5,7 @@ import JavaRuntime
 @JavaInterface("java.lang.reflect.GenericArrayType", extends: Type.self)
 public struct GenericArrayType {
   @JavaMethod
-  public func getGenericComponentType() -> Type?
+  public func getGenericComponentType() -> Type!
 
   @JavaMethod
   public func getTypeName() -> String

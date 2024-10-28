@@ -5,10 +5,10 @@ import JavaRuntime
 @JavaInterface("java.lang.reflect.AnnotatedType")
 public struct AnnotatedType {
   @JavaMethod
-  public func getAnnotatedOwnerType() -> AnnotatedType?
+  public func getAnnotatedOwnerType() -> AnnotatedType!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getAnnotations() -> [Annotation?]
@@ -17,7 +17,7 @@ public struct AnnotatedType {
   public func getDeclaredAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getType() -> Type?
+  public func getType() -> Type!
 
   @JavaMethod
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
@@ -26,7 +26,7 @@ public struct AnnotatedType {
   public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation?
+  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]

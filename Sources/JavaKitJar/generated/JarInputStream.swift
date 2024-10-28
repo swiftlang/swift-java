@@ -5,13 +5,13 @@ import JavaRuntime
 @JavaClass("java.util.jar.JarInputStream")
 public struct JarInputStream {
   @JavaMethod
-  public func getNextJarEntry() throws -> JarEntry?
+  public func getNextJarEntry() throws -> JarEntry!
 
   @JavaMethod
   public func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   @JavaMethod
-  public func getManifest() -> Manifest?
+  public func getManifest() -> Manifest!
 
   @JavaMethod
   public func closeEntry() throws
@@ -62,7 +62,7 @@ public struct JarInputStream {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()

@@ -49,7 +49,7 @@ public struct JavaDouble {
   public func isNaN() -> Bool
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
+  public func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
   public func notify()
@@ -101,7 +101,7 @@ extension JavaClass<JavaDouble> {
   public var BYTES: Int32
 
   @JavaStaticField(isFinal: true)
-  public var TYPE: JavaClass<JavaDouble>?
+  public var TYPE: JavaClass<JavaDouble>!
 
   @JavaStaticMethod
   public func toString(_ arg0: Double) -> String
@@ -134,10 +134,10 @@ extension JavaClass<JavaDouble> {
   public func compare(_ arg0: Double, _ arg1: Double) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaDouble?
+  public func valueOf(_ arg0: String) throws -> JavaDouble!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Double) -> JavaDouble?
+  public func valueOf(_ arg0: Double) -> JavaDouble!
 
   @JavaStaticMethod
   public func toHexString(_ arg0: Double) -> String

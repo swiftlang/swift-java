@@ -14,5 +14,5 @@ public struct Annotation {
   public func hashCode() -> Int32
 
   @JavaMethod
-  public func annotationType() -> JavaClass<Annotation>?
+  public func annotationType() -> JavaClass<Annotation>!
 }

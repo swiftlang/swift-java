@@ -5,19 +5,19 @@ import JavaRuntime
 @JavaInterface("java.util.Queue", extends: JavaCollection<JavaObject>.self)
 public struct Queue<E: AnyJavaObject> {
   @JavaMethod
-  public func remove() -> JavaObject?
+  public func remove() -> JavaObject!
 
   @JavaMethod
   public func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peek() -> JavaObject?
+  public func peek() -> JavaObject!
 
   @JavaMethod
-  public func element() -> JavaObject?
+  public func element() -> JavaObject!
 
   @JavaMethod
-  public func poll() -> JavaObject?
+  public func poll() -> JavaObject!
 
   @JavaMethod
   public func offer(_ arg0: JavaObject?) -> Bool
@@ -47,7 +47,7 @@ public struct Queue<E: AnyJavaObject> {
   public func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>?
+  public func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool

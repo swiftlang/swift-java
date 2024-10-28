@@ -5,11 +5,11 @@ import JavaRuntime
 @JavaInterface("java.util.Enumeration")
 public struct Enumeration<E: AnyJavaObject> {
   @JavaMethod
-  public func asIterator() -> JavaIterator<JavaObject>?
+  public func asIterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
   public func hasMoreElements() -> Bool
 
   @JavaMethod
-  public func nextElement() -> JavaObject?
+  public func nextElement() -> JavaObject!
 }

@@ -11,5 +11,5 @@ public struct JavaIterator<E: AnyJavaObject> {
   public func hasNext() -> Bool
 
   @JavaMethod
-  public func next() -> JavaObject?
+  public func next() -> JavaObject!
 }
