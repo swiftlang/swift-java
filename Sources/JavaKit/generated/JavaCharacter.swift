@@ -42,6 +42,3141 @@ public struct JavaCharacter {
   @JavaMethod
   public func wait() throws
 }
+extension JavaCharacter {
+  @JavaClass("java.lang.Character$UnicodeBlock", extends: JavaCharacter.Subset.self)
+  public struct UnicodeBlock {
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension JavaClass<JavaCharacter.UnicodeBlock> {
+  @JavaStaticField(isFinal: true)
+  public var BASIC_LATIN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_1_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var IPA_EXTENSIONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SPACING_MODIFIER_LETTERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMBINING_DIACRITICAL_MARKS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GREEK: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARMENIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HEBREW: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DEVANAGARI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BENGALI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GURMUKHI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GUJARATI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ORIYA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAMIL: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TELUGU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANNADA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MALAYALAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var THAI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LAO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TIBETAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GEORGIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL_JAMO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_ADDITIONAL: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GREEK_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GENERAL_PUNCTUATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPERSCRIPTS_AND_SUBSCRIPTS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CURRENCY_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMBINING_MARKS_FOR_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LETTERLIKE_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NUMBER_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARROWS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_TECHNICAL: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CONTROL_PICTURES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OPTICAL_CHARACTER_RECOGNITION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ENCLOSED_ALPHANUMERICS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BOX_DRAWING: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BLOCK_ELEMENTS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GEOMETRIC_SHAPES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DINGBATS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HIRAGANA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KATAKANA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BOPOMOFO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL_COMPATIBILITY_JAMO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANBUN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ENCLOSED_CJK_LETTERS_AND_MONTHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_COMPATIBILITY: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL_SYLLABLES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PRIVATE_USE_AREA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_COMPATIBILITY_IDEOGRAPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ALPHABETIC_PRESENTATION_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_PRESENTATION_FORMS_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMBINING_HALF_MARKS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_COMPATIBILITY_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SMALL_FORM_VARIANTS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_PRESENTATION_FORMS_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HALFWIDTH_AND_FULLWIDTH_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SPECIALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SURROGATES_AREA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SYRIAC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var THAANA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SINHALA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MYANMAR: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHEROKEE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OGHAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var RUNIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHMER: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MONGOLIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BRAILLE_PATTERNS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_RADICALS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANGXI_RADICALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var IDEOGRAPHIC_DESCRIPTION_CHARACTERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BOPOMOFO_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var YI_SYLLABLES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var YI_RADICALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC_SUPPLEMENTARY: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAGALOG: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANUNOO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BUHID: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAGBANWA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LIMBU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_LE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHMER_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_ARROWS_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_ARROWS_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_MATHEMATICAL_OPERATORS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_SYMBOLS_AND_ARROWS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KATAKANA_PHONETIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var YIJING_HEXAGRAM_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VARIATION_SELECTORS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LINEAR_B_SYLLABARY: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LINEAR_B_IDEOGRAMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var AEGEAN_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_ITALIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GOTHIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var UGARITIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DESERET: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SHAVIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OSMANYA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYPRIOT_SYLLABARY: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BYZANTINE_MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MUSICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_XUAN_JING_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MATHEMATICAL_ALPHANUMERIC_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAGS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VARIATION_SELECTORS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTARY_PRIVATE_USE_AREA_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTARY_PRIVATE_USE_AREA_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HIGH_SURROGATES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HIGH_PRIVATE_USE_SURROGATES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LOW_SURROGATES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NKO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SAMARITAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MANDAIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NEW_TAI_LUE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BUGINESE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_THAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BALINESE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUNDANESE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BATAK: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LEPCHA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OL_CHIKI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VEDIC_EXTENSIONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PHONETIC_EXTENSIONS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMBINING_DIACRITICAL_MARKS_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GLAGOLITIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_C: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COPTIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GEORGIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TIFINAGH: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_PUNCTUATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_STROKES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LISU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VAI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BAMUM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MODIFIER_TONE_LETTERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_D: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SYLOTI_NAGRI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMMON_INDIC_NUMBER_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PHAGS_PA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SAURASHTRA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DEVANAGARI_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KAYAH_LI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var REJANG: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL_JAMO_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var JAVANESE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MYANMAR_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_VIET: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MEETEI_MAYEK: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL_JAMO_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VERTICAL_FORMS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ANCIENT_GREEK_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ANCIENT_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PHAISTOS_DISC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LYCIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CARIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_PERSIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PHOENICIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LYDIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHAROSHTHI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var AVESTAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_TURKIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var RUMI_NUMERAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BRAHMI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KAITHI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CUNEIFORM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CUNEIFORM_NUMBERS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BAMUM_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANA_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ANCIENT_GREEK_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COUNTING_ROD_NUMERALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MAHJONG_TILES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DOMINO_TILES: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PLAYING_CARDS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ENCLOSED_ALPHANUMERIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ENCLOSED_IDEOGRAPHIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var EMOTICONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TRANSPORT_AND_MAP_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ALCHEMICAL_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUNDANESE_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MEETEI_MAYEK_EXTENSIONS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SORA_SOMPENG: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHAKMA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SHARADA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAKRI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MIAO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COMBINING_DIACRITICAL_MARKS_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MYANMAR_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_E: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var COPTIC_EPACT_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_PERMIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ELBASAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LINEAR_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PALMYRENE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NABATAEAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MANICHAEAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MAHAJANI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SINHALA_ARCHAIC_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHOJKI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHUDAWADI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GRANTHA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TIRHUTA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SIDDHAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MODI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var WARANG_CITI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PAU_CIN_HAU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MRO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BASSA_VAH: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var PAHAWH_HMONG: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DUPLOYAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SHORTHAND_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MENDE_KIKAKUI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ORNAMENTAL_DINGBATS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GEOMETRIC_SHAPES_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_ARROWS_C: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHEROKEE_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HATRAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_HUNGARIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MULTANI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var AHOM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var EARLY_DYNASTIC_CUNEIFORM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUTTON_SIGNWRITING: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_E: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SYRIAC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC_EXTENDED_C: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OSAGE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NEWA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MONGOLIAN_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MARCHEN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var IDEOGRAPHIC_SYMBOLS_AND_PUNCTUATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGUT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGUT_COMPONENTS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANA_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GLAGOLITIC_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ADLAM: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MASARAM_GONDI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NUSHU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SOYOMBO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var BHAIKSUKI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GEORGIAN_EXTENDED: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_SOGDIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SOGDIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DOGRA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var GUNJALA_GONDI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MAKASAR: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MEDEFAIDRIN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var MAYAN_NUMERALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var INDIC_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHESS_SYMBOLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ELYMAIC: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NANDINAGARI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TAMIL_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SMALL_KANA_EXTENSION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var WANCHO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OTTOMAN_SIYAQ_NUMBERS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var YEZIDI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CHORASMIAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DIVES_AKURU: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LISU_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGUT_SUPPLEMENT: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var SYMBOLS_FOR_LEGACY_COMPUTING: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var VITHKUQI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_F: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_UYGHUR: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYPRO_MINOAN: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGSA: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KANA_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ZNAMENNY_MUSICAL_NOTATION: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN_EXTENDED_G: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var TOTO: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC_EXTENDED_B: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC_EXTENDED_C: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var DEVANAGARI_EXTENDED_A: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KAWI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var KAKTOVIK_NUMERALS: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC_EXTENDED_D: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var NAG_MUNDARI: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_H: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticField(isFinal: true)
+  public var CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I: JavaCharacter.UnicodeBlock?
+
+  @JavaStaticMethod
+  public func forName(_ arg0: String) -> JavaCharacter.UnicodeBlock?
+
+  @JavaStaticMethod
+  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeBlock?
+
+  @JavaStaticMethod
+  public func of(_ arg0: UInt16) -> JavaCharacter.UnicodeBlock?
+}
+extension JavaCharacter {
+  @JavaClass("java.lang.Character$UnicodeScript")
+  public struct UnicodeScript {
+    public enum UnicodeScriptCases: Equatable {
+      case COMMON
+  case LATIN
+  case GREEK
+  case CYRILLIC
+  case ARMENIAN
+  case HEBREW
+  case ARABIC
+  case SYRIAC
+  case THAANA
+  case DEVANAGARI
+  case BENGALI
+  case GURMUKHI
+  case GUJARATI
+  case ORIYA
+  case TAMIL
+  case TELUGU
+  case KANNADA
+  case MALAYALAM
+  case SINHALA
+  case THAI
+  case LAO
+  case TIBETAN
+  case MYANMAR
+  case GEORGIAN
+  case HANGUL
+  case ETHIOPIC
+  case CHEROKEE
+  case CANADIAN_ABORIGINAL
+  case OGHAM
+  case RUNIC
+  case KHMER
+  case MONGOLIAN
+  case HIRAGANA
+  case KATAKANA
+  case BOPOMOFO
+  case HAN
+  case YI
+  case OLD_ITALIC
+  case GOTHIC
+  case DESERET
+  case INHERITED
+  case TAGALOG
+  case HANUNOO
+  case BUHID
+  case TAGBANWA
+  case LIMBU
+  case TAI_LE
+  case LINEAR_B
+  case UGARITIC
+  case SHAVIAN
+  case OSMANYA
+  case CYPRIOT
+  case BRAILLE
+  case BUGINESE
+  case COPTIC
+  case NEW_TAI_LUE
+  case GLAGOLITIC
+  case TIFINAGH
+  case SYLOTI_NAGRI
+  case OLD_PERSIAN
+  case KHAROSHTHI
+  case BALINESE
+  case CUNEIFORM
+  case PHOENICIAN
+  case PHAGS_PA
+  case NKO
+  case SUNDANESE
+  case BATAK
+  case LEPCHA
+  case OL_CHIKI
+  case VAI
+  case SAURASHTRA
+  case KAYAH_LI
+  case REJANG
+  case LYCIAN
+  case CARIAN
+  case LYDIAN
+  case CHAM
+  case TAI_THAM
+  case TAI_VIET
+  case AVESTAN
+  case EGYPTIAN_HIEROGLYPHS
+  case SAMARITAN
+  case MANDAIC
+  case LISU
+  case BAMUM
+  case JAVANESE
+  case MEETEI_MAYEK
+  case IMPERIAL_ARAMAIC
+  case OLD_SOUTH_ARABIAN
+  case INSCRIPTIONAL_PARTHIAN
+  case INSCRIPTIONAL_PAHLAVI
+  case OLD_TURKIC
+  case BRAHMI
+  case KAITHI
+  case MEROITIC_HIEROGLYPHS
+  case MEROITIC_CURSIVE
+  case SORA_SOMPENG
+  case CHAKMA
+  case SHARADA
+  case TAKRI
+  case MIAO
+  case CAUCASIAN_ALBANIAN
+  case BASSA_VAH
+  case DUPLOYAN
+  case ELBASAN
+  case GRANTHA
+  case PAHAWH_HMONG
+  case KHOJKI
+  case LINEAR_A
+  case MAHAJANI
+  case MANICHAEAN
+  case MENDE_KIKAKUI
+  case MODI
+  case MRO
+  case OLD_NORTH_ARABIAN
+  case NABATAEAN
+  case PALMYRENE
+  case PAU_CIN_HAU
+  case OLD_PERMIC
+  case PSALTER_PAHLAVI
+  case SIDDHAM
+  case KHUDAWADI
+  case TIRHUTA
+  case WARANG_CITI
+  case AHOM
+  case ANATOLIAN_HIEROGLYPHS
+  case HATRAN
+  case MULTANI
+  case OLD_HUNGARIAN
+  case SIGNWRITING
+  case ADLAM
+  case BHAIKSUKI
+  case MARCHEN
+  case NEWA
+  case OSAGE
+  case TANGUT
+  case MASARAM_GONDI
+  case NUSHU
+  case SOYOMBO
+  case ZANABAZAR_SQUARE
+  case HANIFI_ROHINGYA
+  case OLD_SOGDIAN
+  case SOGDIAN
+  case DOGRA
+  case GUNJALA_GONDI
+  case MAKASAR
+  case MEDEFAIDRIN
+  case ELYMAIC
+  case NANDINAGARI
+  case NYIAKENG_PUACHUE_HMONG
+  case WANCHO
+  case YEZIDI
+  case CHORASMIAN
+  case DIVES_AKURU
+  case KHITAN_SMALL_SCRIPT
+  case VITHKUQI
+  case OLD_UYGHUR
+  case CYPRO_MINOAN
+  case TANGSA
+  case TOTO
+  case KAWI
+  case NAG_MUNDARI
+  case UNKNOWN
+    }
+
+    public var enumValue: UnicodeScriptCases? {
+      let classObj = self.javaClass
+      if self.equals(classObj.COMMON?.as(JavaObject.self)) {
+        return UnicodeScriptCases.COMMON
+  } else if self.equals(classObj.LATIN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LATIN
+  } else if self.equals(classObj.GREEK?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GREEK
+  } else if self.equals(classObj.CYRILLIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CYRILLIC
+  } else if self.equals(classObj.ARMENIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ARMENIAN
+  } else if self.equals(classObj.HEBREW?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HEBREW
+  } else if self.equals(classObj.ARABIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ARABIC
+  } else if self.equals(classObj.SYRIAC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SYRIAC
+  } else if self.equals(classObj.THAANA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.THAANA
+  } else if self.equals(classObj.DEVANAGARI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.DEVANAGARI
+  } else if self.equals(classObj.BENGALI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BENGALI
+  } else if self.equals(classObj.GURMUKHI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GURMUKHI
+  } else if self.equals(classObj.GUJARATI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GUJARATI
+  } else if self.equals(classObj.ORIYA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ORIYA
+  } else if self.equals(classObj.TAMIL?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAMIL
+  } else if self.equals(classObj.TELUGU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TELUGU
+  } else if self.equals(classObj.KANNADA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KANNADA
+  } else if self.equals(classObj.MALAYALAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MALAYALAM
+  } else if self.equals(classObj.SINHALA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SINHALA
+  } else if self.equals(classObj.THAI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.THAI
+  } else if self.equals(classObj.LAO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LAO
+  } else if self.equals(classObj.TIBETAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TIBETAN
+  } else if self.equals(classObj.MYANMAR?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MYANMAR
+  } else if self.equals(classObj.GEORGIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GEORGIAN
+  } else if self.equals(classObj.HANGUL?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HANGUL
+  } else if self.equals(classObj.ETHIOPIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ETHIOPIC
+  } else if self.equals(classObj.CHEROKEE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CHEROKEE
+  } else if self.equals(classObj.CANADIAN_ABORIGINAL?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CANADIAN_ABORIGINAL
+  } else if self.equals(classObj.OGHAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OGHAM
+  } else if self.equals(classObj.RUNIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.RUNIC
+  } else if self.equals(classObj.KHMER?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KHMER
+  } else if self.equals(classObj.MONGOLIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MONGOLIAN
+  } else if self.equals(classObj.HIRAGANA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HIRAGANA
+  } else if self.equals(classObj.KATAKANA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KATAKANA
+  } else if self.equals(classObj.BOPOMOFO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BOPOMOFO
+  } else if self.equals(classObj.HAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HAN
+  } else if self.equals(classObj.YI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.YI
+  } else if self.equals(classObj.OLD_ITALIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_ITALIC
+  } else if self.equals(classObj.GOTHIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GOTHIC
+  } else if self.equals(classObj.DESERET?.as(JavaObject.self)) {
+        return UnicodeScriptCases.DESERET
+  } else if self.equals(classObj.INHERITED?.as(JavaObject.self)) {
+        return UnicodeScriptCases.INHERITED
+  } else if self.equals(classObj.TAGALOG?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAGALOG
+  } else if self.equals(classObj.HANUNOO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HANUNOO
+  } else if self.equals(classObj.BUHID?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BUHID
+  } else if self.equals(classObj.TAGBANWA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAGBANWA
+  } else if self.equals(classObj.LIMBU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LIMBU
+  } else if self.equals(classObj.TAI_LE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAI_LE
+  } else if self.equals(classObj.LINEAR_B?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LINEAR_B
+  } else if self.equals(classObj.UGARITIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.UGARITIC
+  } else if self.equals(classObj.SHAVIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SHAVIAN
+  } else if self.equals(classObj.OSMANYA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OSMANYA
+  } else if self.equals(classObj.CYPRIOT?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CYPRIOT
+  } else if self.equals(classObj.BRAILLE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BRAILLE
+  } else if self.equals(classObj.BUGINESE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BUGINESE
+  } else if self.equals(classObj.COPTIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.COPTIC
+  } else if self.equals(classObj.NEW_TAI_LUE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NEW_TAI_LUE
+  } else if self.equals(classObj.GLAGOLITIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GLAGOLITIC
+  } else if self.equals(classObj.TIFINAGH?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TIFINAGH
+  } else if self.equals(classObj.SYLOTI_NAGRI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SYLOTI_NAGRI
+  } else if self.equals(classObj.OLD_PERSIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_PERSIAN
+  } else if self.equals(classObj.KHAROSHTHI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KHAROSHTHI
+  } else if self.equals(classObj.BALINESE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BALINESE
+  } else if self.equals(classObj.CUNEIFORM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CUNEIFORM
+  } else if self.equals(classObj.PHOENICIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PHOENICIAN
+  } else if self.equals(classObj.PHAGS_PA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PHAGS_PA
+  } else if self.equals(classObj.NKO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NKO
+  } else if self.equals(classObj.SUNDANESE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SUNDANESE
+  } else if self.equals(classObj.BATAK?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BATAK
+  } else if self.equals(classObj.LEPCHA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LEPCHA
+  } else if self.equals(classObj.OL_CHIKI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OL_CHIKI
+  } else if self.equals(classObj.VAI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.VAI
+  } else if self.equals(classObj.SAURASHTRA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SAURASHTRA
+  } else if self.equals(classObj.KAYAH_LI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KAYAH_LI
+  } else if self.equals(classObj.REJANG?.as(JavaObject.self)) {
+        return UnicodeScriptCases.REJANG
+  } else if self.equals(classObj.LYCIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LYCIAN
+  } else if self.equals(classObj.CARIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CARIAN
+  } else if self.equals(classObj.LYDIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LYDIAN
+  } else if self.equals(classObj.CHAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CHAM
+  } else if self.equals(classObj.TAI_THAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAI_THAM
+  } else if self.equals(classObj.TAI_VIET?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAI_VIET
+  } else if self.equals(classObj.AVESTAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.AVESTAN
+  } else if self.equals(classObj.EGYPTIAN_HIEROGLYPHS?.as(JavaObject.self)) {
+        return UnicodeScriptCases.EGYPTIAN_HIEROGLYPHS
+  } else if self.equals(classObj.SAMARITAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SAMARITAN
+  } else if self.equals(classObj.MANDAIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MANDAIC
+  } else if self.equals(classObj.LISU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LISU
+  } else if self.equals(classObj.BAMUM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BAMUM
+  } else if self.equals(classObj.JAVANESE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.JAVANESE
+  } else if self.equals(classObj.MEETEI_MAYEK?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MEETEI_MAYEK
+  } else if self.equals(classObj.IMPERIAL_ARAMAIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.IMPERIAL_ARAMAIC
+  } else if self.equals(classObj.OLD_SOUTH_ARABIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_SOUTH_ARABIAN
+  } else if self.equals(classObj.INSCRIPTIONAL_PARTHIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.INSCRIPTIONAL_PARTHIAN
+  } else if self.equals(classObj.INSCRIPTIONAL_PAHLAVI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.INSCRIPTIONAL_PAHLAVI
+  } else if self.equals(classObj.OLD_TURKIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_TURKIC
+  } else if self.equals(classObj.BRAHMI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BRAHMI
+  } else if self.equals(classObj.KAITHI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KAITHI
+  } else if self.equals(classObj.MEROITIC_HIEROGLYPHS?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MEROITIC_HIEROGLYPHS
+  } else if self.equals(classObj.MEROITIC_CURSIVE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MEROITIC_CURSIVE
+  } else if self.equals(classObj.SORA_SOMPENG?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SORA_SOMPENG
+  } else if self.equals(classObj.CHAKMA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CHAKMA
+  } else if self.equals(classObj.SHARADA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SHARADA
+  } else if self.equals(classObj.TAKRI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TAKRI
+  } else if self.equals(classObj.MIAO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MIAO
+  } else if self.equals(classObj.CAUCASIAN_ALBANIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CAUCASIAN_ALBANIAN
+  } else if self.equals(classObj.BASSA_VAH?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BASSA_VAH
+  } else if self.equals(classObj.DUPLOYAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.DUPLOYAN
+  } else if self.equals(classObj.ELBASAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ELBASAN
+  } else if self.equals(classObj.GRANTHA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GRANTHA
+  } else if self.equals(classObj.PAHAWH_HMONG?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PAHAWH_HMONG
+  } else if self.equals(classObj.KHOJKI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KHOJKI
+  } else if self.equals(classObj.LINEAR_A?.as(JavaObject.self)) {
+        return UnicodeScriptCases.LINEAR_A
+  } else if self.equals(classObj.MAHAJANI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MAHAJANI
+  } else if self.equals(classObj.MANICHAEAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MANICHAEAN
+  } else if self.equals(classObj.MENDE_KIKAKUI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MENDE_KIKAKUI
+  } else if self.equals(classObj.MODI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MODI
+  } else if self.equals(classObj.MRO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MRO
+  } else if self.equals(classObj.OLD_NORTH_ARABIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_NORTH_ARABIAN
+  } else if self.equals(classObj.NABATAEAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NABATAEAN
+  } else if self.equals(classObj.PALMYRENE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PALMYRENE
+  } else if self.equals(classObj.PAU_CIN_HAU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PAU_CIN_HAU
+  } else if self.equals(classObj.OLD_PERMIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_PERMIC
+  } else if self.equals(classObj.PSALTER_PAHLAVI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.PSALTER_PAHLAVI
+  } else if self.equals(classObj.SIDDHAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SIDDHAM
+  } else if self.equals(classObj.KHUDAWADI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KHUDAWADI
+  } else if self.equals(classObj.TIRHUTA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TIRHUTA
+  } else if self.equals(classObj.WARANG_CITI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.WARANG_CITI
+  } else if self.equals(classObj.AHOM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.AHOM
+  } else if self.equals(classObj.ANATOLIAN_HIEROGLYPHS?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ANATOLIAN_HIEROGLYPHS
+  } else if self.equals(classObj.HATRAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HATRAN
+  } else if self.equals(classObj.MULTANI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MULTANI
+  } else if self.equals(classObj.OLD_HUNGARIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_HUNGARIAN
+  } else if self.equals(classObj.SIGNWRITING?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SIGNWRITING
+  } else if self.equals(classObj.ADLAM?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ADLAM
+  } else if self.equals(classObj.BHAIKSUKI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.BHAIKSUKI
+  } else if self.equals(classObj.MARCHEN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MARCHEN
+  } else if self.equals(classObj.NEWA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NEWA
+  } else if self.equals(classObj.OSAGE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OSAGE
+  } else if self.equals(classObj.TANGUT?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TANGUT
+  } else if self.equals(classObj.MASARAM_GONDI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MASARAM_GONDI
+  } else if self.equals(classObj.NUSHU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NUSHU
+  } else if self.equals(classObj.SOYOMBO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SOYOMBO
+  } else if self.equals(classObj.ZANABAZAR_SQUARE?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ZANABAZAR_SQUARE
+  } else if self.equals(classObj.HANIFI_ROHINGYA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.HANIFI_ROHINGYA
+  } else if self.equals(classObj.OLD_SOGDIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_SOGDIAN
+  } else if self.equals(classObj.SOGDIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.SOGDIAN
+  } else if self.equals(classObj.DOGRA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.DOGRA
+  } else if self.equals(classObj.GUNJALA_GONDI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.GUNJALA_GONDI
+  } else if self.equals(classObj.MAKASAR?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MAKASAR
+  } else if self.equals(classObj.MEDEFAIDRIN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.MEDEFAIDRIN
+  } else if self.equals(classObj.ELYMAIC?.as(JavaObject.self)) {
+        return UnicodeScriptCases.ELYMAIC
+  } else if self.equals(classObj.NANDINAGARI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NANDINAGARI
+  } else if self.equals(classObj.NYIAKENG_PUACHUE_HMONG?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NYIAKENG_PUACHUE_HMONG
+  } else if self.equals(classObj.WANCHO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.WANCHO
+  } else if self.equals(classObj.YEZIDI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.YEZIDI
+  } else if self.equals(classObj.CHORASMIAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CHORASMIAN
+  } else if self.equals(classObj.DIVES_AKURU?.as(JavaObject.self)) {
+        return UnicodeScriptCases.DIVES_AKURU
+  } else if self.equals(classObj.KHITAN_SMALL_SCRIPT?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KHITAN_SMALL_SCRIPT
+  } else if self.equals(classObj.VITHKUQI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.VITHKUQI
+  } else if self.equals(classObj.OLD_UYGHUR?.as(JavaObject.self)) {
+        return UnicodeScriptCases.OLD_UYGHUR
+  } else if self.equals(classObj.CYPRO_MINOAN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.CYPRO_MINOAN
+  } else if self.equals(classObj.TANGSA?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TANGSA
+  } else if self.equals(classObj.TOTO?.as(JavaObject.self)) {
+        return UnicodeScriptCases.TOTO
+  } else if self.equals(classObj.KAWI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.KAWI
+  } else if self.equals(classObj.NAG_MUNDARI?.as(JavaObject.self)) {
+        return UnicodeScriptCases.NAG_MUNDARI
+  } else if self.equals(classObj.UNKNOWN?.as(JavaObject.self)) {
+        return UnicodeScriptCases.UNKNOWN
+  } else {
+        return nil
+      }
+    }
+
+  public init(_ enumValue: UnicodeScriptCases, environment: JNIEnvironment? = nil) {
+    let _environment = if let environment {
+      environment
+    } else {
+      try! JavaVirtualMachine.shared().environment()
+    }
+    let classObj = try! JavaClass<Self>(environment: _environment)
+    switch enumValue {
+      case .COMMON:
+        if let COMMON = classObj.COMMON {
+          self = COMMON
+        } else {
+          fatalError("Enum value COMMON was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LATIN:
+        if let LATIN = classObj.LATIN {
+          self = LATIN
+        } else {
+          fatalError("Enum value LATIN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GREEK:
+        if let GREEK = classObj.GREEK {
+          self = GREEK
+        } else {
+          fatalError("Enum value GREEK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CYRILLIC:
+        if let CYRILLIC = classObj.CYRILLIC {
+          self = CYRILLIC
+        } else {
+          fatalError("Enum value CYRILLIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ARMENIAN:
+        if let ARMENIAN = classObj.ARMENIAN {
+          self = ARMENIAN
+        } else {
+          fatalError("Enum value ARMENIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HEBREW:
+        if let HEBREW = classObj.HEBREW {
+          self = HEBREW
+        } else {
+          fatalError("Enum value HEBREW was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ARABIC:
+        if let ARABIC = classObj.ARABIC {
+          self = ARABIC
+        } else {
+          fatalError("Enum value ARABIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SYRIAC:
+        if let SYRIAC = classObj.SYRIAC {
+          self = SYRIAC
+        } else {
+          fatalError("Enum value SYRIAC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .THAANA:
+        if let THAANA = classObj.THAANA {
+          self = THAANA
+        } else {
+          fatalError("Enum value THAANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .DEVANAGARI:
+        if let DEVANAGARI = classObj.DEVANAGARI {
+          self = DEVANAGARI
+        } else {
+          fatalError("Enum value DEVANAGARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BENGALI:
+        if let BENGALI = classObj.BENGALI {
+          self = BENGALI
+        } else {
+          fatalError("Enum value BENGALI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GURMUKHI:
+        if let GURMUKHI = classObj.GURMUKHI {
+          self = GURMUKHI
+        } else {
+          fatalError("Enum value GURMUKHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GUJARATI:
+        if let GUJARATI = classObj.GUJARATI {
+          self = GUJARATI
+        } else {
+          fatalError("Enum value GUJARATI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ORIYA:
+        if let ORIYA = classObj.ORIYA {
+          self = ORIYA
+        } else {
+          fatalError("Enum value ORIYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAMIL:
+        if let TAMIL = classObj.TAMIL {
+          self = TAMIL
+        } else {
+          fatalError("Enum value TAMIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TELUGU:
+        if let TELUGU = classObj.TELUGU {
+          self = TELUGU
+        } else {
+          fatalError("Enum value TELUGU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KANNADA:
+        if let KANNADA = classObj.KANNADA {
+          self = KANNADA
+        } else {
+          fatalError("Enum value KANNADA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MALAYALAM:
+        if let MALAYALAM = classObj.MALAYALAM {
+          self = MALAYALAM
+        } else {
+          fatalError("Enum value MALAYALAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SINHALA:
+        if let SINHALA = classObj.SINHALA {
+          self = SINHALA
+        } else {
+          fatalError("Enum value SINHALA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .THAI:
+        if let THAI = classObj.THAI {
+          self = THAI
+        } else {
+          fatalError("Enum value THAI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LAO:
+        if let LAO = classObj.LAO {
+          self = LAO
+        } else {
+          fatalError("Enum value LAO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TIBETAN:
+        if let TIBETAN = classObj.TIBETAN {
+          self = TIBETAN
+        } else {
+          fatalError("Enum value TIBETAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MYANMAR:
+        if let MYANMAR = classObj.MYANMAR {
+          self = MYANMAR
+        } else {
+          fatalError("Enum value MYANMAR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GEORGIAN:
+        if let GEORGIAN = classObj.GEORGIAN {
+          self = GEORGIAN
+        } else {
+          fatalError("Enum value GEORGIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HANGUL:
+        if let HANGUL = classObj.HANGUL {
+          self = HANGUL
+        } else {
+          fatalError("Enum value HANGUL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ETHIOPIC:
+        if let ETHIOPIC = classObj.ETHIOPIC {
+          self = ETHIOPIC
+        } else {
+          fatalError("Enum value ETHIOPIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CHEROKEE:
+        if let CHEROKEE = classObj.CHEROKEE {
+          self = CHEROKEE
+        } else {
+          fatalError("Enum value CHEROKEE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CANADIAN_ABORIGINAL:
+        if let CANADIAN_ABORIGINAL = classObj.CANADIAN_ABORIGINAL {
+          self = CANADIAN_ABORIGINAL
+        } else {
+          fatalError("Enum value CANADIAN_ABORIGINAL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OGHAM:
+        if let OGHAM = classObj.OGHAM {
+          self = OGHAM
+        } else {
+          fatalError("Enum value OGHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .RUNIC:
+        if let RUNIC = classObj.RUNIC {
+          self = RUNIC
+        } else {
+          fatalError("Enum value RUNIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KHMER:
+        if let KHMER = classObj.KHMER {
+          self = KHMER
+        } else {
+          fatalError("Enum value KHMER was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MONGOLIAN:
+        if let MONGOLIAN = classObj.MONGOLIAN {
+          self = MONGOLIAN
+        } else {
+          fatalError("Enum value MONGOLIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HIRAGANA:
+        if let HIRAGANA = classObj.HIRAGANA {
+          self = HIRAGANA
+        } else {
+          fatalError("Enum value HIRAGANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KATAKANA:
+        if let KATAKANA = classObj.KATAKANA {
+          self = KATAKANA
+        } else {
+          fatalError("Enum value KATAKANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BOPOMOFO:
+        if let BOPOMOFO = classObj.BOPOMOFO {
+          self = BOPOMOFO
+        } else {
+          fatalError("Enum value BOPOMOFO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HAN:
+        if let HAN = classObj.HAN {
+          self = HAN
+        } else {
+          fatalError("Enum value HAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .YI:
+        if let YI = classObj.YI {
+          self = YI
+        } else {
+          fatalError("Enum value YI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_ITALIC:
+        if let OLD_ITALIC = classObj.OLD_ITALIC {
+          self = OLD_ITALIC
+        } else {
+          fatalError("Enum value OLD_ITALIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GOTHIC:
+        if let GOTHIC = classObj.GOTHIC {
+          self = GOTHIC
+        } else {
+          fatalError("Enum value GOTHIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .DESERET:
+        if let DESERET = classObj.DESERET {
+          self = DESERET
+        } else {
+          fatalError("Enum value DESERET was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .INHERITED:
+        if let INHERITED = classObj.INHERITED {
+          self = INHERITED
+        } else {
+          fatalError("Enum value INHERITED was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAGALOG:
+        if let TAGALOG = classObj.TAGALOG {
+          self = TAGALOG
+        } else {
+          fatalError("Enum value TAGALOG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HANUNOO:
+        if let HANUNOO = classObj.HANUNOO {
+          self = HANUNOO
+        } else {
+          fatalError("Enum value HANUNOO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BUHID:
+        if let BUHID = classObj.BUHID {
+          self = BUHID
+        } else {
+          fatalError("Enum value BUHID was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAGBANWA:
+        if let TAGBANWA = classObj.TAGBANWA {
+          self = TAGBANWA
+        } else {
+          fatalError("Enum value TAGBANWA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LIMBU:
+        if let LIMBU = classObj.LIMBU {
+          self = LIMBU
+        } else {
+          fatalError("Enum value LIMBU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAI_LE:
+        if let TAI_LE = classObj.TAI_LE {
+          self = TAI_LE
+        } else {
+          fatalError("Enum value TAI_LE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LINEAR_B:
+        if let LINEAR_B = classObj.LINEAR_B {
+          self = LINEAR_B
+        } else {
+          fatalError("Enum value LINEAR_B was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .UGARITIC:
+        if let UGARITIC = classObj.UGARITIC {
+          self = UGARITIC
+        } else {
+          fatalError("Enum value UGARITIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SHAVIAN:
+        if let SHAVIAN = classObj.SHAVIAN {
+          self = SHAVIAN
+        } else {
+          fatalError("Enum value SHAVIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OSMANYA:
+        if let OSMANYA = classObj.OSMANYA {
+          self = OSMANYA
+        } else {
+          fatalError("Enum value OSMANYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CYPRIOT:
+        if let CYPRIOT = classObj.CYPRIOT {
+          self = CYPRIOT
+        } else {
+          fatalError("Enum value CYPRIOT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BRAILLE:
+        if let BRAILLE = classObj.BRAILLE {
+          self = BRAILLE
+        } else {
+          fatalError("Enum value BRAILLE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BUGINESE:
+        if let BUGINESE = classObj.BUGINESE {
+          self = BUGINESE
+        } else {
+          fatalError("Enum value BUGINESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .COPTIC:
+        if let COPTIC = classObj.COPTIC {
+          self = COPTIC
+        } else {
+          fatalError("Enum value COPTIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NEW_TAI_LUE:
+        if let NEW_TAI_LUE = classObj.NEW_TAI_LUE {
+          self = NEW_TAI_LUE
+        } else {
+          fatalError("Enum value NEW_TAI_LUE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GLAGOLITIC:
+        if let GLAGOLITIC = classObj.GLAGOLITIC {
+          self = GLAGOLITIC
+        } else {
+          fatalError("Enum value GLAGOLITIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TIFINAGH:
+        if let TIFINAGH = classObj.TIFINAGH {
+          self = TIFINAGH
+        } else {
+          fatalError("Enum value TIFINAGH was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SYLOTI_NAGRI:
+        if let SYLOTI_NAGRI = classObj.SYLOTI_NAGRI {
+          self = SYLOTI_NAGRI
+        } else {
+          fatalError("Enum value SYLOTI_NAGRI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_PERSIAN:
+        if let OLD_PERSIAN = classObj.OLD_PERSIAN {
+          self = OLD_PERSIAN
+        } else {
+          fatalError("Enum value OLD_PERSIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KHAROSHTHI:
+        if let KHAROSHTHI = classObj.KHAROSHTHI {
+          self = KHAROSHTHI
+        } else {
+          fatalError("Enum value KHAROSHTHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BALINESE:
+        if let BALINESE = classObj.BALINESE {
+          self = BALINESE
+        } else {
+          fatalError("Enum value BALINESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CUNEIFORM:
+        if let CUNEIFORM = classObj.CUNEIFORM {
+          self = CUNEIFORM
+        } else {
+          fatalError("Enum value CUNEIFORM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PHOENICIAN:
+        if let PHOENICIAN = classObj.PHOENICIAN {
+          self = PHOENICIAN
+        } else {
+          fatalError("Enum value PHOENICIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PHAGS_PA:
+        if let PHAGS_PA = classObj.PHAGS_PA {
+          self = PHAGS_PA
+        } else {
+          fatalError("Enum value PHAGS_PA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NKO:
+        if let NKO = classObj.NKO {
+          self = NKO
+        } else {
+          fatalError("Enum value NKO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SUNDANESE:
+        if let SUNDANESE = classObj.SUNDANESE {
+          self = SUNDANESE
+        } else {
+          fatalError("Enum value SUNDANESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BATAK:
+        if let BATAK = classObj.BATAK {
+          self = BATAK
+        } else {
+          fatalError("Enum value BATAK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LEPCHA:
+        if let LEPCHA = classObj.LEPCHA {
+          self = LEPCHA
+        } else {
+          fatalError("Enum value LEPCHA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OL_CHIKI:
+        if let OL_CHIKI = classObj.OL_CHIKI {
+          self = OL_CHIKI
+        } else {
+          fatalError("Enum value OL_CHIKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .VAI:
+        if let VAI = classObj.VAI {
+          self = VAI
+        } else {
+          fatalError("Enum value VAI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SAURASHTRA:
+        if let SAURASHTRA = classObj.SAURASHTRA {
+          self = SAURASHTRA
+        } else {
+          fatalError("Enum value SAURASHTRA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KAYAH_LI:
+        if let KAYAH_LI = classObj.KAYAH_LI {
+          self = KAYAH_LI
+        } else {
+          fatalError("Enum value KAYAH_LI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .REJANG:
+        if let REJANG = classObj.REJANG {
+          self = REJANG
+        } else {
+          fatalError("Enum value REJANG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LYCIAN:
+        if let LYCIAN = classObj.LYCIAN {
+          self = LYCIAN
+        } else {
+          fatalError("Enum value LYCIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CARIAN:
+        if let CARIAN = classObj.CARIAN {
+          self = CARIAN
+        } else {
+          fatalError("Enum value CARIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LYDIAN:
+        if let LYDIAN = classObj.LYDIAN {
+          self = LYDIAN
+        } else {
+          fatalError("Enum value LYDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CHAM:
+        if let CHAM = classObj.CHAM {
+          self = CHAM
+        } else {
+          fatalError("Enum value CHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAI_THAM:
+        if let TAI_THAM = classObj.TAI_THAM {
+          self = TAI_THAM
+        } else {
+          fatalError("Enum value TAI_THAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAI_VIET:
+        if let TAI_VIET = classObj.TAI_VIET {
+          self = TAI_VIET
+        } else {
+          fatalError("Enum value TAI_VIET was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .AVESTAN:
+        if let AVESTAN = classObj.AVESTAN {
+          self = AVESTAN
+        } else {
+          fatalError("Enum value AVESTAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .EGYPTIAN_HIEROGLYPHS:
+        if let EGYPTIAN_HIEROGLYPHS = classObj.EGYPTIAN_HIEROGLYPHS {
+          self = EGYPTIAN_HIEROGLYPHS
+        } else {
+          fatalError("Enum value EGYPTIAN_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SAMARITAN:
+        if let SAMARITAN = classObj.SAMARITAN {
+          self = SAMARITAN
+        } else {
+          fatalError("Enum value SAMARITAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MANDAIC:
+        if let MANDAIC = classObj.MANDAIC {
+          self = MANDAIC
+        } else {
+          fatalError("Enum value MANDAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LISU:
+        if let LISU = classObj.LISU {
+          self = LISU
+        } else {
+          fatalError("Enum value LISU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BAMUM:
+        if let BAMUM = classObj.BAMUM {
+          self = BAMUM
+        } else {
+          fatalError("Enum value BAMUM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .JAVANESE:
+        if let JAVANESE = classObj.JAVANESE {
+          self = JAVANESE
+        } else {
+          fatalError("Enum value JAVANESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MEETEI_MAYEK:
+        if let MEETEI_MAYEK = classObj.MEETEI_MAYEK {
+          self = MEETEI_MAYEK
+        } else {
+          fatalError("Enum value MEETEI_MAYEK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .IMPERIAL_ARAMAIC:
+        if let IMPERIAL_ARAMAIC = classObj.IMPERIAL_ARAMAIC {
+          self = IMPERIAL_ARAMAIC
+        } else {
+          fatalError("Enum value IMPERIAL_ARAMAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_SOUTH_ARABIAN:
+        if let OLD_SOUTH_ARABIAN = classObj.OLD_SOUTH_ARABIAN {
+          self = OLD_SOUTH_ARABIAN
+        } else {
+          fatalError("Enum value OLD_SOUTH_ARABIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .INSCRIPTIONAL_PARTHIAN:
+        if let INSCRIPTIONAL_PARTHIAN = classObj.INSCRIPTIONAL_PARTHIAN {
+          self = INSCRIPTIONAL_PARTHIAN
+        } else {
+          fatalError("Enum value INSCRIPTIONAL_PARTHIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .INSCRIPTIONAL_PAHLAVI:
+        if let INSCRIPTIONAL_PAHLAVI = classObj.INSCRIPTIONAL_PAHLAVI {
+          self = INSCRIPTIONAL_PAHLAVI
+        } else {
+          fatalError("Enum value INSCRIPTIONAL_PAHLAVI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_TURKIC:
+        if let OLD_TURKIC = classObj.OLD_TURKIC {
+          self = OLD_TURKIC
+        } else {
+          fatalError("Enum value OLD_TURKIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BRAHMI:
+        if let BRAHMI = classObj.BRAHMI {
+          self = BRAHMI
+        } else {
+          fatalError("Enum value BRAHMI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KAITHI:
+        if let KAITHI = classObj.KAITHI {
+          self = KAITHI
+        } else {
+          fatalError("Enum value KAITHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MEROITIC_HIEROGLYPHS:
+        if let MEROITIC_HIEROGLYPHS = classObj.MEROITIC_HIEROGLYPHS {
+          self = MEROITIC_HIEROGLYPHS
+        } else {
+          fatalError("Enum value MEROITIC_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MEROITIC_CURSIVE:
+        if let MEROITIC_CURSIVE = classObj.MEROITIC_CURSIVE {
+          self = MEROITIC_CURSIVE
+        } else {
+          fatalError("Enum value MEROITIC_CURSIVE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SORA_SOMPENG:
+        if let SORA_SOMPENG = classObj.SORA_SOMPENG {
+          self = SORA_SOMPENG
+        } else {
+          fatalError("Enum value SORA_SOMPENG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CHAKMA:
+        if let CHAKMA = classObj.CHAKMA {
+          self = CHAKMA
+        } else {
+          fatalError("Enum value CHAKMA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SHARADA:
+        if let SHARADA = classObj.SHARADA {
+          self = SHARADA
+        } else {
+          fatalError("Enum value SHARADA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TAKRI:
+        if let TAKRI = classObj.TAKRI {
+          self = TAKRI
+        } else {
+          fatalError("Enum value TAKRI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MIAO:
+        if let MIAO = classObj.MIAO {
+          self = MIAO
+        } else {
+          fatalError("Enum value MIAO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CAUCASIAN_ALBANIAN:
+        if let CAUCASIAN_ALBANIAN = classObj.CAUCASIAN_ALBANIAN {
+          self = CAUCASIAN_ALBANIAN
+        } else {
+          fatalError("Enum value CAUCASIAN_ALBANIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BASSA_VAH:
+        if let BASSA_VAH = classObj.BASSA_VAH {
+          self = BASSA_VAH
+        } else {
+          fatalError("Enum value BASSA_VAH was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .DUPLOYAN:
+        if let DUPLOYAN = classObj.DUPLOYAN {
+          self = DUPLOYAN
+        } else {
+          fatalError("Enum value DUPLOYAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ELBASAN:
+        if let ELBASAN = classObj.ELBASAN {
+          self = ELBASAN
+        } else {
+          fatalError("Enum value ELBASAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GRANTHA:
+        if let GRANTHA = classObj.GRANTHA {
+          self = GRANTHA
+        } else {
+          fatalError("Enum value GRANTHA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PAHAWH_HMONG:
+        if let PAHAWH_HMONG = classObj.PAHAWH_HMONG {
+          self = PAHAWH_HMONG
+        } else {
+          fatalError("Enum value PAHAWH_HMONG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KHOJKI:
+        if let KHOJKI = classObj.KHOJKI {
+          self = KHOJKI
+        } else {
+          fatalError("Enum value KHOJKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .LINEAR_A:
+        if let LINEAR_A = classObj.LINEAR_A {
+          self = LINEAR_A
+        } else {
+          fatalError("Enum value LINEAR_A was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MAHAJANI:
+        if let MAHAJANI = classObj.MAHAJANI {
+          self = MAHAJANI
+        } else {
+          fatalError("Enum value MAHAJANI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MANICHAEAN:
+        if let MANICHAEAN = classObj.MANICHAEAN {
+          self = MANICHAEAN
+        } else {
+          fatalError("Enum value MANICHAEAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MENDE_KIKAKUI:
+        if let MENDE_KIKAKUI = classObj.MENDE_KIKAKUI {
+          self = MENDE_KIKAKUI
+        } else {
+          fatalError("Enum value MENDE_KIKAKUI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MODI:
+        if let MODI = classObj.MODI {
+          self = MODI
+        } else {
+          fatalError("Enum value MODI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MRO:
+        if let MRO = classObj.MRO {
+          self = MRO
+        } else {
+          fatalError("Enum value MRO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_NORTH_ARABIAN:
+        if let OLD_NORTH_ARABIAN = classObj.OLD_NORTH_ARABIAN {
+          self = OLD_NORTH_ARABIAN
+        } else {
+          fatalError("Enum value OLD_NORTH_ARABIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NABATAEAN:
+        if let NABATAEAN = classObj.NABATAEAN {
+          self = NABATAEAN
+        } else {
+          fatalError("Enum value NABATAEAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PALMYRENE:
+        if let PALMYRENE = classObj.PALMYRENE {
+          self = PALMYRENE
+        } else {
+          fatalError("Enum value PALMYRENE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PAU_CIN_HAU:
+        if let PAU_CIN_HAU = classObj.PAU_CIN_HAU {
+          self = PAU_CIN_HAU
+        } else {
+          fatalError("Enum value PAU_CIN_HAU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_PERMIC:
+        if let OLD_PERMIC = classObj.OLD_PERMIC {
+          self = OLD_PERMIC
+        } else {
+          fatalError("Enum value OLD_PERMIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .PSALTER_PAHLAVI:
+        if let PSALTER_PAHLAVI = classObj.PSALTER_PAHLAVI {
+          self = PSALTER_PAHLAVI
+        } else {
+          fatalError("Enum value PSALTER_PAHLAVI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SIDDHAM:
+        if let SIDDHAM = classObj.SIDDHAM {
+          self = SIDDHAM
+        } else {
+          fatalError("Enum value SIDDHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KHUDAWADI:
+        if let KHUDAWADI = classObj.KHUDAWADI {
+          self = KHUDAWADI
+        } else {
+          fatalError("Enum value KHUDAWADI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TIRHUTA:
+        if let TIRHUTA = classObj.TIRHUTA {
+          self = TIRHUTA
+        } else {
+          fatalError("Enum value TIRHUTA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .WARANG_CITI:
+        if let WARANG_CITI = classObj.WARANG_CITI {
+          self = WARANG_CITI
+        } else {
+          fatalError("Enum value WARANG_CITI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .AHOM:
+        if let AHOM = classObj.AHOM {
+          self = AHOM
+        } else {
+          fatalError("Enum value AHOM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ANATOLIAN_HIEROGLYPHS:
+        if let ANATOLIAN_HIEROGLYPHS = classObj.ANATOLIAN_HIEROGLYPHS {
+          self = ANATOLIAN_HIEROGLYPHS
+        } else {
+          fatalError("Enum value ANATOLIAN_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HATRAN:
+        if let HATRAN = classObj.HATRAN {
+          self = HATRAN
+        } else {
+          fatalError("Enum value HATRAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MULTANI:
+        if let MULTANI = classObj.MULTANI {
+          self = MULTANI
+        } else {
+          fatalError("Enum value MULTANI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_HUNGARIAN:
+        if let OLD_HUNGARIAN = classObj.OLD_HUNGARIAN {
+          self = OLD_HUNGARIAN
+        } else {
+          fatalError("Enum value OLD_HUNGARIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SIGNWRITING:
+        if let SIGNWRITING = classObj.SIGNWRITING {
+          self = SIGNWRITING
+        } else {
+          fatalError("Enum value SIGNWRITING was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ADLAM:
+        if let ADLAM = classObj.ADLAM {
+          self = ADLAM
+        } else {
+          fatalError("Enum value ADLAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .BHAIKSUKI:
+        if let BHAIKSUKI = classObj.BHAIKSUKI {
+          self = BHAIKSUKI
+        } else {
+          fatalError("Enum value BHAIKSUKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MARCHEN:
+        if let MARCHEN = classObj.MARCHEN {
+          self = MARCHEN
+        } else {
+          fatalError("Enum value MARCHEN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NEWA:
+        if let NEWA = classObj.NEWA {
+          self = NEWA
+        } else {
+          fatalError("Enum value NEWA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OSAGE:
+        if let OSAGE = classObj.OSAGE {
+          self = OSAGE
+        } else {
+          fatalError("Enum value OSAGE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TANGUT:
+        if let TANGUT = classObj.TANGUT {
+          self = TANGUT
+        } else {
+          fatalError("Enum value TANGUT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MASARAM_GONDI:
+        if let MASARAM_GONDI = classObj.MASARAM_GONDI {
+          self = MASARAM_GONDI
+        } else {
+          fatalError("Enum value MASARAM_GONDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NUSHU:
+        if let NUSHU = classObj.NUSHU {
+          self = NUSHU
+        } else {
+          fatalError("Enum value NUSHU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SOYOMBO:
+        if let SOYOMBO = classObj.SOYOMBO {
+          self = SOYOMBO
+        } else {
+          fatalError("Enum value SOYOMBO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ZANABAZAR_SQUARE:
+        if let ZANABAZAR_SQUARE = classObj.ZANABAZAR_SQUARE {
+          self = ZANABAZAR_SQUARE
+        } else {
+          fatalError("Enum value ZANABAZAR_SQUARE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .HANIFI_ROHINGYA:
+        if let HANIFI_ROHINGYA = classObj.HANIFI_ROHINGYA {
+          self = HANIFI_ROHINGYA
+        } else {
+          fatalError("Enum value HANIFI_ROHINGYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_SOGDIAN:
+        if let OLD_SOGDIAN = classObj.OLD_SOGDIAN {
+          self = OLD_SOGDIAN
+        } else {
+          fatalError("Enum value OLD_SOGDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .SOGDIAN:
+        if let SOGDIAN = classObj.SOGDIAN {
+          self = SOGDIAN
+        } else {
+          fatalError("Enum value SOGDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .DOGRA:
+        if let DOGRA = classObj.DOGRA {
+          self = DOGRA
+        } else {
+          fatalError("Enum value DOGRA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .GUNJALA_GONDI:
+        if let GUNJALA_GONDI = classObj.GUNJALA_GONDI {
+          self = GUNJALA_GONDI
+        } else {
+          fatalError("Enum value GUNJALA_GONDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MAKASAR:
+        if let MAKASAR = classObj.MAKASAR {
+          self = MAKASAR
+        } else {
+          fatalError("Enum value MAKASAR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .MEDEFAIDRIN:
+        if let MEDEFAIDRIN = classObj.MEDEFAIDRIN {
+          self = MEDEFAIDRIN
+        } else {
+          fatalError("Enum value MEDEFAIDRIN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .ELYMAIC:
+        if let ELYMAIC = classObj.ELYMAIC {
+          self = ELYMAIC
+        } else {
+          fatalError("Enum value ELYMAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NANDINAGARI:
+        if let NANDINAGARI = classObj.NANDINAGARI {
+          self = NANDINAGARI
+        } else {
+          fatalError("Enum value NANDINAGARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NYIAKENG_PUACHUE_HMONG:
+        if let NYIAKENG_PUACHUE_HMONG = classObj.NYIAKENG_PUACHUE_HMONG {
+          self = NYIAKENG_PUACHUE_HMONG
+        } else {
+          fatalError("Enum value NYIAKENG_PUACHUE_HMONG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .WANCHO:
+        if let WANCHO = classObj.WANCHO {
+          self = WANCHO
+        } else {
+          fatalError("Enum value WANCHO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .YEZIDI:
+        if let YEZIDI = classObj.YEZIDI {
+          self = YEZIDI
+        } else {
+          fatalError("Enum value YEZIDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CHORASMIAN:
+        if let CHORASMIAN = classObj.CHORASMIAN {
+          self = CHORASMIAN
+        } else {
+          fatalError("Enum value CHORASMIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .DIVES_AKURU:
+        if let DIVES_AKURU = classObj.DIVES_AKURU {
+          self = DIVES_AKURU
+        } else {
+          fatalError("Enum value DIVES_AKURU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KHITAN_SMALL_SCRIPT:
+        if let KHITAN_SMALL_SCRIPT = classObj.KHITAN_SMALL_SCRIPT {
+          self = KHITAN_SMALL_SCRIPT
+        } else {
+          fatalError("Enum value KHITAN_SMALL_SCRIPT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .VITHKUQI:
+        if let VITHKUQI = classObj.VITHKUQI {
+          self = VITHKUQI
+        } else {
+          fatalError("Enum value VITHKUQI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .OLD_UYGHUR:
+        if let OLD_UYGHUR = classObj.OLD_UYGHUR {
+          self = OLD_UYGHUR
+        } else {
+          fatalError("Enum value OLD_UYGHUR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .CYPRO_MINOAN:
+        if let CYPRO_MINOAN = classObj.CYPRO_MINOAN {
+          self = CYPRO_MINOAN
+        } else {
+          fatalError("Enum value CYPRO_MINOAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TANGSA:
+        if let TANGSA = classObj.TANGSA {
+          self = TANGSA
+        } else {
+          fatalError("Enum value TANGSA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .TOTO:
+        if let TOTO = classObj.TOTO {
+          self = TOTO
+        } else {
+          fatalError("Enum value TOTO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .KAWI:
+        if let KAWI = classObj.KAWI {
+          self = KAWI
+        } else {
+          fatalError("Enum value KAWI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .NAG_MUNDARI:
+        if let NAG_MUNDARI = classObj.NAG_MUNDARI {
+          self = NAG_MUNDARI
+        } else {
+          fatalError("Enum value NAG_MUNDARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+      case .UNKNOWN:
+        if let UNKNOWN = classObj.UNKNOWN {
+          self = UNKNOWN
+        } else {
+          fatalError("Enum value UNKNOWN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+        }
+    }
+  }
+
+  @JavaMethod
+  public func name() -> String
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func compareTo(_ arg0: JavaObject?) -> Int32
+
+  @JavaMethod
+  public func ordinal() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension JavaCharacter.UnicodeScript {
+  @JavaClass("java.lang.Enum$EnumDesc")
+  public struct EnumDesc<E: AnyJavaObject> {
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func constantName() -> String
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension JavaClass<JavaCharacter.UnicodeScript> {
+  @JavaStaticField(isFinal: true)
+  public var COMMON: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LATIN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GREEK: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CYRILLIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ARMENIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HEBREW: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ARABIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SYRIAC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var THAANA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var DEVANAGARI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BENGALI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GURMUKHI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GUJARATI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ORIYA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAMIL: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TELUGU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KANNADA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MALAYALAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SINHALA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var THAI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LAO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TIBETAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MYANMAR: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GEORGIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HANGUL: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ETHIOPIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CHEROKEE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CANADIAN_ABORIGINAL: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OGHAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var RUNIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KHMER: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MONGOLIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HIRAGANA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KATAKANA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BOPOMOFO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var YI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_ITALIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GOTHIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var DESERET: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var INHERITED: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAGALOG: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HANUNOO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BUHID: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAGBANWA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LIMBU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_LE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LINEAR_B: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var UGARITIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SHAVIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OSMANYA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CYPRIOT: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BRAILLE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BUGINESE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var COPTIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NEW_TAI_LUE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GLAGOLITIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TIFINAGH: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SYLOTI_NAGRI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_PERSIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KHAROSHTHI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BALINESE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CUNEIFORM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PHOENICIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PHAGS_PA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NKO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SUNDANESE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BATAK: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LEPCHA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OL_CHIKI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var VAI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SAURASHTRA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KAYAH_LI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var REJANG: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LYCIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CARIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LYDIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CHAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_THAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAI_VIET: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var AVESTAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var EGYPTIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SAMARITAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MANDAIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LISU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BAMUM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var JAVANESE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MEETEI_MAYEK: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var IMPERIAL_ARAMAIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_SOUTH_ARABIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var INSCRIPTIONAL_PARTHIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var INSCRIPTIONAL_PAHLAVI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_TURKIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BRAHMI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KAITHI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MEROITIC_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MEROITIC_CURSIVE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SORA_SOMPENG: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CHAKMA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SHARADA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TAKRI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MIAO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CAUCASIAN_ALBANIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BASSA_VAH: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var DUPLOYAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ELBASAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GRANTHA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PAHAWH_HMONG: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KHOJKI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var LINEAR_A: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MAHAJANI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MANICHAEAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MENDE_KIKAKUI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MODI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MRO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_NORTH_ARABIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NABATAEAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PALMYRENE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PAU_CIN_HAU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_PERMIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var PSALTER_PAHLAVI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SIDDHAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KHUDAWADI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TIRHUTA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var WARANG_CITI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var AHOM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ANATOLIAN_HIEROGLYPHS: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HATRAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MULTANI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_HUNGARIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SIGNWRITING: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ADLAM: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var BHAIKSUKI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MARCHEN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NEWA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OSAGE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGUT: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MASARAM_GONDI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NUSHU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SOYOMBO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ZANABAZAR_SQUARE: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var HANIFI_ROHINGYA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_SOGDIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var SOGDIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var DOGRA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var GUNJALA_GONDI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MAKASAR: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var MEDEFAIDRIN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var ELYMAIC: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NANDINAGARI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NYIAKENG_PUACHUE_HMONG: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var WANCHO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var YEZIDI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CHORASMIAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var DIVES_AKURU: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KHITAN_SMALL_SCRIPT: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var VITHKUQI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var OLD_UYGHUR: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var CYPRO_MINOAN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TANGSA: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var TOTO: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var KAWI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var NAG_MUNDARI: JavaCharacter.UnicodeScript?
+
+  @JavaStaticField(isFinal: true)
+  public var UNKNOWN: JavaCharacter.UnicodeScript?
+
+  @JavaStaticMethod
+  public func forName(_ arg0: String) -> JavaCharacter.UnicodeScript?
+
+  @JavaStaticMethod
+  public func values() -> [JavaCharacter.UnicodeScript?]
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: String) -> JavaCharacter.UnicodeScript?
+
+  @JavaStaticMethod
+  public func of(_ arg0: Int32) -> JavaCharacter.UnicodeScript?
+}
+extension JavaCharacter {
+  @JavaClass("java.lang.Character$Subset")
+  public struct Subset {
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>?
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
 extension JavaClass<JavaCharacter> {
   @JavaStaticField(isFinal: true)
   public var MIN_RADIX: Int32

@@ -26,9 +26,6 @@ public struct ArrayDeque<E: AnyJavaObject> {
   public func clone() -> ArrayDeque<JavaObject>?
 
   @JavaMethod
-  public func clone() throws -> JavaObject?
-
-  @JavaMethod
   public func clear()
 
   @JavaMethod
