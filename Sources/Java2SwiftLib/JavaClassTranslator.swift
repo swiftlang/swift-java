@@ -110,10 +110,7 @@ struct JavaClassTranslator {
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
     // Superclass.
-    if !javaClass.isInterface(),
-      let javaSuperclass = javaClass.getSuperclass(),
-      javaSuperclass.getName() != "java.lang.Object"
-    {
+    if !javaClass.isInterface(), let javaSuperclass = javaClass.getSuperclass() {
       do {
         self.swiftSuperclass = try translator.getSwiftTypeName(javaSuperclass).swiftName
       } catch {

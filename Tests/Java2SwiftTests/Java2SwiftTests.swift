@@ -69,7 +69,7 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         "import JavaKit",
         """
-        @JavaClass("java.lang.Class")
+        @JavaClass("java.lang.Class", extends: JavaObject.self)
         public struct MyJavaClass<T: AnyJavaObject> {
         """,
         """
