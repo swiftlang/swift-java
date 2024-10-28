@@ -104,7 +104,7 @@ extension JavaTranslator {
 // MARK: Type translation
 extension JavaTranslator {
   /// Turn a Java type into a string.
-  func getSwiftTypeNameAsString(_ javaType: Type, outerOptional: Bool) throws -> String {
+  func getSwiftTypeNameAsString(_ javaType: Type, outerOptional: OptionalKind) throws -> String {
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
@@ -124,7 +124,7 @@ extension JavaTranslator {
 
     // Handle array types by recursing into the component type.
     if let arrayType = javaType.as(GenericArrayType.self) {
-      let elementType = try getSwiftTypeNameAsString(arrayType.getGenericComponentType()!, outerOptional: true)
+      let elementType = try getSwiftTypeNameAsString(arrayType.getGenericComponentType()!, outerOptional: .optional)
       return "[\(elementType)]"
     }
 
@@ -135,21 +135,21 @@ extension JavaTranslator {
     {
       var rawSwiftType = try getSwiftTypeNameAsString(rawJavaType, outerOptional: outerOptional)
 
-      let makeOptional: Bool
-      if rawSwiftType.last == "?" {
-        makeOptional = true
+      let optionalSuffix: String
+      if let lastChar = rawSwiftType.last, lastChar == "?" || lastChar == "!" {
+        optionalSuffix = "\(lastChar)"
         rawSwiftType.removeLast()
       } else {
-        makeOptional = false
+        optionalSuffix = ""
       }
 
       let typeArguments = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
         try typeArg.map { typeArg in
-          try getSwiftTypeNameAsString(typeArg, outerOptional: false)
+          try getSwiftTypeNameAsString(typeArg, outerOptional: .nonoptional)
         }
       }
 
-      return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(makeOptional ? "?" : "")"
+      return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(optionalSuffix)"
     }
 
     // Handle direct references to Java classes.
@@ -159,8 +159,15 @@ extension JavaTranslator {
 
     let (swiftName, isOptional) = try getSwiftTypeName(javaClass)
     var resultString = swiftName
-    if isOptional && outerOptional {
-      resultString += "?"
+    if isOptional {
+      switch outerOptional {
+      case .implicitlyUnwrappedOptional:
+        resultString += "!"
+      case .optional:
+        resultString += "?"
+      case .nonoptional:
+        break
+      }
     }
     return resultString
   }

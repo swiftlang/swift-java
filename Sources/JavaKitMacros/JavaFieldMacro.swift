@@ -27,7 +27,7 @@ extension JavaFieldMacro: AccessorMacro {
     guard let varDecl = declaration.as(VariableDeclSyntax.self),
       let binding = varDecl.bindings.first,
       let fieldNameAsWritten = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed.text,
-      let fieldType = binding.typeAnnotation?.type.trimmed,
+      let fieldType = binding.typeAnnotation?.type.typeReference,
       binding.accessorBlock == nil
     else {
       return []
