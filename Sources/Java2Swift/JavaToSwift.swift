@@ -252,7 +252,7 @@ struct JavaToSwift: ParsableCommand {
 
 
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
-        translator.translatedClasses[javaClassName] = (swiftName, nil, true)
+        translator.translatedClasses[javaClassName] = (swiftName, nil)
         return nestedClass
       }
 
@@ -279,7 +279,8 @@ struct JavaToSwift: ParsableCommand {
 
         """
 
-      let swiftFileName = try! translator.getSwiftTypeName(javaClass).swiftName.replacing(".", with: "+") + ".swift"
+      let swiftFileName = try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
+        .swiftName.replacing(".", with: "+") + ".swift"
       try writeContents(
         swiftFileText,
         to: swiftFileName,

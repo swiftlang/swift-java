@@ -27,8 +27,7 @@ extension JavaTranslator {
     for (javaClassName, swiftName) in config.classes {
       translatedClasses[javaClassName] = (
         swiftType: swiftName,
-        swiftModule: swiftModule,
-        isOptional: true
+        swiftModule: swiftModule
       )
     }
   }

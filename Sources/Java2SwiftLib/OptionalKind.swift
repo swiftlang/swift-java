@@ -22,4 +22,13 @@ enum OptionalKind {
 
   /// The value uses an implicitly-unwrapped optional.
   case implicitlyUnwrappedOptional
+
+  /// Adjust the given type name string based on the optionality of this type.
+  func adjustTypeName(_ string: String) -> String {
+    switch self {
+    case .implicitlyUnwrappedOptional: return string + "!"
+    case .optional: return string + "?"
+    case .nonoptional: return string
+    }
+  }
 }

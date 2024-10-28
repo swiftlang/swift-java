@@ -43,6 +43,37 @@ public struct JavaCharacter {
   public func wait() throws
 }
 extension JavaCharacter {
+  @JavaClass("java.lang.Character$Subset", extends: JavaObject.self)
+  public struct Subset {
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func toString() -> String
+
+  @JavaMethod
+  public func hashCode() -> Int32
+
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>!
+
+  @JavaMethod
+  public func notify()
+
+  @JavaMethod
+  public func notifyAll()
+
+  @JavaMethod
+  public func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  public func wait() throws
+  }
+}
+extension JavaCharacter {
   @JavaClass("java.lang.Character$UnicodeBlock", extends: JavaCharacter.Subset.self)
   public struct UnicodeBlock {
   @JavaMethod
@@ -3145,37 +3176,6 @@ extension JavaClass<JavaCharacter.UnicodeScript> {
 
   @JavaStaticMethod
   public func of(_ arg0: Int32) -> JavaCharacter.UnicodeScript!
-}
-extension JavaCharacter {
-  @JavaClass("java.lang.Character$Subset", extends: JavaObject.self)
-  public struct Subset {
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
-  }
 }
 extension JavaClass<JavaCharacter> {
   @JavaStaticField(isFinal: true)
