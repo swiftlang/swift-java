@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget
+        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       - name: Cache JDK
         id: cache-jdk
         uses: actions/cache@v4
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget
+        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       - name: Cache JDK
         id: cache-jdk
         uses: actions/cache@v4

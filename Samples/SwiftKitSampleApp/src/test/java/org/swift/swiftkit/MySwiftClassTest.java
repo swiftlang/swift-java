@@ -14,14 +14,11 @@
 
 package org.swift.swiftkit;
 
-import com.example.swift.generated.MySwiftClass;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.example.swift.generated.MySwiftClass;
 
 public class MySwiftClassTest {
 
