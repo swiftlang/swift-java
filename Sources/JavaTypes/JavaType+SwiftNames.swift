@@ -19,11 +19,14 @@ public typealias JavaToSwiftClassNameResolver = (String) throws -> String
 
 extension JavaType {
   /// Whether this Java type needs to be represented by a Swift optional.
-  public var isSwiftOptional: Bool {
+  public func isSwiftOptional(stringIsValueType: Bool) -> Bool {
     switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
-      .array, .class(package: "java.lang", name: "String"):
+      .array:
       return false
+
+    case .class(package: "java.lang", name: "String"):
+      return !stringIsValueType
 
     case .class:
       return true
@@ -56,7 +59,7 @@ extension JavaType {
     case .void: return "Void"
     case .array(let elementType):
       let elementTypeName = try elementType.swiftTypeName(resolver: resolver)
-      let elementIsOptional = elementType.isSwiftOptional
+      let elementIsOptional = elementType.isSwiftOptional(stringIsValueType: true)
       return "[\(elementTypeName)\(elementIsOptional ? "?" : "")]"
 
     case .class: return try resolver(description)

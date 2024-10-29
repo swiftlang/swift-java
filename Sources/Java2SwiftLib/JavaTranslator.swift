@@ -28,11 +28,20 @@ package class JavaTranslator {
   let environment: JNIEnvironment
   let format: BasicFormat
 
-  /// A mapping from the canonical name of Java classes to the corresponding
-  /// Swift type name, its Swift module, and whether we need to be working
-  /// with optionals.
-  package var translatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] =
-    defaultTranslatedClasses
+  /// A mapping from the name of each known Java class to the corresponding
+  /// Swift type name and its Swift module.
+  package var translatedClasses: [String: (swiftType: String, swiftModule: String?)] = [:]
+
+  /// A mapping from the name of each known Java class with the Swift value type
+  /// (and its module) to which it is mapped.
+  ///
+  /// The Java classes here can also be part of `translatedClasses`. The entry in
+  /// `translatedClasses` should map to a representation of the Java class (i.e.,
+  /// an AnyJavaObject-conforming type) whereas the entry here should map to
+  /// a value type.
+  package let translatedToValueTypes: [String: (swiftType: String, swiftModule: String) ] = [
+    "java.lang.String": ("String", "JavaKit"),
+  ]
 
   /// The set of Swift modules that need to be imported to make the generated
   /// code compile. Use `getImportDecls()` to format this into a list of
@@ -80,13 +89,6 @@ extension JavaTranslator {
     "JavaKit",
     "JavaRuntime",
   ]
-
-  /// The default set of translated classes that do not come from JavaKit
-  /// itself. This should only be used to refer to types that are built-in to
-  /// JavaKit and therefore aren't captured in any configuration file.
-  package static let defaultTranslatedClasses: [String: (swiftType: String, swiftModule: String?, isOptional: Bool)] = [
-    "java.lang.String": ("String", "JavaKit", false),
-  ]
 }
 
 // MARK: Import translation
@@ -104,13 +106,21 @@ extension JavaTranslator {
 // MARK: Type translation
 extension JavaTranslator {
   /// Turn a Java type into a string.
-  func getSwiftTypeNameAsString(_ javaType: Type, outerOptional: OptionalKind) throws -> String {
+  func getSwiftTypeNameAsString(
+    _ javaType: Type,
+    preferValueTypes: Bool,
+    outerOptional: OptionalKind
+  ) throws -> String {
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
       let bound = typeVariable.getBounds()[0]
     {
-      return try getSwiftTypeNameAsString(bound, outerOptional: outerOptional)
+      return try getSwiftTypeNameAsString(
+        bound,
+        preferValueTypes: preferValueTypes,
+        outerOptional: outerOptional
+      )
     }
 
     // Replace wildcards with their upper bound.
@@ -119,13 +129,30 @@ extension JavaTranslator {
       let bound = wildcardType.getUpperBounds()[0]
     {
       // Replace a wildcard type with its first bound.
-      return try getSwiftTypeNameAsString(bound, outerOptional: outerOptional)
+      return try getSwiftTypeNameAsString(
+        bound,
+        preferValueTypes: preferValueTypes,
+        outerOptional: outerOptional
+      )
     }
 
     // Handle array types by recursing into the component type.
     if let arrayType = javaType.as(GenericArrayType.self) {
-      let elementType = try getSwiftTypeNameAsString(arrayType.getGenericComponentType()!, outerOptional: .optional)
-      return "[\(elementType)]"
+      if preferValueTypes {
+        let elementType = try getSwiftTypeNameAsString(
+          arrayType.getGenericComponentType()!,
+          preferValueTypes: preferValueTypes,
+          outerOptional: .optional
+        )
+        return "[\(elementType)]"
+      }
+
+      let (swiftName, _) = try getSwiftTypeName(
+        JavaClass<JavaArray>().as(JavaClass<JavaObject>.self)!,
+        preferValueTypes: false
+      )
+
+      return outerOptional.adjustTypeName(swiftName)
     }
 
     // Handle parameterized types by recursing on the raw type and the type
@@ -133,7 +160,11 @@ extension JavaTranslator {
     if let parameterizedType = javaType.as(ParameterizedType.self),
       let rawJavaType = parameterizedType.getRawType()
     {
-      var rawSwiftType = try getSwiftTypeNameAsString(rawJavaType, outerOptional: outerOptional)
+      var rawSwiftType = try getSwiftTypeNameAsString(
+        rawJavaType,
+        preferValueTypes: false,
+        outerOptional: outerOptional
+      )
 
       let optionalSuffix: String
       if let lastChar = rawSwiftType.last, lastChar == "?" || lastChar == "!" {
@@ -145,7 +176,7 @@ extension JavaTranslator {
 
       let typeArguments = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
         try typeArg.map { typeArg in
-          try getSwiftTypeNameAsString(typeArg, outerOptional: .nonoptional)
+          try getSwiftTypeNameAsString(typeArg, preferValueTypes: false, outerOptional: .nonoptional)
         }
       }
 
@@ -157,38 +188,50 @@ extension JavaTranslator {
       throw TranslationError.unhandledJavaType(javaType)
     }
 
-    let (swiftName, isOptional) = try getSwiftTypeName(javaClass)
+    let (swiftName, isOptional) = try getSwiftTypeName(javaClass, preferValueTypes: preferValueTypes)
     var resultString = swiftName
     if isOptional {
-      switch outerOptional {
-      case .implicitlyUnwrappedOptional:
-        resultString += "!"
-      case .optional:
-        resultString += "?"
-      case .nonoptional:
-        break
-      }
+      resultString = outerOptional.adjustTypeName(resultString)
     }
     return resultString
   }
 
   /// Translate a Java class into its corresponding Swift type name.
-  package func getSwiftTypeName(_ javaClass: JavaClass<JavaObject>) throws -> (swiftName: String, isOptional: Bool) {
+  package func getSwiftTypeName(
+    _ javaClass: JavaClass<JavaObject>,
+    preferValueTypes: Bool
+  ) throws -> (swiftName: String, isOptional: Bool) {
     let javaType = try JavaType(javaTypeName: javaClass.getName())
-    let isSwiftOptional = javaType.isSwiftOptional
-    return (
-      try javaType.swiftTypeName { javaClassName in
-        try self.getSwiftTypeNameFromJavaClassName(javaClassName)
-      },
-      isSwiftOptional
-    )
+    let isSwiftOptional = javaType.isSwiftOptional(stringIsValueType: preferValueTypes)
+
+    let swiftTypeName: String
+    if !preferValueTypes, case .array(_) = javaType {
+      swiftTypeName = try self.getSwiftTypeNameFromJavaClassName("java.lang.reflect.Array", preferValueTypes: false)
+    } else {
+      swiftTypeName = try javaType.swiftTypeName { javaClassName in
+        try self.getSwiftTypeNameFromJavaClassName(javaClassName, preferValueTypes: preferValueTypes)
+      }
+    }
+
+    return (swiftTypeName, isSwiftOptional)
   }
 
   /// Map a Java class name to its corresponding Swift type.
   func getSwiftTypeNameFromJavaClassName(
     _ name: String,
+    preferValueTypes: Bool,
     escapeMemberNames: Bool = true
   ) throws -> String {
+    // If we want a value type, look for one.
+    if preferValueTypes, let translatedValueType = translatedToValueTypes[name] {
+      // Note that we need to import this Swift module.
+      if translatedValueType.swiftModule != swiftModuleName {
+        importedSwiftModules.insert(translatedValueType.swiftModule)
+      }
+
+      return translatedValueType.swiftType
+    }
+
     if let translated = translatedClasses[name] {
       // Note that we need to import this Swift module.
       if let swiftModule = translated.swiftModule, swiftModule != swiftModuleName {

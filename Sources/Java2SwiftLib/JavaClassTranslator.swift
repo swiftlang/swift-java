@@ -103,7 +103,11 @@ struct JavaClassTranslator {
     let fullName = javaClass.getName()
     self.javaClass = javaClass
     self.translator = translator
-    self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(fullName, escapeMemberNames: false)
+    self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
+      fullName,
+      preferValueTypes: false,
+      escapeMemberNames: false
+    )
 
     // Type parameters.
     self.javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
@@ -112,7 +116,7 @@ struct JavaClassTranslator {
     // Superclass.
     if !javaClass.isInterface(), let javaSuperclass = javaClass.getSuperclass() {
       do {
-        self.swiftSuperclass = try translator.getSwiftTypeName(javaSuperclass).swiftName
+        self.swiftSuperclass = try translator.getSwiftTypeName(javaSuperclass, preferValueTypes: false).swiftName
       } catch {
         translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
         self.swiftSuperclass = nil
@@ -128,7 +132,11 @@ struct JavaClassTranslator {
       }
 
       do {
-        let typeName = try translator.getSwiftTypeNameAsString(javaType, outerOptional: .nonoptional)
+        let typeName = try translator.getSwiftTypeNameAsString(
+          javaType,
+          preferValueTypes: false,
+          outerOptional: .nonoptional
+        )
         return "\(typeName)"
       } catch {
         translator.logUntranslated("Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
@@ -314,7 +322,10 @@ extension JavaClassTranslator {
 
   /// Render any nested classes that will not be rendered separately.
   func renderNestedClasses() -> [DeclSyntax] {
-    return nestedClasses.compactMap { clazz in
+    return nestedClasses
+      .sorted {
+        $0.getName() < $1.getName()
+      }.compactMap { clazz in
       do {
         return try translator.translateClass(clazz)
       } catch {
@@ -456,7 +467,11 @@ extension JavaClassTranslator {
 
     // Map the result type.
     let resultTypeStr: String
-    let resultType = try translator.getSwiftTypeNameAsString(javaMethod.getGenericReturnType()!, outerOptional: .implicitlyUnwrappedOptional)
+    let resultType = try translator.getSwiftTypeNameAsString(
+      javaMethod.getGenericReturnType()!,
+      preferValueTypes: true,
+      outerOptional: .implicitlyUnwrappedOptional
+    )
     if resultType != "Void" {
       resultTypeStr = " -> \(resultType)"
     } else {
@@ -477,7 +492,11 @@ extension JavaClassTranslator {
   /// Render a single Java field into the corresponding Swift property, or
   /// throw an error if that is not possible for any reason.
   package func renderField(_ javaField: Field) throws -> DeclSyntax {
-    let typeName = try translator.getSwiftTypeNameAsString(javaField.getGenericType()!, outerOptional: .implicitlyUnwrappedOptional)
+    let typeName = try translator.getSwiftTypeNameAsString(
+      javaField.getGenericType()!,
+      preferValueTypes: true,
+      outerOptional: .implicitlyUnwrappedOptional
+    )
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
     return """
@@ -544,7 +563,11 @@ extension JavaClassTranslator {
     return try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 
-      let typeName = try translator.getSwiftTypeNameAsString(javaParameter.getParameterizedType()!, outerOptional: .optional)
+      let typeName = try translator.getSwiftTypeNameAsString(
+        javaParameter.getParameterizedType()!,
+        preferValueTypes: true,
+        outerOptional: .optional
+      )
       let paramName = javaParameter.getName()
       return "_ \(raw: paramName): \(raw: typeName)"
     }

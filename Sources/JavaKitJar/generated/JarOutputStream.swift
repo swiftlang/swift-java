@@ -5,9 +5,6 @@ import JavaRuntime
 @JavaClass("java.util.jar.JarOutputStream")
 public struct JarOutputStream {
   @JavaMethod
-  public func closeEntry() throws
-
-  @JavaMethod
   public func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
 
   @JavaMethod
@@ -24,6 +21,9 @@ public struct JarOutputStream {
 
   @JavaMethod
   public func setLevel(_ arg0: Int32)
+
+  @JavaMethod
+  public func closeEntry() throws
 
   @JavaMethod
   public func flush() throws

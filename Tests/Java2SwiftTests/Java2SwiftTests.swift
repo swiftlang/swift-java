@@ -63,8 +63,7 @@ class Java2SwiftTests: XCTestCase {
       JavaClass<JavaObject>.self,
       swiftTypeName: "MyJavaClass",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil, true),
-        "java.lang.String": ("JavaString", nil, true),
+        "java.lang.Object": ("JavaObject", nil),
       ],
       expectedChunks: [
         "import JavaKit",
@@ -74,7 +73,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaStaticMethod
-          public func forName<T: AnyJavaObject>(_ arg0: JavaString) throws -> MyJavaClass<JavaObject>! where ObjectType == MyJavaClass<T>
+          public func forName<T: AnyJavaObject>(_ arg0: String) throws -> MyJavaClass<JavaObject>! where ObjectType == MyJavaClass<T>
         """,
       ]
     )
@@ -115,13 +114,19 @@ class Java2SwiftTests: XCTestCase {
       MyArrayList<JavaObject>.self,
       swiftTypeName: "JavaArrayList",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil, true),
-        "java.util.List": ("JavaList", nil, true),
+        "java.lang.Object": ("JavaObject", nil),
+        "java.lang.reflect.Array": ("JavaArray", nil),
+        "java.util.List": ("JavaList", nil),
+        "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
       ],
       expectedChunks: [
         """
           @JavaMethod
           public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>!
+        """,
+        """
+          @JavaMethod
+          public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [JavaObject?]
         """
       ]
     )
@@ -132,8 +137,8 @@ class Java2SwiftTests: XCTestCase {
       MyLinkedList<JavaObject>.self,
       swiftTypeName: "JavaLinkedList",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil, true),
-        "java.util.List": ("JavaList", nil, true),
+        "java.lang.Object": ("JavaObject", nil),
+        "java.util.List": ("JavaList", nil),
       ],
       expectedChunks: [
         """
@@ -149,9 +154,9 @@ class Java2SwiftTests: XCTestCase {
       ProcessBuilder.self,
       swiftTypeName: "ProcessBuilder",
       translatedClasses: [
-        "java.lang.ProcessBuilder": ("ProcessBuilder", nil, true),
-        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.Redirect", nil, true),
-        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.Redirect.Type", nil, true),
+        "java.lang.ProcessBuilder": ("ProcessBuilder", nil),
+        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.Redirect", nil),
+        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.Redirect.Type", nil),
       ],
       nestedClasses: [
         "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
@@ -189,9 +194,9 @@ class Java2SwiftTests: XCTestCase {
       ProcessBuilder.self,
       swiftTypeName: "ProcessBuilder",
       translatedClasses: [
-        "java.lang.ProcessBuilder": ("ProcessBuilder", nil, true),
-        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.PBRedirect", nil, true),
-        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.PBRedirect.JavaType", nil, true),
+        "java.lang.ProcessBuilder": ("ProcessBuilder", nil),
+        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.PBRedirect", nil),
+        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.PBRedirect.JavaType", nil),
       ],
       nestedClasses: [
         "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
@@ -223,6 +228,44 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testJavaString() throws {
+    try assertTranslatedClass(
+      MyJavaString.self,
+      swiftTypeName: "JavaString",
+      expectedChunks: [
+        """
+        @JavaClass("java.lang.String")
+        public struct JavaString {
+        """
+      ]
+    )
+  }
+
+  func testJavaObjects() throws {
+    try assertTranslatedClass(
+      MyObjects.self,
+      swiftTypeName: "MyJavaObjects",
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.util.function.Supplier" : ("MySupplier", "JavaKitFunction"),
+        "java.lang.String" : ("JavaString", "JavaKit"),
+      ],
+      expectedChunks: [
+        """
+        import JavaKitFunction
+        """,
+        """
+        @JavaClass("java.util.Objects", extends: JavaObject.self)
+        public struct MyJavaObjects {
+        """,
+        """
+          @JavaStaticMethod
+          public func requireNonNull(_ arg0: JavaObject?, _ arg1: MySupplier<JavaString>?) -> JavaObject!
+        """,
+      ]
+    )
+  }
 }
 
 @JavaClass("java.util.ArrayList")
@@ -233,14 +276,28 @@ public struct MyArrayList<E: AnyJavaObject> {
 public struct MyLinkedList<E: AnyJavaObject> {
 }
 
+@JavaClass("java.lang.String")
+public struct MyJavaString {
+}
+
+@JavaClass("java.util.Objects")
+public struct MyObjects { }
+
+@JavaInterface("java.util.function.Supplier")
+public struct MySupplier { }
+
+@JavaInterface("java.util.function.IntFunction")
+public struct MyJavaIntFunction<R: AnyJavaObject> {
+}
+
 /// Translate a Java class and assert that the translated output contains
 /// each of the expected "chunks" of text.
 func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   _ javaType: JavaClassType.Type,
   swiftTypeName: String,
   translatedClasses: [
-    String: (swiftType: String, swiftModule: String?, isOptional: Bool)
-  ] = JavaTranslator.defaultTranslatedClasses,
+    String: (swiftType: String, swiftModule: String?)
+  ] = [:],
   nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
   file: StaticString = #filePath,
@@ -253,7 +310,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   )
 
   translator.translatedClasses = translatedClasses
-  translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil, true)
+  translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil)
   translator.nestedClasses = nestedClasses
   translator.startNewFile()
   let translatedDecls = try translator.translateClass(
