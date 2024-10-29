@@ -14,21 +14,24 @@
 
 package org.swift.swiftkit;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * A Swift arena manages Swift allocated memory for classes, structs, enums etc.
  * When an arena is closed, it will destroy all managed swift objects in a way appropriate to their type.
- * <p>
- * A confined arena has an associated owner thread that confines some operations to
- * associated owner thread such as {@link #close()}.
+ *
+ * <p> A confined arena has an associated owner thread that confines some operations to
+ * associated owner thread such as {@link ClosableSwiftArena#close()}.
  */
-public interface SwiftArena extends AutoCloseable {
+public interface SwiftArena {
 
-    static SwiftArena ofConfined() {
+    static ClosableSwiftArena ofConfined() {
         return new ConfinedSwiftMemorySession(Thread.currentThread());
+    }
+
+    static SwiftArena ofAuto() {
+        ThreadFactory cleanerThreadFactory = r -> new Thread(r, "AutoSwiftArenaCleanerThread");
+        return new AutoSwiftMemorySession(cleanerThreadFactory);
     }
 
     /**
@@ -43,90 +46,17 @@ public interface SwiftArena extends AutoCloseable {
      */
     void register(SwiftValue value);
 
-    /**
-     * Close the arena and make sure all objects it managed are released.
-     * Throws if unable to verify all resources have been release (e.g. over retained Swift classes)
-     */
-    void close();
+}
+
+/**
+ * Represents a list of resources that need a cleanup, e.g. allocated classes/structs.
+ */
+interface SwiftResourceList {
+
+    void runCleanup();
 
 }
 
-final class ConfinedSwiftMemorySession implements SwiftArena {
-
-//    final Arena underlying;
-    final Thread owner;
-    final SwiftResourceList resources;
-
-    final int CLOSED = 0;
-    final int ACTIVE = 1;
-    final AtomicInteger state;
-
-    public ConfinedSwiftMemorySession(Thread owner) {
-        this.owner = owner;
-        resources = new ConfinedResourceList();
-        state = new AtomicInteger(ACTIVE);
-    }
-
-    public void checkValid() throws RuntimeException {
-        if (this.owner != null && this.owner != Thread.currentThread()) {
-            throw new WrongThreadException("ConfinedSwift arena is confined to %s but was closed from %s!".formatted(this.owner, Thread.currentThread()));
-        } else if (this.state.get() < ACTIVE) {
-            throw new RuntimeException("Arena is already closed!");
-        }
-    }
-
-    @Override
-    public void register(SwiftHeapObject object) {
-        this.resources.add(new SwiftHeapObjectCleanup(object));
-    }
-
-    @Override
-    public void register(SwiftValue value) {
-        this.resources.add(new SwiftValueCleanup(value.$memorySegment()));
-    }
-
-    @Override
-    public void close() {
-        checkValid();
-
-        // Cleanup all resources
-        if (this.state.compareAndExchange(ACTIVE, CLOSED) == ACTIVE) {
-            this.resources.cleanup();
-        } // else, was already closed; do nothing
-    }
-
-    /**
-     * Represents a list of resources that need a cleanup, e.g. allocated classes/structs.
-     */
-    static abstract class SwiftResourceList implements Runnable {
-        // TODO: Could use intrusive linked list to avoid one indirection here
-        final List<SwiftInstanceCleanup> resourceCleanups = new LinkedList<>();
-
-        abstract void add(SwiftInstanceCleanup cleanup);
-
-        public abstract void cleanup();
-
-        public final void run() {
-            cleanup(); // cleaner interop
-        }
-    }
-
-    static final class ConfinedResourceList extends SwiftResourceList {
-        @Override
-        void add(SwiftInstanceCleanup cleanup) {
-            resourceCleanups.add(cleanup);
-        }
-
-        @Override
-        public void cleanup() {
-            for (SwiftInstanceCleanup cleanup : resourceCleanups) {
-                cleanup.run();
-            }
-        }
-    }
-
-
-}
 
 final class UnexpectedRetainCountException extends RuntimeException {
     public UnexpectedRetainCountException(Object resource, long retainCount, int expectedRetainCount) {
@@ -135,3 +65,4 @@ final class UnexpectedRetainCountException extends RuntimeException {
         ).formatted(resource, expectedRetainCount, retainCount));
     }
 }
+

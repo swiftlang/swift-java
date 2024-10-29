@@ -19,23 +19,43 @@ import java.lang.foreign.MemorySegment;
 /**
  * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
  */
-sealed interface SwiftInstanceCleanup extends Runnable {
+interface SwiftInstanceCleanup extends Runnable {
 }
 
-record SwiftHeapObjectCleanup(SwiftHeapObject instance) implements SwiftInstanceCleanup {
+/**
+ * Implements cleaning up a Swift {@link SwiftHeapObject}.
+ * <p>
+ * This class does not store references to the Java wrapper class, and therefore the wrapper may be subject to GC,
+ * which may trigger a cleanup (using this class), which will clean up its underlying native memory resource.
+ */
+// non-final for testing
+class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
+
+    final MemorySegment selfPointer;
+    final SwiftAnyType selfType;
+
+    /**
+     * This constructor on purpose does not just take a {@link SwiftHeapObject} in order to make it very
+     * clear that it does not take ownership of it, but we ONLY manage the native resource here.
+     *
+     * This is important for {@link AutoSwiftMemorySession} which relies on the wrapper type to be GC-able,
+     * when no longer "in use" on the Java side.
+     */
+    SwiftHeapObjectCleanup(MemorySegment selfPointer, SwiftAnyType selfType) {
+        this.selfPointer  = selfPointer;
+        this.selfType = selfType;
+    }
 
     @Override
     public void run() throws UnexpectedRetainCountException {
         // Verify we're only destroying an object that's indeed not retained by anyone else:
-        long retainedCount = SwiftKit.retainCount(this.instance);
+        long retainedCount = SwiftKit.retainCount(selfPointer);
         if (retainedCount > 1) {
-            throw new UnexpectedRetainCountException(this.instance, retainedCount, 1);
+            throw new UnexpectedRetainCountException(selfPointer, retainedCount, 1);
         }
 
         // Destroy (and deinit) the object:
-        var ty = this.instance.$swiftType();
-
-        SwiftValueWitnessTable.destroy(ty, this.instance.$memorySegment());
+        SwiftValueWitnessTable.destroy(selfType, selfPointer);
 
         // Invalidate the Java wrapper class, in order to prevent effectively use-after-free issues.
         // FIXME: some trouble with setting the pointer to null, need to figure out an appropriate way to do this
