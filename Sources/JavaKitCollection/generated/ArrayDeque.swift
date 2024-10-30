@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.ArrayDeque")
+@JavaClass("java.util.ArrayDeque", extends: JavaObject.self)
 public struct ArrayDeque<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: Int32, environment: JNIEnvironment? = nil)

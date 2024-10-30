@@ -2,8 +2,11 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarInputStream")
+@JavaClass("java.util.jar.JarInputStream", extends: JavaObject.self)
 public struct JarInputStream {
+  @JavaMethod
+  public func getNextJarEntry() throws -> JarEntry!
+
   @JavaMethod
   public func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
@@ -11,7 +14,7 @@ public struct JarInputStream {
   public func getManifest() -> Manifest!
 
   @JavaMethod
-  public func getNextJarEntry() throws -> JarEntry!
+  public func closeEntry() throws
 
   @JavaMethod
   public func read() throws -> Int32
@@ -23,10 +26,10 @@ public struct JarInputStream {
   public func readAllBytes() throws -> [Int8]
 
   @JavaMethod
-  public func readNBytes(_ arg0: Int32) throws -> [Int8]
+  public func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   @JavaMethod
-  public func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  public func readNBytes(_ arg0: Int32) throws -> [Int8]
 
   @JavaMethod
   public func skip(_ arg0: Int64) throws -> Int64
@@ -36,9 +39,6 @@ public struct JarInputStream {
 
   @JavaMethod
   public func skipNBytes(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func closeEntry() throws
 
   @JavaMethod
   public func reset() throws

@@ -3,7 +3,7 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarFile")
+@JavaClass("java.util.jar.JarFile", extends: JavaObject.self)
 public struct JarFile {
   @JavaMethod
   public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws

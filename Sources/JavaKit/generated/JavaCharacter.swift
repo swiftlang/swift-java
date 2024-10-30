@@ -1102,7 +1102,7 @@ extension JavaClass<JavaCharacter.UnicodeBlock> {
   public func of(_ arg0: UInt16) -> JavaCharacter.UnicodeBlock!
 }
 extension JavaCharacter {
-  @JavaClass("java.lang.Character$UnicodeScript")
+  @JavaClass("java.lang.Character$UnicodeScript", extends: JavaObject.self)
   public struct UnicodeScript {
     public enum UnicodeScriptCases: Equatable {
       case COMMON
@@ -2639,7 +2639,7 @@ extension JavaCharacter {
   }
 }
 extension JavaCharacter.UnicodeScript {
-  @JavaClass("java.lang.Enum$EnumDesc")
+  @JavaClass("java.lang.Enum$EnumDesc", extends: JavaObject.self)
   public struct EnumDesc<E: AnyJavaObject> {
   @JavaMethod
   public func toString() -> String

@@ -2,8 +2,11 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarOutputStream")
+@JavaClass("java.util.jar.JarOutputStream", extends: JavaObject.self)
 public struct JarOutputStream {
+  @JavaMethod
+  public func closeEntry() throws
+
   @JavaMethod
   public func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
 
@@ -21,9 +24,6 @@ public struct JarOutputStream {
 
   @JavaMethod
   public func setLevel(_ arg0: Int32)
-
-  @JavaMethod
-  public func closeEntry() throws
 
   @JavaMethod
   public func flush() throws

@@ -3,7 +3,7 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.net.URLClassLoader")
+@JavaClass("java.net.URLClassLoader", extends: JavaObject.self)
 public struct URLClassLoader {
   @JavaMethod
   public init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
