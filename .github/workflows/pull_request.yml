@@ -19,7 +19,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        swift_version: ['nightly-main']
+        # swift_version: ['nightly-main']
+        swift_version: ['6.0.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -43,8 +44,8 @@ jobs:
         if: steps.cache-jdk.outputs.cache-hit != 'true'
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-      - name: Install Untested Nightly Swift
-        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
+        #      - name: Install Untested Nightly Swift
+        #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
       - name: Cache local Gradle repository
         uses: actions/cache@v4
         continue-on-error: true
@@ -79,7 +80,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['nightly-main']
+        # swift_version: ['nightly-main']
+        swift_version: ['6.0.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -103,8 +105,8 @@ jobs:
         if: steps.cache-jdk.outputs.cache-hit != 'true'
         run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
         # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-      - name: Install Untested Nightly Swift
-        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
+        #      - name: Install Untested Nightly Swift
+        #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
       - name: Cache local Gradle repository
         uses: actions/cache@v4
         continue-on-error: true
@@ -125,9 +127,9 @@ jobs:
             ${{ runner.os }}-swiftpm-cache
             ${{ runner.os }}-swiftpm-
       # run the actual build
-      - name: Generate sources (make) (Temporary)
-        # TODO: this should be triggered by the respective builds
-        run: "make jextract-generate"
+      # - name: Generate sources (make) (Temporary)
+      #  # TODO: this should be triggered by the respective builds
+      #  run: "make jextract-generate"
       - name: Test Swift
         run: "swift test"
       - name: Build (Swift) Sample Apps

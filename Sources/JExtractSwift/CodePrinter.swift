@@ -34,14 +34,19 @@ public struct CodePrinter {
   }
   public var indentationText: String = ""
 
-  public static func toString(_ block: (inout CodePrinter) -> ()) -> String {
+  public static func toString(_ block: (inout CodePrinter) throws -> ()) rethrows -> String {
     var printer = CodePrinter()
-    block(&printer)
+    try block(&printer)
     return printer.finalize()
   }
 
-  public init() {
-
+  var ioMode: PrintMode
+  public enum PrintMode {
+    case accumulateAll
+    case flushToFileOnWrite
+  }
+  public init(io: PrintMode = .flushToFileOnWrite) {
+    self.ioMode = .accumulateAll
   }
 
   internal mutating func append(_ text: String) {
@@ -89,6 +94,16 @@ public struct CodePrinter {
 
       self.print(part, terminator, function: function, file: file, line: line)
     }
+  }
+
+  /// Print a plain newline, e.g. to separate declarations.
+  public mutating func println(
+    _ terminator: PrinterTerminator = .newLine,
+    function: String = #function,
+    file: String = #fileID,
+    line: UInt = #line
+  ) {
+    print("")
   }
 
   public mutating func print(
@@ -159,6 +174,12 @@ public struct CodePrinter {
   public var isEmpty: Bool {
     self.contents.isEmpty
   }
+
+  public mutating func dump(file: String = #fileID, line: UInt = #line) {
+    Swift.print("// CodePrinter.dump @ \(file):\(line)")
+    Swift.print(contents)
+  }
+
 }
 
 public enum PrinterTerminator: String {
@@ -184,4 +205,50 @@ public enum PrinterTerminator: String {
       .commaNewLine
     }
   }
+}
+
+extension CodePrinter {
+  package mutating func writeContents(
+    outputDirectory: String,
+    javaPackagePath: String?,
+    filename: String
+  ) throws {
+    guard self.ioMode != .accumulateAll else {
+      // if we're accumulating everything, we don't want to finalize/flush any contents
+      // let's mark that this is where a write would have happened though:
+      print("// ^^^^ Contents of: \(outputDirectory)/\(filename)")
+      return
+    }
+
+    let contents = finalize()
+    if outputDirectory == "-" {
+      print(
+        "// ==== ---------------------------------------------------------------------------------------------------"
+      )
+      if let javaPackagePath {
+        print("// \(javaPackagePath)/\(filename)")
+      } else {
+        print("// \(filename)")
+      }
+      print(contents)
+      return
+    }
+
+    let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(
+        separator: PATH_SEPARATOR)
+    log.trace("Prepare target directory: \(targetDirectory)")
+    try FileManager.default.createDirectory(
+      atPath: targetDirectory, withIntermediateDirectories: true)
+
+    let targetFilePath = [javaPackagePath, filename].compactMap { $0 }.joined(
+        separator: PATH_SEPARATOR)
+  Swift.print("Writing '\(targetFilePath)'...", terminator: "")
+    try contents.write(
+      to: Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename),
+      atomically: true,
+      encoding: .utf8
+    )
+    Swift.print(" done.".green)
+  }
+
 }

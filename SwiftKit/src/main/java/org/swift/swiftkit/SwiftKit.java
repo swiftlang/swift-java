@@ -260,17 +260,6 @@ public class SwiftKit {
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
 
-    private static class getTypeByStringByteArray {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-                /*returns=*/SwiftValueLayout.SWIFT_POINTER,
-                ValueLayout.ADDRESS
-        );
-
-        public static final MemorySegment ADDR = findOrThrow("getTypeByStringByteArray");
-
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
     /**
      * Get a Swift {@code Any.Type} wrapped by {@link SwiftAnyType} which represents the type metadata available at runtime.
      *
@@ -309,46 +298,6 @@ public class SwiftKit {
     }
 
     /**
-     * Read a Swift.Int value from memory at the given offset and translate it into a Java long.
-     * <p>
-     * This function copes with the fact that a Swift.Int might be 32 or 64 bits.
-     */
-    public static long getSwiftInt(MemorySegment memorySegment, long offset) {
-        if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
-            return memorySegment.get(ValueLayout.JAVA_LONG, offset);
-        } else {
-            return memorySegment.get(ValueLayout.JAVA_INT, offset);
-        }
-    }
-
-
-
-    private static class swift_getTypeName {
-
-        /**
-         * Descriptor for the swift_getTypeName runtime function.
-         */
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-                /*returns=*/MemoryLayout.structLayout(
-                        SwiftValueLayout.SWIFT_POINTER.withName("utf8Chars"),
-                        SwiftValueLayout.SWIFT_INT.withName("length")
-                ),
-                ValueLayout.ADDRESS,
-                ValueLayout.JAVA_BOOLEAN
-        );
-
-        /**
-         * Address of the swift_getTypeName runtime function.
-         */
-        public static final MemorySegment ADDR = findOrThrow("swift_getTypeName");
-
-        /**
-         * Handle for the swift_getTypeName runtime function.
-         */
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
-    /**
      * Produce the name of the Swift type given its Swift type metadata.
      * <p>
      * If 'qualified' is true, leave all the qualification in place to
@@ -373,6 +322,77 @@ public class SwiftKit {
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
+    }
+
+    /***
+     * Namespace for calls down into swift-java generated thunks and accessors, such as {@code swiftjava_getType_...} etc.
+     * <p> Not intended to be used by end-user code directly, but used by swift-java generated Java code.
+     */
+    @SuppressWarnings("unused") // used by source generated Java code
+    public static final class swiftjava {
+        private swiftjava() { /* just a namespace */ }
+
+        private static class getType {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                    /* -> */ValueLayout.ADDRESS);
+        }
+
+        public static MemorySegment getType(String moduleName, String nominalName) {
+            // We cannot cache this statically since it depends on the type names we're looking up
+            // TODO: we could cache the handles per type once we have them, to speed up subsequent calls
+            String symbol = "swiftjava_getType_" + moduleName + "_" + nominalName;
+
+            try {
+                var addr = findOrThrow(symbol);
+                var mh$ = Linker.nativeLinker().downcallHandle(addr, getType.DESC);
+                return (MemorySegment) mh$.invokeExact();
+            } catch (Throwable e) {
+                throw new AssertionError("Failed to call: " + symbol, e);
+            }
+        }
+    }
+
+    // ==== ------------------------------------------------------------------------------------------------------------
+    // Get Swift values out of native memory segments
+
+    /**
+     * Read a Swift.Int value from memory at the given offset and translate it into a Java long.
+     * <p>
+     * This function copes with the fact that a Swift.Int might be 32 or 64 bits.
+     */
+    public static long getSwiftInt(MemorySegment memorySegment, long offset) {
+        if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
+            return memorySegment.get(ValueLayout.JAVA_LONG, offset);
+        } else {
+            return memorySegment.get(ValueLayout.JAVA_INT, offset);
+        }
+    }
+
+
+
+    private static class swift_getTypeName {
+
+        /**
+         * Descriptor for the swift_getTypeName runtime function.
+         */
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /* -> */MemoryLayout.structLayout(
+                        SwiftValueLayout.SWIFT_POINTER.withName("utf8Chars"),
+                        SwiftValueLayout.SWIFT_INT.withName("length")
+                ),
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_BOOLEAN
+        );
+
+        /**
+         * Address of the swift_getTypeName runtime function.
+         */
+        public static final MemorySegment ADDR = findOrThrow("swift_getTypeName");
+
+        /**
+         * Handle for the swift_getTypeName runtime function.
+         */
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
 
 }

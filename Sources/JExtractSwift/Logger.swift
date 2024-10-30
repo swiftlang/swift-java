@@ -88,7 +88,7 @@ public struct Logger {
     }
 
     let metadataString: String =
-      metadata.isEmpty ? "\(metadata)" : ""
+      metadata.isEmpty ? "" : "\(metadata)"
 
     print("[trace][\(file):\(line)](\(function)) \(message()) \(metadataString)")
   }

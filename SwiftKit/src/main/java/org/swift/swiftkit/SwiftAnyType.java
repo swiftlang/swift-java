@@ -27,11 +27,11 @@ public final class SwiftAnyType {
     private final MemorySegment memorySegment;
 
     public SwiftAnyType(MemorySegment memorySegment) {
-        if (memorySegment.byteSize() == 0) {
-            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
-        }
+//        if (SwiftKit.getSwiftInt(memorySegment, 0) > 0) {
+//            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
+//        }
 
-        this.memorySegment = memorySegment;
+        this.memorySegment = memorySegment.asReadOnly();
     }
 
     public SwiftAnyType(SwiftHeapObject object) {

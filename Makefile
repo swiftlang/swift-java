@@ -57,8 +57,6 @@ all:
 	@echo "Welcome to swift-java! There are several makefile targets to choose from:"
 	@echo "  javakit-run: Run the JavaKit example program that uses Java libraries from Swift."
 	@echo "  javakit-generate: Regenerate the Swift wrapper code for the various JavaKit libraries from Java. This only has to be done when changing the Java2Swift tool."
-	@echo "  jextract-run: Run the Java example code that uses the wrapped Swift library. NOTE: this requires development toolchain described in the README."
-	@echo "  jextract-generate: Generate Java wrapper code for the example Swift library allowing Swift to be called from Java. NOTE: this requires development toolchain described in the README."
 
 $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
 	swift build
@@ -104,43 +102,6 @@ format:
 #################################################
 ### "SwiftKit" is the "call swift from java"  ###
 #################################################
-
-JEXTRACT_BUILD_DIR="$(BUILD_DIR)/jextract"
-
-define make_swiftinterface
-    $(eval $@_MODULE = $(1))
-    $(eval $@_FILENAME = $(2))
-	eval ${SWIFTC} \
-		-emit-module-interface-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface \
-		-emit-module-path ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftmodule \
-		-enable-library-evolution \
-		-Xfrontend -abi-comments-in-module-interface \
-		-module-name ${$@_MODULE} \
-		-Xfrontend -abi-comments-in-module-interface \
-		Sources/${$@_MODULE}/${$@_FILENAME}.swift
-	echo "Generated: ${JEXTRACT_BUILD_DIR}/${$@_MODULE}/${$@_FILENAME}.swiftinterface"
-endef
-
-jextract-swift: generate-JExtract-interface-files
-	swift build
-
-generate-JExtract-interface-files: $(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX)
-	@echo "Generate .swiftinterface files..."
-	@$(call make_swiftinterface, "ExampleSwiftLibrary", "MySwiftLibrary")
-	@$(call make_swiftinterface, "SwiftKitSwift", "SwiftKit")
-
-jextract-generate: jextract-swift generate-JExtract-interface-files
-	swift run jextract-swift  \
-		--package-name com.example.swift.generated \
-		--swift-module ExampleSwiftLibrary \
-		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/build/generated/sources/jextract/main \
-		$(BUILD_DIR)/jextract/ExampleSwiftLibrary/MySwiftLibrary.swiftinterface; \
-	swift run jextract-swift \
-		--package-name org.swift.swiftkit.generated \
-		--swift-module SwiftKitSwift \
-		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/build/generated/sources/jextract/main \
-		$(BUILD_DIR)/jextract/SwiftKitSwift/SwiftKit.swiftinterface
-
 
 jextract-run: jextract-generate
 	./gradlew Samples:SwiftKitSampleApp:run

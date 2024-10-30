@@ -256,7 +256,7 @@ extension TranslatedType {
 }
 
 /// Describes the C-compatible layout as it should be referenced from Java.
-enum CCompatibleJavaMemoryLayout {
+enum CCompatibleJavaMemoryLayout: Hashable {
   /// A primitive Java type that has a direct counterpart in C.
   case primitive(JavaType)
 
@@ -288,7 +288,7 @@ extension TranslatedType {
       case .long: return .SwiftInt64
       case .float: return .SwiftFloat
       case .double: return .SwiftDouble
-      case .array, .class, .void: fatalError("Not a primitive type")
+      case .array, .class, .void: fatalError("Not a primitive type: \(cCompatibleJavaMemoryLayout) in \(self)")
       }
 
     case .int:

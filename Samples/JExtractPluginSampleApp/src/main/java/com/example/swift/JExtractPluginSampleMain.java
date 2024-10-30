@@ -12,17 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
-import JavaMath
+package com.example.swift;
 
-let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
-do {
-  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
-  for prime in sieveClass.findPrimes(100)! {
-    print("Found prime: \(prime.intValue())")
-  }
+import org.swift.swiftkit.SwiftKit;
 
-  try JavaClass<RoundingMode>().HALF_UP
-} catch {
-  print("Failure: \(error)")
+public class JExtractPluginSampleMain {
+    public static void main(String[] args) {
+        System.out.println();
+        System.out.println("java.library.path = " + SwiftKit.getJavaLibraryPath());
+        System.out.println("jextract.trace.downcalls = " + SwiftKit.getJextractTraceDowncalls());
+
+        var o = new MyCoolSwiftClass(12);
+        o.exposedToJava();
+    }
 }

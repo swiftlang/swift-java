@@ -39,3 +39,13 @@ extension Collection {
     }
   }
 }
+
+extension Collection where Element == Int {
+  var sum: Int { 
+    var s = 0
+    for i in self {
+      s += i
+    }
+    return s
+  }
+}

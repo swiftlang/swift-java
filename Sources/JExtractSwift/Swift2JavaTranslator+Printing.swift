@@ -25,16 +25,18 @@ let PATH_SEPARATOR = "/"  // TODO: Windows
 extension Swift2JavaTranslator {
 
   /// Every imported public type becomes a public class in its own file in Java.
-  public func writeImportedTypesTo(outputDirectory: String) throws {
+  public func writeExportedJavaSources(outputDirectory: String) throws {
     var printer = CodePrinter()
+    try writeExportedJavaSources(outputDirectory: outputDirectory, printer: &printer)
+  }
 
+  public func writeExportedJavaSources(outputDirectory: String, printer: inout CodePrinter) throws {
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.javaClassName).java"
       log.info("Printing contents: \(filename)")
       printImportedClass(&printer, ty)
 
-      try writeContents(
-        printer.finalize(),
+      try printer.writeContents(
         outputDirectory: outputDirectory,
         javaPackagePath: javaPackagePath,
         filename: filename
@@ -42,47 +44,80 @@ extension Swift2JavaTranslator {
     }
   }
 
+  public func writeSwiftThunkSources(outputDirectory: String) throws {
+    var printer = CodePrinter()
+
+    try writeSwiftThunkSources(outputDirectory: outputDirectory, printer: &printer)
+  }
+
+  public func writeSwiftThunkSources(outputDirectory: String, printer: inout CodePrinter) throws {
+    // ==== Globals
+    for decl in self.importedGlobalFuncs {
+      printSwiftThunkSources(&printer, decl: decl)
+    }
+
+    let moduleFilename = "\(self.swiftModuleName)Module+SwiftJava.swift"
+    log.info("Printing contents: \(moduleFilename)")
+    do {
+      try printer.writeContents(
+        outputDirectory: outputDirectory,
+        javaPackagePath: nil,
+        filename: moduleFilename)
+    } catch {
+      log.warning("Failed to write to Swift thunks: \(moduleFilename)")
+    }
+
+    // === All types
+    for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
+      let filename = "\(ty.swiftTypeName)+SwiftJava.swift"
+      log.info("Printing contents: \(filename)")
+
+      do {
+        try printSwiftThunkSources(&printer, ty: ty)
+
+        try printer.writeContents(
+          outputDirectory: outputDirectory,
+          javaPackagePath: nil,
+          filename: filename)
+      } catch {
+        log.warning("Failed to write to Swift thunks: \(filename)")
+      }
+    }
+  }
+
+  public func printSwiftThunkSources(_ printer: inout CodePrinter, decl: ImportedFunc) {
+    let stt = SwiftThunkTranslator(self)
+
+    for thunk in stt.render(forFunc: decl) {
+      printer.print(thunk)
+      printer.println()
+    }
+  }
+
+  public func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ImportedNominalType) throws {
+    let stt = SwiftThunkTranslator(self)
+
+    for thunk in stt.renderThunks(forType: ty) {
+      printer.print("\(thunk)")
+      printer.print("")
+    }
+  }
+
   /// A module contains all static and global functions from the Swift module,
   /// potentially from across multiple swift interfaces.
-  public func writeModuleTo(outputDirectory: String) throws {
+  public func writeExportedJavaModule(outputDirectory: String) throws {
     var printer = CodePrinter()
+    try writeExportedJavaModule(outputDirectory: outputDirectory, printer: &printer)
+  }
+
+  public func writeExportedJavaModule(outputDirectory: String, printer: inout CodePrinter) throws {
     printModule(&printer)
 
-    try writeContents(
-      printer.finalize(),
+    try printer.writeContents(
       outputDirectory: outputDirectory,
       javaPackagePath: javaPackagePath,
       filename: "\(swiftModuleName).java"
     )
-  }
-
-  private func writeContents(
-    _ contents: String,
-    outputDirectory: String,
-    javaPackagePath: String,
-    filename: String
-  ) throws {
-    if outputDirectory == "-" {
-      print(
-        "// ==== ---------------------------------------------------------------------------------------------------"
-      )
-      print("// \(javaPackagePath)/\(filename)")
-      print(contents)
-      return
-    }
-
-    let targetDirectory = [outputDirectory, javaPackagePath].joined(separator: PATH_SEPARATOR)
-    log.trace("Prepare target directory: \(targetDirectory)")
-    try FileManager.default.createDirectory(atPath: targetDirectory, withIntermediateDirectories: true)
-
-    let targetFilePath = [javaPackagePath, filename].joined(separator: PATH_SEPARATOR)
-    print("Writing '\(targetFilePath)'...", terminator: "")
-    try contents.write(
-      to: Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename),
-      atomically: true,
-      encoding: .utf8
-    )
-    print(" done.".green)
   }
 }
 
@@ -119,11 +154,18 @@ extension Swift2JavaTranslator {
       // Ensure we have loaded the library where the Swift type was declared before we attempt to resolve types in Swift
       printStaticLibraryLoad(&printer)
 
-      // Prepare type metadata, we're going to need these when invoking e.g. initializers so cache them in a static
-      printer.print(
+      // Prepare type metadata, we're going to need these when invoking e.g. initializers so cache them in a static.
+      // We call into source swift-java source generated accessors which give us the type of the Swift object:
+      // TODO: seems we no longer need the mangled name per se, so avoiding such constant and downcall
+      //      printer.printParts(
+      //        "public static final String TYPE_MANGLED_NAME = ",
+      //        SwiftKitPrinting.renderCallGetSwiftTypeMangledName(module: self.swiftModuleName, nominal: decl),
+      //        ";"
+      //      )
+      printer.printParts(
         """
-        public static final String TYPE_MANGLED_NAME = "\(decl.swiftMangledName ?? "")";
-        public static final SwiftAnyType TYPE_METADATA = SwiftKit.getTypeByMangledNameInEnvironment(TYPE_MANGLED_NAME).get();
+        public static final SwiftAnyType TYPE_METADATA =
+            new SwiftAnyType(\(SwiftKitPrinting.renderCallGetSwiftType(module: self.swiftModuleName, nominal: decl)));
         public final SwiftAnyType $swiftType() {
             return TYPE_METADATA;
         }
@@ -178,8 +220,11 @@ extension Swift2JavaTranslator {
     printer.print("")
   }
 
-  public func printClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void) {
-    printer.printTypeDecl("public final class \(decl.javaClassName) implements SwiftHeapObject") { printer in
+  public func printClass(
+    _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
+  ) {
+    printer.printTypeDecl("public final class \(decl.javaClassName) implements SwiftHeapObject") {
+      printer in
       // ==== Storage of the class
       printClassSelfProperty(&printer, decl)
 
@@ -308,7 +353,7 @@ extension Swift2JavaTranslator {
       """
       private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         SWIFT_POINTER
-      ).withName("\(decl.swiftMangledName ?? decl.swiftTypeName)");
+      ).withName("\(decl.swiftTypeName)");
 
       public final GroupLayout $layout() {
           return $LAYOUT;
@@ -391,7 +436,7 @@ extension Swift2JavaTranslator {
   }
 
   public func printClassConstructors(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    guard let parentName = decl.parentName else {
+    guard let parentName = decl.parent else {
       fatalError("init must be inside a parent type! Was: \(decl)")
     }
     printer.printSeparator(decl.identifier)
@@ -399,7 +444,7 @@ extension Swift2JavaTranslator {
     let descClassIdentifier = renderDescClassName(decl)
     printer.printTypeDecl("private static class \(descClassIdentifier)") { printer in
       printFunctionDescriptorValue(&printer, decl)
-      printFindMemorySegmentAddrByMangledName(&printer, decl)
+      printAccessorFunctionAddr(&printer, decl)
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
@@ -420,8 +465,8 @@ extension Swift2JavaTranslator {
        *
        \(decl.renderCommentSnippet ?? " *")
        */
-      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
-        this(/*arena=*/null, \(renderForwardParams(decl, selfVariant: .wrapper)));
+      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
+        this(/*arena=*/null, \(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
       }
       """
     )
@@ -434,14 +479,14 @@ extension Swift2JavaTranslator {
        *
        \(decl.renderCommentSnippet ?? " *")
        */
-      public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
+      public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
         var mh$ = \(descClassIdentifier).HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-              traceDowncall(\(renderForwardParams(decl, selfVariant: nil)));
+              traceDowncall(\(renderForwardJavaParams(decl, paramPassingStyle: nil)));
             }
 
-            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: nil)), TYPE_METADATA.$memorySegment());
+            this.selfMemorySegment = (MemorySegment) mh$.invokeExact(\(renderForwardJavaParams(decl, paramPassingStyle: nil)), TYPE_METADATA.$memorySegment());
             if (arena != null) {
                 arena.register(this);
             }
@@ -468,8 +513,8 @@ extension Swift2JavaTranslator {
     printer.printSeparator(decl.identifier)
 
     printer.printTypeDecl("private static class \(decl.baseIdentifier)") { printer in
-      printFunctionDescriptorValue(&printer, decl);
-      printFindMemorySegmentAddrByMangledName(&printer, decl)
+      printFunctionDescriptorValue(&printer, decl)
+      printAccessorFunctionAddr(&printer, decl)
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
@@ -479,16 +524,18 @@ extension Swift2JavaTranslator {
 
     // Render the basic "make the downcall" function
     if decl.hasParent {
-      printFuncDowncallMethod(&printer, decl: decl, selfVariant: .memorySegment)
-      printFuncDowncallMethod(&printer, decl: decl, selfVariant: .wrapper)
+      printFuncDowncallMethod(&printer, decl: decl, paramPassingStyle: .memorySegment)
+      printFuncDowncallMethod(&printer, decl: decl, paramPassingStyle: .wrapper)
     } else {
-      printFuncDowncallMethod(&printer, decl: decl, selfVariant: nil)
+      printFuncDowncallMethod(&printer, decl: decl, paramPassingStyle: nil)
     }
   }
 
-  private func printFunctionAddressMethod(_ printer: inout CodePrinter,
-                                          decl: ImportedFunc,
-                                          accessorKind: VariableAccessorKind? = nil) {
+  private func printFunctionAddressMethod(
+    _ printer: inout CodePrinter,
+    decl: ImportedFunc,
+    accessorKind: VariableAccessorKind? = nil
+  ) {
 
     let addrName = accessorKind.renderAddrFieldName
     let methodNameSegment = accessorKind.renderMethodNameSegment
@@ -507,9 +554,11 @@ extension Swift2JavaTranslator {
     )
   }
 
-  private func printFunctionMethodHandleMethod(_ printer: inout CodePrinter,
-                                               decl: ImportedFunc,
-                                               accessorKind: VariableAccessorKind? = nil) {
+  private func printFunctionMethodHandleMethod(
+    _ printer: inout CodePrinter,
+    decl: ImportedFunc,
+    accessorKind: VariableAccessorKind? = nil
+  ) {
     let handleName = accessorKind.renderHandleFieldName
     let methodNameSegment = accessorKind.renderMethodNameSegment
     let snippet = decl.renderCommentSnippet ?? "* "
@@ -527,9 +576,11 @@ extension Swift2JavaTranslator {
     )
   }
 
-  private func printFunctionDescriptorMethod(_ printer: inout CodePrinter,
-                                             decl: ImportedFunc,
-                                             accessorKind: VariableAccessorKind? = nil) {
+  private func printFunctionDescriptorMethod(
+    _ printer: inout CodePrinter,
+    decl: ImportedFunc,
+    accessorKind: VariableAccessorKind? = nil
+  ) {
     let descName = accessorKind.renderDescFieldName
     let methodNameSegment = accessorKind.renderMethodNameSegment
     let snippet = decl.renderCommentSnippet ?? "* "
@@ -557,8 +608,8 @@ extension Swift2JavaTranslator {
           continue
         }
 
-        printFunctionDescriptorValue(&printer, accessor, accessorKind: accessorKind);
-        printFindMemorySegmentAddrByMangledName(&printer, accessor, accessorKind: accessorKind)
+        printFunctionDescriptorValue(&printer, accessor, accessorKind: accessorKind)
+        printAccessorFunctionAddr(&printer, accessor, accessorKind: accessorKind)
         printMethodDowncallHandleForAddrDesc(&printer, accessorKind: accessorKind)
       }
     }
@@ -583,24 +634,36 @@ extension Swift2JavaTranslator {
 
       // Render the basic "make the downcall" function
       if decl.hasParent {
-        printFuncDowncallMethod(&printer, decl: accessor, selfVariant: .memorySegment, accessorKind: accessorKind)
-        printFuncDowncallMethod(&printer, decl: accessor, selfVariant: .wrapper, accessorKind: accessorKind)
+        printFuncDowncallMethod(
+          &printer, decl: accessor, paramPassingStyle: .memorySegment, accessorKind: accessorKind)
+        printFuncDowncallMethod(
+          &printer, decl: accessor, paramPassingStyle: .wrapper, accessorKind: accessorKind)
       } else {
-        printFuncDowncallMethod(&printer, decl: accessor, selfVariant: nil, accessorKind: accessorKind)
+        printFuncDowncallMethod(
+          &printer, decl: accessor, paramPassingStyle: nil, accessorKind: accessorKind)
       }
     }
   }
 
-  func printFindMemorySegmentAddrByMangledName(_ printer: inout CodePrinter, _ decl: ImportedFunc,
-                                               accessorKind: VariableAccessorKind? = nil) {
+  func printAccessorFunctionAddr(
+    _ printer: inout CodePrinter, _ decl: ImportedFunc,
+    accessorKind: VariableAccessorKind? = nil
+  ) {
+    var thunkName = SwiftKitPrinting.Names.functionThunk(
+      thunkNameRegistry: &self.thunkNameRegistry,
+      module: self.swiftModuleName, function: decl)
+    thunkName = thunkNameRegistry.deduplicate(name: thunkName)
     printer.print(
       """
-      public static final MemorySegment \(accessorKind.renderAddrFieldName) = \(swiftModuleName).findOrThrow("\(decl.swiftMangledName)");
+      public static final MemorySegment \(accessorKind.renderAddrFieldName) =
+        \(self.swiftModuleName).findOrThrow("\(thunkName)");
       """
-    );
+    )
   }
 
-  func printMethodDowncallHandleForAddrDesc(_ printer: inout CodePrinter, accessorKind: VariableAccessorKind? = nil) {
+  func printMethodDowncallHandleForAddrDesc(
+    _ printer: inout CodePrinter, accessorKind: VariableAccessorKind? = nil
+  ) {
     printer.print(
       """
       public static final MethodHandle \(accessorKind.renderHandleFieldName) = Linker.nativeLinker().downcallHandle(\(accessorKind.renderAddrFieldName), \(accessorKind.renderDescFieldName));
@@ -611,7 +674,7 @@ extension Swift2JavaTranslator {
   public func printFuncDowncallMethod(
     _ printer: inout CodePrinter,
     decl: ImportedFunc,
-    selfVariant: SelfParameterVariant?,
+    paramPassingStyle: SelfParameterVariant?,
     accessorKind: VariableAccessorKind? = nil
   ) {
     let returnTy = decl.returnType.javaType
@@ -635,13 +698,13 @@ extension Swift2JavaTranslator {
     // An identifier may be "getX", "setX" or just the plain method name
     let identifier = accessorKind.renderMethodName(decl)
 
-    if selfVariant == SelfParameterVariant.wrapper {
+    if paramPassingStyle == SelfParameterVariant.wrapper {
       // delegate to the MemorySegment "self" accepting overload
       printer.print(
         """
         \(javaDocComment)
-        public \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
-          \(maybeReturnCast) \(identifier)(\(renderForwardParams(decl, selfVariant: .wrapper)));
+        public \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
+          \(maybeReturnCast) \(identifier)(\(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
         }
         """
       )
@@ -654,7 +717,7 @@ extension Swift2JavaTranslator {
     printer.printParts(
       """
       \(javaDocComment)
-      public static \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
+      public static \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, paramPassingStyle: paramPassingStyle))) {
         var mh$ = \(decl.baseIdentifier).\(handleName);
         \(renderTry(withArena: needsArena))
       """,
@@ -663,9 +726,9 @@ extension Swift2JavaTranslator {
       """,
       """
           if (TRACE_DOWNCALLS) {
-             traceDowncall(\(renderForwardParams(decl, selfVariant: .memorySegment)));
+             traceDowncall(\(renderForwardJavaParams(decl, paramPassingStyle: .memorySegment)));
           }
-          \(maybeReturnCast) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: selfVariant)));
+          \(maybeReturnCast) mh$.invokeExact(\(renderForwardJavaParams(decl, paramPassingStyle: paramPassingStyle)));
         } catch (Throwable ex$) {
           throw new AssertionError("should not reach here", ex$);
         }
@@ -677,7 +740,7 @@ extension Swift2JavaTranslator {
   public func printPropertyAccessorDowncallMethod(
     _ printer: inout CodePrinter,
     decl: ImportedFunc,
-    selfVariant: SelfParameterVariant?
+    paramPassingStyle: SelfParameterVariant?
   ) {
     let returnTy = decl.returnType.javaType
 
@@ -688,7 +751,7 @@ extension Swift2JavaTranslator {
       maybeReturnCast = "return (\(returnTy))"
     }
 
-    if selfVariant == SelfParameterVariant.wrapper {
+    if paramPassingStyle == SelfParameterVariant.wrapper {
       // delegate to the MemorySegment "self" accepting overload
       printer.print(
         """
@@ -697,8 +760,8 @@ extension Swift2JavaTranslator {
          * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
          * }
          */
-        public \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: .wrapper))) {
-          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardParams(decl, selfVariant: .wrapper)));
+        public \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
+          \(maybeReturnCast) \(decl.baseIdentifier)(\(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
         }
         """
       )
@@ -712,13 +775,13 @@ extension Swift2JavaTranslator {
        * \(/*TODO: make a printSnippet func*/decl.syntax ?? "")
        * }
        */
-      public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, selfVariant: selfVariant))) {
+      public static \(returnTy) \(decl.baseIdentifier)(\(renderJavaParamDecls(decl, paramPassingStyle: paramPassingStyle))) {
         var mh$ = \(decl.baseIdentifier).HANDLE;
         try {
           if (TRACE_DOWNCALLS) {
-             traceDowncall(\(renderForwardParams(decl, selfVariant: .memorySegment)));
+             traceDowncall(\(renderForwardJavaParams(decl, paramPassingStyle: .memorySegment)));
           }
-          \(maybeReturnCast) mh$.invokeExact(\(renderForwardParams(decl, selfVariant: selfVariant)));
+          \(maybeReturnCast) mh$.invokeExact(\(renderForwardJavaParams(decl, paramPassingStyle: paramPassingStyle)));
         } catch (Throwable ex$) {
           throw new AssertionError("should not reach here", ex$);
         }
@@ -737,7 +800,7 @@ extension Swift2JavaTranslator {
       return "p\(pCounter)"
     }
 
-    for p in decl.effectiveParameters(selfVariant: nil) {
+    for p in decl.effectiveParameters(paramPassingStyle: nil) {
       let param = "\(p.effectiveName ?? nextUniqueParamName())"
       ps.append(param)
     }
@@ -758,7 +821,7 @@ extension Swift2JavaTranslator {
 
     return false
   }
-  
+
   public func renderTry(withArena: Bool) -> String {
     if withArena {
       "try (Arena arena = Arena.ofConfined()) {"
@@ -767,7 +830,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func renderJavaParamDecls(_ decl: ImportedFunc, selfVariant: SelfParameterVariant?) -> String {
+  public func renderJavaParamDecls(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?) -> String {
     var ps: [String] = []
     var pCounter = 0
 
@@ -776,9 +839,41 @@ extension Swift2JavaTranslator {
       return "p\(pCounter)"
     }
 
-    for p in decl.effectiveParameters(selfVariant: selfVariant) {
+    for p in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
       let param = "\(p.type.javaType.description) \(p.effectiveName ?? nextUniqueParamName())"
       ps.append(param)
+    }
+
+    let res = ps.joined(separator: ", ")
+    return res
+  }
+
+  // TODO: these are stateless, find new place for them?
+  public func renderSwiftParamDecls(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?) -> String {
+    var ps: [String] = []
+    var pCounter = 0
+
+    func nextUniqueParamName() -> String {
+      pCounter += 1
+      return "p\(pCounter)"
+    }
+
+    for p in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
+      let firstName = p.firstName ?? "_"
+      let secondName = p.secondName ?? p.firstName ?? nextUniqueParamName()
+
+      let param =
+        if firstName == secondName {
+          // We have to do this to avoid a 'extraneous duplicate parameter name; 'number' already has an argument label' warning
+          "\(firstName): \(p.type.swiftTypeName.description)"
+        } else {
+          "\(firstName) \(secondName): \(p.type.swiftTypeName.description)"
+        }
+      ps.append(param)
+    }
+
+    if paramPassingStyle == .swiftThunkSelf {
+      ps.append("_self: Any")
     }
 
     let res = ps.joined(separator: ", ")
@@ -790,7 +885,8 @@ extension Swift2JavaTranslator {
     for p in decl.parameters where p.type.javaType.isSwiftClosure {
       if p.type.javaType == .javaLangRunnable {
         let paramName = p.secondName ?? p.firstName ?? "_"
-        let handleDesc = p.type.javaType.prepareClosureDowncallHandle(decl: decl, parameter: paramName)
+        let handleDesc = p.type.javaType.prepareClosureDowncallHandle(
+          decl: decl, parameter: paramName)
         printer.print(handleDesc)
       }
     }
@@ -798,7 +894,7 @@ extension Swift2JavaTranslator {
     return printer.contents
   }
 
-  public func renderForwardParams(_ decl: ImportedFunc, selfVariant: SelfParameterVariant?) -> String {
+  public func renderForwardJavaParams(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?) -> String {
     var ps: [String] = []
     var pCounter = 0
 
@@ -807,12 +903,12 @@ extension Swift2JavaTranslator {
       return "p\(pCounter)"
     }
 
-    for p in decl.effectiveParameters(selfVariant: selfVariant) {
+    for p in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
       // FIXME: fix the handling here we're already a memory segment
       let param: String
       if p.effectiveName == "self$" {
-        precondition(selfVariant == .memorySegment)
-        param = "self$";
+        precondition(paramPassingStyle == .memorySegment)
+        param = "self$"
       } else {
         param = "\(p.renderParameterForwarding() ?? nextUniqueParamName())"
       }
@@ -820,8 +916,29 @@ extension Swift2JavaTranslator {
     }
 
     // Add the forwarding "self"
-    if selfVariant == .wrapper && !decl.isInit {
+    if paramPassingStyle == .wrapper && !decl.isInit {
       ps.append("$memorySegment()")
+    }
+
+    return ps.joined(separator: ", ")
+  }
+
+  // TODO: these are stateless, find new place for them?
+  public func renderForwardSwiftParams(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?) -> String {
+    var ps: [String] = []
+    var pCounter = 0
+
+    func nextUniqueParamName() -> String {
+      pCounter += 1
+      return "p\(pCounter)"
+    }
+
+    for p in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
+      if let firstName = p.firstName {
+        ps.append("\(firstName): \(p.effectiveName ?? nextUniqueParamName())")
+      } else {
+        ps.append("\(p.effectiveName ?? nextUniqueParamName())")
+      }
     }
 
     return ps.joined(separator: ", ")
@@ -830,20 +947,21 @@ extension Swift2JavaTranslator {
   public func printFunctionDescriptorValue(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    accessorKind: VariableAccessorKind? = nil) {
+    accessorKind: VariableAccessorKind? = nil
+  ) {
     let fieldName = accessorKind.renderDescFieldName
     printer.start("public static final FunctionDescriptor \(fieldName) = ")
 
     let parameterLayoutDescriptors = javaMemoryLayoutDescriptors(
       forParametersOf: decl,
-      selfVariant: .pointer
+      paramPassingStyle: .pointer
     )
 
     if decl.returnType.javaType == .void {
-      printer.print("FunctionDescriptor.ofVoid(");
+      printer.print("FunctionDescriptor.ofVoid(")
       printer.indent()
     } else {
-      printer.print("FunctionDescriptor.of(");
+      printer.print("FunctionDescriptor.of(")
       printer.indent()
       printer.print("", .continue)
 
@@ -851,7 +969,9 @@ extension Swift2JavaTranslator {
       let returnTyIsLastTy = decl.parameters.isEmpty && !decl.hasParent
       if decl.isInit {
         // when initializing, we return a pointer to the newly created object
-        printer.print("/* -> */\(ForeignValueLayout.SwiftPointer)", .parameterNewlineSeparator(returnTyIsLastTy))
+        printer.print(
+          "/* -> */\(ForeignValueLayout.SwiftPointer)", .parameterNewlineSeparator(returnTyIsLastTy)
+        )
       } else {
         var returnDesc = decl.returnType.foreignValueLayout
         returnDesc.inlineComment = " -> "
@@ -864,11 +984,13 @@ extension Swift2JavaTranslator {
       printer.print(desc, .parameterNewlineSeparator(isLast))
     }
 
-    printer.outdent();
-    printer.print(");");
+    printer.outdent()
+    printer.print(");")
   }
 
-  public func printHeapObjectToStringMethod(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  public func printHeapObjectToStringMethod(
+    _ printer: inout CodePrinter, _ decl: ImportedNominalType
+  ) {
     printer.print(
       """
       @Override

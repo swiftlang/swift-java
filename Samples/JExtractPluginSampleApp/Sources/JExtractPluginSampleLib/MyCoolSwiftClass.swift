@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
-import JavaMath
-
-let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
-do {
-  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
-  for prime in sieveClass.findPrimes(100)! {
-    print("Found prime: \(prime.intValue())")
+public class MyCoolSwiftClass {
+  var number: Int
+  public init(number: Int) {
+    print("[swift] init(number: \(number))")
+    self.number = number
   }
 
-  try JavaClass<RoundingMode>().HALF_UP
-} catch {
-  print("Failure: \(error)")
+  public func exposedToJava() {
+    print("[swift] exposedToJava()")
+    print("[swift]   number = \(number)")
+  }
 }

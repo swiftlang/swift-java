@@ -28,22 +28,29 @@ public struct SwiftToJava: ParsableCommand {
   @Option(help: "The package the generated Java code should be emitted into.")
   var packageName: String
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files and manifest.")
-  var outputDirectory: String = ".build/jextract-swift/generated"
+  @Option(
+    name: .shortAndLong,
+    help: "The directory in which to output the generated Swift files and manifest.")
+  var outputDirectoryJava: String = ".build/jextract-swift/generated"
 
-  @Option(name: .long, help: "Name of the Swift module to import (and the swift interface files belong to)")
+  @Option(help: "Swift output directory")
+  var outputDirectorySwift: String
+
+  @Option(
+    name: .long,
+    help: "Name of the Swift module to import (and the swift interface files belong to)")
   var swiftModule: String
 
   // TODO: Once we ship this, make this `.warning` by default
   @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
   var logLevel: Logger.Level = .notice
 
-  @Argument(help: "The Swift interface files to export to Java.")
-  var swiftInterfaceFiles: [String]
+  @Argument(help: "The Swift files or directories to recursively export to Java.")
+  var input: [String]
 
   public func run() throws {
-    let interfaceFiles = self.swiftInterfaceFiles.dropFirst()
-    print("Interface files: \(interfaceFiles)")
+    let inputPaths = self.input.dropFirst().map { URL(string: $0)! }
+    print("Input \(inputPaths)")
 
     let translator = Swift2JavaTranslator(
       javaPackage: packageName,
@@ -51,20 +58,34 @@ public struct SwiftToJava: ParsableCommand {
     )
     translator.log.logLevel = logLevel
 
-    var fileNo = 1
-    for interfaceFile in interfaceFiles {
-      print("[\(fileNo)/\(interfaceFiles.count)] Importing module '\(swiftModule)', interface file: \(interfaceFile)")
-      defer { fileNo += 1 }
+    var allFiles: [URL] = []
+    let fileManager = FileManager.default
 
-      try translator.analyze(swiftInterfacePath: interfaceFile)
-      try translator.writeImportedTypesTo(outputDirectory: outputDirectory)
-
-      print("[\(fileNo)/\(interfaceFiles.count)] Imported interface file: \(interfaceFile) " + "done.".green)
+    for path in inputPaths {
+      if isDirectory(url: path) {
+        if let enumerator = fileManager.enumerator(at: path, includingPropertiesForKeys: nil) {
+          for case let fileURL as URL in enumerator {
+            allFiles.append(fileURL)
+          }
+        }
+      } else if path.isFileURL {
+        allFiles.append(path)
+      }
     }
 
-    try translator.writeModuleTo(outputDirectory: outputDirectory)
+    for file in allFiles {
+      print("Importing module '\(swiftModule)', interface file: \(file)")
+
+      try translator.analyze(file: file.path)
+      try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
+      try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
+
+      print("Imported interface file: \(file) " + "done.".green)
+    }
+
+    try translator.writeExportedJavaModule(outputDirectory: outputDirectoryJava)
     print("")
-    print("Generated Java sources in package '\(packageName)' in: \(outputDirectory)/")
+    print("Generated Java sources in package '\(packageName)' in: \(outputDirectoryJava)/")
     print("Swift module '\(swiftModule)' import: " + "done.".green)
   }
 
@@ -78,4 +99,10 @@ extension Logger.Level: ExpressibleByArgument {
     ["trace", "debug", "info", "notice", "warning", "error", "critical"]
 
   public private(set) static var defaultCompletionKind: CompletionKind = .default
+}
+
+func isDirectory(url: URL) -> Bool {
+  var isDirectory: ObjCBool = false
+  FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+  return isDirectory.boolValue
 }

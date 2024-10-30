@@ -18,7 +18,7 @@ import java.nio.file.*
 
 plugins {
     id("build-logic.java-application-conventions")
-    id("me.champeau.jmh") version "0.7.2"
+//     id("me.champeau.jmh") version "0.7.2"
 }
 
 group = "org.swift.swiftkit"
@@ -33,6 +33,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(22))
     }
 }
+
 
 // This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
 // Thus, we also need to watch and re-build the top level project.
@@ -88,7 +89,7 @@ sourceSets {
 }
 
 tasks.build {
-    dependsOn(buildSwift)
+    dependsOn("jextract")
 }
 
 dependencies {
@@ -96,6 +97,8 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    // implementation(swiftDynamicLibrary('')
 }
 
 tasks.named('test', Test) {
@@ -103,21 +106,17 @@ tasks.named('test', Test) {
 }
 
 application {
-    mainClass = "com.example.swift.HelloJava2Swift"
+    mainClass = "com.example.swift.JExtractPluginSampleMain"
 
     applicationDefaultJvmArgs = [
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + BuildUtils.javaLibraryPaths(rootDir).join(":"),
+        "-Djava.library.path=" +
+                (BuildUtils.javaLibraryPaths(rootDir) +
+                 BuildUtils.javaLibraryPaths(layout.projectDirectory.asFile)).join(":"),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"
-    ]
-}
-
-jmh {
-    jvmArgsAppend = [
-        "-Djava.library.path=" + BuildUtils.javaLibraryPaths(rootDir).join(":"),
     ]
 }

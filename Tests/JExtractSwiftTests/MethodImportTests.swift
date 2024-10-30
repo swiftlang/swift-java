@@ -70,12 +70,12 @@ final class MethodImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "helloWorld" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
     }
 
     assertOutput(
@@ -111,14 +111,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == "globalTakeInt"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
     }
 
     assertOutput(
@@ -154,14 +154,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == "globalTakeIntLongString"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -197,14 +197,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -240,14 +240,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberInExtension"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -283,14 +283,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .info
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -326,14 +326,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .info
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "helloMemberFunction"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .wrapper)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .wrapper)
     }
 
     assertOutput(
@@ -361,14 +361,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .info
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.baseIdentifier == "makeInt"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .wrapper)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .wrapper)
     }
 
     assertOutput(
@@ -396,14 +396,14 @@ final class MethodImportTests {
     )
     st.log.logLevel = .info
 
-    try st.analyze(swiftInterfacePath: "/fake/__FakeModule/SwiftFile.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let initDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.initializers.first {
       $0.identifier == "init(len:cap:)"
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printClassInitializerConstructors(&printer, initDecl, parentName: initDecl.parentName!)
+      st.printClassInitializerConstructors(&printer, initDecl, parentName: initDecl.parent!)
     }
 
     assertOutput(
