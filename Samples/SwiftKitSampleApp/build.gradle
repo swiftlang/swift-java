@@ -16,7 +16,7 @@ import org.swift.swiftkit.gradle.BuildUtils
 
 plugins {
     id("build-logic.java-application-conventions")
-    id "me.champeau.jmh" version "0.7.2"
+    id("me.champeau.jmh") version "0.7.2"
 }
 
 group = "org.swift.swiftkit"

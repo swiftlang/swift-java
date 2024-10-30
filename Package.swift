@@ -374,24 +374,6 @@ let package = Package(
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
-    ),
-
-    .executableTarget(
-      name: "JavaApiCallBenchmarks",
-      dependencies: [
-        "JavaRuntime",
-        "JavaKit",
-        "JavaKitNetwork",
-        .product(name: "Benchmark", package: "package-benchmark"),
-      ],
-      path: "Benchmarks/JavaApiCallBenchmarks",
-      swiftSettings: [
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
-        .swiftLanguageMode(.v5),
-      ],
-      plugins: [
-        .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
-      ],
-    ),
+    )
   ]
 )
