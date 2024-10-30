@@ -296,8 +296,18 @@ extension JavaClassTranslator {
     // Collect all of the members of this type.
     let members = properties + enumDecls + initializers + instanceMethods
 
-    // Compute the "extends" clause for the superclass.
-    let extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
+    // Compute the "extends" clause for the superclass (of the struct
+    // formulation) or the inheritance clause (for the class
+    // formulation).
+    let extends: String
+    let inheritanceClause: String
+    if translator.translateAsClass {
+      extends = ""
+      inheritanceClause = swiftSuperclass.map { ": \($0)" } ?? ""
+    } else {
+      extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
+      inheritanceClause = ""
+    }
 
     // Compute the string to capture all of the interfaces.
     let interfacesStr: String
@@ -314,7 +324,7 @@ extension JavaClassTranslator {
     var classDecl: DeclSyntax =
       """
       @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extends)\(raw: interfacesStr))
-      \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause) {
+      \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """
@@ -499,8 +509,12 @@ extension JavaClassTranslator {
       : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
     let accessModifier = implementedInSwift ? ""
       : "\(translator.defaultAccessSpecifier) "
+    let overrideOpt = (translator.translateAsClass &&
+                       !javaMethod.isStatic && isOverride(javaMethod))
+      ? "override "
+      : ""
     return """
-      \(methodAttribute)\(raw: accessModifier)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
 
@@ -624,5 +638,23 @@ struct MethodCollector {
     // new method.
     methodsByName[method.getName(), default: []].append(methods.count)
     methods.append(method)
+  }
+}
+
+// MARK: Utility functions
+extension JavaClassTranslator {
+  /// Determine whether this method is an override of another Java
+  /// method.
+  func isOverride(_ method: Method) -> Bool {
+    guard let javaSuperclass = javaClass.getSuperclass() else {
+      return false
+    }
+
+    do {
+      let overriddenMethod = try javaSuperclass.getDeclaredMethod(method.getName(), method.getParameterTypes())
+      return overriddenMethod != nil
+    } catch {
+      return false
+    }
   }
 }

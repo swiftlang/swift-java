@@ -22,7 +22,13 @@ extension JavaClass {
 
   @JavaMethod
   public func getMethods() -> [Method?]
-    
+
+  @JavaMethod
+  public func getDeclaredMethod(
+    _ name: String,
+    _ parameterTypes: [JavaClass<JavaObject>?]
+  ) throws -> Method?
+
   @JavaMethod
   public func getFields() -> [Field?]
 

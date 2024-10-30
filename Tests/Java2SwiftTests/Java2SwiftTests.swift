@@ -293,6 +293,40 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testJavaLangStringMappingAsClass() throws {
+    try assertTranslatedClass(
+      JavaString.self,
+      swiftTypeName: "JavaString",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.String")
+        open class JavaString: JavaObject {
+        """,
+        """
+          @JavaMethod
+          public init(environment: JNIEnvironment? = nil)
+        """,
+        """
+          @JavaMethod
+          open override func toString() -> String
+        """,
+        """
+          @JavaMethod
+          open override func equals(_ arg0: JavaObject?) -> Bool
+        """,
+        """
+          @JavaMethod
+          open func intern() -> String
+        """
+      ]
+    )
+  }
 }
 
 @JavaClass("java.util.ArrayList")
