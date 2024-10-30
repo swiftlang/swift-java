@@ -125,13 +125,15 @@ extension JavaClassMacro: MemberMacro {
       """
     )
 
-    members.append("""
-      /// Casting to ``\(raw: superclass)`` will never be nil because ``\(raw: swiftName)`` extends it.
-      public func `as`(_: \(raw: superclass).Type) -> \(raw: superclass) {
-          return \(raw: superclass)(javaHolder: javaHolder)
-      }
-      """
-    )
+    if !isSwiftClass {
+      members.append("""
+        /// Casting to ``\(raw: superclass)`` will never be nil because ``\(raw: swiftName)`` extends it.
+        public func `as`(_: \(raw: superclass).Type) -> \(raw: superclass) {
+            return \(raw: superclass)(javaHolder: javaHolder)
+        }
+        """
+      )
+    }
 
     return members
   }

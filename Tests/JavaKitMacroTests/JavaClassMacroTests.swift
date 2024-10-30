@@ -193,11 +193,6 @@ class JavaKitMacroTests: XCTestCase {
             public required init(javaHolder: JavaObjectHolder) {
                 super.init(javaHolder: javaHolder)
             }
-
-            /// Casting to ``OtherJavaType`` will never be nil because ``HelloWorld`` extends it.
-            public func `as`(_: OtherJavaType.Type) -> OtherJavaType {
-                return OtherJavaType(javaHolder: javaHolder)
-            }
         }
       """,
       macros: Self.javaKitMacros
@@ -240,11 +235,6 @@ class JavaKitMacroTests: XCTestCase {
 
             public required init(javaHolder: JavaObjectHolder) {
                 self.javaHolder = javaHolder
-            }
-
-            /// Casting to ``JavaObject`` will never be nil because ``JavaObject`` extends it.
-            public func `as`(_: JavaObject.Type) -> JavaObject {
-                return JavaObject(javaHolder: javaHolder)
             }
         }
       """,
