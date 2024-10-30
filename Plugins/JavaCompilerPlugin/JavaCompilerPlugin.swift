@@ -24,9 +24,11 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     let javaFiles = sourceModule.sourceFiles.map { $0.url }.filter {
       $0.pathExtension == "java"
     }
+    print("JAVA FILES IN \(sourceModule.sourceFiles) .... \(javaFiles)")
     if javaFiles.isEmpty {
       return []
     }
+
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.

@@ -25,4 +25,33 @@ struct Configuration: Codable {
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
   var classes: [String: String] = [:]
+
+  var dependencies: [JavaDependencyDescriptor] = []
+}
+
+struct JavaDependencyDescriptor: Codable {
+  var groupID: String
+  var artifactID: String
+  var version: String
+
+  init(from decoder: any Decoder) throws {
+    var container = try decoder.singleValueContainer()
+    let string = try container.decode(String.self)
+    let parts = string.split(separator: ":")
+    guard parts.count == 3 else {
+      throw JavaDependencyDescriptorError(message: "Illegal dependency, did not match: `groupID:artifactID:version")
+    }
+    self.groupID = String(parts[0])
+    self.artifactID = String(parts[1])
+    self.version = String(parts[2])
+  }
+
+  func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode("\(self.groupID):\(self.artifactID):\(self.version)")
+  }
+
+  struct JavaDependencyDescriptorError: Error {
+    let message: String
+  }
 }

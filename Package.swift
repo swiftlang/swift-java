@@ -41,9 +41,9 @@ let javaIncludePath = "\(javaHome)/include"
 #endif
 
 let package = Package(
-  name: "JavaKit",
+  name: "swift-java",
   platforms: [
-    .macOS(.v10_15)
+    .macOS(.v13)
   ],
   products: [
     // ==== JavaKit (i.e. calling Java directly Swift utilities)
@@ -281,6 +281,22 @@ let package = Package(
       ]
     ),
 
+    .target(
+      name: "JavaKitDependencyResolver",
+      dependencies: [
+        "JavaKitReflection",
+      ],
+      exclude: [
+        "Java2Swift.config",
+        "org/javakit/deps/DependencyResolver.java",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .enableUpcomingFeature("BareSlashRegexLiterals"),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+      ]
+    ),
+
     .executableTarget(
       name: "Java2Swift",
       dependencies: [
@@ -292,6 +308,7 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "Java2SwiftLib",
+        "JavaKitDependencyResolver",
       ],
 
       swiftSettings: [
