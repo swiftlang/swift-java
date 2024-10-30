@@ -26,6 +26,7 @@ package class JavaTranslator {
   let swiftModuleName: String
 
   let environment: JNIEnvironment
+  let translateAsClass: Bool
   let format: BasicFormat
 
   /// A mapping from the name of each known Java class to the corresponding
@@ -61,10 +62,12 @@ package class JavaTranslator {
   package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
+    translateAsClass: Bool = false,
     format: BasicFormat = JavaTranslator.defaultFormat
   ) {
     self.swiftModuleName = swiftModuleName
     self.environment = environment
+    self.translateAsClass = translateAsClass
     self.format = format
   }
 
@@ -246,6 +249,11 @@ extension JavaTranslator {
     }
 
     throw TranslationError.untranslatedJavaClass(name)
+  }
+
+  /// The default Swift access specifier for a Java method.
+  var defaultAccessSpecifier: String {
+    translateAsClass ? "open" : "public"
   }
 }
 

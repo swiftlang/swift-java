@@ -266,6 +266,33 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testJavaLangObjectMappingAsClass() throws {
+    try assertTranslatedClass(
+      JavaObject.self,
+      swiftTypeName: "JavaObject",
+      asClass: true,
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Object")
+        open class JavaObject {
+        """,
+        """
+          @JavaMethod
+          public init(environment: JNIEnvironment? = nil)
+        """,
+        """
+          @JavaMethod
+          open func toString() -> String
+        """,
+        """
+          @JavaMethod
+          open func wait() throws
+        """
+      ]
+    )
+  }
 }
 
 @JavaClass("java.util.ArrayList")
@@ -295,6 +322,7 @@ public struct MyJavaIntFunction<R: AnyJavaObject> {
 func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   _ javaType: JavaClassType.Type,
   swiftTypeName: String,
+  asClass: Bool = false,
   translatedClasses: [
     String: (swiftType: String, swiftModule: String?)
   ] = [:],
@@ -306,7 +334,8 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   let environment = try jvm.environment()
   let translator = JavaTranslator(
     swiftModuleName: "SwiftModule",
-    environment: environment
+    environment: environment,
+    translateAsClass: asClass
   )
 
   translator.translatedClasses = translatedClasses

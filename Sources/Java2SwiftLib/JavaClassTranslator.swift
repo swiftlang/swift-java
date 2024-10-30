@@ -161,8 +161,14 @@ struct JavaClassTranslator {
     }
 
     // Gather methods.
-    for method in javaClass.getMethods() {
+    let methods = translator.translateAsClass
+      ? javaClass.getDeclaredMethods()
+      : javaClass.getMethods()
+    for method in methods {
       guard let method else { continue }
+
+      // Only look at public methods here.
+      guard method.isPublic else { continue }
 
       // Skip any methods that are expected to be implemented in Swift. We will
       // visit them in the second pass, over the *declared* methods, because
@@ -178,6 +184,7 @@ struct JavaClassTranslator {
     }
 
     if translator.swiftNativeImplementations.contains(javaClass.getName()) {
+      // Gather the native methods we're going to implement.
       for method in javaClass.getDeclaredMethods() {
         guard let method else { continue }
 
@@ -206,6 +213,12 @@ extension JavaClassTranslator {
         enumConstants.append(field)
       }
 
+      return
+    }
+
+    // Don't include inherited fields when translating to a class.
+    if translator.translateAsClass &&
+        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
 
@@ -297,10 +310,11 @@ extension JavaClassTranslator {
 
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass";
+    let introducer = translator.translateAsClass ? "open class" : "public struct"
     var classDecl: DeclSyntax =
       """
       @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extends)\(raw: interfacesStr))
-      public struct \(raw: swiftInnermostTypeName)\(raw: genericParameterClause) {
+      \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """
@@ -483,7 +497,8 @@ extension JavaClassTranslator {
     let methodAttribute: AttributeSyntax = implementedInSwift
       ? ""
       : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
-    let accessModifier = implementedInSwift ? "" : "public "
+    let accessModifier = implementedInSwift ? ""
+      : "\(translator.defaultAccessSpecifier) "
     return """
       \(methodAttribute)\(raw: accessModifier)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """

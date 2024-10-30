@@ -237,12 +237,22 @@ extension AnyJavaObject {
     )
   }
 
-  /// Call a Java method with the given name and arguments, which must be of the correct
-  /// type, that produces the given result type.
+  /// Construct a new Java object with the given name and arguments and return
+  /// the result Java instance.
   public static func dynamicJavaNewObject<each Param: JavaValue>(
     in environment: JNIEnvironment,
     arguments: repeat each Param
   ) throws -> Self {
+    let this = try dynamicJavaNewObjectInstance(in: environment, arguments: repeat each arguments)
+    return Self(javaThis: this, environment: environment)
+  }
+
+  /// Construct a new Java object with the given name and arguments and return
+  /// the result Java instance.
+  public static func dynamicJavaNewObjectInstance<each Param: JavaValue>(
+    in environment: JNIEnvironment,
+    arguments: repeat each Param
+  ) throws -> jobject {
     let thisClass = try Self.getJNIClass(in: environment)
 
     // Compute the method signature so we can find the right method, then look up the
@@ -257,11 +267,9 @@ extension AnyJavaObject {
 
     // Retrieve the constructor, then map the arguments and call it.
     let jniArgs = getJValues(repeat each arguments, in: environment)
-    let this = try environment.translatingJNIExceptions {
+    return try environment.translatingJNIExceptions {
       environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
     }!
-
-    return Self(javaThis: this, environment: environment)
   }
 
   /// Retrieve the JNI field ID for a field with the given name and type.
