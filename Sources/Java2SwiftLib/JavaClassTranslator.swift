@@ -37,6 +37,10 @@ struct JavaClassTranslator {
   /// class.
   let swiftTypeName: String
 
+  /// The effective Java superclass object, which is the nearest
+  /// superclass that has been mapped into Swift.
+  let effectiveJavaSuperclass: JavaClass<JavaObject>?
+
   /// The Swift name of the superclass.
   let swiftSuperclass: String?
 
@@ -114,14 +118,24 @@ struct JavaClassTranslator {
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
     // Superclass.
-    if !javaClass.isInterface(), let javaSuperclass = javaClass.getSuperclass() {
-      do {
-        self.swiftSuperclass = try translator.getSwiftTypeName(javaSuperclass, preferValueTypes: false).swiftName
-      } catch {
-        translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
-        self.swiftSuperclass = nil
+    if !javaClass.isInterface() {
+      var javaSuperclass = javaClass.getSuperclass()
+      var swiftSuperclass: String? = nil
+      while let javaSuperclassNonOpt = javaSuperclass {
+        do {
+          swiftSuperclass = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
+          break
+        } catch {
+          translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
+        }
+
+        javaSuperclass = javaSuperclassNonOpt.getSuperclass()
       }
+
+      self.effectiveJavaSuperclass = javaSuperclass
+      self.swiftSuperclass = swiftSuperclass
     } else {
+      self.effectiveJavaSuperclass = nil
       self.swiftSuperclass = nil
     }
 
@@ -646,7 +660,7 @@ extension JavaClassTranslator {
   /// Determine whether this method is an override of another Java
   /// method.
   func isOverride(_ method: Method) -> Bool {
-    guard let javaSuperclass = javaClass.getSuperclass() else {
+    guard let javaSuperclass = effectiveJavaSuperclass else {
       return false
     }
 

@@ -327,7 +327,78 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testURLLoaderSkipMappingAsClass() throws {
+    // URLClassLoader actually inherits from SecureClassLoader. However,
+    // that type wasn't mapped into Swift, so we find the nearest
+    // superclass that was mapped into Swift.
+    try assertTranslatedClass(
+      URLClassLoader.self,
+      swiftTypeName: "URLClassLoader",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.ClassLoader" : ("ClassLoader", "JavaKit"),
+        "java.net.URL" : ("URL", "JavaKitNetwork"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.net.URLClassLoader")
+        open class URLClassLoader: ClassLoader {
+        """,
+        """
+          @JavaMethod
+          open func close() throws
+        """,
+        """
+          @JavaMethod
+          open override func findResource(_ arg0: String) -> URL!
+        """,
+      ]
+    )
+  }
+
+  func testURLLoaderSkipTwiceMappingAsClass() throws {
+    // URLClassLoader actually inherits from SecureClassLoader. However,
+    // that type wasn't mapped into Swift here, nor is ClassLoader,
+    // so we fall back to JavaObject.
+    try assertTranslatedClass(
+      URLClassLoader.self,
+      swiftTypeName: "URLClassLoader",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.net.URL" : ("URL", "JavaKitNetwork"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.net.URLClassLoader")
+        open class URLClassLoader: JavaObject {
+        """,
+        """
+          @JavaMethod
+          open func close() throws
+        """,
+        """
+          @JavaMethod
+          open func findResource(_ arg0: String) -> URL!
+        """,
+      ]
+    )
+  }
 }
+
+@JavaClass("java.lang.ClassLoader")
+public struct ClassLoader { }
+
+@JavaClass("java.security.SecureClassLoader")
+public struct SecureClassLoader { }
+
+@JavaClass("java.net.URLClassLoader")
+public struct URLClassLoader { }
+
 
 @JavaClass("java.util.ArrayList")
 public struct MyArrayList<E: AnyJavaObject> {
