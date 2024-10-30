@@ -127,6 +127,14 @@ let package = Package(
       targets: ["JExtractSwift"]
     ),
 
+    // ==== Plugin for wrapping Java classes in Swift
+    .plugin(
+      name: "JExtractSwiftPlugin",
+      targets: [
+        "JExtractSwiftPlugin"
+      ]
+    ),
+
     // ==== Examples
 
     .library(
@@ -225,6 +233,7 @@ let package = Package(
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
+
     .plugin(
       name: "JavaCompilerPlugin",
       capability: .buildTool()
@@ -325,6 +334,14 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .plugin(
+      name: "JExtractSwiftPlugin",
+      capability: .buildTool(),
+      dependencies: [
+        "JExtractSwiftTool"
       ]
     ),
 
