@@ -17,8 +17,13 @@ import Foundation
 extension JavaTranslator {
   /// Read a configuration file from the given URL.
   package static func readConfiguration(from url: URL) throws -> Configuration {
-    let contents = try Data(contentsOf: url)
-    return try JSONDecoder().decode(Configuration.self, from: contents)
+    do {
+      let contents = try Data(contentsOf: url)
+      return try JSONDecoder().decode(Configuration.self, from: contents)
+    } catch {
+      // Make the error message useful by including which file we failed to decode
+      throw ConfigurationError(message: "Failed to decode configuration: \(url)", error: error)
+    }
   }
 
   /// Load the configuration file with the given name to populate the known set of
@@ -31,4 +36,9 @@ extension JavaTranslator {
       )
     }
   }
+}
+
+struct ConfigurationError: Error {
+  let message: String
+  let error: any Error
 }

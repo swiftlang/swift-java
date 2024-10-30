@@ -42,6 +42,12 @@ struct JavaToSwift: ParsableCommand {
   )
   var jar: Bool = false
 
+  @Flag(
+    help:
+      "Fetch dependencies from given file"
+  )
+  var fetch: Bool = false
+
   @Option(
     name: [.customLong("cp"), .customLong("classpath")],
     help: "Class search path of directories and zip/jar files from which Java classes can be loaded."
@@ -100,6 +106,8 @@ struct JavaToSwift: ParsableCommand {
   /// Describes what kind of generation action is being performed by
   /// Java2Swift.
   enum GenerationMode {
+    case fetchDependencies(Configuration)
+
     /// Generate a configuration file given a Jar file.
     case configuration(jarFile: String)
 
@@ -115,7 +123,11 @@ struct JavaToSwift: ParsableCommand {
       generationMode = .configuration(jarFile: input)
     } else {
       let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
-      generationMode = .classWrappers(config)
+      if fetch {
+        generationMode = .fetchDependencies(config)
+      } else {
+        generationMode = .classWrappers(config)
+      }
     }
 
     // Load all of the dependent configurations and associate them with Swift
@@ -141,7 +153,8 @@ struct JavaToSwift: ParsableCommand {
     case .configuration(jarFile: let jarFile):
       //   * Jar file (in `-jar` mode)
       classPathPieces.append(jarFile)
-    case .classWrappers(let config):
+    case .classWrappers(let config),
+         .fetchDependencies(let config):
       //   * Class path specified in the configuration file (if any)
       config.classPath.map { classPathPieces.append($0) }
     }
@@ -165,10 +178,17 @@ struct JavaToSwift: ParsableCommand {
       )
 
     case .classWrappers(let config):
+      print("classPath = \(classPath)")
       try generateWrappers(
         config: config,
         classPath: classPath,
         dependentConfigs: dependentConfigs,
+        environment: jvm.environment()
+      )
+
+    case .fetchDependencies(let config):
+      try fetchDependencies(
+        config: config,
         environment: jvm.environment()
       )
     }

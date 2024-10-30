@@ -12,19 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
+import JavaKit
+
+let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
+do {
+  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
+  for prime in sieveClass.findPrimes(100)! {
+    print("Found prime: \(prime.intValue())")
+  }
+} catch {
+  print("Failure: \(error)")
 }
-
-rootProject.name = "swift-java"
-
-include "SwiftKit"
-include "JavaKit"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
-}
-
