@@ -485,9 +485,10 @@ extension JavaClassTranslator {
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
+    let convenienceModifier = translator.translateAsClass ? "convenience " : ""
     return """
       @JavaMethod
-      \(raw: accessModifier)init(\(raw: parametersStr))\(raw: throwsStr)
+      \(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
 
