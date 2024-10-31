@@ -186,7 +186,7 @@ class JavaKitMacroTests: XCTestCase {
           }
 
             /// The full Java class name for this Swift type.
-            public override class var fullJavaClassName: String {
+            open override class var fullJavaClassName: String {
                 "org.swift.example.HelloWorld"
             }
 
@@ -227,7 +227,7 @@ class JavaKitMacroTests: XCTestCase {
           }
 
             /// The full Java class name for this Swift type.
-            public class var fullJavaClassName: String {
+            open class var fullJavaClassName: String {
                 "java.lang.Object"
             }
 

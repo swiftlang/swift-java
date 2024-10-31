@@ -91,9 +91,10 @@ extension JavaClassMacro: MemberMacro {
       fullJavaClassNameMemberModifiers = "class"
     }
 
+    let classNameAccessSpecifier = isSwiftClass ? "open" : "public"
     members.append("""
       /// The full Java class name for this Swift type.
-      public \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String { \(literal: className) }
+      \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String { \(literal: className) }
       """
     )
 
