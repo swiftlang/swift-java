@@ -584,7 +584,7 @@ extension JavaClassTranslator {
       } else {
         try! JavaVirtualMachine.shared().environment()
       }
-      let classObj = try! JavaClass<Self>(environment: _environment)
+      let classObj = try! JavaClass<\(raw: swiftInnermostTypeName)>(environment: _environment)
       switch enumValue {
     \(raw: enumConstants.map {
       return """

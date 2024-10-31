@@ -345,6 +345,9 @@ class Java2SwiftTests: XCTestCase {
         """,
         "public convenience init(_ enumValue: MonthCases, environment: JNIEnvironment? = nil) {",
         """
+        let classObj = try! JavaClass<Month>(environment: _environment)
+        """,
+        """
               case .APRIL:
                 if let APRIL = classObj.APRIL {
                   self.init(javaHolder: APRIL.javaHolder)
