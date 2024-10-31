@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget
+        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       - name: Cache JDK
         id: cache-jdk
         uses: actions/cache@v4
@@ -69,6 +69,9 @@ jobs:
         run: |
           ./gradlew build -x test --no-daemon # just build
           ./gradlew build --info --no-daemon
+      - name: Gradle build (benchmarks)
+        run: |
+          ./gradlew compileJmh --info --no-daemon
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -86,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget
+        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       - name: Cache JDK
         id: cache-jdk
         uses: actions/cache@v4
@@ -130,3 +133,6 @@ jobs:
       - name: Build (Swift) Sample Apps
         run: |
           find Samples/ -name Package.swift -maxdepth 2 -exec swift build --package-path $(dirname {}) \;;
+      # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
+      # - name: Build (Swift) Benchmarks
+      #  run: "swift package --package-path Benchmarks/ benchmark list"

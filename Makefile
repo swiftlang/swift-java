@@ -133,12 +133,12 @@ jextract-generate: jextract-swift generate-JExtract-interface-files
 	swift run jextract-swift  \
 		--package-name com.example.swift.generated \
 		--swift-module ExampleSwiftLibrary \
-		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/src/generated/java \
+		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/build/generated/sources/jextract/main \
 		$(BUILD_DIR)/jextract/ExampleSwiftLibrary/MySwiftLibrary.swiftinterface; \
 	swift run jextract-swift \
 		--package-name org.swift.swiftkit.generated \
 		--swift-module SwiftKitSwift \
-		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/src/generated/java \
+		--output-directory ${SAMPLES_DIR}/SwiftKitSampleApp/build/generated/sources/jextract/main \
 		$(BUILD_DIR)/jextract/SwiftKitSwift/SwiftKit.swiftinterface
 
 

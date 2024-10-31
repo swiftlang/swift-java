@@ -94,18 +94,18 @@ let package = Package(
 
     // ==== Plugin for building Java code
     .plugin(
-        name: "JavaCompilerPlugin",
-        targets: [
-            "JavaCompilerPlugin"
-        ]
+      name: "JavaCompilerPlugin",
+      targets: [
+        "JavaCompilerPlugin"
+      ]
     ),
 
     // ==== Plugin for wrapping Java classes in Swift
     .plugin(
-        name: "Java2SwiftPlugin",
-        targets: [
-            "Java2SwiftPlugin"
-        ]
+      name: "Java2SwiftPlugin",
+      targets: [
+        "Java2SwiftPlugin"
+      ]
     ),
 
     // ==== jextract-swift (extract Java accessors from Swift interface files)
@@ -140,6 +140,7 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(from: "1.1.0")),
+    .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
   targets: [
     .macro(
@@ -225,16 +226,16 @@ let package = Package(
       ]
     ),
     .plugin(
-        name: "JavaCompilerPlugin",
-        capability: .buildTool()
+      name: "JavaCompilerPlugin",
+      capability: .buildTool()
     ),
 
     .plugin(
-        name: "Java2SwiftPlugin",
-        capability: .buildTool(),
-        dependencies: [
-          "Java2Swift"
-        ]
+      name: "Java2SwiftPlugin",
+      capability: .buildTool(),
+      dependencies: [
+        "Java2Swift"
+      ]
     ),
 
     .target(
@@ -373,6 +374,6 @@ let package = Package(
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
-    ),
+    )
   ]
 )

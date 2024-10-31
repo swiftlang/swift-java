@@ -78,6 +78,10 @@ public class MySwiftClass {
     p("make int -> 12")
     return 12
   }
+
+  public func makeRandomIntMethod() -> Int {
+    return Int.random(in: 1..<256)
+  }
 }
 
 @_silgen_name("swift_getTypeByMangledNameInEnvironment")
