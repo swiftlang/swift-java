@@ -280,7 +280,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaMethod
-          public convenience init(environment: JNIEnvironment? = nil)
+          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
         """,
         """
           @JavaMethod
@@ -314,7 +314,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaMethod
-          public convenience init(environment: JNIEnvironment? = nil)
+          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
         """,
         """
           @JavaMethod

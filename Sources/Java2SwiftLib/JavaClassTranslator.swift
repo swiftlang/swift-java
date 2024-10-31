@@ -492,9 +492,10 @@ extension JavaClassTranslator {
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
     let convenienceModifier = translateAsClass ? "convenience " : ""
+    let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
     return """
       @JavaMethod
-      \(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
+      \(raw: nonoverrideAttribute)\(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
 
