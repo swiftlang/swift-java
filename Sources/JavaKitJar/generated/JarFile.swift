@@ -18,6 +18,9 @@ public struct JarFile {
   public func getManifest() throws -> Manifest!
 
   @JavaMethod
+  public func getEntry(_ arg0: String) -> ZipEntry!
+
+  @JavaMethod
   public func getJarEntry(_ arg0: String) -> JarEntry!
 
   @JavaMethod

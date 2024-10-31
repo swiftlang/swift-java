@@ -5,6 +5,9 @@ import JavaRuntime
 @JavaClass("java.util.jar.JarInputStream", extends: JavaObject.self)
 public struct JarInputStream {
   @JavaMethod
+  public func getNextEntry() throws -> ZipEntry!
+
+  @JavaMethod
   public func getNextJarEntry() throws -> JarEntry!
 
   @JavaMethod

@@ -2,49 +2,73 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarOutputStream", extends: JavaObject.self)
-public struct JarOutputStream {
+@JavaClass("java.util.zip.ZipEntry", extends: JavaObject.self)
+public struct ZipEntry {
   @JavaMethod
-  public func putNextEntry(_ arg0: ZipEntry?) throws
+  public init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func closeEntry() throws
+  public init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
-
-  @JavaMethod
-  public func close() throws
-
-  @JavaMethod
-  public func finish() throws
-
-  @JavaMethod
-  public func setMethod(_ arg0: Int32)
-
-  @JavaMethod
-  public func setComment(_ arg0: String)
-
-  @JavaMethod
-  public func setLevel(_ arg0: Int32)
-
-  @JavaMethod
-  public func flush() throws
-
-  @JavaMethod
-  public func write(_ arg0: Int32) throws
-
-  @JavaMethod
-  public func write(_ arg0: [Int8]) throws
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  public func getName() -> String
 
   @JavaMethod
   public func toString() -> String
 
   @JavaMethod
   public func hashCode() -> Int32
+
+  @JavaMethod
+  public func clone() -> JavaObject!
+
+  @JavaMethod
+  public func getMethod() -> Int32
+
+  @JavaMethod
+  public func getSize() -> Int64
+
+  @JavaMethod
+  public func isDirectory() -> Bool
+
+  @JavaMethod
+  public func getTime() -> Int64
+
+  @JavaMethod
+  public func setTime(_ arg0: Int64)
+
+  @JavaMethod
+  public func setSize(_ arg0: Int64)
+
+  @JavaMethod
+  public func getCompressedSize() -> Int64
+
+  @JavaMethod
+  public func setCompressedSize(_ arg0: Int64)
+
+  @JavaMethod
+  public func setCrc(_ arg0: Int64)
+
+  @JavaMethod
+  public func getCrc() -> Int64
+
+  @JavaMethod
+  public func setMethod(_ arg0: Int32)
+
+  @JavaMethod
+  public func setExtra(_ arg0: [Int8])
+
+  @JavaMethod
+  public func getExtra() -> [Int8]
+
+  @JavaMethod
+  public func setComment(_ arg0: String)
+
+  @JavaMethod
+  public func getComment() -> String
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
   public func getClass() -> JavaClass<JavaObject>!
@@ -64,7 +88,7 @@ public struct JarOutputStream {
   @JavaMethod
   public func wait() throws
 }
-extension JavaClass<JarOutputStream> {
+extension JavaClass<ZipEntry> {
   @JavaStaticField(isFinal: true)
   public var STORED: Int32
 

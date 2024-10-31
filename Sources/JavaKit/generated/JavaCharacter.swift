@@ -1612,7 +1612,7 @@ extension JavaCharacter {
     } else {
       try! JavaVirtualMachine.shared().environment()
     }
-    let classObj = try! JavaClass<Self>(environment: _environment)
+    let classObj = try! JavaClass<UnicodeScript>(environment: _environment)
     switch enumValue {
       case .COMMON:
         if let COMMON = classObj.COMMON {
