@@ -133,5 +133,6 @@ jobs:
       - name: Build (Swift) Sample Apps
         run: |
           find Samples/ -name Package.swift -maxdepth 2 -exec swift build --package-path $(dirname {}) \;;
-      - name: Build (Swift) Benchmarks
-        run: "swift package --package-path Benchmarks/ benchmark list"
+      # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
+      # - name: Build (Swift) Benchmarks
+      #  run: "swift package --package-path Benchmarks/ benchmark list"
