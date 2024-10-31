@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.TreeSet")
+@JavaClass("java.util.TreeSet", extends: JavaObject.self)
 public struct TreeSet<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)

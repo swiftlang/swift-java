@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.TreeMap")
+@JavaClass("java.util.TreeMap", extends: JavaObject.self)
 public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
   public init(environment: JNIEnvironment? = nil)

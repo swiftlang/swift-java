@@ -266,7 +266,298 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testJavaLangObjectMappingAsClass() throws {
+    try assertTranslatedClass(
+      JavaObject.self,
+      swiftTypeName: "JavaObject",
+      asClass: true,
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Object")
+        open class JavaObject {
+        """,
+        """
+          @JavaMethod
+          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+        """,
+        """
+          @JavaMethod
+          open func toString() -> String
+        """,
+        """
+          @JavaMethod
+          open func wait() throws
+        """,
+        """
+          @JavaMethod
+          open func clone() throws -> JavaObject!
+        """,
+      ]
+    )
+  }
+
+  func testJavaLangStringMappingAsClass() throws {
+    try assertTranslatedClass(
+      JavaString.self,
+      swiftTypeName: "JavaString",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.String")
+        open class JavaString: JavaObject {
+        """,
+        """
+          @JavaMethod
+          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+        """,
+        """
+          @JavaMethod
+          open override func toString() -> String
+        """,
+        """
+          @JavaMethod
+          open override func equals(_ arg0: JavaObject?) -> Bool
+        """,
+        """
+          @JavaMethod
+          open func intern() -> String
+        """,
+        """
+          @JavaStaticMethod
+          public func valueOf(_ arg0: Int64) -> String
+        """,
+      ]
+    )
+  }
+
+  func testEnumAsClass() throws {
+    try assertTranslatedClass(
+      JavaMonth.self,
+      swiftTypeName: "Month",
+      asClass: true,
+      expectedChunks: [
+        "import JavaKit",
+        "enum MonthCases: Equatable",
+        "case APRIL",
+        "public var enumValue: MonthCases!",
+        """
+            } else if self.equals(classObj.APRIL?.as(JavaObject.self)) {
+              return MonthCases.APRIL
+            }
+        """,
+        "public convenience init(_ enumValue: MonthCases, environment: JNIEnvironment? = nil) {",
+        """
+        let classObj = try! JavaClass<Month>(environment: _environment)
+        """,
+        """
+              case .APRIL:
+                if let APRIL = classObj.APRIL {
+                  self.init(javaHolder: APRIL.javaHolder)
+                } else {
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                }
+        """,
+        """
+          @JavaStaticField(isFinal: true)
+          public var APRIL: Month!
+        """
+      ])
+  }
+
+  func testURLLoaderSkipMappingAsClass() throws {
+    // URLClassLoader actually inherits from SecureClassLoader. However,
+    // that type wasn't mapped into Swift, so we find the nearest
+    // superclass that was mapped into Swift.
+    try assertTranslatedClass(
+      URLClassLoader.self,
+      swiftTypeName: "URLClassLoader",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.ClassLoader" : ("ClassLoader", "JavaKit"),
+        "java.net.URL" : ("URL", "JavaKitNetwork"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.net.URLClassLoader")
+        open class URLClassLoader: ClassLoader {
+        """,
+        """
+          @JavaMethod
+          open func close() throws
+        """,
+        """
+          @JavaMethod
+          open override func findResource(_ arg0: String) -> URL!
+        """,
+      ]
+    )
+  }
+
+  func testURLLoaderSkipTwiceMappingAsClass() throws {
+    // URLClassLoader actually inherits from SecureClassLoader. However,
+    // that type wasn't mapped into Swift here, nor is ClassLoader,
+    // so we fall back to JavaObject.
+    try assertTranslatedClass(
+      URLClassLoader.self,
+      swiftTypeName: "URLClassLoader",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.net.URL" : ("URL", "JavaKitNetwork"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.net.URLClassLoader")
+        open class URLClassLoader: JavaObject {
+        """,
+        """
+          @JavaMethod
+          open func close() throws
+        """,
+        """
+          @JavaMethod
+          open func findResource(_ arg0: String) -> URL!
+        """,
+      ]
+    )
+  }
+
+  func testOverrideSkipImmediateSuperclass() throws {
+    // JavaByte overrides equals() from JavaObject, which it indirectly
+    // inherits through JavaNumber
+    try assertTranslatedClass(
+      JavaByte.self,
+      swiftTypeName: "JavaByte",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Number" : ("JavaNumber", "JavaKit"),
+        "java.lang.Byte" : ("JavaByte", "JavaKit"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Byte")
+        open class JavaByte: JavaNumber {
+        """,
+        """
+          @JavaMethod
+          open override func equals(_ arg0: JavaObject?) -> Bool
+        """,
+      ]
+    )
+  }
+
+  func testJavaInterfaceAsClassNOT() throws {
+    try assertTranslatedClass(
+      MyJavaIntFunction<JavaObject>.self,
+      swiftTypeName: "MyJavaIntFunction",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaInterface("java.util.function.IntFunction")
+        public struct MyJavaIntFunction<R: AnyJavaObject> {
+        """,
+        """
+          @JavaMethod
+          public func apply(_ arg0: Int32) -> JavaObject!
+        """,
+      ]
+    )
+  }
+
+  func testCovariantInJavaNotInSwiftOverride() throws {
+    try assertTranslatedClass(
+      Method.self,
+      swiftTypeName: "Method",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Class" : ("JavaClass", "JavaKit"),
+        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
+        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+      ],
+      expectedChunks: [
+        "import JavaKitReflection",
+        """
+        @JavaClass("java.lang.reflect.Method")
+        open class Method: Executable {
+        """,
+        """
+          @JavaMethod
+          open func getTypeParameters() -> [TypeVariable<Method>?]
+        """,
+        """
+          @JavaMethod
+          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        """,
+        """
+          @JavaMethod
+          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        """,
+      ]
+    )
+  }
+
+  func testCovariantInJavaNotInSwiftOverride2() throws {
+    try assertTranslatedClass(
+      Constructor.self,
+      swiftTypeName: "Constructor",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Class" : ("JavaClass", "JavaKit"),
+        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
+        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+      ],
+      expectedChunks: [
+        "import JavaKitReflection",
+        """
+        @JavaClass("java.lang.reflect.Constructor")
+        open class Constructor<T: AnyJavaObject>: Executable {
+        """,
+        """
+          @JavaMethod
+          open func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
+        """,
+        """
+          @JavaMethod
+          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        """,
+        """
+          @JavaMethod
+          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        """,
+      ]
+    )
+  }
 }
+
+@JavaClass("java.lang.ClassLoader")
+public struct ClassLoader { }
+
+@JavaClass("java.security.SecureClassLoader")
+public struct SecureClassLoader { }
+
+@JavaClass("java.net.URLClassLoader")
+public struct URLClassLoader { }
+
 
 @JavaClass("java.util.ArrayList")
 public struct MyArrayList<E: AnyJavaObject> {
@@ -290,11 +581,28 @@ public struct MySupplier { }
 public struct MyJavaIntFunction<R: AnyJavaObject> {
 }
 
+@JavaClass("java.lang.reflect.Method", extends: Executable.self)
+public struct Method {
+}
+
+@JavaClass("java.lang.reflect.Constructor", extends: Executable.self)
+public struct Constructor {
+}
+
+@JavaClass("java.lang.reflect.Executable")
+public struct Executable {
+}
+
+@JavaInterface("java.lang.reflect.TypeVariable")
+public struct TypeVariable<D: AnyJavaObject> {
+}
+
 /// Translate a Java class and assert that the translated output contains
 /// each of the expected "chunks" of text.
 func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   _ javaType: JavaClassType.Type,
   swiftTypeName: String,
+  asClass: Bool = false,
   translatedClasses: [
     String: (swiftType: String, swiftModule: String?)
   ] = [:],
@@ -306,7 +614,8 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   let environment = try jvm.environment()
   let translator = JavaTranslator(
     swiftModuleName: "SwiftModule",
-    environment: environment
+    environment: environment,
+    translateAsClass: asClass
   )
 
   translator.translatedClasses = translatedClasses

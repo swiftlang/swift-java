@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.PriorityQueue")
+@JavaClass("java.util.PriorityQueue", extends: JavaObject.self)
 public struct PriorityQueue<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: PriorityQueue<JavaObject>?, environment: JNIEnvironment? = nil)

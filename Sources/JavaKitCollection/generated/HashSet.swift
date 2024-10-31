@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.HashSet", implements: JavaSet<JavaObject>.self)
+@JavaClass("java.util.HashSet", extends: JavaObject.self, implements: JavaSet<JavaObject>.self)
 public struct HashSet<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: Int32, environment: JNIEnvironment? = nil)

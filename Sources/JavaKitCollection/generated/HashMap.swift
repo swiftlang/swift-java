@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.HashMap")
+@JavaClass("java.util.HashMap", extends: JavaObject.self)
 public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: Int32, environment: JNIEnvironment? = nil)

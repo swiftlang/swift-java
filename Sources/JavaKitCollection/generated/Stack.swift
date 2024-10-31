@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.Stack")
+@JavaClass("java.util.Stack", extends: JavaObject.self)
 public struct Stack<E: AnyJavaObject> {
   @JavaMethod
   public init(environment: JNIEnvironment? = nil)

@@ -26,6 +26,11 @@ struct JavaClassTranslator {
   /// The Java class (or interface) being translated.
   let javaClass: JavaClass<JavaObject>
 
+  /// Whether to translate this Java class into a Swift class.
+  ///
+  /// This will be false for Java interfaces.
+  let translateAsClass: Bool
+
   /// The type parameters to the Java class or interface.
   let javaTypeParameters: [TypeVariable<JavaClass<JavaObject>>]
 
@@ -36,6 +41,10 @@ struct JavaClassTranslator {
   /// The full name of the Swift type that will be generated for this Java
   /// class.
   let swiftTypeName: String
+
+  /// The effective Java superclass object, which is the nearest
+  /// superclass that has been mapped into Swift.
+  let effectiveJavaSuperclass: JavaClass<JavaObject>?
 
   /// The Swift name of the superclass.
   let swiftSuperclass: String?
@@ -103,6 +112,7 @@ struct JavaClassTranslator {
     let fullName = javaClass.getName()
     self.javaClass = javaClass
     self.translator = translator
+    self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
     self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
       fullName,
       preferValueTypes: false,
@@ -114,14 +124,24 @@ struct JavaClassTranslator {
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
     // Superclass.
-    if !javaClass.isInterface(), let javaSuperclass = javaClass.getSuperclass() {
-      do {
-        self.swiftSuperclass = try translator.getSwiftTypeName(javaSuperclass, preferValueTypes: false).swiftName
-      } catch {
-        translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
-        self.swiftSuperclass = nil
+    if !javaClass.isInterface() {
+      var javaSuperclass = javaClass.getSuperclass()
+      var swiftSuperclass: String? = nil
+      while let javaSuperclassNonOpt = javaSuperclass {
+        do {
+          swiftSuperclass = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
+          break
+        } catch {
+          translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
+        }
+
+        javaSuperclass = javaSuperclassNonOpt.getSuperclass()
       }
+
+      self.effectiveJavaSuperclass = javaSuperclass
+      self.swiftSuperclass = swiftSuperclass
     } else {
+      self.effectiveJavaSuperclass = nil
       self.swiftSuperclass = nil
     }
 
@@ -161,8 +181,14 @@ struct JavaClassTranslator {
     }
 
     // Gather methods.
-    for method in javaClass.getMethods() {
+    let methods = translateAsClass
+      ? javaClass.getDeclaredMethods()
+      : javaClass.getMethods()
+    for method in methods {
       guard let method else { continue }
+
+      // Only look at public and protected methods here.
+      guard method.isPublic || method.isProtected else { continue }
 
       // Skip any methods that are expected to be implemented in Swift. We will
       // visit them in the second pass, over the *declared* methods, because
@@ -178,6 +204,7 @@ struct JavaClassTranslator {
     }
 
     if translator.swiftNativeImplementations.contains(javaClass.getName()) {
+      // Gather the native methods we're going to implement.
       for method in javaClass.getDeclaredMethods() {
         guard let method else { continue }
 
@@ -206,6 +233,12 @@ extension JavaClassTranslator {
         enumConstants.append(field)
       }
 
+      return
+    }
+
+    // Don't include inherited fields when translating to a class.
+    if translateAsClass &&
+        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
 
@@ -283,8 +316,18 @@ extension JavaClassTranslator {
     // Collect all of the members of this type.
     let members = properties + enumDecls + initializers + instanceMethods
 
-    // Compute the "extends" clause for the superclass.
-    let extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
+    // Compute the "extends" clause for the superclass (of the struct
+    // formulation) or the inheritance clause (for the class
+    // formulation).
+    let extends: String
+    let inheritanceClause: String
+    if translateAsClass {
+      extends = ""
+      inheritanceClause = swiftSuperclass.map { ": \($0)" } ?? ""
+    } else {
+      extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
+      inheritanceClause = ""
+    }
 
     // Compute the string to capture all of the interfaces.
     let interfacesStr: String
@@ -297,10 +340,11 @@ extension JavaClassTranslator {
 
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass";
+    let introducer = translateAsClass ? "open class" : "public struct"
     var classDecl: DeclSyntax =
       """
       @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extends)\(raw: interfacesStr))
-      public struct \(raw: swiftInnermostTypeName)\(raw: genericParameterClause) {
+      \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """
@@ -447,9 +491,11 @@ extension JavaClassTranslator {
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
+    let convenienceModifier = translateAsClass ? "convenience " : ""
+    let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
     return """
       @JavaMethod
-      \(raw: accessModifier)init(\(raw: parametersStr))\(raw: throwsStr)
+      \(raw: nonoverrideAttribute)\(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
 
@@ -483,9 +529,14 @@ extension JavaClassTranslator {
     let methodAttribute: AttributeSyntax = implementedInSwift
       ? ""
       : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
-    let accessModifier = implementedInSwift ? "" : "public "
+    let accessModifier = implementedInSwift ? ""
+      : (javaMethod.isStatic || !translateAsClass) ? "public "
+      : "open "
+    let overrideOpt = (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
+      ? "override "
+      : ""
     return """
-      \(methodAttribute)\(raw: accessModifier)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
       """
   }
 
@@ -532,20 +583,23 @@ extension JavaClassTranslator {
       }
     """
 
+    let convenienceModifier = translateAsClass ? "convenience " : ""
     let initSyntax: DeclSyntax = """
-    public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
+    public \(raw: convenienceModifier)init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
       let _environment = if let environment {
         environment
       } else {
         try! JavaVirtualMachine.shared().environment()
       }
-      let classObj = try! JavaClass<Self>(environment: _environment)
+      let classObj = try! JavaClass<\(raw: swiftInnermostTypeName)>(environment: _environment)
       switch enumValue {
     \(raw: enumConstants.map {
       return """
           case .\($0.getName()):
             if let \($0.getName()) = classObj.\($0.getName()) {
-              self = \($0.getName())
+              \(translateAsClass
+                  ? "self.init(javaHolder: \($0.getName()).javaHolder)"
+                  : "self = \($0.getName())")
             } else {
               fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
             }
@@ -609,5 +663,173 @@ struct MethodCollector {
     // new method.
     methodsByName[method.getName(), default: []].append(methods.count)
     methods.append(method)
+  }
+}
+
+// MARK: Utility functions
+extension JavaClassTranslator {
+  /// Determine whether this method is an override of another Java
+  /// method.
+  func isOverride(_ method: Method) -> Bool {
+    var currentSuperclass = effectiveJavaSuperclass
+    while let currentSuperclassNonOpt = currentSuperclass {
+      // Set the loop up for the next run.
+      defer {
+        currentSuperclass = currentSuperclassNonOpt.getSuperclass()
+      }
+
+      do {
+        // If this class didn't get translated into Swift, skip it.
+        if translator.translatedClasses[currentSuperclassNonOpt.getName()] == nil {
+          continue
+        }
+
+        // If this superclass declares a method with the same parameter types,
+        // we have an override.
+        guard let overriddenMethod = try currentSuperclassNonOpt
+          .getDeclaredMethod(method.getName(), method.getParameterTypes()) else {
+          continue
+        }
+
+        // Ignore non-public, non-protected methods because they would not
+        // have been render into the Swift superclass.
+        if !overriddenMethod.isPublic && !overriddenMethod.isProtected {
+          continue
+        }
+
+        // We know that Java considers this method an override. However, it is
+        // possible that Swift will not consider it an override, because Java
+        // has subtyping relations that Swift does not.
+        if method.getGenericReturnType().isEqualToOrSubtypeOf(overriddenMethod.getGenericReturnType()) {
+          return true
+        }
+      } catch {
+      }
+    }
+
+    return false
+  }
+}
+
+extension [Type?] {
+  /// Determine whether the types in the array match the other array.
+  func allTypesEqual(_ other: [Type?]) -> Bool {
+    if self.count != other.count {
+      return false
+    }
+
+    for (selfType, otherType) in zip(self, other) {
+      if !selfType!.isEqualTo(otherType!) {
+        return false
+      }
+    }
+
+    return true
+  }
+}
+
+extension Type {
+  /// Adjust the given type to use its bounds, mirroring what we do in
+  /// mapping Java types into Swift.
+  func adjustToJavaBounds(adjusted: inout Bool) -> Type {
+    if let typeVariable = self.as(TypeVariable<GenericDeclaration>.self),
+       typeVariable.getBounds().count == 1,
+       let bound = typeVariable.getBounds()[0] {
+      adjusted = true
+      return bound
+    }
+
+    if let wildcardType = self.as(WildcardType.self),
+      wildcardType.getUpperBounds().count == 1,
+      let bound = wildcardType.getUpperBounds()[0] {
+      adjusted = true
+      return bound
+    }
+
+    return self
+  }
+
+  /// Determine whether this type is equivalent to or a subtype of the other
+  /// type.
+  func isEqualTo(_ other: Type) -> Bool {
+    // First, adjust types to their bounds, if we need to.
+    var anyAdjusted: Bool = false
+    let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)
+    let adjustedOther = other.adjustToJavaBounds(adjusted: &anyAdjusted)
+    if anyAdjusted {
+      return adjustedSelf.isEqualTo(adjustedOther)
+    }
+
+    // If both are classes, check for equivalence.
+    if let selfClass = self.as(JavaClass<JavaObject>.self),
+       let otherClass = other.as(JavaClass<JavaObject>.self) {
+      return selfClass.equals(otherClass.as(JavaObject.self))
+    }
+
+    // If both are arrays, check that their component types are equivalent.
+    if let selfArray = self.as(GenericArrayType.self),
+       let otherArray = other.as(GenericArrayType.self) {
+      return selfArray.getGenericComponentType().isEqualTo(otherArray.getGenericComponentType())
+    }
+
+    // If both are parameterized types, check their raw type and type
+    // arguments for equivalence.
+    if let selfParameterizedType = self.as(ParameterizedType.self),
+       let otherParameterizedType = other.as(ParameterizedType.self) {
+      if !selfParameterizedType.getRawType().isEqualTo(otherParameterizedType.getRawType()) {
+        return false
+      }
+
+      return selfParameterizedType.getActualTypeArguments()
+        .allTypesEqual(otherParameterizedType.getActualTypeArguments())
+    }
+
+    // If both are type variables, compare their bounds.
+    // FIXME: This is a hack.
+    if let selfTypeVariable = self.as(TypeVariable<GenericDeclaration>.self),
+       let otherTypeVariable = other.as(TypeVariable<GenericDeclaration>.self) {
+      return selfTypeVariable.getBounds().allTypesEqual(otherTypeVariable.getBounds())
+    }
+
+    // If both are wildcards, compare their upper and lower bounds.
+    if let selfWildcard = self.as(WildcardType.self),
+       let otherWildcard = other.as(WildcardType.self) {
+      return selfWildcard.getUpperBounds().allTypesEqual(otherWildcard.getUpperBounds())
+      && selfWildcard.getLowerBounds().allTypesEqual(otherWildcard.getLowerBounds())
+    }
+
+    return false
+  }
+
+  /// Determine whether this type is equivalent to or a subtype of the
+  /// other type.
+  func isEqualToOrSubtypeOf(_ other: Type) -> Bool {
+    // First, adjust types to their bounds, if we need to.
+    var anyAdjusted: Bool = false
+    let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)
+    let adjustedOther = other.adjustToJavaBounds(adjusted: &anyAdjusted)
+    if anyAdjusted {
+      return adjustedSelf.isEqualToOrSubtypeOf(adjustedOther)
+    }
+
+    if isEqualTo(other) {
+      return true
+    }
+
+    // If both are classes, check for subclassing.
+    if let selfClass = self.as(JavaClass<JavaObject>.self),
+       let otherClass = other.as(JavaClass<JavaObject>.self) {
+      return selfClass.isSubclass(of: otherClass)
+    }
+
+    // Anything object-like is a subclass of java.lang.Object
+    if let otherClass = other.as(JavaClass<JavaObject>.self),
+       otherClass.getName() == "java.lang.Object" {
+      if self.is(GenericArrayType.self) || self.is(ParameterizedType.self) ||
+          self.is(WildcardType.self) || self.is(TypeVariable<GenericDeclaration>.self) {
+        return true
+      }
+    }
+    return false
   }
 }

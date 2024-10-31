@@ -2,10 +2,13 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarEntry")
+@JavaClass("java.util.jar.JarEntry", extends: ZipEntry.self)
 public struct JarEntry {
   @JavaMethod
   public init(_ arg0: JarEntry?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  public init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   public init(_ arg0: String, environment: JNIEnvironment? = nil)

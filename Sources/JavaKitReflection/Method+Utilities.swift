@@ -18,6 +18,11 @@ extension Method {
     return (getModifiers() & 1) != 0
   }
 
+  /// Whether this is a 'protected' method.
+  public var isProtected: Bool {
+    return (getModifiers() & 4) != 0
+  }
+
   /// Whether this is a 'static' method.
   public var isStatic: Bool {
     return (getModifiers() & 0x08) != 0

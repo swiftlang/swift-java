@@ -2,7 +2,7 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
+@JavaClass("java.util.ArrayList", extends: JavaObject.self, implements: List<JavaObject>.self, RandomAccess.self)
 public struct ArrayList<E: AnyJavaObject> {
   @JavaMethod
   public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)

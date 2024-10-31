@@ -115,5 +115,131 @@ class JavaKitMacroTests: XCTestCase {
       macros: Self.javaKitMacros
     )
   }
+
+  func testJavaClassAsClass() throws {
+    assertMacroExpansion("""
+        @JavaClass("org.swift.example.HelloWorld")
+        public class HelloWorld: OtherJavaType {
+          @JavaMethod
+          public init(environment: JNIEnvironment? = nil)
+
+          @JavaMethod
+          public init(_ value: Int32, environment: JNIEnvironment? = nil)
+
+          @JavaMethod
+          public func isBigEnough(_: Int32) -> Bool
+
+          @JavaField
+          public var myField: Int64
+
+          @JavaField
+          public var objectField: JavaObject!
+
+          @JavaField(isFinal: true)
+          public var myFinalField: Int64
+        }
+      """,
+      expandedSource: """
+
+        public class HelloWorld: OtherJavaType {
+          public init(environment: JNIEnvironment? = nil) {
+              let _environment = if let environment {
+                  environment
+              } else {
+                  try! JavaVirtualMachine.shared().environment()
+              }
+              let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment)
+              self.init(javaThis: javaThis, environment: _environment)
+          }
+          public init(_ value: Int32, environment: JNIEnvironment? = nil) {
+              let _environment = if let environment {
+                  environment
+              } else {
+                  try! JavaVirtualMachine.shared().environment()
+              }
+              let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment, arguments: value.self)
+              self.init(javaThis: javaThis, environment: _environment)
+          }
+          public func isBigEnough(_: Int32) -> Bool {
+              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+          }
+          public var myField: Int64 {
+              get {
+                  self[javaFieldName: "myField", fieldType: Int64.self]
+              }
+              set {
+                  self[javaFieldName: "myField", fieldType: Int64.self] = newValue
+              }
+          }
+          public var objectField: JavaObject! {
+              get {
+                  self[javaFieldName: "objectField", fieldType: JavaObject?.self]
+              }
+              set {
+                  self[javaFieldName: "objectField", fieldType: JavaObject?.self] = newValue
+              }
+          }
+          public var myFinalField: Int64 {
+              get {
+                  self[javaFieldName: "myFinalField", fieldType: Int64.self]
+              }
+          }
+
+            /// The full Java class name for this Swift type.
+            open override class var fullJavaClassName: String {
+                "org.swift.example.HelloWorld"
+            }
+
+            public required init(javaHolder: JavaObjectHolder) {
+                super.init(javaHolder: javaHolder)
+            }
+        }
+      """,
+      macros: Self.javaKitMacros
+    )
+  }
+
+  func testJavaObjectAsClass() throws {
+    assertMacroExpansion("""
+        @JavaClass("java.lang.Object")
+        public class JavaObject {
+          @JavaMethod
+          public init(environment: JNIEnvironment? = nil)
+
+          @JavaMethod
+          public func isBigEnough(_: Int32) -> Bool
+        }
+      """,
+      expandedSource: """
+
+        public class JavaObject {
+          public init(environment: JNIEnvironment? = nil) {
+              let _environment = if let environment {
+                  environment
+              } else {
+                  try! JavaVirtualMachine.shared().environment()
+              }
+              let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment)
+              self.init(javaThis: javaThis, environment: _environment)
+          }
+          public func isBigEnough(_: Int32) -> Bool {
+              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+          }
+
+            /// The full Java class name for this Swift type.
+            open class var fullJavaClassName: String {
+                "java.lang.Object"
+            }
+
+            public var javaHolder: JavaObjectHolder
+
+            public required init(javaHolder: JavaObjectHolder) {
+                self.javaHolder = javaHolder
+            }
+        }
+      """,
+      macros: Self.javaKitMacros
+    )
+  }
 }
 
