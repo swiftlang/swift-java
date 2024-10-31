@@ -18,7 +18,8 @@ extension JavaClass {
   public typealias ObjectType = T
 
   /// Lookup this Java class within the given environment.
-  public init(environment: JNIEnvironment? = nil) throws {
+  @_nonoverride
+  public convenience init(environment: JNIEnvironment? = nil) throws {
     let environment = try environment ?? JavaVirtualMachine.shared().environment()
     self.init(
       javaThis: try ObjectType.getJNIClass(in: environment),

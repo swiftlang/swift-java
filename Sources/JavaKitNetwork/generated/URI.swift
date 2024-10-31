@@ -2,127 +2,109 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.net.URI", extends: JavaObject.self)
-public struct URI {
+@JavaClass("java.net.URI")
+open class URI: JavaObject {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, _ arg4: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, _ arg4: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: Int32, _ arg4: String, _ arg5: String, _ arg6: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: Int32, _ arg4: String, _ arg5: String, _ arg6: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func compareTo(_ arg0: JavaObject?) -> Int32
+  open func compareTo(_ arg0: JavaObject?) -> Int32
 
   @JavaMethod
-  public func compareTo(_ arg0: URI?) -> Int32
+  open func compareTo(_ arg0: URI?) -> Int32
 
   @JavaMethod
-  public func isAbsolute() -> Bool
+  open func isAbsolute() -> Bool
 
   @JavaMethod
-  public func resolve(_ arg0: String) -> URI!
+  open func resolve(_ arg0: String) -> URI!
 
   @JavaMethod
-  public func resolve(_ arg0: URI?) -> URI!
+  open func resolve(_ arg0: URI?) -> URI!
 
   @JavaMethod
-  public func getScheme() -> String
+  open func getScheme() -> String
 
   @JavaMethod
-  public func isOpaque() -> Bool
+  open func isOpaque() -> Bool
 
   @JavaMethod
-  public func getRawAuthority() -> String
+  open func getRawAuthority() -> String
 
   @JavaMethod
-  public func getRawFragment() -> String
+  open func getRawFragment() -> String
 
   @JavaMethod
-  public func getRawQuery() -> String
+  open func getRawQuery() -> String
 
   @JavaMethod
-  public func getRawPath() -> String
+  open func getRawPath() -> String
 
   @JavaMethod
-  public func getHost() -> String
+  open func getHost() -> String
 
   @JavaMethod
-  public func getPort() -> Int32
+  open func getPort() -> Int32
 
   @JavaMethod
-  public func getAuthority() -> String
+  open func getAuthority() -> String
 
   @JavaMethod
-  public func getQuery() -> String
+  open func getQuery() -> String
 
   @JavaMethod
-  public func getPath() -> String
+  open func getPath() -> String
 
   @JavaMethod
-  public func getUserInfo() -> String
+  open func getUserInfo() -> String
 
   @JavaMethod
-  public func toURL() throws -> URL!
+  open func toURL() throws -> URL!
 
   @JavaMethod
-  public func normalize() -> URI!
+  open func normalize() -> URI!
 
   @JavaMethod
-  public func relativize(_ arg0: URI?) -> URI!
+  open func relativize(_ arg0: URI?) -> URI!
 
   @JavaMethod
-  public func getRawSchemeSpecificPart() -> String
+  open func getRawSchemeSpecificPart() -> String
 
   @JavaMethod
-  public func parseServerAuthority() throws -> URI!
+  open func parseServerAuthority() throws -> URI!
 
   @JavaMethod
-  public func getSchemeSpecificPart() -> String
+  open func getSchemeSpecificPart() -> String
 
   @JavaMethod
-  public func getRawUserInfo() -> String
+  open func getRawUserInfo() -> String
 
   @JavaMethod
-  public func getFragment() -> String
+  open func getFragment() -> String
 
   @JavaMethod
-  public func toASCIIString() -> String
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func toASCIIString() -> String
 }
 extension JavaClass<URI> {
   @JavaStaticMethod

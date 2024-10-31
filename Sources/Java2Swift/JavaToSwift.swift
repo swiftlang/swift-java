@@ -184,7 +184,7 @@ struct JavaToSwift: ParsableCommand {
     let translator = JavaTranslator(
       swiftModuleName: moduleName,
       environment: environment,
-      translateAsClass: false
+      translateAsClass: true
     )
 
     // Keep track of all of the Java classes that will have

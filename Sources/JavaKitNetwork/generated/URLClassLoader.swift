@@ -3,84 +3,30 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.net.URLClassLoader", extends: JavaObject.self)
-public struct URLClassLoader {
+@JavaClass("java.net.URLClassLoader")
+open class URLClassLoader: JavaObject {
   @JavaMethod
-  public init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func findResource(_ arg0: String) -> URL!
+  open func findResource(_ arg0: String) -> URL!
 
   @JavaMethod
-  public func findResources(_ arg0: String) throws -> Enumeration<URL>!
+  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func close() throws
+  open func findResources(_ arg0: String) throws -> Enumeration<URL>!
 
   @JavaMethod
-  public func getURLs() -> [URL?]
+  open func close() throws
 
   @JavaMethod
-  public func getName() -> String
+  open func addURL(_ arg0: URL?)
 
   @JavaMethod
-  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func getResource(_ arg0: String) -> URL!
-
-  @JavaMethod
-  public func getResources(_ arg0: String) throws -> Enumeration<URL>!
-
-  @JavaMethod
-  public func isRegisteredAsParallelCapable() -> Bool
-
-  @JavaMethod
-  public func setDefaultAssertionStatus(_ arg0: Bool)
-
-  @JavaMethod
-  public func setPackageAssertionStatus(_ arg0: String, _ arg1: Bool)
-
-  @JavaMethod
-  public func setClassAssertionStatus(_ arg0: String, _ arg1: Bool)
-
-  @JavaMethod
-  public func clearAssertionStatus()
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func getURLs() -> [URL?]
 }
 extension JavaClass<URLClassLoader> {
   @JavaStaticMethod
   public func newInstance(_ arg0: [URL?]) -> URLClassLoader!
-
-  @JavaStaticMethod
-  public func getSystemResource(_ arg0: String) -> URL!
-
-  @JavaStaticMethod
-  public func getSystemResources(_ arg0: String) throws -> Enumeration<URL>!
 }

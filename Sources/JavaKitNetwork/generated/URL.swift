@@ -2,89 +2,71 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.net.URL", extends: JavaObject.self)
-public struct URL {
+@JavaClass("java.net.URL")
+open class URL: JavaObject {
   @JavaMethod
-  public init(_ arg0: URL?, _ arg1: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: URL?, _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func getHost() -> String
+  open func getHost() -> String
 
   @JavaMethod
-  public func getPort() -> Int32
+  open func getPort() -> Int32
 
   @JavaMethod
-  public func getDefaultPort() -> Int32
+  open func getDefaultPort() -> Int32
 
   @JavaMethod
-  public func sameFile(_ arg0: URL?) -> Bool
+  open func sameFile(_ arg0: URL?) -> Bool
 
   @JavaMethod
-  public func toExternalForm() -> String
+  open func toExternalForm() -> String
 
   @JavaMethod
-  public func getContent() throws -> JavaObject!
+  open func getContent() throws -> JavaObject!
 
   @JavaMethod
-  public func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
+  open func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
 
   @JavaMethod
-  public func getProtocol() -> String
+  open func getProtocol() -> String
 
   @JavaMethod
-  public func getAuthority() -> String
+  open func getAuthority() -> String
 
   @JavaMethod
-  public func getFile() -> String
+  open func getFile() -> String
 
   @JavaMethod
-  public func getRef() -> String
+  open func getRef() -> String
 
   @JavaMethod
-  public func getQuery() -> String
+  open func getQuery() -> String
 
   @JavaMethod
-  public func getPath() -> String
+  open func getPath() -> String
 
   @JavaMethod
-  public func getUserInfo() -> String
+  open func getUserInfo() -> String
 
   @JavaMethod
-  public func toURI() throws -> URI!
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func toURI() throws -> URI!
 }

@@ -2,34 +2,40 @@
 import JavaRuntime
 
 @JavaClass("java.lang.Object")
-public struct JavaObject {
+open class JavaObject {
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open func finalize() throws
 
   @JavaMethod
-  public func toString() -> String
+  open func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open func toString() -> String
 
   @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
+  open func hashCode() -> Int32
 
   @JavaMethod
-  public func notify()
+  open func getClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func notifyAll()
+  open func clone() throws -> JavaObject!
 
   @JavaMethod
-  public func wait(_ arg0: Int64) throws
+  open func notify()
 
   @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
+  open func notifyAll()
 
   @JavaMethod
-  public func wait() throws
+  open func wait(_ arg0: Int64) throws
+
+  @JavaMethod
+  open func wait(_ arg0: Int64, _ arg1: Int32) throws
+
+  @JavaMethod
+  open func wait() throws
 }
