@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.util.OptionalLong;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -53,6 +55,13 @@ public class MySwiftClassTest {
     void test_MySwiftClass_property_len() {
         MySwiftClass o = new MySwiftClass(12, 42);
         var got = o.getLen();
+        assertEquals(12, got);
+    }
+
+    @Test
+    void test_MySwiftClass_optionalInt() {
+        MySwiftClass o = new MySwiftClass(12, 42);
+        OptionalLong got = o.getOptionalInt(); // FIXME: we need to get the Swift optional as memory region, map it to the Java Optional
         assertEquals(12, got);
     }
 

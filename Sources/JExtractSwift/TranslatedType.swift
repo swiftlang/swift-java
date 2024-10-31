@@ -23,10 +23,30 @@ extension Swift2JavaVisitor {
     case .arrayType, .attributedType, .classRestrictionType, .compositionType,
         .dictionaryType, .implicitlyUnwrappedOptionalType, .metatypeType,
         .missingType, .namedOpaqueReturnType,
-        .optionalType, .packElementType, .packExpansionType, .someOrAnyType,
+        .packElementType, .packExpansionType, .someOrAnyType,
         .suppressedType, .tupleType:
       throw TypeTranslationError.unimplementedType(type)
 
+    case .optionalType(let optionalType):
+      if optionalType.wrappedType.trimmedDescription == "Int" {
+        return TranslatedType(
+          cCompatibleConvention: .direct,
+          originalSwiftType: optionalType.wrappedType, // FIXME: just optionalType?
+          cCompatibleSwiftType: "OptionalLong",
+          cCompatibleJavaMemoryLayout: .heapObject,
+          javaType: .javaUtilOptionalLong
+        )
+      } else if let translatedWrappedType = try? cCompatibleType(for: optionalType.wrappedType) {
+        return TranslatedType(
+          cCompatibleConvention: .direct,
+          originalSwiftType: optionalType.wrappedType, // FIXME: just optionalType?
+          cCompatibleSwiftType: "Optional<TODO>",
+          cCompatibleJavaMemoryLayout: .heapObject,
+          javaType: .javaUtilOptionalT(translatedWrappedType.javaType)
+        )
+      } else {
+        throw TypeTranslationError.unimplementedType(type)
+      }
     case .functionType(let functionType):
       // FIXME: Temporary hack to keep existing code paths working.
       if functionType.trimmedDescription == "() -> ()" {

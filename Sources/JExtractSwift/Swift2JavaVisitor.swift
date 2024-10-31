@@ -100,6 +100,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       }
 
       javaResultType = try cCompatibleType(for: returnTy)
+      log.trace("Mapped return type type: \(returnTy) -> \(javaResultType)")
     } catch {
       self.log.info("Unable to import function \(node.name) - \(error)")
       return .skipChildren
