@@ -111,6 +111,28 @@ To run a simple example app showcasing the jextract (Java calling Swift) approac
 This will also generate the necessary sources (by invoking jextract, extracting the `Sources/ExampleSwiftLibrary`) 
 and generating Java sources in `src/generated/java`.
 
+## Benchmarks
+
+You can run Swift [ordo-one/package-benchmark](https://github.com/ordo-one/package-benchmark) and OpenJDK [JMH](https://github.com/openjdk/jmh) benchmarks in this project.
+
+Swift benchmarks are located under `Benchmarks/` and JMH benchmarks are currently part of the SwiftKit sample project: `Samples/SwiftKitSampleApp/src/jmh` because they depend on generated sources from the sample.
+
+To run **Swift benchmarks** you can:
+
+```bash
+cd Benchmarks
+swift package benchmark
+```
+
+In order to run JMH benchmarks you can:
+
+```bash
+cd Samples/SwiftKitSampleApp
+gradle jmh
+```
+
+Please read documentation of both performance testing tools and understand that results must be interpreted and not just taken at face value. Benchmarking is tricky and environment sensitive task, so please be careful when constructing and reading benchmarks and their results. If in doubt, please reach out on the forums.
+
 ## User Guide
 
 More details about the project and how it can be used are available in [USER_GUIDE.md](USER_GUIDE.md)
