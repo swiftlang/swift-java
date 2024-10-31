@@ -244,8 +244,7 @@ let package = Package(
           .when(platforms: [.windows])),
         .linkedLibrary(
           "jvm",
-          .when(platforms: [.linux, .macOS, .windows])
-        ),
+          .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .macCatalyst, .linux, .openbsd, .wasi, .windows])),
       ]
     ),
     .target(

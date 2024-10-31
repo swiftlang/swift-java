@@ -30,7 +30,7 @@ func findJavaHome() -> String {
 }
 let javaHome = findJavaHome()
 
-let javaIncludePath = "\(javaHome)/include"
+let javaIncludePath = ProcessInfo.processInfo.environment["JAVA_INCLUDE_PATH"] ?? "\(javaHome)/include"
 #if os(Linux)
   let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
