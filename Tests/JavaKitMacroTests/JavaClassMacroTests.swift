@@ -167,7 +167,7 @@ class JavaKitMacroTests: XCTestCase {
               get {
                   self[javaFieldName: "myField", fieldType: Int64.self]
               }
-              nonmutating set {
+              set {
                   self[javaFieldName: "myField", fieldType: Int64.self] = newValue
               }
           }
@@ -175,7 +175,7 @@ class JavaKitMacroTests: XCTestCase {
               get {
                   self[javaFieldName: "objectField", fieldType: JavaObject?.self]
               }
-              nonmutating set {
+              set {
                   self[javaFieldName: "objectField", fieldType: JavaObject?.self] = newValue
               }
           }
