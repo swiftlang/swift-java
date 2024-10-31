@@ -328,6 +328,37 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
+  func testEnumAsClass() throws {
+    try assertTranslatedClass(
+      JavaMonth.self,
+      swiftTypeName: "Month",
+      asClass: true,
+      expectedChunks: [
+        "import JavaKit",
+        "enum MonthCases: Equatable",
+        "case APRIL",
+        "public var enumValue: MonthCases!",
+        """
+            } else if self.equals(classObj.APRIL?.as(JavaObject.self)) {
+              return MonthCases.APRIL
+            }
+        """,
+        "public convenience init(_ enumValue: MonthCases, environment: JNIEnvironment? = nil) {",
+        """
+              case .APRIL:
+                if let APRIL = classObj.APRIL {
+                  self.init(javaHolder: APRIL.javaHolder)
+                } else {
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                }
+        """,
+        """
+          @JavaStaticField(isFinal: true)
+          public var APRIL: Month!
+        """
+      ])
+  }
+
   func testURLLoaderSkipMappingAsClass() throws {
     // URLClassLoader actually inherits from SecureClassLoader. However,
     // that type wasn't mapped into Swift, so we find the nearest

@@ -576,8 +576,9 @@ extension JavaClassTranslator {
       }
     """
 
+    let convenienceModifier = translator.translateAsClass ? "convenience " : ""
     let initSyntax: DeclSyntax = """
-    public init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
+    public \(raw: convenienceModifier)init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
       let _environment = if let environment {
         environment
       } else {
@@ -589,7 +590,9 @@ extension JavaClassTranslator {
       return """
           case .\($0.getName()):
             if let \($0.getName()) = classObj.\($0.getName()) {
-              self = \($0.getName())
+              \(translator.translateAsClass
+                  ? "self.init(javaHolder: \($0.getName()).javaHolder)"
+                  : "self = \($0.getName())")
             } else {
               fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
             }
