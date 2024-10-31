@@ -26,7 +26,10 @@ package class JavaTranslator {
   let swiftModuleName: String
 
   let environment: JNIEnvironment
+
+  /// Whether to translate Java classes into classes (rather than structs).
   let translateAsClass: Bool
+
   let format: BasicFormat
 
   /// A mapping from the name of each known Java class to the corresponding

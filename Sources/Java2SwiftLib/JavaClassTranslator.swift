@@ -26,6 +26,11 @@ struct JavaClassTranslator {
   /// The Java class (or interface) being translated.
   let javaClass: JavaClass<JavaObject>
 
+  /// Whether to translate this Java class into a Swift class.
+  ///
+  /// This will be false for Java interfaces.
+  let translateAsClass: Bool
+
   /// The type parameters to the Java class or interface.
   let javaTypeParameters: [TypeVariable<JavaClass<JavaObject>>]
 
@@ -107,6 +112,7 @@ struct JavaClassTranslator {
     let fullName = javaClass.getName()
     self.javaClass = javaClass
     self.translator = translator
+    self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
     self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
       fullName,
       preferValueTypes: false,
@@ -175,7 +181,7 @@ struct JavaClassTranslator {
     }
 
     // Gather methods.
-    let methods = translator.translateAsClass
+    let methods = translateAsClass
       ? javaClass.getDeclaredMethods()
       : javaClass.getMethods()
     for method in methods {
@@ -231,7 +237,7 @@ extension JavaClassTranslator {
     }
 
     // Don't include inherited fields when translating to a class.
-    if translator.translateAsClass &&
+    if translateAsClass &&
         !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
@@ -315,7 +321,7 @@ extension JavaClassTranslator {
     // formulation).
     let extends: String
     let inheritanceClause: String
-    if translator.translateAsClass {
+    if translateAsClass {
       extends = ""
       inheritanceClause = swiftSuperclass.map { ": \($0)" } ?? ""
     } else {
@@ -334,7 +340,7 @@ extension JavaClassTranslator {
 
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass";
-    let introducer = translator.translateAsClass ? "open class" : "public struct"
+    let introducer = translateAsClass ? "open class" : "public struct"
     var classDecl: DeclSyntax =
       """
       @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extends)\(raw: interfacesStr))
@@ -485,7 +491,7 @@ extension JavaClassTranslator {
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
-    let convenienceModifier = translator.translateAsClass ? "convenience " : ""
+    let convenienceModifier = translateAsClass ? "convenience " : ""
     return """
       @JavaMethod
       \(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
@@ -523,10 +529,9 @@ extension JavaClassTranslator {
       ? ""
       : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
     let accessModifier = implementedInSwift ? ""
-      : (javaMethod.isStatic || !translator.translateAsClass) ? "public "
+      : (javaMethod.isStatic || !translateAsClass) ? "public "
       : "open "
-    let overrideOpt = (translator.translateAsClass &&
-                       !javaMethod.isStatic && isOverride(javaMethod))
+    let overrideOpt = (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
     return """
@@ -577,7 +582,7 @@ extension JavaClassTranslator {
       }
     """
 
-    let convenienceModifier = translator.translateAsClass ? "convenience " : ""
+    let convenienceModifier = translateAsClass ? "convenience " : ""
     let initSyntax: DeclSyntax = """
     public \(raw: convenienceModifier)init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
       let _environment = if let environment {
@@ -591,7 +596,7 @@ extension JavaClassTranslator {
       return """
           case .\($0.getName()):
             if let \($0.getName()) = classObj.\($0.getName()) {
-              \(translator.translateAsClass
+              \(translateAsClass
                   ? "self.init(javaHolder: \($0.getName()).javaHolder)"
                   : "self = \($0.getName())")
             } else {

@@ -456,6 +456,30 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testJavaInterfaceAsClassNOT() throws {
+    try assertTranslatedClass(
+      MyJavaIntFunction<JavaObject>.self,
+      swiftTypeName: "MyJavaIntFunction",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaInterface("java.util.function.IntFunction")
+        public struct MyJavaIntFunction<R: AnyJavaObject> {
+        """,
+        """
+          @JavaMethod
+          public func apply(_ arg0: Int32) -> JavaObject!
+        """,
+      ]
+    )
+
+  }
 }
 
 @JavaClass("java.lang.ClassLoader")
