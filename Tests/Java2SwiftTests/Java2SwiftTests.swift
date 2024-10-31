@@ -478,7 +478,74 @@ class Java2SwiftTests: XCTestCase {
         """,
       ]
     )
+  }
 
+  func testCovariantInJavaNotInSwiftOverride() throws {
+    try assertTranslatedClass(
+      Method.self,
+      swiftTypeName: "Method",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Class" : ("JavaClass", "JavaKit"),
+        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
+        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+      ],
+      expectedChunks: [
+        "import JavaKitReflection",
+        """
+        @JavaClass("java.lang.reflect.Method")
+        open class Method: Executable {
+        """,
+        """
+          @JavaMethod
+          open func getTypeParameters() -> [TypeVariable<Method>?]
+        """,
+        """
+          @JavaMethod
+          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        """,
+        """
+          @JavaMethod
+          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        """,
+      ]
+    )
+  }
+
+  func testCovariantInJavaNotInSwiftOverride2() throws {
+    try assertTranslatedClass(
+      Constructor.self,
+      swiftTypeName: "Constructor",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Class" : ("JavaClass", "JavaKit"),
+        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
+        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+      ],
+      expectedChunks: [
+        "import JavaKitReflection",
+        """
+        @JavaClass("java.lang.reflect.Constructor")
+        open class Constructor<T: AnyJavaObject>: Executable {
+        """,
+        """
+          @JavaMethod
+          open func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
+        """,
+        """
+          @JavaMethod
+          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        """,
+        """
+          @JavaMethod
+          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        """,
+      ]
+    )
   }
 }
 
@@ -512,6 +579,22 @@ public struct MySupplier { }
 
 @JavaInterface("java.util.function.IntFunction")
 public struct MyJavaIntFunction<R: AnyJavaObject> {
+}
+
+@JavaClass("java.lang.reflect.Method", extends: Executable.self)
+public struct Method {
+}
+
+@JavaClass("java.lang.reflect.Constructor", extends: Executable.self)
+public struct Constructor {
+}
+
+@JavaClass("java.lang.reflect.Executable")
+public struct Executable {
+}
+
+@JavaInterface("java.lang.reflect.TypeVariable")
+public struct TypeVariable<D: AnyJavaObject> {
 }
 
 /// Translate a Java class and assert that the translated output contains

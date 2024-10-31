@@ -685,15 +685,150 @@ extension JavaClassTranslator {
 
         // If this superclass declares a method with the same parameter types,
         // we have an override.
-        let overriddenMethod = try currentSuperclassNonOpt
-          .getDeclaredMethod(method.getName(), method.getParameterTypes())
-        if overriddenMethod != nil {
+        guard let overriddenMethod = try currentSuperclassNonOpt
+          .getDeclaredMethod(method.getName(), method.getParameterTypes()) else {
+          continue
+        }
+
+        // Ignore non-public, non-protected methods because they would not
+        // have been render into the Swift superclass.
+        if !overriddenMethod.isPublic && !overriddenMethod.isProtected {
+          continue
+        }
+
+        // We know that Java considers this method an override. However, it is
+        // possible that Swift will not consider it an override, because Java
+        // has subtyping relations that Swift does not.
+        if method.getGenericReturnType().isEqualToOrSubtypeOf(overriddenMethod.getGenericReturnType()) {
           return true
         }
       } catch {
       }
     }
 
+    return false
+  }
+}
+
+extension [Type?] {
+  /// Determine whether the types in the array match the other array.
+  func allTypesEqual(_ other: [Type?]) -> Bool {
+    if self.count != other.count {
+      return false
+    }
+
+    for (selfType, otherType) in zip(self, other) {
+      if !selfType!.isEqualTo(otherType!) {
+        return false
+      }
+    }
+
+    return true
+  }
+}
+
+extension Type {
+  /// Adjust the given type to use its bounds, mirroring what we do in
+  /// mapping Java types into Swift.
+  func adjustToJavaBounds(adjusted: inout Bool) -> Type {
+    if let typeVariable = self.as(TypeVariable<GenericDeclaration>.self),
+       typeVariable.getBounds().count == 1,
+       let bound = typeVariable.getBounds()[0] {
+      adjusted = true
+      return bound
+    }
+
+    if let wildcardType = self.as(WildcardType.self),
+      wildcardType.getUpperBounds().count == 1,
+      let bound = wildcardType.getUpperBounds()[0] {
+      adjusted = true
+      return bound
+    }
+
+    return self
+  }
+
+  /// Determine whether this type is equivalent to or a subtype of the other
+  /// type.
+  func isEqualTo(_ other: Type) -> Bool {
+    // First, adjust types to their bounds, if we need to.
+    var anyAdjusted: Bool = false
+    let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)
+    let adjustedOther = other.adjustToJavaBounds(adjusted: &anyAdjusted)
+    if anyAdjusted {
+      return adjustedSelf.isEqualTo(adjustedOther)
+    }
+
+    // If both are classes, check for equivalence.
+    if let selfClass = self.as(JavaClass<JavaObject>.self),
+       let otherClass = other.as(JavaClass<JavaObject>.self) {
+      return selfClass.equals(otherClass.as(JavaObject.self))
+    }
+
+    // If both are arrays, check that their component types are equivalent.
+    if let selfArray = self.as(GenericArrayType.self),
+       let otherArray = other.as(GenericArrayType.self) {
+      return selfArray.getGenericComponentType().isEqualTo(otherArray.getGenericComponentType())
+    }
+
+    // If both are parameterized types, check their raw type and type
+    // arguments for equivalence.
+    if let selfParameterizedType = self.as(ParameterizedType.self),
+       let otherParameterizedType = other.as(ParameterizedType.self) {
+      if !selfParameterizedType.getRawType().isEqualTo(otherParameterizedType.getRawType()) {
+        return false
+      }
+
+      return selfParameterizedType.getActualTypeArguments()
+        .allTypesEqual(otherParameterizedType.getActualTypeArguments())
+    }
+
+    // If both are type variables, compare their bounds.
+    // FIXME: This is a hack.
+    if let selfTypeVariable = self.as(TypeVariable<GenericDeclaration>.self),
+       let otherTypeVariable = other.as(TypeVariable<GenericDeclaration>.self) {
+      return selfTypeVariable.getBounds().allTypesEqual(otherTypeVariable.getBounds())
+    }
+
+    // If both are wildcards, compare their upper and lower bounds.
+    if let selfWildcard = self.as(WildcardType.self),
+       let otherWildcard = other.as(WildcardType.self) {
+      return selfWildcard.getUpperBounds().allTypesEqual(otherWildcard.getUpperBounds())
+      && selfWildcard.getLowerBounds().allTypesEqual(otherWildcard.getLowerBounds())
+    }
+
+    return false
+  }
+
+  /// Determine whether this type is equivalent to or a subtype of the
+  /// other type.
+  func isEqualToOrSubtypeOf(_ other: Type) -> Bool {
+    // First, adjust types to their bounds, if we need to.
+    var anyAdjusted: Bool = false
+    let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)
+    let adjustedOther = other.adjustToJavaBounds(adjusted: &anyAdjusted)
+    if anyAdjusted {
+      return adjustedSelf.isEqualToOrSubtypeOf(adjustedOther)
+    }
+
+    if isEqualTo(other) {
+      return true
+    }
+
+    // If both are classes, check for subclassing.
+    if let selfClass = self.as(JavaClass<JavaObject>.self),
+       let otherClass = other.as(JavaClass<JavaObject>.self) {
+      return selfClass.isSubclass(of: otherClass)
+    }
+
+    // Anything object-like is a subclass of java.lang.Object
+    if let otherClass = other.as(JavaClass<JavaObject>.self),
+       otherClass.getName() == "java.lang.Object" {
+      if self.is(GenericArrayType.self) || self.is(ParameterizedType.self) ||
+          self.is(WildcardType.self) || self.is(TypeVariable<GenericDeclaration>.self) {
+        return true
+      }
+    }
     return false
   }
 }
