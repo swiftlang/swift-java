@@ -181,8 +181,8 @@ struct JavaClassTranslator {
     for method in methods {
       guard let method else { continue }
 
-      // Only look at public methods here.
-      guard method.isPublic else { continue }
+      // Only look at public and protected methods here.
+      guard method.isPublic || method.isProtected else { continue }
 
       // Skip any methods that are expected to be implemented in Swift. We will
       // visit them in the second pass, over the *declared* methods, because

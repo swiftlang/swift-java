@@ -289,7 +289,11 @@ class Java2SwiftTests: XCTestCase {
         """
           @JavaMethod
           open func wait() throws
+        """,
         """
+          @JavaMethod
+          open func clone() throws -> JavaObject!
+        """,
       ]
     )
   }
