@@ -523,7 +523,8 @@ extension JavaClassTranslator {
       ? ""
       : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
     let accessModifier = implementedInSwift ? ""
-      : "\(translator.defaultAccessSpecifier) "
+      : (javaMethod.isStatic || !translator.translateAsClass) ? "public "
+      : "open "
     let overrideOpt = (translator.translateAsClass &&
                        !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "

@@ -323,7 +323,11 @@ class Java2SwiftTests: XCTestCase {
         """
           @JavaMethod
           open func intern() -> String
+        """,
         """
+          @JavaStaticMethod
+          public func valueOf(_ arg0: Int64) -> String
+        """,
       ]
     )
   }

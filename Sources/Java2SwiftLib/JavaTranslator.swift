@@ -250,11 +250,6 @@ extension JavaTranslator {
 
     throw TranslationError.untranslatedJavaClass(name)
   }
-
-  /// The default Swift access specifier for a Java method.
-  var defaultAccessSpecifier: String {
-    translateAsClass ? "open" : "public"
-  }
 }
 
 // MARK: Class translation
