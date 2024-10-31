@@ -113,4 +113,39 @@ final class OptionalImportTests {
       ]
     )
   }
+
+  @Test("Import: public func globalGetFloatOptional() -> Float?")
+  func globalGetFloatOptional() throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .warning
+
+    assertOutput(
+      st,
+      input: class_interfaceFile,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func globalGetFloatOptional() -> Float?
+         * }
+         */
+        public static java.util.OptionalDouble globalGetFloatOptional() {
+            var mh$ = globalGetFloatOptional.HANDLE;
+            try {
+                if (TRACE_DOWNCALLS) {
+                    traceDowncall();
+                }
+                return (java.util.OptionalDouble) mh$.invokeExact();
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+        }
+        """
+      ]
+    )
+  }
 }

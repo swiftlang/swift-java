@@ -78,6 +78,10 @@ public class MySwiftClass {
     p("make int -> 12")
     return 12
   }
+
+  public func getOptionalInt() -> Int? {
+    return 12
+  }
 }
 
 @_silgen_name("swift_getTypeByMangledNameInEnvironment")

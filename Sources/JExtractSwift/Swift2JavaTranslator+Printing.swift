@@ -456,7 +456,8 @@ extension Swift2JavaTranslator {
     printer.print(
       """
       static {
-          System.loadLibrary("swiftCore");
+          System.loadLibrary(SwiftKit.STDLIB_DYLIB_NAME);
+          System.loadLibrary(SwiftKit.SWIFTKIT_DYLIB_NAME);
           System.loadLibrary(LIB_NAME);
       }
       """
