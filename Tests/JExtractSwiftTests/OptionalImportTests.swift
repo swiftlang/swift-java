@@ -34,6 +34,9 @@ final class OptionalImportTests {
     // MANGLED NAME: $fake
     public func globalGetIntOptional() -> Int?
 
+    // MANGLED NAME: $fake
+    public func globalGetFloatOptional() -> Float?
+
     // FIXME: Hack to allow us to translate "String", even though it's not
     // actually available
     // MANGLED NAME: $ss
@@ -49,38 +52,30 @@ final class OptionalImportTests {
     )
     st.log.logLevel = .warning
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
-
-    let funcDecl = st.importedGlobalFuncs.first {
-      $0.baseIdentifier == "globalGetIntOptional"
-    }!
-
-    let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
-    }
-
     assertOutput(
-      output,
-      expected:
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func globalGetIntOptional() -> Int?
-       * }
-       */
-      public static java.util.OptionalLong globalGetIntOptional() {
-          var mh$ = globalGetIntOptional.HANDLE;
-          try {
-              if (TRACE_DOWNCALLS) {
-                  traceDowncall();
-              }
-              return (java.util.OptionalLong) mh$.invokeExact();
-          } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-          }
-      }
-      """
+      st,
+      input: class_interfaceFile,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func globalGetIntOptional() -> Int?
+         * }
+         */
+        public static java.util.OptionalLong globalGetIntOptional() {
+            var mh$ = globalGetIntOptional.HANDLE;
+            try {
+                if (TRACE_DOWNCALLS) {
+                    traceDowncall();
+                }
+                return (java.util.OptionalLong) mh$.invokeExact();
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+        }
+        """
+      ]
     )
   }
 
@@ -92,38 +87,30 @@ final class OptionalImportTests {
     )
     st.log.logLevel = .warning
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
-
-    let funcDecl = st.importedGlobalFuncs.first {
-      $0.baseIdentifier == "globalGetStringOptional"
-    }!
-
-    let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
-    }
-
     assertOutput(
-      output,
-      expected:
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func globalGetStringOptional() -> String?
-       * }
-       */
-      public static java.util.Optional<String> globalGetStringOptional() {
-          var mh$ = globalGetStringOptional.HANDLE;
-          try {
-              if (TRACE_DOWNCALLS) {
-                  traceDowncall();
-              }
-              return (java.util.Optional<String>) mh$.invokeExact();
-          } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-          }
-      }
-      """
+      st,
+      input: class_interfaceFile,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func globalGetStringOptional() -> String?
+         * }
+         */
+        public static java.util.Optional<String> globalGetStringOptional() {
+            var mh$ = globalGetStringOptional.HANDLE;
+            try {
+                if (TRACE_DOWNCALLS) {
+                    traceDowncall();
+                }
+                return (java.util.Optional<String>) mh$.invokeExact();
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+        }
+        """
+      ]
     )
   }
 }
