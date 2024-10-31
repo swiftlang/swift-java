@@ -664,15 +664,30 @@ extension JavaClassTranslator {
   /// Determine whether this method is an override of another Java
   /// method.
   func isOverride(_ method: Method) -> Bool {
-    guard let javaSuperclass = effectiveJavaSuperclass else {
-      return false
+    var currentSuperclass = effectiveJavaSuperclass
+    while let currentSuperclassNonOpt = currentSuperclass {
+      // Set the loop up for the next run.
+      defer {
+        currentSuperclass = currentSuperclassNonOpt.getSuperclass()
+      }
+
+      do {
+        // If this class didn't get translated into Swift, skip it.
+        if translator.translatedClasses[currentSuperclassNonOpt.getName()] == nil {
+          continue
+        }
+
+        // If this superclass declares a method with the same parameter types,
+        // we have an override.
+        let overriddenMethod = try currentSuperclassNonOpt
+          .getDeclaredMethod(method.getName(), method.getParameterTypes())
+        if overriddenMethod != nil {
+          return true
+        }
+      } catch {
+      }
     }
 
-    do {
-      let overriddenMethod = try javaSuperclass.getDeclaredMethod(method.getName(), method.getParameterTypes())
-      return overriddenMethod != nil
-    } catch {
-      return false
-    }
+    return false
   }
 }

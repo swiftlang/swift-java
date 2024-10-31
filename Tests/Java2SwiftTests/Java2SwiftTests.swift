@@ -422,6 +422,32 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testOverrideSkipImmediateSuperclass() throws {
+    // JavaByte overrides equals() from JavaObject, which it indirectly
+    // inherits through JavaNumber
+    try assertTranslatedClass(
+      JavaByte.self,
+      swiftTypeName: "JavaByte",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Number" : ("JavaNumber", "JavaKit"),
+        "java.lang.Byte" : ("JavaByte", "JavaKit"),
+      ],
+      expectedChunks: [
+        "import JavaKit",
+        """
+        @JavaClass("java.lang.Byte")
+        open class JavaByte: JavaNumber {
+        """,
+        """
+          @JavaMethod
+          open override func equals(_ arg0: JavaObject?) -> Bool
+        """,
+      ]
+    )
+  }
 }
 
 @JavaClass("java.lang.ClassLoader")
