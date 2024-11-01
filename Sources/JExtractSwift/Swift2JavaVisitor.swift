@@ -108,12 +108,12 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     let fullName = "\(node.name.text)"
 
     var funcDecl = ImportedFunc(
+      decl: node.trimmed,
       parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
     )
-    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
 
     // Retrieve the mangled name, if available.
     if let mangledName = node.mangledNameFromComment {
@@ -207,13 +207,13 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(String(params.flatMap { "\($0.effectiveName ?? "_"):" })))"
 
     var funcDecl = ImportedFunc(
+      decl: node.trimmed,
       parentName: currentType.translatedType,
       identifier: initIdentifier,
       returnType: currentType.translatedType,
       parameters: params
     )
     funcDecl.isInit = true
-    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
 
     // Retrieve the mangled name, if available.
     if let mangledName = node.mangledNameFromComment {

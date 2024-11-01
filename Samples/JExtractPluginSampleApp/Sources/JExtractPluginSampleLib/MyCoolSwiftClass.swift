@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public class MyCoolLibrary {
+public class MyCoolSwiftClass {
+  public init(number: Int) {}
   public func exposedToJava() { }
 }

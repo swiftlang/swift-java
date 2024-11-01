@@ -44,12 +44,19 @@ let package = Package(
     platforms: [
         .macOS(.v10_15),
     ],
-    dependencies: [
+   products: [
+     .library(
+       name: "JExtractPluginSampleLib",
+       type: .dynamic,
+       targets: ["JExtractPluginSampleLib"]
+     ),
+   ],
+   dependencies: [
         .package(name: "swift-java", path: "../../"),
     ],
     targets: [
-        .executableTarget(
-            name: "JExtractPluginSample",
+        .target(
+            name: "JExtractPluginSampleLib",
             dependencies: [
             ],
             swiftSettings: [

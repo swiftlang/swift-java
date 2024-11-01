@@ -29,17 +29,15 @@ public typealias JavaPackage = String
 public struct ImportedNominalType: ImportedDecl {
   public let swiftTypeName: String
   public let javaType: JavaType
-  public var swiftMangledName: String?
   public var kind: NominalTypeKind
 
   public var initializers: [ImportedFunc] = []
   public var methods: [ImportedFunc] = []
   public var variables: [ImportedVariable] = []
 
-  public init(swiftTypeName: String, javaType: JavaType, swiftMangledName: String? = nil, kind: NominalTypeKind) {
+  public init(swiftTypeName: String, javaType: JavaType, kind: NominalTypeKind) {
     self.swiftTypeName = swiftTypeName
     self.javaType = javaType
-    self.swiftMangledName = swiftMangledName
     self.kind = kind
   }
 
@@ -201,16 +199,22 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
 
   public var swiftMangledName: String = ""
 
-  public var syntax: String? = nil
+  public var swiftDecl: any DeclSyntaxProtocol
+
+  public var syntax: String? {
+    "\(self.swiftDecl)"
+  }
 
   public var isInit: Bool = false
 
   public init(
+    decl: any DeclSyntaxProtocol,
     parentName: TranslatedType?,
     identifier: String,
     returnType: TranslatedType,
     parameters: [ImportedParam]
   ) {
+    self.swiftDecl = decl
     self.parentName = parentName
     self.identifier = identifier
     self.returnType = returnType
@@ -287,6 +291,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
     case .set:
       let newValueParam: FunctionParameterSyntax = "_ newValue: \(self.returnType.cCompatibleSwiftType)"
       var funcDecl = ImportedFunc(
+        decl: self.syntax!,
         parentName: self.parentName,
         identifier: self.identifier,
         returnType: TranslatedType.void,
@@ -296,6 +301,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
 
     case .get:
       var funcDecl = ImportedFunc(
+        decl: self.syntax!,
         parentName: self.parentName,
         identifier: self.identifier,
         returnType: self.returnType,

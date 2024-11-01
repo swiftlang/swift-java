@@ -16,7 +16,7 @@ import org.swift.swiftkit.gradle.BuildUtils
 
 plugins {
     id("build-logic.java-application-conventions")
-    id("me.champeau.jmh") version "0.7.2"
+//     id("me.champeau.jmh") version "0.7.2"
 }
 
 group = "org.swift.swiftkit"
@@ -33,31 +33,30 @@ java {
 }
 
 
-def jextract = tasks.register("jextract", Exec) {
-    description = "Extracts Java accessor sources using jextract"
+def jextract = tasks.register("swift-build", Exec) {
+    description = "Builds swift sources, including swift-java source generation"
 
-    outputs.dir(layout.buildDirectory.dir("generated/sources/jextract/main"))
-    inputs.dir("$rootDir/Sources/ExampleSwiftLibrary") // monitored library
+    // monitor project Swift sources:
+    inputs.dir(layout.projectDirectory.dir("Sources/"))
 
-    // any changes in the source generator sources also mean the resulting output might change
-    inputs.dir("$rootDir/Sources/JExtractSwift")
-    inputs.dir("$rootDir/Sources/JExtractSwiftTool")
+    // monitor root java-swift sources (including source generator libs which may be changing):
+    inputs.dir("$rootDir/Sources")
+
+    // the swift-java produced Java sources are located here:
+    outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/jextractpluginsampleapp/JExtractPluginSampleLib/destination/JExtractSwiftPlugin/src/generated/java"))
 
     workingDir = rootDir
-    commandLine "make"
-    args "jextract-generate"
+    commandLine "swift"
+    args "build"
 }
 
+// Add the java-swift generated Java sources
 sourceSets {
     main {
         java {
             srcDir(jextract)
         }
     }
-}
-
-tasks.build {
-    dependsOn("jextract")
 }
 
 dependencies {
@@ -88,11 +87,5 @@ application {
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"
-    ]
-}
-
-jmh {
-    jvmArgsAppend = [
-        "-Djava.library.path=" + BuildUtils.javaLibraryPaths(rootDir).join(":"),
     ]
 }
