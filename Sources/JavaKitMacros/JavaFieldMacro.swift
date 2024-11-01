@@ -65,7 +65,8 @@ extension JavaFieldMacro: AccessorMacro {
     ]
 
     let nonmutatingModifier =
-      (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false)
+      (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false ||
+       context.lexicalContext.first?.is(ExtensionDeclSyntax.self) ?? false)
         ? ""
         : "nonmutating "
 
