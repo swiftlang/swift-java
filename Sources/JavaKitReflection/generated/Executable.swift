@@ -3,121 +3,70 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.lang.reflect.Executable", extends: AccessibleObject.self, implements: GenericDeclaration.self)
-public struct Executable {
+@JavaClass("java.lang.reflect.Executable", implements: GenericDeclaration.self)
+open class Executable: AccessibleObject {
   @JavaMethod
-  public func getName() -> String
+  open func getName() -> String
 
   @JavaMethod
-  public func getModifiers() -> Int32
+  open func getModifiers() -> Int32
 
   @JavaMethod
-  public func getTypeParameters() -> [TypeVariable<JavaObject>?]
+  open func getTypeParameters() -> [TypeVariable<JavaObject>?]
 
   @JavaMethod
-  public func getParameterTypes() -> [JavaClass<JavaObject>?]
+  open func getParameterTypes() -> [JavaClass<JavaObject>?]
 
   @JavaMethod
-  public func toGenericString() -> String
+  open func toGenericString() -> String
 
   @JavaMethod
-  public func isSynthetic() -> Bool
+  open func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getDeclaringClass() -> JavaClass<JavaObject>!
+  open func getDeclaringClass() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
+  open override func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
-  public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
+  open override func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotations() -> [Annotation?]
+  open override func getDeclaredAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func isVarArgs() -> Bool
+  open func isVarArgs() -> Bool
 
   @JavaMethod
-  public func getAnnotatedParameterTypes() -> [AnnotatedType?]
+  open func getAnnotatedParameterTypes() -> [AnnotatedType?]
 
   @JavaMethod
-  public func getParameterCount() -> Int32
+  open func getParameterCount() -> Int32
 
   @JavaMethod
-  public func getParameterAnnotations() -> [[Annotation?]]
+  open func getParameterAnnotations() -> [[Annotation?]]
 
   @JavaMethod
-  public func getGenericParameterTypes() -> [Type?]
+  open func getGenericParameterTypes() -> [Type?]
 
   @JavaMethod
-  public func getGenericExceptionTypes() -> [Type?]
+  open func getGenericExceptionTypes() -> [Type?]
 
   @JavaMethod
-  public func getExceptionTypes() -> [JavaClass<JavaObject>?]
+  open func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
   @JavaMethod
-  public func getAnnotatedReturnType() -> AnnotatedType!
+  open func getAnnotatedReturnType() -> AnnotatedType!
 
   @JavaMethod
-  public func getParameters() -> [Parameter?]
+  open func getParameters() -> [Parameter?]
 
   @JavaMethod
-  public func getAnnotatedReceiverType() -> AnnotatedType!
+  open func getAnnotatedReceiverType() -> AnnotatedType!
 
   @JavaMethod
-  public func getAnnotatedExceptionTypes() -> [AnnotatedType?]
-
-  @JavaMethod
-  public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
-
-  @JavaMethod
-  public func getAnnotations() -> [Annotation?]
-
-  @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
-
-  @JavaMethod
-  public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
-
-  @JavaMethod
-  public func setAccessible(_ arg0: Bool)
-
-  @JavaMethod
-  public func trySetAccessible() -> Bool
-
-  @JavaMethod
-  public func canAccess(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func isAccessible() -> Bool
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func getAnnotatedExceptionTypes() -> [AnnotatedType?]
 }
 extension JavaClass<Executable> {
   @JavaStaticField(isFinal: true)
@@ -125,7 +74,4 @@ extension JavaClass<Executable> {
 
   @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
-
-  @JavaStaticMethod
-  public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
 }

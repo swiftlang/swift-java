@@ -3,83 +3,62 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.lang.reflect.Parameter", extends: JavaObject.self)
-public struct Parameter {
+@JavaClass("java.lang.reflect.Parameter")
+open class Parameter: JavaObject {
   @JavaMethod
-  public func getName() -> String
+  open func getName() -> String
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func getModifiers() -> Int32
+  open func getModifiers() -> Int32
 
   @JavaMethod
-  public func isSynthetic() -> Bool
+  open func isSynthetic() -> Bool
 
   @JavaMethod
-  public func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
+  open func getAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
-  public func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
+  open func getAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
 
   @JavaMethod
-  public func getAnnotations() -> [Annotation?]
+  open func getAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
+  open func getDeclaredAnnotation(_ arg0: JavaClass<Annotation>?) -> Annotation!
 
   @JavaMethod
-  public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
+  open func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
 
   @JavaMethod
-  public func getDeclaredAnnotations() -> [Annotation?]
+  open func getDeclaredAnnotations() -> [Annotation?]
 
   @JavaMethod
-  public func getType() -> JavaClass<JavaObject>!
+  open func getType() -> JavaClass<JavaObject>!
 
   @JavaMethod
-  public func getAnnotatedType() -> AnnotatedType!
+  open func getAnnotatedType() -> AnnotatedType!
 
   @JavaMethod
-  public func getParameterizedType() -> Type!
+  open func getParameterizedType() -> Type!
 
   @JavaMethod
-  public func isVarArgs() -> Bool
+  open func isVarArgs() -> Bool
 
   @JavaMethod
-  public func isNamePresent() -> Bool
+  open func isNamePresent() -> Bool
 
   @JavaMethod
-  public func getDeclaringExecutable() -> Executable!
+  open func getDeclaringExecutable() -> Executable!
 
   @JavaMethod
-  public func isImplicit() -> Bool
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
-
-  @JavaMethod
-  public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
+  open func isImplicit() -> Bool
 }

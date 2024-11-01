@@ -2,121 +2,103 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.BitSet", extends: JavaObject.self)
-public struct BitSet {
+@JavaClass("java.util.BitSet")
+open class BitSet: JavaObject {
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func cardinality() -> Int32
+  open func cardinality() -> Int32
 
   @JavaMethod
-  public func nextSetBit(_ arg0: Int32) -> Int32
+  open func nextSetBit(_ arg0: Int32) -> Int32
 
   @JavaMethod
-  public func toLongArray() -> [Int64]
+  open func toLongArray() -> [Int64]
 
   @JavaMethod
-  public func previousSetBit(_ arg0: Int32) -> Int32
+  open func previousSetBit(_ arg0: Int32) -> Int32
 
   @JavaMethod
-  public func previousClearBit(_ arg0: Int32) -> Int32
+  open func previousClearBit(_ arg0: Int32) -> Int32
 
   @JavaMethod
-  public func intersects(_ arg0: BitSet?) -> Bool
+  open func intersects(_ arg0: BitSet?) -> Bool
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
+  open func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
 
   @JavaMethod
-  public func get(_ arg0: Int32) -> Bool
+  open func get(_ arg0: Int32) -> Bool
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func length() -> Int32
+  open func length() -> Int32
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func clear(_ arg0: Int32)
+  open func clear(_ arg0: Int32)
 
   @JavaMethod
-  public func clear(_ arg0: Int32, _ arg1: Int32)
+  open func clear(_ arg0: Int32, _ arg1: Int32)
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: Int32, _ arg2: Bool)
+  open func set(_ arg0: Int32, _ arg1: Int32, _ arg2: Bool)
 
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: Int32)
+  open func set(_ arg0: Int32, _ arg1: Int32)
 
   @JavaMethod
-  public func set(_ arg0: Int32)
+  open func set(_ arg0: Int32)
 
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: Bool)
+  open func set(_ arg0: Int32, _ arg1: Bool)
 
   @JavaMethod
-  public func flip(_ arg0: Int32, _ arg1: Int32)
+  open func flip(_ arg0: Int32, _ arg1: Int32)
 
   @JavaMethod
-  public func flip(_ arg0: Int32)
+  open func flip(_ arg0: Int32)
 
   @JavaMethod
-  public func nextClearBit(_ arg0: Int32) -> Int32
+  open func nextClearBit(_ arg0: Int32) -> Int32
 
   @JavaMethod
-  public func or(_ arg0: BitSet?)
+  open func or(_ arg0: BitSet?)
 
   @JavaMethod
-  public func toByteArray() -> [Int8]
+  open func toByteArray() -> [Int8]
 
   @JavaMethod
-  public func and(_ arg0: BitSet?)
+  open func and(_ arg0: BitSet?)
 
   @JavaMethod
-  public func xor(_ arg0: BitSet?)
+  open func xor(_ arg0: BitSet?)
 
   @JavaMethod
-  public func andNot(_ arg0: BitSet?)
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func andNot(_ arg0: BitSet?)
 }
 extension JavaClass<BitSet> {
   @JavaStaticMethod

@@ -3,133 +3,79 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.util.jar.Attributes", extends: JavaObject.self)
-public struct Attributes {
+@JavaClass("java.util.jar.Attributes")
+open class Attributes: JavaObject {
   @JavaMethod
-  public init(_ arg0: Attributes?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Attributes?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject!
+  open func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject!
+  open func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>!
+  open func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func getValue(_ arg0: String) -> String
+  open func getValue(_ arg0: String) -> String
 
   @JavaMethod
-  public func getValue(_ arg0: Attributes.Name?) -> String
+  open func getValue(_ arg0: Attributes.Name?) -> String
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func containsKey(_ arg0: JavaObject?) -> Bool
+  open func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>!
+  open func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
-  public func containsValue(_ arg0: JavaObject?) -> Bool
+  open func containsValue(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func putValue(_ arg0: String, _ arg1: String) -> String
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
-
-  @JavaMethod
-  public func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func putValue(_ arg0: String, _ arg1: String) -> String
 }
 extension Attributes {
-  @JavaClass("java.util.jar.Attributes$Name", extends: JavaObject.self)
-  public struct Name {
+  @JavaClass("java.util.jar.Attributes$Name")
+  open class Name: JavaObject {
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open override func hashCode() -> Int32
   }
 }
 extension JavaClass<Attributes.Name> {

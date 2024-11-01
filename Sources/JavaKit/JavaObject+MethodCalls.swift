@@ -387,7 +387,7 @@ extension JavaClass {
       return FieldType(fromJNI: jniMethod(javaEnvironment, javaThis, fieldID), in: javaEnvironment)
     }
 
-    nonmutating set {
+    set {
       let fieldID = getJNIStaticFieldID(fieldName, fieldType: fieldType)!
       let jniMethod = FieldType.jniStaticFieldSet(in: javaEnvironment)
       jniMethod(javaEnvironment, javaThis, fieldID, newValue.getJNIValue(in: javaEnvironment))

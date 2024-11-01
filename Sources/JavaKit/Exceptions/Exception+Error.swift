@@ -12,13 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-// Translate all Java Exception instances in a Swift error.
-extension Exception: Error, CustomStringConvertible {
-  public var description: String {
-    return getMessage()
-  }
-}
-
 extension JavaClass<Exception> {
   /// Determine whether this instance is a checked exception (which must be
   /// handled) vs. an unchecked exception (which is not handled).

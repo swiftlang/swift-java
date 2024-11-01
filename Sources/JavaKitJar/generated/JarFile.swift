@@ -3,67 +3,28 @@ import JavaKit
 import JavaKitCollection
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarFile", extends: JavaObject.self)
-public struct JarFile {
+@JavaClass("java.util.jar.JarFile")
+open class JarFile: JavaObject {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func entries() -> Enumeration<JarEntry>!
+  open func entries() -> Enumeration<JarEntry>!
 
   @JavaMethod
-  public func getManifest() throws -> Manifest!
+  open func getManifest() throws -> Manifest!
 
   @JavaMethod
-  public func getEntry(_ arg0: String) -> ZipEntry!
+  open func getEntry(_ arg0: String) -> ZipEntry!
 
   @JavaMethod
-  public func getJarEntry(_ arg0: String) -> JarEntry!
+  open func getJarEntry(_ arg0: String) -> JarEntry!
 
   @JavaMethod
-  public func isMultiRelease() -> Bool
-
-  @JavaMethod
-  public func getName() -> String
-
-  @JavaMethod
-  public func size() -> Int32
-
-  @JavaMethod
-  public func close() throws
-
-  @JavaMethod
-  public func getComment() -> String
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func isMultiRelease() -> Bool
 }
 extension JavaClass<JarFile> {
   @JavaStaticField(isFinal: true)

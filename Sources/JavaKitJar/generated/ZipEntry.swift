@@ -2,91 +2,70 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.zip.ZipEntry", extends: JavaObject.self)
-public struct ZipEntry {
+@JavaClass("java.util.zip.ZipEntry")
+open class ZipEntry: JavaObject {
   @JavaMethod
-  public init(_ arg0: String, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func getName() -> String
+  open func getName() -> String
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func getMethod() -> Int32
+  open func getMethod() -> Int32
 
   @JavaMethod
-  public func getSize() -> Int64
+  open func getSize() -> Int64
 
   @JavaMethod
-  public func isDirectory() -> Bool
+  open func isDirectory() -> Bool
 
   @JavaMethod
-  public func getTime() -> Int64
+  open func getTime() -> Int64
 
   @JavaMethod
-  public func setTime(_ arg0: Int64)
+  open func setTime(_ arg0: Int64)
 
   @JavaMethod
-  public func setSize(_ arg0: Int64)
+  open func setSize(_ arg0: Int64)
 
   @JavaMethod
-  public func getCompressedSize() -> Int64
+  open func getCompressedSize() -> Int64
 
   @JavaMethod
-  public func setCompressedSize(_ arg0: Int64)
+  open func setCompressedSize(_ arg0: Int64)
 
   @JavaMethod
-  public func setCrc(_ arg0: Int64)
+  open func setCrc(_ arg0: Int64)
 
   @JavaMethod
-  public func getCrc() -> Int64
+  open func getCrc() -> Int64
 
   @JavaMethod
-  public func setMethod(_ arg0: Int32)
+  open func setMethod(_ arg0: Int32)
 
   @JavaMethod
-  public func setExtra(_ arg0: [Int8])
+  open func setExtra(_ arg0: [Int8])
 
   @JavaMethod
-  public func getExtra() -> [Int8]
+  open func getExtra() -> [Int8]
 
   @JavaMethod
-  public func setComment(_ arg0: String)
+  open func setComment(_ arg0: String)
 
   @JavaMethod
-  public func getComment() -> String
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func getComment() -> String
 }
 extension JavaClass<ZipEntry> {
   @JavaStaticField(isFinal: true)
