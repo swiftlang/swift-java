@@ -547,6 +547,35 @@ class Java2SwiftTests: XCTestCase {
       ]
     )
   }
+
+  func testCovariantInJavaNotInSwiftOverride3() throws {
+    try assertTranslatedClass(
+      NIOByteBuffer.self,
+      swiftTypeName: "NIOByteBuffer",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Class" : ("JavaClass", "JavaKit"),
+        "java.nio.Buffer": ("NIOBuffer", "JavaKitNIO"),
+        "java.nio.ByteBuffer": ("NIOByteBuffer", "JavaKitNIO"),
+      ],
+      expectedChunks: [
+        "import JavaKitNIO",
+        """
+        @JavaClass("java.nio.ByteBuffer")
+        open class NIOByteBuffer: NIOBuffer {
+        """,
+        """
+          @JavaMethod
+          open func array() -> [Int8]
+        """,
+        """
+          @JavaMethod
+          open override func arrayOffset() -> Int32
+        """,
+      ]
+    )
+  }
 }
 
 @JavaClass("java.lang.ClassLoader")
@@ -595,6 +624,16 @@ public struct Executable {
 
 @JavaInterface("java.lang.reflect.TypeVariable")
 public struct TypeVariable<D: AnyJavaObject> {
+}
+
+@JavaClass("java.nio.Buffer")
+open class NIOBuffer: JavaObject {
+
+}
+
+@JavaClass("java.nio.ByteBuffer")
+open class NIOByteBuffer: NIOBuffer {
+
 }
 
 /// Translate a Java class and assert that the translated output contains
