@@ -819,6 +819,12 @@ extension Type {
     // If both are classes, check for subclassing.
     if let selfClass = self.as(JavaClass<JavaObject>.self),
        let otherClass = other.as(JavaClass<JavaObject>.self) {
+      // If either is a Java array, then this cannot be a subtype relationship
+      // in Swift.
+      if selfClass.isArray() || otherClass.isArray() {
+        return false
+      }
+
       return selfClass.isSubclass(of: otherClass)
     }
 
