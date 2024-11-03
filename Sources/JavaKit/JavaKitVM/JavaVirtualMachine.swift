@@ -12,6 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
 
 public final class JavaVirtualMachine: @unchecked Sendable {
@@ -54,6 +60,12 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     // Construct the complete list of VM options.
     var allVMOptions: [String] = []
     if !classPath.isEmpty {
+      let fileManager = FileManager.default
+      for path in classPath {
+        if !fileManager.fileExists(atPath: path) {
+          throw JavaKitError.classPathEntryNotFound(entry: path, classPath: classPath)
+        }
+      }
       let colonSeparatedClassPath = classPath.joined(separator: ":")
       allVMOptions.append("-Djava.class.path=\(colonSeparatedClassPath)")
     }
@@ -267,5 +279,9 @@ extension JavaVirtualMachine {
       default: self = .unknown(error)
       }
     }
+  }
+
+  enum JavaKitError: Error {
+    case classPathEntryNotFound(entry: String, classPath: [String])
   }
 }
