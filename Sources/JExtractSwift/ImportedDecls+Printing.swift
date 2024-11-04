@@ -15,7 +15,6 @@
 import Foundation
 import JavaTypes
 import SwiftSyntax
-import OrderedCollections
 
 extension ImportedFunc {
   /// Render a `@{@snippet ... }` comment section that can be put inside a JavaDoc comment
