@@ -41,7 +41,7 @@ final class VariableImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let identifier = "counterInt"
     let varDecl: ImportedVariable? =

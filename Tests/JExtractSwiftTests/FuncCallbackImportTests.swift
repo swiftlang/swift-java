@@ -41,7 +41,7 @@ final class FuncCallbackImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: Self.class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "callMe" }!
 

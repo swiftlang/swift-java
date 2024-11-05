@@ -159,11 +159,11 @@ extension Swift2JavaTranslator {
       // Prepare type metadata, we're going to need these when invoking e.g. initializers so cache them in a static.
       // We call into source swift-java source generated accessors which give us the type of the Swift object:
       // TODO: seems we no longer need the mangled name per se, so avoiding such constant and downcall
-//      printer.printParts(
-//        "public static final String TYPE_MANGLED_NAME = ",
-//        SwiftKitPrinting.renderCallGetSwiftTypeMangledName(module: self.swiftModuleName, nominal: decl),
-//        ";"
-//      )
+      //      printer.printParts(
+      //        "public static final String TYPE_MANGLED_NAME = ",
+      //        SwiftKitPrinting.renderCallGetSwiftTypeMangledName(module: self.swiftModuleName, nominal: decl),
+      //        ";"
+      //      )
       printer.printParts(
         """
         public static final SwiftAnyType TYPE_METADATA =
@@ -438,7 +438,7 @@ extension Swift2JavaTranslator {
   }
 
   public func printClassConstructors(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    guard let parentName = decl.parentName else {
+    guard let parentName = decl.parent else {
       fatalError("init must be inside a parent type! Was: \(decl)")
     }
     printer.printSeparator(decl.identifier)
@@ -446,7 +446,7 @@ extension Swift2JavaTranslator {
     let descClassIdentifier = renderDescClassName(decl)
     printer.printTypeDecl("private static class \(descClassIdentifier)") { printer in
       printFunctionDescriptorValue(&printer, decl)
-      printFindMemorySegmentAddrByMangledName(&printer, decl)
+      printAccessorFunctionAddr(&printer, decl)
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
@@ -516,7 +516,7 @@ extension Swift2JavaTranslator {
 
     printer.printTypeDecl("private static class \(decl.baseIdentifier)") { printer in
       printFunctionDescriptorValue(&printer, decl)
-      printFindMemorySegmentAddrByMangledName(&printer, decl)
+      printAccessorFunctionAddr(&printer, decl)
       printMethodDowncallHandleForAddrDesc(&printer)
     }
 
@@ -611,7 +611,7 @@ extension Swift2JavaTranslator {
         }
 
         printFunctionDescriptorValue(&printer, accessor, accessorKind: accessorKind)
-        printFindMemorySegmentAddrByMangledName(&printer, accessor, accessorKind: accessorKind)
+        printAccessorFunctionAddr(&printer, accessor, accessorKind: accessorKind)
         printMethodDowncallHandleForAddrDesc(&printer, accessorKind: accessorKind)
       }
     }
@@ -647,13 +647,15 @@ extension Swift2JavaTranslator {
     }
   }
 
-  func printFindMemorySegmentAddrByMangledName(
+  func printAccessorFunctionAddr(
     _ printer: inout CodePrinter, _ decl: ImportedFunc,
     accessorKind: VariableAccessorKind? = nil
   ) {
     printer.print(
       """
-      public static final MemorySegment \(accessorKind.renderAddrFieldName) = \(swiftModuleName).findOrThrow("\(decl.swiftMangledName)");
+      public static final MemorySegment \(accessorKind.renderAddrFieldName) = 
+        // FIXME: remove old impl \(swiftModuleName).findOrThrow("NO MANGLED NAMES");
+        \(swiftModuleName).findOrThrow("\(SwiftKitPrinting.Names.functionThunk(module: self.swiftModuleName, function: decl))");
       """
     )
   }

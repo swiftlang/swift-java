@@ -15,6 +15,7 @@
 import org.swift.swiftkit.gradle.BuildUtils
 
 import java.nio.file.Files
+import java.nio.file.Paths
 
 plugins {
     id("build-logic.java-application-conventions")
@@ -35,29 +36,47 @@ java {
 }
 
 
-def buildSwift = tasks.register("build-swift", Exec) {
+// This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
+// Thus, we also need to watch and re-build the top level project.
+def buildJExtractPlugin = tasks.register("swiftBuildJExtractPlugin", Exec) {
+    description = "Rebuild the swift-java root project"
+
+    inputs.file(new File(rootDir, "Package.swift"))
+    inputs.dir(new File(rootDir, "Sources"))
+    outputs.dir(new File(rootDir, ".build"))
+
+    workingDir = rootDir
+    commandLine "swift"
+    args "build"
+}
+
+def buildSwift = tasks.register("swiftBuildProject", Exec) {
     description = "Builds swift sources, including swift-java source generation"
+    dependsOn buildJExtractPlugin
 
-    // monitor root project Swift sources:
-    inputs.dir(layout.projectDirectory.dir("Sources/"))
-    println("INPUT = ${layout.projectDirectory.dir("Sources/")}")
+    // only because we depend on "live developing" the plugin while using this project to test it
+    inputs.file(new File(rootDir, "Package.swift"))
+    inputs.dir(new File(rootDir, "Sources"))
 
-    // monitor root java-swift sources (including source generator libs which may be changing):
-    inputs.dir("$rootDir/Sources")
-    println("INPUT = ${"$rootDir/Sources"}")
+    // TODO: we can use package describe --type json to figure out which targets depend on JExtractSwiftPlugin and will produce outputs
+    inputs.file(layout.projectDirectory.file("Package.swift"))
+    inputs.dir(layout.projectDirectory.dir("Sources"))
 
-    // the swift-java produced Java sources are located here:
-    outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/jextractpluginsampleapp/JExtractPluginSampleLib/destination/JExtractSwiftPlugin/src/generated/java"))
+//    outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractPluginSampleLib/destination/JExtractSwiftPlugin/src/generated/java"))
+    outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}"))
 
+    File baseSwiftPluginOutputsDir = layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile
+    if (!baseSwiftPluginOutputsDir.exists()) {
+        baseSwiftPluginOutputsDir.mkdirs()
+    }
     Files.walk(layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile.toPath()).each {
-        println("PATH === ${it}")
         if (it.endsWith("JExtractSwiftPlugin/src/generated/java")) {
             outputs.dir(it)
-            println("MAKE IT AN OUTPUT")
+            println("OUTPUT = ${it}")
         }
     }
 
-    workingDir = rootDir
+    workingDir = layout.projectDirectory
     commandLine "swift"
     args "build"
 }
@@ -76,6 +95,8 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    // implementation(swiftDynamicLibrary('')
 }
 
 tasks.named('test', Test) {

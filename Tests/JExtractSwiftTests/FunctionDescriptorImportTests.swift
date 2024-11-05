@@ -53,7 +53,6 @@ final class FunctionDescriptorTests {
     }
     """
 
-
   @Test
   func FunctionDescriptor_globalTakeInt() throws {
     try functionDescriptorTest("globalTakeInt") { output in
@@ -141,7 +140,7 @@ extension FunctionDescriptorTests {
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
-    body: (String) throws -> ()
+    body: (String) throws -> Void
   ) throws {
     let st = Swift2JavaTranslator(
       javaPackage: javaPackage,
@@ -149,7 +148,7 @@ extension FunctionDescriptorTests {
     )
     st.log.logLevel = logLevel
 
-    try st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.baseIdentifier == methodIdentifier
@@ -168,7 +167,7 @@ extension FunctionDescriptorTests {
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
-    body: (String) throws -> ()
+    body: (String) throws -> Void
   ) throws {
     let st = Swift2JavaTranslator(
       javaPackage: javaPackage,
@@ -176,20 +175,21 @@ extension FunctionDescriptorTests {
     )
     st.log.logLevel = logLevel
 
-    try st.analyze(swiftInterfacePath: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let varDecl: ImportedVariable? =
       st.importedTypes.values.compactMap {
-          $0.variables.first {
-            $0.identifier == identifier
-          }
-        }.first
+        $0.variables.first {
+          $0.identifier == identifier
+        }
+      }.first
     guard let varDecl else {
       fatalError("Cannot find descriptor of: \(identifier)")
     }
 
     let getOutput = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(&printer, varDecl.accessorFunc(kind: accessorKind)!, accessorKind: accessorKind)
+      st.printFunctionDescriptorValue(
+        &printer, varDecl.accessorFunc(kind: accessorKind)!, accessorKind: accessorKind)
     }
 
     try body(getOutput)

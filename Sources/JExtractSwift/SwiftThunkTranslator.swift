@@ -56,10 +56,33 @@ struct SwiftThunkTranslator {
       """
       @_cdecl("\(raw: funcName)")
       public func \(raw: funcName)() -> Any /* Any.Type */ {
-        \(raw: nominal.swiftTypeName).self
+        print("[swift] get type \\(\(raw: nominal.swiftTypeName).self)")
+        print("[swift] type object identifier ObjectIdentifier(\(raw: nominal.swiftTypeName).self) = \\(ObjectIdentifier(\(raw: nominal.swiftTypeName).self))")
+        return \(raw: nominal.swiftTypeName).self
       }
       """
   }
+
+  func renderSwiftInitAccessor(_ function: ImportedFunc) -> DeclSyntax {
+//    let funcName = SwiftKitPrinting.Names.functionThunk(
+//      module: st.swiftModuleName,
+//      funcDecl: function.swiftDecl.as(FuncDeclSyntax.self)!) // FIXME: the field should be well typed
+
+//    guard let parent = function.parent
+//
+//    // FIXME: handle in thunk: return types
+//    // FIXME: handle in thunk: parameters
+//    // FIXME: handle in thunk: errors
+//    return
+//      """
+//      @_cdecl("\(raw: funcName)")
+//      public func \(raw: funcName)() -> {
+//        
+//      }
+//      """
+    fatalError()
+  }
+
 
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
     let decl: DeclSyntax =

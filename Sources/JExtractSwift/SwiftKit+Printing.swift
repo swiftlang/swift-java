@@ -39,4 +39,12 @@ extension SwiftKitPrinting.Names {
   static func getType(module: String, nominal: ImportedNominalType) -> String {
     "swiftjava_getType_\(module)_\(nominal.swiftTypeName)"
   }
+
+  static func functionThunk(module: String, function: ImportedFunc) -> String {
+    if let parent = function.parent {
+      "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)_PARAMS"
+    } else {
+      "swiftjava_\(module)_\(function.baseIdentifier)"
+    }
+  }
 }

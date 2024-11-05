@@ -33,6 +33,9 @@ struct JExtractSwiftBuildToolPlugin: BuildToolPlugin {
       .appending(path: "generated")
       .appending(path: "java")
     let outputDirectorySwift = context.pluginWorkDirectoryURL
+      .appending(path: "src")
+      .appending(path: "generated")
+      .appending(path: "Sources")
 
     var arguments: [String] = [
       "--swift-module", sourceModule.name,
