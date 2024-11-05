@@ -14,6 +14,8 @@
 
 import org.swift.swiftkit.gradle.BuildUtils
 
+import java.nio.file.Files
+
 plugins {
     id("build-logic.java-application-conventions")
 //     id("me.champeau.jmh") version "0.7.2"
@@ -33,17 +35,27 @@ java {
 }
 
 
-def jextract = tasks.register("swift-build", Exec) {
+def buildSwift = tasks.register("build-swift", Exec) {
     description = "Builds swift sources, including swift-java source generation"
 
-    // monitor project Swift sources:
+    // monitor root project Swift sources:
     inputs.dir(layout.projectDirectory.dir("Sources/"))
+    println("INPUT = ${layout.projectDirectory.dir("Sources/")}")
 
     // monitor root java-swift sources (including source generator libs which may be changing):
     inputs.dir("$rootDir/Sources")
+    println("INPUT = ${"$rootDir/Sources"}")
 
     // the swift-java produced Java sources are located here:
     outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/jextractpluginsampleapp/JExtractPluginSampleLib/destination/JExtractSwiftPlugin/src/generated/java"))
+
+    Files.walk(layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile.toPath()).each {
+        println("PATH === ${it}")
+        if (it.endsWith("JExtractSwiftPlugin/src/generated/java")) {
+            outputs.dir(it)
+            println("MAKE IT AN OUTPUT")
+        }
+    }
 
     workingDir = rootDir
     commandLine "swift"
@@ -54,7 +66,7 @@ def jextract = tasks.register("swift-build", Exec) {
 sourceSets {
     main {
         java {
-            srcDir(jextract)
+            srcDir(buildSwift)
         }
     }
 }
@@ -71,7 +83,7 @@ tasks.named('test', Test) {
 }
 
 application {
-    mainClass = "com.example.swift.HelloJava2Swift"
+    mainClass = "com.example.swift.JExtractPluginSampleMain"
 
     // In order to silence:
     //   WARNING: A restricted method in java.lang.foreign.SymbolLookup has been called
@@ -83,7 +95,9 @@ application {
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + BuildUtils.javaLibraryPaths(rootDir).join(":"),
+        "-Djava.library.path=" +
+                (BuildUtils.javaLibraryPaths(rootDir) +
+                 BuildUtils.javaLibraryPaths(layout.projectDirectory.asFile)).join(":"),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"
