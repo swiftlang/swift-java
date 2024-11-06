@@ -32,7 +32,8 @@ package struct SwiftKitPrinting {
 // Helpers to form names of "well known" SwiftKit generated functions
 
 extension SwiftKitPrinting {
-  enum Names {}
+  enum Names {
+  }
 }
 
 extension SwiftKitPrinting.Names {
@@ -40,11 +41,24 @@ extension SwiftKitPrinting.Names {
     "swiftjava_getType_\(module)_\(nominal.swiftTypeName)"
   }
 
-  static func functionThunk(module: String, function: ImportedFunc) -> String {
-    if let parent = function.parent {
-      "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)_"
-    } else {
-      "swiftjava_\(module)_\(function.baseIdentifier)"
+  static func functionThunk(
+    thunkNameRegistry: inout ThunkNameRegistry,
+    module: String, function: ImportedFunc) -> String {
+    let params = function.effectiveParameters(paramPassingStyle: .swiftThunkSelf)
+    var paramsPart = ""
+    if !params.isEmpty {
+      paramsPart = "_" + params.map { param in
+        param.firstName ?? "_"
+      }.joined(separator: "_")
     }
+
+    let name =
+      if let parent = function.parent {
+        "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)\(paramsPart)"
+      } else {
+        "swiftjava_\(module)_\(function.baseIdentifier)\(paramsPart)"
+      }
+
+    return thunkNameRegistry.deduplicate(name: name)
   }
 }

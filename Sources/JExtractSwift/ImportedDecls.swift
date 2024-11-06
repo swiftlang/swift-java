@@ -68,10 +68,10 @@ public enum NominalTypeKind {
 }
 
 public struct ImportedParam {
-  let param: FunctionParameterSyntax
+  let syntax: FunctionParameterSyntax
 
   var firstName: String? {
-    let text = param.firstName.trimmed.text
+    let text = syntax.firstName.trimmed.text
     guard text != "_" else {
       return nil
     }
@@ -80,7 +80,7 @@ public struct ImportedParam {
   }
 
   var secondName: String? {
-    let text = param.secondName?.trimmed.text
+    let text = syntax.secondName?.trimmed.text
     guard text != "_" else {
       return nil
     }
@@ -94,7 +94,7 @@ public struct ImportedParam {
 
   // The Swift type as-is from the swift interface
   var swiftType: String {
-    param.type.trimmed.description
+    syntax.type.trimmed.description
   }
 
   // The mapped-to Java type of the above Java type, collections and optionals may be replaced with Java ones etc.
@@ -182,7 +182,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
       case .pointer:
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
-          ImportedParam(param: selfParam, type: parent)
+          ImportedParam(syntax: selfParam, type: parent)
         )
 
       case .memorySegment:
@@ -190,7 +190,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
         var parentForSelf = parent
         parentForSelf.javaType = .javaForeignMemorySegment
         params.append(
-          ImportedParam(param: selfParam, type: parentForSelf)
+          ImportedParam(syntax: selfParam, type: parentForSelf)
         )
 
       case .swiftThunkSelf:
@@ -203,10 +203,6 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
     } else {
       return self.parameters
     }
-  }
-
-  public var accessorThunkName: String {
-    SwiftKitPrinting.Names.functionThunk(module: self.module, function: self)
   }
 
   public var swiftDecl: any DeclSyntaxProtocol
@@ -236,7 +232,6 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var description: String {
     """
     ImportedFunc {
-      accessorThunkName: \(self.accessorThunkName)
       identifier: \(identifier)
       returnType: \(returnType)
       parameters: \(parameters)
@@ -312,7 +307,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         parent: self.parentName,
         identifier: self.identifier,
         returnType: TranslatedType.void,
-        parameters: [.init(param: newValueParam, type: self.returnType)])
+        parameters: [.init(syntax: newValueParam, type: self.returnType)])
       return funcDecl
 
     case .get:
@@ -337,7 +332,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         "_ newValue: \(raw: self.returnType.swiftTypeName)"
       params.append(
         ImportedParam(
-          param: newValueParam,
+          syntax: newValueParam,
           type: self.returnType)
       )
     }
@@ -351,7 +346,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
           ImportedParam(
-            param: selfParam,
+            syntax: selfParam,
             type: parentName
           )
         )
@@ -362,7 +357,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         parentForSelf.javaType = .javaForeignMemorySegment
         params.append(
           ImportedParam(
-            param: selfParam,
+            syntax: selfParam,
             type: parentForSelf
           )
         )

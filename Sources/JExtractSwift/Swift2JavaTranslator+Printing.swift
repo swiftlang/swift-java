@@ -648,10 +648,14 @@ extension Swift2JavaTranslator {
     _ printer: inout CodePrinter, _ decl: ImportedFunc,
     accessorKind: VariableAccessorKind? = nil
   ) {
+    var thunkName = SwiftKitPrinting.Names.functionThunk(
+      thunkNameRegistry: &self.thunkNameRegistry,
+      module: self.swiftModuleName, function: decl)
+    thunkName = thunkNameRegistry.deduplicate(name: thunkName)
     printer.print(
       """
       public static final MemorySegment \(accessorKind.renderAddrFieldName) = 
-        \(self.swiftModuleName).findOrThrow("\(SwiftKitPrinting.Names.functionThunk(module: self.swiftModuleName, function: decl))");
+        \(self.swiftModuleName).findOrThrow("\(thunkName)");
       """
     )
   }

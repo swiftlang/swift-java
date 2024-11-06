@@ -57,7 +57,6 @@ func assertOutput(
       let textLinesAtOffset = gotLines[offset..<offset+detectChunkByInitialLines]
         .map({$0.trimmingCharacters(in: .whitespacesAndNewlines)})
         .joined(separator: "\n")
-
       if textLinesAtOffset == expectedInitialMatchingLines {
         matchingOutputOffset = offset
         break

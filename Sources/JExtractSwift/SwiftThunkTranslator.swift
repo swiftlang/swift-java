@@ -66,8 +66,6 @@ struct SwiftThunkTranslator {
       """
       @_cdecl("\(raw: funcName)")
       public func \(raw: funcName)() -> Any /* Any.Type */ {
-        print("[swift] get type \\(\(raw: nominal.swiftTypeName).self)")
-        print("[swift] type object identifier ObjectIdentifier(\(raw: nominal.swiftTypeName).self) = \\(ObjectIdentifier(\(raw: nominal.swiftTypeName).self))")
         return \(raw: nominal.swiftTypeName).self
       }
       """
@@ -79,6 +77,7 @@ struct SwiftThunkTranslator {
     }
 
     let funcName = SwiftKitPrinting.Names.functionThunk(
+      thunkNameRegistry: &self.st.thunkNameRegistry,
       module: st.swiftModuleName,
       function: function)
 
@@ -100,6 +99,7 @@ struct SwiftThunkTranslator {
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
     st.log.trace("Rendering thunks for: \(decl.baseIdentifier)")
     let funcName = SwiftKitPrinting.Names.functionThunk(
+      thunkNameRegistry: &st.thunkNameRegistry,
       module: st.swiftModuleName,
       function: decl)
 

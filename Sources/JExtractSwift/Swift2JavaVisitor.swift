@@ -95,7 +95,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
-          param: param,
+          syntax: param,
           type: try cCompatibleType(for: param.type)
         )
       }
@@ -193,7 +193,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
-          param: param,
+          syntax: param,
           type: try cCompatibleType(for: param.type)
         )
       }

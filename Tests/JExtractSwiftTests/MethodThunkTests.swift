@@ -28,17 +28,26 @@ final class MethodThunkTests {
   func thunk_overloads() throws {
     let st = Swift2JavaTranslator(
       javaPackage: "com.example.swift",
-      swiftModuleName: "__FakeModule"
+      swiftModuleName: "FakeModule"
     )
-    st.log.logLevel = .trace
+    st.log.logLevel = .error
 
     try assertOutput(
       st, input: input, .swift,
+      detectChunkByInitialLines: 1,
       expectedChunks:
       [
         """
-        @_cdecl()
-        func kappa()
+        @_cdecl("swiftjava_FakeModule_globalFunc_a_b")
+        public func swiftjava_FakeModule_globalFunc_a_b(a: Int32, b: Int64) -> Swift.Void /* Void */ {
+          globalFunc(a: a, b: b)
+        }
+        """,
+        """
+        @_cdecl("swiftjava_FakeModule_globalFunc_a_b$1")
+        public func swiftjava_FakeModule_globalFunc_a_b$1(a: Double, b: Int64) -> Swift.Void /* Void */ {
+          globalFunc(a: a, b: b)
+        }
         """
       ]
     )

@@ -36,14 +36,15 @@ public final class Swift2JavaTranslator {
 
   // ==== Output state
 
-  // TODO: consider how/if we need to store those etc
-  public var importedGlobalFuncs: [ImportedFunc] = []
+  package var importedGlobalFuncs: [ImportedFunc] = []
 
   /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
   /// type representation.
-  public var importedTypes: [String: ImportedNominalType] = [:]
+  package var importedTypes: [String: ImportedNominalType] = [:]
 
   let nominalResolution: NominalTypeResolution = NominalTypeResolution()
+
+  var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   public init(
     javaPackage: String,
