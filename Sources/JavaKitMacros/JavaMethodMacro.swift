@@ -108,6 +108,17 @@ extension JavaMethodMacro: BodyMacro {
       initDecl.signature.effectSpecifiers?.throwsClause != nil
       ? "try" : "try!"
 
+    let objectCreation: [CodeBlockItemSyntax]
+    if context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false {
+      objectCreation = [
+        "let javaThis = \(raw: tryKeyword) Self.dynamicJavaNewObjectInstance(in: _environment\(raw: arguments))\n",
+        "self.init(javaThis: javaThis, environment: _environment)\n",
+      ]
+    } else {
+      objectCreation = [
+        "self = \(raw: tryKeyword) Self.dynamicJavaNewObject(in: _environment\(raw: arguments))\n"
+      ]
+    }
     return [
       """
       let _environment = if let environment {
@@ -115,9 +126,8 @@ extension JavaMethodMacro: BodyMacro {
       } else {
           \(raw: tryKeyword) JavaVirtualMachine.shared().environment()
       }
-      self = \(raw: tryKeyword) Self.dynamicJavaNewObject(in: _environment\(raw: arguments))
       """
-    ]
+    ] + objectCreation
   }
 }
 

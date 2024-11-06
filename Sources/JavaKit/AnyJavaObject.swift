@@ -42,9 +42,6 @@ public protocol AnyJavaObject {
   /// Retrieve the full Java class name (e.g., java.util.Vector)
   static var fullJavaClassName: String { get }
 
-  /// The Java superclass type
-  associatedtype JavaSuperclass: AnyJavaObject
-
   /// Initialize a Java object from the Swift instance that keeps it alive.
   init(javaHolder: JavaObjectHolder)
 

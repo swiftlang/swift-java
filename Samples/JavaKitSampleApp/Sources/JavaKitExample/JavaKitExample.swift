@@ -57,7 +57,7 @@ extension HelloSwift: HelloSwiftNativeMethods {
       print("Hello from the subclass!")
       helloSub.greetMe()
 
-      assert(helloSub.super.value == 2.71828)
+      assert(helloSub.value == 2.71828)
     } else {
       fatalError("Expected subclass here")
     }

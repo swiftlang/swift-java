@@ -3,63 +3,9 @@ import JavaKit
 import JavaRuntime
 
 @JavaClass("java.util.jar.JarOutputStream")
-public struct JarOutputStream {
+open class JarOutputStream: JavaObject {
   @JavaMethod
-  public func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
-
-  @JavaMethod
-  public func close() throws
-
-  @JavaMethod
-  public func finish() throws
-
-  @JavaMethod
-  public func setMethod(_ arg0: Int32)
-
-  @JavaMethod
-  public func setComment(_ arg0: String)
-
-  @JavaMethod
-  public func setLevel(_ arg0: Int32)
-
-  @JavaMethod
-  public func closeEntry() throws
-
-  @JavaMethod
-  public func flush() throws
-
-  @JavaMethod
-  public func write(_ arg0: Int32) throws
-
-  @JavaMethod
-  public func write(_ arg0: [Int8]) throws
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func putNextEntry(_ arg0: ZipEntry?) throws
 }
 extension JavaClass<JarOutputStream> {
   @JavaStaticField(isFinal: true)

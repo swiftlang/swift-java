@@ -26,6 +26,10 @@ package class JavaTranslator {
   let swiftModuleName: String
 
   let environment: JNIEnvironment
+
+  /// Whether to translate Java classes into classes (rather than structs).
+  let translateAsClass: Bool
+
   let format: BasicFormat
 
   /// A mapping from the name of each known Java class to the corresponding
@@ -61,10 +65,12 @@ package class JavaTranslator {
   package init(
     swiftModuleName: String,
     environment: JNIEnvironment,
+    translateAsClass: Bool = false,
     format: BasicFormat = JavaTranslator.defaultFormat
   ) {
     self.swiftModuleName = swiftModuleName
     self.environment = environment
+    self.translateAsClass = translateAsClass
     self.format = format
   }
 

@@ -54,6 +54,8 @@ enum GenerationMode {
       let attributes: AttributeListSyntax
       if let structSyntax = lexicalContext.as(StructDeclSyntax.self) {
         attributes = structSyntax.attributes
+      } else if let classSyntax = lexicalContext.as(ClassDeclSyntax.self) {
+        attributes = classSyntax.attributes
       } else if let extSyntax = lexicalContext.as(ExtensionDeclSyntax.self) {
         attributes = extSyntax.attributes
       } else {

@@ -44,7 +44,7 @@ class BasicRuntimeTests: XCTestCase {
 
     // 'super' and 'as' don't require allocating a new holder.
     let url = try URL("http://swift.org", environment: environment)
-    let superURL = url.super
+    let superURL: JavaObject = url
     XCTAssert(url.javaHolder === superURL.javaHolder)
     let urlAgain = superURL.as(URL.self)!
     XCTAssert(url.javaHolder === urlAgain.javaHolder)

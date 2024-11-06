@@ -3,90 +3,63 @@ import JavaKit
 import JavaRuntime
 
 @JavaClass("java.util.HashMap")
-public struct HashMap<K: AnyJavaObject, V: AnyJavaObject> {
+open class HashMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, _ arg1: Float, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, _ arg1: Float, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject!
+  open func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
+  open func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject!
+  open func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>!
+  open func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
+  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
 
   @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func containsKey(_ arg0: JavaObject?) -> Bool
+  open func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>!
+  open func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
-  public func containsValue(_ arg0: JavaObject?) -> Bool
+  open func containsValue(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 }
 extension JavaClass {
   @JavaStaticMethod

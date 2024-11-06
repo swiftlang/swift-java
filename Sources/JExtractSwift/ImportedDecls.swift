@@ -263,7 +263,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
   /// Usually this will be all the accessors the variable declares,
   /// however if the getter is async or throwing we may not be able to import it
   /// (yet), and therefore would skip it from the supported set.
-  public var supportedAccessorKinds: OrderedSet<VariableAccessorKind> = [.get, .set]
+  public var supportedAccessorKinds: [VariableAccessorKind] = [.get, .set]
 
   /// This is the base identifier for the function, e.g., "init" for an
   /// initializer or "f" for "f(a:b:)".

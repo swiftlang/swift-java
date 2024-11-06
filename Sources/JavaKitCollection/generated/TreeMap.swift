@@ -3,192 +3,120 @@ import JavaKit
 import JavaRuntime
 
 @JavaClass("java.util.TreeMap")
-public struct TreeMap<K: AnyJavaObject, V: AnyJavaObject> {
+open class TreeMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject!
+  open func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject!
+  open func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func values() -> JavaCollection<JavaObject>!
+  open func values() -> JavaCollection<JavaObject>!
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
+  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
 
   @JavaMethod
-  public func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func containsKey(_ arg0: JavaObject?) -> Bool
+  open func containsKey(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func keySet() -> JavaSet<JavaObject>!
+  open func keySet() -> JavaSet<JavaObject>!
 
   @JavaMethod
-  public func containsValue(_ arg0: JavaObject?) -> Bool
+  open func containsValue(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func firstKey() -> JavaObject!
+  open func firstKey() -> JavaObject!
 
   @JavaMethod
-  public func putFirst(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func putFirst(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func putLast(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func putLast(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func lowerKey(_ arg0: JavaObject?) -> JavaObject!
+  open func lowerKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func floorKey(_ arg0: JavaObject?) -> JavaObject!
+  open func floorKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func ceilingKey(_ arg0: JavaObject?) -> JavaObject!
+  open func ceilingKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func higherKey(_ arg0: JavaObject?) -> JavaObject!
+  open func higherKey(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func lastKey() -> JavaObject!
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func isEmpty() -> Bool
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
-
-  @JavaMethod
-  public func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func lastKey() -> JavaObject!
 }
 extension TreeMap {
-  @JavaClass("java.util.AbstractMap$SimpleEntry", extends: JavaObject.self)
-  public struct SimpleEntry<K: AnyJavaObject, V: AnyJavaObject> {
+  @JavaClass("java.util.AbstractMap$SimpleEntry")
+  open class SimpleEntry<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func getValue() -> JavaObject!
+  open func getValue() -> JavaObject!
 
   @JavaMethod
-  public func getKey() -> JavaObject!
+  open func getKey() -> JavaObject!
 
   @JavaMethod
-  public func setValue(_ arg0: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func setValue(_ arg0: JavaObject?) -> JavaObject!
   }
 }
 extension TreeMap {
-  @JavaClass("java.util.AbstractMap$SimpleImmutableEntry", extends: JavaObject.self)
-  public struct SimpleImmutableEntry<K: AnyJavaObject, V: AnyJavaObject> {
+  @JavaClass("java.util.AbstractMap$SimpleImmutableEntry")
+  open class SimpleImmutableEntry<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toString() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func getValue() -> JavaObject!
+  open func getValue() -> JavaObject!
 
   @JavaMethod
-  public func getKey() -> JavaObject!
+  open func getKey() -> JavaObject!
 
   @JavaMethod
-  public func setValue(_ arg0: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func setValue(_ arg0: JavaObject?) -> JavaObject!
   }
 }

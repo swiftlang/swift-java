@@ -2,24 +2,72 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.jar.JarEntry")
-open class JarEntry: ZipEntry {
+@JavaClass("java.util.zip.ZipEntry")
+open class ZipEntry: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JarEntry?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
+  open func getName() -> String
 
   @JavaMethod
-  open func getRealName() -> String
+  open override func toString() -> String
 
   @JavaMethod
-  open func getAttributes() throws -> Attributes!
+  open override func hashCode() -> Int32
+
+  @JavaMethod
+  open override func clone() -> JavaObject!
+
+  @JavaMethod
+  open func getMethod() -> Int32
+
+  @JavaMethod
+  open func getSize() -> Int64
+
+  @JavaMethod
+  open func isDirectory() -> Bool
+
+  @JavaMethod
+  open func getTime() -> Int64
+
+  @JavaMethod
+  open func setTime(_ arg0: Int64)
+
+  @JavaMethod
+  open func setSize(_ arg0: Int64)
+
+  @JavaMethod
+  open func getCompressedSize() -> Int64
+
+  @JavaMethod
+  open func setCompressedSize(_ arg0: Int64)
+
+  @JavaMethod
+  open func setCrc(_ arg0: Int64)
+
+  @JavaMethod
+  open func getCrc() -> Int64
+
+  @JavaMethod
+  open func setMethod(_ arg0: Int32)
+
+  @JavaMethod
+  open func setExtra(_ arg0: [Int8])
+
+  @JavaMethod
+  open func getExtra() -> [Int8]
+
+  @JavaMethod
+  open func setComment(_ arg0: String)
+
+  @JavaMethod
+  open func getComment() -> String
 }
-extension JavaClass<JarEntry> {
+extension JavaClass<ZipEntry> {
   @JavaStaticField(isFinal: true)
   public var STORED: Int32
 

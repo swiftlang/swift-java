@@ -3,148 +3,118 @@ import JavaKit
 import JavaRuntime
 
 @JavaClass("java.util.ArrayDeque")
-public struct ArrayDeque<E: AnyJavaObject> {
+open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove() -> JavaObject!
+  open func remove() -> JavaObject!
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> Bool
+  open func remove(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func clone() -> ArrayDeque<JavaObject>!
+  open override func clone() -> ArrayDeque<JavaObject>!
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func add(_ arg0: JavaObject?) -> Bool
+  open func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  open func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
 
   @JavaMethod
-  public func toArray() -> [JavaObject?]
+  open func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>!
+  open func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
-  public func contains(_ arg0: JavaObject?) -> Bool
+  open func contains(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func peek() -> JavaObject!
+  open func peek() -> JavaObject!
 
   @JavaMethod
-  public func getFirst() -> JavaObject!
+  open func getFirst() -> JavaObject!
 
   @JavaMethod
-  public func getLast() -> JavaObject!
+  open func getLast() -> JavaObject!
 
   @JavaMethod
-  public func element() -> JavaObject!
+  open func element() -> JavaObject!
 
   @JavaMethod
-  public func addFirst(_ arg0: JavaObject?)
+  open func addFirst(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func addLast(_ arg0: JavaObject?)
+  open func addLast(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func removeFirst() -> JavaObject!
+  open func removeFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeLast() -> JavaObject!
+  open func removeLast() -> JavaObject!
 
   @JavaMethod
-  public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func poll() -> JavaObject!
+  open func poll() -> JavaObject!
 
   @JavaMethod
-  public func push(_ arg0: JavaObject?)
+  open func push(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func pop() -> JavaObject!
+  open func pop() -> JavaObject!
 
   @JavaMethod
-  public func pollFirst() -> JavaObject!
+  open func pollFirst() -> JavaObject!
 
   @JavaMethod
-  public func pollLast() -> JavaObject!
+  open func pollLast() -> JavaObject!
 
   @JavaMethod
-  public func offerLast(_ arg0: JavaObject?) -> Bool
+  open func offerLast(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peekFirst() -> JavaObject!
+  open func peekFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeFirstOccurrence(_ arg0: JavaObject?) -> Bool
+  open func removeFirstOccurrence(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func offerFirst(_ arg0: JavaObject?) -> Bool
+  open func offerFirst(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func peekLast() -> JavaObject!
+  open func peekLast() -> JavaObject!
 
   @JavaMethod
-  public func removeLastOccurrence(_ arg0: JavaObject?) -> Bool
+  open func removeLastOccurrence(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func offer(_ arg0: JavaObject?) -> Bool
+  open func offer(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func descendingIterator() -> JavaIterator<JavaObject>!
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func descendingIterator() -> JavaIterator<JavaObject>!
 }

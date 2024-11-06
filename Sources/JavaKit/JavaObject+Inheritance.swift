@@ -15,11 +15,6 @@
 import JavaRuntime
 
 extension AnyJavaObject {
-  /// Retrieve the same object instance but with the superclass type.
-  public var `super`: JavaSuperclass {
-    JavaSuperclass(javaHolder: javaHolder)
-  }
-
   /// Look up the other class type
   ///
   /// - Returns: `nil` when either `OtherClass` isn't known to the

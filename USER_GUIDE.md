@@ -45,15 +45,15 @@ If you build the project, there will be a generated file `BigInteger.swift` that
 
 ```swift
 @JavaClass("java.math.BigInteger")
-public struct BigInteger {
+open class BigInteger: JavaNumber {
   @JavaMethod
   public init(_ arg0: String, environment: JNIEnvironment? = nil)
   
   @JavaMethod
-  public func toString() -> String
+  open func toString() -> String
   
   @JavaMethod
-  public func isProbablePrime(_ arg0: Int32) -> Bool
+  open func isProbablePrime(_ arg0: Int32) -> Bool
 
   // many more methods
 }
@@ -219,7 +219,7 @@ do {
 
 Note that we are passing the Jar file in the `classPath` argument when initializing the `JavaVirtualMachine` instance. Otherwise, the program will fail with an error because it cannot find the Java class `com.gazman.quadratic_sieve.primes.SieveOfEratosthenes`.
 
-### Up and downcasting
+### Downcasting
 
 All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checkin whether a given object is of the specified type, e.g.,
 
@@ -288,31 +288,31 @@ This section describes how Java libraries and mapped into Swift and their use fr
 
 ### Translation from Java classes into Swift
 
-Each Java class that can be used from Swift is translated to a Swift `struct` that provides information about the Java class itself and is populated with the Swift projection of each of its constructors, methods, and fields. For example, here is an excerpt of the Swift projection of [`java.util.jar.JarFile`](https://docs.oracle.com/javase/8/docs/api/java/util/jar/JarFile.html):
+Each Java class that can be used from Swift is translated to a Swift `class` that provides information about the Java class itself and is populated with the Swift projection of each of its constructors, methods, and fields. For example, here is an excerpt of the Swift projection of [`java.util.jar.JarFile`](https://docs.oracle.com/javase/8/docs/api/java/util/jar/JarFile.html):
 
 ```swift
-@JavaClass("java.util.jar.JarFile", extends: ZipFile.self, implements: AutoCloseable.self)
-public struct JarFile {
+@JavaClass("java.util.jar.JarFile", extends: AutoCloseable.self)
+open class JarFile: ZipFile {
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func entries() -> Enumeration<JarEntry>?
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  public func getManifest() -> Manifest?
+  open func entries() -> Enumeration<JarEntry>!
 
   @JavaMethod
-  public func getJarEntry(_ arg0: String) -> JarEntry?
+  open func getManifest() throws -> Manifest!
 
   @JavaMethod
-  public func isMultiRelease() -> Bool
+  open func getEntry(_ arg0: String) -> ZipEntry!
 
   @JavaMethod
-  public func getName() -> String
+  open func getJarEntry(_ arg0: String) -> JarEntry!
 
   @JavaMethod
-  public func size() -> Int32
+  open func isMultiRelease() -> Bool
 }
 ```
 
@@ -328,7 +328,7 @@ Each of the public Java constructors, methods, and fields in the Java class will
 
 ```swift
   @JavaMethod
-  public init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil)
+  public convenience init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil)
 ```
 
 corresponds to the Java constructor:
@@ -423,6 +423,20 @@ extension JavaClass<URLConnection> {
 ### Interfaces
 
 Java interfaces are similar to classes, and are projected into Swift in much the same way, but with the macro `JavaInterface`. The `JavaInterface` macro takes the Java interface name as well as any Java interfaces that this interface extends. As an example, here is the Swift projection of the [`java.util.Enumeration`](https://docs.oracle.com/javase/8/docs/api/java/util/Enumeration.html) generic interface:
+
+```swift
+@JavaInterface("java.util.Enumeration")
+public struct Enumeration<E: AnyJavaObject> {
+  @JavaMethod
+  public func asIterator() -> JavaIterator<JavaObject>!
+
+  @JavaMethod
+  public func hasMoreElements() -> Bool
+
+  @JavaMethod
+  public func nextElement() -> JavaObject!
+}
+```
 
 ## Translating Java classes with `Java2Swift`
 

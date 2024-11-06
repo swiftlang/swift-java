@@ -64,9 +64,15 @@ extension JavaFieldMacro: AccessorMacro {
       getter
     ]
 
+    let nonmutatingModifier =
+      (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false ||
+       context.lexicalContext.first?.is(ExtensionDeclSyntax.self) ?? false)
+        ? ""
+        : "nonmutating "
+
     if createSetter {
       let setter: AccessorDeclSyntax = """
-        nonmutating set { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] = newValue }
+        \(raw: nonmutatingModifier)set { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] = newValue }
         """
       accessors.append(setter)
     }

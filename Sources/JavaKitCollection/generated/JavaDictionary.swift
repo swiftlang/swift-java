@@ -2,56 +2,29 @@
 import JavaKit
 import JavaRuntime
 
-@JavaClass("java.util.Dictionary", extends: JavaObject.self)
-public struct JavaDictionary<K: AnyJavaObject, V: AnyJavaObject> {
+@JavaClass("java.util.Dictionary")
+open class JavaDictionary<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> JavaObject!
+  open func remove(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: JavaObject?) -> JavaObject!
+  open func get(_ arg0: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func elements() -> Enumeration<JavaObject>!
+  open func elements() -> Enumeration<JavaObject>!
 
   @JavaMethod
-  public func keys() -> Enumeration<JavaObject>!
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
+  open func keys() -> Enumeration<JavaObject>!
 }

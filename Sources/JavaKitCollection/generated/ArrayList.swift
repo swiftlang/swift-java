@@ -3,139 +3,115 @@ import JavaKit
 import JavaRuntime
 
 @JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
-public struct ArrayList<E: AnyJavaObject> {
+open class ArrayList<E: AnyJavaObject>: JavaObject {
   @JavaMethod
-  public init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  public func remove(_ arg0: JavaObject?) -> Bool
+  open func remove(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func remove(_ arg0: Int32) -> JavaObject!
+  open func remove(_ arg0: Int32) -> JavaObject!
 
   @JavaMethod
-  public func size() -> Int32
+  open func size() -> Int32
 
   @JavaMethod
-  public func get(_ arg0: Int32) -> JavaObject!
+  open func get(_ arg0: Int32) -> JavaObject!
 
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func hashCode() -> Int32
+  open override func hashCode() -> Int32
 
   @JavaMethod
-  public func clone() -> JavaObject!
+  open override func clone() -> JavaObject!
 
   @JavaMethod
-  public func indexOf(_ arg0: JavaObject?) -> Int32
+  open func indexOf(_ arg0: JavaObject?) -> Int32
 
   @JavaMethod
-  public func clear()
+  open func clear()
 
   @JavaMethod
-  public func lastIndexOf(_ arg0: JavaObject?) -> Int32
+  open func lastIndexOf(_ arg0: JavaObject?) -> Int32
 
   @JavaMethod
-  public func isEmpty() -> Bool
+  open func isEmpty() -> Bool
 
   @JavaMethod
-  public func add(_ arg0: JavaObject?) -> Bool
+  open func add(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func add(_ arg0: Int32, _ arg1: JavaObject?)
+  open func add(_ arg0: Int32, _ arg1: JavaObject?)
 
   @JavaMethod
-  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
+  open func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
 
   @JavaMethod
-  public func toArray() -> [JavaObject?]
+  open func toArray() -> [JavaObject?]
 
   @JavaMethod
-  public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  open func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
 
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>!
+  open func iterator() -> JavaIterator<JavaObject>!
 
   @JavaMethod
-  public func contains(_ arg0: JavaObject?) -> Bool
+  open func contains(_ arg0: JavaObject?) -> Bool
 
   @JavaMethod
-  public func addAll(_ arg0: Int32, _ arg1: JavaCollection<JavaObject>?) -> Bool
+  open func addAll(_ arg0: Int32, _ arg1: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject!
+  open func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject!
 
   @JavaMethod
-  public func ensureCapacity(_ arg0: Int32)
+  open func ensureCapacity(_ arg0: Int32)
 
   @JavaMethod
-  public func trimToSize()
+  open func trimToSize()
 
   @JavaMethod
-  public func getFirst() -> JavaObject!
+  open func getFirst() -> JavaObject!
 
   @JavaMethod
-  public func getLast() -> JavaObject!
+  open func getLast() -> JavaObject!
 
   @JavaMethod
-  public func addFirst(_ arg0: JavaObject?)
+  open func addFirst(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func addLast(_ arg0: JavaObject?)
+  open func addLast(_ arg0: JavaObject?)
 
   @JavaMethod
-  public func removeFirst() -> JavaObject!
+  open func removeFirst() -> JavaObject!
 
   @JavaMethod
-  public func removeLast() -> JavaObject!
+  open func removeLast() -> JavaObject!
 
   @JavaMethod
-  public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func removeRange(_ arg0: Int32, _ arg1: Int32)
 
   @JavaMethod
-  public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>!
+  open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   @JavaMethod
-  public func listIterator() -> ListIterator<JavaObject>!
+  open func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>!
 
   @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64) throws
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  @JavaMethod
-  public func wait() throws
-
-  @JavaMethod
-  public func reversed() -> List<JavaObject>!
+  open func listIterator() -> ListIterator<JavaObject>!
 }

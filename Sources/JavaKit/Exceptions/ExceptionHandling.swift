@@ -20,9 +20,8 @@ extension JNIEnvironment {
 
     // Check whether a Java exception occurred.
     if let exception = interface.ExceptionOccurred(self) {
-      let throwable = Throwable(javaThis: exception, environment: self)
       interface.ExceptionClear(self)
-      throw throwable
+      throw Throwable(javaThis: exception, environment: self)
     }
 
     return result
