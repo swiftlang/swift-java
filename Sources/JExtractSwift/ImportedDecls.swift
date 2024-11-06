@@ -14,7 +14,6 @@
 
 import Foundation
 import JavaTypes
-import OrderedCollections
 import SwiftSyntax
 
 /// Any imported (Swift) declaration
