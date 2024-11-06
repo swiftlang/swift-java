@@ -253,23 +253,23 @@ extension AnyJavaObject {
     in environment: JNIEnvironment,
     arguments: repeat each Param
   ) throws -> jobject {
-    let thisClass = try Self.getJNIClass(in: environment)
+    try Self.withJNIClass(in: environment) { thisClass in
+      // Compute the method signature so we can find the right method, then look up the
+      // method within the class.
+      let methodID = try Self.javaMethodLookup(
+        thisClass: thisClass,
+        methodName: javaConstructorName,
+        parameterTypes: repeat (each Param).self,
+        resultType: .void,
+        in: environment
+      )
 
-    // Compute the method signature so we can find the right method, then look up the
-    // method within the class.
-    let methodID = try Self.javaMethodLookup(
-      thisClass: thisClass,
-      methodName: javaConstructorName,
-      parameterTypes: repeat (each Param).self,
-      resultType: .void,
-      in: environment
-    )
-
-    // Retrieve the constructor, then map the arguments and call it.
-    let jniArgs = getJValues(repeat each arguments, in: environment)
-    return try environment.translatingJNIExceptions {
-      environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
-    }!
+      // Retrieve the constructor, then map the arguments and call it.
+      let jniArgs = getJValues(repeat each arguments, in: environment)
+      return try environment.translatingJNIExceptions {
+        environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
+      }!
+    }
   }
 
   /// Retrieve the JNI field ID for a field with the given name and type.

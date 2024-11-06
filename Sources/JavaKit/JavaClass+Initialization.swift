@@ -21,9 +21,11 @@ extension JavaClass {
   @_nonoverride
   public convenience init(environment: JNIEnvironment? = nil) throws {
     let environment = try environment ?? JavaVirtualMachine.shared().environment()
-    self.init(
-      javaThis: try ObjectType.getJNIClass(in: environment),
-      environment: environment
-    )
+    var javaClassHolder: JavaObjectHolder!
+
+    javaClassHolder = try ObjectType.withJNIClass(in: environment) { javaClass in
+      JavaObjectHolder(object: javaClass, environment: environment)
+    }
+    self.init(javaHolder: javaClassHolder)
   }
 }
