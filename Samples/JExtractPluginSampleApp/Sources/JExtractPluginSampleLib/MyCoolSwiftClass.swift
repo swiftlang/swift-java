@@ -13,6 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 public class MyCoolSwiftClass {
-  public init(number: Int) {}
-  public func exposedToJava() { }
+  var number: Int
+  public init(number: Int) {
+    print("[swift] init(number: \(number))")
+    self.number = number
+  }
+
+  public func exposedToJava() {
+    print("[swift] exposedToJava()")
+    print("[swift]   number = \(number)")
+  }
 }

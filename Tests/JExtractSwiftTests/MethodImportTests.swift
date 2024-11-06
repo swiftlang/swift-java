@@ -75,7 +75,7 @@ final class MethodImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "helloWorld" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
     }
 
     assertOutput(
@@ -118,7 +118,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
     }
 
     assertOutput(
@@ -161,7 +161,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -204,7 +204,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -247,7 +247,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -290,7 +290,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .memorySegment)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .memorySegment)
     }
 
     assertOutput(
@@ -333,7 +333,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .wrapper)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .wrapper)
     }
 
     assertOutput(
@@ -368,7 +368,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: .wrapper)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: .wrapper)
     }
 
     assertOutput(

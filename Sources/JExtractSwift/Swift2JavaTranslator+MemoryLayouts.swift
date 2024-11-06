@@ -20,16 +20,16 @@ import SwiftSyntax
 extension Swift2JavaTranslator {
   public func javaMemoryLayoutDescriptors(
     forParametersOf decl: ImportedFunc,
-    selfVariant: SelfParameterVariant?
+    paramPassingStyle: SelfParameterVariant?
   ) -> [ForeignValueLayout] {
     var layouts: [ForeignValueLayout] = []
     layouts.reserveCapacity(decl.parameters.count + 1)
 
     //     // When the method is `init()` it does not accept a self (well, unless allocating init but we don't import those)
-    //    let selfVariant: SelfParameterVariant? =
+    //    let paramPassingStyle: SelfParameterVariant? =
     //      decl.isInit ? nil : .wrapper
 
-    for param in decl.effectiveParameters(selfVariant: selfVariant) {
+    for param in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
       layouts.append(param.type.foreignValueLayout)
     }
 

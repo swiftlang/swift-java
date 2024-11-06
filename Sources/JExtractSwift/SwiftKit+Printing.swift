@@ -42,7 +42,7 @@ extension SwiftKitPrinting.Names {
 
   static func functionThunk(module: String, function: ImportedFunc) -> String {
     if let parent = function.parent {
-      "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)_PARAMS"
+      "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)_"
     } else {
       "swiftjava_\(module)_\(function.baseIdentifier)"
     }

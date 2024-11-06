@@ -115,13 +115,20 @@ extension ImportedParam {
 }
 
 // TODO: this is used in different contexts and needs a cleanup
+//       Perhaps this is "which parameter passing style"?
 public enum SelfParameterVariant {
+  // ==== Java forwarding patterns
+
   /// Make a method that accepts the raw memory pointer as a MemorySegment
   case memorySegment
   /// Make a method that accepts the the Java wrapper class of the type
   case wrapper
   /// Raw SWIFT_POINTER
   case pointer
+
+  // ==== Swift forwarding patterns
+
+  case swiftThunkSelf
 }
 
 public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
@@ -161,14 +168,14 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var returnType: TranslatedType
   public var parameters: [ImportedParam]
 
-  public func effectiveParameters(selfVariant: SelfParameterVariant?) -> [ImportedParam] {
+  public func effectiveParameters(paramPassingStyle: SelfParameterVariant?) -> [ImportedParam] {
     if let parent {
       var params = parameters
 
       // Add `self: Self` for method calls on a member
       //
       // allocating initializer takes a Self.Type instead, but it's also a pointer
-      switch selfVariant {
+      switch paramPassingStyle {
       case nil, .wrapper:
         break
 
@@ -185,6 +192,9 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
         params.append(
           ImportedParam(param: selfParam, type: parentForSelf)
         )
+
+      case .swiftThunkSelf:
+        break
       }
 
       // TODO: add any metadata for generics and other things we may need to add here
@@ -303,24 +313,22 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         identifier: self.identifier,
         returnType: TranslatedType.void,
         parameters: [.init(param: newValueParam, type: self.returnType)])
-      // FIXME: funcDecl.swiftMangledName = self.swiftMangledName + "s" // form mangled name of the getter by adding the suffix
       return funcDecl
 
     case .get:
-      var funcDecl = ImportedFunc(
+      let funcDecl = ImportedFunc(
         module: self.module,
         decl: self.syntax!,
         parent: self.parentName,
         identifier: self.identifier,
         returnType: self.returnType,
         parameters: [])
-      // FIXME: funcDecl.swiftMangledName = self.swiftMangledName + "g" // form mangled name of the getter by adding the suffix
       return funcDecl
     }
   }
 
   public func effectiveAccessorParameters(
-    _ kind: VariableAccessorKind, selfVariant: SelfParameterVariant?
+    _ kind: VariableAccessorKind, paramPassingStyle: SelfParameterVariant?
   ) -> [ImportedParam] {
     var params: [ImportedParam] = []
 
@@ -338,10 +346,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
       // Add `self: Self` for method calls on a member
       //
       // allocating initializer takes a Self.Type instead, but it's also a pointer
-      switch selfVariant {
-      case nil, .wrapper:
-        break
-
+      switch paramPassingStyle {
       case .pointer:
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
@@ -361,6 +366,11 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
             type: parentForSelf
           )
         )
+
+      case nil,
+           .wrapper,
+           .swiftThunkSelf:
+        break
       }
     }
 

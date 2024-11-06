@@ -58,11 +58,11 @@ def buildSwift = tasks.register("swiftBuildProject", Exec) {
     inputs.file(new File(rootDir, "Package.swift"))
     inputs.dir(new File(rootDir, "Sources"))
 
-    // TODO: we can use package describe --type json to figure out which targets depend on JExtractSwiftPlugin and will produce outputs
     inputs.file(layout.projectDirectory.file("Package.swift"))
     inputs.dir(layout.projectDirectory.dir("Sources"))
 
-//    outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractPluginSampleLib/destination/JExtractSwiftPlugin/src/generated/java"))
+    // TODO: we can use package describe --type json to figure out which targets depend on JExtractSwiftPlugin and will produce outputs
+    //       Avoid adding this directory, but create the expected one specifically for all targets which WILL produce sources because they have the plugin
     outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}"))
 
     File baseSwiftPluginOutputsDir = layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile
@@ -72,7 +72,6 @@ def buildSwift = tasks.register("swiftBuildProject", Exec) {
     Files.walk(layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile.toPath()).each {
         if (it.endsWith("JExtractSwiftPlugin/src/generated/java")) {
             outputs.dir(it)
-            println("OUTPUT = ${it}")
         }
     }
 
