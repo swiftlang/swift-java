@@ -24,6 +24,10 @@ extension String: JavaValue {
   }
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
+    guard let value else {
+      self.init()
+      return
+    }
     let cString = environment.interface.GetStringUTFChars(environment, value, nil)!
     defer { environment.interface.ReleaseStringUTFChars(environment, value, cString) }
     self = String(cString: cString)
