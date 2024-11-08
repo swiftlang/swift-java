@@ -32,6 +32,17 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
 
+    // The name of the configuration file JavaKit.config from the target for
+    // which we are generating Swift wrappers for Java classes.
+    let configFile = URL(filePath: sourceDir).appending(path: "Java2Swift.config")
+    let config: Configuration?
+
+    if let configData = try? Data(contentsOf: configFile) {
+      config = try? JSONDecoder().decode(Configuration.self, from: configData)
+    } else {
+      config = nil
+    }
+
     // The class files themselves will be generated into the build directory
     // for this target.
     let classFiles = javaFiles.map { sourceFileURL in
@@ -60,7 +71,7 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
         arguments: javaFiles.map { $0.path(percentEncoded: false) } + [
           "-d", javaClassFileURL.path(),
           "-parameters", // keep parameter names, which allows us to emit them in generated Swift decls
-        ],
+        ] + (config?.compilerVersionArgs ?? []),
         inputFiles: javaFiles,
         outputFiles: classFiles
       )
