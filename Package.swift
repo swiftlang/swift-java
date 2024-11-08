@@ -39,6 +39,17 @@ let javaIncludePath = "\(javaHome)/include"
   let javaPlatformIncludePath = "\(javaIncludePath)/win32"
 #endif
 
+func sjEnableBenchmarking() -> Bool {
+    if let value = ProcessInfo.processInfo.environment["SWIFT_JAVA_ENABLE_BENCHMARKING"] {
+        switch value {
+        case "TRUE", "YES", "1": return true
+        case "FALSE", "NO", "0": return false
+        default: break
+        }
+    }
+    fatalError("Please set 'SWIFT_JAVA_ENABLE_BENCHMARKING' to 'TRUE' or 'FALSE'")
+}
+
 let package = Package(
   name: "JavaKit",
   platforms: [
@@ -138,8 +149,10 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
-    .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
-  ],
+  ] + (sjEnableBenchmarking() ? [
+    .package(url: "https://github.com/ordo-one/package-benchmark",
+             .upToNextMajor(from: "1.4.0")),
+  ] : []),
   targets: [
     .macro(
       name: "JavaKitMacros",

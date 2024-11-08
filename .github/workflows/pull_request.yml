@@ -12,6 +12,8 @@ jobs:
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
       format_check_enabled: false
       license_header_check_project_name: Swift.org
+    env:
+      SWIFT_JAVA_ENABLE_BENCHMARKING: NO
 
   test-java:
     name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -86,6 +88,7 @@ jobs:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
+      SWIFT_JAVA_ENABLE_BENCHMARKING: NO
     steps:
       - uses: actions/checkout@v4
       - name: Install System Dependencies
