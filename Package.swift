@@ -35,9 +35,8 @@ let javaIncludePath = "\(javaHome)/include"
   let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
   let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
-#else
-  // TODO: Handle windows as well
-  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+#elseif os(Windows)
+  let javaPlatformIncludePath = "\(javaIncludePath)/win32"
 #endif
 
 let package = Package(
