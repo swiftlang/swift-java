@@ -173,8 +173,14 @@ let package = Package(
             "-rpath",
             "-Xlinker",
             "\(javaHome)/lib/server",
-          ]
+          ],
+          .when(platforms: [.linux, .macOS])
         ),
+        .unsafeFlags(
+          [
+            "-L\(javaHome)/lib"
+          ], 
+          .when(platforms: [.windows])),
         .linkedLibrary("jvm"),
       ]
     ),
