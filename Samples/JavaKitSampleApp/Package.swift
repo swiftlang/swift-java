@@ -43,7 +43,7 @@ let javaIncludePath = ProcessInfo.processInfo.environment["JAVA_INCLUDE_PATH"] ?
 let package = Package(
   name: "JavaKitSampleApp",
   platforms: [
-    .macOS(.v13),
+    .macOS(.v15),
     .iOS(.v13),
     .tvOS(.v13),
     .watchOS(.v6),
