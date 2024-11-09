@@ -246,6 +246,9 @@ let package = Package(
         .linkedLibrary(
           "jvm",
           .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .macCatalyst, .linux, .openbsd, .wasi, .windows])),
+        .linkedLibrary(
+          "nativehelper",
+          .when(platforms: [.android])),
       ]
     ),
     .target(
