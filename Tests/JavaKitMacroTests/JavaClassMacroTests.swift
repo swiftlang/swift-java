@@ -26,6 +26,25 @@ class JavaKitMacroTests: XCTestCase {
     "JavaField": JavaFieldMacro.self
   ]
 
+  func testJavaStaticMethodFailure() throws {
+    assertMacroExpansion(
+      """
+        @JavaClass("org.swift.example.HelloWorld")
+        public struct HelloWorld {
+          @JavaStaticMethod
+          public init(environment: JNIEnvironment? = nil)
+        }
+      """,
+      expandedSource: """
+
+        public struct HelloWorld {
+        }
+      """,
+      diagnostics: [DiagnosticSpec(message: "", line: 0, column: 0)],
+      macros: Self.javaKitMacros
+    )
+  }
+
   func testJavaClass() throws {
     assertMacroExpansion("""
         @JavaClass("org.swift.example.HelloWorld")
