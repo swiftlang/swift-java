@@ -23,24 +23,35 @@ class JavaKitMacroTests: XCTestCase {
   static let javaKitMacros: [String: any Macro.Type] = [
     "JavaClass": JavaClassMacro.self,
     "JavaMethod": JavaMethodMacro.self,
-    "JavaField": JavaFieldMacro.self
+    "JavaField": JavaFieldMacro.self,
+    "JavaStaticField": JavaFieldMacro.self
   ]
 
   func testJavaStaticMethodFailure() throws {
     assertMacroExpansion(
       """
         @JavaClass("org.swift.example.HelloWorld")
-        public struct HelloWorld {
-          @JavaStaticMethod
-          public init(environment: JNIEnvironment? = nil)
+        public class HelloWorld {
+          @JavaStaticField
+          public var test: String
         }
       """,
       expandedSource: """
-
-        public struct HelloWorld {
+      
+        public class HelloWorld {
+          public var test: String
+      
+            /// The full Java class name for this Swift type.
+            open override class var fullJavaClassName: String {
+                "org.swift.example.HelloWorld"
+            }
+      
+            public required init(javaHolder: JavaObjectHolder) {
+                super.init(javaHolder: javaHolder)
+            }
         }
       """,
-      diagnostics: [DiagnosticSpec(message: "", line: 0, column: 0)],
+      diagnostics: [DiagnosticSpec(message: "Cannot use @JavaStaticField outside of a JavaClass instance", line: 3, column: 5)],
       macros: Self.javaKitMacros
     )
   }

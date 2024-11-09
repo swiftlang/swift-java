@@ -33,9 +33,9 @@ extension JavaFieldMacro: AccessorMacro {
       return []
     }
 
-    let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
+    let isStatic = node.attributeName.trimmedDescription == "JavaStaticField"
     guard !isStatic || isInStaticContext(context: context) else {
-      throw MacroExpansionErrorMessage("Cannot use @JavaStaticMethod outside of a JavaClass instance")
+      throw MacroExpansionErrorMessage("Cannot use @JavaStaticField outside of a JavaClass instance")
     }
 
     // Dig out the Java field name, if provided. Otherwise, use the name as written.
@@ -87,8 +87,8 @@ extension JavaFieldMacro: AccessorMacro {
 
   private static func isInStaticContext(context: some MacroExpansionContext) -> Bool {
     for lexicalContext in context.lexicalContext {
-      if let classSyntax = lexicalContext.as(StructDeclSyntax.self) {
-        if classSyntax.name.trimmedDescription.starts(with: "JavaClass") {
+      if let classSyntax = lexicalContext.as(ClassDeclSyntax.self) {
+        if classSyntax.name.trimmedDescription.starts(with: "JavaClass<") {
           return true
         } else {
           return false
