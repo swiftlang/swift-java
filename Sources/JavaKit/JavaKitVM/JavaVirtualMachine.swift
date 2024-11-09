@@ -24,6 +24,11 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// The JNI version that we depend on.
   static let jniVersion = JNI_VERSION_1_6
 
+  /// Thread-local storage to detach from thread on exit
+  private static let destroyTLS = ThreadLocalStorage { _ in
+    try? JavaVirtualMachine.shared().detachCurrentThread()
+  }
+
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
 
@@ -146,12 +151,14 @@ extension JavaVirtualMachine {
       throw attachError
     }
 
+    JavaVirtualMachine.destroyTLS.set(environment!)
+
     return environment!.assumingMemoryBound(to: JNIEnv?.self)
   }
 
   /// Detach the current thread from the Java Virtual Machine. All Java
   /// threads waiting for this thread to die are notified.
-  public func detachCurrentThread() throws {
+  func detachCurrentThread() throws {
     if let resultError = VMError(fromJNIError: jvm.pointee!.pointee.DetachCurrentThread(jvm)) {
       throw resultError
     }
