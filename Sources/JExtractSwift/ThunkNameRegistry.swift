@@ -23,10 +23,10 @@ package struct ThunkNameRegistry {
 
   package mutating func deduplicate(name: String) -> String {
     var emittedCount = self.baseNames[name, default: 0]
-    self.baseNames[name] = emittedCount + 1
+    defer { self.baseNames[name] = emittedCount + 1 }
 
     if emittedCount == 0 {
-      return name // first occurrence of a name we keep as-is
+      return name  // first occurrence of a name we keep as-is
     } else {
       return "\(name)$\(emittedCount)"
     }

@@ -40,31 +40,32 @@ let javaIncludePath = "\(javaHome)/include"
 #endif
 
 let package = Package(
-    name: "JExtractPluginSampleApp",
-    platforms: [
-        .macOS(.v10_15),
-    ],
-   products: [
-     .library(
-       name: "JExtractPluginSampleLib",
-       type: .dynamic,
-       targets: ["JExtractPluginSampleLib"]
-     ),
-   ],
-   dependencies: [
-        .package(name: "swift-java", path: "../../"),
-    ],
-    targets: [
-        .target(
-            name: "JExtractPluginSampleLib",
-            dependencies: [
-            ],
-            swiftSettings: [
-              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-            ],
-            plugins: [
-              .plugin(name: "JExtractSwiftPlugin", package: "swift-java"),
-            ]
-        ),
-    ]
+  name: "JExtractPluginSampleApp",
+  platforms: [
+    .macOS(.v10_15)
+  ],
+  products: [
+    .library(
+      name: "JExtractPluginSampleLib",
+      type: .dynamic,
+      targets: ["JExtractPluginSampleLib"]
+    )
+  ],
+  dependencies: [
+    .package(name: "swift-java", path: "../../")
+  ],
+  targets: [
+    .target(
+      name: "JExtractPluginSampleLib",
+      dependencies: [],
+      swiftSettings: [
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      plugins: [
+        .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
+        ,
+        .plugin(name: "JExtractSwiftCommandPlugin", package: "swift-java")
+      ]
+    )
+  ]
 )

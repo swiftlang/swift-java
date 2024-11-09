@@ -133,7 +133,13 @@ let package = Package(
         "JExtractSwiftPlugin"
       ]
     ),
-
+    .plugin(
+      name: "JExtractSwiftCommandPlugin",
+      targets: [
+        "JExtractSwiftCommandPlugin"
+      ]
+    ),
+    
     // ==== Examples
 
     .library(
@@ -343,6 +349,16 @@ let package = Package(
     .plugin(
       name: "JExtractSwiftPlugin",
       capability: .buildTool(),
+      dependencies: [
+        "JExtractSwiftTool"
+      ]
+    ),
+    .plugin(
+      name: "JExtractSwiftCommandPlugin",
+      capability: .command(
+        intent: .custom(verb: "jextract", description: "Extract Java accessors from Swift module"),
+        permissions: [
+        ]),
       dependencies: [
         "JExtractSwiftTool"
       ]

@@ -21,7 +21,7 @@ struct Configuration: Codable {
 }
 
 func readConfiguration(sourceDir: String) throws -> Configuration {
-  let configFile = URL(filePath: sourceDir).appending(path: "JExtractSwift.config")
+  let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
   do {
     let configData = try Data(contentsOf: configFile)
     return try JSONDecoder().decode(Configuration.self, from: configData)

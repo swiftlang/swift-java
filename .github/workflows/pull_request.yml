@@ -8,6 +8,7 @@ jobs:
   soundness:
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
     with:
+      # Not API stable package (yet)
       api_breakage_check_enabled: false
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
       format_check_enabled: false

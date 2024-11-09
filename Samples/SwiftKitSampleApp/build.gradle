@@ -75,7 +75,7 @@ def buildSwift = tasks.register("swiftBuildProject", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args "build"
+    args ["package", "jextract"]
 }
 
 // Add the java-swift generated Java sources

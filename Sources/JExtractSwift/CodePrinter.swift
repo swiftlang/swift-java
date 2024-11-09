@@ -40,13 +40,13 @@ public struct CodePrinter {
     return printer.finalize()
   }
 
-  var ioMode: PrintMode
+  var mode: PrintMode
   public enum PrintMode {
     case accumulateAll
     case flushToFileOnWrite
   }
-  public init(io: PrintMode = .flushToFileOnWrite) {
-    self.ioMode = .accumulateAll
+  public init(mode: PrintMode = .flushToFileOnWrite) {
+    self.mode = mode
   }
 
   internal mutating func append(_ text: String) {
@@ -208,16 +208,18 @@ public enum PrinterTerminator: String {
 }
 
 extension CodePrinter {
+  
+  /// - Returns: the output path of the generated file, if any (i.e. not in accumulate in memory mode)
   package mutating func writeContents(
     outputDirectory: String,
     javaPackagePath: String?,
     filename: String
-  ) throws {
-    guard self.ioMode != .accumulateAll else {
+  ) throws -> URL? {
+    guard self.mode != .accumulateAll else {
       // if we're accumulating everything, we don't want to finalize/flush any contents
       // let's mark that this is where a write would have happened though:
       print("// ^^^^ Contents of: \(outputDirectory)/\(filename)")
-      return
+      return nil
     }
 
     let contents = finalize()
@@ -231,24 +233,22 @@ extension CodePrinter {
         print("// \(filename)")
       }
       print(contents)
-      return
+      return nil
     }
 
-    let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(
-        separator: PATH_SEPARATOR)
+    let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(separator: PATH_SEPARATOR)
     log.trace("Prepare target directory: \(targetDirectory)")
     try FileManager.default.createDirectory(
       atPath: targetDirectory, withIntermediateDirectories: true)
 
-    let targetFilePath = [javaPackagePath, filename].compactMap { $0 }.joined(
-        separator: PATH_SEPARATOR)
-  Swift.print("Writing '\(targetFilePath)'...", terminator: "")
+    let outputPath = Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename)
     try contents.write(
-      to: Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename),
+      to: outputPath,
       atomically: true,
       encoding: .utf8
     )
-    Swift.print(" done.".green)
+    
+    return outputPath
   }
 
 }

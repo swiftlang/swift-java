@@ -22,7 +22,15 @@ public class JExtractPluginSampleMain {
         System.out.println("java.library.path = " + SwiftKit.getJavaLibraryPath());
         System.out.println("jextract.trace.downcalls = " + SwiftKit.getJextractTraceDowncalls());
 
-        var o = new MyCoolSwiftClass(12);
-        o.exposedToJava();
+        try {
+            var o = new MyCoolSwiftClass(12);
+            o.exposedToJava();
+        } catch (UnsatisfiedLinkError linkError) {
+            if (linkError.getMessage().startsWith("unresolved symbol: ")) {
+                var unresolvedSymbolName = linkError.getMessage().substring("unresolved symbol: ".length());
+
+
+            }
+        }
     }
 }

@@ -50,7 +50,6 @@ public struct SwiftToJava: ParsableCommand {
 
   public func run() throws {
     let inputPaths = self.input.dropFirst().map { URL(string: $0)! }
-    print("Input \(inputPaths)")
 
     let translator = Swift2JavaTranslator(
       javaPackage: packageName,
@@ -60,8 +59,10 @@ public struct SwiftToJava: ParsableCommand {
 
     var allFiles: [URL] = []
     let fileManager = FileManager.default
-
+    let log = translator.log
+    
     for path in inputPaths {
+      log.debug("Input path: \(path)")
       if isDirectory(url: path) {
         if let enumerator = fileManager.enumerator(at: path, includingPropertiesForKeys: nil) {
           for case let fileURL as URL in enumerator {
@@ -73,20 +74,24 @@ public struct SwiftToJava: ParsableCommand {
       }
     }
 
-    for file in allFiles {
-      print("Importing module '\(swiftModule)', interface file: \(file)")
+    for file in allFiles where canExtract(from: file) {
+      translator.log.debug("Importing module '\(swiftModule)', file: \(file)")
 
       try translator.analyze(file: file.path)
       try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
       try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
 
-      print("Imported interface file: \(file) " + "done.".green)
+      log.debug("[swift-java] Imported interface file: \(file.path)")
     }
 
     try translator.writeExportedJavaModule(outputDirectory: outputDirectoryJava)
-    print("")
-    print("Generated Java sources in package '\(packageName)' in: \(outputDirectoryJava)/")
-    print("Swift module '\(swiftModule)' import: " + "done.".green)
+    print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
+    print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
+  }
+  
+  func canExtract(from file: URL) -> Bool {
+    file.lastPathComponent.hasSuffix(".swift") ||
+    file.lastPathComponent.hasSuffix(".swiftinterface")
   }
 
 }

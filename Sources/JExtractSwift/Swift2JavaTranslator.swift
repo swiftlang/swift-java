@@ -81,7 +81,7 @@ extension Swift2JavaTranslator {
 
     try analyzeSwiftInterface(interfaceFilePath: file, text: text)
 
-    log.info("Done processing: \(file)")
+    log.debug("Done processing: \(file)")
   }
 
   package func analyzeSwiftInterface(interfaceFilePath: String, text: String) throws {

@@ -94,6 +94,9 @@ javakit-generate: generate-JavaKit generate-JavaKitReflection generate-JavaKitJa
 
 clean:
 	rm -rf .build; \
+	rm -rf build; \
+	rm -rf Samples/JExtractPluginSampleApp/.build; \
+	rm -rf Samples/JExtractPluginSampleApp/build; \
 	rm -rf Samples/SwiftKitExampleApp/src/generated/java/*
 
 format:

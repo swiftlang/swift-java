@@ -49,7 +49,7 @@ def buildJExtractPlugin = tasks.register("swiftBuildJExtractPlugin", Exec) {
     args "build"
 }
 
-def buildSwift = tasks.register("swiftBuildProject", Exec) {
+def jextract = tasks.register("jextract", Exec) {
     description = "Builds swift sources, including swift-java source generation"
     dependsOn buildJExtractPlugin
 
@@ -76,14 +76,14 @@ def buildSwift = tasks.register("swiftBuildProject", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args "build"
+    args("package", "jextract")
 }
 
 // Add the java-swift generated Java sources
 sourceSets {
     main {
         java {
-            srcDir(buildSwift)
+            srcDir(jextract)
         }
     }
 }

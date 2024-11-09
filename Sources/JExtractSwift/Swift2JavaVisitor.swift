@@ -50,7 +50,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visitPost(_ node: ClassDeclSyntax) {
     if currentTypeName != nil {
-      log.info("Completed import: \(node.kind) \(node.name)")
+      log.debug("Completed import: \(node.kind) \(node.name)")
       currentTypeName = nil
     }
   }
@@ -186,7 +186,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentType.javaType.description)")
+    self.log.debug("Import initializer: \(node.kind) \(currentType.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -215,7 +215,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     )
     funcDecl.isInit = true
 
-    log.info(
+    log.debug(
       "Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 

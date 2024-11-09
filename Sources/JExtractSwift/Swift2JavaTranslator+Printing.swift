@@ -36,11 +36,13 @@ extension Swift2JavaTranslator {
       log.info("Printing contents: \(filename)")
       printImportedClass(&printer, ty)
 
-      try printer.writeContents(
+      if let outputFile = try printer.writeContents(
         outputDirectory: outputDirectory,
         javaPackagePath: javaPackagePath,
         filename: filename
-      )
+      ) {
+        print("[swift-java] Generated: \(ty.javaClassName.bold).java (at \(outputFile))")
+      }
     }
   }
 
@@ -56,29 +58,35 @@ extension Swift2JavaTranslator {
       printSwiftThunkSources(&printer, decl: decl)
     }
 
-    let moduleFilename = "\(self.swiftModuleName)Module+SwiftJava.swift"
+    let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
+    let moduleFilename = "\(moduleFilenameBase).swift"
     log.info("Printing contents: \(moduleFilename)")
     do {
-      try printer.writeContents(
+      if let outputFile = try printer.writeContents(
         outputDirectory: outputDirectory,
         javaPackagePath: nil,
-        filename: moduleFilename)
+        filename: moduleFilename) {
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).java (at \(outputFile)")
+      }
     } catch {
       log.warning("Failed to write to Swift thunks: \(moduleFilename)")
     }
 
     // === All types
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
-      let filename = "\(ty.swiftTypeName)+SwiftJava.swift"
+      let fileNameBase = "\(ty.swiftTypeName)+SwiftJava"
+      let filename = "\(fileNameBase).swift"
       log.info("Printing contents: \(filename)")
 
       do {
         try printSwiftThunkSources(&printer, ty: ty)
 
-        try printer.writeContents(
+        if let outputFile = try printer.writeContents(
           outputDirectory: outputDirectory,
           javaPackagePath: nil,
-          filename: filename)
+          filename: filename) {
+          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile)")
+        }
       } catch {
         log.warning("Failed to write to Swift thunks: \(filename)")
       }
@@ -113,11 +121,13 @@ extension Swift2JavaTranslator {
   public func writeExportedJavaModule(outputDirectory: String, printer: inout CodePrinter) throws {
     printModule(&printer)
 
-    try printer.writeContents(
+    if let file = try printer.writeContents(
       outputDirectory: outputDirectory,
       javaPackagePath: javaPackagePath,
       filename: "\(swiftModuleName).java"
-    )
+    ) {
+      self.log.info("Generated: \(file): \("done".green).")
+    }
   }
 }
 
