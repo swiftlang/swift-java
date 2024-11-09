@@ -12,34 +12,40 @@
 //
 //===----------------------------------------------------------------------===//
 
-package typealias JavaVersion = Int
+typealias JavaVersion = Int
 
 /// Configuration for the Java2Swift translation tool, provided on a per-target
 /// basis.
 ///
-/// Note: there is a copy of this struct in the Java2Swift plugin. They
+/// Note: there is a copy of this struct in the Java2Swift library. They
 /// must be kept in sync.
-package struct Configuration: Codable {
+struct Configuration: Codable {
   /// The Java class path that should be passed along to the Java2Swift tool.
-  package var classPath: String? = nil
+  var classPath: String? = nil
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
-  package var classes: [String: String] = [:]
+  var classes: [String: String] = [:]
 
-  package var sourceCompatibility: JavaVersion?
-  package var targetCompatibility: JavaVersion?
+  // Compile for the specified Java SE release.
+  var sourceCompatibility: JavaVersion?
 
-  package init(
-    classPath: String? = nil,
-    classes: [String : String] = [:],
-    sourceCompatibility: JavaVersion? = nil,
-    targetCompatibility: JavaVersion? = nil
-  ) {
-    self.classPath = classPath
-    self.classes = classes
-    self.sourceCompatibility = sourceCompatibility
-    self.targetCompatibility = targetCompatibility
+  // Generate class files suitable for the specified Java SE release.
+  var targetCompatibility: JavaVersion?
+}
+
+extension Configuration {
+  var compilerVersionArgs: [String] {
+    var compilerVersionArgs = [String]()
+
+    if let sourceCompatibility {
+      compilerVersionArgs += ["--source", String(sourceCompatibility)]
+    }
+    if let targetCompatibility {
+      compilerVersionArgs += ["--target", String(targetCompatibility)]
+    }
+
+    return compilerVersionArgs
   }
 }

@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+typealias JavaVersion = Int
+
 /// Configuration for the Java2Swift translation tool, provided on a per-target
 /// basis.
 ///
@@ -25,4 +27,10 @@ struct Configuration: Codable {
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
   var classes: [String: String] = [:]
+
+  // Compile for the specified Java SE release.
+  var sourceCompatibility: JavaVersion?
+
+  // Generate class files suitable for the specified Java SE release.
+  var targetCompatibility: JavaVersion?
 }

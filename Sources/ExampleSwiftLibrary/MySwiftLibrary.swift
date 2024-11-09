@@ -19,7 +19,9 @@
 
 #if os(Linux)
 import Glibc
-#else
+#elseif os(Windows)
+import CRT
+#elseif canImport(Darwin)
 import Darwin.C
 #endif
 

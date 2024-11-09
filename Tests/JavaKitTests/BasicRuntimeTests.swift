@@ -76,6 +76,12 @@ class BasicRuntimeTests: XCTestCase {
       XCTAssertEqual(String(describing: error), "org/swift/javakit/Nonexistent")
     }
   }
+
+  func testNullJavaStringConversion() throws {
+    let environment = try jvm.environment()
+    let nullString = String(fromJNI: nil, in: environment)
+    XCTAssertEqual(nullString, "")
+  }
 }
 
 @JavaClass("org.swift.javakit.Nonexistent")
