@@ -55,12 +55,7 @@ extension Swift2JavaVisitor {
       // Translate the generic arguments to the C-compatible types.
       let genericArgs = try memberType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          switch argument.argument {
-          case .type(let argumentType):
-            try cCompatibleType(for: argumentType)
-          @unknown default:
-            throw TypeTranslationError.unimplementedType(TypeSyntax(memberType))
-          }
+          try cCompatibleType(for: argument.argument)
         }
       }
 
@@ -76,12 +71,7 @@ extension Swift2JavaVisitor {
       // Translate the generic arguments to the C-compatible types.
       let genericArgs = try identifierType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          switch argument.argument {
-          case .type(let argumentType):
-            try cCompatibleType(for: argumentType)
-          @unknown default:
-            throw TypeTranslationError.unimplementedType(TypeSyntax(identifierType))
-          }
+          try cCompatibleType(for: argument.argument)
         }
       }
 
