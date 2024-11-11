@@ -26,8 +26,9 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
-import com.example.swift.generated.MySwiftClass;
+import com.example.swift.MySwiftClass;
 
+@SuppressWarnings("unused")
 public class JavaToSwiftBenchmark {
 
     @State(Scope.Benchmark)

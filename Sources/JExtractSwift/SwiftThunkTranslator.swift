@@ -25,16 +25,22 @@ struct SwiftThunkTranslator {
     self.st = st
   }
 
+  func renderGlobalThunks() -> [DeclSyntax] {
+    var decls: [DeclSyntax] = []
+
+    for decl in st.importedGlobalFuncs {
+      decls.append(contentsOf: render(forFunc: decl))
+    }
+
+    return decls
+  }
+
   /// Render all the thunks that make Swift methods accessible to Java.
   func renderThunks(forType nominal: ImportedNominalType) -> [DeclSyntax] {
     var decls: [DeclSyntax] = []
     decls.reserveCapacity(nominal.initializers.count + nominal.methods.count)
 
     decls.append(renderSwiftTypeAccessor(nominal))
-
-    for decl in st.importedGlobalFuncs {
-      decls.append(contentsOf: render(forFunc: decl))
-    }
 
     for decl in nominal.initializers {
       decls.append(contentsOf: renderSwiftInitAccessor(decl))
@@ -79,46 +85,48 @@ struct SwiftThunkTranslator {
     let thunkName = self.st.thunkNameRegistry.functionThunkName(
       module: st.swiftModuleName, decl: function)
 
-    // FIXME: handle in thunk: return types
-    // FIXME: handle in thunk: parameters
-    // FIXME: handle in thunk: errors
     return
       [
         """
         @_cdecl("\(raw: thunkName)")
         public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> Any /* \(raw: parent.swiftTypeName) */ {
-          \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+          print("[swift] init class \(raw: parent.swiftTypeName)")
+          return \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
         }
         """
       ]
   }
 
-
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
     st.log.trace("Rendering thunks for: \(decl.baseIdentifier)")
-//    let funcName = SwiftKitPrinting.Names.functionThunk(
-//      thunkNameRegistry: &st.thunkNameRegistry,
-//      module: st.swiftModuleName,
-//      function: decl)
-    let funcName = st.thunkNameRegistry.functionThunkName(module: st.swiftModuleName, decl: decl)
+    let thunkName = st.thunkNameRegistry.functionThunkName(module: st.swiftModuleName, decl: decl)
 
     // Do we need to pass a self parameter?
     let paramPassingStyle: SelfParameterVariant?
     let callBaseDot: String
       if let parent = decl.parent {
         paramPassingStyle = .swiftThunkSelf
-        // TODO: unsafe bitcast
-        callBaseDot = "(_self as! \(parent.originalSwiftType))."
+        callBaseDot = "unsafeBitCast(_self, to: \(parent.originalSwiftType).self)."
+        // callBaseDot = "(_self as! \(parent.originalSwiftType))."
       } else {
         paramPassingStyle = nil
         callBaseDot = ""
       }
 
+    let returnArrowTy =
+      if decl.returnType.cCompatibleJavaMemoryLayout == .primitive(.void) {
+        "/* \(decl.returnType.swiftTypeName) */"
+      } else {
+        "-> \(decl.returnType.cCompatibleSwiftType) /* \(decl.returnType.swiftTypeName) */"
+      }
+
+    // FIXME: handle in thunk: errors
+
     return
       [
         """
-        @_cdecl("\(raw: funcName)")
-        public func \(raw: funcName)(\(raw: st.renderSwiftParamDecls(decl, paramPassingStyle: paramPassingStyle))) -> \(decl.returnType.cCompatibleSwiftType) /* \(raw: decl.returnType.swiftTypeName) */ {
+        @_cdecl("\(raw: thunkName)")
+        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(decl, paramPassingStyle: paramPassingStyle))) \(raw: returnArrowTy) {
           \(raw: callBaseDot)\(raw: decl.baseIdentifier)(\(raw: st.renderForwardSwiftParams(decl, paramPassingStyle: paramPassingStyle)))
         }
         """

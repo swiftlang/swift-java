@@ -15,7 +15,8 @@
 package com.example.swift;
 
 // Import swift-extract generated sources
-import com.example.swift.ExampleSwiftLibrary;
+
+import com.example.swift.MySwiftLibrary;
 import com.example.swift.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
@@ -23,31 +24,33 @@ import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 import org.swift.swiftkit.SwiftValueWitnessTable;
 
-import java.lang.foreign.*;
-
 public class HelloJava2Swift {
 
     public static void main(String[] args) {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
+        System.out.print("java.library.path = \n");
+        for (var path : SwiftKit.getJavaLibraryPath().split(":")) {
+            System.out.println("  " + path);
+        }
 
         examples();
+
     }
 
     static void examples() {
-         ExampleSwiftLibrary.helloWorld();
+        MySwiftLibrary.helloWorld();
 
-         ExampleSwiftLibrary.globalTakeInt(1337);
+        MySwiftLibrary.globalTakeInt(1337);
 
-         MySwiftClass obj = new MySwiftClass(2222, 7777);
+        MySwiftClass obj = new MySwiftClass(2222, 7777);
 
-         SwiftKit.retain(obj.$memorySegment());
-         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+        SwiftKit.retain(obj.$memorySegment());
+        System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
 
-         obj.voidMethod();
-         obj.takeIntMethod(42);
+        obj.voidMethod();
+        obj.takeIntMethod(42);
 
         System.out.println("DONE.");
     }

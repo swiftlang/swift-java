@@ -12,46 +12,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-package com.example.swift.generated;
+package com.example.swift;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.swift.swiftkit.SwiftKit;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GeneratedJavaKitExampleModuleTest {
-
-    @BeforeAll
-    static void beforeAll() {
-        System.out.println("java.library.path = " + SwiftKit.getJavaLibraryPath());
-        System.out.println("java.library.path = " + SwiftKit.getJextractTraceDowncalls());
-    }
+public class MySwiftLibraryTest {
 
     @Test
     void call_helloWorld() {
-        ExampleSwiftLibrary.helloWorld();
+        MySwiftLibrary.helloWorld();
 
-        assertNotNull(ExampleSwiftLibrary.helloWorld$address());
+        assertNotNull(MySwiftLibrary.helloWorld$address());
     }
 
     @Test
     void call_globalTakeInt() {
-        ExampleSwiftLibrary.globalTakeInt(12);
+        MySwiftLibrary.globalTakeInt(12);
 
-        assertNotNull(ExampleSwiftLibrary.globalTakeInt$address());
+        assertNotNull(MySwiftLibrary.globalTakeInt$address());
     }
 
     @Test
+    @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        ExampleSwiftLibrary.globalCallMeRunnable(new Runnable() {
+        MySwiftLibrary.globalCallMeRunnable(new Runnable() {
             @Override
             public void run() {
                 countDownLatch.countDown();
@@ -59,10 +55,10 @@ public class GeneratedJavaKitExampleModuleTest {
         });
         assertEquals(2, countDownLatch.getCount());
 
-        ExampleSwiftLibrary.globalCallMeRunnable(() -> countDownLatch.countDown());
+        MySwiftLibrary.globalCallMeRunnable(() -> countDownLatch.countDown());
         assertEquals(1, countDownLatch.getCount());
 
-        ExampleSwiftLibrary.globalCallMeRunnable(countDownLatch::countDown);
+        MySwiftLibrary.globalCallMeRunnable(countDownLatch::countDown);
         assertEquals(0, countDownLatch.getCount());
     }
 

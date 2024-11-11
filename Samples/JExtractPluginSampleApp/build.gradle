@@ -36,7 +36,7 @@ java {
 
 // This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
 // Thus, we also need to watch and re-build the top level project.
-def buildJExtractPlugin = tasks.register("swiftBuildJExtractPlugin", Exec) {
+def compileSwiftJExtractPlugin = tasks.register("compileSwiftJExtractPlugin", Exec) {
     description = "Rebuild the swift-java root project"
 
     inputs.file(new File(rootDir, "Package.swift"))
@@ -45,19 +45,41 @@ def buildJExtractPlugin = tasks.register("swiftBuildJExtractPlugin", Exec) {
 
     workingDir = rootDir
     commandLine "swift"
-    args "build"
+    args("build",
+            "--product", "SwiftKitSwift",
+            "--product", "JExtractSwiftPlugin",
+            "--product", "JExtractSwiftCommandPlugin")
+}
+def compileSwiftKitSwift = tasks.register("compileSwiftKitSwift", Exec) {
+    description = "Rebuild the swift-java root project"
+
+    inputs.file(new File(rootDir, "Package.swift"))
+    inputs.dir(new File(rootDir, "Sources"))
+    outputs.dir(new File(rootDir, ".build"))
+
+    workingDir = rootDir
+    commandLine "swift"
+    args("build",
+            "--product", "SwiftKitSwift")
+}
+
+def cleanSwift = tasks.register("cleanSwift", Exec) {
+    workingDir = layout.projectDirectory
+    commandLine "swift"
+    args("package", "clean")
 }
 
 def jextract = tasks.register("jextract", Exec) {
     description = "Builds swift sources, including swift-java source generation"
-    dependsOn buildJExtractPlugin
+    dependsOn compileSwiftJExtractPlugin
+    dependsOn compileSwiftKitSwift
 
     // only because we depend on "live developing" the plugin while using this project to test it
     inputs.file(new File(rootDir, "Package.swift"))
     inputs.dir(new File(rootDir, "Sources"))
 
-    inputs.file(layout.projectDirectory.file("Package.swift"))
-    inputs.dir(layout.projectDirectory.dir("Sources"))
+    inputs.file(new File(projectDir, "Package.swift"))
+    inputs.dir(new File(projectDir, "Sources"))
 
     // TODO: we can use package describe --type json to figure out which targets depend on JExtractSwiftPlugin and will produce outputs
     //       Avoid adding this directory, but create the expected one specifically for all targets
@@ -93,6 +115,10 @@ tasks.build {
     dependsOn("jextract")
 }
 
+tasks.clean {
+    dependsOn("cleanSwift")
+}
+
 dependencies {
     implementation(project(':SwiftKit'))
 
@@ -113,7 +139,7 @@ application {
         // Include the library paths where our dylibs are that we want to load and call
         "-Djava.library.path=" +
                 (BuildUtils.javaLibraryPaths(rootDir) +
-                 BuildUtils.javaLibraryPaths(layout.projectDirectory.asFile)).join(":"),
+                 BuildUtils.javaLibraryPaths(project.projectDir)).join(":"),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"

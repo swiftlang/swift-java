@@ -22,6 +22,7 @@ public class JExtractPluginSampleMain {
         System.out.println("java.library.path = " + SwiftKit.getJavaLibraryPath());
         System.out.println("jextract.trace.downcalls = " + SwiftKit.getJextractTraceDowncalls());
 
+        SwiftKit.loadLibraries(true);
         var o = new MyCoolSwiftClass(12);
         o.exposedToJava();
     }

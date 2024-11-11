@@ -15,18 +15,12 @@
 package org.swift.swiftkit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeAll;
+
 import org.junit.jupiter.api.Test;
 
-import com.example.swift.generated.MySwiftClass;
+import com.example.swift.MySwiftClass;
 
 public class MySwiftClassTest {
-
-    @BeforeAll
-    static void beforeAll() {
-        System.out.printf("java.library.path = %s\n", SwiftKit.getJavaLibraryPath());
-        System.out.printf("jextract.trace.downcalls = %s\n", SwiftKit.getJextractTraceDowncalls());
-    }
 
     @Test
     void call_retain_retainCount_release() {

@@ -75,6 +75,7 @@ fi
 
 mkdir -p /usr/lib/jvm/
 mv jdk.tar.gz /usr/lib/jvm/
+cd /usr/lib/jvm/
 tar xzvf jdk.tar.gz && rm jdk.tar.gz
 mv "$(find . -depth -maxdepth 1 -type d | head -n1)" default-jdk
 

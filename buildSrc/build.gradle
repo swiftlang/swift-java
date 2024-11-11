@@ -15,3 +15,12 @@
 repositories {
     mavenCentral()
 }
+
+def cleanSwift = tasks.register("cleanSwift", Exec) {
+    workingDir = layout.projectDirectory
+    commandLine "swift"
+    args("package", "clean")
+}
+tasks.clean {
+    dependsOn("cleanSwift")
+}

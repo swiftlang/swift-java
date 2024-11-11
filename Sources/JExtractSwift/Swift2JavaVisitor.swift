@@ -136,7 +136,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     // TODO: filter out kinds of variables we cannot import
 
-    self.log.info("Import variable: \(node.kind) \(fullName)")
+    self.log.debug("Import variable: \(node.kind) \(fullName)")
 
     let returnTy: TypeSyntax
     if let typeAnnotation = binding.typeAnnotation {
@@ -167,7 +167,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     if let currentTypeName {
-      log.info("Record variable in \(currentTypeName)")
+      log.debug("Record variable in \(currentTypeName)")
       translator.importedTypes[currentTypeName]!.variables.append(varDecl)
     } else {
       fatalError("Global variables are not supported yet: \(node.debugDescription)")
@@ -219,6 +219,10 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
+    return .skipChildren
+  }
+
+  override func visit(_ node: DeinitializerDeclSyntax) -> SyntaxVisitorContinueKind {
     return .skipChildren
   }
 }

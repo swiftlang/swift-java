@@ -49,18 +49,20 @@ final class VariableImportTests {
         """
         private static class counterInt {
           public static final FunctionDescriptor DESC_GET =     FunctionDescriptor.of(
-                /* -> */SWIFT_INT,
+              /* -> */SWIFT_INT,
               SWIFT_POINTER
-            );
-          public static final MemorySegment ADDR_GET = 
-            FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$1");
+          );
+          public static final MemorySegment ADDR_GET =
+          FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt");
+
           public static final MethodHandle HANDLE_GET = Linker.nativeLinker().downcallHandle(ADDR_GET, DESC_GET);
           public static final FunctionDescriptor DESC_SET =     FunctionDescriptor.ofVoid(
-            SWIFT_INT,
+              SWIFT_INT,
               SWIFT_POINTER
-            );
+          );
           public static final MemorySegment ADDR_SET =
-            FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt__$1");
+              FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt");
+
           public static final MethodHandle HANDLE_SET = Linker.nativeLinker().downcallHandle(ADDR_SET, DESC_SET);
         }
         """,

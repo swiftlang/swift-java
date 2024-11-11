@@ -39,3 +39,4 @@ gradlew
 gradlew.bat
 **/gradlew
 **/gradlew.bat
+**/ci-validate.sh

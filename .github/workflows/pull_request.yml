@@ -30,50 +30,14 @@ jobs:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
-      - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
-      - name: Cache JDK
-        id: cache-jdk
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: /usr/lib/jvm/default-jdk/
-          key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
-          restore-keys: |
-            ${{ runner.os }}-jdk-
-      - name: Install JDK
-        if: steps.cache-jdk.outputs.cache-hit != 'true'
-        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
-        # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-        #      - name: Install Untested Nightly Swift
-        #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
-      - name: Cache local Gradle repository
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: |
-            /root/.gradle/caches
-            /root/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Cache local SwiftPM repository
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: /__w/swift-java/swift-java/.build/checkouts
-          key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
-          restore-keys: |
-            ${{ runner.os }}-swiftpm-cache
-            ${{ runner.os }}-swiftpm-
-      # run the actual build
-      - name: Gradle build
-        run: |
-          ./gradlew build -x test --no-daemon # just build
-          ./gradlew build --info --no-daemon
-      - name: Gradle build (benchmarks)
-        run: |
-          ./gradlew compileJmh --info --no-daemon
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Gradle :SwiftKit:build
+        run: ./gradlew build -x test
+      - name: Gradle :SwiftKit:check
+        run: ./gradlew :SwiftKit:check --info
+      - name: Gradle compile JMH benchmarks
+        run: ./gradlew compileJmh --info
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
@@ -91,50 +55,33 @@ jobs:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
     steps:
       - uses: actions/checkout@v4
-      - name: Install System Dependencies
-        run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
-      - name: Cache JDK
-        id: cache-jdk
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: /usr/lib/jvm/default-jdk/
-          key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
-          restore-keys: |
-            ${{ runner.os }}-jdk-
-      - name: Install JDK
-        if: steps.cache-jdk.outputs.cache-hit != 'true'
-        run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
-        # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-        #      - name: Install Untested Nightly Swift
-        #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
-      - name: Cache local Gradle repository
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: |
-            /root/.gradle/caches
-            /root/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Cache local SwiftPM repository
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: /__w/swift-java/swift-java/.build/checkouts
-          key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
-          restore-keys: |
-            ${{ runner.os }}-swiftpm-cache
-            ${{ runner.os }}-swiftpm-
-      # run the actual build
-      # - name: Generate sources (make) (Temporary)
-      #  # TODO: this should be triggered by the respective builds
-      #  run: "make jextract-generate"
-      - name: Test Swift
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Swift Build
+        run: "swift build --build-tests"
+      - name: Swift Test
         run: "swift test"
-      - name: Build (Swift) Sample Apps
+
+  verify-samples:
+    name: Verify Samples (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # swift_version: ['nightly-main']
+        swift_version: ['6.0.2']
+        os_version: ['jammy']
+        jdk_vendor: ['Corretto']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Verify Samples (All)
         run: .github/scripts/validate_samples.sh
-      # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
-      # - name: Build (Swift) Benchmarks
-      #  run: "swift package --package-path Benchmarks/ benchmark list"
+        # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
+        # - name: Build (Swift) Benchmarks
+        #  run: "swift package --package-path Benchmarks/ benchmark list"

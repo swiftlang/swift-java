@@ -39,13 +39,13 @@ final class MethodThunkTests {
       [
         """
         @_cdecl("swiftjava_FakeModule_globalFunc_a_b")
-        public func swiftjava_FakeModule_globalFunc_a_b(a: Int32, b: Int64) -> Swift.Void /* Void */ {
+        public func swiftjava_FakeModule_globalFunc_a_b(a: Int32, b: Int64) /* Void */ {
           globalFunc(a: a, b: b)
         }
         """,
         """
         @_cdecl("swiftjava_FakeModule_globalFunc_a_b$1")
-        public func swiftjava_FakeModule_globalFunc_a_b$1(a: Double, b: Int64) -> Swift.Void /* Void */ {
+        public func swiftjava_FakeModule_globalFunc_a_b$1(a: Double, b: Int64) /* Void */ {
           globalFunc(a: a, b: b)
         }
         """

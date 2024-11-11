@@ -30,7 +30,7 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
   /// This helps verify that the generated output is correct, and won't miscompile on the next build.
   var buildOutputs: Bool = true
 
-  func createBuildCommands(context: PackagePlugin.PluginContext, target: any PackagePlugin.Target) async throws -> [PackagePlugin.Command] {
+  func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
     // FIXME: This is not a build plugin but SwiftPM forces us to impleme the protocol anyway? rdar://139556637
     return []
   }
@@ -38,9 +38,6 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
   func performCommand(context: PluginContext, arguments: [String]) throws {
     // Plugin can't have dependencies, so we have some naive argument parsing instead:
     self.verbose = arguments.contains("-v") || arguments.contains("--verbose")
-    if !self.verbose {
-        fatalError("Plugin should be verbose")
-    }
 
     let selectedTargets: [String] =
       if let last = arguments.lastIndex(where: { $0.starts(with: "-")}),
@@ -52,30 +49,23 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
 
     for target in context.package.targets {
       guard let configPath = getSwiftJavaConfig(target: target) else {
-        log("Skipping target '\(target.name), has no 'swift-java.config' file")
+        log("Skipping target '\(target.name)', has no 'swift-java.config' file")
         continue
       }
 
       do {
-        print("[swift-java] Extracting Java wrappers from target: '\(target.name)'...")
-        try performCommand(context: context, target: target, arguments: arguments)
+        print("[swift-java-command] Extracting Java wrappers from target: '\(target.name)'...")
+        try performCommand(context: context, target: target, extraArguments: arguments)
       } catch {
-        print("[swift-java] error: Failed to extract from target '\(target.name)': \(error)")
+        print("[swift-java-command] error: Failed to extract from target '\(target.name)': \(error)")
       }
+
     }
+    print("[swift-java-command] Generating sources: " + "done".green + ".")
   }
 
-  /// Perform the command on a specific target.
-  func performCommand(context: PluginContext, target: Target, arguments: [String]) throws {
-    // Make sure the target can builds properly
-    try self.packageManager.build(.target(target.name), parameters: .init())
-
-    guard let sourceModule = target.sourceModule else { return }
-
-    if self.buildInputs {
-      log("Pre-building target '\(target.name)' before extracting sources...")
-      try self.packageManager.build(.target(target.name), parameters: .init())
-    }
+  func prepareJExtractArguments(context: PluginContext, target: Target) throws -> [String] {
+    guard let sourceModule = target.sourceModule else { return [] }
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
@@ -104,8 +94,25 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
     ]
     arguments.append(sourceDir)
 
+    return arguments
+  }
+
+  /// Perform the command on a specific target.
+  func performCommand(context: PluginContext, target: Target, extraArguments _: [String]) throws {
+    // Make sure the target can builds properly
+    try self.packageManager.build(.target(target.name), parameters: .init())
+
+    guard let sourceModule = target.sourceModule else { return }
+
+    if self.buildInputs {
+      log("Pre-building target '\(target.name)' before extracting sources...")
+      try self.packageManager.build(.target(target.name), parameters: .init())
+    }
+
+    let arguments = try prepareJExtractArguments(context: context, target: target)
+
     try runExtract(context: context, target: target, arguments: arguments)
-    
+
     if self.buildOutputs {
       // Building the *products* since we need to build the dylib that contains our newly generated sources,
       // so just building the target again would not be enough. We build all products which we affected using
@@ -142,5 +149,12 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
     if self.verbose {
       print("[swift-java-command] \(message())", terminator: terminator)
     }
+  }
+}
+
+// Mini coloring helper, since we cannot have dependencies we keep it minimal here
+extension String {
+  var green: String {
+    "\u{001B}[0;32m" + "\(self)" + "\u{001B}[0;0m"
   }
 }

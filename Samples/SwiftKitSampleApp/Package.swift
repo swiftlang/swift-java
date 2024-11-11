@@ -62,6 +62,9 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftKitSwift", package: "swift-java"),
       ],
+      exclude: [
+        "swift-java.config",
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])

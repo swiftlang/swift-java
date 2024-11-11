@@ -101,3 +101,12 @@ private func p(_ msg: String, file: String = #fileID, line: UInt = #line, functi
   print("[swift][\(file):\(line)](\(function)) \(msg)")
   fflush(stdout)
 }
+
+#if os(Linux)
+// FIXME: why do we need this workaround?
+@_silgen_name("_objc_autoreleaseReturnValue")
+public func _objc_autoreleaseReturnValue(a: Any) {}
+
+@_silgen_name("objc_autoreleaseReturnValue")
+public func objc_autoreleaseReturnValue(a: Any) {}
+#endif

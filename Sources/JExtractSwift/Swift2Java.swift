@@ -107,6 +107,6 @@ extension Logger.Level: ExpressibleByArgument {
 
 func isDirectory(url: URL) -> Bool {
   var isDirectory: ObjCBool = false
-  FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+  _ = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
   return isDirectory.boolValue
 }
