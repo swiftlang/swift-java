@@ -76,10 +76,8 @@ struct SwiftThunkTranslator {
       fatalError("Cannot render initializer accessor if init function has no parent! Was: \(function)")
     }
 
-    let funcName = SwiftKitPrinting.Names.functionThunk(
-      thunkNameRegistry: &self.st.thunkNameRegistry,
-      module: st.swiftModuleName,
-      function: function)
+    let thunkName = self.st.thunkNameRegistry.functionThunkName(
+      module: st.swiftModuleName, decl: function)
 
     // FIXME: handle in thunk: return types
     // FIXME: handle in thunk: parameters
@@ -87,8 +85,8 @@ struct SwiftThunkTranslator {
     return
       [
         """
-        @_cdecl("\(raw: funcName)")
-        public func \(raw: funcName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> Any /* \(raw: parent.swiftTypeName) */ {
+        @_cdecl("\(raw: thunkName)")
+        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> Any /* \(raw: parent.swiftTypeName) */ {
           \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
         }
         """
@@ -98,10 +96,11 @@ struct SwiftThunkTranslator {
 
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
     st.log.trace("Rendering thunks for: \(decl.baseIdentifier)")
-    let funcName = SwiftKitPrinting.Names.functionThunk(
-      thunkNameRegistry: &st.thunkNameRegistry,
-      module: st.swiftModuleName,
-      function: decl)
+//    let funcName = SwiftKitPrinting.Names.functionThunk(
+//      thunkNameRegistry: &st.thunkNameRegistry,
+//      module: st.swiftModuleName,
+//      function: decl)
+    let funcName = st.thunkNameRegistry.functionThunkName(module: st.swiftModuleName, decl: decl)
 
     // Do we need to pass a self parameter?
     let paramPassingStyle: SelfParameterVariant?

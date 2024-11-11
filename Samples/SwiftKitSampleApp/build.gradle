@@ -109,7 +109,9 @@ application {
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" + BuildUtils.javaLibraryPaths(rootDir).join(":"),
+        "-Djava.library.path=" +
+                (BuildUtils.javaLibraryPaths(rootDir) +
+                 BuildUtils.javaLibraryPaths(rootDir)).join(":"),
 
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=true"

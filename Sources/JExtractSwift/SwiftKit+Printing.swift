@@ -41,24 +41,4 @@ extension SwiftKitPrinting.Names {
     "swiftjava_getType_\(module)_\(nominal.swiftTypeName)"
   }
 
-  static func functionThunk(
-    thunkNameRegistry: inout ThunkNameRegistry,
-    module: String, function: ImportedFunc) -> String {
-    let params = function.effectiveParameters(paramPassingStyle: .swiftThunkSelf)
-    var paramsPart = ""
-    if !params.isEmpty {
-      paramsPart = "_" + params.map { param in
-        param.firstName ?? "_"
-      }.joined(separator: "_")
-    }
-
-    let name =
-      if let parent = function.parent {
-        "swiftjava_\(module)_\(parent.swiftTypeName)_\(function.baseIdentifier)\(paramsPart)"
-      } else {
-        "swiftjava_\(module)_\(function.baseIdentifier)\(paramsPart)"
-      }
-
-    return thunkNameRegistry.deduplicate(name: name)
-  }
 }

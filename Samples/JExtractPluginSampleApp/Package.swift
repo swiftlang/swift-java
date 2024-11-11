@@ -35,8 +35,7 @@ let javaIncludePath = "\(javaHome)/include"
 #elseif os(macOS)
   let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #else
-  // TODO: Handle windows as well
-  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+  let javaPlatformIncludePath = "\(javaIncludePath)/win32"
 #endif
 
 let package = Package(
@@ -58,6 +57,9 @@ let package = Package(
     .target(
       name: "JExtractPluginSampleLib",
       dependencies: [],
+      exclude: [
+        "swift-java.config"
+      ],
       swiftSettings: [
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ],

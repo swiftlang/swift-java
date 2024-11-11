@@ -17,27 +17,31 @@ import PackagePlugin
 
 @main
 final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
-  
+
   var verbose: Bool = false
-  
+
   /// Build the target before attempting to extract from it.
   /// This avoids trying to extract from broken sources.
   ///
   /// You may disable this if confident that input targets sources are correct and there's no need to kick off a pre-build for some reason.
   var buildInputs: Bool = true
-  
+
   /// Build the target once swift-java sources have been generated.
   /// This helps verify that the generated output is correct, and won't miscompile on the next build.
   var buildOutputs: Bool = true
-  
+
   func createBuildCommands(context: PackagePlugin.PluginContext, target: any PackagePlugin.Target) async throws -> [PackagePlugin.Command] {
     // FIXME: This is not a build plugin but SwiftPM forces us to impleme the protocol anyway? rdar://139556637
     return []
   }
-  
+
   func performCommand(context: PluginContext, arguments: [String]) throws {
+    // Plugin can't have dependencies, so we have some naive argument parsing instead:
     self.verbose = arguments.contains("-v") || arguments.contains("--verbose")
-    
+    if !self.verbose {
+        fatalError("Plugin should be verbose")
+    }
+
     let selectedTargets: [String] =
       if let last = arguments.lastIndex(where: { $0.starts(with: "-")}),
          last < arguments.endIndex {
@@ -45,13 +49,13 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
       } else {
         []
       }
-    
+
     for target in context.package.targets {
       guard let configPath = getSwiftJavaConfig(target: target) else {
         log("Skipping target '\(target.name), has no 'swift-java.config' file")
         continue
       }
-      
+
       do {
         print("[swift-java] Extracting Java wrappers from target: '\(target.name)'...")
         try performCommand(context: context, target: target, arguments: arguments)
@@ -60,24 +64,19 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
       }
     }
   }
-  
+
   /// Perform the command on a specific target.
   func performCommand(context: PluginContext, target: Target, arguments: [String]) throws {
     // Make sure the target can builds properly
     try self.packageManager.build(.target(target.name), parameters: .init())
-    
+
     guard let sourceModule = target.sourceModule else { return }
 
     if self.buildInputs {
       log("Pre-building target '\(target.name)' before extracting sources...")
       try self.packageManager.build(.target(target.name), parameters: .init())
     }
-    
-    if self.buildOutputs {
-      log("Post-building target '\(target.name)' to verify generated sources...")
-      try self.packageManager.build(.target(target.name), parameters: .init())
-    }
-    
+
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
@@ -91,8 +90,6 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
       .appending(path: "generated")
       .appending(path: "java")
     let outputDirectorySwift = context.pluginWorkDirectoryURL
-      .appending(path: "src")
-      .appending(path: "generated")
       .appending(path: "Sources")
 
     var arguments: [String] = [
@@ -108,28 +105,42 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
     arguments.append(sourceDir)
 
     try runExtract(context: context, target: target, arguments: arguments)
+    
+    if self.buildOutputs {
+      // Building the *products* since we need to build the dylib that contains our newly generated sources,
+      // so just building the target again would not be enough. We build all products which we affected using
+      // our source generation, which usually would be just a product dylib with our library.
+      //
+      // In practice, we'll always want to build after generating; either here,
+      // or via some other task before we run any Java code, calling into Swift.
+      log("Post-extract building products with target '\(target.name)'...")
+      for product in context.package.products where product.targets.contains(where: { $0.id == target.id }) {
+        log("Post-extract building product '\(product.name)'...")
+        try self.packageManager.build(.product(product.name), parameters: .init())
+      }
+    }
   }
-  
+
   func runExtract(context: PluginContext, target: Target, arguments: [String]) throws {
     let process = Process()
     process.executableURL = try context.tool(named: "JExtractSwiftTool").url
     process.arguments = arguments
-    
+
     do {
-      log("Execute: \(process.executableURL) \(arguments)")
-      
+      log("Execute: \(process.executableURL!.absoluteURL.relativePath) \(arguments.joined(separator: " "))")
+
       try process.run()
       process.waitUntilExit()
-      
+
       assert(process.terminationStatus == 0, "Process failed with exit code: \(process.terminationStatus)")
     } catch {
-      print("[swift-java][command] Failed to extract Java sources for target: '\(target.name); Error: \(error)")
+      print("[swift-java-command] Failed to extract Java sources for target: '\(target.name); Error: \(error)")
     }
   }
-  
-  func log(_ message: @autoclosure () -> String) {
+
+  func log(_ message: @autoclosure () -> String, terminator: String = "\n") {
     if self.verbose {
-      print("[swift-java] \(message())")
+      print("[swift-java-command] \(message())", terminator: terminator)
     }
   }
 }

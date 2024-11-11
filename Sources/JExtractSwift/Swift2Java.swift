@@ -41,9 +41,8 @@ public struct SwiftToJava: ParsableCommand {
     help: "Name of the Swift module to import (and the swift interface files belong to)")
   var swiftModule: String
 
-  // TODO: Once we ship this, make this `.warning` by default
   @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
-  var logLevel: Logger.Level = .notice
+  var logLevel: Logger.Level = .info
 
   @Argument(help: "The Swift files or directories to recursively export to Java.")
   var input: [String]

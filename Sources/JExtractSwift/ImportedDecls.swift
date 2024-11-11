@@ -243,6 +243,17 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 }
 
+extension ImportedFunc: Hashable {
+  public func hash(into hasher: inout Swift.Hasher) {
+    self.swiftDecl.id.hash(into: &hasher)
+  }
+
+  public static func ==(lhs: ImportedFunc, rhs: ImportedFunc) -> Swift.Bool {
+    lhs.parent?.originalSwiftType.id == rhs.parent?.originalSwiftType.id &&
+    lhs.swiftDecl.id == rhs.swiftDecl.id
+  }
+}
+
 public enum VariableAccessorKind {
   case get
   case set
@@ -300,7 +311,7 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
     case .set:
       let newValueParam: FunctionParameterSyntax =
         "_ newValue: \(self.returnType.cCompatibleSwiftType)"
-      var funcDecl = ImportedFunc(
+      let funcDecl = ImportedFunc(
         module: self.module,
         decl: self.syntax!,
         parent: self.parentName,
