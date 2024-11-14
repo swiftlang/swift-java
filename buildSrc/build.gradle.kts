@@ -12,15 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
+plugins {
+    kotlin("jvm") version "1.9.10"
+}
+
 repositories {
     mavenCentral()
 }
 
-def cleanSwift = tasks.register("cleanSwift", Exec) {
-    workingDir = layout.projectDirectory
-    commandLine "swift"
-    args("package", "clean")
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 }
-tasks.clean {
-    dependsOn("cleanSwift")
+
+kotlin {
+    jvmToolchain(17)
 }

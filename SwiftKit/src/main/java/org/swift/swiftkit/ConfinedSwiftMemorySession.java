@@ -36,7 +36,8 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
 
     public void checkValid() throws RuntimeException {
         if (this.owner != null && this.owner != Thread.currentThread()) {
-            throw new WrongThreadException("ConfinedSwift arena is confined to %s but was closed from %s!".formatted(this.owner, Thread.currentThread()));
+            throw new WrongThreadException("ConfinedSwift arena is confined to %s but was closed from %s!"
+                    .formatted(this.owner, Thread.currentThread()));
         } else if (this.state.get() < ACTIVE) {
             throw new RuntimeException("SwiftArena is already closed!");
         }

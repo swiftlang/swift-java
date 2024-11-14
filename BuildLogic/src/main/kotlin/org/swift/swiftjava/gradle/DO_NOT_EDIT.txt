@@ -1,0 +1,6 @@
+DO NOT EDIT THIS PACKAGE
+
+It is copied from buildSrc/ during build.
+
+We cannot easily share the sources between BuildLogic and buildSrc so we automated the copy.
+If this could be shared in some nicer way, please improve the build to do so :-)

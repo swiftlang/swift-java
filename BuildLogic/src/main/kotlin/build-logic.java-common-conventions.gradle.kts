@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import java.util.*
+import org.swift.swiftjava.gradle.JavaLibraryPathUtils.javaLibraryPaths
 import java.io.*
 
 plugins {
@@ -42,43 +42,6 @@ tasks.withType(JavaCompile::class).forEach {
     it.options.compilerArgs.add("--enable-preview")
     it.options.compilerArgs.add("-Xlint:preview")
 }
-
-
-// FIXME: cannot share definition with 'buildSrc' so we duplicated the impl here
-fun javaLibraryPaths(dir: File): List<String> {
-    val osName = System.getProperty("os.name")
-    val osArch = System.getProperty("os.arch")
-    val isLinux = osName.lowercase(Locale.getDefault()).contains("linux")
-
-    return listOf(
-        if (isLinux) {
-            if (osArch.equals("x86_64") || osArch.equals("amd64")) {
-                "$dir/.build/x86_64-unknown-linux-gnu/debug/"
-            } else {
-                "$dir/.build/$osArch-unknown-linux-gnu/debug/"
-            }
-        } else {
-            if (osArch.equals("aarch64")) {
-                "$dir/.build/arm64-apple-macosx/debug/"
-            } else {
-                "$dir/.build/$osArch-apple-macosx/debug/"
-            }
-        },
-        if (isLinux) {
-            "/usr/lib/swift/linux"
-        } else {
-            // assume macOS
-            "/usr/lib/swift/"
-        },
-        if (isLinux) {
-            System.getProperty("user.home") + "/.local/share/swiftly/toolchains/6.0.2/usr/lib/swift/linux"
-        } else {
-            // assume macOS
-            "/usr/lib/swift/"
-        }
-    )
-}
-
 
 // Configure paths for native (Swift) libraries
 tasks.test {
