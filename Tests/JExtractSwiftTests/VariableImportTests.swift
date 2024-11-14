@@ -143,8 +143,8 @@ final class VariableImportTests {
         public static long getCounterInt(java.lang.foreign.MemorySegment self$) {
             var mh$ = counterInt.HANDLE_GET;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(self$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(self$);
                 }
                 return (long) mh$.invokeExact(self$);
             } catch (Throwable ex$) {
@@ -173,8 +173,8 @@ final class VariableImportTests {
         public static void setCounterInt(long newValue, java.lang.foreign.MemorySegment self$) {
           var mh$ = counterInt.HANDLE_SET;
           try {
-            if (TRACE_DOWNCALLS) {
-               traceDowncall(newValue, self$);
+            if (SwiftKit.TRACE_DOWNCALLS) {
+               SwiftKit.traceDowncall(newValue, self$);
             }
              mh$.invokeExact(newValue, self$);
           } catch (Throwable ex$) {

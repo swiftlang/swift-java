@@ -22,7 +22,7 @@ for samplePackage in ${SAMPLE_PACKAGES} ; do
     ./${CI_VALIDATE_SCRIPT} || exit
   elif [[ $(find . -name 'build.gradle*' -maxdepth 1) ]]; then
     echo -e "${BOLD}Gradle${RESET} build..."
-    ./gradlew build --info || exit
+    ./gradlew build || ./gradlew build --info # re-run to get better failure output
   else
     echo -e "${BOLD}SwiftPM${RESET} build..."
     swift build || exit

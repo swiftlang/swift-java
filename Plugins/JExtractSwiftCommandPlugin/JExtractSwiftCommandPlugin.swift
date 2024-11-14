@@ -60,6 +60,7 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
         print("[swift-java-command] error: Failed to extract from target '\(target.name)': \(error)")
       }
 
+      print("[swift-java-command] Done.")
     }
     print("[swift-java-command] Generating sources: " + "done".green + ".")
   }

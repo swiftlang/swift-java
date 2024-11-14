@@ -69,8 +69,8 @@ final class FuncCallbackImportTests {
                 callMe_callback_handle$ = callMe_callback_handle$.bindTo(callback);
                 Linker linker = Linker.nativeLinker();
                 MemorySegment callback$ = linker.upcallStub(callMe_callback_handle$, callMe_callback_desc$, arena);
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(callback$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(callback$);
                 }
                 mh$.invokeExact(callback$);
             } catch (Throwable ex$) {

@@ -29,10 +29,11 @@ public class SwiftKit {
 
     public static final String STDLIB_DYLIB_NAME = "swiftCore";
     public static final String SWIFTKITSWIFT_DYLIB_NAME = "SwiftKitSwift";
+    public static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
+
     private static final String STDLIB_MACOS_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
 
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
-    static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
@@ -62,12 +63,31 @@ public class SwiftKit {
     public SwiftKit() {
     }
 
-    static void traceDowncall(String name, Object... args) {
-        String traceArgs = Arrays.stream(args)
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        System.out.printf("[java] Downcall: %s(%s)\n", name, traceArgs);
-    }
+  public static void traceDowncall(Object... args) {
+      var ex = new RuntimeException();
+
+      String traceArgs = Arrays.stream(args)
+              .map(Object::toString)
+              .collect(Collectors.joining(", "));
+      System.out.printf("[java][%s:%d] Downcall: %s(%s)\n",
+              ex.getStackTrace()[1].getFileName(),
+              ex.getStackTrace()[1].getLineNumber(),
+              ex.getStackTrace()[1].getMethodName(),
+              traceArgs);
+  }
+
+  public static void trace(Object... args) {
+      var ex = new RuntimeException();
+
+      String traceArgs = Arrays.stream(args)
+              .map(Object::toString)
+              .collect(Collectors.joining(", "));
+      System.out.printf("[java][%s:%d] %s: %s\n",
+              ex.getStackTrace()[1].getFileName(),
+              ex.getStackTrace()[1].getLineNumber(),
+              ex.getStackTrace()[1].getMethodName(),
+              traceArgs);
+  }
 
     static MemorySegment findOrThrow(String symbol) {
         return SYMBOL_LOOKUP.find(symbol)

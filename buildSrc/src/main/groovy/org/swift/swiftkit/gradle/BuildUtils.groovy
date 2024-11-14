@@ -41,6 +41,7 @@ final class BuildUtils {
         ]
         def releasePaths = debugPaths.collect { it.replaceAll("debug", "release") }
         def systemPaths =
+                // system paths
                 isLinux ?
                         [
                                 "/usr/lib/swift/linux",

@@ -24,19 +24,17 @@ import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 import org.swift.swiftkit.SwiftValueWitnessTable;
 
+import java.util.Arrays;
+
 public class HelloJava2Swift {
 
     public static void main(String[] args) {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.print("java.library.path = \n");
-        for (var path : SwiftKit.getJavaLibraryPath().split(":")) {
-            System.out.println("  " + path);
-        }
+        System.out.print("Property: java.library.path = " +SwiftKit.getJavaLibraryPath());
 
         examples();
-
     }
 
     static void examples() {
@@ -44,13 +42,17 @@ public class HelloJava2Swift {
 
         MySwiftLibrary.globalTakeInt(1337);
 
-        MySwiftClass obj = new MySwiftClass(2222, 7777);
+        // Example of using an arena; MyClass.deinit is run at end of scope
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
 
-        SwiftKit.retain(obj.$memorySegment());
-        System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+            // just checking retains/releases work
+            SwiftKit.retain(obj.$memorySegment());
+            SwiftKit.release(obj.$memorySegment());
 
-        obj.voidMethod();
-        obj.takeIntMethod(42);
+            obj.voidMethod();
+            obj.takeIntMethod(42);
+        }
 
         System.out.println("DONE.");
     }

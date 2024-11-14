@@ -91,8 +91,8 @@ final class MethodImportTests {
         public static void helloWorld() {
             var mh$ = helloWorld.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall();
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall();
                 }
                 mh$.invokeExact();
             } catch (Throwable ex$) {
@@ -134,8 +134,8 @@ final class MethodImportTests {
         public static void globalTakeInt(long i) {
             var mh$ = globalTakeInt.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(i);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(i);
                 }
                 mh$.invokeExact(i);
             } catch (Throwable ex$) {
@@ -177,8 +177,8 @@ final class MethodImportTests {
         public static void globalTakeIntLongString(int i32, long l, com.example.swift.String s) {
             var mh$ = globalTakeIntLongString.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(i32, l, s.$memorySegment());
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(i32, l, s.$memorySegment());
                 }
                 mh$.invokeExact(i32, l, s.$memorySegment());
             } catch (Throwable ex$) {
@@ -220,8 +220,8 @@ final class MethodImportTests {
         public static void helloMemberFunction(java.lang.foreign.MemorySegment self$) {
             var mh$ = helloMemberFunction.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(self$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(self$);
                 }
                 mh$.invokeExact(self$);
             } catch (Throwable ex$) {
@@ -263,8 +263,8 @@ final class MethodImportTests {
         public static void helloMemberInExtension(java.lang.foreign.MemorySegment self$) {
             var mh$ = helloMemberInExtension.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(self$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(self$);
                 }
                 mh$.invokeExact(self$);
             } catch (Throwable ex$) {
@@ -306,8 +306,8 @@ final class MethodImportTests {
         public static void helloMemberFunction(java.lang.foreign.MemorySegment self$) {
             var mh$ = helloMemberFunction.HANDLE;
             try {
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(self$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(self$);
                 }
                 mh$.invokeExact(self$);
             } catch (Throwable ex$) {
@@ -431,8 +431,8 @@ final class MethodImportTests {
         public MySwiftClass(SwiftArena arena, long len, long cap) {
           var mh$ = init_len_cap.HANDLE;
           try {
-              if (TRACE_DOWNCALLS) {
-                traceDowncall(len, cap);
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(len, cap);
               }
               this.selfMemorySegment = (MemorySegment) mh$.invokeExact(len, cap, TYPE_METADATA.$memorySegment());
               if (arena != null) {

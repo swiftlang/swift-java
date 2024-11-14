@@ -71,8 +71,8 @@ struct SwiftThunkTranslator {
     return
       """
       @_cdecl("\(raw: funcName)")
-      public func \(raw: funcName)() -> Any /* Any.Type */ {
-        return \(raw: nominal.swiftTypeName).self
+      public func \(raw: funcName)() -> UnsafeMutableRawPointer /* Any.Type */ {
+        return unsafeBitCast(\(raw: nominal.swiftTypeName).self, to: UnsafeMutableRawPointer.self)
       }
       """
   }
@@ -89,9 +89,10 @@ struct SwiftThunkTranslator {
       [
         """
         @_cdecl("\(raw: thunkName)")
-        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> Any /* \(raw: parent.swiftTypeName) */ {
-          print("[swift] init class \(raw: parent.swiftTypeName)")
-          return \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: parent.swiftTypeName) */ {
+          let _self = \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+          let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
+          return _swiftjava_swift_retain(object: self$)
         }
         """
       ]
@@ -127,7 +128,7 @@ struct SwiftThunkTranslator {
         """
         @_cdecl("\(raw: thunkName)")
         public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(decl, paramPassingStyle: paramPassingStyle))) \(raw: returnArrowTy) {
-          \(raw: callBaseDot)\(raw: decl.baseIdentifier)(\(raw: st.renderForwardSwiftParams(decl, paramPassingStyle: paramPassingStyle)))
+          return \(raw: callBaseDot)\(raw: decl.baseIdentifier)(\(raw: st.renderForwardSwiftParams(decl, paramPassingStyle: paramPassingStyle)))
         }
         """
       ]
