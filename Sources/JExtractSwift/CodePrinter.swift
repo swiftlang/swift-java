@@ -34,14 +34,19 @@ public struct CodePrinter {
   }
   public var indentationText: String = ""
 
-  public static func toString(_ block: (inout CodePrinter) -> ()) -> String {
+  public static func toString(_ block: (inout CodePrinter) throws -> ()) rethrows -> String {
     var printer = CodePrinter()
-    block(&printer)
+    try block(&printer)
     return printer.finalize()
   }
 
-  public init() {
-
+  var mode: PrintMode
+  public enum PrintMode {
+    case accumulateAll
+    case flushToFileOnWrite
+  }
+  public init(mode: PrintMode = .flushToFileOnWrite) {
+    self.mode = mode
   }
 
   internal mutating func append(_ text: String) {
@@ -89,6 +94,16 @@ public struct CodePrinter {
 
       self.print(part, terminator, function: function, file: file, line: line)
     }
+  }
+
+  /// Print a plain newline, e.g. to separate declarations.
+  public mutating func println(
+    _ terminator: PrinterTerminator = .newLine,
+    function: String = #function,
+    file: String = #fileID,
+    line: UInt = #line
+  ) {
+    print("")
   }
 
   public mutating func print(
@@ -159,6 +174,12 @@ public struct CodePrinter {
   public var isEmpty: Bool {
     self.contents.isEmpty
   }
+
+  public mutating func dump(file: String = #fileID, line: UInt = #line) {
+    Swift.print("// CodePrinter.dump @ \(file):\(line)")
+    Swift.print(contents)
+  }
+
 }
 
 public enum PrinterTerminator: String {
@@ -184,4 +205,50 @@ public enum PrinterTerminator: String {
       .commaNewLine
     }
   }
+}
+
+extension CodePrinter {
+  
+  /// - Returns: the output path of the generated file, if any (i.e. not in accumulate in memory mode)
+  package mutating func writeContents(
+    outputDirectory: String,
+    javaPackagePath: String?,
+    filename: String
+  ) throws -> URL? {
+    guard self.mode != .accumulateAll else {
+      // if we're accumulating everything, we don't want to finalize/flush any contents
+      // let's mark that this is where a write would have happened though:
+      print("// ^^^^ Contents of: \(outputDirectory)/\(filename)")
+      return nil
+    }
+
+    let contents = finalize()
+    if outputDirectory == "-" {
+      print(
+        "// ==== ---------------------------------------------------------------------------------------------------"
+      )
+      if let javaPackagePath {
+        print("// \(javaPackagePath)/\(filename)")
+      } else {
+        print("// \(filename)")
+      }
+      print(contents)
+      return nil
+    }
+
+    let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(separator: PATH_SEPARATOR)
+    log.trace("Prepare target directory: \(targetDirectory)")
+    try FileManager.default.createDirectory(
+      atPath: targetDirectory, withIntermediateDirectories: true)
+
+    let outputPath = Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename)
+    try contents.write(
+      to: outputPath,
+      atomically: true,
+      encoding: .utf8
+    )
+    
+    return outputPath
+  }
+
 }

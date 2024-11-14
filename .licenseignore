@@ -37,3 +37,6 @@ Makefile
 gradle/wrapper/gradle-wrapper.properties
 gradlew
 gradlew.bat
+**/gradlew
+**/gradlew.bat
+**/ci-validate.sh

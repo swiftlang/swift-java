@@ -518,7 +518,9 @@ extension JavaClassTranslator {
       preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
-    if resultType != "Void" {
+
+    // FIXME: cleanup the checking here
+    if resultType != "Void" && resultType != "Swift.Void" {
       resultTypeStr = " -> \(resultType)"
     } else {
       resultTypeStr = ""

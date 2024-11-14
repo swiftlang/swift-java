@@ -88,21 +88,21 @@ public struct Logger {
     }
 
     let metadataString: String =
-      metadata.isEmpty ? "\(metadata)" : ""
+      metadata.isEmpty ? "" : "\(metadata)"
 
     print("[trace][\(file):\(line)](\(function)) \(message()) \(metadataString)")
   }
 }
 
 extension Logger {
-  public enum Level: Int, Hashable {
-    case trace = 0
-    case debug = 1
-    case info = 2
-    case notice = 3
-    case warning = 4
-    case error = 5
-    case critical = 6
+  public enum Level: String, Hashable {
+    case trace = "trace"
+    case debug = "debug"
+    case info = "info"
+    case notice = "notice"
+    case warning = "warning"
+    case error = "error"
+    case critical = "critical"
   }
 }
 

@@ -36,14 +36,15 @@ public final class Swift2JavaTranslator {
 
   // ==== Output state
 
-  // TODO: consider how/if we need to store those etc
-  public var importedGlobalFuncs: [ImportedFunc] = []
+  package var importedGlobalFuncs: [ImportedFunc] = []
 
   /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
   /// type representation.
-  public var importedTypes: [String: ImportedNominalType] = [:]
+  package var importedTypes: [String: ImportedNominalType] = [:]
 
   let nominalResolution: NominalTypeResolution = NominalTypeResolution()
+
+  var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   public init(
     javaPackage: String,
@@ -68,31 +69,22 @@ extension Swift2JavaTranslator {
   var javaPrimitiveForSwiftInt: JavaType { .long }
 
   public func analyze(
-    swiftInterfacePath: String,
+    file: String,
     text: String? = nil
   ) throws {
-    if text == nil {
-      precondition(
-        swiftInterfacePath.hasSuffix(Self.SWIFT_INTERFACE_SUFFIX),
-        "Swift interface path must end with \(Self.SWIFT_INTERFACE_SUFFIX), was: \(swiftInterfacePath)"
-      )
-
-      if !FileManager.default.fileExists(atPath: swiftInterfacePath) {
-        throw Swift2JavaTranslatorError(message: "Missing input file: \(swiftInterfacePath)")
-      }
+    guard text != nil || FileManager.default.fileExists(atPath: file) else {
+      throw Swift2JavaTranslatorError(message: "Missing input file: \(file)")
     }
 
-    log.trace("Analyze: \(swiftInterfacePath)")
-    let text = try text ?? String(contentsOfFile: swiftInterfacePath)
+    log.trace("Analyze: \(file)")
+    let text = try text ?? String(contentsOfFile: file)
 
-    try analyzeSwiftInterface(interfaceFilePath: swiftInterfacePath, text: text)
+    try analyzeSwiftInterface(interfaceFilePath: file, text: text)
 
-    log.info("Done processing: \(swiftInterfacePath)")
+    log.debug("Done processing: \(file)")
   }
 
   package func analyzeSwiftInterface(interfaceFilePath: String, text: String) throws {
-    assert(interfaceFilePath.hasSuffix(Self.SWIFT_INTERFACE_SUFFIX))
-
     let sourceFileSyntax = Parser.parse(source: text)
 
     // Find all of the types and extensions, then bind the extensions.
@@ -168,7 +160,6 @@ extension Swift2JavaTranslator {
         package: javaPackage,
         name: fullName
       ),
-      swiftMangledName: nominal.mangledNameFromComment,
       kind: kind
     )
 

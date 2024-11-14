@@ -55,12 +55,7 @@ extension Swift2JavaVisitor {
       // Translate the generic arguments to the C-compatible types.
       let genericArgs = try memberType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          switch argument.argument {
-          case .type(let argumentType):
-            try cCompatibleType(for: argumentType)
-          @unknown default:
-            throw TypeTranslationError.unimplementedType(TypeSyntax(memberType))
-          }
+          try cCompatibleType(for: argument.argument)
         }
       }
 
@@ -76,12 +71,7 @@ extension Swift2JavaVisitor {
       // Translate the generic arguments to the C-compatible types.
       let genericArgs = try identifierType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          switch argument.argument {
-          case .type(let argumentType):
-            try cCompatibleType(for: argumentType)
-          @unknown default:
-            throw TypeTranslationError.unimplementedType(TypeSyntax(identifierType))
-          }
+          try cCompatibleType(for: argument.argument)
         }
       }
 
@@ -256,7 +246,7 @@ extension TranslatedType {
 }
 
 /// Describes the C-compatible layout as it should be referenced from Java.
-enum CCompatibleJavaMemoryLayout {
+enum CCompatibleJavaMemoryLayout: Hashable {
   /// A primitive Java type that has a direct counterpart in C.
   case primitive(JavaType)
 
@@ -288,7 +278,7 @@ extension TranslatedType {
       case .long: return .SwiftInt64
       case .float: return .SwiftFloat
       case .double: return .SwiftDouble
-      case .array, .class, .void: fatalError("Not a primitive type")
+      case .array, .class, .void: fatalError("Not a primitive type: \(cCompatibleJavaMemoryLayout) in \(self)")
       }
 
     case .int:

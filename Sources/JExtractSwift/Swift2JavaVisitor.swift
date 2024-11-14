@@ -50,7 +50,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visitPost(_ node: ClassDeclSyntax) {
     if currentTypeName != nil {
-      log.info("Completed import: \(node.kind) \(node.name)")
+      log.debug("Completed import: \(node.kind) \(node.name)")
       currentTypeName = nil
     }
   }
@@ -59,7 +59,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
     guard let nominal = translator.nominalResolution.extendedType(of: node),
-          let importedNominalType = translator.importedNominalType(nominal) else {
+      let importedNominalType = translator.importedNominalType(nominal)
+    else {
       return .skipChildren
     }
 
@@ -94,7 +95,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
-          param: param,
+          syntax: param,
           type: try cCompatibleType(for: param.type)
         )
       }
@@ -107,18 +108,14 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     let fullName = "\(node.name.text)"
 
-    var funcDecl = ImportedFunc(
-      parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
+    let funcDecl = ImportedFunc(
+      module: self.translator.swiftModuleName,
+      decl: node.trimmed,
+      parent: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
       identifier: fullName,
       returnType: javaResultType,
       parameters: params
     )
-    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
-
-    // Retrieve the mangled name, if available.
-    if let mangledName = node.mangledNameFromComment {
-      funcDecl.swiftMangledName = mangledName
-    }
 
     if let currentTypeName {
       log.debug("Record method in \(currentTypeName)")
@@ -139,10 +136,10 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     // TODO: filter out kinds of variables we cannot import
 
-    self.log.info("Import variable: \(node.kind) \(fullName)")
+    self.log.debug("Import variable: \(node.kind) \(fullName)")
 
     let returnTy: TypeSyntax
-    if let typeAnnotation = binding.typeAnnotation{
+    if let typeAnnotation = binding.typeAnnotation {
       returnTy = typeAnnotation.type
     } else {
       returnTy = "Swift.Void"
@@ -157,6 +154,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     var varDecl = ImportedVariable(
+      module: self.translator.swiftModuleName,
       parentName: currentTypeName.map { translator.importedTypes[$0] }??.translatedType,
       identifier: fullName,
       returnType: javaResultType
@@ -169,7 +167,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     if let currentTypeName {
-      log.info("Record variable in \(currentTypeName)")
+      log.debug("Record variable in \(currentTypeName)")
       translator.importedTypes[currentTypeName]!.variables.append(varDecl)
     } else {
       fatalError("Global variables are not supported yet: \(node.debugDescription)")
@@ -180,21 +178,22 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
     guard let currentTypeName,
-            let currentType = translator.importedTypes[currentTypeName] else {
+      let currentType = translator.importedTypes[currentTypeName]
+    else {
       fatalError("Initializer must be within a current type, was: \(node)")
     }
     guard node.shouldImport(log: log) else {
       return .skipChildren
     }
 
-    self.log.info("Import initializer: \(node.kind) \(currentType.javaType.description)")
+    self.log.debug("Import initializer: \(node.kind) \(currentType.javaType.description)")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
         // TODO: more robust parameter handling
         // TODO: More robust type handling
         return ImportedParam(
-          param: param,
+          syntax: param,
           type: try cCompatibleType(for: param.type)
         )
       }
@@ -207,22 +206,23 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       "init(\(String(params.flatMap { "\($0.effectiveName ?? "_"):" })))"
 
     var funcDecl = ImportedFunc(
-      parentName: currentType.translatedType,
+      module: self.translator.swiftModuleName,
+      decl: node.trimmed,
+      parent: currentType.translatedType,
       identifier: initIdentifier,
       returnType: currentType.translatedType,
       parameters: params
     )
     funcDecl.isInit = true
-    funcDecl.syntax = "\(node.trimmed)"  // TODO: rethink this, it's useful for comments in Java
 
-    // Retrieve the mangled name, if available.
-    if let mangledName = node.mangledNameFromComment {
-      funcDecl.swiftMangledName = mangledName
-    }
-
-    log.info("Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
+    log.debug(
+      "Record initializer method in \(currentType.javaType.description): \(funcDecl.identifier)")
     translator.importedTypes[currentTypeName]!.initializers.append(funcDecl)
 
+    return .skipChildren
+  }
+
+  override func visit(_ node: DeinitializerDeclSyntax) -> SyntaxVisitorContinueKind {
     return .skipChildren
   }
 }

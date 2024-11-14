@@ -15,15 +15,16 @@
 package com.example.swift;
 
 // Import swift-extract generated sources
-import com.example.swift.generated.ExampleSwiftLibrary;
-import com.example.swift.generated.MySwiftClass;
+
+import com.example.swift.MySwiftLibrary;
+import com.example.swift.MySwiftClass;
 
 // Import javakit/swiftkit support libraries
 import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 import org.swift.swiftkit.SwiftValueWitnessTable;
 
-import java.lang.foreign.*;
+import java.util.Arrays;
 
 public class HelloJava2Swift {
 
@@ -31,23 +32,27 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
+        System.out.print("Property: java.library.path = " +SwiftKit.getJavaLibraryPath());
 
         examples();
     }
 
     static void examples() {
-         ExampleSwiftLibrary.helloWorld();
+        MySwiftLibrary.helloWorld();
 
-         ExampleSwiftLibrary.globalTakeInt(1337);
+        MySwiftLibrary.globalTakeInt(1337);
 
-         MySwiftClass obj = new MySwiftClass(2222, 7777);
+        // Example of using an arena; MyClass.deinit is run at end of scope
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
 
-         SwiftKit.retain(obj.$memorySegment());
-         System.out.println("[java] obj ref count = " + SwiftKit.retainCount(obj.$memorySegment()));
+            // just checking retains/releases work
+            SwiftKit.retain(obj.$memorySegment());
+            SwiftKit.release(obj.$memorySegment());
 
-         obj.voidMethod();
-         obj.takeIntMethod(42);
+            obj.voidMethod();
+            obj.takeIntMethod(42);
+        }
 
         System.out.println("DONE.");
     }

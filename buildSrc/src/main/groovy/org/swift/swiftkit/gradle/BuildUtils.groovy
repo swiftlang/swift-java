@@ -23,7 +23,7 @@ final class BuildUtils {
         def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")
         def base = rootDir == null ? "" : "${rootDir}/"
 
-        return [
+        def debugPaths = [
                 isLinux ?
                         /* Linux */ (osArch == "amd64" || osArch == "x86_64" ?
                         "${base}.build/x86_64-unknown-linux-gnu/debug/" :
@@ -38,10 +38,21 @@ final class BuildUtils {
                         /* macOS */ (osArch == "aarch64" ?
                         "${base}../../.build/arm64-apple-macosx/debug/" :
                         "${base}../../.build/${osArch}-apple-macosx/debug/"),
-                isLinux ?
-                        "/usr/lib/swift/linux" :
-                        // assume macOS
-                        "/usr/lib/swift/"
         ]
+        def releasePaths = debugPaths.collect { it.replaceAll("debug", "release") }
+        def systemPaths =
+                // system paths
+                isLinux ?
+                        [
+                                "/usr/lib/swift/linux",
+                                // TODO: should we be Swiftly aware and then use the currently used path?
+                                System.getProperty("user.home") + "/.local/share/swiftly/toolchains/6.0.2/usr/lib/swift/linux"
+                        ] :
+                        [
+                                // assume macOS
+                                "/usr/lib/swift/"
+                        ]
+
+        return releasePaths + debugPaths + systemPaths
     }
 }

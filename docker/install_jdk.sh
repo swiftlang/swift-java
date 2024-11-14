@@ -76,10 +76,7 @@ fi
 mkdir -p /usr/lib/jvm/
 mv jdk.tar.gz /usr/lib/jvm/
 cd /usr/lib/jvm/
-ls
 tar xzvf jdk.tar.gz && rm jdk.tar.gz
-ls
-find . -depth -maxdepth 1 -type d
 mv "$(find . -depth -maxdepth 1 -type d | head -n1)" default-jdk
 
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"

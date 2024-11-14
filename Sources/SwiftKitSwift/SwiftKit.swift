@@ -12,12 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-// This is a "plain Swift" file containing various types of declarations,
-// that is exported to Java by using the `jextract-swift` tool.
-//
-// No annotations are necessary on the Swift side to perform the export.
-
-// FIXME: this is a workaround until we can pass String to Swift directly
 @_silgen_name("getTypeByStringByteArray")
 public func getTypeByStringByteArray(_ name: UnsafePointer<UInt8>) -> Any.Type? {
   let string = String(cString: name)
@@ -26,9 +20,25 @@ public func getTypeByStringByteArray(_ name: UnsafePointer<UInt8>) -> Any.Type? 
   return type
 }
 
-//// FIXME: this is internal in stdlib, it would make things easier here
-//@_silgen_name("swift_stdlib_getTypeByMangledNameUntrusted")
-//public func _getTypeByMangledNameUntrusted(
-//  _ name: UnsafePointer<UInt8>,
-//  _ nameLength: UInt)
-//  -> Any.Type?
+@_silgen_name("swift_retain")
+public func _swiftjava_swift_retain(object: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer
+
+@_silgen_name("swift_release")
+public func _swiftjava_swift_release(object: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer
+
+@_silgen_name("swift_retainCount")
+public func _swiftjava_swift_retainCount(object: UnsafeMutableRawPointer) -> Int
+
+@_silgen_name("swift_isUniquelyReferenced")
+public func _swiftjava_swift_isUniquelyReferenced(object: UnsafeMutableRawPointer) -> Bool
+
+
+ @_alwaysEmitIntoClient @_transparent
+ internal func _swiftjava_withHeapObject<R>(
+   of object: AnyObject,
+   _ body: (UnsafeMutableRawPointer) -> R
+ ) -> R {
+   defer { _fixLifetime(object) }
+   let unmanaged = Unmanaged.passUnretained(object)
+   return body(unmanaged.toOpaque())
+ }

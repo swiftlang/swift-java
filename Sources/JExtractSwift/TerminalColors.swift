@@ -21,6 +21,7 @@ package enum Rainbow: String {
   case magenta = "\u{001B}[0;35m"
   case cyan = "\u{001B}[0;36m"
   case white = "\u{001B}[0;37m"
+  case bold = "\u{001B}[1m"
   case `default` = "\u{001B}[0;0m"
 
   func name() -> String {
@@ -33,6 +34,7 @@ package enum Rainbow: String {
     case .magenta: return "Magenta"
     case .cyan: return "Cyan"
     case .white: return "White"
+    case .bold: return "Bold"
     case .default: return "Default"
     }
   }
@@ -127,6 +129,17 @@ package extension String {
     }
   }
 
+  var bold: String {
+    self.colored(as: .bold)
+  }
+  func bold(if condition: Bool) -> String {
+    if condition {
+      self.colored(as: .bold)
+    } else {
+      self
+    }
+  }
+  
   var `default`: String {
     self.colored(as: .default)
   }
@@ -169,6 +182,10 @@ package extension Substring {
     self.colored(as: .white)
   }
 
+  var bold: String {
+    self.colored(as: .bold)
+  }
+  
   var `default`: String {
     self.colored(as: .default)
   }

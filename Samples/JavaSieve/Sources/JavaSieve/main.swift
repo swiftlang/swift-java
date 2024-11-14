@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
+import JavaMath
 
 let jvm = try JavaVirtualMachine.shared(classPath: ["QuadraticSieve-1.0.jar"])
 do {
@@ -20,6 +21,8 @@ do {
   for prime in sieveClass.findPrimes(100)! {
     print("Found prime: \(prime.intValue())")
   }
+
+  try JavaClass<RoundingMode>().HALF_UP
 } catch {
   print("Failure: \(error)")
 }

@@ -1,0 +1,44 @@
+name: 'Swift Java CI Env'
+description: 'Prepare the CI environment by installing Swift and selected JDK etc.'
+
+runs:
+  using: composite
+  steps:
+    - name: Install System Dependencies
+      run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
+      shell: bash
+    - name: Cache JDK
+      id: cache-jdk
+      uses: actions/cache@v4
+      continue-on-error: true
+      with:
+        path: /usr/lib/jvm/default-jdk/
+        key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
+        restore-keys: |
+          ${{ runner.os }}-jdk-
+    - name: Install JDK
+      if: steps.cache-jdk.outputs.cache-hit != 'true'
+      run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
+      shell: bash
+      # TODO: not using setup-java since incompatible with the swiftlang/swift base image
+      #      - name: Install Untested Nightly Swift
+      #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
+    - name: Cache local Gradle repository
+      uses: actions/cache@v4
+      continue-on-error: true
+      with:
+        path: |
+          /root/.gradle/caches
+          /root/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('*/*.gradle*', 'settings.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Cache local SwiftPM repository
+      uses: actions/cache@v4
+      continue-on-error: true
+      with:
+        path: /__w/swift-java/swift-java/.build/checkouts
+        key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
+        restore-keys: |
+          ${{ runner.os }}-swiftpm-cache
+          ${{ runner.os }}-swiftpm-

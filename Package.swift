@@ -126,6 +126,20 @@ let package = Package(
       targets: ["JExtractSwift"]
     ),
 
+    // ==== Plugin for wrapping Java classes in Swift
+    .plugin(
+      name: "JExtractSwiftPlugin",
+      targets: [
+        "JExtractSwiftPlugin"
+      ]
+    ),
+    .plugin(
+      name: "JExtractSwiftCommandPlugin",
+      targets: [
+        "JExtractSwiftCommandPlugin"
+      ]
+    ),
+    
     // ==== Examples
 
     .library(
@@ -136,7 +150,7 @@ let package = Package(
 
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "main"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", from: "600.0.1"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
@@ -229,6 +243,7 @@ let package = Package(
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
     ),
+
     .plugin(
       name: "JavaCompilerPlugin",
       capability: .buildTool()
@@ -328,6 +343,24 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .plugin(
+      name: "JExtractSwiftPlugin",
+      capability: .buildTool(),
+      dependencies: [
+        "JExtractSwiftTool"
+      ]
+    ),
+    .plugin(
+      name: "JExtractSwiftCommandPlugin",
+      capability: .command(
+        intent: .custom(verb: "jextract", description: "Extract Java accessors from Swift module"),
+        permissions: [
+        ]),
+      dependencies: [
+        "JExtractSwiftTool"
       ]
     ),
 

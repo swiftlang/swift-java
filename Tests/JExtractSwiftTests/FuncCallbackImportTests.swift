@@ -41,12 +41,12 @@ final class FuncCallbackImportTests {
     )
     st.log.logLevel = .error
 
-    try st.analyze(swiftInterfacePath: "/fake/Fake.swiftinterface", text: Self.class_interfaceFile)
+    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "callMe" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, selfVariant: nil)
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
     }
 
     assertOutput(
@@ -69,8 +69,8 @@ final class FuncCallbackImportTests {
                 callMe_callback_handle$ = callMe_callback_handle$.bindTo(callback);
                 Linker linker = Linker.nativeLinker();
                 MemorySegment callback$ = linker.upcallStub(callMe_callback_handle$, callMe_callback_desc$, arena);
-                if (TRACE_DOWNCALLS) {
-                    traceDowncall(callback$);
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                    SwiftKit.traceDowncall(callback$);
                 }
                 mh$.invokeExact(callback$);
             } catch (Throwable ex$) {

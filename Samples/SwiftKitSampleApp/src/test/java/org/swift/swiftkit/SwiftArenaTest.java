@@ -14,23 +14,20 @@
 
 package org.swift.swiftkit;
 
-import com.example.swift.generated.MySwiftClass;
+import com.example.swift.MySwiftClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 import org.swift.swiftkit.util.PlatformUtils;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.swift.swiftkit.SwiftKit.*;
 import static org.swift.swiftkit.SwiftKit.retainCount;
 
 public class SwiftArenaTest {
-
-    @BeforeAll
-    static void beforeAll() {
-        System.out.printf("java.library.path = %s\n", SwiftKit.getJavaLibraryPath());
-        System.out.printf("jextract.trace.downcalls = %s\n", SwiftKit.getJextractTraceDowncalls());
-    }
 
     static boolean isAmd64() {
         return PlatformUtils.isAmd64();

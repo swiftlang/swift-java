@@ -12,33 +12,41 @@
 //
 //===----------------------------------------------------------------------===//
 
-package com.example.swift.generated;
+package com.example.swift;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.swift.swiftkit.SwiftKit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.io.File;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftClassTest {
 
-    @BeforeAll
-    static void beforeAll() {
-        System.out.printf("java.library.path = %s\n", System.getProperty("java.library.path"));
+    void checkPaths(Throwable throwable) {
+        var paths = SwiftKit.getJavaLibraryPath().split(":");
+        for (var path : paths) {
+            System.out.println("CHECKING PATH: " + path);
+            Stream.of(new File(path).listFiles())
+                    .filter(file -> !file.isDirectory())
+                    .forEach((file) -> {
+                        System.out.println("  - " + file.getPath());
+                    });
+        }
 
-        System.loadLibrary("swiftCore");
-        System.loadLibrary("ExampleSwiftLibrary");
-
-        System.setProperty("jextract.trace.downcalls", "true");
+        throw new RuntimeException(throwable);
     }
 
     @Test
     void test_MySwiftClass_voidMethod() {
-        MySwiftClass o = new MySwiftClass(12, 42);
-        o.voidMethod();
+        try {
+            MySwiftClass o = new MySwiftClass(12, 42);
+            o.voidMethod();
+        } catch (Throwable throwable) {
+            checkPaths(throwable);
+        }
     }
 
     @Test

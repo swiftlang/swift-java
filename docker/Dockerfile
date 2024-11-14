@@ -26,5 +26,5 @@ ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"
 
 # Install "untested" nightly 'main' Swift
 # TODO: Only do this if the released Swift is older than what we require
-COPY install_untested_nightly_swift.sh .
-RUN bash -xc './install_untested_nightly_swift.sh'
+#COPY install_untested_nightly_swift.sh .
+RUN #bash -xc './install_untested_nightly_swift.sh'
