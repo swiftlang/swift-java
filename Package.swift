@@ -155,6 +155,11 @@ let package = Package(
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
   targets: [
+    // Main target which serves as landing page for documentation
+    .target(
+      name: "SwiftJava"
+    ),
+    
     .macro(
       name: "JavaKitMacros",
       dependencies: [
@@ -413,3 +418,12 @@ let package = Package(
     )
   ]
 )
+
+switch ProcessInfo.processInfo.environment["SWIFT_DOCC"] {
+case "true", "TRUE", "yes", "YES", "1":
+  package.dependencies.append(
+    .package(url: "https://github.com/swiftlang/swift-docc-plugin", "1.0.0"..<"1.4.0")
+  )
+default:
+  ()
+}

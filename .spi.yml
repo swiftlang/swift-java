@@ -1,0 +1,9 @@
+version: 1
+builder:
+  configs:
+    - documentation_targets: [
+      SwiftJava,
+      JavaKit,
+      SwiftKitSwift,
+      JExtractSwift
+    ]
