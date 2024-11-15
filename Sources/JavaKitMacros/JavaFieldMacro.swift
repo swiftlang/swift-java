@@ -88,7 +88,7 @@ extension JavaFieldMacro: AccessorMacro {
   private static func isInJavaClassContext(context: some MacroExpansionContext) -> Bool {
     for lexicalContext in context.lexicalContext {
       if let classSyntax = lexicalContext.as(ExtensionDeclSyntax.self) {
-        return classSyntax.extendedType.trimmedDescription.starts(with: "JavaClass<")
+        return classSyntax.extendedType.trimmedDescription.starts(with: "JavaClass")
       }
     }
 
