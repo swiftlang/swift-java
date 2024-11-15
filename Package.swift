@@ -139,14 +139,6 @@ let package = Package(
         "JExtractSwiftCommandPlugin"
       ]
     ),
-    
-    // ==== Examples
-
-    .library(
-      name: "ExampleSwiftLibrary",
-      type: .dynamic,
-      targets: ["ExampleSwiftLibrary"]
-    ),
 
   ],
   dependencies: [
@@ -262,14 +254,6 @@ let package = Package(
       ]
     ),
 
-    .target(
-      name: "ExampleSwiftLibrary",
-      dependencies: [],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-      ]
-    ),
     .target(
       name: "SwiftKitSwift",
       dependencies: [],
