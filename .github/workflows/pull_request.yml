@@ -13,6 +13,30 @@ jobs:
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
       format_check_enabled: false
       license_header_check_project_name: Swift.org
+      # We need JAVA_HOME to be set to build the Swift project, so the default check would not do that.
+      docs_check_enabled: false
+
+  soundness-docs:
+    name: Soundness (Documentation) (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        # swift_version: ['nightly-main']
+        swift_version: ['6.0.2']
+        os_version: ['jammy']
+        jdk_vendor: ['Corretto']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: "Soundness (Documentation)"
+        run: apt-get -qq update && apt-get -qq -y install curl yq && \
+             curl -s https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/check-docs.sh | bash
 
   test-java:
     name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})

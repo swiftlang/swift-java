@@ -38,7 +38,6 @@ func callMe(maybe: () -> ()) {}
 ```
 
 
-
 ## `jextract-swift` importer behavior
 
 Only `public` functions, properties and types are imported.
@@ -60,3 +59,4 @@ public final class SomeModule ... {
     public static void globalFunction() { ... }
 }
 ```
+

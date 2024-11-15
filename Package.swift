@@ -26,6 +26,14 @@ func findJavaHome() -> String {
     return home
   }
 
+  // Detect we're on CI and try to guess the JAVA_HOME for the shared Swift Soundness scripts
+  if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] != nil {
+    let defaultCIJDKPath = "/usr/lib/jvm/default-jdk"
+    if FileManager.default.fileExists(atPath: defaultCIJDKPath) {
+      return defaultCIJDKPath
+    }
+  }
+
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
 }
 let javaHome = findJavaHome()
