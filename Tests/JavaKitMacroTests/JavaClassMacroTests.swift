@@ -56,6 +56,31 @@ class JavaKitMacroTests: XCTestCase {
     )
   }
 
+  func testJavaStaticMethodSuccess() throws {
+    assertMacroExpansion(
+      """
+        extension JavaClass<HelloWorld> {
+          @JavaStaticField
+          public var test: String
+        }
+      """,
+      expandedSource: """
+      
+        extension JavaClass<HelloWorld> {
+          public var test: String {
+              get {
+                  self[javaFieldName: "test", fieldType: String.self]
+              }
+              set {
+                  self[javaFieldName: "test", fieldType: String.self] = newValue
+              }
+          }
+        }
+      """,
+      macros: Self.javaKitMacros
+    )
+  }
+
   func testJavaClass() throws {
     assertMacroExpansion("""
         @JavaClass("org.swift.example.HelloWorld")
