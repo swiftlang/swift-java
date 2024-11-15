@@ -14,6 +14,8 @@
 
 import java.util.*
 import java.io.*
+import kotlin.system.exitProcess
+import kotlinx.serialization.json.*
 
 plugins {
     java
@@ -44,41 +46,60 @@ tasks.withType(JavaCompile::class).forEach {
 }
 
 
-// FIXME: cannot share definition with 'buildSrc' so we duplicated the impl here
-fun javaLibraryPaths(dir: File): List<String> {
-    val osName = System.getProperty("os.name")
-    val osArch = System.getProperty("os.arch")
-    val isLinux = osName.lowercase(Locale.getDefault()).contains("linux")
+fun getSwiftRuntimeLibraryPaths(): List<String> {
+    val process = ProcessBuilder("swiftc", "-print-target-info")
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
 
-    return listOf(
-        if (isLinux) {
-            if (osArch.equals("x86_64") || osArch.equals("amd64")) {
-                "$dir/.build/x86_64-unknown-linux-gnu/debug/"
-            } else {
-                "$dir/.build/$osArch-unknown-linux-gnu/debug/"
-            }
-        } else {
-            if (osArch.equals("aarch64")) {
-                "$dir/.build/arm64-apple-macosx/debug/"
-            } else {
-                "$dir/.build/$osArch-apple-macosx/debug/"
-            }
-        },
-        if (isLinux) {
-            "/usr/lib/swift/linux"
-        } else {
-            // assume macOS
-            "/usr/lib/swift/"
-        },
-        if (isLinux) {
-            System.getProperty("user.home") + "/.local/share/swiftly/toolchains/6.0.2/usr/lib/swift/linux"
-        } else {
-            // assume macOS
-            "/usr/lib/swift/"
-        }
-    )
+    val output = process.inputStream.bufferedReader().use { it.readText() }
+    val exitCode = process.waitFor()
+    if (exitCode != 0) {
+        System.err.println("Error executing swiftc -print-target-info")
+        exitProcess(exitCode)
+    }
+
+    val json = Json.parseToJsonElement(output)
+    val runtimeLibraryPaths = json.jsonObject["paths"]?.jsonObject?.get("runtimeLibraryPaths")?.jsonArray
+    return runtimeLibraryPaths?.map { it.jsonPrimitive.content } ?: emptyList()
 }
 
+/**
+ * Find library paths for 'java.library.path' when running or testing projects inside this build.
+ */
+// TODO: can't figure out how to share this code between BuildLogic/ and buildSrc/
+fun javaLibraryPaths(rootDir: File): List<String> {
+    val osName = System.getProperty("os.name").lowercase(Locale.getDefault())
+    val osArch = System.getProperty("os.arch")
+    val isLinux = osName.contains("linux")
+    val base = rootDir.path.let { "$it/" }
+
+    val projectBuildOutputPath =
+        if (isLinux) {
+            if (osArch == "amd64" || osArch == "x86_64")
+                "$base.build/x86_64-unknown-linux-gnu"
+            else
+                "$base.build/${osArch}-unknown-linux-gnu"
+        } else {
+            if (osArch == "aarch64")
+                "$base.build/arm64-apple-macosx"
+            else
+                "$base.build/${osArch}-apple-macosx"
+        }
+    val parentParentBuildOutputPath =
+        "../../$projectBuildOutputPath"
+
+
+    val swiftBuildOutputPaths = listOf(
+        projectBuildOutputPath,
+        parentParentBuildOutputPath
+    )
+
+    val debugBuildOutputPaths = swiftBuildOutputPaths.map { "$it/debug" }
+    val releaseBuildOutputPaths = swiftBuildOutputPaths.map { "$it/release" }
+    val swiftRuntimePaths = getSwiftRuntimeLibraryPaths()
+
+    return debugBuildOutputPaths + releaseBuildOutputPaths + swiftRuntimePaths
+}
 
 // Configure paths for native (Swift) libraries
 tasks.test {
