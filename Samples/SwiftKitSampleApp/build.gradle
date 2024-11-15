@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import org.swift.swiftjava.gradle.JavaLibraryPathUtils
+import org.swift.swiftkit.gradle.BuildUtils
 
 import java.nio.file.*
 
@@ -136,8 +136,8 @@ application {
 
         // Include the library paths where our dylibs are that we want to load and call
         "-Djava.library.path=" +
-                (JavaLibraryPathUtils.javaLibraryPaths(rootDir) +
-                        JavaLibraryPathUtils.javaLibraryPaths(project.projectDir)).join(":"),
+                (BuildUtils.javaLibraryPaths(rootDir) +
+                 BuildUtils.javaLibraryPaths(project.projectDir)).join(":"),
 
 
         // Enable tracing downcalls (to Swift)
@@ -148,7 +148,7 @@ application {
 jmh {
     jvmArgsAppend = [
         "-Djava.library.path=" +
-                (JavaLibraryPathUtils.javaLibraryPaths(rootDir) +
-                        JavaLibraryPathUtils.javaLibraryPaths(project.projectDir)).join(":"),
+                (BuildUtils.javaLibraryPaths(rootDir) +
+                 BuildUtils.javaLibraryPaths(project.projectDir)).join(":"),
     ]
 }

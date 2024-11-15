@@ -12,25 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import org.apache.tools.ant.filters.*
-import org.jetbrains.kotlin.ir.backend.js.compile
-
 repositories {
     gradlePluginPortal()
     mavenCentral()
 }
 
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3")
+}
+
 plugins {
     `kotlin-dsl`
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    // for parsing Swift compiler information
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-}
-
-
-kotlin {
-    jvmToolchain(17)
 }
