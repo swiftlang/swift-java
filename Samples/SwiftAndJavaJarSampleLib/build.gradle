@@ -144,11 +144,11 @@ List<String> swiftProductDylibPaths() {
             }.flatten()
 
 
-    println("products = ${products}")
+
     def productDylibPaths = products.collect {
+        logger.info("[swift-java] Include Swift product: '${it}' in product resource paths.")
         "${layout.projectDirectory}/.build/${swiftBuildConfiguration()}/lib${it}.dylib"
     }
-    println("PRODUCT DYLIB PATHS = ${productDylibPaths}")
 
     return productDylibPaths
 }
@@ -161,6 +161,10 @@ processResources {
     ]
     dylibs.addAll(swiftProductDylibPaths())
     from(dylibs)
+}
+
+jar {
+    archiveClassifier = osdetector.classifier
 }
 
 base {
