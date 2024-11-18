@@ -14,15 +14,19 @@
 
 package org.swift.swiftkit.gradle
 
+import groovy.json.JsonSlurper
+
 final class BuildUtils {
 
-    static String swiftCoreDylibPath() {
-        def osName = System.getProperty("os.name")
-        def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")
+    static List<String> getSwiftRuntimeLibraryPaths() {
+        def process = ['swiftc', '-print-target-info'].execute()
+        def output = new StringWriter()
+        process.consumeProcessOutput(output, System.err)
+        process.waitFor()
 
-        return isLinux ?
-                "/usr/lib/swift/linux" :
-                "/usr/lib/swift"
+        def json = new JsonSlurper().parseText(output.toString())
+        def runtimeLibraryPaths = json.paths.runtimeLibraryPaths
+        return runtimeLibraryPaths
     }
 
     /// Find library paths for 'java.library.path' when running or testing projects inside this build.
@@ -49,18 +53,8 @@ final class BuildUtils {
                         "${base}../../.build/${osArch}-apple-macosx/debug/"),
         ]
         def releasePaths = debugPaths.collect { it.replaceAll("debug", "release") }
-        def systemPaths =
-                // system paths
-                isLinux ?
-                        [
-                                swiftCoreDylibPath(),
-                                // TODO: should we be Swiftly aware and then use the currently used path?
-                                System.getProperty("user.home") + "/.local/share/swiftly/toolchains/6.0.2/usr/lib/swift/linux"
-                        ] :
-                        [
-                                swiftCoreDylibPath(),
-                        ]
+        def swiftRuntimePaths = getSwiftRuntimeLibraryPaths()
 
-        return releasePaths + debugPaths + systemPaths
+        return releasePaths + debugPaths + swiftRuntimePaths
     }
 }

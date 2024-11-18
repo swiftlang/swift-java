@@ -16,6 +16,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3")
+}
+
 def cleanSwift = tasks.register("cleanSwift", Exec) {
     workingDir = layout.projectDirectory
     commandLine "swift"
