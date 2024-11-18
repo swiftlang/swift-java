@@ -16,6 +16,15 @@ package org.swift.swiftkit.gradle
 
 final class BuildUtils {
 
+    static String swiftCoreDylibPath() {
+        def osName = System.getProperty("os.name")
+        def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")
+
+        return isLinux ?
+                "/usr/lib/swift/linux" :
+                "/usr/lib/swift"
+    }
+
     /// Find library paths for 'java.library.path' when running or testing projects inside this build.
     static def javaLibraryPaths(File rootDir) {
         def osName = System.getProperty("os.name")
@@ -44,13 +53,12 @@ final class BuildUtils {
                 // system paths
                 isLinux ?
                         [
-                                "/usr/lib/swift/linux",
+                                swiftCoreDylibPath(),
                                 // TODO: should we be Swiftly aware and then use the currently used path?
                                 System.getProperty("user.home") + "/.local/share/swiftly/toolchains/6.0.2/usr/lib/swift/linux"
                         ] :
                         [
-                                // assume macOS
-                                "/usr/lib/swift/"
+                                swiftCoreDylibPath(),
                         ]
 
         return releasePaths + debugPaths + systemPaths

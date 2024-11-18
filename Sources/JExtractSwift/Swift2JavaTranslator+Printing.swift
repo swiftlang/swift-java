@@ -325,9 +325,9 @@ extension Swift2JavaTranslator {
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             // Ensure Swift and our Lib are loaded during static initialization of the class.
-            System.loadLibrary("swiftCore");
-            System.loadLibrary("SwiftKitSwift");
-            System.loadLibrary(LIB_NAME);
+            SwiftKit.loadLibrary("swiftCore");
+            SwiftKit.loadLibrary("SwiftKitSwift");
+            SwiftKit.loadLibrary(LIB_NAME);
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)

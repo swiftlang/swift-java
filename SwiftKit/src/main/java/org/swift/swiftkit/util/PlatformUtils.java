@@ -35,4 +35,19 @@ public class PlatformUtils {
         String arch = System.getProperty("os.arch");
         return arch.equals("amd64") || arch.equals("x86_64");
     }
+
+    public static String dynamicLibraryName(String base) {
+        if (isLinux()) {
+            return "lib" + uppercaseFistLetter(base) + ".so";
+        } else {
+            return "lib" + uppercaseFistLetter(base) + ".dylib";
+        }
+    }
+
+    static String uppercaseFistLetter(String base) {
+        if (base == null || base.isEmpty()) {
+            return base;
+        }
+        return base.substring(0, 1).toUpperCase() + base.substring(1);
+    }
 }

@@ -23,6 +23,16 @@ struct JExtractSwiftBuildToolPlugin: BuildToolPlugin {
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
+    
+    let t = target.dependencies.first!
+    switch (t) {
+    case .target(let t):
+      t.sourceModule
+    case .product(let p):
+      p.sourceModules
+    @unknown default:
+      fatalError("Unknown target dependency type: \(t)")
+    }
 
     let toolURL = try context.tool(named: "JExtractSwiftTool").url
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
