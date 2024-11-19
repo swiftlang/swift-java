@@ -18,7 +18,6 @@ import PackagePlugin
 @main
 struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-    print("COMPILER PLUGIN ================================")
     guard let sourceModule = target.sourceModule else { return [] }
 
     // Collect all of the Java source files within this target's sources.

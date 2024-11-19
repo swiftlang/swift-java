@@ -1,4 +1,4 @@
-//---------------------------------------------===-------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -10,7 +10,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//---------------------------------------------===-------------------------===//
+//===----------------------------------------------------------------------===//
 
 import Foundation
 import PackagePlugin
@@ -32,13 +32,11 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
   var buildOutputs: Bool = true
 
   func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
-    print("JEXTRACT COMMAND CREATE BUILD COMMANDS ================================")
     // FIXME: This is not a build plugin but SwiftPM forces us to impleme the protocol anyway? rdar://139556637
     return []
   }
 
   func performCommand(context: PluginContext, arguments: [String]) throws {
-    print("JEXTRACT COMMAND ================================")
     // Plugin can't have dependencies, so we have some naive argument parsing instead:
     self.verbose = arguments.contains("-v") || arguments.contains("--verbose")
 

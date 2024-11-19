@@ -1,4 +1,4 @@
-//---------------------------------------------===-------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -10,7 +10,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//---------------------------------------------===-------------------------===//
+//===----------------------------------------------------------------------===//
 
 import Foundation
 import PackagePlugin
@@ -24,14 +24,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
   
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-    print("JAVA2Swift ================================")
-    print("JAVA2Swift ================================")
-    print("JAVA2Swift ================================")
-    print("JAVA2Swift ================================")
-    print("JAVA2Swift ================================")
-
     guard let sourceModule = target.sourceModule else { return [] }
-
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
