@@ -1,4 +1,4 @@
-//===----------------------------------------------------------------------===//
+//---------------------------------------------===-------------------------===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -10,12 +10,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//===----------------------------------------------------------------------===//
+//---------------------------------------------===-------------------------===//
 
 import Foundation
 import PackagePlugin
 
-fileprivate let Java2SwiftConfigFileName = "Java2Swift.config"
+fileprivate let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
@@ -24,7 +24,14 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
   
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
+    print("JAVA2Swift ================================")
+    print("JAVA2Swift ================================")
+    print("JAVA2Swift ================================")
+    print("JAVA2Swift ================================")
+    print("JAVA2Swift ================================")
+
     guard let sourceModule = target.sourceModule else { return [] }
+
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
@@ -33,7 +40,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // The name of the configuration file JavaKit.config from the target for
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
-      .appending(path: "Java2Swift.config")
+      .appending(path: SwiftJavaConfigFileName)
     let configData = try Data(contentsOf: configFile)
     let config = try JSONDecoder().decode(Configuration.self, from: configData)
 
@@ -45,7 +52,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
       // Look for a config file within this target.
       let dependencyConfigURL = dependencyURL
-        .appending(path: Java2SwiftConfigFileName)
+        .appending(path: SwiftJavaConfigFileName)
       let dependencyConfigString = dependencyConfigURL
         .path(percentEncoded: false)
 

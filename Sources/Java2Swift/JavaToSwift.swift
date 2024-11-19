@@ -369,8 +369,8 @@ struct JavaToSwift: ParsableCommand {
     // Write the file.
     try writeContents(
       contents,
-      to: "Java2Swift.config",
-      description: "Java2Swift configuration file"
+      to: "swift-java.config",
+      description: "swift-java configuration file"
     )
   }
 }

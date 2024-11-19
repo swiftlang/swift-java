@@ -42,3 +42,4 @@ gradlew.bat
 **/ci-validate.sh
 **/DO_NOT_EDIT.txt
 Plugins/**/_PluginsShared
+Plugins/**/0_PLEASE_SYMLINK*
