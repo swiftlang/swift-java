@@ -16,39 +16,46 @@ import Foundation
 import PackagePlugin
 
 @main
-struct JExtractSwiftBuildToolPlugin: BuildToolPlugin {
+struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+
+  var pluginName: String = "swift-java"
+  var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
+
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
+    let toolURL = try context.tool(named: "JExtractSwiftTool").url
+    
     guard let sourceModule = target.sourceModule else { return [] }
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
-    let sourceDir = target.directory.string
-    
-    let t = target.dependencies.first!
-    switch (t) {
-    case .target(let t):
-      t.sourceModule
-    case .product(let p):
-      p.sourceModules
-    @unknown default:
-      fatalError("Unknown target dependency type: \(t)")
+    for dependency in target.dependencies {
+      switch (dependency) {
+      case .target(let t):
+        t.sourceModule
+      case .product(let p):
+        p.sourceModules
+      @unknown default:
+        fatalError("Unknown target dependency type: \(dependency)")
+      }
     }
 
-    let toolURL = try context.tool(named: "JExtractSwiftTool").url
+    let sourceDir = target.directory.string
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
-
+    
+    guard let javaPackage = configuration.javaPackage else {
+      // throw SwiftJavaPluginError.missingConfiguration(sourceDir: "\(sourceDir)", key: "javaPackage")
+      log("Skipping jextract step, no 'javaPackage' configuration in \(getSwiftJavaConfigPath(target: target) ?? "")")
+      return []
+    }
+    
     // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
     // that is common in JVM ecosystem
-    let outputDirectoryJava = context.pluginWorkDirectoryURL
-      .appending(path: "src")
-      .appending(path: "generated")
-      .appending(path: "java")
-    let outputDirectorySwift = context.pluginWorkDirectoryURL
-      .appending(path: "Sources")
+    let outputDirectoryJava = context.outputDirectoryJava
+    let outputDirectorySwift = context.outputDirectorySwift
 
     var arguments: [String] = [
       "--swift-module", sourceModule.name,
-      "--package-name", configuration.javaPackage,
+      "--package-name", javaPackage,
       "--output-directory-java", outputDirectoryJava.path(percentEncoded: false),
       "--output-directory-swift", outputDirectorySwift.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...

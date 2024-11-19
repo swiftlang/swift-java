@@ -15,10 +15,14 @@
 import Foundation
 import PackagePlugin
 
-fileprivate let Java2SwiftConfigFileName = "Java2Swift.config"
+fileprivate let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
-struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
+struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+
+  var pluginName: String = "swift-java-javac"
+  var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
+  
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
     guard let sourceModule = target.sourceModule else { return [] }
 
@@ -29,7 +33,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     // The name of the configuration file JavaKit.config from the target for
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
-      .appending(path: "Java2Swift.config")
+      .appending(path: SwiftJavaConfigFileName)
     let configData = try Data(contentsOf: configFile)
     let config = try JSONDecoder().decode(Configuration.self, from: configData)
 
@@ -41,7 +45,7 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
 
       // Look for a config file within this target.
       let dependencyConfigURL = dependencyURL
-        .appending(path: Java2SwiftConfigFileName)
+        .appending(path: SwiftJavaConfigFileName)
       let dependencyConfigString = dependencyConfigURL
         .path(percentEncoded: false)
 
@@ -87,9 +91,14 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
     }
     arguments.append(configFile.path(percentEncoded: false))
 
+    guard let classes = config.classes else {
+      log("Config at \(configFile) did not have 'classes' configured, skipping java2swift step.")
+      return []
+    }
+    
     /// Determine the set of Swift files that will be emitted by the Java2Swift
     /// tool.
-    let outputSwiftFiles = config.classes.map { (javaClassName, swiftName) in
+    let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
       let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
       return outputDirectory.appending(path: "\(swiftNestedName).swift")
     }
@@ -125,10 +134,15 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
         arguments += [ "--swift-native-implementation", className]
       }
     }
+    
+    guard let classes = config.classes else {
+      log("Skipping java2swift step: Missing 'classes' key in swift-java.config at '\(configFile.path)'")
+      return []
+    }
 
     return [
       .buildCommand(
-        displayName: "Wrapping \(config.classes.count) Java classes target \(sourceModule.name) in Swift",
+        displayName: "Wrapping \(classes.count) Java classes target \(sourceModule.name) in Swift",
         executable: try context.tool(named: "Java2Swift").url,
         arguments: arguments,
         inputFiles: [ configFile ] + compiledClassFiles,
@@ -136,26 +150,4 @@ struct Java2SwiftBuildToolPlugin: BuildToolPlugin {
       )
     ]
   }
-}
-
-// Note: the JAVA_HOME environment variable must be set to point to where
-// Java is installed, e.g.,
-//   Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home.
-func findJavaHome() -> String {
-  if let home = ProcessInfo.processInfo.environment["JAVA_HOME"] {
-    return home
-  }
-
-  // This is a workaround for envs (some IDEs) which have trouble with
-  // picking up env variables during the build process
-  let path = "\(FileManager.default.homeDirectoryForCurrentUser.path()).java_home"
-  if let home = try? String(contentsOfFile: path, encoding: .utf8) {
-    if let lastChar = home.last, lastChar.isNewline {
-      return String(home.dropLast())
-    }
-
-    return home
-  }
-
-  fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
 }

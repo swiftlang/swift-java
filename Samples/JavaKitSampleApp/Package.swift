@@ -76,6 +76,7 @@ let package = Package(
       ],
       plugins: [
         .plugin(name: "JavaCompilerPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
     ),

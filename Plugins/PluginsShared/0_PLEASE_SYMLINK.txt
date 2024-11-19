@@ -1,0 +1,3 @@
+This directory should be symlinked from all plugins so that we can avoid copy-pasting the contents.
+
+Package plugins cannot have dependencies, so this is a way to share sources common between all the plugins.
