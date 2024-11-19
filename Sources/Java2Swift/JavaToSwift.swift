@@ -267,6 +267,9 @@ struct JavaToSwift: ParsableCommand {
       allClassesToVisit.append(contentsOf: nestedClasses)
     }
 
+    // Validate configurations before writing any files
+    try translator.validateClassConfiguration()
+
     // Translate all of the Java classes into Swift classes.
     for javaClass in javaClasses {
       translator.startNewFile()
