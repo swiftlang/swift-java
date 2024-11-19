@@ -22,7 +22,7 @@ func findJavaHome() -> String {
   if let home = ProcessInfo.processInfo.environment["JAVA_HOME"] {
     return home
   }
-  
+
   // This is a workaround for envs (some IDEs) which have trouble with
   // picking up env variables during the build process
   let path = "\(FileManager.default.homeDirectoryForCurrentUser.path()).java_home"
@@ -30,19 +30,45 @@ func findJavaHome() -> String {
     if let lastChar = home.last, lastChar.isNewline {
       return String(home.dropLast())
     }
-    
+
     return home
   }
-  
+
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
 }
 
-func getSwiftJavaConfig(target: Target) -> String? {
+func getSwiftJavaConfigPath(target: Target) -> String? {
   let configPath = URL(fileURLWithPath: target.directory.string).appending(component: "swift-java.config").path()
-  
+
   if FileManager.default.fileExists(atPath: configPath) {
-    return    configPath
+    return configPath
   } else {
     return nil
+  }
+}
+
+func getEnvironmentBool(_ name: String) -> Bool {
+  if let value = ProcessInfo.processInfo.environment[name] {
+    switch value.lowercased() {
+    case "true", "yes", "1": true
+    case "false", "no", "0": false
+    default: false
+    }
+  } else {
+    false
+  }
+}
+
+extension PluginContext {
+  var outputDirectoryJava: URL {
+    self.pluginWorkDirectoryURL
+      .appending(path: "src")
+      .appending(path: "generated")
+      .appending(path: "java")
+  }
+  
+  var outputDirectorySwift: URL {
+    self.pluginWorkDirectoryURL
+      .appending(path: "Sources")
   }
 }

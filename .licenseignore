@@ -41,3 +41,4 @@ gradlew.bat
 **/gradlew.bat
 **/ci-validate.sh
 **/DO_NOT_EDIT.txt
+Plugins/**/_PluginsShared

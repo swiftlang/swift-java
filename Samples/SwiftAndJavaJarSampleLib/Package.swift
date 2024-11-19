@@ -70,7 +70,7 @@ let package = Package(
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ],
       plugins: [
-        .plugin(name: "JExtractSwiftPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
   ]

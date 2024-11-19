@@ -12,27 +12,42 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+
 typealias JavaVersion = Int
 
-/// Configuration for the Java2Swift translation tool, provided on a per-target
-/// basis.
-///
-/// Note: there is a copy of this struct in the Java2Swift library. They
-/// must be kept in sync.
+/// Configuration for the SwiftJava plugins, provided on a per-target basis.
 struct Configuration: Codable {
+  // ==== swift 2 java ---------------------------------------------------------
+
+  var javaPackage: String?
+
+  // ==== java 2 swift ---------------------------------------------------------
+
   /// The Java class path that should be passed along to the Java2Swift tool.
   var classPath: String? = nil
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
-  var classes: [String: String] = [:]
+  var classes: [String: String]? = [:]
 
   // Compile for the specified Java SE release.
   var sourceCompatibility: JavaVersion?
 
   // Generate class files suitable for the specified Java SE release.
   var targetCompatibility: JavaVersion?
+}
+
+func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
+  let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
+  do {
+    let configData = try Data(contentsOf: configFile)
+    return try JSONDecoder().decode(Configuration.self, from: configData)
+  } catch {
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configFile)!'", error: error,
+      file: file, line: line)
+  }
 }
 
 extension Configuration {
@@ -47,5 +62,20 @@ extension Configuration {
     }
 
     return compilerVersionArgs
+  }
+}
+
+struct ConfigurationError: Error {
+  let message: String
+  let error: any Error
+
+  let file: String
+  let line: UInt
+
+  init(message: String, error: any Error, file: String = #fileID, line: UInt = #line) {
+    self.message = message
+    self.error = error
+    self.file = file
+    self.line = line
   }
 }

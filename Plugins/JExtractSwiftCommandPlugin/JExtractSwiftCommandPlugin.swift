@@ -16,9 +16,10 @@ import Foundation
 import PackagePlugin
 
 @main
-final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
+final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin, CommandPlugin {
 
-  var verbose: Bool = false
+  var pluginName: String = "swift-java-command"
+  var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
 
   /// Build the target before attempting to extract from it.
   /// This avoids trying to extract from broken sources.
@@ -48,8 +49,8 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
       }
 
     for target in context.package.targets {
-      guard let configPath = getSwiftJavaConfig(target: target) else {
-        log("Skipping target '\(target.name)', has no 'swift-java.config' file")
+      guard getSwiftJavaConfigPath(target: target) != nil else {
+        log("[swift-java-command] Skipping jextract step: Missing swift-java.config for target '\(target.name)'")
         continue
       }
 
@@ -73,21 +74,15 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
     let sourceDir = target.directory.string
 
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
-
-    // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
-    // that is common in JVM ecosystem
-    let outputDirectoryJava = context.pluginWorkDirectoryURL
-      .appending(path: "src")
-      .appending(path: "generated")
-      .appending(path: "java")
-    let outputDirectorySwift = context.pluginWorkDirectoryURL
-      .appending(path: "Sources")
+    guard let javaPackage = configuration.javaPackage else {
+      throw SwiftJavaPluginError.missingConfiguration(sourceDir: "\(sourceDir)", key: "javaPackage")
+    }
 
     var arguments: [String] = [
       "--swift-module", sourceModule.name,
-      "--package-name", configuration.javaPackage,
-      "--output-directory-java", outputDirectoryJava.path(percentEncoded: false),
-      "--output-directory-swift", outputDirectorySwift.path(percentEncoded: false),
+      "--package-name", javaPackage,
+      "--output-directory-java", context.outputDirectoryJava.path(percentEncoded: false),
+      "--output-directory-swift", context.outputDirectorySwift.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...
       //       Since plugins cannot depend on libraries we cannot detect what the output files will be,
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
@@ -100,14 +95,17 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
 
   /// Perform the command on a specific target.
   func performCommand(context: PluginContext, target: Target, extraArguments _: [String]) throws {
-    // Make sure the target can builds properly
-    try self.packageManager.build(.target(target.name), parameters: .init())
-
     guard let sourceModule = target.sourceModule else { return }
 
     if self.buildInputs {
+      // Make sure the target can builds properly
       log("Pre-building target '\(target.name)' before extracting sources...")
-      try self.packageManager.build(.target(target.name), parameters: .init())
+      let targetBuildResult = try self.packageManager.build(.target(target.name), parameters: .init())
+
+      guard targetBuildResult.succeeded else {
+        print("[swift-java-command] Build of '\(target.name)' failed: \(targetBuildResult.logText)")
+        return
+      }
     }
 
     let arguments = try prepareJExtractArguments(context: context, target: target)
@@ -124,7 +122,13 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
       log("Post-extract building products with target '\(target.name)'...")
       for product in context.package.products where product.targets.contains(where: { $0.id == target.id }) {
         log("Post-extract building product '\(product.name)'...")
-        try self.packageManager.build(.product(product.name), parameters: .init())
+        let buildResult = try self.packageManager.build(.product(product.name), parameters: .init())
+        
+        if buildResult.succeeded {
+          log("Post-extract build: " + "done".green + ".")
+        } else {
+          log("Post-extract build: " + "done".red + "!")
+        }
       }
     }
   }
@@ -146,16 +150,15 @@ final class JExtractSwiftCommandPlugin: BuildToolPlugin, CommandPlugin {
     }
   }
 
-  func log(_ message: @autoclosure () -> String, terminator: String = "\n") {
-    if self.verbose {
-      print("[swift-java-command] \(message())", terminator: terminator)
-    }
-  }
 }
 
 // Mini coloring helper, since we cannot have dependencies we keep it minimal here
 extension String {
+  var red: String {
+    "\u{001B}[0;31m" + "\(self)" + "\u{001B}[0;0m"
+  }
   var green: String {
     "\u{001B}[0;32m" + "\(self)" + "\u{001B}[0;0m"
   }
 }
+
