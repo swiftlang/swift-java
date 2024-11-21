@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-
 package extension JavaTranslator {
   struct SwiftTypeName: Hashable {
     let swiftType: String
@@ -42,14 +40,17 @@ package extension JavaTranslator {
       switch self {
       case .multipleClassesMappedToSameName(let swiftToJavaMapping):
               """
-              The following Java classes were mapped to the same Swift type:
-                \(swiftToJavaMapping.map { mapping in
-                  "Swift Type: \(mapping.swiftType.swiftModule ?? "").\(mapping.swiftType.swiftType), Java Types: \(mapping.javaTypes.sorted().joined(separator: ", "))"
-              }.joined(separator: "\n"))
+              The following Java classes were mapped to the same Swift type name:
+                \(swiftToJavaMapping.map(mappingDescription(mapping:)).joined(separator: "\n"))
               """
       }
     }
 
+    private func mappingDescription(mapping: SwiftToJavaMapping) -> String {
+      let javaTypes = mapping.javaTypes.map { "'\($0)'" }.joined(separator: ", ")
+      return "Swift Type: '\(mapping.swiftType.swiftModule ?? "")'.'\(mapping.swiftType.swiftType)', Java Types: \(javaTypes)"
+
+    }
   }
   func validateClassConfiguration() throws {
     // Group all classes by swift name
@@ -63,7 +64,7 @@ package extension JavaTranslator {
       // Convert them to swift object and throw
       var errorMappings = [SwiftToJavaMapping]()
       for (swiftType, swiftJavaMappings) in multipleClassesMappedToSameName {
-        errorMappings.append(SwiftToJavaMapping(swiftType: swiftType, javaTypes: swiftJavaMappings.map(\.0)))
+        errorMappings.append(SwiftToJavaMapping(swiftType: swiftType, javaTypes: swiftJavaMappings.map(\.0).sorted()))
       }
       throw ValidationError.multipleClassesMappedToSameName(swiftToJavaMapping: errorMappings)
     }
