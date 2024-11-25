@@ -52,6 +52,9 @@ struct JavaClassTranslator {
   /// The Swift names of the interfaces that this class implements.
   let swiftInterfaces: [String]
 
+  /// The annotations of the Java class
+  let annotations: [Annotation]
+
   /// The (instance) fields of the Java class.
   var fields: [Field] = []
 
@@ -164,6 +167,8 @@ struct JavaClassTranslator {
       }
     }
 
+    self.annotations = javaClass.getAnnotations().compactMap(\.self)
+
     // Collect all of the class members that we will need to translate.
     // TODO: Switch over to "declared" versions of these whenever we don't need
     // to see inherited members.
@@ -274,6 +279,7 @@ extension JavaClassTranslator {
     if let nativeMethodsProtocol = renderNativeMethodsProtocol() {
       allDecls.append(nativeMethodsProtocol)
     }
+    allDecls.append(contentsOf: renderAnnotationExtensions())
     return allDecls
   }
 
@@ -481,6 +487,30 @@ extension JavaClassTranslator {
       """
 
     return protocolDecl.formatted(using: translator.format).cast(DeclSyntax.self)
+  }
+
+  func renderAnnotationExtensions() -> [DeclSyntax] {
+    var extensions: [DeclSyntax] = []
+
+    for annotation in annotations {
+      let annotationName = annotation.annotationType().getName().splitSwiftTypeName().name
+      if annotationName == "ThreadSafe" || annotationName == "Immutable" { // If we are threadsafe, mark as unchecked Sendable
+        extensions.append(
+          """
+          extension \(raw: swiftTypeName): @unchecked Swift.Sendable { }
+          """
+        )
+      } else if annotationName == "NotThreadSafe" { // If we are _not_ threadsafe, mark sendable unavailable
+        extensions.append(
+          """
+          @available(unavailable, *)
+          extension \(raw: swiftTypeName): Swift.Sendable { }
+          """
+        )
+      }
+    }
+
+    return extensions
   }
 
   /// Render the given Java constructor as a Swift initializer.

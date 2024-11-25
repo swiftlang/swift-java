@@ -43,4 +43,7 @@ extension JavaClass {
 
   @JavaMethod
   public func getGenericInterfaces() -> [Type?]
+
+  @JavaMethod
+  public func getAnnotations() -> [Annotation?]
 }
