@@ -76,6 +76,9 @@ extension HelloSwift: HelloSwiftNativeMethods {
       print("Caught Java error: \(error)")
     }
 
+    // Make sure that the thread safe class is sendable
+    let threadSafe: Sendable = ThreadSafeHelperClass(environment: javaEnvironment)
+
     return i * j
   }
 
