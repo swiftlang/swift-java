@@ -49,6 +49,9 @@ open class JavaFloat: JavaNumber {
   open override func doubleValue() -> Double
 
   @JavaMethod
+  open func describeConstable() -> JavaOptional<JavaFloat>!
+
+  @JavaMethod
   open func isNaN() -> Bool
 }
 extension JavaClass<JavaFloat> {

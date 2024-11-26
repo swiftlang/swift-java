@@ -206,6 +206,9 @@ open class JavaString: JavaObject {
 
   @JavaMethod
   open func intern() -> String
+
+  @JavaMethod
+  open func describeConstable() -> JavaOptional<JavaString>!
 }
 extension JavaClass<JavaString> {
   @JavaStaticMethod

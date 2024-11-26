@@ -567,9 +567,21 @@ extension JavaClassTranslator {
     let overrideOpt = (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
-    return """
-      \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
-      """
+
+    if let resultOptional = resultTypeStr.optionalWrappedType() {
+      let parameters = parameters.map { "\($0.secondName!.trimmedDescription)" }.joined(separator: ", ")
+      return """
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func __\(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultOptional)\(raw: whereClause) {
+            \(raw: javaMethod.throwsCheckedException ? "try " : "")__\(raw: swiftMethodName)(\(raw: parameters))?.toJavaOptional()
+          }
+        """
+    } else {
+      return """
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        """
+    }
   }
 
   /// Render a single Java field into the corresponding Swift property, or
@@ -582,10 +594,33 @@ extension JavaClassTranslator {
     )
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
-    return """
+
+    if let optionalType = swiftTypeName.optionalWrappedType() {
+      let setter = if javaField.isFinal {
+      """
+      
+        set {
+          __\(swiftFieldName) = newValue?.toJavaOptional()
+        }
+      """
+      } else { "" }
+      return """
+      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+      public var __\(raw: swiftFieldName): \(raw: typeName)
+
+      
+      public var \(raw: swiftFieldName): \(raw: optionalType)? {
+        get {
+          .init(__\(raw: swiftFieldName))
+        }\(raw: setter)
+      }
+      """
+    } else {
+      return """
       \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
       public var \(raw: swiftFieldName): \(raw: typeName)
       """
+    }
   }
 
   package func renderEnum(name: String) -> [DeclSyntax] {

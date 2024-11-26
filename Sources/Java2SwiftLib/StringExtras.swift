@@ -39,4 +39,13 @@ extension String {
   public func replacing(_ character: Character, with replacement: Character) -> String {
     return replacingOccurrences(of: String(character), with: String(replacement))
   }
+
+  public func optionalWrappedType() -> String? {
+    print("\(self) printing this thing")
+    if starts(with: "JavaOptional<") {
+      return String(self[index(startIndex, offsetBy: 13)..<index(before: endIndex)])
+    } else {
+      return nil
+    }
+  }
 }

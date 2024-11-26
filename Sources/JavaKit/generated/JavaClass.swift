@@ -52,6 +52,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func isRecord() -> Bool
 
   @JavaMethod
+  open func getClassLoader() -> JavaClassLoader!
+
+  @JavaMethod
   open func newInstance() throws -> JavaObject!
 
   @JavaMethod
