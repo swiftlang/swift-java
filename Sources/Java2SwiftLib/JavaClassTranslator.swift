@@ -570,6 +570,7 @@ extension JavaClassTranslator {
 
     if let resultOptional = resultType.optionalWrappedType() {
       let parameters = parameters.map { "\($0.secondName!.trimmedDescription)" }.joined(separator: ", ")
+
       return """
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
@@ -600,18 +601,18 @@ extension JavaClassTranslator {
       """
       
         set {
-          __\(swiftFieldName) = newValue?.toJavaOptional()
+          \(swiftFieldName) = newValue?.toJavaOptional()
         }
       """
       } else { "" }
       return """
-      \(fieldAttribute)("\(raw: swiftFieldName)", isFinal: \(raw: javaField.isFinal))
-      public var __\(raw: swiftFieldName): \(raw: typeName)
+      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+      public var \(raw: swiftFieldName): \(raw: typeName)
 
       
-      public var \(raw: swiftFieldName): \(raw: optionalType)? {
+      public var \(raw: swiftFieldName)Optional: \(raw: optionalType)? {
         get {
-          Optional(javaOptional: __\(raw: swiftFieldName))
+          Optional(javaOptional: \(raw: swiftFieldName))
         }\(raw: setter)
       }
       """
