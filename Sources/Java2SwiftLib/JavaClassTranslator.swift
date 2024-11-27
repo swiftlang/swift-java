@@ -573,7 +573,7 @@ extension JavaClassTranslator {
         let name = param.secondName!.trimmedDescription
 
         return if let optionalType = param.type.trimmedDescription.optionalWrappedType() {
-          (clause: FunctionParameterSyntax(firstName: "_", secondName: "\(raw: name)", type: TypeSyntax(stringLiteral: "\(optionalType)")), passedArg: "\(name)?.toJavaOptional()")
+          (clause: "_ \(raw: name): \(raw: optionalType)", passedArg: "\(name).toJavaOptional()")
         } else {
           (clause: param, passedArg: "\(name)")
         }
@@ -613,15 +613,17 @@ extension JavaClassTranslator {
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
 
-    if let optionalType = swiftTypeName.optionalWrappedType() {
+    if let optionalType = typeName.optionalWrappedType() {
       let setter = if !javaField.isFinal {
       """
       
         set {
-          \(swiftFieldName) = newValue?.toJavaOptional()
+          \(swiftFieldName) = newValue.toJavaOptional()
         }
       """
-      } else { "" }
+      } else {
+        ""
+      }
       return """
       \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
       public var \(raw: swiftFieldName): \(raw: typeName)

@@ -80,11 +80,15 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let helper = ThreadSafeHelperClass(environment: javaEnvironment)
     let threadSafe: Sendable = helper
 
-    let text: String? = helper.textOptional
-    let value: String? = helper.getValueOptional(Optional<String>.none)
-    let textFunc: String? = helper.getTextOptional()
+    checkOptionals(helper: helper)
 
     return i * j
+  }
+
+  func checkOptionals(helper: ThreadSafeHelperClass) {
+    let text: JavaString? = helper.textOptional
+    let value: String? = helper.getValueOptional(Optional<JavaString>.none)
+    let textFunc: JavaString? = helper.getTextOptional()
   }
 
   @JavaMethod

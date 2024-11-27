@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension Optional where Wrapped: AnyJavaObject {
+public extension Optional where Wrapped: AnyJavaObject {
   func toJavaOptional() -> JavaOptional<Wrapped> {
     return try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
   }
@@ -26,7 +26,7 @@ extension Optional where Wrapped: AnyJavaObject {
   }
 }
 
-extension Optional where Wrapped == Double {
+public extension Optional where Wrapped == Double {
   func toJavaOptional() -> JavaOptionalDouble {
     if let self {
       return try! JavaClass<JavaOptionalDouble>().of(self)!
@@ -44,7 +44,7 @@ extension Optional where Wrapped == Double {
   }
 }
 
-extension Optional where Wrapped == Int32 {
+public extension Optional where Wrapped == Int32 {
   func toJavaOptional() -> JavaOptionalInt {
     if let self {
       return try! JavaClass<JavaOptionalInt>().of(self)!
@@ -62,7 +62,7 @@ extension Optional where Wrapped == Int32 {
   }
 }
 
-extension Optional where Wrapped == Int64 {
+public extension Optional where Wrapped == Int64 {
   func toJavaOptional() -> JavaOptionalLong {
     if let self {
       return try! JavaClass<JavaOptionalLong>().of(self)!
