@@ -568,14 +568,31 @@ extension JavaClassTranslator {
       ? "override "
       : ""
 
-    if let resultOptional = resultType.optionalWrappedType() {
-      let parameters = parameters.map { "\($0.secondName!.trimmedDescription)" }.joined(separator: ", ")
+    if resultType.optionalWrappedType() != nil || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil }) {
+      let parameters = parameters.map { param -> (clause: FunctionParameterSyntax, passedArg: String) in
+        let name = param.secondName!.trimmedDescription
+
+        return if let optionalType = param.type.trimmedDescription.optionalWrappedType() {
+          (clause: FunctionParameterSyntax(firstName: "_", secondName: "\(raw: name)", type: TypeSyntax(stringLiteral: "\(optionalType)")), passedArg: "\(name)?.toJavaOptional()")
+        } else {
+          (clause: param, passedArg: "\(name)")
+        }
+      }
+
+      let resultOptional: String = resultType.optionalWrappedType() ?? resultType
+      let baseBody: ExprSyntax = "Optional(javaOptional: \(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", "))))"
+      let body: ExprSyntax = if let optionalType = resultType.optionalWrappedType() {
+        "Optional(javaOptional: \(baseBody))"
+      } else {
+        baseBody
+      }
+
 
       return """
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
-        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
-          Optional(javaOptional: \(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters)))
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClause)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
+          \(body)
         }
         """
     } else {
