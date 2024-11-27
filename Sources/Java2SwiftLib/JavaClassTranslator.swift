@@ -627,7 +627,7 @@ extension JavaClassTranslator {
       public var \(raw: swiftFieldName): \(raw: typeName)
 
       
-      public var \(raw: swiftFieldName)Optional: \(raw: optionalType)? {
+      public var \(raw: swiftFieldName)Optional: \(raw: optionalType) {
         get {
           Optional(javaOptional: \(raw: swiftFieldName))
         }\(raw: setter)
