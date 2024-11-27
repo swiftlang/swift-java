@@ -56,12 +56,6 @@ public protocol CustomJavaClassLoader: AnyJavaObject {
   static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader!
 }
 
-/// Add getClassLoader() to JavaObject as it is otherwise recursively defined
-extension JavaObject {
-  @JavaMethod
-  public func getClassLoader() throws -> JavaClassLoader!
-}
-
 extension AnyJavaObject {
   /// Retrieve the underlying Java object.
   public var javaThis: jobject {

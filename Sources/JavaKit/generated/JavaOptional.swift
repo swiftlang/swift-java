@@ -31,9 +31,21 @@ extension JavaClass {
   @JavaStaticMethod
   public func of<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
 
+  public func ofOptional<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T> {
+    Optional(javaOptional: of(arg0))
+  }
+
   @JavaStaticMethod
   public func empty<T: AnyJavaObject>() -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
 
+  public func emptyOptional<T: AnyJavaObject>() -> JavaObject? where ObjectType == JavaOptional<T> {
+    Optional(javaOptional: empty())
+  }
+
   @JavaStaticMethod
   public func ofNullable<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
+
+  public func ofNullableOptional<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T> {
+    Optional(javaOptional: ofNullable(arg0))
+  }
 }

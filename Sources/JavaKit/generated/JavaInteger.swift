@@ -44,6 +44,10 @@ open class JavaInteger: JavaNumber {
 
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaInteger>!
+
+  open func describeConstableOptional() -> JavaInteger? {
+    Optional(javaOptional: describeConstable())
+  }
 }
 extension JavaClass<JavaInteger> {
   @JavaStaticField(isFinal: true)

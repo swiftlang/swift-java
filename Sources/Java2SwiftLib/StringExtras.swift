@@ -41,9 +41,8 @@ extension String {
   }
 
   public func optionalWrappedType() -> String? {
-    print("\(self) printing this thing")
-    if starts(with: "JavaOptional<") {
-      return String(self[index(startIndex, offsetBy: 13)..<index(before: endIndex)])
+    if hasPrefix("JavaOptional<") {
+      return "\(String(self[index(startIndex, offsetBy: 13)..<lastIndex(of: ">")!]))?"
     } else {
       return nil
     }

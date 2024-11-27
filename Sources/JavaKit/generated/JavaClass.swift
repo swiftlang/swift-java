@@ -134,6 +134,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
 }
 extension JavaClass {
   @JavaStaticMethod
+  public func forName<T: AnyJavaObject>(_ arg0: String, _ arg1: Bool, _ arg2: JavaClassLoader?) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
+
+  @JavaStaticMethod
   public func forName<T: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
 
   @JavaStaticMethod

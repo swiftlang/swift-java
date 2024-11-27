@@ -17,7 +17,11 @@ extension Optional where Wrapped: AnyJavaObject {
     return try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
   }
 
-  init?(_ javaOptional: JavaOptional<Wrapped>) {
-    self = javaOptional.isPresent() ? javaOptional.get().as(Wrapped.self) : Optional<Wrapped>.none
+  init(javaOptional: JavaOptional<Wrapped>?) {
+    if let javaOptional {
+      self = javaOptional.isPresent() ? javaOptional.get().as(Wrapped.self) : Optional<Wrapped>.none
+    } else {
+      self = nil
+    }
   }
 }

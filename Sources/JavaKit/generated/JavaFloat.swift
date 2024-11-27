@@ -51,6 +51,10 @@ open class JavaFloat: JavaNumber {
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaFloat>!
 
+  open func describeConstableOptional() -> JavaFloat? {
+    Optional(javaOptional: describeConstable())
+  }
+
   @JavaMethod
   open func isNaN() -> Bool
 }

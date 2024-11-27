@@ -48,6 +48,10 @@ open class JavaDouble: JavaNumber {
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaDouble>!
 
+  open func describeConstableOptional() -> JavaDouble? {
+    Optional(javaOptional: describeConstable())
+  }
+
   @JavaMethod
   open func isNaN() -> Bool
 }

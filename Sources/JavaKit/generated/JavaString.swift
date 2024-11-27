@@ -209,6 +209,10 @@ open class JavaString: JavaObject {
 
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaString>!
+
+  open func describeConstableOptional() -> JavaString? {
+    Optional(javaOptional: describeConstable())
+  }
 }
 extension JavaClass<JavaString> {
   @JavaStaticMethod

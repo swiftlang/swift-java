@@ -568,14 +568,14 @@ extension JavaClassTranslator {
       ? "override "
       : ""
 
-    if let resultOptional = resultTypeStr.optionalWrappedType() {
+    if let resultOptional = resultType.optionalWrappedType() {
       let parameters = parameters.map { "\($0.secondName!.trimmedDescription)" }.joined(separator: ", ")
       return """
-        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func __\(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
-        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultOptional)\(raw: whereClause) {
-            \(raw: javaMethod.throwsCheckedException ? "try " : "")__\(raw: swiftMethodName)(\(raw: parameters))?.toJavaOptional()
-          }
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
+          Optional(javaOptional: \(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters)))
+        }
         """
     } else {
       return """
@@ -605,13 +605,13 @@ extension JavaClassTranslator {
       """
       } else { "" }
       return """
-      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+      \(fieldAttribute)("\(raw: swiftFieldName)", isFinal: \(raw: javaField.isFinal))
       public var __\(raw: swiftFieldName): \(raw: typeName)
 
       
       public var \(raw: swiftFieldName): \(raw: optionalType)? {
         get {
-          .init(__\(raw: swiftFieldName))
+          Optional(javaOptional: __\(raw: swiftFieldName))
         }\(raw: setter)
       }
       """
