@@ -580,7 +580,7 @@ extension JavaClassTranslator {
       }
 
       let resultOptional: String = resultType.optionalWrappedType() ?? resultType
-      let baseBody: ExprSyntax = "Optional(javaOptional: \(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", "))))"
+      let baseBody: ExprSyntax = "\(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", ")))"
       let body: ExprSyntax = if let optionalType = resultType.optionalWrappedType() {
         "Optional(javaOptional: \(baseBody))"
       } else {
