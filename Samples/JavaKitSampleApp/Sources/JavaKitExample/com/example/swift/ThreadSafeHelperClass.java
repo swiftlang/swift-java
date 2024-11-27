@@ -15,6 +15,9 @@
 package com.example.swift;
 
 import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 @ThreadSafe
 public class ThreadSafeHelperClass {
@@ -22,11 +25,17 @@ public class ThreadSafeHelperClass {
 
     public Optional<String> text = Optional.of("");
 
+    public final OptionalDouble val = OptionalDouble.of(2);
+
     public String getValue(Optional<String> name) {
         return name.orElse("");
     }
 
     public Optional<String> getText() {
         return text;
+    }
+
+    public OptionalLong from(OptionalInt value) {
+        return OptionalLong.of(value.getAsInt());
     }
 }

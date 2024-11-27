@@ -41,11 +41,11 @@ extension String {
   }
 
   public func optionalWrappedType() -> String? {
-    if self == "JavaOptionalInt!" {
+    if self == "JavaOptionalInt!" || self == "JavaOptionalInt?" {
       return "Int32?"
-    } else if self == "JavaOptionalLong!" {
+    } else if self == "JavaOptionalLong!" || self == "JavaOptionalLong?" {
       return "Int64?"
-    } else if self == "JavaOptionalDouble!" {
+    } else if self == "JavaOptionalDouble!" || self == "JavaOptionalDouble?" {
       return "Double?"
     } else if hasPrefix("JavaOptional<") {
       let offsetCount = "JavaOptional<".count

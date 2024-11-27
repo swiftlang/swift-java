@@ -89,6 +89,13 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let text: JavaString? = helper.textOptional
     let value: String? = helper.getValueOptional(Optional<JavaString>.none)
     let textFunc: JavaString? = helper.getTextOptional()
+    let doubleOpt: Double? = helper.valOptional
+    let longOpt: Int64? = helper.fromOptional(21 as Int32?)
+    print("Optional text = \(text)")
+    print("Optional string value = \(value)")
+    print("Optional text function returned \(textFunc)")
+    print("Optional double function returned \(doubleOpt)")
+    print("Optional long function returned \(longOpt)")
   }
 
   @JavaMethod
