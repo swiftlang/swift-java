@@ -597,7 +597,7 @@ extension JavaClassTranslator {
     let swiftFieldName = javaField.getName().escapedSwiftName
 
     if let optionalType = swiftTypeName.optionalWrappedType() {
-      let setter = if javaField.isFinal {
+      let setter = if !javaField.isFinal {
       """
       
         set {
