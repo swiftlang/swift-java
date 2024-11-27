@@ -25,3 +25,57 @@ extension Optional where Wrapped: AnyJavaObject {
     }
   }
 }
+
+extension Optional where Wrapped == Double {
+  func toJavaOptional() -> JavaOptionalDouble {
+    if let self {
+      return try! JavaClass<JavaOptionalDouble>().of(self)!
+    } else {
+      return try! JavaClass<JavaOptionalDouble>().empty()!
+    }
+  }
+
+  init(javaOptional: JavaOptionalDouble?) {
+    if let javaOptional {
+      self = javaOptional.isPresent() ? javaOptional.getAsDouble() : nil
+    } else {
+      self = nil
+    }
+  }
+}
+
+extension Optional where Wrapped == Int32 {
+  func toJavaOptional() -> JavaOptionalInt {
+    if let self {
+      return try! JavaClass<JavaOptionalInt>().of(self)!
+    } else {
+      return try! JavaClass<JavaOptionalInt>().empty()!
+    }
+  }
+
+  init(javaOptional: JavaOptionalInt?) {
+    if let javaOptional {
+      self = javaOptional.isPresent() ? javaOptional.getAsInt() : nil
+    } else {
+      self = nil
+    }
+  }
+}
+
+extension Optional where Wrapped == Int64 {
+  func toJavaOptional() -> JavaOptionalLong {
+    if let self {
+      return try! JavaClass<JavaOptionalLong>().of(self)!
+    } else {
+      return try! JavaClass<JavaOptionalLong>().empty()!
+    }
+  }
+
+  init(javaOptional: JavaOptionalLong?) {
+    if let javaOptional {
+      self = javaOptional.isPresent() ? javaOptional.getAsLong() : nil
+    } else {
+      self = nil
+    }
+  }
+}

@@ -41,7 +41,13 @@ extension String {
   }
 
   public func optionalWrappedType() -> String? {
-    if hasPrefix("JavaOptional<") {
+    if self == "JavaOptionalInt!" {
+      return "Int32?"
+    } else if self == "JavaOptionalDouble!" {
+      return "Double?"
+    } else if self == "JavaOptionalLong!" {
+      return "Int64?"
+    } else if hasPrefix("JavaOptional<") {
       return "\(String(self[index(startIndex, offsetBy: 13)..<lastIndex(of: ">")!]))?"
     } else {
       return nil
