@@ -14,7 +14,19 @@
 
 package com.example.swift;
 
+import java.util.Optional;
+
 @ThreadSafe
 public class ThreadSafeHelperClass {
     public ThreadSafeHelperClass() { }
+
+    public Optional<String> text = Optional.of("");
+
+    public String getValue(Optional<String> name) {
+        return name.orElse("");
+    }
+
+    public Optional<String> getText() {
+        return text;
+    }
 }

@@ -77,7 +77,12 @@ extension HelloSwift: HelloSwiftNativeMethods {
     }
 
     // Make sure that the thread safe class is sendable
-    let threadSafe: Sendable = ThreadSafeHelperClass(environment: javaEnvironment)
+    let helper = ThreadSafeHelperClass(environment: javaEnvironment)
+    let threadSafe: Sendable = helper
+
+    let text: String? = helper.textOptional
+    let value: String? = helper.getValueOptional(Optional<String>.none)
+    let textFunc: String? = helper.getTextOptional()
 
     return i * j
   }
