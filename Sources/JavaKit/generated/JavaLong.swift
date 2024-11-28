@@ -41,6 +41,13 @@ open class JavaLong: JavaNumber {
 
   @JavaMethod
   open override func doubleValue() -> Double
+
+  @JavaMethod
+  open func describeConstable() -> JavaOptional<JavaLong>!
+
+  open func describeConstableOptional() -> JavaLong? {
+    Optional(javaOptional: describeConstable())
+  }
 }
 extension JavaClass<JavaLong> {
   @JavaStaticField(isFinal: true)

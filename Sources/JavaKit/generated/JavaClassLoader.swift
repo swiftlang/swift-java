@@ -31,10 +31,10 @@ open class JavaClassLoader: JavaObject {
   open func resolveClass(_ arg0: JavaClass<JavaObject>?)
 
   @JavaMethod
-  open func defineClass(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
+  open func defineClass(_ arg0: String, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  open func defineClass(_ arg0: String, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
+  open func defineClass(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
   open func findLibrary(_ arg0: String) -> String

@@ -52,6 +52,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func isRecord() -> Bool
 
   @JavaMethod
+  open func getClassLoader() -> JavaClassLoader!
+
+  @JavaMethod
   open func newInstance() throws -> JavaObject!
 
   @JavaMethod
@@ -130,6 +133,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func isSealed() -> Bool
 }
 extension JavaClass {
+  @JavaStaticMethod
+  public func forName<T: AnyJavaObject>(_ arg0: String, _ arg1: Bool, _ arg2: JavaClassLoader?) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
+
   @JavaStaticMethod
   public func forName<T: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
 

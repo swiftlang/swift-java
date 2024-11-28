@@ -39,4 +39,19 @@ extension String {
   public func replacing(_ character: Character, with replacement: Character) -> String {
     return replacingOccurrences(of: String(character), with: String(replacement))
   }
+
+  public func optionalWrappedType() -> String? {
+    if self == "JavaOptionalInt!" || self == "JavaOptionalInt?" {
+      return "Int32?"
+    } else if self == "JavaOptionalLong!" || self == "JavaOptionalLong?" {
+      return "Int64?"
+    } else if self == "JavaOptionalDouble!" || self == "JavaOptionalDouble?" {
+      return "Double?"
+    } else if hasPrefix("JavaOptional<") {
+      let offsetCount = "JavaOptional<".count
+      return "\(String(self[index(startIndex, offsetBy: offsetCount)..<lastIndex(of: ">")!]))?"
+    } else {
+      return nil
+    }
+  }
 }

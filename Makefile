@@ -68,27 +68,27 @@ Java2Swift: $(BUILD_DIR)/debug/Java2Swift
 
 generate-JavaKit: Java2Swift
 	mkdir -p Sources/JavaKit/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKit -o Sources/JavaKit/generated Sources/JavaKit/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKit -o Sources/JavaKit/generated Sources/JavaKit/swift-java.config
 
 generate-JavaKitCollection: Java2Swift
 	mkdir -p Sources/JavaKitCollection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitCollection  --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitCollection/generated Sources/JavaKitCollection/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitCollection  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitCollection/generated Sources/JavaKitCollection/swift-java.config
 
 generate-JavaKitFunction: Java2Swift
 	mkdir -p Sources/JavaKitFunction/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitFunction  --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitFunction/generated Sources/JavaKitFunction/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitFunction  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitFunction/generated Sources/JavaKitFunction/swift-java.config
 
 generate-JavaKitReflection: Java2Swift generate-JavaKit generate-JavaKitCollection
 	mkdir -p Sources/JavaKitReflection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --depends-on JavaKit=Sources/JavaKit/Java2Swift.config --depends-on JavaKitCollection=Sources/JavaKitCollection/Java2Swift.config -o Sources/JavaKitReflection/generated Sources/JavaKitReflection/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --depends-on JavaKit=Sources/JavaKit/swift-java.config --depends-on JavaKitCollection=Sources/JavaKitCollection/swift-java.config -o Sources/JavaKitReflection/generated Sources/JavaKitReflection/swift-java.config
 
 generate-JavaKitJar: Java2Swift generate-JavaKit generate-JavaKitCollection
 	mkdir -p Sources/JavaKitJar/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitJar --depends-on JavaKit=Sources/JavaKit/Java2Swift.config --depends-on JavaKitCollection=Sources/JavaKitCollection/Java2Swift.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitJar --depends-on JavaKit=Sources/JavaKit/swift-java.config --depends-on JavaKitCollection=Sources/JavaKitCollection/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
 
 generate-JavaKitNetwork: Java2Swift generate-JavaKit generate-JavaKitCollection
 	mkdir -p Sources/JavaKitNetwork/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitNetwork --depends-on JavaKit=Sources/JavaKit/Java2Swift.config --depends-on JavaKitCollection=Sources/JavaKitCollection/Java2Swift.config -o Sources/JavaKitNetwork/generated Sources/JavaKitNetwork/Java2Swift.config
+	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitNetwork --depends-on JavaKit=Sources/JavaKit/swift-java.config --depends-on JavaKitCollection=Sources/JavaKitCollection/swift-java.config -o Sources/JavaKitNetwork/generated Sources/JavaKitNetwork/swift-java.config
 
 javakit-generate: generate-JavaKit generate-JavaKitReflection generate-JavaKitJar generate-JavaKitNetwork
 

@@ -567,9 +567,39 @@ extension JavaClassTranslator {
     let overrideOpt = (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
-    return """
-      \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
-      """
+
+    if resultType.optionalWrappedType() != nil || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil }) {
+      let parameters = parameters.map { param -> (clause: FunctionParameterSyntax, passedArg: String) in
+        let name = param.secondName!.trimmedDescription
+
+        return if let optionalType = param.type.trimmedDescription.optionalWrappedType() {
+          (clause: "_ \(raw: name): \(raw: optionalType)", passedArg: "\(name).toJavaOptional()")
+        } else {
+          (clause: param, passedArg: "\(name)")
+        }
+      }
+
+      let resultOptional: String = resultType.optionalWrappedType() ?? resultType
+      let baseBody: ExprSyntax = "\(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", ")))"
+      let body: ExprSyntax = if let optionalType = resultType.optionalWrappedType() {
+        "Optional(javaOptional: \(baseBody))"
+      } else {
+        baseBody
+      }
+
+
+      return """
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClause)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
+          \(body)
+        }
+        """
+    } else {
+      return """
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        """
+    }
   }
 
   /// Render a single Java field into the corresponding Swift property, or
@@ -582,10 +612,35 @@ extension JavaClassTranslator {
     )
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
     let swiftFieldName = javaField.getName().escapedSwiftName
-    return """
+
+    if let optionalType = typeName.optionalWrappedType() {
+      let setter = if !javaField.isFinal {
+      """
+      
+        set {
+          \(swiftFieldName) = newValue.toJavaOptional()
+        }
+      """
+      } else {
+        ""
+      }
+      return """
+      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+      public var \(raw: swiftFieldName): \(raw: typeName)
+
+      
+      public var \(raw: swiftFieldName)Optional: \(raw: optionalType) {
+        get {
+          Optional(javaOptional: \(raw: swiftFieldName))
+        }\(raw: setter)
+      }
+      """
+    } else {
+      return """
       \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
       public var \(raw: swiftFieldName): \(raw: typeName)
       """
+    }
   }
 
   package func renderEnum(name: String) -> [DeclSyntax] {

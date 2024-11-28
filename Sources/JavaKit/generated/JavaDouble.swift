@@ -46,6 +46,13 @@ open class JavaDouble: JavaNumber {
   open override func doubleValue() -> Double
 
   @JavaMethod
+  open func describeConstable() -> JavaOptional<JavaDouble>!
+
+  open func describeConstableOptional() -> JavaDouble? {
+    Optional(javaOptional: describeConstable())
+  }
+
+  @JavaMethod
   open func isNaN() -> Bool
 }
 extension JavaClass<JavaDouble> {

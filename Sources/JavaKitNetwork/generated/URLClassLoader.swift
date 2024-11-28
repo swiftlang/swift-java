@@ -28,5 +28,8 @@ open class URLClassLoader: JavaObject {
 }
 extension JavaClass<URLClassLoader> {
   @JavaStaticMethod
+  public func newInstance(_ arg0: [URL?], _ arg1: JavaClassLoader?) -> URLClassLoader!
+
+  @JavaStaticMethod
   public func newInstance(_ arg0: [URL?]) -> URLClassLoader!
 }
