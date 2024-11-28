@@ -205,6 +205,11 @@ extension Swift2JavaTranslator {
       )
       printer.print("")
 
+      // Layout of the class
+      printClassMemoryLayout(&printer, decl)
+
+      printer.printParts("")
+
       // Initializers
       for initDecl in decl.initializers {
         printClassConstructors(&printer, initDecl)
@@ -263,9 +268,6 @@ extension Swift2JavaTranslator {
       // Constants
       printClassConstants(printer: &printer)
       printTypeMappingDecls(&printer)
-
-      // Layout of the class
-      printClassMemoryLayout(&printer, decl)
 
       body(&printer)
     }
@@ -384,12 +386,9 @@ extension Swift2JavaTranslator {
   }
 
   private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    // TODO: make use of the swift runtime to get the layout
     printer.print(
       """
-      private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        SWIFT_POINTER
-      ).withName("\(decl.swiftTypeName)");
+      private static final GroupLayout $LAYOUT = (GroupLayout)SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
 
       public final GroupLayout $layout() {
           return $LAYOUT;
