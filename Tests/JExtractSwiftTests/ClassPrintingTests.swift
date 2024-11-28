@@ -28,7 +28,6 @@ struct ClassPrintingTests {
     import _StringProcessing
     import _SwiftConcurrencyShims
 
-    // MANGLED NAME: $s14MySwiftLibrary0aB5ClassCMa
     public class MySwiftClass {
       // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC3len3capACSi_SitcfC
       public init(len: Swift.Int, cap: Swift.Int)
