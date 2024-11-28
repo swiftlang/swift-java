@@ -208,7 +208,7 @@ extension Swift2JavaTranslator {
       // Layout of the class
       printClassMemoryLayout(&printer, decl)
 
-      printer.printParts("")
+      printer.print("")
 
       // Initializers
       for initDecl in decl.initializers {
