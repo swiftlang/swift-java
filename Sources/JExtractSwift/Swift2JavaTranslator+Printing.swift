@@ -388,7 +388,7 @@ extension Swift2JavaTranslator {
   private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
-      private static final GroupLayout $LAYOUT = (GroupLayout)SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
+      private static final GroupLayout $LAYOUT = (GroupLayout) SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
 
       public final GroupLayout $layout() {
           return $LAYOUT;
