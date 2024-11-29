@@ -14,32 +14,79 @@
 
 import Foundation
 
-typealias JavaVersion = Int
+////////////////////////////////////////////////////////////////////////////////
+// This file is only supposed to be edited in `Shared/` and must be symlinked //
+// from everywhere else! We cannot share dependencies with or between plugins //
+////////////////////////////////////////////////////////////////////////////////
+
+public typealias JavaVersion = Int
 
 /// Configuration for the SwiftJava plugins, provided on a per-target basis.
-struct Configuration: Codable {
+public struct Configuration: Codable {
   // ==== swift 2 java ---------------------------------------------------------
 
-  var javaPackage: String?
+  public var javaPackage: String?
 
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the Java2Swift tool.
-  var classPath: String? = nil
+  public var classPath: String? = nil
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
-  var classes: [String: String]? = [:]
+  public var classes: [String: String]? = [:]
 
   // Compile for the specified Java SE release.
-  var sourceCompatibility: JavaVersion?
+  public var sourceCompatibility: JavaVersion?
 
   // Generate class files suitable for the specified Java SE release.
-  var targetCompatibility: JavaVersion?
+  public var targetCompatibility: JavaVersion?
+
+  // ==== dependencies ---------------------------------------------------------
+
+  // Java dependencies we need to fetch for this target.
+  public var dependencies: [JavaDependencyDescriptor]?
+
+  public init() {
+  }
+
 }
 
-func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
+/// Represents a maven-style Java dependency.
+public struct JavaDependencyDescriptor: Codable {
+  public var groupID: String
+  public var artifactID: String
+  public var version: String
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    let string = try container.decode(String.self)
+    let parts = string.split(separator: ":")
+    guard parts.count == 3 else {
+      throw JavaDependencyDescriptorError(message: "Illegal dependency, did not match: `groupID:artifactID:version`")
+    }
+    self.groupID = String(parts[0])
+    self.artifactID = String(parts[1])
+    self.version = String(parts[2])
+  }
+
+  public var descriptionGradleStyle: String {
+    [groupID, artifactID, version].joined(separator: ":")
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode("\(self.groupID):\(self.artifactID):\(self.version)")
+  }
+
+  struct JavaDependencyDescriptorError: Error {
+    let message: String
+  }
+}
+
+@available(macOS 13.0, *)
+public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
   let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
   do {
     let configData = try Data(contentsOf: configFile)
@@ -51,7 +98,7 @@ func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #
 }
 
 extension Configuration {
-  var compilerVersionArgs: [String] {
+  public var compilerVersionArgs: [String] {
     var compilerVersionArgs = [String]()
 
     if let sourceCompatibility {
@@ -65,7 +112,7 @@ extension Configuration {
   }
 }
 
-struct ConfigurationError: Error {
+public struct ConfigurationError: Error {
   let message: String
   let error: any Error
 

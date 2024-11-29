@@ -40,7 +40,7 @@ let javaIncludePath = "\(javaHome)/include"
 #endif
 
 let package = Package(
-  name: "JavaKit",
+  name: "SwiftJava",
   platforms: [
     .macOS(.v10_15)
   ],
@@ -171,6 +171,21 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ]
     ),
+
+    .target(
+      name: "JavaKitDependencyResolver",
+      dependencies: [
+        "JavaKit",
+      ],
+      exclude: [
+        "swift-java.config",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+      ]
+    ),
+
     .target(
       name: "JavaKit",
       dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
@@ -283,6 +298,10 @@ let package = Package(
     ),
 
     .target(
+      name: "JavaKitConfigurationShared"
+    ),
+
+    .target(
       name: "Java2SwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -293,6 +312,8 @@ let package = Package(
         "JavaKitReflection",
         "JavaKitNetwork",
         "JavaTypes",
+        "JavaKitConfigurationShared",
+        "JavaKitDependencyResolver",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -312,6 +333,7 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "Java2SwiftLib",
+        "JavaKitDependencyResolver",
       ],
 
       swiftSettings: [

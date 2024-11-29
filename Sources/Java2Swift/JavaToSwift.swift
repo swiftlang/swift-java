@@ -21,6 +21,7 @@ import JavaKitNetwork
 import JavaKitReflection
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import JavaKitConfigurationShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
@@ -28,7 +29,7 @@ struct JavaToSwift: ParsableCommand {
   static var _commandName: String { "Java2Swift" }
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
-  var moduleName: String
+  var moduleName: String?
 
   @Option(
     help:
@@ -62,6 +63,9 @@ struct JavaToSwift: ParsableCommand {
   )
   var input: String
 
+  @Flag(help: "Fetch dependencies from given target (containing swift-java configuration) or dependency string")
+  var fetch: Bool = false
+
   /// Whether we have ensured that the output directory exists.
   var createdOutputDirectory: Bool = false
 
@@ -77,6 +81,10 @@ struct JavaToSwift: ParsableCommand {
       }
 
       return URL(fileURLWithPath: outputDirectory)
+    }
+
+    guard let moduleName else {
+      fatalError("--module-name must be set!")
     }
 
     // Put the result into Sources/\(moduleName).
@@ -97,25 +105,36 @@ struct JavaToSwift: ParsableCommand {
     return outputDir
   }
 
-  /// Describes what kind of generation action is being performed by
-  /// Java2Swift.
-  enum GenerationMode {
+  /// Describes what kind of generation action is being performed by swift-java.
+  enum ToolMode {
     /// Generate a configuration file given a Jar file.
     case configuration(jarFile: String)
 
     /// Generate Swift wrappers for Java classes based on the given
     /// configuration.
     case classWrappers(Configuration)
+
+    /// Fetch dependencies for a module
+    case fetchDependencies(Configuration)
+    // FIXME each mode should have its own config?
   }
 
   mutating func run() throws {
     // Determine the mode in which we'll execute.
-    let generationMode: GenerationMode
+    let toolMode: ToolMode
     if jar {
-      generationMode = .configuration(jarFile: input)
+      toolMode = .configuration(jarFile: input)
+    } else if fetch {
+      let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
+      guard let dependencies = config.dependencies else {
+        print("[swift-java] Running in 'fetch dependencies' mode but dependencies list was empty!")
+        print("[swift-java] Nothing to do: done.")
+        return
+      }
+      toolMode = .fetchDependencies(config)
     } else {
       let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
-      generationMode = .classWrappers(config)
+      toolMode = .classWrappers(config)
     }
 
     // Load all of the dependent configurations and associate them with Swift
@@ -136,160 +155,58 @@ struct JavaToSwift: ParsableCommand {
 
     // Form a class path from all of our input sources:
     //   * Command-line option --classpath
-    var classpathPieces: [String] = classpath
-    switch generationMode {
+    var classPathPieces: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
+    switch toolMode {
     case .configuration(jarFile: let jarFile):
       //   * Jar file (in `-jar` mode)
-      classpathPieces.append(jarFile)
-    case .classWrappers(let config):
-      //   * Class path specified in the configuration file (if any)
-      config.classpath.map { classpathPieces.append($0) }
+      classPathPieces.append(jarFile)
+    case .classWrappers(let config),
+         .fetchDependencies(let config):
+      //   * Classpath specified in the configuration file (if any)
+      if let classpath = config.classPath {
+        for part in classpath.split(separator: ":") {
+          classPathPieces.append(String(part))
+        }
+      }
     }
 
-    //   * Classes paths from all dependent configuration files
+    //   * Classespaths from all dependent configuration files
     for (_, config) in dependentConfigs {
-      config.classpath.map { classpathPieces.append($0) }
+      config.classPath.map { element in
+        print("[swift-java] Add dependent config classpath element: \(element)")
+        classPathPieces.append(element)
+      }
     }
 
     // Bring up the Java VM.
-    let jvm = try JavaVirtualMachine.shared(classpath: classpathPieces)
+    let classpath = classPathPieces.joined(separator: ":")
+    // TODO: print only in verbose mode
+    print("[swift-java] Initialize JVM with classpath: \(classpath)")
 
-    // Run the generation step.
-    let classpath = classpathPieces.joined(separator: ":")
-    switch generationMode {
+
+    // Run the task.
+    let jvm: JavaVirtualMachine
+    switch toolMode {
     case .configuration(jarFile: let jarFile):
+      jvm = try JavaVirtualMachine.shared(classPath: classPathPieces)
       try emitConfiguration(
         forJarFile: jarFile,
-        classpath: classpath,
+        classPath: classpath,
         environment: jvm.environment()
       )
 
     case .classWrappers(let config):
+      jvm = try JavaVirtualMachine.shared(classPath: classPathPieces)
       try generateWrappers(
         config: config,
-        classpath: classpath,
+        classPath: classpath,
         dependentConfigs: dependentConfigs,
         environment: jvm.environment()
       )
-    }
-  }
 
-  /// Generate wrapper
-  mutating func generateWrappers(
-    config: Configuration,
-    classpath: String,
-    dependentConfigs: [(String, Configuration)],
-    environment: JNIEnvironment
-  ) throws {
-    let translator = JavaTranslator(
-      swiftModuleName: moduleName,
-      environment: environment,
-      translateAsClass: true
-    )
-
-    // Keep track of all of the Java classes that will have
-    // Swift-native implementations.
-    translator.swiftNativeImplementations = Set(swiftNativeImplementation)
-
-    // Note all of the dependent configurations.
-    for (swiftModuleName, dependentConfig) in dependentConfigs {
-      translator.addConfiguration(
-        dependentConfig,
-        forSwiftModule: swiftModuleName
-      )
-    }
-
-    // Add the configuration for this module.
-    translator.addConfiguration(config, forSwiftModule: moduleName)
-
-    // Load all of the explicitly-requested classes.
-    let classLoader = try JavaClass<ClassLoader>(environment: environment)
-      .getSystemClassLoader()!
-    var javaClasses: [JavaClass<JavaObject>] = []
-    for (javaClassName, swiftName) in config.classes {
-      guard let javaClass = try classLoader.loadClass(javaClassName) else {
-        print("warning: could not find Java class '\(javaClassName)'")
-        continue
-      }
-
-      // Add this class to the list of classes we'll translate.
-      javaClasses.append(javaClass)
-    }
-
-    // Find all of the nested classes for each class, adding them to the list
-    // of classes to be translated if they were already specified.
-    var allClassesToVisit = javaClasses
-    var currentClassIndex: Int = 0
-    while currentClassIndex < allClassesToVisit.count {
-      defer {
-        currentClassIndex += 1
-      }
-
-      // The current class we're in.
-      let currentClass = allClassesToVisit[currentClassIndex]
-      guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType else {
-        continue
-      }
-
-      // Find all of the nested classes that weren't explicitly translated
-      // already.
-      let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap { nestedClass in
-        guard let nestedClass else { return nil }
-
-        // If this is a local class, we're done.
-        let javaClassName = nestedClass.getName()
-        if javaClassName.isLocalJavaClass {
-          return nil
-        }
-
-        // If this class has been explicitly mentioned, we're done.
-        if translator.translatedClasses[javaClassName] != nil {
-          return nil
-        }
-
-        // Record this as a translated class.
-        let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
-          .defaultSwiftNameForJavaClass
-
-
-        let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
-        translator.translatedClasses[javaClassName] = (swiftName, nil)
-        return nestedClass
-      }
-
-      // If there were no new nested classes, there's nothing to do.
-      if nestedClasses.isEmpty {
-        continue
-      }
-
-      // Record all of the nested classes that we will visit.
-      translator.nestedClasses[currentClass.getName()] = nestedClasses
-      allClassesToVisit.append(contentsOf: nestedClasses)
-    }
-
-    // Validate configurations before writing any files
-    try translator.validateClassConfiguration()
-
-    // Translate all of the Java classes into Swift classes.
-    for javaClass in javaClasses {
-      translator.startNewFile()
-      let swiftClassDecls = try translator.translateClass(javaClass)
-      let importDecls = translator.getImportDecls()
-
-      let swiftFileText = """
-        // Auto-generated by Java-to-Swift wrapper generator.
-        \(importDecls.map { $0.description }.joined())
-        \(swiftClassDecls.map { $0.description }.joined(separator: "\n"))
-
-        """
-
-      let swiftFileName = try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
-        .swiftName.replacing(".", with: "+") + ".swift"
-      try writeContents(
-        swiftFileText,
-        to: swiftFileName,
-        description: "Java class '\(javaClass.getName())' translation"
-      )
+    case .fetchDependencies(let config):
+      let dependencies = config.dependencies! // TODO: cleanup how we do config
+      try fetchDependencies(dependencies: dependencies, baseClasspath: classPathPieces)
     }
   }
 
@@ -333,48 +250,9 @@ struct JavaToSwift: ParsableCommand {
 
     // Write the file:
     let file = outputDir.appendingPathComponent(filename)
-    print("Writing \(description) to '\(file.path)'...", terminator: "")
+    print("[swift-java] Writing \(description) to '\(file.path)'...", terminator: "")
     try contents.write(to: file, atomically: true, encoding: .utf8)
     print(" done.")
-  }
-
-  mutating func emitConfiguration(
-    forJarFile jarFileName: String,
-    classpath: String,
-    environment: JNIEnvironment
-  ) throws {
-    var configuration = Configuration(classpath: classpath)
-
-    let jarFile = try JarFile(jarFileName, false, environment: environment)
-    for entry in jarFile.entries()! {
-      // We only look at class files in the Jar file.
-      guard entry.getName().hasSuffix(".class") else {
-        continue
-      }
-
-      // If this is a local class, it cannot be mapped into Swift.
-      if entry.getName().isLocalJavaClass {
-        continue
-      }
-
-      let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
-        .dropLast(".class".count))
-      configuration.classes[javaCanonicalName] =
-        javaCanonicalName.defaultSwiftNameForJavaClass
-    }
-
-    // Encode the configuration.
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    var contents = String(data: try encoder.encode(configuration), encoding: .utf8)!
-    contents.append("\n")
-
-    // Write the file.
-    try writeContents(
-      contents,
-      to: "swift-java.config",
-      description: "swift-java configuration file"
-    )
   }
 }
 
@@ -391,19 +269,6 @@ extension JavaToSwiftError: CustomStringConvertible {
   }
 }
 
-extension String {
-  /// For a String that's of the form java.util.Vector, return the "Vector"
-  /// part.
-  fileprivate var defaultSwiftNameForJavaClass: String {
-    if let dotLoc = lastIndex(of: ".") {
-      let afterDot = index(after: dotLoc)
-      return String(self[afterDot...]).javaClassNameToCanonicalName.adjustedSwiftTypeName
-    }
-
-    return javaClassNameToCanonicalName.adjustedSwiftTypeName
-  }
-}
-
 @JavaClass("java.lang.ClassLoader")
 public struct ClassLoader {
   @JavaMethod
@@ -415,29 +280,3 @@ extension JavaClass<ClassLoader> {
   public func getSystemClassLoader() -> ClassLoader?
 }
 
-extension String {
-  /// Replace all of the $'s for nested names with "." to turn a Java class
-  /// name into a Java canonical class name,
-  fileprivate var javaClassNameToCanonicalName: String {
-    return replacing("$", with: ".")
-  }
-
-  /// Whether this is the name of an anonymous class.
-  fileprivate var isLocalJavaClass: Bool {
-    for segment in split(separator: "$") {
-      if let firstChar = segment.first, firstChar.isNumber {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  /// Adjust type name for "bad" type names that don't work well in Swift.
-  fileprivate var adjustedSwiftTypeName: String {
-    switch self {
-    case "Type": return "JavaType"
-    default: return self
-    }
-  }
-}

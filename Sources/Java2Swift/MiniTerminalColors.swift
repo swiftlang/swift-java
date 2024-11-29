@@ -12,18 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
+// TODO: Share TerminalColors.swift
+
+// Mini coloring helper, since we cannot have dependencies we keep it minimal here
+extension String {
+  var red: String {
+    "\u{001B}[0;31m" + "\(self)" + "\u{001B}[0;0m"
+  }
+  var green: String {
+    "\u{001B}[0;32m" + "\(self)" + "\u{001B}[0;0m"
+  }
 }
 
-rootProject.name = "swift-java"
-
-include "JavaKit"
-include "SwiftKit"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
-}

@@ -17,6 +17,7 @@ import JavaKitReflection
 import JavaTypes
 import SwiftBasicFormat
 import SwiftSyntax
+import JavaKitConfigurationShared
 import SwiftSyntaxBuilder
 
 /// Utility that translates Java classes into Swift source code to access
