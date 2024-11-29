@@ -137,6 +137,10 @@ struct JavaToSwift: ParsableCommand {
       toolMode = .classWrappers(config)
     }
 
+    let moduleName = self.moduleName ??
+      input.split(separator: "/").dropLast().last.map(String.init) ??
+      "__UnknownModule"
+
     // Load all of the dependent configurations and associate them with Swift
     // modules.
     let dependentConfigs = try dependsOn.map { dependentConfig in
@@ -206,7 +210,7 @@ struct JavaToSwift: ParsableCommand {
 
     case .fetchDependencies(let config):
       let dependencies = config.dependencies! // TODO: cleanup how we do config
-      try fetchDependencies(dependencies: dependencies, baseClasspath: classPathPieces)
+      try fetchDependencies(moduleName: moduleName, dependencies: dependencies, baseClasspath: classPathPieces)
     }
   }
 

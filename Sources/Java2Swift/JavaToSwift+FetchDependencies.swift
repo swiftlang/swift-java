@@ -22,7 +22,7 @@ import JavaKitDependencyResolver
 import JavaKitConfigurationShared
 
 extension JavaToSwift {
-  func fetchDependencies(projectName: String,
+  func fetchDependencies(moduleName: String,
                          dependencies: [JavaDependencyDescriptor],
                          baseClasspath: [String]) throws -> JavaClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
@@ -36,9 +36,16 @@ extension JavaToSwift {
       projectBaseDirectory: URL(fileURLWithPath: ".").path,
       dependencies: deps)
 
-    let entryCount = classpath.split(separator: ":").count
-    print("[debug][swift-java] Resolved classpath for \(deps.count) dependencies: classpath entries: \(entryCount)... ", terminator: "")
+    let entries = classpath.split(separator: ":")
+    let entryCount = entries.count
+
+    print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)': classpath entries: \(entryCount)... ", terminator: "")
     print("done.".green)
+
+    for entry in entries {
+      print("[debug][swift-java] Classpath entry: \(entry)")
+    }
+
     return .init(classpath)
   }
 }
