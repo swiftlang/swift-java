@@ -302,6 +302,10 @@ let package = Package(
     ),
 
     .target(
+      name: "JavaKitShared"
+    ),
+
+    .target(
       name: "Java2SwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -351,6 +355,7 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaTypes",
+        "JavaKitShared",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

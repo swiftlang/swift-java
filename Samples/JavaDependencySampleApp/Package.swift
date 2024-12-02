@@ -41,7 +41,7 @@ let javaIncludePath = "\(javaHome)/include"
 #endif
 
 let package = Package(
-  name: "JavaKitSampleApp",
+  name: "JavaDependencySampleApp",
   platforms: [
     .macOS(.v13),
     .iOS(.v13),
@@ -64,7 +64,7 @@ let package = Package(
 
   targets: [
     .target(
-      name: "JavaKitExample",
+      name: "JavaDependencySample",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "JavaKitFunction", package: "swift-java"),

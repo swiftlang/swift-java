@@ -16,6 +16,7 @@ import ArgumentParser
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import JavaKitShared
 
 /// Command-line utility, similar to `jextract` to export Swift types to Java.
 public struct SwiftToJava: ParsableCommand {

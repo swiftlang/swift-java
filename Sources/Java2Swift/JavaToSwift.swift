@@ -66,6 +66,10 @@ struct JavaToSwift: ParsableCommand {
   @Flag(help: "Fetch dependencies from given target (containing swift-java configuration) or dependency string")
   var fetch: Bool = false
 
+  // TODO: Need a better name, this follows up a fetch with creating modules for each of the dependencies
+  @Flag(help: "Fetch dependencies for given ")
+  var fetchMakeModules: Bool = false
+
   /// Whether we have ensured that the output directory exists.
   var createdOutputDirectory: Bool = false
 
