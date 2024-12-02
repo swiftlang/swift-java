@@ -44,7 +44,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// Initialize a new Java virtual machine instance.
   ///
   /// - Parameters:
-  ///   - classPath: The directories, JAR files, and ZIP files in which the JVM
+  ///   - classpath: The directories, JAR files, and ZIP files in which the JVM
   ///     should look to find classes. This maps to the VM option
   ///     `-Djava.class.path=`.
   ///   - vmOptions: Options that should be passed along to the JVM, which will
@@ -52,7 +52,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   ///   - ignoreUnrecognized: Whether the JVM should ignore any VM options it
   ///     does not recognize.
   private init(
-    classPath: [String] = [],
+    classpath: [String] = [],
     vmOptions: [String] = [],
     ignoreUnrecognized: Bool = false
   ) throws {
@@ -64,14 +64,14 @@ public final class JavaVirtualMachine: @unchecked Sendable {
 
     // Construct the complete list of VM options.
     var allVMOptions: [String] = []
-    if !classPath.isEmpty {
+    if !classpath.isEmpty {
       let fileManager = FileManager.default
-      for path in classPath {
+      for path in classpath {
         if !fileManager.fileExists(atPath: path) {
-          throw JavaKitError.classPathEntryNotFound(entry: path, classPath: classPath)
+          throw JavaKitError.classpathEntryNotFound(entry: path, classpath: classpath)
         }
       }
-      let colonSeparatedClassPath = classPath.joined(separator: ":")
+      let colonSeparatedClassPath = classpath.joined(separator: ":")
       allVMOptions.append("-Djava.class.path=\(colonSeparatedClassPath)")
     }
     allVMOptions.append(contentsOf: vmOptions)
@@ -183,7 +183,7 @@ extension JavaVirtualMachine {
   /// calls.
   ///
   /// - Parameters:
-  ///   - classPath: The directories, JAR files, and ZIP files in which the JVM
+  ///   - classpath: The directories, JAR files, and ZIP files in which the JVM
   ///     should look to find classes. This maps to the VM option
   ///     `-Djava.class.path=`.
   ///   - vmOptions: Options that should be passed along to the JVM, which will
@@ -191,7 +191,7 @@ extension JavaVirtualMachine {
   ///   - ignoreUnrecognized: Whether the JVM should ignore any VM options it
   ///     does not recognize.
   public static func shared(
-    classPath: [String] = [],
+    classpath: [String] = [],
     vmOptions: [String] = [],
     ignoreUnrecognized: Bool = false
   ) throws -> JavaVirtualMachine {
@@ -225,7 +225,7 @@ extension JavaVirtualMachine {
           let javaVirtualMachine: JavaVirtualMachine
           do {
             javaVirtualMachine = try JavaVirtualMachine(
-              classPath: classPath,
+              classpath: classpath,
               vmOptions: vmOptions,
               ignoreUnrecognized: ignoreUnrecognized
             )
@@ -289,6 +289,6 @@ extension JavaVirtualMachine {
   }
 
   enum JavaKitError: Error {
-    case classPathEntryNotFound(entry: String, classPath: [String])
+    case classpathEntryNotFound(entry: String, classpath: [String])
   }
 }
