@@ -21,7 +21,7 @@ package typealias JavaVersion = Int
 /// must be kept in sync.
 package struct Configuration: Codable {
   /// The Java class path that should be passed along to the Java2Swift tool.
-  package var classPath: String? = nil
+  package var classpath: String? = nil
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
@@ -32,12 +32,12 @@ package struct Configuration: Codable {
   package var targetCompatibility: JavaVersion?
 
   package init(
-    classPath: String? = nil,
+    classpath: String? = nil,
     classes: [String : String] = [:],
     sourceCompatibility: JavaVersion? = nil,
     targetCompatibility: JavaVersion? = nil
   ) {
-    self.classPath = classPath
+    self.classpath = classpath
     self.classes = classes
     self.sourceCompatibility = sourceCompatibility
     self.targetCompatibility = targetCompatibility
