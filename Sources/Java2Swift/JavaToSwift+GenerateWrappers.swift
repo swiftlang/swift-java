@@ -24,7 +24,7 @@ import JavaKitConfigurationShared
 extension JavaToSwift {
   mutating func generateWrappers(
     config: Configuration,
-    classPath: String,
+    classpath: String,
     dependentConfigs: [(String, Configuration)],
     environment: JNIEnvironment
   ) throws {

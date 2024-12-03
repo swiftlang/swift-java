@@ -316,6 +316,7 @@ let package = Package(
         "JavaKitReflection",
         "JavaKitNetwork",
         "JavaTypes",
+        "JavaKitShared",
         "JavaKitConfigurationShared",
         "JavaKitDependencyResolver",
       ],
@@ -338,6 +339,7 @@ let package = Package(
         "JavaKitNetwork",
         "Java2SwiftLib",
         "JavaKitDependencyResolver",
+        "JavaKitShared",
       ],
 
       swiftSettings: [

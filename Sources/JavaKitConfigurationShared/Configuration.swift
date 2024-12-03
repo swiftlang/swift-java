@@ -30,7 +30,7 @@ public struct Configuration: Codable {
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the Java2Swift tool.
-  public var classPath: String? = nil
+  public var classpath: String? = nil
 
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
@@ -54,7 +54,7 @@ public struct Configuration: Codable {
 }
 
 /// Represents a maven-style Java dependency.
-public struct JavaDependencyDescriptor: Codable {
+public struct JavaDependencyDescriptor: Hashable, Codable {
   public var groupID: String
   public var artifactID: String
   public var version: String
@@ -85,14 +85,13 @@ public struct JavaDependencyDescriptor: Codable {
   }
 }
 
-@available(macOS 13.0, *)
 public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
-  let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
+  let configFile = URL(string: sourceDir)!.appendingPathComponent("swift-java.config", isDirectory: false)
   do {
     let configData = try Data(contentsOf: configFile)
     return try JSONDecoder().decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configFile)!'", error: error,
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configFile)'!", error: error,
       file: file, line: line)
   }
 }
@@ -109,6 +108,17 @@ extension Configuration {
     }
 
     return compilerVersionArgs
+  }
+}
+
+extension Configuration {
+  /// Render the configuration as JSON text.
+  public func renderJSON() throws -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    var contents = String(data: try encoder.encode(self), encoding: .utf8)!
+    contents.append("\n")
+    return contents
   }
 }
 

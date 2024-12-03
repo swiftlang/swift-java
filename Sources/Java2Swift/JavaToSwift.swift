@@ -22,6 +22,7 @@ import JavaKitReflection
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import JavaKitConfigurationShared
+import JavaKitShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
@@ -37,11 +38,15 @@ struct JavaToSwift: ParsableCommand {
   )
   var dependsOn: [String] = []
 
+  // TODO: This should be a "make wrappers" option that just detects when we give it a jar
   @Flag(
     help:
       "Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to generate wrappers for those public classes."
   )
   var jar: Bool = false
+
+  @Flag(help: "Fetch dependencies from given target (containing swift-java configuration) or dependency string")
+  var fetch: Bool = false
 
   @Option(
     name: [.customLong("cp"), .customLong("classpath")],
@@ -57,18 +62,21 @@ struct JavaToSwift: ParsableCommand {
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
   var outputDirectory: String? = nil
 
+  @Option(name: .shortAndLong, help: "How to handle an existing swift-java.config; by default 'overwrite' by can be changed to amending a configuration")
+  var existingConfig: ExistingConfigFileMode = .overwrite
+  public enum ExistingConfigFileMode: String, ExpressibleByArgument, Codable {
+    case overwrite
+    case amend
+  }
+
+  @Option(name: .shortAndLong, help: "While scanning a classpath, inspect only types included in this package")
+  var javaPackageFilter: String? = nil
+
   @Argument(
     help:
       "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
-
-  @Flag(help: "Fetch dependencies from given target (containing swift-java configuration) or dependency string")
-  var fetch: Bool = false
-
-  // TODO: Need a better name, this follows up a fetch with creating modules for each of the dependencies
-  @Flag(help: "Fetch dependencies for given ")
-  var fetchMakeModules: Bool = false
 
   /// Whether we have ensured that the output directory exists.
   var createdOutputDirectory: Bool = false
@@ -112,7 +120,7 @@ struct JavaToSwift: ParsableCommand {
   /// Describes what kind of generation action is being performed by swift-java.
   enum ToolMode {
     /// Generate a configuration file given a Jar file.
-    case configuration(jarFile: String)
+    case configuration(jarFile: String) // FIXME: this is more like "extract" configuration from classpath
 
     /// Generate Swift wrappers for Java classes based on the given
     /// configuration.
@@ -163,58 +171,64 @@ struct JavaToSwift: ParsableCommand {
 
     // Form a class path from all of our input sources:
     //   * Command-line option --classpath
-    var classPathPieces: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
+    var classpathPieces: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
     switch toolMode {
     case .configuration(jarFile: let jarFile):
       //   * Jar file (in `-jar` mode)
-      classPathPieces.append(jarFile)
+      classpathPieces.append(jarFile)
     case .classWrappers(let config),
          .fetchDependencies(let config):
       //   * Classpath specified in the configuration file (if any)
-      if let classpath = config.classPath {
+      if let classpath = config.classpath {
         for part in classpath.split(separator: ":") {
-          classPathPieces.append(String(part))
+          classpathPieces.append(String(part))
         }
       }
     }
 
     //   * Classespaths from all dependent configuration files
     for (_, config) in dependentConfigs {
-      config.classPath.map { element in
+      config.classpath.map { element in
         print("[swift-java] Add dependent config classpath element: \(element)")
-        classPathPieces.append(element)
+        classpathPieces.append(element)
       }
     }
 
     // Bring up the Java VM.
-    let classpath = classPathPieces.joined(separator: ":")
+    let classpath = classpathPieces.joined(separator: ":")
     // TODO: print only in verbose mode
     print("[swift-java] Initialize JVM with classpath: \(classpath)")
 
 
     // Run the task.
-    let jvm: JavaVirtualMachine
+    let jvm = try JavaVirtualMachine.shared(classpath: classpathPieces)
     switch toolMode {
     case .configuration(jarFile: let jarFile):
-      jvm = try JavaVirtualMachine.shared(classPath: classPathPieces)
+
       try emitConfiguration(
         forJarFile: jarFile,
-        classPath: classpath,
+        classpath: classpath,
         environment: jvm.environment()
       )
 
     case .classWrappers(let config):
-      jvm = try JavaVirtualMachine.shared(classPath: classPathPieces)
       try generateWrappers(
         config: config,
-        classPath: classpath,
+        classpath: classpath,
         dependentConfigs: dependentConfigs,
         environment: jvm.environment()
       )
 
     case .fetchDependencies(let config):
       let dependencies = config.dependencies! // TODO: cleanup how we do config
-      try fetchDependencies(moduleName: moduleName, dependencies: dependencies, baseClasspath: classPathPieces)
+      let dependencyClasspath = try fetchDependencies(
+        moduleName: moduleName,
+        dependencies: dependencies,
+        baseClasspath: classpathPieces,
+        environment: jvm.environment()
+      )
+
+      try writeFetchDependencies(resolvedClasspath: dependencyClasspath)
     }
   }
 
@@ -239,7 +253,20 @@ struct JavaToSwift: ParsableCommand {
     return (javaClassName, swiftName.javaClassNameToCanonicalName)
   }
 
-  mutating func writeContents(_ contents: String, to filename: String, description: String) throws {
+  mutating func writeContents(
+    _ contents: String,
+    to filename: String, description: String) throws {
+    try writeContents(
+      contents,
+      outputDirectoryOverride: self.actualOutputDirectory,
+      to: filename,
+      description: description)
+  }
+
+  mutating func writeContents(
+    _ contents: String,
+    outputDirectoryOverride: Foundation.URL?,
+    to filename: String, description: String) throws {
     guard let outputDir = actualOutputDirectory else {
       print("// \(filename) - \(description)")
       print(contents)
@@ -260,7 +287,26 @@ struct JavaToSwift: ParsableCommand {
     let file = outputDir.appendingPathComponent(filename)
     print("[swift-java] Writing \(description) to '\(file.path)'...", terminator: "")
     try contents.write(to: file, atomically: true, encoding: .utf8)
-    print(" done.")
+    print(" done.".green)
+  }
+}
+
+extension JavaToSwift {
+  /// Get base configuration, depending on if we are to 'amend' or 'overwrite' the existing configuration.
+  package func getBaseConfigurationForWrite() throws -> (Bool, Configuration) {
+    guard let actualOutputDirectory = self.actualOutputDirectory else {
+      // If output has no path there's nothing to amend
+      return (false, .init())
+    }
+
+    switch self.existingConfig {
+    case .overwrite:
+      // always make up a fresh instance if we're overwriting
+      return (false, .init())
+    case .amend:
+      let configPath = actualOutputDirectory
+      return (true, try readConfiguration(sourceDir: "file://" + configPath.path))
+    }
   }
 }
 

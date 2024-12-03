@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ArgumentParser
+import Foundation
 import Java2SwiftLib
 import JavaKit
 import Foundation
@@ -20,44 +20,76 @@ import JavaKitJar
 import Java2SwiftLib
 import JavaKitDependencyResolver
 import JavaKitConfigurationShared
+import JavaKitShared
 
 extension JavaToSwift {
   func fetchDependencies(moduleName: String,
                          dependencies: [JavaDependencyDescriptor],
-                         baseClasspath: [String]) throws -> JavaClasspath {
+                         baseClasspath: [String],
+                         environment: JNIEnvironment) throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
-    print("[debug][swift-java] Fetch dependencies: \(deps)")
+    print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
+    let resolverClass = try JavaClass<DependencyResolver>(environment: environment)
 
-    let jvm = try JavaVirtualMachine.shared(classPath: baseClasspath)
-    // let jvm = try ensureDependencyResolverDependenciesLoaded(baseClasspath: baseClasspath)
+      let fullClasspath = try resolverClass.resolveDependenciesToClasspath(
+        projectBaseDirectory: URL(fileURLWithPath: ".").path,
+        dependencies: deps)
+        .split(separator: ":")
 
-    let resolverClass = try JavaClass<DependencyResolver>(environment: jvm.environment())
-    let classpath = try resolverClass.resolveDependenciesToClasspath(
-      projectBaseDirectory: URL(fileURLWithPath: ".").path,
-      dependencies: deps)
+    let classpathEntries = fullClasspath.filter {
+      $0.hasSuffix(".jar")
+    }
+    let classpath = classpathEntries.joined(separator: ":")
 
-    let entries = classpath.split(separator: ":")
-    let entryCount = entries.count
-
-    print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)': classpath entries: \(entryCount)... ", terminator: "")
+    print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)', classpath entries: \(classpathEntries.count), ", terminator: "")
     print("done.".green)
 
-    for entry in entries {
-      print("[debug][swift-java] Classpath entry: \(entry)")
-    }
-
-    return .init(classpath)
+    return ResolvedDependencyClasspath(for: dependencies, classpath: classpath)
   }
 }
 
-struct JavaClasspath: CustomStringConvertible {
-  let value: String
+extension JavaToSwift {
+  mutating func writeFetchDependencies(resolvedClasspath: ResolvedDependencyClasspath) throws {
+    var configuration = Configuration()
+    configuration.dependencies = resolvedClasspath.rootDependencies
+    configuration.classpath = resolvedClasspath.classpath
 
-  init(_ value: String) {
-    self.value = value
+    // Convert the artifact name to a module name
+    // e.g. reactive-streams -> ReactiveStreams
+    // TODO: Should we prefix them with `Java...`?
+    let targetModule = artifactIDAsModuleID(resolvedClasspath.rootDependencies.first!.artifactID)
+
+    // Encode the configuration.
+    let contents = try configuration.renderJSON()
+
+    // Write the file
+    try writeContents(
+      contents,
+      to: "swift-java.config",
+      description: "swift-java configuration file"
+    )
+  }
+
+  public func artifactIDAsModuleID(_ artifactID: String) -> String {
+    let components = artifactID.split(whereSeparator: { $0 == "-" })
+    let camelCased = components.map { $0.capitalized }.joined()
+    return camelCased
+  }
+}
+
+struct ResolvedDependencyClasspath: CustomStringConvertible {
+  /// The dependency identifiers this is the classpath for.
+  let rootDependencies: [JavaDependencyDescriptor]
+
+  /// Plain string representation of a Java classpath
+  let classpath: String
+
+  init(for rootDependencies: [JavaDependencyDescriptor], classpath: String) {
+    self.rootDependencies = rootDependencies
+    self.classpath = classpath
   }
 
   var description: String {
-    "JavaClasspath(value: \(value))"
+    "JavaClasspath(for: \(rootDependencies), classpath: \(classpath))"
   }
 }

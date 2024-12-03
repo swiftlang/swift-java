@@ -22,13 +22,20 @@ import JavaKitDependencyResolver
 import JavaKitConfigurationShared
 
 extension JavaToSwift {
+
+  // TODO: make this perhaps "emit type mappings"
   mutating func emitConfiguration(
     forJarFile jarFileName: String,
-    classPath: String,
+    classpath: String,
     environment: JNIEnvironment
   ) throws {
-    var configuration = Configuration()
-    configuration.classPath = classPath
+    // Get a fresh or existing configuration we'll amend
+    var (amendExistingConfig, configuration) = try getBaseConfigurationForWrite()
+    if amendExistingConfig {
+      print("[java-swift] Amend existing swift-java.config file...")
+    } else {
+      configuration.classpath = classpath // TODO: is this correct?
+    }
 
     let jarFile = try JarFile(jarFileName, false, environment: environment)
     for entry in jarFile.entries()! {
@@ -44,15 +51,26 @@ extension JavaToSwift {
 
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
         .dropLast(".class".count))
+
+      if let javaPackageFilter {
+        if !javaCanonicalName.hasPrefix(javaPackageFilter) {
+          // Skip classes which don't match our expected prefix
+          continue
+        }
+      }
+
+      if amendExistingConfig && configuration.classes?[javaCanonicalName] != nil {
+        // If we're amending an existing config, we never overwrite an existing
+        // class configuration. E.g. the user may have configured a custom name
+        // for a type.
+        continue
+      }
       configuration.classes?[javaCanonicalName] =
         javaCanonicalName.defaultSwiftNameForJavaClass
     }
 
     // Encode the configuration.
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    var contents = String(data: try encoder.encode(configuration), encoding: .utf8)!
-    contents.append("\n")
+    let contents = try configuration.renderJSON()
 
     // Write the file.
     try writeContents(

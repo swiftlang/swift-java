@@ -14,3 +14,9 @@
 
 import JavaKit
 import JavaKitFunction
+import ReactiveStreams
+
+// Just showcasing that we imported the module
+let s: Subscriber<Int>? = nil
+
+print("Done.")

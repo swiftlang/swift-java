@@ -51,10 +51,9 @@ let package = Package(
   ],
 
   products: [
-    .library(
-      name: "JavaKitExample",
-      type: .dynamic,
-      targets: ["JavaKitExample"]
+    .executable(
+      name: "JavaDependencySample",
+      targets: ["JavaDependencySample"]
     ),
   ],
 
@@ -63,11 +62,13 @@ let package = Package(
   ],
 
   targets: [
-    .target(
+    .executableTarget(
       name: "JavaDependencySample",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaRuntime", package: "swift-java"),
         .product(name: "JavaKitFunction", package: "swift-java"),
+        "ReactiveStreams"
       ],
       swiftSettings: [
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -76,5 +77,20 @@ let package = Package(
         .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
+
+    .target(
+      name: "ReactiveStreams",
+      dependencies: [
+        .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaRuntime", package: "swift-java"),
+      ],
+      swiftSettings: [
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      plugins: [
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+      ]
+    ),
+
   ]
 )

@@ -32,7 +32,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
 
-  let classPath: [String]
+  let classpath: [String]
 
   /// Whether to destroy the JVM on deinit.
   private let destroyOnDeinit: LockedState<Bool> // FIXME: we should require macOS 15 and then use Synchronization
@@ -40,7 +40,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   /// Adopt an existing JVM pointer.
   public init(adoptingJVM jvm: JavaVMPointer) {
     self.jvm = jvm
-    self.classPath = [] // FIXME: bad...
+    self.classpath = [] // FIXME: bad...
     self.destroyOnDeinit = .init(initialState: false)
   }
 
@@ -59,7 +59,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     vmOptions: [String] = [],
     ignoreUnrecognized: Bool = false
   ) throws {
-    self.classPath = classPath
+    self.classpath = classpath
     var jvm: JavaVMPointer? = nil
     var environment: UnsafeMutableRawPointer? = nil
     var vmArgs = JavaVMInitArgs()
@@ -74,7 +74,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
         if !fileManager.fileExists(atPath: path) {
           // FIXME: this should be configurable, a classpath missing a directory isn't reason to blow up
           print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(path)") // TODO: stderr
-          // throw JavaKitError.classPathEntryNotFound(entry: path, classPath: classPath)
+          // throw JavaKitError.classpathEntryNotFound(entry: path, classpath: classpath)
         }
       }
       let colonSeparatedClassPath = classpath.joined(separator: ":")
@@ -111,7 +111,6 @@ public final class JavaVirtualMachine: @unchecked Sendable {
 
     self.jvm = jvm!
     self.destroyOnDeinit = .init(initialState: true)
-    print("[trace][swift-java][JavaVirtualMachine] init complete \(self)")
   }
 
   public func destroyJVM() throws {
@@ -121,7 +120,6 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     }
 
     _ = destroyOnDeinit.withLock { $0 = false } // we destroyed explicitly, disable destroy in deinit
-    print("[trace][swift-java][JavaVirtualMachine] destroy complete \(self)")
   }
 
   deinit {
@@ -132,7 +130,6 @@ public final class JavaVirtualMachine: @unchecked Sendable {
           fatalError("Failed to destroy the JVM: \(error)")
       }
     }
-    print("[trace][swift-java][JavaVirtualMachine] Deinit complete \(self)")
   }
 }
 
@@ -226,7 +223,7 @@ extension JavaVirtualMachine {
     ignoreUnrecognized: Bool = false,
     replace: Bool = false
   ) throws -> JavaVirtualMachine {
-    precondition(!classPath.contains(where: { $0.contains(":") }), "Classpath element must not contain `:`! Split the path into elements! Was: \(classPath)")
+    precondition(!classpath.contains(where: { $0.contains(":") }), "Classpath element must not contain `:`! Split the path into elements! Was: \(classpath)")
 
     return try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
       // If we already have a JavaVirtualMachine instance, return it.
