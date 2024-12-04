@@ -14,10 +14,10 @@ MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
 ### 2) extract the config for the fetched dependency
 DEP_JAR_CP=$(jq .classpath "$MODULE_CONFIG_PATH")
 DEP_JAR_CP=$(echo "$DEP_JAR_CP" | tr -d '"') # trim the "..."
-# FIXME: "jar" is the wrong word for it
 # shellcheck disable=SC2086
 "$JAVASWIFT" --jar $DEP_JAR_CP \
     --module-name "$MODULE_NAME" \
+    --java-package-filter com.google.common \
     --existing-config amend
 
 ### 3) make wrappers for the module

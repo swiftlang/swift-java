@@ -84,6 +84,10 @@ struct ResolvedDependencyClasspath: CustomStringConvertible {
   /// Plain string representation of a Java classpath
   let classpath: String
 
+  var classpathEntries: [String] {
+    classpath.split(separator: ":").map(String.init)
+  }
+
   init(for rootDependencies: [JavaDependencyDescriptor], classpath: String) {
     self.rootDependencies = rootDependencies
     self.classpath = classpath
