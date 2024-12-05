@@ -119,11 +119,11 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       throw error
     }
 
-    _ = destroyOnDeinit.withLock { $0 = false } // we destroyed explicitly, disable destroy in deinit
+    destroyOnDeinit.withLock { $0 = false } // we destroyed explicitly, disable destroy in deinit
   }
 
   deinit {
-    if destroyOnDeinit.withLock { $0 } {
+    if destroyOnDeinit.withLock({ $0 }) {
       do {
         try destroyJVM()
       } catch {
