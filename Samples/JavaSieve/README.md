@@ -12,9 +12,8 @@ This example wraps an [open-source Java library](https://github.com/gazman-sdk/q
 git clone https://github.com/gazman-sdk/quadratic-sieve-Java
 cd quadratic-sieve-Java
 sh ./gradlew jar
+cd ..
 ```
-
-Then, copy the resulting Jar file (`./build/libs/QuadraticSieve-1.0.jar`) into the `Samples/JavaSieve` directory.
 
 Now we're ready to build and run the Swift program from `Samples/JavaSieve`:
 
