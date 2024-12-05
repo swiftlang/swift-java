@@ -152,141 +152,159 @@ struct JavaToSwift: ParsableCommand {
     // FIXME each mode should have its own config?
   }
 
-  mutating func run() throws {
-    let config: Configuration
+  mutating func run() {
+    print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
+    do {
+      let config: Configuration
 
-    // Determine the mode in which we'll execute.
-    let toolMode: ToolMode
-    if jar {
-      if let moduleBaseDir {
-        config = try readConfiguration(sourceDir: "file://" + moduleBaseDir.path)
+      // Determine the mode in which we'll execute.
+      let toolMode: ToolMode
+      if jar {
+        if let moduleBaseDir {
+          config = try readConfiguration(sourceDir: "file://" + moduleBaseDir.path)
+        } else {
+          config = Configuration()
+        }
+        toolMode = .configuration(extraClasspath: input)
+      } else if fetch {
+        config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
+        guard let dependencies = config.dependencies else {
+          print("[swift-java] Running in 'fetch dependencies' mode but dependencies list was empty!")
+          print("[swift-java] Nothing to do: done.")
+          return
+        }
+        toolMode = .fetchDependencies
       } else {
-        config = Configuration()
-      }
-      toolMode = .configuration(extraClasspath: input)
-    } else if fetch {
-      config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
-      guard let dependencies = config.dependencies else {
-        print("[swift-java] Running in 'fetch dependencies' mode but dependencies list was empty!")
-        print("[swift-java] Nothing to do: done.")
-        return
-      }
-      toolMode = .fetchDependencies
-    } else {
-      config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
-      toolMode = .classWrappers
-    }
-
-    let moduleName = self.moduleName ??
-      input.split(separator: "/").dropLast().last.map(String.init) ??
-      "__UnknownModule"
-
-    // Load all of the dependent configurations and associate them with Swift
-    // modules.
-    let dependentConfigs = try dependsOn.map { dependentConfig in
-      guard let equalLoc = dependentConfig.firstIndex(of: "=") else {
-        throw JavaToSwiftError.badConfigOption(dependentConfig)
+        config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
+        toolMode = .classWrappers
       }
 
-      let afterEqual = dependentConfig.index(after: equalLoc)
-      let swiftModuleName = String(dependentConfig[..<equalLoc])
-      let configFileName = String(dependentConfig[afterEqual...])
+      let moduleName = self.moduleName ??
+        input.split(separator: "/").dropLast().last.map(String.init) ??
+        "__UnknownModule"
 
-      let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: configFileName))
+      // Load all of the dependent configurations and associate them with Swift
+      // modules.
+      let dependentConfigs = try dependsOn.map { dependentConfig in
+        guard let equalLoc = dependentConfig.firstIndex(of: "=") else {
+          throw JavaToSwiftError.badConfigOption(dependentConfig)
+        }
 
-      return (swiftModuleName, config)
-    }
+        let afterEqual = dependentConfig.index(after: equalLoc)
+        let swiftModuleName = String(dependentConfig[..<equalLoc])
+        let configFileName = String(dependentConfig[afterEqual...])
 
-    // Form a class path from all of our input sources:
-    //   * Command-line option --classpath
-    let classpathOptionEntries: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
-    let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
-    var classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
-    print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
+        let config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: configFileName))
 
-    var classpathEntries: [String] = classpathFromConfig
-    if !classpathOptionEntries.isEmpty {
-      print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
-      classpathEntries += classpathOptionEntries
-    } else {
-      // * Base classpath from CLASSPATH env variable
-      print("[debug][swift-java] Classpath from environment: \(classpathFromEnv)")
-      classpathEntries += classpathFromEnv
-    }
-
-    switch toolMode {
-    case .configuration(let extraClasspath):
-      //   * Jar file (in `-jar` mode)
-      let extraClasspathEntries = extraClasspath.split(separator: ":").map(String.init)
-      print("[debug][swift-java] Extra classpath: \(extraClasspathEntries)")
-      classpathEntries += extraClasspathEntries
-    case .classWrappers/*(let config)*/,
-         .fetchDependencies/*(let config)*/:
-      break;
-      //   * Classpath specified in the configuration file (if any)
-//      let extraClasspathEntries = config.classpath?.split(separator: ":").map(String.init) ?? []
-//      print("[debug][swift-java] Config classpath: \(extraClasspathEntries)")
-//      classpathEntries += extraClasspathEntries
-    }
-
-    // Bring up the Java VM.
-    // TODO: print only in verbose mode
-    let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
-    let classpath = classpathEntries.joined(separator: ":")
-    print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
-
-    // FIXME: we should resolve dependencies here perhaps
-//    if let dependencies = config.dependencies {
-//      print("[info][swift-java] Resolve dependencies...")
-//      let dependencyClasspath = try fetchDependencies(
-//        moduleName: moduleName,
-//        dependencies: dependencies,
-//        baseClasspath: classpathOptionEntries,
-//        environment: jvm.environment()
-//      )
-//      classpathEntries += dependencyClasspath.classpathEntries
-//    }
-
-    //   * Classespaths from all dependent configuration files
-    for (_, config) in dependentConfigs {
-      // TODO: may need to resolve the dependent configs rather than just get their configs
-      // TODO: We should cache the resolved classpaths as well so we don't do it many times
-      config.classpath.map { entry in
-        print("[swift-java] Add dependent config classpath element: \(entry)")
-        classpathEntries.append(entry)
-      }
-    }
-
-    // Run the task.
-    switch toolMode {
-    case .configuration:
-      try emitConfiguration(
-        classpath: classpath,
-        environment: jvm.environment()
-      )
-
-    case .classWrappers/*(let config)*/:
-      try generateWrappers(
-        config: config,
-        classpath: classpath,
-        dependentConfigs: dependentConfigs,
-        environment: jvm.environment()
-      )
-
-    case .fetchDependencies/*(let config)*/:
-      guard let dependencies = config.dependencies else {
-        fatalError("Configuration for fetching dependencies must have 'dependencies' defined!")
+        return (swiftModuleName, config)
       }
 
-      let dependencyClasspath = try fetchDependencies(
-        moduleName: moduleName,
-        dependencies: dependencies,
-        baseClasspath: classpathOptionEntries,
-        environment: jvm.environment()
-      )
+      // Form a class path from all of our input sources:
+      //   * Command-line option --classpath
+      let classpathOptionEntries: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
+      let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
+      var classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
+      print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
 
-      try writeFetchDependencies(resolvedClasspath: dependencyClasspath)
+      var classpathEntries: [String] = classpathFromConfig
+      if !classpathOptionEntries.isEmpty {
+        print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
+        classpathEntries += classpathOptionEntries
+      } else {
+        // * Base classpath from CLASSPATH env variable
+        print("[debug][swift-java] Classpath from environment: \(classpathFromEnv)")
+        classpathEntries += classpathFromEnv
+      }
+
+      switch toolMode {
+      case .configuration(let extraClasspath):
+        //   * Jar file (in `-jar` mode)
+        let extraClasspathEntries = extraClasspath.split(separator: ":").map(String.init)
+        print("[debug][swift-java] Extra classpath: \(extraClasspathEntries)")
+        classpathEntries += extraClasspathEntries
+      case .classWrappers/*(let config)*/,
+           .fetchDependencies/*(let config)*/:
+        break;
+        //   * Classpath specified in the configuration file (if any)
+  //      let extraClasspathEntries = config.classpath?.split(separator: ":").map(String.init) ?? []
+  //      print("[debug][swift-java] Config classpath: \(extraClasspathEntries)")
+  //      classpathEntries += extraClasspathEntries
+      }
+
+      // Add extra classpath entries which are specific to building the JavaKit project and samples
+      let classpathBuildJavaKitEntries = [
+        "JavaKit/build/classes/java/main",
+        "../../JavaKit/build/classes/java/main",
+      ]
+      classpathEntries += classpathBuildJavaKitEntries
+
+      // Bring up the Java VM.
+      // TODO: print only in verbose mode
+      let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
+      let classpath = classpathEntries.joined(separator: ":")
+      print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
+
+      // FIXME: we should resolve dependencies here perhaps
+  //    if let dependencies = config.dependencies {
+  //      print("[info][swift-java] Resolve dependencies...")
+  //      let dependencyClasspath = try fetchDependencies(
+  //        moduleName: moduleName,
+  //        dependencies: dependencies,
+  //        baseClasspath: classpathOptionEntries,
+  //        environment: jvm.environment()
+  //      )
+  //      classpathEntries += dependencyClasspath.classpathEntries
+  //    }
+
+      //   * Classespaths from all dependent configuration files
+      print("[debug][swift-java] Dependent configs: \(dependentConfigs.map { $0.1 })")
+      for (_, config) in dependentConfigs {
+        // TODO: may need to resolve the dependent configs rather than just get their configs
+        // TODO: We should cache the resolved classpaths as well so we don't do it many times
+        config.classpath.map { entry in
+          print("[swift-java] Add dependent config classpath element: \(entry)")
+          classpathEntries.append(entry)
+        }
+      }
+
+      // Run the task.
+      switch toolMode {
+      case .configuration:
+        try emitConfiguration(
+          classpath: classpath,
+          environment: jvm.environment()
+        )
+
+      case .classWrappers/*(let config)*/:
+        try generateWrappers(
+          config: config,
+          classpath: classpath,
+          dependentConfigs: dependentConfigs,
+          environment: jvm.environment()
+        )
+
+      case .fetchDependencies/*(let config)*/:
+        guard let dependencies = config.dependencies else {
+          fatalError("Configuration for fetching dependencies must have 'dependencies' defined!")
+        }
+
+        let dependencyClasspath = try fetchDependencies(
+          moduleName: moduleName,
+          dependencies: dependencies,
+          baseClasspath: classpathOptionEntries,
+          environment: jvm.environment()
+        )
+
+        try writeFetchDependencies(resolvedClasspath: dependencyClasspath)
+      }
+    } catch {
+      // We fail like this since throwing out of the run often ends up hiding the failure reason when it is executed as SwiftPM plugin (!)
+      let message = "Failed with error: \(error)"
+      print("[error][java-swift] \(message)")
+      fatalError(message)
     }
+
+    print("[info][swift-java] " + "Done.".green)
   }
 
   private func names(from javaClassNameOpt: String) -> (javaClassName: String, swiftName: String) {

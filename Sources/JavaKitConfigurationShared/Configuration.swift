@@ -86,7 +86,10 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 }
 
 public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
-  let configFile = URL(string: sourceDir)!.appendingPathComponent("swift-java.config", isDirectory: false)
+  let sourcePath =
+    if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
+  let configFile = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
+
   do {
     let configData = try Data(contentsOf: configFile)
     return try JSONDecoder().decode(Configuration.self, from: configData)

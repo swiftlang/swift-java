@@ -68,27 +68,31 @@ let package = Package(
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "JavaRuntime", package: "swift-java"),
         .product(name: "JavaKitFunction", package: "swift-java"),
-        "ReactiveStreams"
+        "JavaCommonsCSV"
       ],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+        .swiftLanguageMode(.v5),
       ],
       plugins: [
-        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+//        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
 
     .target(
-      name: "ReactiveStreams",
+      name: "JavaCommonsCSV",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "JavaRuntime", package: "swift-java"),
       ],
       swiftSettings: [
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+        .swiftLanguageMode(.v5),
       ],
       plugins: [
-        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+//        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
     ),
 

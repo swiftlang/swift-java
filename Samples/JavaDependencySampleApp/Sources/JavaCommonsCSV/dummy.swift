@@ -12,11 +12,3 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
-import JavaKitFunction
-import JavaCommonsCSV
-
-// Just showcasing that we imported the module
-let s: Subscriber<Int>? = nil
-
-print("Done.")

@@ -140,10 +140,13 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       return []
     }
 
+    let executable = try context.tool(named: "Java2Swift").url
+    log("Prepared build command: \(executable) \(arguments)")
+
     return [
       .buildCommand(
         displayName: "Wrapping \(classes.count) Java classes target \(sourceModule.name) in Swift",
-        executable: try context.tool(named: "Java2Swift").url,
+        executable: executable,
         arguments: arguments,
         inputFiles: [ configFile ] + compiledClassFiles,
         outputFiles: outputSwiftFiles

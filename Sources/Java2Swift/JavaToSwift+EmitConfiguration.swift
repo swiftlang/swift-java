@@ -54,7 +54,7 @@ extension JavaToSwift {
           environment: environment
         )
       } else if FileManager.default.fileExists(atPath: entry) {
-        fatalError("[warning][swift-java] Currently unable handle directory classpath entries for config generation! Skipping: \(entry)")
+        print("[warning][swift-java] Currently unable handle directory classpath entries for config generation! Skipping: \(entry)")
       } else {
         print("[warning][swift-java] Classpath entry does not exist, skipping: \(entry)")
       }
@@ -87,6 +87,9 @@ extension JavaToSwift {
         continue
       }
       guard !entry.getName().hasSuffix("package-info") else {
+        continue
+      }
+      guard !entry.getName().hasSuffix("package-info.class") else {
         continue
       }
 

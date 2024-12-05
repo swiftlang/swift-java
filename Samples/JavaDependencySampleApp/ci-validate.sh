@@ -2,12 +2,12 @@
 
 JAVASWIFT="../../.build/debug/Java2Swift"
 
-MODULE_NAME=Guava
+MODULE_NAME="JavaCommonsCSV"
 MODULE_CONFIG_DIR=$(pwd)/Sources/$MODULE_NAME/
 MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
 
 ### 1) downloads all the dependencies
-"$JAVASWIFT" --fetch Sources/JavaDependencySample/swift-java.config \
+"$JAVASWIFT" --fetch "$MODULE_CONFIG_DIR/swift-java.config" \
     --module-name "$MODULE_NAME" \
     --output-directory "$MODULE_CONFIG_DIR"
 
@@ -17,8 +17,8 @@ DEP_JAR_CP=$(echo "$DEP_JAR_CP" | tr -d '"') # trim the "..."
 # shellcheck disable=SC2086
 "$JAVASWIFT" --jar $DEP_JAR_CP \
     --module-name "$MODULE_NAME" \
-    --java-package-filter com.google.common \
     --existing-config amend
+#    --java-package-filter com.google.common \
 
 ### 3) make wrappers for the module
 "$JAVASWIFT" "$MODULE_CONFIG_PATH" --module-name "$MODULE_NAME"
