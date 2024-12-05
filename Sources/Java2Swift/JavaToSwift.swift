@@ -161,7 +161,7 @@ struct JavaToSwift: ParsableCommand {
       let toolMode: ToolMode
       if jar {
         if let moduleBaseDir {
-          config = try readConfiguration(sourceDir: "file://" + moduleBaseDir.path)
+          config = try readConfiguration(sourceDir: moduleBaseDir.path)
         } else {
           config = Configuration()
         }
@@ -304,7 +304,7 @@ struct JavaToSwift: ParsableCommand {
       fatalError(message)
     }
 
-    print("[info][swift-java] " + "Done.".green)
+    print("[info][swift-java] " + "Done: ".green + CommandLine.arguments.joined(separator: " "))
   }
 
   private func names(from javaClassNameOpt: String) -> (javaClassName: String, swiftName: String) {
@@ -380,7 +380,7 @@ extension JavaToSwift {
       return (false, .init())
     case .amend:
       let configPath = actualOutputDirectory
-      return (true, try readConfiguration(sourceDir: "file://" + configPath.path))
+      return (true, try readConfiguration(sourceDir: configPath.path))
     }
   }
 }

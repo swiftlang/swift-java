@@ -11,14 +11,16 @@ MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
     --module-name "$MODULE_NAME" \
     --output-directory "$MODULE_CONFIG_DIR"
 
-### 2) extract the config for the fetched dependency
-DEP_JAR_CP=$(jq .classpath "$MODULE_CONFIG_PATH")
-DEP_JAR_CP=$(echo "$DEP_JAR_CP" | tr -d '"') # trim the "..."
-# shellcheck disable=SC2086
-"$JAVASWIFT" --jar $DEP_JAR_CP \
-    --module-name "$MODULE_NAME" \
-    --existing-config amend
-#    --java-package-filter com.google.common \
+#### 2) extract the config for the fetched dependency
+#DEP_JAR_CP=$(jq .classpath "$MODULE_CONFIG_PATH")
+#DEP_JAR_CP=$(echo "$DEP_JAR_CP" | tr -d '"') # trim the "..."
+## shellcheck disable=SC2086
+#"$JAVASWIFT" --jar $DEP_JAR_CP \
+#    --module-name "$MODULE_NAME" \
+#    --java-package-filter org.apache.commons \
+#    --existing-config amend
+
+# for now in CI we just use what we have already generated and comitted in the config
 
 ### 3) make wrappers for the module
-"$JAVASWIFT" "$MODULE_CONFIG_PATH" --module-name "$MODULE_NAME"
+swift run

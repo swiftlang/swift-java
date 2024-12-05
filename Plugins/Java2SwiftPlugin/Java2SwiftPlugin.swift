@@ -24,6 +24,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
   
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
+    log("Create build commands for: \(target.name)")
     guard let sourceModule = target.sourceModule else { return [] }
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
@@ -41,6 +42,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
+      log("Search for config files in target: \(target.name)")
       let dependencyURL = URL(filePath: target.directory.string)
 
       // Look for a config file within this target.
@@ -58,10 +60,13 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     for dependency in target.dependencies {
       switch dependency {
       case .target(let target):
+        log("Dependency target: \(target.name)")
         searchForConfigFiles(in: target)
 
       case .product(let product):
+        log("Dependency product: \(product.name)")
         for target in product.targets {
+          log("Dependency product: \(product.name), target: \(target.name)")
           searchForConfigFiles(in: target)
         }
 
@@ -72,6 +77,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // Process indirect target dependencies.
     for dependency in target.recursiveTargetDependencies {
+      log("Recursive dependency target: \(dependency.name)")
       searchForConfigFiles(in: dependency)
     }
 
@@ -115,7 +121,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       while classpath.lastPathComponent != "Java" {
         classpath.deleteLastPathComponent()
       }
-      arguments += [ "--classpath", classpath.path() ]
+      arguments += ["--classpath", classpath.path()]
 
       // For each of the class files, note that it can have Swift-native
       // implementations. We figure this out based on the path.
@@ -131,7 +137,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         let className = classNameComponents
           .reversed()
           .joined(separator: ".")
-        arguments += [ "--swift-native-implementation", className]
+        arguments += ["--swift-native-implementation", className]
       }
     }
     
@@ -141,7 +147,6 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     let executable = try context.tool(named: "Java2Swift").url
-    log("Prepared build command: \(executable) \(arguments)")
 
     return [
       .buildCommand(

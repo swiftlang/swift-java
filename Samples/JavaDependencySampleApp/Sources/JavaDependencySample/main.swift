@@ -14,9 +14,29 @@
 
 import JavaKit
 import JavaKitFunction
+import JavaKitConfigurationShared
+import Foundation
+
+// Import the commons-csv library wrapper:
 import JavaCommonsCSV
 
-// Just showcasing that we imported the module
-let s: Subscriber<Int>? = nil
+// Make sure we have the classpath loaded
+// TODO: this is more complex than that, need to account for dependencies of our module
+let currentDir = FileManager.default.currentDirectoryPath
+let configuration = try readConfiguration(sourceDir: "\(currentDir)/Sources/JavaCommonsCSV/")
+
+// 1) Start a JVM with apropriate classpath
+let jvm = try JavaVirtualMachine.shared(classpath: configuration.classpathEntries)
+
+// 2) Get the FilenameUtils Java class so we can call the static methods on it
+let FilenameUtilsClass = try JavaClass<FilenameUtils>()
+
+// Some silly sample path we want to work with:
+let path = "/example/path/executable.exe"
+print("Path = \(path)")
+
+let ext = try! FilenameUtilsClass.getExtension(path)
+print("Java FilenameUtils found extension = \(ext)")
+precondition(ext == "exe")
 
 print("Done.")

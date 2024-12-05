@@ -84,6 +84,7 @@ let package = Package(
       name: "JavaCommonsCSV",
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaKitFunction", package: "swift-java"),
         .product(name: "JavaRuntime", package: "swift-java"),
       ],
       swiftSettings: [

@@ -188,7 +188,12 @@ let package = Package(
 
     .target(
       name: "JavaKit",
-      dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
+      dependencies: [
+        "JavaRuntime",
+        "JavaKitMacros",
+        "JavaTypes",
+        "JavaKitConfigurationShared", // for Configuration reading at runtime
+      ],
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -198,10 +203,8 @@ let package = Package(
         .unsafeFlags(
           [
             "-L\(javaHome)/lib/server",
-            "-Xlinker",
-            "-rpath",
-            "-Xlinker",
-            "\(javaHome)/lib/server",
+            "-Xlinker", "-rpath",
+            "-Xlinker", "\(javaHome)/lib/server",
           ],
           .when(platforms: [.linux, .macOS])
         ),

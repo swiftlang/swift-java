@@ -32,6 +32,14 @@ public struct Configuration: Codable {
   /// The Java class path that should be passed along to the Java2Swift tool.
   public var classpath: String? = nil
 
+  public var classpathEntries: [String] {
+    guard let classpath else {
+      return []
+    }
+
+    return classpath.split(separator: ":").map(String.init)
+  }
+
   /// The Java classes that should be translated to Swift. The keys are
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
@@ -86,6 +94,7 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 }
 
 public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
+  // Workaround since filePath is macOS 13
   let sourcePath =
     if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
   let configFile = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
