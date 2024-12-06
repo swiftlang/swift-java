@@ -52,7 +52,7 @@ package extension JavaTranslator {
 
     }
   }
-  func validateClassConfiguration() throws {
+  func validateClassConfiguration() throws(ValidationError) {
     // Group all classes by swift name
     let groupedDictionary: [SwiftTypeName: [(String, (String, String?))]] = Dictionary(grouping: translatedClasses, by: { SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule) })
     // Find all that are mapped to multiple names

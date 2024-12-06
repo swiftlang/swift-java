@@ -40,7 +40,7 @@ let javaIncludePath = "\(javaHome)/include"
 #endif
 
 let package = Package(
-  name: "JavaKit",
+  name: "SwiftJava",
   platforms: [
     .macOS(.v10_15)
   ],
@@ -171,9 +171,29 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ]
     ),
+
+    .target(
+      name: "JavaKitDependencyResolver",
+      dependencies: [
+        "JavaKit",
+      ],
+      exclude: [
+        "swift-java.config",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+      ]
+    ),
+
     .target(
       name: "JavaKit",
-      dependencies: ["JavaRuntime", "JavaKitMacros", "JavaTypes"],
+      dependencies: [
+        "JavaRuntime",
+        "JavaKitMacros",
+        "JavaTypes",
+        "JavaKitConfigurationShared", // for Configuration reading at runtime
+      ],
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -183,10 +203,8 @@ let package = Package(
         .unsafeFlags(
           [
             "-L\(javaHome)/lib/server",
-            "-Xlinker",
-            "-rpath",
-            "-Xlinker",
-            "\(javaHome)/lib/server",
+            "-Xlinker", "-rpath",
+            "-Xlinker", "\(javaHome)/lib/server",
           ],
           .when(platforms: [.linux, .macOS])
         ),
@@ -283,6 +301,14 @@ let package = Package(
     ),
 
     .target(
+      name: "JavaKitConfigurationShared"
+    ),
+
+    .target(
+      name: "JavaKitShared"
+    ),
+
+    .target(
       name: "Java2SwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -293,6 +319,9 @@ let package = Package(
         "JavaKitReflection",
         "JavaKitNetwork",
         "JavaTypes",
+        "JavaKitShared",
+        "JavaKitConfigurationShared",
+        "JavaKitDependencyResolver",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -312,6 +341,8 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "Java2SwiftLib",
+        "JavaKitDependencyResolver",
+        "JavaKitShared",
       ],
 
       swiftSettings: [
@@ -329,6 +360,7 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaTypes",
+        "JavaKitShared",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

@@ -43,3 +43,4 @@ gradlew.bat
 **/DO_NOT_EDIT.txt
 Plugins/**/_PluginsShared
 Plugins/**/0_PLEASE_SYMLINK*
+Plugins/PluginsShared/JavaKitConfigurationShared

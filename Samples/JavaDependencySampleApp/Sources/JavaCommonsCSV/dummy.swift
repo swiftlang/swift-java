@@ -11,19 +11,3 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-
-pluginManagement {
-    includeBuild("BuildLogic")
-}
-
-rootProject.name = "swift-java"
-
-include "JavaKit"
-include "SwiftKit"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
-}

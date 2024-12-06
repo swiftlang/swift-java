@@ -12,18 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.javakit.dependencies;
 
-rootProject.name = "swift-java"
+public class SwiftJavaBootstrapException extends RuntimeException {
+    public SwiftJavaBootstrapException(String message) {
+        super(message);
+    }
 
-include "JavaKit"
-include "SwiftKit"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
+    public SwiftJavaBootstrapException(String message, Exception ex) {
+        super(message, ex);
     }
 }
