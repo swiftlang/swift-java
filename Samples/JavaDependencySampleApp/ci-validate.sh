@@ -9,6 +9,7 @@ MODULE_NAME="JavaCommonsCSV"
 MODULE_CONFIG_DIR=$(pwd)/Sources/$MODULE_NAME/
 
 ### 1) downloads all the dependencies
+echo "Resolve dependencies..."
 "$JAVASWIFT" --fetch "$MODULE_CONFIG_DIR/swift-java.config" \
     --module-name "$MODULE_NAME" \
     --output-directory "$MODULE_CONFIG_DIR"

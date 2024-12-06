@@ -235,7 +235,9 @@ struct JavaToSwift: ParsableCommand {
       let classpathBuildJavaKitEntries = [
         "JavaKit/build/classes/java/main",
         "../../JavaKit/build/classes/java/main",
-      ]
+      ].filter {
+        FileManager.default.fileExists(atPath: $0)
+      }
       classpathEntries += classpathBuildJavaKitEntries
 
       // Bring up the Java VM.
