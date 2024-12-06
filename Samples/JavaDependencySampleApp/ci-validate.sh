@@ -4,7 +4,6 @@ JAVASWIFT="../../.build/debug/Java2Swift"
 
 MODULE_NAME="JavaCommonsCSV"
 MODULE_CONFIG_DIR=$(pwd)/Sources/$MODULE_NAME/
-MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
 
 ### 1) downloads all the dependencies
 "$JAVASWIFT" --fetch "$MODULE_CONFIG_DIR/swift-java.config" \
@@ -12,6 +11,7 @@ MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
     --output-directory "$MODULE_CONFIG_DIR"
 
 #### 2) extract the config for the fetched dependency
+#MODULE_CONFIG_PATH="$MODULE_CONFIG_DIR/swift-java.config"
 #DEP_JAR_CP=$(jq .classpath "$MODULE_CONFIG_PATH")
 #DEP_JAR_CP=$(echo "$DEP_JAR_CP" | tr -d '"') # trim the "..."
 ## shellcheck disable=SC2086
