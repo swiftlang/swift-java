@@ -26,4 +26,7 @@ extension JavaClass<DependencyResolver> {
     projectBaseDirectory: String,
     dependencies: [String]) throws -> String
 
+  @JavaStaticMethod
+  public func hasDependencyResolverDependenciesLoaded() -> Bool
+
 }

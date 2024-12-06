@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class DependencyResolver {
 
     private static final String COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH = "CLASSPATH:";
-    private static final String CLASSPATH_CACHE_FILENAME = "JavaKitDependencyResolver.classpath.swift-java";
+    private static final String CLASSPATH_CACHE_FILENAME = "JavaKitDependencyResolver.swift-java.classpath";
 
     public static String GRADLE_API_DEPENDENCY = "dev.gradleplugins:gradle-api:8.10.1";
     public static String[] BASE_DEPENDENCIES = {
@@ -46,42 +46,42 @@ public class DependencyResolver {
     @UsedFromSwift
     @SuppressWarnings("unused")
     public static String resolveDependenciesToClasspath(String projectBaseDirectoryString, String[] dependencies) throws IOException {
-try {
-    simpleLog("Fetch dependencies: " + Arrays.toString(dependencies));
-    simpleLog("projectBaseDirectoryString =  " + projectBaseDirectoryString);
-    var projectBasePath = new File(projectBaseDirectoryString).toPath();
+        try {
+            simpleLog("Fetch dependencies: " + Arrays.toString(dependencies));
+            simpleLog("Classpath: " + System.getProperty("java.class.path"));
+            var projectBasePath = new File(projectBaseDirectoryString).toPath();
 
-    File projectDir = Files.createTempDirectory("java-swift-dependencies").toFile();
-    projectDir.mkdirs();
+            File projectDir = Files.createTempDirectory("java-swift-dependencies").toFile();
+            projectDir.mkdirs();
 
-    if (hasDependencyResolverDependenciesLoaded()) {
-        // === Resolve dependencies using Gradle API in-process
-        simpleLog("Gradle API runtime dependency is available, resolve dependencies...");
-        return resolveDependenciesUsingAPI(projectDir, dependencies);
-    }
+            if (hasDependencyResolverDependenciesLoaded()) {
+                // === Resolve dependencies using Gradle API in-process
+                simpleLog("Gradle API runtime dependency is available, resolve dependencies...");
+                return resolveDependenciesUsingAPI(projectDir, dependencies);
+            }
 
-    // === Bootstrap the resolver dependencies and cache them
-    simpleLog("Gradle API not available on classpath, bootstrap %s dependencies: %s"
-            .formatted(DependencyResolver.class.getSimpleName(), Arrays.toString(BASE_DEPENDENCIES)));
-    String dependencyResolverDependenciesClasspath = bootstrapDependencyResolverClasspath();
-    writeDependencyResolverClasspath(projectBasePath, dependencyResolverDependenciesClasspath);
+            // === Bootstrap the resolver dependencies and cache them
+            simpleLog("Gradle API not available on classpath, bootstrap %s dependencies: %s"
+                    .formatted(DependencyResolver.class.getSimpleName(), Arrays.toString(BASE_DEPENDENCIES)));
+            String dependencyResolverDependenciesClasspath = bootstrapDependencyResolverClasspath();
+            writeDependencyResolverClasspath(projectBasePath, dependencyResolverDependenciesClasspath);
 
-    // --- Resolve dependencies using sub-process process
-    // TODO: it would be nice to just add the above classpath to the system classloader and here call the API
-    //       immediately, but that's challenging and not a stable API we can rely on (hacks exist to add paths
-    //       to system classloader but are not reliable).
-    printBuildFiles(projectDir, dependencies);
-    return resolveDependenciesWithSubprocess(projectDir);
-} catch (Exception e) {
-    e.printStackTrace();
-    throw e;
-}
+            // --- Resolve dependencies using sub-process process
+            // TODO: it would be nice to just add the above classpath to the system classloader and here call the API
+            //       immediately, but that's challenging and not a stable API we can rely on (hacks exist to add paths
+            //       to system classloader but are not reliable).
+            printBuildFiles(projectDir, dependencies);
+            return resolveDependenciesWithSubprocess(projectDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 
     /**
      * Use an external {@code gradle} invocation in order to download dependencies such that we can use `gradle-api`
-     * next time we want to resolve dependencies. This uses an external process and is sligtly worse than using the API
+     * next time we want to resolve dependencies. This uses an external process and is slightly worse than using the API
      * directly.
      *
      * @return classpath obtained for the dependencies
@@ -158,7 +158,8 @@ try {
     /**
      * Detect if we have the necessary dependencies loaded.
      */
-    private static boolean hasDependencyResolverDependenciesLoaded() {
+    @UsedFromSwift
+    public static boolean hasDependencyResolverDependenciesLoaded() {
         return hasDependencyResolverDependenciesLoaded(DependencyResolver.class.getClassLoader());
     }
 

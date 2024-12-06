@@ -23,6 +23,32 @@ import JavaKitConfigurationShared
 import JavaKitShared
 
 extension JavaToSwift {
+
+  /// Must be the same as `DependencyResolver#CLASSPATH_CACHE_FILENAME` on the java side.
+  var JavaKitDependencyResolverClasspathCacheFilename: String {
+    "JavaKitDependencyResolver.swift-java.classpath"
+  }
+  var JavaKitDependencyResolverClasspathCacheFilePath: String {
+    ".build/\(JavaKitDependencyResolverClasspathCacheFilename)"
+  }
+
+  func fetchDependenciesCachedClasspath() -> [String]? {
+    guard let cachedClasspathURL = URL(string: "file://" + FileManager.default.currentDirectoryPath + "/" + JavaKitDependencyResolverClasspathCacheFilePath) else {
+      return []
+    }
+
+    guard FileManager.default.fileExists(atPath: cachedClasspathURL.path) else {
+      return []
+    }
+
+    guard let javaKitDependencyResolverCachedClasspath = try? String(contentsOf: cachedClasspathURL) else {
+      return []
+    }
+
+    print("[debug][swift-java] Cached dependency resolver classpath: \(javaKitDependencyResolverCachedClasspath)")
+    return javaKitDependencyResolverCachedClasspath.split(separator: ":").map(String.init)
+  }
+
   func fetchDependencies(moduleName: String,
                          dependencies: [JavaDependencyDescriptor],
                          baseClasspath: [String],

@@ -222,13 +222,16 @@ struct JavaToSwift: ParsableCommand {
         let extraClasspathEntries = extraClasspath.split(separator: ":").map(String.init)
         print("[debug][swift-java] Extra classpath: \(extraClasspathEntries)")
         classpathEntries += extraClasspathEntries
-      case .classWrappers/*(let config)*/,
-           .fetchDependencies/*(let config)*/:
+      case .fetchDependencies:
+        // if we have already fetched dependencies for the dependency loader,
+        // let's use them so we can in-process resolve rather than forking a new
+        // gradle process.
+        if let dependencyResolverClasspath = fetchDependenciesCachedClasspath() {
+          print("[debug][swift-java] Found cached dependency resolver classpath: \(dependencyResolverClasspath)")
+          classpathEntries += dependencyResolverClasspath
+        }
+      case .classWrappers:
         break;
-        //   * Classpath specified in the configuration file (if any)
-  //      let extraClasspathEntries = config.classpath?.split(separator: ":").map(String.init) ?? []
-  //      print("[debug][swift-java] Config classpath: \(extraClasspathEntries)")
-  //      classpathEntries += extraClasspathEntries
       }
 
       // Add extra classpath entries which are specific to building the JavaKit project and samples
