@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+set -x
+
 JAVASWIFT="../../.build/debug/Java2Swift"
 
 MODULE_NAME="JavaCommonsCSV"
