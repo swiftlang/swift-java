@@ -97,17 +97,23 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
     arguments.append(configFile.path(percentEncoded: false))
 
-    guard let classes = config.classes else {
-      log("Config at \(configFile) did not have 'classes' configured, skipping java2swift step.")
-      return []
-    }
-    
+//    guard let classes = config.classes else {
+//      log("Config at \(configFile) did not have 'classes' configured, skipping java2swift step.")
+//      return []
+//    }
+    let classes = config.classes ?? [:]
+
     /// Determine the set of Swift files that will be emitted by the Java2Swift
     /// tool.
     let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
       let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
       return outputDirectory.appending(path: "\(swiftNestedName).swift")
     }
+    
+    arguments += [
+      "--cache-directory",
+      context.pluginWorkDirectoryURL.path(percentEncoded: false)
+    ]
 
     // Find the Java .class files generated from prior plugins.
     let compiledClassFiles = sourceModule.pluginGeneratedResources.filter { url in
@@ -141,19 +147,17 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       }
     }
     
-    guard let classes = config.classes else {
-      log("Skipping java2swift step: Missing 'classes' key in swift-java.config at '\(configFile.path)'")
-      return []
-    }
-
     let executable = try context.tool(named: "Java2Swift").url
 
     return [
       .buildCommand(
-        displayName: "Wrapping \(classes.count) Java classes target \(sourceModule.name) in Swift",
+        displayName: "Wrapping \(classes.count) Java classes target in Swift target '\(sourceModule.name)'",
         executable: executable,
         arguments: arguments,
-        inputFiles: [ configFile ] + compiledClassFiles,
+        inputFiles: compiledClassFiles + [
+          configFile,
+          context.cachedClasspathFile(moduleName: sourceModule.name)
+        ],
         outputFiles: outputSwiftFiles
       )
     ]

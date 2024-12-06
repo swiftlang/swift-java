@@ -62,6 +62,20 @@ struct JavaToSwift: ParsableCommand {
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
   var outputDirectory: String? = nil
 
+  
+  @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
+  var cacheDirectory: String? = nil
+  
+  var effectiveCacheDirectory: String? {
+    if let cacheDirectory {
+      return cacheDirectory
+    } else if let outputDirectory {
+      return outputDirectory
+    } else {
+      return nil
+    }
+  }
+  
   @Option(name: .shortAndLong, help: "How to handle an existing swift-java.config; by default 'overwrite' by can be changed to amending a configuration")
   var existingConfig: ExistingConfigFileMode = .overwrite
   public enum ExistingConfigFileMode: String, ExpressibleByArgument, Codable {
@@ -288,9 +302,15 @@ struct JavaToSwift: ParsableCommand {
           environment: jvm.environment()
         )
 
-      case .fetchDependencies/*(let config)*/:
+      case .fetchDependencies:
         guard let dependencies = config.dependencies else {
           fatalError("Configuration for fetching dependencies must have 'dependencies' defined!")
+        }
+        guard let moduleName = self.moduleName else {
+          fatalError("Fetching dependencies must specify module name (--module-name)!")
+        }
+        guard let effectiveCacheDirectory else {
+          fatalError("Fetching dependencies must effective cache directory! Specify --output-directory or --cache-directory")
         }
 
         let dependencyClasspath = try fetchDependencies(
@@ -300,7 +320,10 @@ struct JavaToSwift: ParsableCommand {
           environment: jvm.environment()
         )
 
-        try writeFetchDependencies(resolvedClasspath: dependencyClasspath)
+        try writeFetchedDependenciesClasspath(
+          moduleName: moduleName,
+          cacheDir: effectiveCacheDirectory,
+          resolvedClasspath: dependencyClasspath)
       }
     } catch {
       // We fail like this since throwing out of the run often ends up hiding the failure reason when it is executed as SwiftPM plugin (!)
@@ -309,7 +332,8 @@ struct JavaToSwift: ParsableCommand {
       fatalError(message)
     }
 
-    print("[info][swift-java] " + "Done: ".green + CommandLine.arguments.joined(separator: " "))
+    // Just for debugging so it is clear which command has finished
+    print("[debug][swift-java] " + "Done: ".green + CommandLine.arguments.joined(separator: " ").green)
   }
 
   private func names(from javaClassNameOpt: String) -> (javaClassName: String, swiftName: String) {
@@ -346,8 +370,9 @@ struct JavaToSwift: ParsableCommand {
   mutating func writeContents(
     _ contents: String,
     outputDirectoryOverride: Foundation.URL?,
-    to filename: String, description: String) throws {
-    guard let outputDir = actualOutputDirectory else {
+    to filename: String,
+    description: String) throws {
+    guard let outputDir = (outputDirectoryOverride ?? actualOutputDirectory) else {
       print("// \(filename) - \(description)")
       print(contents)
       return
@@ -365,9 +390,9 @@ struct JavaToSwift: ParsableCommand {
 
     // Write the file:
     let file = outputDir.appendingPathComponent(filename)
-    print("[swift-java] Writing \(description) to '\(file.path)'...", terminator: "")
+    print("[debug][swift-java] Writing \(description) to '\(file.path)'... ", terminator: "")
     try contents.write(to: file, atomically: true, encoding: .utf8)
-    print(" done.".green)
+    print("done.".green)
   }
 }
 

@@ -75,24 +75,22 @@ extension JavaToSwift {
 }
 
 extension JavaToSwift {
-  mutating func writeFetchDependencies(resolvedClasspath: ResolvedDependencyClasspath) throws {
-    var configuration = Configuration()
-    configuration.dependencies = resolvedClasspath.rootDependencies
-    configuration.classpath = resolvedClasspath.classpath
-
+  mutating func writeFetchedDependenciesClasspath(
+    moduleName: String,
+    cacheDir: String,
+    resolvedClasspath: ResolvedDependencyClasspath) throws {
     // Convert the artifact name to a module name
     // e.g. reactive-streams -> ReactiveStreams
-    // TODO: Should we prefix them with `Java...`?
-    let targetModule = artifactIDAsModuleID(resolvedClasspath.rootDependencies.first!.artifactID)
 
-    // Encode the configuration.
-    let contents = try configuration.renderJSON()
+    // The file contents are just plain
+    let contents = resolvedClasspath.classpath
 
     // Write the file
     try writeContents(
       contents,
-      to: "swift-java.config",
-      description: "swift-java configuration file"
+      outputDirectoryOverride: URL(fileURLWithPath: cacheDir),
+      to: "\(moduleName).swift-java.classpath",
+      description: "swift-java.classpath file for module \(moduleName)"
     )
   }
 

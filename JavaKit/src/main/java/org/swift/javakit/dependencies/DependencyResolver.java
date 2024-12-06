@@ -29,6 +29,8 @@ import java.util.stream.Stream;
  * Fetches dependencies using the Gradle resolver and returns the resulting classpath which includes
  * the fetched dependency and all of its dependencies.
  */
+@UsedFromSwift
+@SuppressWarnings("unused")
 public class DependencyResolver {
 
     private static final String COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH = "CLASSPATH:";
@@ -48,7 +50,6 @@ public class DependencyResolver {
     public static String resolveDependenciesToClasspath(String projectBaseDirectoryString, String[] dependencies) throws IOException {
         try {
             simpleLog("Fetch dependencies: " + Arrays.toString(dependencies));
-            simpleLog("Classpath: " + System.getProperty("java.class.path"));
             var projectBasePath = new File(projectBaseDirectoryString).toPath();
 
             File projectDir = Files.createTempDirectory("java-swift-dependencies").toFile();
