@@ -82,8 +82,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
-      - name: Verify Samples (All)
-        run: .github/scripts/validate_samples.sh
+      - name: "Verify Sample: JavaDependencySampleApp"
+        run: .github/scripts/validate_sample.sh Samples/JavaDependencySampleApp
+      - name: "Verify Sample: JavaKitSampleApp"
+        run: .github/scripts/validate_sample.sh Samples/JavaKitSampleApp
+      - name: "Verify Sample: JavaProbablyPrime"
+        run: .github/scripts/validate_sample.sh Samples/JavaProbablyPrime
+      - name: "Verify Sample: JavaSieve"
+        run: .github/scripts/validate_sample.sh Samples/JavaSieve
+      - name: "Verify Sample: SwiftAndJavaJarSampleLib"
+        run: .github/scripts/validate_sample.sh Samples/SwiftAndJavaJarSampleLib
+      - name: "Verify Sample: SwiftKitSampleApp"
+        run: .github/scripts/validate_sample.sh Samples/SwiftKitSampleApp
         # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
         # - name: Build (Swift) Benchmarks
         #  run: "swift package --package-path Benchmarks/ benchmark list"

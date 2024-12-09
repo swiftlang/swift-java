@@ -36,7 +36,7 @@ let path = "/example/path/executable.exe"
 print("Path = \(path)")
 
 let ext = try! FilenameUtilsClass.getExtension(path)
-print("Java FilenameUtils found extension = \(ext)")
+print("org.apache.commons.io.FilenameUtils.getExtension = \(ext)")
 precondition(ext == "exe")
 
 print("Done.")
