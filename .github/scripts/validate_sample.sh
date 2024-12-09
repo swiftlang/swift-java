@@ -28,5 +28,5 @@ echo -e "Validated sample '${BOLD}${sampleDir}${RESET}': ${BOLD}passed${RESET}."
 cd - || exit
 
 echo
-printf "Done validating sample: ${sampleDir}"
+printf "Done validating sample: %s" "${sampleDir}"
 echo -e "${GREEN}done${RESET}."

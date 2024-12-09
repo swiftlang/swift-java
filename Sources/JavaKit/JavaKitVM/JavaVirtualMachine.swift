@@ -249,7 +249,6 @@ extension JavaVirtualMachine {
             // wrapper.
             let javaVirtualMachine = JavaVirtualMachine(adoptingJVM: jvm!)
             sharedJVMPointer = javaVirtualMachine
-            print("WAS EXISTING")
             return javaVirtualMachine
           }
 
@@ -261,7 +260,6 @@ extension JavaVirtualMachine {
           // Create a new instance of the JVM.
           let javaVirtualMachine: JavaVirtualMachine
           do {
-            print("CREATE")
             javaVirtualMachine = try JavaVirtualMachine(
               classpath: classpath,
               vmOptions: vmOptions,
