@@ -170,7 +170,7 @@ struct JavaToSwift: ParsableCommand {
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
     do {
       let config: Configuration
-
+      
       // Determine the mode in which we'll execute.
       let toolMode: ToolMode
       if jar {
@@ -217,10 +217,16 @@ struct JavaToSwift: ParsableCommand {
       //   * Command-line option --classpath
       let classpathOptionEntries: [String] = classpath.flatMap { $0.split(separator: ":").map(String.init) }
       let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
-      var classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
+      let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
       print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
-
+      
       var classpathEntries: [String] = classpathFromConfig
+      
+      let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(
+        in: self.effectiveCacheDirectory ?? FileManager.default.currentDirectoryPath)
+      print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
+      classpathEntries += swiftJavaCachedModuleClasspath
+      
       if !classpathOptionEntries.isEmpty {
         print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
         classpathEntries += classpathOptionEntries
@@ -276,7 +282,6 @@ struct JavaToSwift: ParsableCommand {
   //    }
 
       //   * Classespaths from all dependent configuration files
-      print("[debug][swift-java] Dependent configs: \(dependentConfigs.map { $0.1 })")
       for (_, config) in dependentConfigs {
         // TODO: may need to resolve the dependent configs rather than just get their configs
         // TODO: We should cache the resolved classpaths as well so we don't do it many times

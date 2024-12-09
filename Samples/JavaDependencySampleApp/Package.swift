@@ -70,13 +70,13 @@ let package = Package(
         .product(name: "JavaKitFunction", package: "swift-java"),
         "JavaCommonsCSV"
       ],
+      exclude: ["swift-java.config"],
       swiftSettings: [
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
         .swiftLanguageMode(.v5),
       ],
       plugins: [
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
-//        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
 
@@ -85,14 +85,14 @@ let package = Package(
       dependencies: [
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "JavaKitFunction", package: "swift-java"),
-        .product(name: "JavaRuntime", package: "swift-java"),
+        .product(name: "JavaKitCollection", package: "swift-java"),
       ],
+      exclude: ["swift-java.config"],
       swiftSettings: [
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
         .swiftLanguageMode(.v5),
       ],
       plugins: [
-//        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
     ),

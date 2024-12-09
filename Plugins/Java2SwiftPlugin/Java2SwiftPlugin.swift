@@ -20,13 +20,16 @@ fileprivate let SwiftJavaConfigFileName = "swift-java.config"
 @main
 struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
-  var pluginName: String = "swift-java-javac"
+  var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
   
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-    log("Create build commands for: \(target.name)")
+    log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
+    let executable = try context.tool(named: "Java2Swift").url
+    var commands: [Command] = []
+    
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
@@ -35,14 +38,17 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
       .appending(path: SwiftJavaConfigFileName)
-    let configData = try Data(contentsOf: configFile)
-    let config = try JSONDecoder().decode(Configuration.self, from: configData)
+    let config = try readConfiguration(sourceDir: sourceDir)
+
+    log("Config on path: \(configFile.path(percentEncoded: false))")
+    log("Config was: \(config)")
+    var javaDependencies = config.dependencies ?? []
 
     /// Find the manifest files from other Java2Swift executions in any targets
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
-      log("Search for config files in target: \(target.name)")
+      // log("Search for config files in target: \(target.name)")
       let dependencyURL = URL(filePath: target.directory.string)
 
       // Look for a config file within this target.
@@ -60,13 +66,13 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     for dependency in target.dependencies {
       switch dependency {
       case .target(let target):
-        log("Dependency target: \(target.name)")
+        // log("Dependency target: \(target.name)")
         searchForConfigFiles(in: target)
 
       case .product(let product):
-        log("Dependency product: \(product.name)")
+        // log("Dependency product: \(product.name)")
         for target in product.targets {
-          log("Dependency product: \(product.name), target: \(target.name)")
+          // log("Dependency product: \(product.name), target: \(target.name)")
           searchForConfigFiles(in: target)
         }
 
@@ -77,17 +83,14 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // Process indirect target dependencies.
     for dependency in target.recursiveTargetDependencies {
-      log("Recursive dependency target: \(dependency.name)")
+      // log("Recursive dependency target: \(dependency.name)")
       searchForConfigFiles(in: dependency)
     }
 
-    let outputDirectory = context.pluginWorkDirectoryURL
-      .appending(path: "generated")
-
-    var arguments: [String] = [
-      "--module-name", sourceModule.name,
-      "--output-directory", outputDirectory.path(percentEncoded: false),
-    ]
+    var arguments: [String] = []
+    arguments += argumentsModuleName(sourceModule: sourceModule)
+    arguments += argumentsOutputDirectory(context: context)
+    
     arguments += dependentConfigFiles.flatMap { moduleAndConfigFile in
       let (moduleName, configFile) = moduleAndConfigFile
       return [
@@ -102,12 +105,14 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 //      return []
 //    }
     let classes = config.classes ?? [:]
+    print("Classes to wrap: \(classes.map(\.key))")
 
-    /// Determine the set of Swift files that will be emitted by the Java2Swift
-    /// tool.
+    /// Determine the set of Swift files that will be emitted by the Java2Swift tool.
+    // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
+    let outputDirectoryGenerated = self.outputDirectory(context: context, generated: true)
     let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
       let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
-      return outputDirectory.appending(path: "\(swiftNestedName).swift")
+      return outputDirectoryGenerated.appending(path: "\(swiftNestedName).swift")
     }
     
     arguments += [
@@ -147,19 +152,77 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       }
     }
     
-    let executable = try context.tool(named: "Java2Swift").url
+    var fetchDependenciesOutputFiles: [URL] = []
+    if let dependencies = config.dependencies, !dependencies.isEmpty {
+      let displayName = "Fetch (Java) dependencies for Swift target \(sourceModule.name)"
+      log("Prepared: \(displayName)")
+      
+      fetchDependenciesOutputFiles += [
+        outputFilePath(context: context, generated: false, filename: "\(sourceModule.name).swift-java.classpath")
+      ]
+      
+      commands += [
+        .buildCommand(
+          displayName: displayName,
+          executable: executable,
+          arguments: [
+            "--fetch", configFile.path(percentEncoded: false),
+            "--module-name", sourceModule.name,
+            "--output-directory", outputDirectory(context: context, generated: false).path(percentEncoded: false)
+          ],
+          environment: [:],
+          inputFiles: [configFile],
+          outputFiles: fetchDependenciesOutputFiles
+        )
+      ]
+    } else {
+      log("No dependencies to fetch for target \(sourceModule.name)")
+    }
+    
+    if !outputSwiftFiles.isEmpty {
+      commands += [
+        .buildCommand(
+          displayName: "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'",
+          executable: executable,
+          arguments: arguments,
+          inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [
+            configFile
+          ],
+          outputFiles: outputSwiftFiles
+        )
+      ]
+    } else {
+      log("No Swift output files, skip wrapping")
+    }
+    
+    return commands
+  }
+}
 
+extension Java2SwiftBuildToolPlugin {
+  func argumentsModuleName(sourceModule: Target) -> [String] {
     return [
-      .buildCommand(
-        displayName: "Wrapping \(classes.count) Java classes target in Swift target '\(sourceModule.name)'",
-        executable: executable,
-        arguments: arguments,
-        inputFiles: compiledClassFiles + [
-          configFile,
-          context.cachedClasspathFile(moduleName: sourceModule.name)
-        ],
-        outputFiles: outputSwiftFiles
-      )
+      "--module-name", sourceModule.name
     ]
+  }
+  
+  func argumentsOutputDirectory(context: PluginContext, generated: Bool = true) -> [String] {
+    return [
+      "--output-directory",
+      outputDirectory(context: context, generated: generated).path(percentEncoded: false)
+    ]
+  }
+  
+  func outputDirectory(context: PluginContext, generated: Bool = true) -> URL {
+    let dir = context.pluginWorkDirectoryURL
+    if generated {
+      return dir.appending(path: "generated")
+    } else {
+      return dir
+    }
+  }
+  
+  func outputFilePath(context: PluginContext, generated: Bool, filename: String) -> URL {
+    outputDirectory(context: context, generated: generated).appending(path: filename)
   }
 }

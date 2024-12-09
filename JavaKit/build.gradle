@@ -12,33 +12,48 @@
  //
  //===----------------------------------------------------------------------===//
 
- plugins {
-     id("build-logic.java-application-conventions")
- }
+import groovy.json.JsonSlurper
 
- group = "org.swift.javakit"
- version = "1.0-SNAPSHOT"
+plugins {
+  id("build-logic.java-library-conventions")
+}
 
- repositories {
-     mavenCentral()
- }
+group = "org.swift.javakit"
+version = "1.0-SNAPSHOT"
 
- java {
-     toolchain {
-         languageVersion.set(JavaLanguageVersion.of(22))
-     }
- }
+repositories {
+  mavenCentral()
+}
 
- dependencies {
-     implementation("dev.gradleplugins:gradle-api:8.10.1")
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(22))
+  }
+}
 
-     testImplementation(platform("org.junit:junit-bom:5.10.0"))
-     testImplementation("org.junit.jupiter:junit-jupiter")
- }
+List<String> loadDependenciesFromSwiftJavaJSON() {
+  def jsonFile = file("../Sources/JavaKitDependencyResolver/swift-java.config")
+  if (!jsonFile.exists()) {
+    throw new FileNotFoundException("Dependencies must be declared in Swift config file! Not found: ${jsonFile.absolutePath}")
+  }
+  def jsonContent = new JsonSlurper().parseText(jsonFile.text)
+  return jsonContent.dependencies
+}
 
- tasks.test {
-     useJUnitPlatform()
-     testLogging {
-         events("passed", "skipped", "failed")
-     }
- }
+dependencies {
+  // We load dependencies from one source of truth: the swift-java.config of module
+  // that is used to access this Java code.
+  loadDependenciesFromSwiftJavaJSON().each {
+    implementation(it)
+  }
+
+  testImplementation(platform("org.junit:junit-bom:5.10.0"))
+  testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks.test {
+  useJUnitPlatform()
+  testLogging {
+    events("passed", "skipped", "failed")
+  }
+}

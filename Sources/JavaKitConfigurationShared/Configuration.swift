@@ -108,6 +108,31 @@ public func readConfiguration(sourceDir: String, file: String = #fileID, line: U
   }
 }
 
+public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.currentDirectoryPath) -> [String] {
+  let fileManager = FileManager.default
+
+  let baseURL = URL(fileURLWithPath: basePath)
+  var classpathEntries: [String] = []
+
+  print("[debug][swift-java] Searching for *.swift-java.classpath files in: \(baseURL)")
+  guard let enumerator = fileManager.enumerator(at: baseURL, includingPropertiesForKeys: []) else {
+    print("[warning][swift-java] Failed to get enumerator for \(baseURL)")
+    return []
+  }
+  
+  for case let fileURL as URL in enumerator {
+    if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
+      print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.relativePath)")
+      if let contents = try? String(contentsOf: fileURL) {
+        let entries = contents.split(separator: ":").map(String.init)
+        classpathEntries += entries
+      }
+    }
+  }
+
+  return classpathEntries
+}
+
 extension Configuration {
   public var compilerVersionArgs: [String] {
     var compilerVersionArgs = [String]()

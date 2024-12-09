@@ -23,10 +23,10 @@ import JavaCommonsCSV
 // Make sure we have the classpath loaded
 // TODO: this is more complex than that, need to account for dependencies of our module
 let currentDir = FileManager.default.currentDirectoryPath
-let configuration = try readConfiguration(sourceDir: "\(currentDir)/Sources/JavaCommonsCSV/")
+let swiftJavaClasspath = findSwiftJavaClasspaths()
 
-// 1) Start a JVM with apropriate classpath
-let jvm = try JavaVirtualMachine.shared(classpath: configuration.classpathEntries)
+// 1) Start a JVM with appropriate classpath
+let jvm = try JavaVirtualMachine.shared(classpath: swiftJavaClasspath)
 
 // 2) Get the FilenameUtils Java class so we can call the static methods on it
 let FilenameUtilsClass = try JavaClass<FilenameUtils>()

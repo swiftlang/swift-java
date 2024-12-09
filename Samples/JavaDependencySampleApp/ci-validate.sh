@@ -4,7 +4,11 @@ set -e
 set -x
 
 JAVASWIFT="../../.build/debug/Java2Swift"
+cd ../../
+echo "Build Java2Swift binary..."
+swift build
 
+cd -
 MODULE_NAME="JavaCommonsCSV"
 MODULE_CONFIG_DIR=$(pwd)/Sources/$MODULE_NAME/
 

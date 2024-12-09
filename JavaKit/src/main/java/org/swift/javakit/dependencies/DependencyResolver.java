@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -137,7 +138,9 @@ public class DependencyResolver {
 
             ex.printStackTrace();
             throw new SwiftJavaBootstrapException("Failed to bootstrap dependencies necessary for " +
-                    DependencyResolver.class.getCanonicalName() + "!", ex);
+                    DependencyResolver.class.getCanonicalName() + "! " +
+                    "Make sure to invoke SwiftPM with --disable-sandbox because " +
+                    "swift-java needs network access to fetch java dependencies.", ex);
         }
     }
 
@@ -186,10 +189,19 @@ public class DependencyResolver {
                     .run();
 
             var all = outputStream.toString();
-            var classpath = Arrays.stream(all.split("\n"))
+            var classpathString = Arrays.stream(all.split("\n"))
                     .filter(s -> s.startsWith(COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH))
                     .map(s -> s.substring(COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH.length()))
                     .findFirst().orElseThrow(() -> new RuntimeException("Could not find classpath output from ':printRuntimeClasspath' task."));
+            simpleLog("DEPENDENCY BUILD PATH = " + projectDir.getAbsolutePath());
+
+            // remove output directories of the project we used for the dependency resolution
+            var classpath = Arrays.stream(classpathString
+                    .split(":"))
+                    .filter(s -> !s.startsWith(projectDir.getAbsolutePath()))
+                    .collect(Collectors.joining(":"));
+
+
             return classpath;
         }
     }
