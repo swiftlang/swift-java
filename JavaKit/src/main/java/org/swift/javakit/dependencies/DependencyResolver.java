@@ -193,7 +193,6 @@ public class DependencyResolver {
                     .filter(s -> s.startsWith(COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH))
                     .map(s -> s.substring(COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH.length()))
                     .findFirst().orElseThrow(() -> new RuntimeException("Could not find classpath output from ':printRuntimeClasspath' task."));
-            simpleLog("DEPENDENCY BUILD PATH = " + projectDir.getAbsolutePath());
 
             // remove output directories of the project we used for the dependency resolution
             var classpath = Arrays.stream(classpathString

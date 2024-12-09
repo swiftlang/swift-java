@@ -12,8 +12,6 @@
  //
  //===----------------------------------------------------------------------===//
 
-import groovy.json.JsonSlurper
-
 plugins {
   id("build-logic.java-library-conventions")
 }
@@ -31,21 +29,8 @@ java {
   }
 }
 
-List<String> loadDependenciesFromSwiftJavaJSON() {
-  def jsonFile = file("../Sources/JavaKitDependencyResolver/swift-java.config")
-  if (!jsonFile.exists()) {
-    throw new FileNotFoundException("Dependencies must be declared in Swift config file! Not found: ${jsonFile.absolutePath}")
-  }
-  def jsonContent = new JsonSlurper().parseText(jsonFile.text)
-  return jsonContent.dependencies
-}
-
 dependencies {
-  // We load dependencies from one source of truth: the swift-java.config of module
-  // that is used to access this Java code.
-  loadDependenciesFromSwiftJavaJSON().each {
-    implementation(it)
-  }
+  implementation("dev.gradleplugins:gradle-api:8.10.1")
 
   testImplementation(platform("org.junit:junit-bom:5.10.0"))
   testImplementation("org.junit.jupiter:junit-jupiter")
@@ -56,4 +41,13 @@ tasks.test {
   testLogging {
     events("passed", "skipped", "failed")
   }
+}
+
+// Task necessary to bootstrap
+task printRuntimeClasspath {
+    def runtimeClasspath = sourceSets.main.runtimeClasspath
+    inputs.files(runtimeClasspath)
+    doLast {
+        println("CLASSPATH:${runtimeClasspath.asPath}")
+    }
 }
