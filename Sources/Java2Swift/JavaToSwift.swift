@@ -255,19 +255,22 @@ struct JavaToSwift: ParsableCommand {
       }
 
       // Add extra classpath entries which are specific to building the JavaKit project and samples
-      let classpathBuildJavaKitEntries = [
-        "JavaKit/build/classes/java/main",
-        "../../JavaKit/build/classes/java/main",
-      ].filter {
-        FileManager.default.fileExists(atPath: $0)
-      }
+      let classpathBuildJavaKitEntries = [ // FIXME: THIS IS A TRICK UNTIL WE FIGURE OUT HOW TO BOOTSTRAP THIS PART
+        FileManager.default.currentDirectoryPath,
+        FileManager.default.currentDirectoryPath + "/.build",
+        FileManager.default.currentDirectoryPath + "/JavaKit/build/libs",
+        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+          .deletingLastPathComponent()
+          .deletingLastPathComponent().absoluteURL.path + "/JavaKit/build/libs/JavaKit-1.0-SNAPSHOT.jar"
+      ]
       classpathEntries += classpathBuildJavaKitEntries
-
+    
       // Bring up the Java VM.
       // TODO: print only in verbose mode
-      let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
       let classpath = classpathEntries.joined(separator: ":")
       print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
+
+      let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
 
       // FIXME: we should resolve dependencies here perhaps
   //    if let dependencies = config.dependencies {
@@ -317,6 +320,8 @@ struct JavaToSwift: ParsableCommand {
         guard let effectiveCacheDirectory else {
           fatalError("Fetching dependencies must effective cache directory! Specify --output-directory or --cache-directory")
         }
+
+        print("[debug][swift-java] Base classpath to fetch dependencies: \(classpathOptionEntries)")
 
         let dependencyClasspath = try fetchDependencies(
           moduleName: moduleName,

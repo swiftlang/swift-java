@@ -33,9 +33,8 @@ extension JavaToSwift {
   }
 
   func fetchDependenciesCachedClasspath() -> [String]? {
-    guard let cachedClasspathURL = URL(string: "file://" + FileManager.default.currentDirectoryPath + "/" + JavaKitDependencyResolverClasspathCacheFilePath) else {
-      return []
-    }
+    let cachedClasspathURL = URL(
+      fileURLWithPath: FileManager.default.currentDirectoryPath + "/" + JavaKitDependencyResolverClasspathCacheFilePath)
 
     guard FileManager.default.fileExists(atPath: cachedClasspathURL.path) else {
       return []

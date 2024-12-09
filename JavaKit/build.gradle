@@ -43,6 +43,30 @@ tasks.test {
   }
 }
 
+// Copy the gradle wrapper we're using into the resulting jar's resources.
+// We'll use it to bootstrap dependencies (and gradle!) if there is none yet.
+tasks.processResources {
+  from('gradlew') {
+    into 'gradle/'
+  }
+  from('gradlew.bat') {
+    into 'gradle/'
+  }
+  from('../gradle/wrapper/gradle-wrapper.jar') {
+    into 'gradle/wrapper/'
+  }
+  from('../gradle/wrapper/gradle-wrapper.properties') {
+    into 'gradle/wrapper/'
+  }
+}
+
+//task fatJar(type: Jar) {
+//    archiveBaseName = 'java-kit-fat-jar'
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
+//}
+
 // Task necessary to bootstrap
 task printRuntimeClasspath {
     def runtimeClasspath = sourceSets.main.runtimeClasspath

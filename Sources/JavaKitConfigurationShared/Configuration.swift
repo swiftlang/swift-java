@@ -71,9 +71,18 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
     let container = try decoder.singleValueContainer()
     let string = try container.decode(String.self)
     let parts = string.split(separator: ":")
-    guard parts.count == 3 else {
-      throw JavaDependencyDescriptorError(message: "Illegal dependency, did not match: `groupID:artifactID:version`")
+    
+    if parts.count == 1 && string.hasPrefix(":") {
+      self.groupID = ""
+      self.artifactID = ":" + String(parts.first!)
+      self.version = ""
+      return
     }
+    
+    guard parts.count == 3 else {
+      throw JavaDependencyDescriptorError(message: "Illegal dependency, did not match: `groupID:artifactID:version`, parts: '\(parts)'")
+    }
+    
     self.groupID = String(parts[0])
     self.artifactID = String(parts[1])
     self.version = String(parts[2])
@@ -96,14 +105,18 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
   // Workaround since filePath is macOS 13
   let sourcePath =
-    if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
-  let configFile = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
+  if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
+  let configPath = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
+  
+  return try readConfiguration(configPath: configPath, file: file, line: line)
+}
 
+public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration {
   do {
-    let configData = try Data(contentsOf: configFile)
+    let configData = try Data(contentsOf: configPath)
     return try JSONDecoder().decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configFile)'!", error: error,
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath)'!", error: error,
       file: file, line: line)
   }
 }
@@ -125,6 +138,9 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
       print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.relativePath)")
       if let contents = try? String(contentsOf: fileURL) {
         let entries = contents.split(separator: ":").map(String.init)
+        for entry in entries {
+          print("[debug][swift-java] Classpath += \(entry)")
+        }
         classpathEntries += entries
       }
     }

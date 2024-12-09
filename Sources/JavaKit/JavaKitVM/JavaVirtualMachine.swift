@@ -73,8 +73,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       for path in classpath {
         if !fileManager.fileExists(atPath: path) {
           // FIXME: this should be configurable, a classpath missing a directory isn't reason to blow up
-          print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(path)") // TODO: stderr
-          // throw JavaKitError.classpathEntryNotFound(entry: path, classpath: classpath)
+          print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)") // TODO: stderr
         }
       }
       let colonSeparatedClassPath = classpath.joined(separator: ":")
@@ -250,6 +249,7 @@ extension JavaVirtualMachine {
             // wrapper.
             let javaVirtualMachine = JavaVirtualMachine(adoptingJVM: jvm!)
             sharedJVMPointer = javaVirtualMachine
+            print("WAS EXISTING")
             return javaVirtualMachine
           }
 
@@ -261,6 +261,7 @@ extension JavaVirtualMachine {
           // Create a new instance of the JVM.
           let javaVirtualMachine: JavaVirtualMachine
           do {
+            print("CREATE")
             javaVirtualMachine = try JavaVirtualMachine(
               classpath: classpath,
               vmOptions: vmOptions,

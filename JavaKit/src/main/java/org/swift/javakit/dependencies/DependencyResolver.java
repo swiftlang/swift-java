@@ -51,6 +51,7 @@ public class DependencyResolver {
     public static String resolveDependenciesToClasspath(String projectBaseDirectoryString, String[] dependencies) throws IOException {
         try {
             simpleLog("Fetch dependencies: " + Arrays.toString(dependencies));
+            simpleLog("Classpath: " + System.getProperty("java.class.path"));
             var projectBasePath = new File(projectBaseDirectoryString).toPath();
 
             File projectDir = Files.createTempDirectory("java-swift-dependencies").toFile();
@@ -118,7 +119,7 @@ public class DependencyResolver {
         stderrFile.deleteOnExit();
 
         try {
-            ProcessBuilder gradleBuilder = new ProcessBuilder("gradle", ":printRuntimeClasspath");
+            ProcessBuilder gradleBuilder = new ProcessBuilder("./gradlew", ":printRuntimeClasspath");
             gradleBuilder.directory(gradleProjectDir);
             gradleBuilder.redirectOutput(stdoutFile);
             gradleBuilder.redirectError(stderrFile);
@@ -172,7 +173,7 @@ public class DependencyResolver {
      *
      * @return classpath which was resolved for the dependencies
      */
-    private static String resolveDependenciesUsingAPI(File projectDir, String[] dependencies) throws FileNotFoundException {
+    private static String resolveDependenciesUsingAPI(File projectDir, String[] dependencies) throws IOException {
         printBuildFiles(projectDir, dependencies);
 
         var connection = GradleConnector.newConnector()
@@ -196,7 +197,7 @@ public class DependencyResolver {
 
             // remove output directories of the project we used for the dependency resolution
             var classpath = Arrays.stream(classpathString
-                    .split(":"))
+                            .split(":"))
                     .filter(s -> !s.startsWith(projectDir.getAbsolutePath()))
                     .collect(Collectors.joining(":"));
 
@@ -221,7 +222,8 @@ public class DependencyResolver {
         }
     }
 
-    private static void printBuildFiles(File projectDir, String[] dependencies) throws FileNotFoundException {
+    private static void printBuildFiles(File projectDir, String[] dependencies) throws IOException {
+        // === build.gradle
         File buildFile = new File(projectDir, "build.gradle");
         try (PrintWriter writer = new PrintWriter(buildFile)) {
             writer.println("plugins { id 'java-library' }");
@@ -244,11 +246,47 @@ public class DependencyResolver {
                     """);
         }
 
+        // === settings.gradle
         File settingsFile = new File(projectDir, "settings.gradle.kts");
         try (PrintWriter writer = new PrintWriter(settingsFile)) {
             writer.println("""
                     rootProject.name = "swift-java-resolve-temp-project"
                     """);
+        }
+
+        // === gradle wrapper files, so we can even download gradle when necessary to bootstrap
+        File gradlew = new File(projectDir, "gradlew");
+        writeResourceToFile("/gradle/gradlew", gradlew);
+        gradlew.setExecutable(true);
+
+        File gradlewBat = new File(projectDir, "gradlew.bat");
+        writeResourceToFile("/gradle/gradlew.bat", gradlewBat);
+        gradlew.setExecutable(true);
+
+        File gradleDir = new File(projectDir, "gradle");
+        File gradleWrapperDir = new File(gradleDir, "wrapper");
+        gradleWrapperDir.mkdirs();
+
+        File gradleWrapperJar = new File(gradleWrapperDir, "gradle-wrapper.jar");
+        writeResourceToFile("/gradle/wrapper/gradle-wrapper.jar", gradleWrapperJar);
+        File gradleWrapperProps = new File(gradleWrapperDir, "gradle-wrapper.properties");
+        writeResourceToFile("/gradle/wrapper/gradle-wrapper.properties", gradleWrapperProps);
+    }
+
+    private static void writeResourceToFile(String resource, File target) throws IOException {
+        try (PrintWriter writer = new PrintWriter(target)) {
+            try (InputStream inputStream = DependencyResolver.class.getResourceAsStream(resource)) {
+                if (inputStream == null) {
+                    throw new FileNotFoundException("Not found: gradlew wrapper in resources!");
+                }
+                try (var os = new BufferedOutputStream(new FileOutputStream(target))) {
+                    byte[] buffer = new byte[8192]; // Buffer size of 8 KB
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                }
+            }
         }
     }
 

@@ -20,6 +20,11 @@ import Foundation
 // Import the commons-csv library wrapper:
 import JavaCommonsCSV
 
+print("")
+print("")
+print("-----------------------------------------------------------------------")
+print("Start Sample app...")
+
 // Make sure we have the classpath loaded
 // TODO: this is more complex than that, need to account for dependencies of our module
 let currentDir = FileManager.default.currentDirectoryPath
