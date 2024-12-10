@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import JavaKitConfigurationShared
 
 extension JavaTranslator {
   /// Read a configuration file from the given URL.
@@ -24,7 +25,11 @@ extension JavaTranslator {
   /// Load the configuration file with the given name to populate the known set of
   /// translated Java classes.
   package func addConfiguration(_ config: Configuration, forSwiftModule swiftModule: String) {
-    for (javaClassName, swiftName) in config.classes {
+    guard let classes = config.classes else {
+      return
+    }
+  
+    for (javaClassName, swiftName) in classes {
       translatedClasses[javaClassName] = (
         swiftType: swiftName,
         swiftModule: swiftModule

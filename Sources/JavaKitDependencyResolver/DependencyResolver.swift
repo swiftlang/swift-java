@@ -12,18 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
+import JavaKit
+import JavaRuntime
+
+@JavaInterface("org.swift.javakit.dependencies.DependencyResolver")
+public struct DependencyResolver {
 }
 
-rootProject.name = "swift-java"
+extension JavaClass<DependencyResolver> {
 
-include "JavaKit"
-include "SwiftKit"
+  @JavaStaticMethod
+  public func resolveDependenciesToClasspath(
+    projectBaseDirectory: String,
+    dependencies: [String]) throws -> String
 
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
+  @JavaStaticMethod
+  public func hasDependencyResolverDependenciesLoaded() -> Bool
+
 }

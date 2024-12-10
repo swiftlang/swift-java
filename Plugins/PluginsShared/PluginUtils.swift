@@ -71,4 +71,9 @@ extension PluginContext {
     self.pluginWorkDirectoryURL
       .appending(path: "Sources")
   }
+  
+  func cachedClasspathFile(moduleName: String) -> URL {
+    self.pluginWorkDirectoryURL
+      .appending(path: "\(moduleName)", directoryHint: .notDirectory)
+  }
 }
