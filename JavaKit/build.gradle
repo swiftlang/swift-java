@@ -60,18 +60,13 @@ tasks.processResources {
   }
 }
 
-//task fatJar(type: Jar) {
-//    archiveBaseName = 'java-kit-fat-jar'
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-//    with jar
-//}
+// Task necessary to bootstrap and EXIT, this is to prevent hangs when used via SwiftPM plugin.
+tasks.register('printRuntimeClasspath') {
+  dependsOn 'jar'
 
-// Task necessary to bootstrap
-task printRuntimeClasspath {
-    def runtimeClasspath = sourceSets.main.runtimeClasspath
-    inputs.files(runtimeClasspath)
-    doLast {
-        println("CLASSPATH:${runtimeClasspath.asPath}")
-    }
+  def runtimeClasspath = sourceSets.main.runtimeClasspath
+  inputs.files(runtimeClasspath)
+  doLast {
+    println("SWIFT_JAVA_CLASSPATH:${runtimeClasspath.asPath}")
+  }
 }
