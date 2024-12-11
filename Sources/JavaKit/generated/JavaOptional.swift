@@ -29,23 +29,23 @@ open class JavaOptional<T: AnyJavaObject>: JavaObject {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func of<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
+  public func of<T1: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T1>
 
-  public func ofOptional<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T> {
+  public func ofOptional<T1: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T1> {
     Optional(javaOptional: of(arg0))
   }
 
   @JavaStaticMethod
-  public func empty<T: AnyJavaObject>() -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
+  public func empty<T1: AnyJavaObject>() -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T1>
 
-  public func emptyOptional<T: AnyJavaObject>() -> JavaObject? where ObjectType == JavaOptional<T> {
+  public func emptyOptional<T1: AnyJavaObject>() -> JavaObject? where ObjectType == JavaOptional<T1> {
     Optional(javaOptional: empty())
   }
 
   @JavaStaticMethod
-  public func ofNullable<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T>
+  public func ofNullable<T1: AnyJavaObject>(_ arg0: JavaObject?) -> JavaOptional<JavaObject>! where ObjectType == JavaOptional<T1>
 
-  public func ofNullableOptional<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T> {
+  public func ofNullableOptional<T1: AnyJavaObject>(_ arg0: JavaObject?) -> JavaObject? where ObjectType == JavaOptional<T1> {
     Optional(javaOptional: ofNullable(arg0))
   }
 }

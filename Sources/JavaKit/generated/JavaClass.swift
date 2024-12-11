@@ -52,13 +52,16 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func isRecord() -> Bool
 
   @JavaMethod
+  open func isSealed() -> Bool
+
+  @JavaMethod
+  open func getInterfaces() -> [JavaClass<JavaObject>?]
+
+  @JavaMethod
   open func getClassLoader() -> JavaClassLoader!
 
   @JavaMethod
   open func newInstance() throws -> JavaObject!
-
-  @JavaMethod
-  open func getInterfaces() -> [JavaClass<JavaObject>?]
 
   @JavaMethod
   open func isMemberClass() -> Bool
@@ -128,17 +131,14 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
 
   @JavaMethod
   open func getNestMembers() -> [JavaClass<JavaObject>?]
-
-  @JavaMethod
-  open func isSealed() -> Bool
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func forName<T: AnyJavaObject>(_ arg0: String, _ arg1: Bool, _ arg2: JavaClassLoader?) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
+  public func forName<T1: AnyJavaObject>(_ arg0: String, _ arg1: Bool, _ arg2: JavaClassLoader?) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T1>
 
   @JavaStaticMethod
-  public func forName<T: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
+  public func forName<T1: AnyJavaObject>(_ arg0: String) throws -> JavaClass<JavaObject>! where ObjectType == JavaClass<T1>
 
   @JavaStaticMethod
-  public func forPrimitiveName<T: AnyJavaObject>(_ arg0: String) -> JavaClass<JavaObject>! where ObjectType == JavaClass<T>
+  public func forPrimitiveName<T1: AnyJavaObject>(_ arg0: String) -> JavaClass<JavaObject>! where ObjectType == JavaClass<T1>
 }

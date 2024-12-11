@@ -104,10 +104,23 @@ struct JavaClassTranslator {
     }
 
     let genericParameters = javaTypeParameters.map { param in
-      "\(param.getName()): AnyJavaObject"
+      let name = generateGenericParameterName(param.getName())
+      translator.usedGenericParameterNames.insert(param.getName())
+      return "\(name): AnyJavaObject"
     }
 
     return "<\(genericParameters.joined(separator: ", "))>"
+  }
+
+  /// If the name already exists, append a 1 to it.
+  /// For example, if name = "T" and it already exists, the result will be "T1".
+  private func generateGenericParameterName(_ baseName: String) -> String {
+    var name = baseName
+    let index = 1
+    if translator.usedGenericParameterNames.contains(name) {
+      name = "\(baseName)\(index)"
+    }
+    return name
   }
 
   /// Prepare translation for the given Java class (or interface).
@@ -392,7 +405,9 @@ extension JavaClassTranslator {
     let staticMemberWhereClause: String
     if !javaTypeParameters.isEmpty {
       let genericParameterNames = javaTypeParameters.compactMap { typeVar in
-        typeVar.getName()
+        let name = generateGenericParameterName(typeVar.getName())
+        translator.usedGenericParameterNames.insert(typeVar.getName())
+        return name
       }
 
       let genericArgumentClause = "<\(genericParameterNames.joined(separator: ", "))>"

@@ -48,5 +48,5 @@ open class HashSet<E: AnyJavaObject>: JavaObject {
 }
 extension JavaClass {
   @JavaStaticMethod
-  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>! where ObjectType == HashSet<E>
+  public func newHashSet<E1: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>! where ObjectType == HashSet<E1>
 }
