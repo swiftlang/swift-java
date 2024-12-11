@@ -17,11 +17,10 @@ import Foundation
 
 import Dispatch
 import SystemPackage
-import Synchronization
 
 // Naive Mutex so we don't have to update the macOS dependency
 final class _Mutex<Value>: Sendable {
-  let lock = NSLock()
+  let lock = Lock()
   
   var value: Value
   

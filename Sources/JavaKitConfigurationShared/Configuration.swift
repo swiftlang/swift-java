@@ -116,7 +116,7 @@ public func readConfiguration(configPath: URL, file: String = #fileID, line: UIn
     let configData = try Data(contentsOf: configPath)
     return try JSONDecoder().decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath)'!", error: error,
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.absoluteURL)'!", error: error,
       file: file, line: line)
   }
 }
