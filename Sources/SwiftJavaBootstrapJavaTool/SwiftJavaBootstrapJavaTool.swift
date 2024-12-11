@@ -30,11 +30,11 @@ final class SwiftJavaBootstrapJavaTool {
   let out = Synchronization.Mutex<Data>(Data())
   let err = Synchronization.Mutex<Data>(Data())
   
-  static func main() async throws {
-    try await SwiftJavaBootstrapJavaTool().run()
+  static func main() async {
+    await SwiftJavaBootstrapJavaTool().run()
   }
   
-  func run() async throws {
+  func run() async {
     print("[debug][swift-java-bootstrap] RUN SwiftJavaBootstrapJavaTool: \(CommandLine.arguments.joined(separator: " "))")
     
     var args = CommandLine.arguments
@@ -51,7 +51,7 @@ final class SwiftJavaBootstrapJavaTool {
 
     let configPathURL = URL(fileURLWithPath: configPath)
     print("[debug][swift-java-bootstrap] Load config: \(configPathURL.absoluteString)")
-    let config = try readConfiguration(configPath: configPathURL)
+    let config = try! readConfiguration(configPath: configPathURL)
     
     // We only support a single dependency right now.
     let localGradleProjectDependencyName = (config.dependencies ?? []).filter {
@@ -60,7 +60,7 @@ final class SwiftJavaBootstrapJavaTool {
       $0.artifactID
     }.first!
     
-    let process = try await Subprocess.run(
+    let process = try! await Subprocess.run(
       .at("./gradlew"),
       arguments: [
         "--no-daemon",
@@ -97,7 +97,7 @@ final class SwiftJavaBootstrapJavaTool {
     let classpathString = String(classpathOutput.dropFirst(self.SwiftJavaClasspathPrefix.count))
 
     _ = try? FileManager.default.createDirectory(
-      at: outputDirectoryPath,
+      at: URL(fileURLWithPath: outputDirectoryPath),
       withIntermediateDirectories: true,
       attributes: nil
     )
