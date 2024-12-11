@@ -186,10 +186,12 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
-      ],
-      plugins: [
-        "SwiftJavaBootstrapJavaPlugin",
       ]
+//      // FIXME: when the tool is run from plugin it hangs even if sandbox is disabled
+//      ,
+//      plugins: [
+//        "SwiftJavaBootstrapJavaPlugin",
+//      ]
     ),
 
     .target(
