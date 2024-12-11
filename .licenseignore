@@ -14,6 +14,7 @@ Package.resolved
 README.md
 SECURITY.md
 scripts/unacceptable-language.txt
+.unacceptablelanguageignore
 docker/*
 **/*.docc/*
 **/.gitignore
@@ -44,3 +45,4 @@ gradlew.bat
 Plugins/**/_PluginsShared
 Plugins/**/0_PLEASE_SYMLINK*
 Plugins/PluginsShared/JavaKitConfigurationShared
+Sources/_Subprocess/_nio_locks.swift

@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class DependencyResolver {
 
-    private static final String COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH = "CLASSPATH:";
+    private static final String COMMAND_OUTPUT_LINE_PREFIX_CLASSPATH = "SWIFT_JAVA_CLASSPATH:";
     private static final String CLASSPATH_CACHE_FILENAME = "JavaKitDependencyResolver.swift-java.classpath";
 
     public static String GRADLE_API_DEPENDENCY = "dev.gradleplugins:gradle-api:8.10.1";
@@ -236,11 +236,11 @@ public class DependencyResolver {
             writer.println("}");
 
             writer.println("""
-                    task printRuntimeClasspath {
+                    tasks.register("printRuntimeClasspath") {
                         def runtimeClasspath = sourceSets.main.runtimeClasspath
                         inputs.files(runtimeClasspath)
                         doLast {
-                            println("CLASSPATH:${runtimeClasspath.asPath}")
+                            println("SWIFT_JAVA_CLASSPATH:${runtimeClasspath.asPath}")
                         }
                     }
                     """);

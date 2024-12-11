@@ -139,7 +139,7 @@ let package = Package(
         "JExtractSwiftCommandPlugin"
       ]
     ),
-    
+
     // ==== Examples
 
     .library(
@@ -152,6 +152,9 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "600.0.1"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+    .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
+
+    // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
   targets: [
@@ -184,6 +187,11 @@ let package = Package(
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
       ]
+//      // FIXME: when the tool is run from plugin it hangs even if sandbox is disabled
+//      ,
+//      plugins: [
+//        "SwiftJavaBootstrapJavaPlugin",
+//      ]
     ),
 
     .target(
@@ -211,7 +219,7 @@ let package = Package(
         .unsafeFlags(
           [
             "-L\(javaHome)/lib"
-          ], 
+          ],
           .when(platforms: [.windows])),
         .linkedLibrary("jvm"),
       ]
@@ -378,6 +386,25 @@ let package = Package(
       ]
     ),
 
+    .executableTarget(
+      name: "SwiftJavaBootstrapJavaTool",
+      dependencies: [
+        "JavaKitConfigurationShared", // for Configuration reading at runtime
+        "_Subprocess",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .plugin(
+      name: "SwiftJavaBootstrapJavaPlugin",
+      capability: .buildTool(),
+      dependencies: [
+        "SwiftJavaBootstrapJavaTool"
+      ]
+    ),
+
     .plugin(
       name: "SwiftJavaPlugin",
       capability: .buildTool(),
@@ -441,6 +468,24 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    
+    // Experimental Foundation Subprocess Copy
+    .target(
+      name: "_CShims",
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+    .target(
+      name: "_Subprocess",
+      dependencies: [
+        "_CShims",
+        .product(name: "SystemPackage", package: "swift-system"),
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
       ]
     )
   ]
