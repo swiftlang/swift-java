@@ -121,6 +121,17 @@ public func readConfiguration(configPath: URL, file: String = #fileID, line: UIn
   }
 }
 
+public func findSwiftJavaClasspaths(moduleName: String) -> [String] {
+  let basePath: String = FileManager.default.currentDirectoryPath
+  let pluginOutputsDir = URL(fileURLWithPath: basePath)
+    .appendingPathComponent(".build", isDirectory: true)
+    .appendingPathComponent("plugins", isDirectory: true)
+    .appendingPathComponent("outputs", isDirectory: true)
+    .appendingPathComponent(moduleName, isDirectory: true)
+
+  return findSwiftJavaClasspaths(in: pluginOutputsDir.path)
+}
+
 public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.currentDirectoryPath) -> [String] {
   let fileManager = FileManager.default
 

@@ -26,7 +26,7 @@ import JavaKitShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
-struct JavaToSwift: ParsableCommand {
+struct JavaToSwift: AsyncParsableCommand {
   static var _commandName: String { "Java2Swift" }
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
@@ -159,14 +159,13 @@ struct JavaToSwift: ParsableCommand {
 
     /// Generate Swift wrappers for Java classes based on the given
     /// configuration.
-    case classWrappers // (Configuration)
+    case classWrappers
 
     /// Fetch dependencies for a module
-    case fetchDependencies // (Configuration)
-    // FIXME each mode should have its own config?
+    case fetchDependencies
   }
 
-  mutating func run() {
+  mutating func run() async {
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
     do {
       let config: Configuration
@@ -246,43 +245,22 @@ struct JavaToSwift: ParsableCommand {
         // if we have already fetched dependencies for the dependency loader,
         // let's use them so we can in-process resolve rather than forking a new
         // gradle process.
-        if let dependencyResolverClasspath = fetchDependenciesCachedClasspath() {
-          print("[debug][swift-java] Found cached dependency resolver classpath: \(dependencyResolverClasspath)")
-          classpathEntries += dependencyResolverClasspath
-        }
+        print("[debug][swift-java] Add classpath from .classpath files")
+        classpathEntries += findSwiftJavaClasspaths(in: FileManager.default.currentDirectoryPath)
+//        if let dependencyResolverClasspath = fetchDependenciesCachedClasspath() {
+//          print("[debug][swift-java] Found cached dependency resolver classpath: \(dependencyResolverClasspath)")
+//          classpathEntries += dependencyResolverClasspath
+//        }
       case .classWrappers:
         break;
       }
 
-      // Add extra classpath entries which are specific to building the JavaKit project and samples
-      let classpathBuildJavaKitEntries = [ // FIXME: THIS IS A TRICK UNTIL WE FIGURE OUT HOW TO BOOTSTRAP THIS PART
-        FileManager.default.currentDirectoryPath,
-        FileManager.default.currentDirectoryPath + "/.build",
-        FileManager.default.currentDirectoryPath + "/JavaKit/build/libs",
-        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-          .deletingLastPathComponent()
-          .deletingLastPathComponent().absoluteURL.path + "/JavaKit/build/libs/JavaKit-1.0-SNAPSHOT.jar"
-      ]
-      classpathEntries += classpathBuildJavaKitEntries
-    
       // Bring up the Java VM.
       // TODO: print only in verbose mode
       let classpath = classpathEntries.joined(separator: ":")
       print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
 
       let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
-
-      // FIXME: we should resolve dependencies here perhaps
-  //    if let dependencies = config.dependencies {
-  //      print("[info][swift-java] Resolve dependencies...")
-  //      let dependencyClasspath = try fetchDependencies(
-  //        moduleName: moduleName,
-  //        dependencies: dependencies,
-  //        baseClasspath: classpathOptionEntries,
-  //        environment: jvm.environment()
-  //      )
-  //      classpathEntries += dependencyClasspath.classpathEntries
-  //    }
 
       //   * Classespaths from all dependent configuration files
       for (_, config) in dependentConfigs {
@@ -323,11 +301,9 @@ struct JavaToSwift: ParsableCommand {
 
         print("[debug][swift-java] Base classpath to fetch dependencies: \(classpathOptionEntries)")
 
-        let dependencyClasspath = try fetchDependencies(
+        let dependencyClasspath = try await fetchDependencies(
           moduleName: moduleName,
-          dependencies: dependencies,
-          baseClasspath: classpathOptionEntries,
-          environment: jvm.environment()
+          dependencies: dependencies
         )
 
         try writeFetchedDependenciesClasspath(

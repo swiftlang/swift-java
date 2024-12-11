@@ -18,62 +18,105 @@ import JavaKit
 import Foundation
 import JavaKitJar
 import Java2SwiftLib
-import JavaKitDependencyResolver
 import JavaKitConfigurationShared
 import JavaKitShared
+import _Subprocess
 
 extension JavaToSwift {
 
-  /// Must be the same as `DependencyResolver#CLASSPATH_CACHE_FILENAME` on the java side.
-  var JavaKitDependencyResolverClasspathCacheFilename: String {
-    "JavaKitDependencyResolver.swift-java.classpath"
-  }
-  var JavaKitDependencyResolverClasspathCacheFilePath: String {
-    ".build/\(JavaKitDependencyResolverClasspathCacheFilename)"
-  }
+  var SwiftJavaClasspathPrefix: String { "SWIFT_JAVA_CLASSPATH:" }
 
-  func fetchDependenciesCachedClasspath() -> [String]? {
-    let cachedClasspathURL = URL(
-      fileURLWithPath: FileManager.default.currentDirectoryPath + "/" + JavaKitDependencyResolverClasspathCacheFilePath)
-
-    guard FileManager.default.fileExists(atPath: cachedClasspathURL.path) else {
-      return []
-    }
-
-    guard let javaKitDependencyResolverCachedClasspath = try? String(contentsOf: cachedClasspathURL) else {
-      return []
-    }
-
-    print("[debug][swift-java] Cached dependency resolver classpath: \(javaKitDependencyResolverCachedClasspath)")
-    return javaKitDependencyResolverCachedClasspath.split(separator: ":").map(String.init)
-  }
+  var printRuntimeClasspathTaskName: String { "printRuntimeClasspath" }
 
   func fetchDependencies(moduleName: String,
-                         dependencies: [JavaDependencyDescriptor],
-                         baseClasspath: [String],
-                         environment: JNIEnvironment) throws -> ResolvedDependencyClasspath {
+                         dependencies: [JavaDependencyDescriptor]) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
-    let resolverClass = try JavaClass<DependencyResolver>(environment: environment)
 
-      let fullClasspath = try resolverClass.resolveDependenciesToClasspath(
-        projectBaseDirectory: URL(fileURLWithPath: ".").path,
-        dependencies: deps)
-        .split(separator: ":")
+    let dependenciesClasspath = await resolveDependencies(dependencies: dependencies)
+    let classpathEntries = dependenciesClasspath.split(separator: ":")
 
-    let classpathEntries = fullClasspath.filter {
-      $0.hasSuffix(".jar")
-    }
-    let classpath = classpathEntries.joined(separator: ":")
 
     print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)', classpath entries: \(classpathEntries.count), ", terminator: "")
     print("done.".green)
 
-    return ResolvedDependencyClasspath(for: dependencies, classpath: classpath)
+    return ResolvedDependencyClasspath(for: dependencies, classpath: dependenciesClasspath)
   }
-}
 
-extension JavaToSwift {
+  func resolveDependencies(dependencies: [JavaDependencyDescriptor]) async -> String {
+    let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+      .appendingPathComponent(".build")
+    let resolverDir = try! createTemporaryDirectory(in: workDir)
+
+    try! copyGradlew(to: resolverDir)
+
+    try! printGradleProject(directory: resolverDir, dependencies: dependencies)
+
+    let process = try! await Subprocess.run(
+      .at(.init(resolverDir.appendingPathComponent("gradlew").path)),
+      arguments: [
+        "--no-daemon",
+        "--rerun-tasks",
+        "\(printRuntimeClasspathTaskName)",
+      ],
+      workingDirectory: .init(platformString: resolverDir.path)
+    )
+
+    let outString = String(
+      data: process.standardOutput,
+      encoding: .utf8
+    )
+    let errString = String(
+      data: process.standardError,
+      encoding: .utf8
+    )
+
+    let classpathOutput: String
+    if let found = outString?.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
+      classpathOutput = String(found)
+    } else if let found = errString?.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
+      classpathOutput = String(found)
+    } else {
+      let suggestDisablingSandbox = "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
+      fatalError("Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n" +
+        "Output was:<<<\(outString ?? "<empty>")>>>; Err was:<<<\(errString ?? "<empty>")>>>")
+    }
+
+    return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))
+  }
+
+  func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor]) throws {
+    let buildGradle = directory
+      .appendingPathComponent("build.gradle", isDirectory: false)
+
+    let buildGradleText =
+      """
+      plugins { id 'java-library' }
+      repositories { mavenCentral() }
+
+      dependencies {
+        \(dependencies.map({ dep in "implementation(\"\(dep.descriptionGradleStyle)\")" }).joined(separator: ",\n"))
+      }
+
+      tasks.register("printRuntimeClasspath") {
+          def runtimeClasspath = sourceSets.main.runtimeClasspath
+          inputs.files(runtimeClasspath)
+          doLast {
+              println("\(SwiftJavaClasspathPrefix)${runtimeClasspath.asPath}")
+          }
+      }
+      """
+    try buildGradleText.write(to: buildGradle, atomically: true, encoding: .utf8)
+
+    let settingsGradle = directory
+      .appendingPathComponent("settings.gradle.kts", isDirectory: false)
+    let settingsGradleText =
+      """
+      rootProject.name = "swift-java-resolve-temp-project"
+      """
+    try settingsGradleText.write(to: settingsGradle, atomically: true, encoding: .utf8)
+  }
+
   mutating func writeFetchedDependenciesClasspath(
     moduleName: String,
     cacheDir: String,
@@ -98,6 +141,62 @@ extension JavaToSwift {
     let camelCased = components.map { $0.capitalized }.joined()
     return camelCased
   }
+
+  func copyGradlew(to resolverWorkDirectory: URL) throws {
+    var searchDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    
+    while searchDir.pathComponents.count > 1 {
+      print("[COPY] Search dir: \(searchDir)")
+      
+      let gradlewFile = searchDir.appendingPathComponent("gradlew")
+      let gradlewExists = FileManager.default.fileExists(atPath: gradlewFile.path)
+      guard gradlewExists else {
+        searchDir = searchDir.deletingLastPathComponent()
+        continue
+      }
+      
+      let gradleDir = searchDir.appendingPathComponent("gradle")
+      let gradleDirExists = FileManager.default.fileExists(atPath: gradleDir.path)
+      guard gradleDirExists else {
+        searchDir = searchDir.deletingLastPathComponent()
+        continue
+      }
+//      
+//      let gradleWrapperDir = gradleDir.appendingPathComponent("wrapper")
+//      let gradleWrapperDirExists = FileManager.default.fileExists(atPath: gradleWrapperDir.path)
+//      guard gradleWrapperDirExists else {
+//        searchDir = searchDir.deletingLastPathComponent()
+//        continue
+//      }
+//      
+//      let gradleWrapperJarFile = gradleWrapperDir.appendingPathComponent("gradle-wrapper.jar")
+//      let gradleWrapperJarFileExists = FileManager.default.fileExists(atPath: gradleWrapperJarFile.path)
+//      guard gradleWrapperJarFileExists else {
+//        searchDir = searchDir.deletingLastPathComponent()
+//        continue
+//      }
+      
+      print("COPY: \(gradlewFile) -> \(resolverWorkDirectory)")
+      print("COPY: \(gradleDir) -> \(resolverWorkDirectory)")
+      try? FileManager.default.copyItem(
+        at: gradlewFile,
+        to: resolverWorkDirectory.appendingPathComponent("gradlew"))
+      try? FileManager.default.copyItem(
+        at: gradleDir,
+        to: resolverWorkDirectory.appendingPathComponent("gradle"))
+      return
+    }
+  }
+
+  func createTemporaryDirectory(in directory: URL) throws -> URL {
+    let uuid = UUID().uuidString
+    let resolverDirectoryURL = directory.appendingPathComponent("swift-java-dependencies-\(uuid)")
+
+    try FileManager.default.createDirectory(at: resolverDirectoryURL, withIntermediateDirectories: true, attributes: nil)
+
+    return resolverDirectoryURL
+  }
+
 }
 
 struct ResolvedDependencyClasspath: CustomStringConvertible {
@@ -120,3 +219,4 @@ struct ResolvedDependencyClasspath: CustomStringConvertible {
     "JavaClasspath(for: \(rootDependencies), classpath: \(classpath))"
   }
 }
+

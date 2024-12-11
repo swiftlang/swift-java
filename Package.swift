@@ -128,9 +128,9 @@ let package = Package(
 
     // ==== Plugin for wrapping Java classes in Swift
     .plugin(
-      name: "SwiftJavaPlugin",
+      name: "JExtractSwiftPlugin",
       targets: [
-        "SwiftJavaPlugin"
+        "JExtractSwiftPlugin"
       ]
     ),
     .plugin(
@@ -173,25 +173,6 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ]
-    ),
-
-    .target(
-      name: "JavaKitDependencyResolver",
-      dependencies: [
-        "JavaKit",
-      ],
-      exclude: [
-        "swift-java.config",
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
-      ]
-//      // FIXME: when the tool is run from plugin it hangs even if sandbox is disabled
-//      ,
-//      plugins: [
-//        "SwiftJavaBootstrapJavaPlugin",
-//      ]
     ),
 
     .target(
@@ -329,7 +310,7 @@ let package = Package(
         "JavaTypes",
         "JavaKitShared",
         "JavaKitConfigurationShared",
-        "JavaKitDependencyResolver",
+        "_Subprocess", // using process spawning
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -349,7 +330,6 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "Java2SwiftLib",
-        "JavaKitDependencyResolver",
         "JavaKitShared",
       ],
 
@@ -386,27 +366,8 @@ let package = Package(
       ]
     ),
 
-    .executableTarget(
-      name: "SwiftJavaBootstrapJavaTool",
-      dependencies: [
-        "JavaKitConfigurationShared", // for Configuration reading at runtime
-        "_Subprocess",
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-
     .plugin(
-      name: "SwiftJavaBootstrapJavaPlugin",
-      capability: .buildTool(),
-      dependencies: [
-        "SwiftJavaBootstrapJavaTool"
-      ]
-    ),
-
-    .plugin(
-      name: "SwiftJavaPlugin",
+      name: "JExtractSwiftPlugin",
       capability: .buildTool(),
       dependencies: [
         "JExtractSwiftTool"
