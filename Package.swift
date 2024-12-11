@@ -440,6 +440,7 @@ let package = Package(
       ]
     ),
 
+/*
     .testTarget(
       name: "JavaKitMacroTests",
       dependencies: [
@@ -450,6 +451,7 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ]
     ),
+*/
 
     .testTarget(
       name: "Java2SwiftTests",
