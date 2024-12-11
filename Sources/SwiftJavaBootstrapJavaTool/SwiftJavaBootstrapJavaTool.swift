@@ -67,8 +67,11 @@ final class SwiftJavaBootstrapJavaTool {
         "--rerun-tasks",
   //      "--debug",
   //      "\(localGradleProjectDependencyName):jar",
-        "\(localGradleProjectDependencyName):\(printRuntimeClasspathTaskName)"
+        "\(localGradleProjectDependencyName):\(printRuntimeClasspathTaskName)",
       ]
+//      ,
+//      output: .writeTo(.open("/tmp/out.txt", .writeOnly), closeAfterSpawningProcess: true),
+//      error: .writeTo(.open("/tmp/err.txt", .writeOnly), closeAfterSpawningProcess: true)
     )
     
     let outString = String(
@@ -106,6 +109,7 @@ final class SwiftJavaBootstrapJavaTool {
       URL(fileURLWithPath: outputDirectoryPath)
         .appendingPathComponent("\(moduleName).swift-java.classpath", isDirectory: false)
     
+    // let classpathString = "MOCK"
     try! classpathString.write(to: classpathOutputURL, atomically: true, encoding: .utf8)
     
     print("[swift-java-bootstrap] Done, written classpath to: \(classpathOutputURL)")
