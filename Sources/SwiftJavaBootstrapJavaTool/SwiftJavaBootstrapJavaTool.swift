@@ -35,7 +35,7 @@ final class SwiftJavaBootstrapJavaTool {
   }
   
   func run() async throws {
-    print("RUN SwiftJavaBootstrapJavaTool: \(CommandLine.arguments)")
+    print("[debug][swift-java-bootstrap] RUN SwiftJavaBootstrapJavaTool: \(CommandLine.arguments.joined(separator: " "))")
     
     var args = CommandLine.arguments
     _ = args.removeFirst() // executable
@@ -48,8 +48,10 @@ final class SwiftJavaBootstrapJavaTool {
     
     assert(args.removeFirst() == "--output-directory")
     let outputDirectoryPath = args.removeFirst()
-    
-    let config = try readConfiguration(configPath: URL(fileURLWithPath: configPath))
+
+    let configPathURL = URL(fileURLWithPath: configPath)
+    print("[debug][swift-java-bootstrap] Load config: \(configPathURL.absoluteString)")
+    let config = try readConfiguration(configPath: configPathURL)
     
     // We only support a single dependency right now.
     let localGradleProjectDependencyName = (config.dependencies ?? []).filter {
@@ -65,9 +67,8 @@ final class SwiftJavaBootstrapJavaTool {
         "--rerun-tasks",
   //      "--debug",
   //      "\(localGradleProjectDependencyName):jar",
-        "\(localGradleProjectDependencyName):\(printRuntimeClasspathTaskName)",
-      ],
-      workingDirectory: "/Users/ktoso/code/swift-java"
+        "\(localGradleProjectDependencyName):\(printRuntimeClasspathTaskName)"
+      ]
     )
     
     let outString = String(
