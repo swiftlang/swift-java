@@ -1,0 +1,17 @@
+Sources/SwiftJavaBootstrapJavaTool/SwiftJavaBootstrapJavaTool.swift
+Sources/_Subprocess/Platforms/Subprocess+Darwin.swift
+Sources/_Subprocess/Platforms/Subprocess+Linux.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Platforms/Subprocess+Unix.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess+Teardown.swift
+Sources/_Subprocess/Subprocess.swift
