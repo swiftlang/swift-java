@@ -95,7 +95,13 @@ final class SwiftJavaBootstrapJavaTool {
     }
     
     let classpathString = String(classpathOutput.dropFirst(self.SwiftJavaClasspathPrefix.count))
-    
+
+    _ = try? FileManager.default.createDirectory(
+      at: outputDirectoryPath,
+      withIntermediateDirectories: true,
+      attributes: nil
+    )
+
     let classpathOutputURL =
       URL(fileURLWithPath: outputDirectoryPath)
         .appendingPathComponent("\(moduleName).swift-java.classpath", isDirectory: false)
