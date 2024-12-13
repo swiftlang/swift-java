@@ -47,7 +47,13 @@ extension JavaToSwift {
     let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
       .appendingPathComponent(".build")
     let resolverDir = try! createTemporaryDirectory(in: workDir)
+    defer {
+      try? FileManager.default.removeItem(at: resolverDir)
+    }
 
+    // We try! because it's easier to track down errors like this than when we bubble up the errors,
+    // and don't get great diagnostics or backtraces due to how swiftpm plugin tools are executed.
+    
     try! copyGradlew(to: resolverDir)
 
     try! printGradleProject(directory: resolverDir, dependencies: dependencies)
