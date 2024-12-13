@@ -45,4 +45,6 @@ gradlew.bat
 Plugins/**/_PluginsShared
 Plugins/**/0_PLEASE_SYMLINK*
 Plugins/PluginsShared/JavaKitConfigurationShared
+Samples/JavaDependencySampleApp/gradle
 Sources/_Subprocess/_nio_locks.swift
+Samples/gradle

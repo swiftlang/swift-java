@@ -93,6 +93,7 @@ let package = Package(
         .swiftLanguageMode(.v5),
       ],
       plugins: [
+//        .plugin(name: "SwiftJavaBootstrapJavaPlugin", package: "swift-java"),
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
     ),

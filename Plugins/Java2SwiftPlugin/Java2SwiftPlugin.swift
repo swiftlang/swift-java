@@ -156,11 +156,11 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     if let dependencies = config.dependencies, !dependencies.isEmpty {
       let displayName = "Fetch (Java) dependencies for Swift target \(sourceModule.name)"
       log("Prepared: \(displayName)")
-      
+
       fetchDependenciesOutputFiles += [
         outputFilePath(context: context, generated: false, filename: "\(sourceModule.name).swift-java.classpath")
       ]
-      
+
       commands += [
         .buildCommand(
           displayName: displayName,

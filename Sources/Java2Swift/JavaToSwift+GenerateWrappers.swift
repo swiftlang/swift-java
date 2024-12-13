@@ -18,7 +18,6 @@ import Java2SwiftLib
 import JavaKit
 import JavaKitJar
 import Java2SwiftLib
-import JavaKitDependencyResolver
 import JavaKitConfigurationShared
 
 extension JavaToSwift {

@@ -25,10 +25,8 @@ print("")
 print("-----------------------------------------------------------------------")
 print("Start Sample app...")
 
-// Make sure we have the classpath loaded
-// TODO: this is more complex than that, need to account for dependencies of our module
-let currentDir = FileManager.default.currentDirectoryPath
-let swiftJavaClasspath = findSwiftJavaClasspaths()
+// TODO: locating the classpath is more complex, need to account for dependencies of our module
+let swiftJavaClasspath = findSwiftJavaClasspaths() // scans for .classpath files
 
 // 1) Start a JVM with appropriate classpath
 let jvm = try JavaVirtualMachine.shared(classpath: swiftJavaClasspath)
