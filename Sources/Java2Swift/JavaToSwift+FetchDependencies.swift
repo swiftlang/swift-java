@@ -155,32 +155,25 @@ extension JavaToSwift {
         continue
       }
       
+      let gradlewBatFile = searchDir.appendingPathComponent("gradlew.bat")
+      let gradlewBatExists = FileManager.default.fileExists(atPath: gradlewFile.path)
+      
       let gradleDir = searchDir.appendingPathComponent("gradle")
       let gradleDirExists = FileManager.default.fileExists(atPath: gradleDir.path)
       guard gradleDirExists else {
         searchDir = searchDir.deletingLastPathComponent()
         continue
       }
-//      
-//      let gradleWrapperDir = gradleDir.appendingPathComponent("wrapper")
-//      let gradleWrapperDirExists = FileManager.default.fileExists(atPath: gradleWrapperDir.path)
-//      guard gradleWrapperDirExists else {
-//        searchDir = searchDir.deletingLastPathComponent()
-//        continue
-//      }
-//      
-//      let gradleWrapperJarFile = gradleWrapperDir.appendingPathComponent("gradle-wrapper.jar")
-//      let gradleWrapperJarFileExists = FileManager.default.fileExists(atPath: gradleWrapperJarFile.path)
-//      guard gradleWrapperJarFileExists else {
-//        searchDir = searchDir.deletingLastPathComponent()
-//        continue
-//      }
       
-      print("COPY: \(gradlewFile) -> \(resolverWorkDirectory)")
-      print("COPY: \(gradleDir) -> \(resolverWorkDirectory)")
+      // TODO: gradle.bat as well
       try? FileManager.default.copyItem(
         at: gradlewFile,
         to: resolverWorkDirectory.appendingPathComponent("gradlew"))
+      if gradlewBatExists {
+        try? FileManager.default.copyItem(
+          at: gradlewBatFile,
+          to: resolverWorkDirectory.appendingPathComponent("gradlew.bat"))
+      }
       try? FileManager.default.copyItem(
         at: gradleDir,
         to: resolverWorkDirectory.appendingPathComponent("gradle"))
