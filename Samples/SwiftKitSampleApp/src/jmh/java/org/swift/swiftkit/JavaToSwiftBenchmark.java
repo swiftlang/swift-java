@@ -36,19 +36,15 @@ public class JavaToSwiftBenchmark {
         MySwiftClass obj;
 
         @Setup(Level.Trial)
-        public void beforeALl() {
-            System.loadLibrary("swiftCore");
-            System.loadLibrary("ExampleSwiftLibrary");
-
-            // Tune down debug statements so they don't fill up stdout
-            System.setProperty("jextract.trace.downcalls", "false");
-
+        public void beforeAll() {
             obj = new MySwiftClass(1, 2);
         }
     }
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void simpleSwiftApiCall(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.obj.makeRandomIntMethod());
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public long simpleSwiftApiCall(BenchmarkState state, Blackhole blackhole) {
+        return state.obj.makeRandomIntMethod();
     }
 }
