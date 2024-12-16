@@ -50,6 +50,7 @@ struct SwiftThunkTranslator {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
+// TODO: handle variables
 //    for v in nominal.variables {
 //      if let acc = v.accessorFunc(kind: .get) {
 //        decls.append(contentsOf: render(forFunc: acc))
@@ -102,35 +103,73 @@ struct SwiftThunkTranslator {
     st.log.trace("Rendering thunks for: \(decl.baseIdentifier)")
     let thunkName = st.thunkNameRegistry.functionThunkName(module: st.swiftModuleName, decl: decl)
 
-    // Do we need to pass a self parameter?
-    let paramPassingStyle: SelfParameterVariant?
-    let callBaseDot: String
-      if let parent = decl.parent {
-        paramPassingStyle = .swiftThunkSelf
-        callBaseDot = "unsafeBitCast(_self, to: \(parent.originalSwiftType).self)."
-        // callBaseDot = "(_self as! \(parent.originalSwiftType))."
-      } else {
-        paramPassingStyle = nil
-        callBaseDot = ""
-      }
-
     let returnArrowTy =
       if decl.returnType.cCompatibleJavaMemoryLayout == .primitive(.void) {
         "/* \(decl.returnType.swiftTypeName) */"
       } else {
         "-> \(decl.returnType.cCompatibleSwiftType) /* \(decl.returnType.swiftTypeName) */"
       }
+    
+    // Do we need to pass a self parameter?
+    let paramPassingStyle: SelfParameterVariant?
+    let callBase: String
+    let callBaseDot: String
+      if let parent = decl.parent {
+        paramPassingStyle = .swiftThunkSelf
+        callBase = "let self$ = unsafeBitCast(_self, to: \(parent.originalSwiftType).self)"
+        callBaseDot = "self$."
+      } else {
+        paramPassingStyle = nil
+        callBase = ""
+        callBaseDot = ""
+      }
 
     // FIXME: handle in thunk: errors
 
+    let returnStatement: String
+    if decl.returnType.javaType.isString {
+      returnStatement =
+        """
+        let adaptedReturnValue = fatalError("Not implemented: adapting return types in Swift thunks")
+        return adaptedReturnValue
+        """
+    } else {
+      returnStatement = "return returnValue"
+    }
+
+    let declParams = st.renderSwiftParamDecls(
+      decl,
+      paramPassingStyle: paramPassingStyle,
+      style: .cDeclThunk
+    )
     return
       [
         """
         @_cdecl("\(raw: thunkName)")
-        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(decl, paramPassingStyle: paramPassingStyle))) \(raw: returnArrowTy) {
-          return \(raw: callBaseDot)\(raw: decl.baseIdentifier)(\(raw: st.renderForwardSwiftParams(decl, paramPassingStyle: paramPassingStyle)))
+        public func \(raw: thunkName)(\(raw: declParams)) \(raw: returnArrowTy) {
+          \(raw: adaptArgumentsInThunk(decl))
+          \(raw: callBase)
+          let returnValue = \(raw: callBaseDot)\(raw: decl.baseIdentifier)(\(raw: st.renderForwardSwiftParams(decl, paramPassingStyle: paramPassingStyle)))
+          \(raw: returnStatement)
         }
         """
       ]
+  }
+  
+  func adaptArgumentsInThunk(_ decl: ImportedFunc) -> String {
+    var lines: [String] = []
+    for p in decl.parameters {
+      if p.type.javaType.isString {
+        // FIXME: is there a way we can avoid the copying here?
+        let adaptedType =
+          """
+          let \(p.effectiveValueName) = String(cString: \(p.effectiveValueName))
+          """
+          
+        lines += [adaptedType]
+      }
+    }
+    
+    return lines.joined(separator: "\n")
   }
 }

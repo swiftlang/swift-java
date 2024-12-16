@@ -60,6 +60,8 @@ let package = Package(
     .target(
       name: "MySwiftLibrary",
       dependencies: [
+        .product(name: "JavaKit", package: "swift-java"),
+        .product(name: "JavaRuntime", package: "swift-java"),
         .product(name: "SwiftKitSwift", package: "swift-java"),
       ],
       exclude: [

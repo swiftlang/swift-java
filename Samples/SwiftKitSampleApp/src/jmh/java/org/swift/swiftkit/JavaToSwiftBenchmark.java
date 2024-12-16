@@ -14,37 +14,51 @@
 
 package org.swift.swiftkit;
 
-import java.util.concurrent.TimeUnit;
-
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.Blackhole;
+import com.example.swift.HelloJava2Swift;
+import com.example.swift.MySwiftLibrary;
+import org.openjdk.jmh.annotations.*;
 
 import com.example.swift.MySwiftClass;
 
-@SuppressWarnings("unused")
+import java.util.concurrent.TimeUnit;
+
+@BenchmarkMode(Mode.AverageTime)
+@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Fork(value = 3, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
 public class JavaToSwiftBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
+        ClosableSwiftArena arena;
         MySwiftClass obj;
 
         @Setup(Level.Trial)
         public void beforeAll() {
-            obj = new MySwiftClass(1, 2);
+            arena = SwiftArena.ofConfined();
+            obj = new MySwiftClass(arena, 1, 2);
+        }
+
+        @TearDown(Level.Trial)
+        public void afterAll() {
+            arena.close();
         }
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public long simpleSwiftApiCall(BenchmarkState state, Blackhole blackhole) {
-        return state.obj.makeRandomIntMethod();
+    public long jextract_getInt_ffm(BenchmarkState state) {
+        return MySwiftLibrary.globalMakeInt();
     }
+
+    @Benchmark
+    public long getInt_global_jni(BenchmarkState state) {
+        return HelloJava2Swift.jniGetInt();
+    }
+
+    @Benchmark
+    public long getInt_member_ffi(BenchmarkState state) {
+        return state.obj.makeIntMethod();
+    }
+
 }

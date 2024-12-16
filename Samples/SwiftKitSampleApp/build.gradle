@@ -145,10 +145,21 @@ application {
     ]
 }
 
+String jmhIncludes = findProperty("jmhIncludes")
+
 jmh {
+    if (jmhIncludes != null) {
+        includes = [jmhIncludes]
+    }
+
     jvmArgsAppend = [
+        "--enable-native-access=ALL-UNNAMED",
+
         "-Djava.library.path=" +
                 (BuildUtils.javaLibraryPaths(rootDir) +
                  BuildUtils.javaLibraryPaths(project.projectDir)).join(":"),
+
+        // Enable tracing downcalls (to Swift)
+        "-Djextract.trace.downcalls=false"
     ]
 }

@@ -56,4 +56,8 @@ public class HelloJava2Swift {
 
         System.out.println("DONE.");
     }
+
+    public static native long jniWriteString(String str);
+    public static native long jniGetInt();
+
 }
