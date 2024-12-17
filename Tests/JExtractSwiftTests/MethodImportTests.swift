@@ -38,7 +38,6 @@ final class MethodImportTests {
     public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
 
     extension MySwiftClass {
-      // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC22helloMemberFunctionInExtension
       public func helloMemberInExtension()
     }
 
@@ -53,12 +52,6 @@ final class MethodImportTests {
       public func makeInt() -> Int
 
       @objc deinit
-    }
-
-    // FIXME: Hack to allow us to translate "String", even though it's not
-    // actually available
-    // MANGLED NAME: $ss
-    public class String {
     }
     """
 
@@ -174,13 +167,14 @@ final class MethodImportTests {
          * public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
          * }
          */
-        public static void globalTakeIntLongString(int i32, long l, com.example.swift.String s) {
+        public static void globalTakeIntLongString(int i32, long l, java.lang.String s) {
             var mh$ = globalTakeIntLongString.HANDLE;
-            try {
+            try (var arena = Arena.ofConfined()) {
+                var s$ = arena.allocateFrom(s);
                 if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(i32, l, s.$memorySegment());
+                    SwiftKit.traceDowncall(i32, l, s$);
                 }
-                mh$.invokeExact(i32, l, s.$memorySegment());
+                mh$.invokeExact(i32, l, s$);
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }

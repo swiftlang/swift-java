@@ -42,7 +42,7 @@ final class StringPassingTests {
             try (var arena = Arena.ofConfined()) {
                 var string$ = arena.allocateFrom(string);
                 if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall();
+                    SwiftKit.traceDowncall(string$);
                 }
                 return (long) mh$.invokeExact(string$);
             } catch (Throwable ex$) {
