@@ -45,6 +45,18 @@ extension JavaType {
     }
   }
 
+  public var isString: Bool {
+    switch self {
+    case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
+         .array:
+      return false
+    case .class(package: "java.lang", name: "String"):
+      return true
+    case .class:
+      return false
+    }
+  }
+
   /// Produce the Swift type name for this Java type.
   public func swiftTypeName(resolver: JavaToSwiftClassNameResolver) rethrows -> String {
     switch self {

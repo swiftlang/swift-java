@@ -61,7 +61,7 @@ final class FuncCallbackImportTests {
          */
         public static void callMe(java.lang.Runnable callback) {
             var mh$ = callMe.HANDLE;
-            try (Arena arena = Arena.ofConfined()) {
+            try (var arena = Arena.ofConfined()) {
                 FunctionDescriptor callMe_callback_desc$ = FunctionDescriptor.ofVoid();
                 MethodHandle callMe_callback_handle$ = MethodHandles.lookup()
                          .findVirtual(Runnable.class, "run",

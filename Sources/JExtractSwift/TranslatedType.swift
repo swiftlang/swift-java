@@ -116,6 +116,17 @@ extension Swift2JavaVisitor {
       )
     }
 
+    // We special handle String types
+    if parent == nil, name == "String" {
+      return TranslatedType(
+        cCompatibleConvention: .direct,
+        originalSwiftType: "\(raw: name)",
+        cCompatibleSwiftType: "Swift.\(raw: name)",
+        cCompatibleJavaMemoryLayout: .heapObject, // FIXME: or specialize string?
+        javaType: .javaLangString
+      )
+    }
+
     // Identify the various pointer types from the standard library.
     if let (requiresArgument, _, hasCount) = name.isNameOfSwiftPointerType, !hasCount {
       // Dig out the pointee type if needed.

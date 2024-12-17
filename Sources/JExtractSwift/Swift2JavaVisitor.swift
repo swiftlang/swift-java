@@ -94,7 +94,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       params = try node.signature.parameterClause.parameters.map { param in
         // TODO: more robust parameter handling
         // TODO: More robust type handling
-        return ImportedParam(
+        ImportedParam(
           syntax: param,
           type: try cCompatibleType(for: param.type)
         )

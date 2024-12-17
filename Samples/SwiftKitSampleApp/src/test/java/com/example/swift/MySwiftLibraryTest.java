@@ -14,6 +14,7 @@
 
 package com.example.swift;
 
+import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftLibraryTest {
 
+    static {
+        System.loadLibrary(MySwiftLibrary.LIB_NAME);
+    }
+
     @Test
     void call_helloWorld() {
         MySwiftLibrary.helloWorld();
@@ -39,6 +44,22 @@ public class MySwiftLibraryTest {
         MySwiftLibrary.globalTakeInt(12);
 
         assertNotNull(MySwiftLibrary.globalTakeInt$address());
+    }
+
+    @Test
+    void call_writeString_jextract() {
+        var string = "Hello Swift!";
+        long reply = MySwiftLibrary.globalWriteString(string);
+
+        assertEquals(string.length(), reply);
+    }
+
+    @Test
+    void call_writeString_jni() {
+        var string = "Hello Swift!";
+        long reply = HelloJava2Swift.jniWriteString(string);
+
+        assertEquals(string.length(), reply);
     }
 
     @Test

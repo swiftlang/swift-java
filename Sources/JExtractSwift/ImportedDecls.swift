@@ -90,6 +90,10 @@ public struct ImportedParam {
   var effectiveName: String? {
     firstName ?? secondName
   }
+  
+  var effectiveValueName: String {
+    secondName ?? firstName ?? "_"
+  }
 
   // The Swift type as-is from the swift interface
   var swiftType: String {
@@ -111,6 +115,14 @@ extension ImportedParam {
       "\(effectiveName!).$memorySegment()"
     }
   }
+}
+
+public enum ParameterVariant {
+  /// Used when declaring the "Swift thunks" we call through into Swift.
+  ///
+  /// Some types need to be represented as raw pointers and recovered into
+  /// Swift types inside the thunks when we do this.
+  case cDeclThunk
 }
 
 // TODO: this is used in different contexts and needs a cleanup

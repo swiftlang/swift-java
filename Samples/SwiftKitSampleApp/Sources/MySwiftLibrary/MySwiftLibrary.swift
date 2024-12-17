@@ -31,6 +31,14 @@ public func globalTakeInt(i: Int) {
   p("i:\(i)")
 }
 
+public func globalMakeInt() -> Int {
+  return 42
+}
+
+public func globalWriteString(string: String) -> Int {
+  return string.count
+}
+
 public func globalTakeIntInt(i: Int, j: Int) {
   p("i:\(i), j:\(j)")
 }
@@ -79,6 +87,11 @@ public class MySwiftClass {
     return 12
   }
 
+  public func writeString(string: String) -> Int {
+    p("echo -> \(string)")
+    return string.count
+  }
+
   public func makeRandomIntMethod() -> Int {
     return Int.random(in: 1..<256)
   }
@@ -87,8 +100,8 @@ public class MySwiftClass {
 // ==== Internal helpers
 
 private func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
-  print("[swift][\(file):\(line)](\(function)) \(msg)")
-  fflush(stdout)
+//  print("[swift][\(file):\(line)](\(function)) \(msg)")
+//  fflush(stdout)
 }
 
 #if os(Linux)

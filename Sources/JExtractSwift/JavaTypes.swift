@@ -20,6 +20,11 @@ extension JavaType {
     .class(package: "java.lang.foreign", name: "MemorySegment")
   }
 
+  /// The description of the type java.lang.String.
+  static var javaLangString: JavaType {
+    .class(package: "java.lang", name: "String")
+  }
+
   /// The description of the type java.lang.Runnable.
   static var javaLangRunnable: JavaType {
     .class(package: "java.lang", name: "Runnable")
