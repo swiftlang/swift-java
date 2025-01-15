@@ -34,6 +34,8 @@ final class MethodImportTests {
     // MANGLED NAME: $s14MySwiftLibrary13globalTakeInt1iySi_tF
     public func globalTakeInt(i: Int)
 
+    public func getSwiftIntArray() -> [Int]
+
     // MANGLED NAME: $s14MySwiftLibrary23globalTakeLongIntString1l3i321sys5Int64V_s5Int32VSStF
     public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
 
@@ -437,6 +439,47 @@ final class MethodImportTests {
           }
         }
         """
+    )
+  }
+
+  @Test("Import: public func getSwiftIntArray()")
+  func method_getSwiftIntArray() throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .error
+
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "helloWorld" }!
+
+    let output = CodePrinter.toString { printer in
+      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
+    }
+
+    assertOutput(
+      output,
+      expected:
+      """
+      /**
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func getSwiftIntArray() -> [Int]
+       * }
+       */
+      public static SwiftArrayAccessor<Integer> getSwiftIntArray() {
+          var mh$ = helloWorld.HANDLE;
+          try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall();
+              }
+              mh$.invokeExact();
+          } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+          }
+      }
+      """
     )
   }
 }

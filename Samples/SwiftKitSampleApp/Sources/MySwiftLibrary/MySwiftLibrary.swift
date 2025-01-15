@@ -47,9 +47,82 @@ public func globalCallMeRunnable(run: () -> ()) {
   run()
 }
 
+public func getArrayInt() -> [Int] {
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+
+let DATA = [
+               MySwiftClass(len: 1, cap: 11),
+               MySwiftClass(len: 2, cap: 22),
+               MySwiftClass(len: 3, cap: 33),
+             ]
+
+public func getArrayMySwiftClass() -> [MySwiftClass] {
+  DATA
+}
+
+public class MySwiftClass {
+
+  public var len: Int
+  public var cap: Int
+
+  public init(len: Int, cap: Int) {
+    self.len = len
+    self.cap = cap
+
+    p("\(MySwiftClass.self).len = \(self.len)")
+    p("\(MySwiftClass.self).cap = \(self.cap)")
+    let addr = unsafeBitCast(self, to: UInt64.self)
+    p("initializer done, self = 0x\(String(addr, radix: 16, uppercase: true))")
+  }
+
+  deinit {
+    let addr = unsafeBitCast(self, to: UInt64.self)
+    p("MySwiftClass.deinit, self = 0x\(String(addr, radix: 16, uppercase: true))")
+  }
+
+  public var counter: Int32 = 0
+
+  public func voidMethod() {
+    p("")
+  }
+
+  public func takeIntMethod(i: Int) {
+    p("i:\(i)")
+  }
+
+  // TODO: workaround until we expose properties again
+  public func getterForLen() -> Int {
+    len
+  }
+  // TODO: workaround until we expose properties again
+  public func getterForCap() -> Int {
+    cap
+  }
+
+  public func echoIntMethod(i: Int) -> Int {
+    p("i:\(i)")
+    return i
+  }
+
+  public func makeIntMethod() -> Int {
+    p("make int -> 12")
+    return 12
+  }
+
+  public func writeString(string: String) -> Int {
+    p("echo -> \(string)")
+    return string.count
+  }
+
+  public func makeRandomIntMethod() -> Int {
+    return Int.random(in: 1..<256)
+  }
+}
+
 // ==== Internal helpers
 
-func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
+package func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
   print("[swift][\(file):\(line)](\(function)) \(msg)")
   fflush(stdout)
 }

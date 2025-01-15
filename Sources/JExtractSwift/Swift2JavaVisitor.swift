@@ -126,6 +126,11 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     let fullName = "\(node.name.text)"
 
+    guard !fullName.hasPrefix("swiftjava_") else {
+      self.log.debug("Skip swiftjava_ thunk method during importing: \(fullName)")
+      return .skipChildren
+    }
+
     let funcDecl = ImportedFunc(
       module: self.translator.swiftModuleName,
       decl: node.trimmed,
@@ -188,7 +193,8 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       log.debug("Record variable in \(currentTypeName)")
       translator.importedTypes[currentTypeName]!.variables.append(varDecl)
     } else {
-      fatalError("Global variables are not supported yet: \(node.debugDescription)")
+      log.warning("Global variables are not supported yet: \(node.debugDescription)")
+      return .skipChildren
     }
 
     return .skipChildren
