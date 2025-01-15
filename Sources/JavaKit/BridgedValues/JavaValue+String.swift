@@ -30,7 +30,7 @@ extension String: JavaValue {
     }
     let cString = environment.interface.GetStringUTFChars(environment, value, nil)!
     defer { environment.interface.ReleaseStringUTFChars(environment, value, cString) }
-    self = String(cString: cString)
+    self = String(cString: cString) // copy
   }
 
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {

@@ -31,6 +31,14 @@ public func globalTakeInt(i: Int) {
   p("i:\(i)")
 }
 
+public func globalMakeInt() -> Int {
+  return 42
+}
+
+public func globalWriteString(string: String) -> Int {
+  return string.count
+}
+
 public func globalTakeIntInt(i: Int, j: Int) {
   p("i:\(i), j:\(j)")
 }
