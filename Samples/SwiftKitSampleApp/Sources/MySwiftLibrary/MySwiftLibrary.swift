@@ -47,6 +47,20 @@ public func globalCallMeRunnable(run: () -> ()) {
   run()
 }
 
+public func getArrayInt() -> [Int] {
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+
+let DATA = [
+               MySwiftClass(len: 1, cap: 11),
+               MySwiftClass(len: 2, cap: 22),
+               MySwiftClass(len: 3, cap: 33),
+             ]
+
+public func getArrayMySwiftClass() -> [MySwiftClass] {
+  DATA
+}
+
 public class MySwiftClass {
 
   public var len: Int
@@ -64,7 +78,7 @@ public class MySwiftClass {
 
   deinit {
     let addr = unsafeBitCast(self, to: UInt64.self)
-    p("Deinit, self = 0x\(String(addr, radix: 16, uppercase: true))")
+    p("MySwiftClass.deinit, self = 0x\(String(addr, radix: 16, uppercase: true))")
   }
 
   public var counter: Int32 = 0
@@ -75,6 +89,15 @@ public class MySwiftClass {
 
   public func takeIntMethod(i: Int) {
     p("i:\(i)")
+  }
+
+  // TODO: workaround until we expose properties again
+  public func getterForLen() -> Int {
+    len
+  }
+  // TODO: workaround until we expose properties again
+  public func getterForCap() -> Int {
+    cap
   }
 
   public func echoIntMethod(i: Int) -> Int {
@@ -99,9 +122,9 @@ public class MySwiftClass {
 
 // ==== Internal helpers
 
-private func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
-//  print("[swift][\(file):\(line)](\(function)) \(msg)")
-//  fflush(stdout)
+package func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
+  print("[swift][\(file):\(line)](\(function)) \(msg)")
+  fflush(stdout)
 }
 
 #if os(Linux)
