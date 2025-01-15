@@ -52,6 +52,9 @@ public class HelloJava2Swift {
 
             obj.voidMethod();
             obj.takeIntMethod(42);
+
+            MySwiftStruct swiftValue = new MySwiftStruct(12);
+
         }
 
         System.out.println("DONE.");
