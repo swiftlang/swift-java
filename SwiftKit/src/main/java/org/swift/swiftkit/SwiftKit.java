@@ -95,7 +95,7 @@ public class SwiftKit {
                 traceArgs);
     }
 
-    static MemorySegment findOrThrow(String symbol) {
+    public static MemorySegment findOrThrow(String symbol) {
         return SYMBOL_LOOKUP.find(symbol)
                 .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
     }
@@ -112,6 +112,7 @@ public class SwiftKit {
     // Loading libraries
 
     public static void loadLibrary(String libname) {
+        System.out.println("[swiftjava] Loading library: " + libname);
         // TODO: avoid concurrent loadResource calls; one load is enough esp since we cause File IO when we do that
         try {
             // try to load a dylib from our classpath, e.g. when we included it in our jar
@@ -289,6 +290,7 @@ public class SwiftKit {
     }
 
     public static MemorySegment getTypeByName(String string) {
+        System.out.println("[java] get type by name: " + string);
         var mh$ = swift_getTypeByName.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {

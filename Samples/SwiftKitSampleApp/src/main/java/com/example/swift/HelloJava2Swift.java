@@ -16,15 +16,9 @@ package com.example.swift;
 
 // Import swift-extract generated sources
 
-import com.example.swift.MySwiftLibrary;
-import com.example.swift.MySwiftClass;
-
 // Import javakit/swiftkit support libraries
-import org.swift.swiftkit.SwiftArena;
+import org.swift.swiftkit.SwiftArrayRef;
 import org.swift.swiftkit.SwiftKit;
-import org.swift.swiftkit.SwiftValueWitnessTable;
-
-import java.util.Arrays;
 
 public class HelloJava2Swift {
 
@@ -38,26 +32,58 @@ public class HelloJava2Swift {
     }
 
     static void examples() {
-        MySwiftLibrary.helloWorld();
+//        MySwiftLibrary.helloWorld();
+//
+//        MySwiftLibrary.globalTakeInt(1337);
+//
+//        // Example of using an arena; MyClass.deinit is run at end of scope
+//        try (var arena = SwiftArena.ofConfined()) {
+//            MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
+//
+//            // just checking retains/releases work
+//            SwiftKit.retain(obj.$memorySegment());
+//            SwiftKit.release(obj.$memorySegment());
+//
+//            obj.voidMethod();
+//            obj.takeIntMethod(42);
+//        }
 
-        MySwiftLibrary.globalTakeInt(1337);
+        // public func getArrayMySwiftClass() -> [MySwiftClass]
+        SwiftArrayRef<MySwiftClass> arr = ManualImportedMethods.getArrayMySwiftClass();
 
-        // Example of using an arena; MyClass.deinit is run at end of scope
-        try (var arena = SwiftArena.ofConfined()) {
-            MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
+        MySwiftClass first = arr.get(0, MySwiftClass::new);
+        System.out.println("[java] first = " + first);
 
-            // just checking retains/releases work
-            SwiftKit.retain(obj.$memorySegment());
-            SwiftKit.release(obj.$memorySegment());
+        // FIXME: properties don't work yet, need the thunks!
+//        System.out.println("[java] first.getLen() = " + first.getLen());
+//        assert(first.getLen() == 1);
+//        System.out.println("[java] first.getCap() = " + first.getCap());
+//        assert(first.getCap() == 2);
 
-            obj.voidMethod();
-            obj.takeIntMethod(42);
-        }
+        System.out.println("[java] first.getterForLen() = " + first.getterForLen());
+        System.out.println("[java] first.getForCap() = " + first.getterForCap());
+        precondition(1, first.getterForLen());
+        precondition(11, first.getterForCap());
+
+        MySwiftClass second = arr.get(1, MySwiftClass::new);
+        System.out.println("[java] second = " + second);
+        System.out.println("[java] second.getterForLen() = " + second.getterForLen());
+        System.out.println("[java] second.getForCap() = " + second.getterForCap());
+        precondition(2, second.getterForLen());
+        precondition(22, second.getterForCap());
+
 
         System.out.println("DONE.");
+    }
+
+    private static void precondition(long expected, long got) {
+        if (expected != got) {
+            throw new AssertionError("Expected '" + expected + "', but got '" + got + "'!");
+        }
     }
 
     public static native long jniWriteString(String str);
     public static native long jniGetInt();
 
 }
+

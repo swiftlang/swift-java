@@ -1,0 +1,27 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+import SwiftKitSwift
+
+//@_cdecl("swiftjava_SwiftKitSwift_Array_count")
+//public func swiftjava_SwiftKitSwift_Array_Int_count(
+//  array: UnsafeMutableRawPointer, // Array<T>
+//  elementType: UnsafeMutableRawPointer // Metadata of T
+//) -> Int {
+//  print("[swift][\(#fileID):\(#line)](\(#function) passed in array = \(array)")
+//  print("[swift][\(#fileID):\(#line)](\(#function) passed in metadata = \(elementType)")
+//  let array = unsafeBitCast(array, to: Array<Int>.self)
+//  print("[swift][\(#fileID):\(#line)](\(#function) ARRAY count = \(array.count)")
+//  return array.count
+//}

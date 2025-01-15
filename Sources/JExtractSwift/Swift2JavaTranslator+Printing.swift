@@ -303,7 +303,7 @@ extension Swift2JavaTranslator {
 
       printer.print(
         """
-        static MemorySegment findOrThrow(String symbol) {
+        public static MemorySegment findOrThrow(String symbol) {
             return SYMBOL_LOOKUP.find(symbol)
                     .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
         }
@@ -344,7 +344,7 @@ extension Swift2JavaTranslator {
       // https://bugs.openjdk.org/browse/JDK-8311090
       printer.print(
         """
-        static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
+        public static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             // Ensure Swift and our Lib are loaded during static initialization of the class.
             SwiftKit.loadLibrary("swiftCore");
@@ -478,6 +478,17 @@ extension Swift2JavaTranslator {
     parentName: TranslatedType
   ) {
     let descClassIdentifier = renderDescClassName(decl)
+
+    printer.print(
+      """
+      /**
+       * Wrap a memory segment which is pointing to an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
+       */
+      public \(parentName.unqualifiedJavaTypeName)(MemorySegment self) {
+        this.selfMemorySegment = self;
+      }
+      """
+    )
 
     printer.print(
       """

@@ -34,6 +34,8 @@ final class MethodImportTests {
     // MANGLED NAME: $s14MySwiftLibrary13globalTakeInt1iySi_tF
     public func globalTakeInt(i: Int)
 
+    public func getSwiftIntArray() -> [Int]
+
     // MANGLED NAME: $s14MySwiftLibrary23globalTakeLongIntString1l3i321sys5Int64V_s5Int32VSStF
     public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
 
@@ -379,7 +381,7 @@ final class MethodImportTests {
           return (long) makeInt($memorySegment());
         }
         """
-    )
+    )al
   }
 
   @Test
@@ -404,6 +406,12 @@ final class MethodImportTests {
       output,
       expected:
         """
+        /**
+         * Wrap a memory segment which is pointing to an instance of {@code MySwiftClass}.
+         */
+        public MySwiftClass(MemorySegment self) {
+          this.selfMemorySegment = self;
+        }
         /**
          * Create an instance of {@code MySwiftClass}.
          *
@@ -439,4 +447,5 @@ final class MethodImportTests {
         """
     )
   }
+
 }
