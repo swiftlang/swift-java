@@ -70,6 +70,10 @@ public class SwiftArenaTest {
             // The message should point out which objects "leaked":
             assertTrue(ex.getMessage().contains(memorySegmentDescription));
         }
+    }
+
+    @Test
+    public void arena_initializeWithCopy_struct() {
 
     }
 }

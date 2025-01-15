@@ -225,4 +225,72 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
+    /**
+     * {@snippet lang = C:
+     * ///   T *(*initializeWithCopy)(T *dest, T *src, M *self);
+     * ///
+     * /// Given an invalid object of this type, initialize it as a copy of
+     * /// the source object.  Returns the dest object.
+     * FUNCTION_VALUE_WITNESS(initializeWithCopy,
+     *                        InitializeWithCopy,
+     *                        MUTABLE_VALUE_TYPE,
+     *                        (MUTABLE_VALUE_TYPE, MUTABLE_VALUE_TYPE, TYPE_TYPE))
+     *}
+     */
+    private static class initializeWithCopy {
+
+        static final long $offset =
+                $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("initializeWithCopy"));
+
+        static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /* -> */ ValueLayout.ADDRESS, // returns the destination object
+                ValueLayout.ADDRESS, // destination
+                ValueLayout.ADDRESS, // source
+                ValueLayout.ADDRESS // pointer to the witness table
+        );
+
+        /**
+         * Function pointer for the initializeWithCopy operation
+         */
+        static MemorySegment addr(SwiftAnyType ty) {
+            // Get the value witness table of the type
+            final var vwt = SwiftValueWitnessTable.valueWitnessTable(ty.$memorySegment());
+
+            // Get the address of the function stored at the offset of the witness table
+            long funcAddress = getSwiftInt(vwt, initializeWithCopy.$offset);
+            return MemorySegment.ofAddress(funcAddress);
+        }
+
+        static MethodHandle handle(SwiftAnyType ty) {
+            return Linker.nativeLinker().downcallHandle(addr(ty), DESC);
+        }
+    }
+
+
+    /**
+     * Given an invalid object of this type, initialize it as a copy of
+     * the source object.
+     * <p/>
+     * Returns the dest object.
+     */
+    public static MemorySegment initializeWithCopy(SwiftAnyType type, MemorySegment dest, MemorySegment src) {
+        var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
+        var wtable = valueWitnessTable(fullTypeMetadata);
+
+        var mh = initializeWithCopy.handle(type);
+
+        try (var arena = Arena.ofConfined()) {
+            // we need to make a pointer to the self pointer when calling witness table functions:
+            MemorySegment indirectDest = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegmentUtils.setSwiftPointerAddress(indirectDest, dest);
+            MemorySegment indirectSrc = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegmentUtils.setSwiftPointerAddress(indirectSrc, src);
+
+            var returnedDest = (MemorySegment) mh.invokeExact(indirectDest, indirectSrc, wtable);
+            return returnedDest;
+        } catch (Throwable th) {
+            throw new AssertionError("Failed to initializeWithCopy '" + type + "' (" + dest + ", " + src + ")", th);
+        }
+    }
+
 }

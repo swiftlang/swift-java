@@ -12,35 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-// This is a "plain Swift" file containing various types of declarations,
-// that is exported to Java by using the `jextract-swift` tool.
-//
-// No annotations are necessary on the Swift side to perform the export.
-
-#if os(Linux)
-import Glibc
-#elseif os(Windows)
-import CRT
-#elseif canImport(Darwin)
-import Darwin.C
-#endif
-
-public func helloWorld() {
-  p("\(#function)")
-}
-
-public func globalTakeInt(i: Int) {
-  p("i:\(i)")
-}
-
-public func globalTakeIntInt(i: Int, j: Int) {
-  p("i:\(i), j:\(j)")
-}
-
-public func globalCallMeRunnable(run: () -> ()) {
-  run()
-}
-
 public class MySwiftClass {
 
   public var len: Int
@@ -84,20 +55,4 @@ public class MySwiftClass {
   public func makeRandomIntMethod() -> Int {
     return Int.random(in: 1..<256)
   }
-}
-
-@_silgen_name("swift_getTypeByMangledNameInEnvironment")
-public func _getTypeByMangledNameInEnvironment(
-  _ name: UnsafePointer<UInt8>,
-  _ nameLength: UInt,
-  genericEnvironment: UnsafeRawPointer?,
-  genericArguments: UnsafeRawPointer?)
-  -> Any.Type?
-
-
-// ==== Internal helpers
-
-func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
-  print("[swift][\(file):\(line)](\(function)) \(msg)")
-  fflush(stdout)
 }

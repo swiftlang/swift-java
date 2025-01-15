@@ -91,7 +91,6 @@ public class HelloJava2Swift {
         precondition(2, second.getterForLen());
         precondition(22, second.getterForCap());
 
-
         System.out.println("DONE.");
     }
 

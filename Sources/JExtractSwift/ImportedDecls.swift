@@ -49,6 +49,15 @@ public struct ImportedNominalType: ImportedDecl {
       javaType: javaType
     )
   }
+  
+  public var isReferenceType: Bool {
+    switch self.kind {
+    case .class, .actor:
+      return true
+    case .enum, .struct:
+      return false
+    }
+  }
 
   /// The Java class name without the package.
   public var javaClassName: String {
