@@ -55,6 +55,22 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
   }
 
+  override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+    guard let importedNominalType = translator.importedNominalType(node) else {
+      return .skipChildren
+    }
+
+    currentTypeName = importedNominalType.swiftTypeName
+    return .visitChildren
+  }
+
+  override func visitPost(_ node: StructDeclSyntax) {
+    if currentTypeName != nil {
+      log.debug("Completed import: \(node.kind) \(node.name)")
+      currentTypeName = nil
+    }
+  }
+
   override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
