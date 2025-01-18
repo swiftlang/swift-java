@@ -198,6 +198,7 @@ public class SwiftKit {
         try {
             if (TRACE_DOWNCALLS) {
                 traceDowncall("swift_retainCount", object);
+                throw new RuntimeException("DONT DO THIS");
             }
             return (long) mh$.invokeExact(object);
         } catch (Throwable ex$) {

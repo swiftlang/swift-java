@@ -14,6 +14,7 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.MemorySegment;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +65,9 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     public void register(SwiftValue value) {
         checkValid();
 
-        var cleanup = new SwiftValueCleanup(value.$memorySegment());
+        MemorySegment selfPointer = value.$memorySegment();
+        SwiftAnyType selfType = value.$swiftType();
+        var cleanup = new SwiftValueCleanup(selfPointer, selfType);
         this.resources.add(cleanup);
     }
 

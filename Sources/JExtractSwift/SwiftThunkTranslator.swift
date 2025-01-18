@@ -86,6 +86,13 @@ struct SwiftThunkTranslator {
     let thunkName = self.st.thunkNameRegistry.functionThunkName(
       module: st.swiftModuleName, decl: function)
 
+    let maybeRetainedSelf: String =
+        if parent.isReferenceType {
+            "_swiftjava_swift_retain(object: self$)"
+        } else {
+            "self$"
+        }
+
     return
       [
         """
@@ -93,7 +100,7 @@ struct SwiftThunkTranslator {
         public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: parent.swiftTypeName) */ {
           let _self = \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
           let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
-          return _swiftjava_swift_retain(object: self$)
+          return \(raw: maybeRetainedSelf)
         }
         """
       ]
@@ -109,7 +116,7 @@ struct SwiftThunkTranslator {
       } else {
         "-> \(decl.returnType.cCompatibleSwiftType) /* \(decl.returnType.swiftTypeName) */"
       }
-    
+
     // Do we need to pass a self parameter?
     let paramPassingStyle: SelfParameterVariant?
     let callBase: String
@@ -155,7 +162,7 @@ struct SwiftThunkTranslator {
         """
       ]
   }
-  
+
   func adaptArgumentsInThunk(_ decl: ImportedFunc) -> String {
     var lines: [String] = []
     for p in decl.parameters {
@@ -165,11 +172,11 @@ struct SwiftThunkTranslator {
           """
           let \(p.effectiveValueName) = String(cString: \(p.effectiveValueName))
           """
-          
+
         lines += [adaptedType]
       }
     }
-    
+
     return lines.joined(separator: "\n")
   }
 }

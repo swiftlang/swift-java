@@ -62,8 +62,9 @@ final class AutoSwiftMemorySession implements SwiftArena {
     @Override
     public void register(SwiftValue value) {
         Objects.requireNonNull(value, "value");
-        MemorySegment resource = value.$memorySegment();
-        var cleanupAction = new SwiftValueCleanup(resource);
+        MemorySegment selfPointer = value.$memorySegment();
+        SwiftAnyType selfType = value.$swiftType();
+        var cleanupAction = new SwiftValueCleanup(selfPointer, selfType);
         cleaner.register(value, cleanupAction);
     }
 

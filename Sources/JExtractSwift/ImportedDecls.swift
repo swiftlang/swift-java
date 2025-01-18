@@ -64,6 +64,16 @@ public enum NominalTypeKind {
   case `class`
   case `enum`
   case `struct`
+
+  var isReferenceType: Bool {
+    switch self {
+    case .actor, .class: true
+    case .enum, .struct: false
+    }
+  }
+  var isValueType: Bool {
+    !isReferenceType
+  }
 }
 
 public struct ImportedParam {
@@ -90,7 +100,7 @@ public struct ImportedParam {
   var effectiveName: String? {
     firstName ?? secondName
   }
-  
+
   var effectiveValueName: String {
     secondName ?? firstName ?? "_"
   }

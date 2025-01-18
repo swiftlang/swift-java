@@ -58,7 +58,7 @@ extension TypeSyntax {
   }
 }
 
-extension DeclSyntaxProtocol {
+extension SyntaxProtocol {
   var isClass: Bool {
     return self.is(ClassDeclSyntax.self)
   }

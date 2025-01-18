@@ -194,7 +194,7 @@ extension Swift2JavaTranslator {
     printPackage(&printer)
     printImports(&printer)
 
-    printClass(&printer, decl) { printer in
+    printNominal(&printer, decl) { printer in
       // Prepare type metadata, we're going to need these when invoking e.g. initializers so cache them in a static.
       // We call into source swift-java source generated accessors which give us the type of the Swift object:
       // TODO: seems we no longer need the mangled name per se, so avoiding such constant and downcall
@@ -277,17 +277,28 @@ extension Swift2JavaTranslator {
     printer.print("")
   }
 
-  public func printClass(
+  public func printNominal(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
   ) {
-    printer.printTypeDecl("public final class \(decl.javaClassName) implements SwiftHeapObject") {
-      printer in
+    let baseType: String =
+        if decl.kind.isReferenceType {
+            "SwiftHeapObject"
+        } else {
+            "SwiftValue"
+        }
+
+    printer.printTypeDecl("public final class \(decl.javaClassName) implements \(baseType)") { printer in
       // ==== Storage of the class
       printClassSelfProperty(&printer, decl)
 
       // Constants
       printClassConstants(printer: &printer)
       printTypeMappingDecls(&printer)
+
+      // struct specific funcs
+      if decl.kind.isValueType {
+        printValueTypeFuncs(printer: &printer, decl)
+      }
 
       body(&printer)
     }
@@ -375,6 +386,18 @@ extension Swift2JavaTranslator {
       """
     )
   }
+
+  private func printValueTypeFuncs(printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    let typeName = decl.javaClassName
+    printer.print(
+    """
+    public \(typeName) wrap(MemorySegment self) {
+      return new \(typeName)(self);
+    }
+    """
+    )
+  }
+
 
   private func printPrivateConstructor(_ printer: inout CodePrinter, _ typeName: String) {
     printer.print(

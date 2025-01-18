@@ -62,9 +62,9 @@ class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
     }
 }
 
-record SwiftValueCleanup(MemorySegment resource) implements SwiftInstanceCleanup {
+record SwiftValueCleanup(MemorySegment selfPointer, SwiftAnyType selfType) implements SwiftInstanceCleanup {
     @Override
     public void run() {
-        throw new RuntimeException("not implemented yet");
+        SwiftValueWitnessTable.destroy(selfType, selfPointer);
     }
 }

@@ -17,6 +17,7 @@ package com.example.swift;
 // Import swift-extract generated sources
 
 // Import javakit/swiftkit support libraries
+import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftArrayRef;
 import org.swift.swiftkit.SwiftKit;
 
@@ -48,29 +49,36 @@ public class HelloJava2Swift {
 //            obj.takeIntMethod(42);
 //        }
 
-        // public func getArrayMySwiftClass() -> [MySwiftClass]
-        SwiftArrayRef<MySwiftClass> arr = ManualImportedMethods.getArrayMySwiftClass();
+//        // public func getArrayMySwiftClass() -> [MySwiftClass]
+//        SwiftArrayRef<MySwiftClass> arr = ManualImportedMethods.getArrayMySwiftClass();
+//
+//        MySwiftClass first = arr.get(0, MySwiftClass::new);
+//        System.out.println("[java] first = " + first);
+//
+//        // FIXME: properties don't work yet, need the thunks!
+////        System.out.println("[java] first.getLen() = " + first.getLen());
+////        assert(first.getLen() == 1);
+////        System.out.println("[java] first.getCap() = " + first.getCap());
+////        assert(first.getCap() == 2);
+//
+//        System.out.println("[java] first.getterForLen() = " + first.getterForLen());
+//        System.out.println("[java] first.getForCap() = " + first.getterForCap());
+//        precondition(1, first.getterForLen());
+//        precondition(11, first.getterForCap());
+//
+//        MySwiftClass second = arr.get(1, MySwiftClass::new);
+//        System.out.println("[java] second = " + second);
+//        System.out.println("[java] second.getterForLen() = " + second.getterForLen());
+//        System.out.println("[java] second.getForCap() = " + second.getterForCap());
+//        precondition(2, second.getterForLen());
+//        precondition(22, second.getterForCap());
 
-        MySwiftClass first = arr.get(0, MySwiftClass::new);
-        System.out.println("[java] first = " + first);
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftStruct struct = new MySwiftStruct(arena, 44);
+//            long theNumber = struct.getTheNumber();
+//            precondition(44, theNumber);
 
-        // FIXME: properties don't work yet, need the thunks!
-//        System.out.println("[java] first.getLen() = " + first.getLen());
-//        assert(first.getLen() == 1);
-//        System.out.println("[java] first.getCap() = " + first.getCap());
-//        assert(first.getCap() == 2);
-
-        System.out.println("[java] first.getterForLen() = " + first.getterForLen());
-        System.out.println("[java] first.getForCap() = " + first.getterForCap());
-        precondition(1, first.getterForLen());
-        precondition(11, first.getterForCap());
-
-        MySwiftClass second = arr.get(1, MySwiftClass::new);
-        System.out.println("[java] second = " + second);
-        System.out.println("[java] second.getterForLen() = " + second.getterForLen());
-        System.out.println("[java] second.getForCap() = " + second.getterForCap());
-        precondition(2, second.getterForLen());
-        precondition(22, second.getterForCap());
+        }
 
 
         System.out.println("DONE.");

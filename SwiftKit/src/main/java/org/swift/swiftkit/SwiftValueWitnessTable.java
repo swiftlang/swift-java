@@ -161,9 +161,12 @@ public abstract class SwiftValueWitnessTable {
     static final long $flags$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("flags"));
 
+    // ==== ------------------------------------------------------------------------------------------------------------
+    // destroy
+
     /**
      * {@snippet lang = C:
-     * ///void(*destroy)(T *object, witness_t *self);
+     * ///    void(*destroy)(T *object, witness_t *self);
      * ///
      * /// Given a valid object of this type, destroy it, leaving it as an
      * /// invalid object. This is useful when generically destroying
@@ -202,7 +205,6 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
-
     /**
      * Destroy the value/object.
      * <p>
@@ -225,4 +227,48 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
+    // ==== ------------------------------------------------------------------------------------------------------------
+    // initializeWithCopy
+
+    /**
+     * {@snippet lang = C:
+     * ///   T *(*initializeWithCopy)(T *dest, T *src, M *self);
+     * ///
+     * /// Given an invalid object of this type, initialize it as a copy of
+     * /// the source object.  Returns the dest object.
+     * FUNCTION_VALUE_WITNESS(initializeWithCopy,
+     *                        InitializeWithCopy,
+     *                        MUTABLE_VALUE_TYPE,
+     *                        (MUTABLE_VALUE_TYPE, MUTABLE_VALUE_TYPE, TYPE_TYPE))
+     * }
+     */
+    private static class initializeWithCopy {
+        static final long $offset =
+                $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
+
+        static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+                ValueLayout.ADDRESS, // witness table functions expect a pointer to self pointer
+                ValueLayout.ADDRESS // pointer to the witness table
+        );
+
+        /**
+         * Function pointer for the destroy operation
+         */
+        static MemorySegment addr(SwiftAnyType ty) {
+            // Get the value witness table of the type
+            final var vwt = SwiftValueWitnessTable.valueWitnessTable(ty.$memorySegment());
+
+            // Get the address of the destroy function stored at the offset of the witness table
+            long funcAddress = getSwiftInt(vwt, destroy.$offset);
+            return MemorySegment.ofAddress(funcAddress);
+        }
+
+        static MethodHandle handle(SwiftAnyType ty) {
+            return Linker.nativeLinker().downcallHandle(addr(ty), DESC);
+        }
+    }
+
+    public static void initializeWithCopy(SwiftAnyType type, MemorySegment from, MemorySegment target) {
+
+    }
 }

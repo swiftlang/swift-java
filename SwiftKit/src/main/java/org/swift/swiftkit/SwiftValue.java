@@ -14,6 +14,26 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+
 public interface SwiftValue extends SwiftInstance {
     SwiftAnyType $swiftType();
+
+
+    /**
+     * Create a copy of the Swift array but keeping the memory managed in Swift native memory.
+     */
+    default SwiftValue copy(Arena arena) {
+        var layout = SwiftValueWitnessTable.layoutOfSwiftType($swiftType().$memorySegment());
+        System.out.println("layout = " + layout);
+
+        MemorySegment target = arena.allocate(layout.byteSize());
+
+        SwiftValueWitnessTable.initializeWithCopy($swiftType(), $memorySegment(), target);
+
+        return wrap(target);
+    }
+
+    SwiftValue wrap(MemorySegment self);
 }

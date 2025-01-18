@@ -236,6 +236,11 @@ public struct TranslatedType {
     originalSwiftType.trimmedDescription
   }
 
+  var isReferenceType: Bool {
+    originalSwiftType.isClass ||
+        originalSwiftType.isActor
+  }
+
   /// Produce the "unqualified" Java type name.
   var unqualifiedJavaTypeName: String {
     switch javaType {
