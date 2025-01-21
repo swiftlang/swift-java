@@ -30,7 +30,7 @@ public func swiftjava_manual_getArrayMySwiftClass() -> UnsafeMutableRawPointer /
 }
 
 @_cdecl("swiftjava_SwiftKitSwift_Array_count") // FIXME: hardcoded for MySwiftClass
-public func swiftjava_SwiftKitSwift_Array____count(
+public func swiftjava_SwiftKitSwift_Array_count(
   rawPointer: UnsafeMutableRawPointer, // Array<T>
   elementType: UnsafeMutableRawPointer // Metadata of T
 ) -> Int {
@@ -46,7 +46,7 @@ public func swiftjava_SwiftKitSwift_Array____count(
 }
 
 @_cdecl("swiftjava_SwiftKitSwift_Array_get") // FIXME: hardcoded for MySwiftClass
-public func swiftjava_SwiftKitSwift_Array____get(
+public func swiftjava_SwiftKitSwift_Array_get(
   rawPointer: UnsafeMutableRawPointer, // Array<T>
   index: Int,
   elementType: UnsafeMutableRawPointer // Metadata of T

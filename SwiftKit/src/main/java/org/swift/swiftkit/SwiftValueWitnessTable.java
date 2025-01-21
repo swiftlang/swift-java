@@ -16,6 +16,7 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
@@ -70,8 +71,7 @@ public abstract class SwiftValueWitnessTable {
      */
     public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
         return fullTypeMetadata(typeMetadata)
-                 .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
-//                .get(ValueLayout.ADDRESS, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+                .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
     }
 
 
@@ -82,20 +82,31 @@ public abstract class SwiftValueWitnessTable {
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("size"));
 
     /**
+     * Variable handle for the "stride" field within the value witness table.
+     */
+    static final VarHandle $size$mh =
+            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("size"));
+
+    /**
      * Determine the size of a Swift type given its type metadata.
      *
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long sizeOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$size$offset);
+        return getSwiftInt(valueWitnessTable(typeMetadata), $size$mh);
     }
-
 
     /**
      * Offset for the "stride" field within the value witness table.
      */
     static final long $stride$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("stride"));
+
+    /**
+     * Variable handle for the "stride" field within the value witness table.
+     */
+    static final VarHandle $stride$mh =
+            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("size"));
 
     /**
      * Determine the stride of a Swift type given its type metadata, which is
@@ -107,7 +118,7 @@ public abstract class SwiftValueWitnessTable {
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long strideOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$stride$offset);
+        return getSwiftInt(valueWitnessTable(typeMetadata), $stride$mh);
     }
 
 
@@ -117,7 +128,7 @@ public abstract class SwiftValueWitnessTable {
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
-        long flags = getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$flags$offset);
+        long flags = getSwiftInt(valueWitnessTable(typeMetadata), $flags$offset);
         return (flags & 0xFF) + 1;
     }
 
@@ -240,7 +251,7 @@ public abstract class SwiftValueWitnessTable {
      *                        InitializeWithCopy,
      *                        MUTABLE_VALUE_TYPE,
      *                        (MUTABLE_VALUE_TYPE, MUTABLE_VALUE_TYPE, TYPE_TYPE))
-     * }
+     *}
      */
     private static class initializeWithCopy {
         static final long $offset =

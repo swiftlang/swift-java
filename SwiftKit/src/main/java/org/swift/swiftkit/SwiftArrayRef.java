@@ -25,12 +25,21 @@ public class SwiftArrayRef<Wrapped extends SwiftInstance> {
 
     private final MemorySegment self$;
     private final SwiftAnyType wrappedType;
+    private final Function<MemorySegment, Wrapped> wrapAsWrapped;
+
+    private GroupLayout ELEMENT_LAYOUT = null;
+    private SequenceLayout ARRAY_OF_ELEMENT_LAYOUT = null;
 
     public SwiftArrayRef(Arena arena,
                          MemorySegment selfMemorySegment,
-                         SwiftAnyType wrappedSwiftTypeMetadata) {
+                         SwiftAnyType wrappedSwiftTypeMetadata,
+                         Function<MemorySegment, Wrapped> memorySegmentAsWrapped) {
         this.self$ = selfMemorySegment;
         this.wrappedType = wrappedSwiftTypeMetadata;
+        this.wrapAsWrapped = memorySegmentAsWrapped;
+
+        this.ELEMENT_LAYOUT = (GroupLayout) SwiftValueWitnessTable.layoutOfSwiftType(wrappedType.$memorySegment());
+        this.ARRAY_OF_ELEMENT_LAYOUT = MemoryLayout.sequenceLayout(this.count(), ELEMENT_LAYOUT);
     }
 
     public final MemorySegment $memorySegment() {
@@ -45,6 +54,8 @@ public class SwiftArrayRef<Wrapped extends SwiftInstance> {
         System.loadLibrary("SwiftKitSwift");
         return true;
     }
+
+
 
     // ==== ------------------------------------------------------------------------
     // count
@@ -62,7 +73,7 @@ public class SwiftArrayRef<Wrapped extends SwiftInstance> {
     }
 
 
-    public int size() {
+    public int count() {
         var mh$ = count.HANDLE;
         try {
             if (SwiftKit.TRACE_DOWNCALLS) {
@@ -74,6 +85,8 @@ public class SwiftArrayRef<Wrapped extends SwiftInstance> {
                     self$, // the array
                     wrappedType.$memorySegment() // the T metadata
             );
+
+            System.out.println("got array count = " + count);
 
             return Math.toIntExact(count);
         } catch (Throwable ex$) {
@@ -98,21 +111,40 @@ public class SwiftArrayRef<Wrapped extends SwiftInstance> {
     }
 
 
-    public Wrapped get(long index, Function<MemorySegment, Wrapped> wrap) {
+    public Wrapped get(long index) {
         var mh$ = get.HANDLE;
         try {
             if (SwiftKit.TRACE_DOWNCALLS) {
                 SwiftKit.traceDowncall(self$);
             }
-            // A Swift array has `Int` length which is a Java long potentially,
-            // however it won't be so large so we will to-int-convert it...
+
             var pointer = (MemorySegment) mh$.invokeExact(
                     self$, // the array
                     index,
                     wrappedType.$memorySegment() // the T metadata
             );
 
-            return wrap.apply(pointer);
+            return this.wrapAsWrapped.apply(pointer);
+        } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    public Wrapped getWithVarHandle(long index) {
+        var mh$ = get.HANDLE;
+        try {
+            if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(self$);
+            }
+
+
+            var pointer = (MemorySegment) mh$.invokeExact(
+                    self$, // the array
+                    index,
+                    wrappedType.$memorySegment() // the T metadata
+            );
+
+            return this.wrapAsWrapped.apply(pointer);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }

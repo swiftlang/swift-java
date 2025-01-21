@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SwiftArrayTest {
+public class SwiftArrayRefTest {
 
     @BeforeAll
     public static void setUp() {
@@ -35,7 +35,7 @@ public class SwiftArrayTest {
         try (var arena = SwiftArena.ofConfined()) {
             SwiftArrayRef<MySwiftClass> arr = ManualImportedMethods.getArrayMySwiftClass();
 
-            MySwiftClass first = arr.get(0, MySwiftClass::new);
+            MySwiftClass first = arr.get(0);
             System.out.println("[java] first = " + first);
 
             // FIXME: properties don't work yet, need the thunks!
@@ -49,7 +49,7 @@ public class SwiftArrayTest {
             assertEquals(1, first.getterForLen());
             assertEquals(11, first.getterForCap());
 
-            MySwiftClass second = arr.get(1, MySwiftClass::new);
+            MySwiftClass second = arr.get(1);
             System.out.println("[java] second = " + second);
             System.out.println("[java] second.getterForLen() = " + second.getterForLen());
             System.out.println("[java] second.getForCap() = " + second.getterForCap());

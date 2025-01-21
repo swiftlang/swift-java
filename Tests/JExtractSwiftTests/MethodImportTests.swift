@@ -121,7 +121,7 @@ final class MethodImportTests {
       expected:
         """
         /**
-         * Downcall to Swift: 
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public func globalTakeInt(i: Int)
          * }
@@ -381,7 +381,7 @@ final class MethodImportTests {
           return (long) makeInt($memorySegment());
         }
         """
-    )al
+    )
   }
 
   @Test

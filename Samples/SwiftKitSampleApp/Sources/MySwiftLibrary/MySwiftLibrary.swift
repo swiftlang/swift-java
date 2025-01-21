@@ -56,13 +56,23 @@ public func getArrayInt() -> [Int] {
 }
 
 let DATA = [
-               MySwiftClass(len: 1, cap: 11),
-               MySwiftClass(len: 2, cap: 22),
-               MySwiftClass(len: 3, cap: 33),
-             ]
+    MySwiftClass(len: 1, cap: 11),
+    MySwiftClass(len: 2, cap: 22),
+    MySwiftClass(len: 3, cap: 33),
+]
 
 public func getArrayMySwiftClass() -> [MySwiftClass] {
   DATA
+}
+
+
+let BYTES_DATA: [UInt8] = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+]
+
+
+public func getByteArray() -> [UInt8] {
+  BYTES_DATA
 }
 
 public class MySwiftClass {

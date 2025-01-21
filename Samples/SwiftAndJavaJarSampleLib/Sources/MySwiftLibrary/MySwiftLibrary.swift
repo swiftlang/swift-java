@@ -59,7 +59,12 @@ public class MySwiftClass {
     p("Deinit, self = 0x\(String(addr, radix: 16, uppercase: true))")
   }
 
-  public var counter: Int32 = 0
+  public var counter: Int = 0
+
+  public func increment(by num: Int) -> Int {
+    counter += num
+    return counter
+  }
 
   public func voidMethod() {
     p("")

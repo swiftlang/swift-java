@@ -37,12 +37,12 @@ class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
     /**
      * This constructor on purpose does not just take a {@link SwiftHeapObject} in order to make it very
      * clear that it does not take ownership of it, but we ONLY manage the native resource here.
-     *
+     * <p>
      * This is important for {@link AutoSwiftMemorySession} which relies on the wrapper type to be GC-able,
      * when no longer "in use" on the Java side.
      */
     SwiftHeapObjectCleanup(MemorySegment selfPointer, SwiftAnyType selfType) {
-        this.selfPointer  = selfPointer;
+        this.selfPointer = selfPointer;
         this.selfType = selfType;
     }
 
@@ -65,6 +65,7 @@ class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
 record SwiftValueCleanup(MemorySegment selfPointer, SwiftAnyType selfType) implements SwiftInstanceCleanup {
     @Override
     public void run() {
+        System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
         SwiftValueWitnessTable.destroy(selfType, selfPointer);
     }
 }

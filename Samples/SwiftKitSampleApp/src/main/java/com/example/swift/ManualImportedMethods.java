@@ -23,6 +23,7 @@ import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 
+import static org.swift.swiftkit.SwiftValueLayout.SWIFT_INT;
 import static org.swift.swiftkit.SwiftValueLayout.SWIFT_POINTER;
 
 public final class ManualImportedMethods {
@@ -61,10 +62,43 @@ public final class ManualImportedMethods {
             return new SwiftArrayRef<>(
                     arena,
                     arrayPointer,
-                    /* element type = */MySwiftClass.TYPE_METADATA
+                    /* element type = */MySwiftClass.TYPE_METADATA,
+                    MySwiftClass::new
             );
         } catch (Throwable e) {
             throw new RuntimeException("Failed to invoke Swift method", e);
         }
     }
+
+//    private static class getByteArray {
+//        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+//                /* -> */SWIFT_POINTER,
+//                /* size */SWIFT_INT
+//        );
+//        public static final MemorySegment ADDR =
+//                SwiftKit.findOrThrow("swiftjava_manual_getByteArray");
+//
+//        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+//    }
+//
+//    public static SwiftPrimiviteArrayRef getByteArray() {
+//        MethodHandle mh = getByteArray.HANDLE;
+//
+//        Arena arena = Arena.ofAuto();
+//        try {
+//            if (SwiftKit.TRACE_DOWNCALLS) {
+//                SwiftKit.traceDowncall();
+//            }
+//
+//            MemorySegment arrayPointer = (MemorySegment) mh.invokeExact();
+//            return new SwiftArrayRef<>(
+//                    arena,
+//                    arrayPointer,
+//                    /* element type = */,
+//                    MySwiftClass::new
+//            );
+//        } catch (Throwable e) {
+//            throw new RuntimeException("Failed to invoke Swift method", e);
+//        }
+//    }
 }

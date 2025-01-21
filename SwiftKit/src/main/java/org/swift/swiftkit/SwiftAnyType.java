@@ -26,11 +26,17 @@ public final class SwiftAnyType {
 
     private final MemorySegment memorySegment;
 
-    public SwiftAnyType(MemorySegment memorySegment) {
-//        if (SwiftKit.getSwiftInt(memorySegment, 0) > 0) {
-//            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
-//        }
+    public static SwiftAnyType SWIFT_INT = SwiftKit.getTypeByMangledNameInEnvironment("SiSg").get();
+    public static SwiftAnyType SWIFT_UINT = SwiftKit.getTypeByMangledNameInEnvironment("SuSg").get();
+    public static SwiftAnyType SWIFT_LONG = SwiftKit.getTypeByMangledNameInEnvironment("SiSg").get();
+    public static SwiftAnyType SWIFT_BOOL = SwiftKit.getTypeByMangledNameInEnvironment("SbSg").get();
+    public static SwiftAnyType SWIFT_DOUBLE = SwiftKit.getTypeByMangledNameInEnvironment("SdSg").get();
+    public static SwiftAnyType SWIFT_FLOAT = SwiftKit.getTypeByMangledNameInEnvironment("SfSg").get();
+    public static SwiftAnyType SWIFT_UNSAFE_RAW_POINTER = SwiftKit.getTypeByMangledNameInEnvironment("SVSg").get();
+    public static SwiftAnyType SWIFT_UNSAFE_MUTABLE_RAW_POINTER = SwiftKit.getTypeByMangledNameInEnvironment("SvSg").get();
+    public static SwiftAnyType SWIFT_string = SwiftKit.getTypeByMangledNameInEnvironment("SSg").get();
 
+    public SwiftAnyType(MemorySegment memorySegment) {
         this.memorySegment = memorySegment.asReadOnly();
     }
 
@@ -56,11 +62,19 @@ public final class SwiftAnyType {
         return $LAYOUT;
     }
 
+    /**
+     * Get the human-readable Swift type name of this type.
+     */
+    public String getSwiftName() {
+        return SwiftKit.nameOfSwiftType(memorySegment, true);
+    }
+
     @Override
     public String toString() {
         return "AnySwiftType{" +
-                "name=" + SwiftKit.nameOfSwiftType(memorySegment, true) +
+                "name=" + getSwiftName() +
                 ", memorySegment=" + memorySegment +
                 '}';
     }
+
 }
