@@ -86,21 +86,27 @@ struct SwiftThunkTranslator {
     let thunkName = self.st.thunkNameRegistry.functionThunkName(
       module: st.swiftModuleName, decl: function)
 
-    let maybeRetainedSelf: String =
-        if parent.isReferenceType {
-            "_swiftjava_swift_retain(object: self$)"
-        } else {
-            "self$"
-        }
+    let returnSelf: String =
+      if parent.isReferenceType {
+        """
+        let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
+        _swiftjava_swift_retain(object: self$)
+        """
+      } else {
+        """
+        // FIXME: Reconsider how else we want to deal with value types being returned to JVM
+        let self$ = withUnsafePointer(to: &_self) { $0 }
+        return UnsafeMutableRawPointer(mutating: self$)
+        """
+      }
 
     return
       [
         """
         @_cdecl("\(raw: thunkName)")
         public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: parent.swiftTypeName) */ {
-          let _self = \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
-          let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
-          return \(raw: maybeRetainedSelf)
+          var _self = \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+          \(raw: returnSelf)
         }
         """
       ]
@@ -123,6 +129,7 @@ struct SwiftThunkTranslator {
     let callBaseDot: String
       if let parent = decl.parent {
         paramPassingStyle = .swiftThunkSelf
+        // FIXME: for structs
         callBase = "let self$ = unsafeBitCast(_self, to: \(parent.originalSwiftType).self)"
         callBaseDot = "self$."
       } else {

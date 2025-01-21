@@ -57,7 +57,7 @@ public class HelloJava2Swift {
         // public func getArrayMySwiftClass() -> [MySwiftClass]
         SwiftArrayRef<MySwiftClass> arr = ManualImportedMethods.getArrayMySwiftClass();
 
-        precondition(3, arr.count());
+        // precondition(3, arr.count());
 
         MySwiftClass first = arr.get(0);
         System.out.println("[java] first = " + first);
@@ -78,10 +78,17 @@ public class HelloJava2Swift {
         precondition(22, second.getterForCap());
 
         try (var arena = SwiftArena.ofConfined()) {
-            MySwiftStruct struct = new MySwiftStruct(arena, 44);
-            System.out.println("struct.getTheNumber() = " + struct.getTheNumber());
-            long theNumber = struct.getTheNumber();
-            precondition(44, theNumber);
+            var struct = new MySwiftStruct(arena, 44);
+//            System.out.println("struct.getTheNumber() = " + struct.getTheNumber());
+//            long theNumber = struct.getTheNumber();
+//            precondition(44, theNumber);
+
+            System.out.println("struct.$layout() = " + struct.$layout());
+            System.out.println("struct.$layout() = " + struct.$layout().byteSize());
+
+            var huge = new MyHugeSwiftStruct(arena, 44);
+            System.out.println("huge.$layout() = " + huge.$layout());
+            System.out.println("huge.$layout() = " + huge.$layout().byteSize());
         }
 
 

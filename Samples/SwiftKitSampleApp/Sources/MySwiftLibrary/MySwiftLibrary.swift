@@ -134,18 +134,6 @@ public class MySwiftClass {
   }
 }
 
-public struct MySwiftStruct {
-    public var number: Int
-
-    public init(number: Int) {
-        self.number = number
-    }
-
-    public func getTheNumber() -> Int {
-        number
-    }
-}
-
 // ==== Internal helpers
 
 package func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
