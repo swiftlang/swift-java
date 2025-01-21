@@ -16,7 +16,6 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.VarHandle;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
@@ -71,7 +70,8 @@ public abstract class SwiftValueWitnessTable {
      */
     public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
         return fullTypeMetadata(typeMetadata)
-                .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+                 .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
+//                .get(ValueLayout.ADDRESS, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
     }
 
 
@@ -82,31 +82,20 @@ public abstract class SwiftValueWitnessTable {
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("size"));
 
     /**
-     * Variable handle for the "stride" field within the value witness table.
-     */
-    static final VarHandle $size$mh =
-            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("size"));
-
-    /**
      * Determine the size of a Swift type given its type metadata.
      *
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long sizeOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), $size$mh);
+        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$size$offset);
     }
+
 
     /**
      * Offset for the "stride" field within the value witness table.
      */
     static final long $stride$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("stride"));
-
-    /**
-     * Variable handle for the "stride" field within the value witness table.
-     */
-    static final VarHandle $stride$mh =
-            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("size"));
 
     /**
      * Determine the stride of a Swift type given its type metadata, which is
@@ -118,7 +107,7 @@ public abstract class SwiftValueWitnessTable {
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long strideOfSwiftType(MemorySegment typeMetadata) {
-        return getSwiftInt(valueWitnessTable(typeMetadata), $stride$mh);
+        return getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$stride$offset);
     }
 
 
@@ -128,7 +117,7 @@ public abstract class SwiftValueWitnessTable {
      * @param typeMetadata the memory segment must point to a Swift metadata
      */
     public static long alignmentOfSwiftType(MemorySegment typeMetadata) {
-        long flags = getSwiftInt(valueWitnessTable(typeMetadata), $flags$offset);
+        long flags = getSwiftInt(valueWitnessTable(typeMetadata), SwiftValueWitnessTable.$flags$offset);
         return (flags & 0xFF) + 1;
     }
 
@@ -172,12 +161,9 @@ public abstract class SwiftValueWitnessTable {
     static final long $flags$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("flags"));
 
-    // ==== ------------------------------------------------------------------------------------------------------------
-    // destroy
-
     /**
      * {@snippet lang = C:
-     * ///    void(*destroy)(T *object, witness_t *self);
+     * ///void(*destroy)(T *object, witness_t *self);
      * ///
      * /// Given a valid object of this type, destroy it, leaving it as an
      * /// invalid object. This is useful when generically destroying
@@ -216,6 +202,7 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
+
     /**
      * Destroy the value/object.
      * <p>
@@ -238,9 +225,6 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
-    // ==== ------------------------------------------------------------------------------------------------------------
-    // initializeWithCopy
-
     /**
      * {@snippet lang = C:
      * ///   T *(*initializeWithCopy)(T *dest, T *src, M *self);
@@ -254,23 +238,26 @@ public abstract class SwiftValueWitnessTable {
      *}
      */
     private static class initializeWithCopy {
-        static final long $offset =
-                $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
 
-        static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-                ValueLayout.ADDRESS, // witness table functions expect a pointer to self pointer
+        static final long $offset =
+                $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("initializeWithCopy"));
+
+        static final FunctionDescriptor DESC = FunctionDescriptor.of(
+                /* -> */ ValueLayout.ADDRESS, // returns the destination object
+                ValueLayout.ADDRESS, // destination
+                ValueLayout.ADDRESS, // source
                 ValueLayout.ADDRESS // pointer to the witness table
         );
 
         /**
-         * Function pointer for the destroy operation
+         * Function pointer for the initializeWithCopy operation
          */
         static MemorySegment addr(SwiftAnyType ty) {
             // Get the value witness table of the type
             final var vwt = SwiftValueWitnessTable.valueWitnessTable(ty.$memorySegment());
 
-            // Get the address of the destroy function stored at the offset of the witness table
-            long funcAddress = getSwiftInt(vwt, destroy.$offset);
+            // Get the address of the function stored at the offset of the witness table
+            long funcAddress = getSwiftInt(vwt, initializeWithCopy.$offset);
             return MemorySegment.ofAddress(funcAddress);
         }
 
@@ -279,7 +266,31 @@ public abstract class SwiftValueWitnessTable {
         }
     }
 
-    public static void initializeWithCopy(SwiftAnyType type, MemorySegment from, MemorySegment target) {
 
+    /**
+     * Given an invalid object of this type, initialize it as a copy of
+     * the source object.
+     * <p/>
+     * Returns the dest object.
+     */
+    public static MemorySegment initializeWithCopy(SwiftAnyType type, MemorySegment dest, MemorySegment src) {
+        var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
+        var wtable = valueWitnessTable(fullTypeMetadata);
+
+        var mh = initializeWithCopy.handle(type);
+
+        try (var arena = Arena.ofConfined()) {
+            // we need to make a pointer to the self pointer when calling witness table functions:
+            MemorySegment indirectDest = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegmentUtils.setSwiftPointerAddress(indirectDest, dest);
+            MemorySegment indirectSrc = arena.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegmentUtils.setSwiftPointerAddress(indirectSrc, src);
+
+            var returnedDest = (MemorySegment) mh.invokeExact(indirectDest, indirectSrc, wtable);
+            return returnedDest;
+        } catch (Throwable th) {
+            throw new AssertionError("Failed to initializeWithCopy '" + type + "' (" + dest + ", " + src + ")", th);
+        }
     }
+
 }
