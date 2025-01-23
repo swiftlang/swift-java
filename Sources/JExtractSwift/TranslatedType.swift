@@ -176,7 +176,7 @@ extension String {
   ///     2. Whether the memory referenced by the pointer is mutable.
   ///     3. Whether the pointer type has a `count` property describing how
   ///        many elements it points to.
-  fileprivate var isNameOfSwiftPointerType: (requiresArgument: Bool, mutable: Bool, hasCount: Bool)? {
+  var isNameOfSwiftPointerType: (requiresArgument: Bool, mutable: Bool, hasCount: Bool)? {
     switch self {
     case "COpaquePointer", "UnsafeRawPointer":
       return (requiresArgument: false, mutable: true, hasCount: false)
@@ -280,17 +280,7 @@ extension TranslatedType {
   var foreignValueLayout: ForeignValueLayout {
     switch cCompatibleJavaMemoryLayout {
     case .primitive(let javaType):
-      switch javaType {
-      case .boolean: return .SwiftBool
-      case .byte: return .SwiftInt8
-      case .char: return .SwiftUInt16
-      case .short: return .SwiftInt16
-      case .int: return .SwiftInt32
-      case .long: return .SwiftInt64
-      case .float: return .SwiftFloat
-      case .double: return .SwiftDouble
-      case .array, .class, .void: fatalError("Not a primitive type: \(cCompatibleJavaMemoryLayout) in \(self)")
-      }
+      return ForeignValueLayout(javaType: javaType)!
 
     case .int:
       return .SwiftInt

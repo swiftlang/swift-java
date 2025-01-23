@@ -24,9 +24,6 @@ public final class Swift2JavaTranslator {
 
   package var log = Logger(label: "translator", logLevel: .info)
 
-  // ==== Input configuration
-  let swiftModuleName: String
-
   // ==== Output configuration
   let javaPackage: String
 
@@ -42,16 +39,29 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
+  var swiftStdlibTypes: SwiftStandardLibraryTypes
+
+  let symbolTable: SwiftSymbolTable
   let nominalResolution: NominalTypeResolution = NominalTypeResolution()
 
   var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
+
+  /// The name of the Swift module being translated.
+  var swiftModuleName: String {
+    symbolTable.moduleName
+  }
 
   public init(
     javaPackage: String,
     swiftModuleName: String
   ) {
     self.javaPackage = javaPackage
-    self.swiftModuleName = swiftModuleName
+    self.symbolTable = SwiftSymbolTable(parsedModuleName: swiftModuleName)
+
+    // Create a mock of the Swift standard library.
+    var parsedSwiftModule = SwiftParsedModuleSymbolTable(moduleName: "Swift")
+    self.swiftStdlibTypes = SwiftStandardLibraryTypes(into: &parsedSwiftModule)
+    self.symbolTable.importedModules.append(parsedSwiftModule.symbolTable)
   }
 }
 
@@ -87,9 +97,8 @@ extension Swift2JavaTranslator {
   package func analyzeSwiftInterface(interfaceFilePath: String, text: String) throws {
     let sourceFileSyntax = Parser.parse(source: text)
 
-    // Find all of the types and extensions, then bind the extensions.
-    nominalResolution.addSourceFile(sourceFileSyntax)
-    nominalResolution.bindExtensions()
+    addSourceFile(sourceFileSyntax)
+    prepareForTranslation()
 
     let visitor = Swift2JavaVisitor(
       moduleName: self.swiftModuleName,
@@ -99,6 +108,25 @@ extension Swift2JavaTranslator {
     visitor.walk(sourceFileSyntax)
   }
 
+  package func addSourceFile(_ sourceFile: SourceFileSyntax) {
+    nominalResolution.addSourceFile(sourceFile)
+  }
+
+  package func prepareForTranslation() {
+    nominalResolution.bindExtensions()
+
+    for (_, node) in nominalResolution.topLevelNominalTypes {
+      symbolTable.parsedModule.addNominalTypeDeclaration(node, parent: nil)
+    }
+
+    for (ext, nominalNode) in nominalResolution.resolvedExtensions {
+      guard let nominalDecl = symbolTable.parsedModule.lookup(nominalNode) else {
+        continue
+      }
+
+      symbolTable.parsedModule.addExtension(ext, extending: nominalDecl)
+    }
+  }
 }
 
 // ===== --------------------------------------------------------------------------------------------------------------
