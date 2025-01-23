@@ -25,13 +25,13 @@ public class NominalTypeResolution {
 
   /// Mapping from extension declarations to the type declaration that they
   /// extend.
-  private var resolvedExtensions: [ExtensionDeclSyntax: NominalTypeDeclSyntaxNode] = [:]
+  var resolvedExtensions: [ExtensionDeclSyntax: NominalTypeDeclSyntaxNode] = [:]
 
   /// Extensions that have been encountered but not yet resolved to
   private var unresolvedExtensions: [ExtensionDeclSyntax] = []
 
   /// Mapping from qualified nominal type names to their syntax nodes.
-  private var topLevelNominalTypes: [String: NominalTypeDeclSyntaxNode] = [:]
+  var topLevelNominalTypes: [String: NominalTypeDeclSyntaxNode] = [:]
 
   @_spi(Testing) public init() { }
 }
