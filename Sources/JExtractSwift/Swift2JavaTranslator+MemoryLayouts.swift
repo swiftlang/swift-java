@@ -34,7 +34,9 @@ extension Swift2JavaTranslator {
         continue
       }
 
-      layouts.append(param.type.foreignValueLayout)
+      var layout = param.type.foreignValueLayout
+      layout.inlineComment = "\(param.effectiveValueName)"
+      layouts.append(layout)
     }
 
     return layouts

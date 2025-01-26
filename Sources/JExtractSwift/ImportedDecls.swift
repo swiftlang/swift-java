@@ -44,18 +44,19 @@ public struct ImportedNominalType: ImportedDecl {
     TranslatedType(
       cCompatibleConvention: .direct,
       originalSwiftType: "\(raw: swiftTypeName)",
+      originalSwiftTypeKind: self.kind,
       cCompatibleSwiftType: "UnsafeRawPointer",
       cCompatibleJavaMemoryLayout: .heapObject,
       javaType: javaType
     )
   }
-  
+
   public var isReferenceType: Bool {
     switch self.kind {
     case .class, .actor:
-      return true
-    case .enum, .struct:
-      return false
+      true
+    default:
+      false
     }
   }
 
@@ -73,6 +74,34 @@ public enum NominalTypeKind {
   case `class`
   case `enum`
   case `struct`
+  case `void`  // TODO: NOT NOMINAL, BUT...
+  case function  // TODO: NOT NOMINAL, BUT...
+  case primitive  // TODO: NOT NOMINAL, BUT...
+
+  var isReferenceType: Bool {
+    switch self {
+    case .actor, .class: true
+    case .enum, .struct: false
+    case .void, .function, .primitive: false
+    }
+  }
+
+  var isValueType: Bool {
+    switch self {
+    case .actor, .class: false
+    case .enum, .struct: true
+    case .void, .function, .primitive: false
+    }
+  }
+
+  var isVoid: Bool {
+    switch self {
+    case .actor, .class: false
+    case .enum, .struct: false
+    case .void: true
+    case .function, .primitive: false
+    }
+  }
 }
 
 public struct ImportedParam {
@@ -99,7 +128,7 @@ public struct ImportedParam {
   var effectiveName: String? {
     firstName ?? secondName
   }
-  
+
   var effectiveValueName: String {
     secondName ?? firstName ?? "_"
   }
@@ -269,9 +298,9 @@ extension ImportedFunc: Hashable {
     self.swiftDecl.id.hash(into: &hasher)
   }
 
-  public static func ==(lhs: ImportedFunc, rhs: ImportedFunc) -> Swift.Bool {
-    lhs.parent?.originalSwiftType.id == rhs.parent?.originalSwiftType.id &&
-    lhs.swiftDecl.id == rhs.swiftDecl.id
+  public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Swift.Bool {
+    lhs.parent?.originalSwiftType.id == rhs.parent?.originalSwiftType.id
+      && lhs.swiftDecl.id == rhs.swiftDecl.id
   }
 }
 
@@ -394,8 +423,8 @@ public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
         )
 
       case nil,
-           .wrapper,
-           .swiftThunkSelf:
+        .wrapper,
+        .swiftThunkSelf:
         break
       }
     }

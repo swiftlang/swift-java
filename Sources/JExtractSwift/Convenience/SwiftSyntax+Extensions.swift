@@ -52,13 +52,22 @@ extension ImplicitlyUnwrappedOptionalTypeSyntax {
   }
 }
 
-extension TypeSyntax {
-  fileprivate var isActorSystem: Bool {
-    self.trimmedDescription == "ActorSystem"
-  }
-}
+extension SyntaxProtocol {
 
-extension DeclSyntaxProtocol {
+  var asNominalTypeKind: NominalTypeKind {
+    if isClass {
+      .class
+    } else if isActor {
+      .actor
+    } else if isStruct {
+      .struct
+    } else if isEnum {
+      .enum
+    } else {
+      fatalError("Unknown nominal kind: \(self)")
+    }
+  }
+
   var isClass: Bool {
     return self.is(ClassDeclSyntax.self)
   }
@@ -79,11 +88,8 @@ extension DeclSyntaxProtocol {
 extension DeclModifierSyntax {
   var isAccessControl: Bool {
     switch self.name.tokenKind {
-    case .keyword(.private): fallthrough
-    case .keyword(.fileprivate): fallthrough
-    case .keyword(.internal): fallthrough
-    case .keyword(.package): fallthrough
-    case .keyword(.public):
+    case .keyword(.private), .keyword(.fileprivate), .keyword(.internal), .keyword(.package),
+      .keyword(.public):
       return true
     default:
       return false

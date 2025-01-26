@@ -120,6 +120,8 @@ extension Swift2JavaTranslator {
     "java.util.Arrays",
     "java.util.stream.Collectors",
     "java.nio.charset.StandardCharsets",
+
+    "java.util.concurrent.atomic.*",
   ]
 
 }
