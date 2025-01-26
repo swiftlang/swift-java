@@ -11,6 +11,7 @@ DerivedData/
 *.class
 bin/
 BuildLogic/out/
+.index-build
 
 # Ignore gradle build artifacts
 .gradle
