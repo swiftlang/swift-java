@@ -53,6 +53,10 @@ final class MethodImportTests {
 
       @objc deinit
     }
+
+    public struct MySwiftStruct {
+      public init(len: Swift.Int, cap: Swift.Int) {}
+    }
     """
 
   @Test("Import: public func helloWorld()")
@@ -397,7 +401,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printClassInitializerConstructors(&printer, initDecl, parentName: initDecl.parent!)
+      st.printNominalInitializerConstructors(&printer, initDecl, parentName: initDecl.parent!)
     }
 
     assertOutput(
@@ -428,7 +432,72 @@ final class MethodImportTests {
               if (SwiftKit.TRACE_DOWNCALLS) {
                 SwiftKit.traceDowncall(len, cap);
               }
-              this.selfMemorySegment = (MemorySegment) mh$.invokeExact(len, cap, TYPE_METADATA.$memorySegment());
+              this.selfMemorySegment = (MemorySegment) mh$.invokeExact(
+                  len, cap
+              );
+              if (arena != null) {
+                  arena.register(this);
+              }
+          } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+          }
+        }
+        """
+    )
+  }
+
+  @Test
+  func struct_constructor() throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .info
+
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+
+    let initDecl: ImportedFunc = st.importedTypes["MySwiftStruct"]!.initializers.first {
+      $0.identifier == "init(len:cap:)"
+    }!
+
+    let output = CodePrinter.toString { printer in
+      st.printNominalInitializerConstructors(&printer, initDecl, parentName: initDecl.parent!)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+         * Create an instance of {@code MySwiftStruct}.
+         *
+         * {@snippet lang=swift :
+         * public init(len: Swift.Int, cap: Swift.Int) {}
+         * }
+         */
+        public MySwiftStruct(long len, long cap) {
+          this(/*arena=*/null, len, cap);
+        }
+        /**
+         * Create an instance of {@code MySwiftStruct}.
+         * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
+         *
+         * {@snippet lang=swift :
+         * public init(len: Swift.Int, cap: Swift.Int) {}
+         * }
+         */
+
+        public MySwiftStruct(SwiftArena arena, long len, long cap) {
+          var mh$ = init_len_cap.HANDLE;
+          try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(len, cap);
+              }
+              this.selfMemorySegment = arena.allocate($layout());
+              mh$.invokeExact(
+                  len, cap,
+                  /* indirect return buffer */this.selfMemorySegment
+              );
               if (arena != null) {
                   arena.register(this);
               }
