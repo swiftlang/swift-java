@@ -56,11 +56,19 @@ public final class SwiftAnyType {
         return $LAYOUT;
     }
 
+    /**
+     * Get the human-readable Swift type name of this type.
+     */
+    public String getSwiftName() {
+        return SwiftKit.nameOfSwiftType(memorySegment, true);
+    }
+
     @Override
     public String toString() {
         return "AnySwiftType{" +
-                "name=" + SwiftKit.nameOfSwiftType(memorySegment, true) +
+                "name=" + getSwiftName() +
                 ", memorySegment=" + memorySegment +
                 '}';
     }
+
 }
