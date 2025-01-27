@@ -34,8 +34,7 @@ final class StringPassingTests {
     try assertOutput(
       st, input: class_interfaceFile, .java,
       detectChunkByInitialLines: 1,
-      expectedChunks:
-      [
+      expectedChunks: [
         """
         public static long writeString(java.lang.String string) {
             var mh$ = writeString.HANDLE;

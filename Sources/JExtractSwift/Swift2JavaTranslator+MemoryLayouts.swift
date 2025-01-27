@@ -18,16 +18,13 @@ import SwiftParser
 import SwiftSyntax
 
 extension Swift2JavaTranslator {
+
   public func javaMemoryLayoutDescriptors(
     forParametersOf decl: ImportedFunc,
     paramPassingStyle: SelfParameterVariant?
   ) -> [ForeignValueLayout] {
     var layouts: [ForeignValueLayout] = []
     layouts.reserveCapacity(decl.parameters.count + 1)
-
-    //     // When the method is `init()` it does not accept a self (well, unless allocating init but we don't import those)
-    //    let paramPassingStyle: SelfParameterVariant? =
-    //      decl.isInit ? nil : .wrapper
 
     for param in decl.effectiveParameters(paramPassingStyle: paramPassingStyle) {
       if param.type.cCompatibleJavaMemoryLayout == CCompatibleJavaMemoryLayout.primitive(.void) {
@@ -36,6 +33,13 @@ extension Swift2JavaTranslator {
 
       var layout = param.type.foreignValueLayout
       layout.inlineComment = "\(param.effectiveValueName)"
+      layouts.append(layout)
+    }
+
+    // an indirect return passes the buffer as the last parameter to our thunk
+    if decl.isIndirectReturn {
+      var layout = ForeignValueLayout.SwiftPointer
+      layout.inlineComment = "indirect return buffer"
       layouts.append(layout)
     }
 

@@ -106,7 +106,7 @@ public abstract class SwiftValueWitnessTable {
      * Variable handle for the "stride" field within the value witness table.
      */
     static final VarHandle $stride$mh =
-            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("size"));
+            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("stride"));
 
     /**
      * Determine the stride of a Swift type given its type metadata, which is

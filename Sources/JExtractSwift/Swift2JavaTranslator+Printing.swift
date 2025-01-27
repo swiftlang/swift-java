@@ -755,11 +755,21 @@ extension Swift2JavaTranslator {
     let identifier = accessorKind.renderMethodName(decl)
 
     if paramPassingStyle == SelfParameterVariant.wrapper {
+      let guardFromDestroyedObjectCalls: String =
+      if decl.hasParent {
+        """
+        if (this.$state$destroyed.get()) {
+          throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
+        }
+        """
+      } else { "" }
+
       // delegate to the MemorySegment "self" accepting overload
       printer.print(
         """
         \(javaDocComment)
         public \(returnTy) \(identifier)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
+          \(guardFromDestroyedObjectCalls)
           \(maybeReturnCast) \(identifier)(\(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
         }
         """
@@ -1048,18 +1058,12 @@ extension Swift2JavaTranslator {
     let fieldName = accessorKind.renderDescFieldName
     printer.start("public static final FunctionDescriptor \(fieldName) = ")
 
-    let isIndirectReturn =
-      decl.returnType.isValueType || (decl.isInit && (decl.parent?.isValueType ?? false))
+    let isIndirectReturn = decl.isIndirectReturn
 
     var parameterLayoutDescriptors: [ForeignValueLayout] = javaMemoryLayoutDescriptors(
       forParametersOf: decl,
       paramPassingStyle: .pointer
     )
-
-    // Write indirect return buffer parameter after formal
-    // if isIndirectReturn || decl.isInit {
-    //   parameterLayoutDescriptors.append(.SwiftPointer)
-    // }
 
     if decl.returnType.javaType == .void || isIndirectReturn {
       printer.print("FunctionDescriptor.ofVoid(")
@@ -1087,11 +1091,6 @@ extension Swift2JavaTranslator {
     for (desc, isLast) in parameterLayoutDescriptors.withIsLast {
       printer.print(desc, .parameterNewlineSeparator(isLast))
     }
-
-    // // Write indirect return buffer parameter after formal
-    // if isIndirectReturn {
-    //   printer.print(", /* indirect return buffer */SWIFT_POINTER")
-    // }
 
     printer.outdent()
     printer.print(");")

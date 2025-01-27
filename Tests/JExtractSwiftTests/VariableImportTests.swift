@@ -44,8 +44,7 @@ final class VariableImportTests {
     try assertOutput(
       st, input: class_interfaceFile, .java,
       detectChunkByInitialLines: 7,
-      expectedChunks:
-      [
+      expectedChunks: [
         """
         private static class counterInt {
           public static final FunctionDescriptor DESC_GET =     FunctionDescriptor.of(
@@ -109,8 +108,7 @@ final class VariableImportTests {
         public static FunctionDescriptor counterInt$set$descriptor() {
             return counterInt.DESC_SET;
         }
-        """
-        ,
+        """,
         """
         /**
          * Downcall method handle for:
@@ -160,6 +158,9 @@ final class VariableImportTests {
          * }
          */
         public long getCounterInt() {
+          if (this.$state$destroyed.get()) {
+            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().
+          }
           return (long) getCounterInt($memorySegment());
         }
         """,
@@ -174,9 +175,9 @@ final class VariableImportTests {
           var mh$ = counterInt.HANDLE_SET;
           try {
             if (SwiftKit.TRACE_DOWNCALLS) {
-               SwiftKit.traceDowncall(newValue, self$);
+              SwiftKit.traceDowncall(newValue, self$);
             }
-             mh$.invokeExact(newValue, self$);
+            mh$.invokeExact(newValue, self$);
           } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
           }
@@ -190,9 +191,12 @@ final class VariableImportTests {
          * }
          */
         public void setCounterInt(long newValue) {
-           setCounterInt(newValue, $memorySegment());
+          if (this.$state$destroyed.get()) {
+            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
+          }
+          setCounterInt(newValue, $memorySegment());
         }
-        """
+        """,
       ]
     )
   }

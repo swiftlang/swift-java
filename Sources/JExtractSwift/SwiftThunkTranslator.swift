@@ -50,15 +50,15 @@ struct SwiftThunkTranslator {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
-// TODO: handle variables
-//    for v in nominal.variables {
-//      if let acc = v.accessorFunc(kind: .get) {
-//        decls.append(contentsOf: render(forFunc: acc))
-//      }
-//      if let acc = v.accessorFunc(kind: .set) {
-//        decls.append(contentsOf: render(forFunc: acc))
-//      }
-//    }
+    // TODO: handle variables
+    //    for v in nominal.variables {
+    //      if let acc = v.accessorFunc(kind: .get) {
+    //        decls.append(contentsOf: render(forFunc: acc))
+    //      }
+    //      if let acc = v.accessorFunc(kind: .set) {
+    //        decls.append(contentsOf: render(forFunc: acc))
+    //      }
+    //    }
 
     return decls
   }

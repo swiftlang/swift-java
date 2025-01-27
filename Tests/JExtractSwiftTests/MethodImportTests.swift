@@ -91,6 +91,7 @@ final class MethodImportTests {
                 if (SwiftKit.TRACE_DOWNCALLS) {
                     SwiftKit.traceDowncall();
                 }
+                
                 mh$.invokeExact();
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
@@ -132,8 +133,9 @@ final class MethodImportTests {
             var mh$ = globalTakeInt.HANDLE;
             try {
                 if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(i);
+                  SwiftKit.traceDowncall(i);
                 }
+
                 mh$.invokeExact(i);
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
@@ -162,6 +164,7 @@ final class MethodImportTests {
     }
 
     assertOutput(
+      dump: true,
       output,
       expected:
         """
@@ -178,6 +181,7 @@ final class MethodImportTests {
                 if (SwiftKit.TRACE_DOWNCALLS) {
                     SwiftKit.traceDowncall(i32, l, s$);
                 }
+                
                 mh$.invokeExact(i32, l, s$);
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
@@ -345,6 +349,9 @@ final class MethodImportTests {
          * }
          */
         public void helloMemberFunction() {
+            if (this.$state$destroyed.get()) {
+              throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!")
+            }
             helloMemberFunction($memorySegment());
         }
         """
@@ -380,6 +387,10 @@ final class MethodImportTests {
          * }
          */
         public long makeInt() {
+          if (this.$state$destroyed.get()) {
+            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!")
+          }
+
           return (long) makeInt($memorySegment());
         }
         """

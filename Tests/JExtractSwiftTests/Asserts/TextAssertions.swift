@@ -45,7 +45,9 @@ func assertOutput(
   }
   output = printer.finalize()
 
-  let gotLines = output.split(separator: "\n")
+  let gotLines = output.split(separator: "\n").filter { l in
+    l.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count > 0
+  }
   for expected in expectedChunks {
     let expectedLines = expected.split(separator: "\n")
 

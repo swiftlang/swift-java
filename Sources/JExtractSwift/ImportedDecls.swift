@@ -228,13 +228,13 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
       case nil, .wrapper:
         break
 
-      case .pointer:
+      case .pointer where !isInit:
         let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
         params.append(
           ImportedParam(syntax: selfParam, type: parent)
         )
 
-      case .memorySegment:
+      case .memorySegment where !isInit:
         let selfParam: FunctionParameterSyntax = "self$: $java_lang_foreign_MemorySegment"
         var parentForSelf = parent
         parentForSelf.javaType = .javaForeignMemorySegment
@@ -243,6 +243,9 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
         )
 
       case .swiftThunkSelf:
+        break
+
+      default:
         break
       }
 
@@ -261,6 +264,11 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 
   public var isInit: Bool = false
+
+  public var isIndirectReturn: Bool {
+    returnType.isValueType ||
+      (isInit && (parent?.isValueType ?? false))
+  }
 
   public init(
     module: String,

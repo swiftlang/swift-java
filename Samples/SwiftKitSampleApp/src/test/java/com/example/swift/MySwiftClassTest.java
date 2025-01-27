@@ -28,7 +28,6 @@ public class MySwiftClassTest {
     void checkPaths(Throwable throwable) {
         var paths = SwiftKit.getJavaLibraryPath().split(":");
         for (var path : paths) {
-            System.out.println("CHECKING PATH: " + path);
             Stream.of(new File(path).listFiles())
                     .filter(file -> !file.isDirectory())
                     .forEach((file) -> {
