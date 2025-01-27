@@ -147,9 +147,8 @@ extension Swift2JavaTranslator {
     "java.lang.invoke.*",
     "java.util.Arrays",
     "java.util.stream.Collectors",
-    "java.nio.charset.StandardCharsets",
-
     "java.util.concurrent.atomic.*",
+    "java.nio.charset.StandardCharsets",
   ]
 
 }

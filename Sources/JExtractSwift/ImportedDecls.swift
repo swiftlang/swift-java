@@ -69,6 +69,7 @@ public struct ImportedNominalType: ImportedDecl {
   }
 }
 
+// TODO: replace this with `SwiftNominalTypeDeclaration.Kind`
 public enum NominalTypeKind {
   case `actor`
   case `class`

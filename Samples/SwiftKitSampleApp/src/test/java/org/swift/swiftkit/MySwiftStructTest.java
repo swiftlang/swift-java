@@ -9,8 +9,6 @@
 // See CONTRIBUTORS.txt for the list of Swift.org project authors
 //
 // SPDX-License-Identifier: Apache-2.0
-
-
 //
 //===----------------------------------------------------------------------===//
 

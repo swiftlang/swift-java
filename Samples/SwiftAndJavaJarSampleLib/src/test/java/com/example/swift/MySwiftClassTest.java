@@ -45,8 +45,7 @@ public class MySwiftClassTest {
             MySwiftClass o = new MySwiftClass(12, 42);
             o.voidMethod();
         } catch (Throwable throwable) {
-            throw throwable;
-//            checkPaths(throwable);
+            checkPaths(throwable);
         }
     }
 

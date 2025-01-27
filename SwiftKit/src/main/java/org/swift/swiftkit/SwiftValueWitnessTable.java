@@ -15,7 +15,7 @@
 package org.swift.swiftkit;
 
 import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.*;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
