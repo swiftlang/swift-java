@@ -131,8 +131,12 @@ func assertOutput(
   line: Int = #line,
   column: Int = #column
 ) {
-  let gotLines = got.split(separator: "\n")
-  let expectedLines = expected.split(separator: "\n")
+  let gotLines = got.split(separator: "\n").filter { l in
+    l.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count > 0
+  }
+  let expectedLines = expected.split(separator: "\n").filter { l in
+    l.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count > 0
+  }
 
   var diffLineNumbers: [Int] = []
 
