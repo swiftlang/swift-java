@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import JavaTypes
 
 /// Represents a value of a `java.lang.foreign.Self` that we want to render in generated Java code.
 ///
 /// This type may gain further methods for adjusting target layout, byte order, names etc.
-public struct ForeignValueLayout: CustomStringConvertible {
+public struct ForeignValueLayout: CustomStringConvertible, Equatable {
   var inlineComment: String?
   var value: String
 
@@ -33,6 +34,20 @@ public struct ForeignValueLayout: CustomStringConvertible {
     self.inlineComment = inlineComment
     self.value = customType
     self.needsMemoryLayoutCall = true
+  }
+
+  public init?(javaType: JavaType) {
+    switch javaType {
+    case .boolean: self = .SwiftBool
+    case .byte: self =  .SwiftInt8
+    case .char: self =  .SwiftUInt16
+    case .short: self =  .SwiftInt16
+    case .int: self =  .SwiftInt32
+    case .long: self =  .SwiftInt64
+    case .float: self =  .SwiftFloat
+    case .double: self =  .SwiftDouble
+    case .array, .class, .void: return nil
+    }
   }
 
   public var description: String {
@@ -68,4 +83,9 @@ extension ForeignValueLayout {
 
   public static let SwiftFloat = Self(javaConstant: "SWIFT_FLOAT")
   public static let SwiftDouble = Self(javaConstant: "SWIFT_DOUBLE")
+
+  var isPrimitive: Bool {
+    // FIXME: This is a hack, we need an enum to better describe this!
+    value != "SWIFT_POINTER"
+  }
 }
