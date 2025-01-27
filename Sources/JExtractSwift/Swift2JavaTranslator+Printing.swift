@@ -705,9 +705,6 @@ extension Swift2JavaTranslator {
     _ printer: inout CodePrinter, _ decl: ImportedFunc,
     accessorKind: VariableAccessorKind? = nil
   ) {
-    //    var thunkName = SwiftKitPrinting.Names.functionThunk(
-    //      thunkNameRegistry: &self.thunkNameRegistry,
-    //      module: self.swiftModuleName, function: decl)
     let thunkName = thunkNameRegistry.functionThunkName(module: self.swiftModuleName, decl: decl)
     printer.print(
       """
@@ -899,9 +896,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func renderJavaParamDecls(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?)
-    -> String
-  {
+  public func renderJavaParamDecls(_ decl: ImportedFunc, paramPassingStyle: SelfParameterVariant?) -> String {
     var ps: [String] = []
     var pCounter = 0
 
@@ -958,7 +953,6 @@ extension Swift2JavaTranslator {
 
     if paramPassingStyle == .swiftThunkSelf {
       ps.append("_self: UnsafeMutableRawPointer")
-      //      ps.append("_self: Any")
     }
 
     let res = ps.joined(separator: ", ")
