@@ -72,6 +72,7 @@ final class FuncCallbackImportTests {
                 if (SwiftKit.TRACE_DOWNCALLS) {
                     SwiftKit.traceDowncall(callback$);
                 }
+                
                 mh$.invokeExact(callback$);
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);

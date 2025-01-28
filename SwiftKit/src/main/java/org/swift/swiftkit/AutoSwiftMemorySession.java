@@ -14,6 +14,7 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.ref.Cleaner;
 import java.util.Objects;
@@ -38,15 +39,24 @@ import java.util.concurrent.ThreadFactory;
  */
 final class AutoSwiftMemorySession implements SwiftArena {
 
+    private final Arena arena;
     private final Cleaner cleaner;
 
     public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
         this.cleaner = Cleaner.create(cleanerThreadFactory);
+        this.arena = Arena.ofAuto();
     }
 
     @Override
     public void register(SwiftHeapObject object) {
-        SwiftHeapObjectCleanup cleanupAction = new SwiftHeapObjectCleanup(object.$memorySegment(), object.$swiftType());
+        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+
+        SwiftHeapObjectCleanup cleanupAction = new SwiftHeapObjectCleanup(
+                object.$memorySegment(),
+                object.$swiftType(),
+                markAsDestroyed
+        );
         register(object, cleanupAction);
     }
 
@@ -62,9 +72,18 @@ final class AutoSwiftMemorySession implements SwiftArena {
     @Override
     public void register(SwiftValue value) {
         Objects.requireNonNull(value, "value");
+
+        // We're doing this dance to avoid keeping a strong reference to the value itself
+        var statusDestroyedFlag = value.$statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+
         MemorySegment resource = value.$memorySegment();
-        var cleanupAction = new SwiftValueCleanup(resource);
+        var cleanupAction = new SwiftValueCleanup(resource, value.$swiftType(), markAsDestroyed);
         cleaner.register(value, cleanupAction);
     }
 
+    @Override
+    public MemorySegment allocate(long byteSize, long byteAlignment) {
+        return arena.allocate(byteSize, byteAlignment);
+    }
 }

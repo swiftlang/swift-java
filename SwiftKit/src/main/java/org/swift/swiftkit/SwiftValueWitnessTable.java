@@ -15,7 +15,7 @@
 package org.swift.swiftkit;
 
 import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.*;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static org.swift.swiftkit.SwiftKit.getSwiftInt;
@@ -96,6 +96,12 @@ public abstract class SwiftValueWitnessTable {
      */
     static final long $stride$offset =
             $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("stride"));
+
+    /**
+     * Variable handle for the "stride" field within the value witness table.
+     */
+    static final VarHandle $stride$mh =
+            $LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("stride"));
 
     /**
      * Determine the stride of a Swift type given its type metadata, which is

@@ -48,8 +48,8 @@ final class FunctionDescriptorTests {
 
       //  #MySwiftClass.counter!getter: (MySwiftClass) -> () -> Int32 : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvg\t// MySwiftClass.counter.getter
       //  #MySwiftClass.counter!setter: (MySwiftClass) -> (Int32) -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvs\t// MySwiftClass.counter.setter
-      //  #MySwiftClass.counter!modify: (MySwiftClass) -> () -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32VvM\t// MySwiftClass.counter.modify 
-      var counter: Int32 
+      //  #MySwiftClass.counter!modify: (MySwiftClass) -> () -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32VvM\t// MySwiftClass.counter.modify
+      var counter: Int32
     }
     """
 
@@ -61,7 +61,7 @@ final class FunctionDescriptorTests {
         expected:
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            SWIFT_INT
+            /*i*/SWIFT_INT
           );
           """
       )
@@ -76,8 +76,8 @@ final class FunctionDescriptorTests {
         expected:
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            SWIFT_INT64,
-            SWIFT_INT32
+            /*l*/SWIFT_INT64,
+            /*i32*/SWIFT_INT32
           );
           """
       )
@@ -93,7 +93,7 @@ final class FunctionDescriptorTests {
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             /* -> */SWIFT_INT,
-            SWIFT_INT
+            /*i*/SWIFT_INT
           );
           """
       )
@@ -109,7 +109,7 @@ final class FunctionDescriptorTests {
           """
           public static final FunctionDescriptor DESC_GET = FunctionDescriptor.of(
             /* -> */SWIFT_INT32,
-            SWIFT_POINTER
+            /*self$*/SWIFT_POINTER
           );
           """
       )
@@ -123,8 +123,8 @@ final class FunctionDescriptorTests {
         expected:
           """
           public static final FunctionDescriptor DESC_SET = FunctionDescriptor.ofVoid(
-            SWIFT_INT32,
-            SWIFT_POINTER
+            /*newValue*/SWIFT_INT32,
+            /*self$*/SWIFT_POINTER
           );
           """
       )

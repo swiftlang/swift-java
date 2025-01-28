@@ -14,6 +14,7 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.SegmentAllocator;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -23,7 +24,7 @@ import java.util.concurrent.ThreadFactory;
  * <p> A confined arena has an associated owner thread that confines some operations to
  * associated owner thread such as {@link ClosableSwiftArena#close()}.
  */
-public interface SwiftArena {
+public interface SwiftArena extends SegmentAllocator {
 
     static ClosableSwiftArena ofConfined() {
         return new ConfinedSwiftMemorySession(Thread.currentThread());
@@ -65,4 +66,3 @@ final class UnexpectedRetainCountException extends RuntimeException {
         ).formatted(resource, expectedRetainCount, retainCount));
     }
 }
-

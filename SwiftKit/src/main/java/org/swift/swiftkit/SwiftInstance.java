@@ -16,6 +16,7 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface SwiftInstance {
 
@@ -39,4 +40,13 @@ public interface SwiftInstance {
     default boolean isReferenceType() {
         return this instanceof SwiftHeapObject;
     }
+
+    /**
+     * Exposes a boolean value which can be used to indicate if the object was destroyed.
+     * <p/>
+     * This is exposing the object, rather than performing the action because we don't want to accidentally
+     * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
+     * if using an GC managed instance (e.g. using an {@link AutoSwiftMemorySession}.
+     */
+    AtomicBoolean $statusDestroyedFlag();
 }

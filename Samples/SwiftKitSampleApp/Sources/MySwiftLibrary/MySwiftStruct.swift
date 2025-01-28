@@ -14,10 +14,12 @@
 
 public struct MySwiftStruct {
 
-  public var number: Int
+  private var cap: Int
+  private var len: Int
 
-  public init(number: Int) {
-    self.number = number
+  public init(cap: Int, len: Int) {
+    self.cap = cap
+    self.len = len
   }
 
   public func voidMethod() {
@@ -36,6 +38,20 @@ public struct MySwiftStruct {
   public func makeIntMethod() -> Int {
     p("make int -> 12")
     return 12
+  }
+
+  public func getCapacity() -> Int {
+    self.cap
+  }
+
+  public func getLength() -> Int {
+    self.len
+  }
+
+  public mutating func increaseCap(by value: Int) -> Int {
+    precondition(value > 0)
+     self.cap += value
+    return self.cap
   }
 
   public func makeRandomIntMethod() -> Int {

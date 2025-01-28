@@ -15,6 +15,7 @@
 package org.swift.swiftkit;
 
 import com.example.swift.MySwiftClass;
+import com.example.swift.MySwiftStruct;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
@@ -47,8 +48,44 @@ public class SwiftArenaTest {
             release(obj.$memorySegment());
             assertEquals(1, retainCount(obj.$memorySegment()));
         }
+    }
 
-        // TODO: should we zero out the $memorySegment perhaps?
+    // FIXME: The destroy witness table call hangs on x86_64 platforms during the destroy witness table call
+    //        See: https://github.com/swiftlang/swift-java/issues/97
+    @Test
+    public void arena_markAsDestroyed_preventUseAfterFree_class() {
+        MySwiftClass unsafelyEscapedOutsideArenaScope = null;
+
+        try (var arena = SwiftArena.ofConfined()) {
+            var obj = new MySwiftClass(arena,1, 2);
+            unsafelyEscapedOutsideArenaScope = obj;
+        }
+
+        try {
+            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
+            fail("Expected exception to be thrown! Object was suposed to be dead.");
+        } catch (IllegalStateException ex) {
+            return;
+        }
+    }
+
+    // FIXME: The destroy witness table call hangs on x86_64 platforms during the destroy witness table call
+    //        See: https://github.com/swiftlang/swift-java/issues/97
+    @Test
+    public void arena_markAsDestroyed_preventUseAfterFree_struct() {
+        MySwiftStruct unsafelyEscapedOutsideArenaScope = null;
+
+        try (var arena = SwiftArena.ofConfined()) {
+            var s = new MySwiftStruct(arena,1, 2);
+            unsafelyEscapedOutsideArenaScope = s;
+        }
+
+        try {
+            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
+            fail("Expected exception to be thrown! Object was suposed to be dead.");
+        } catch (IllegalStateException ex) {
+            return;
+        }
     }
 
     @Test

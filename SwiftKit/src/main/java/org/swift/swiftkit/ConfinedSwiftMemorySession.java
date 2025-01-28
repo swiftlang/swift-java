@@ -14,6 +14,8 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,12 +28,15 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     final Thread owner;
     final AtomicInteger state;
 
+    final Arena arena;
     final ConfinedResourceList resources;
 
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
         this.state = new AtomicInteger(ACTIVE);
         this.resources = new ConfinedResourceList();
+
+        this.arena = Arena.ofConfined();
     }
 
     public void checkValid() throws RuntimeException {
@@ -51,13 +56,20 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
         if (this.state.compareAndExchange(ACTIVE, CLOSED) == ACTIVE) {
             this.resources.runCleanup();
         } // else, was already closed; do nothing
+
+        this.arena.close();
     }
 
     @Override
     public void register(SwiftHeapObject object) {
         checkValid();
 
-        var cleanup = new SwiftHeapObjectCleanup(object.$memorySegment(), object.$swiftType());
+        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+
+        var cleanup = new SwiftHeapObjectCleanup(
+                object.$memorySegment(), object.$swiftType(),
+                markAsDestroyed);
         this.resources.add(cleanup);
     }
 
@@ -65,8 +77,19 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     public void register(SwiftValue value) {
         checkValid();
 
-        var cleanup = new SwiftValueCleanup(value.$memorySegment());
+        var statusDestroyedFlag = value.$statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+
+        var cleanup = new SwiftValueCleanup(
+                value.$memorySegment(),
+                value.$swiftType(),
+                markAsDestroyed);
         this.resources.add(cleanup);
+    }
+
+    @Override
+    public MemorySegment allocate(long byteSize, long byteAlignment) {
+        return arena.allocate(byteSize, byteAlignment);
     }
 
     static final class ConfinedResourceList implements SwiftResourceList {
@@ -82,6 +105,7 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
             for (SwiftInstanceCleanup cleanup : resourceCleanups) {
                 cleanup.run();
             }
+            resourceCleanups.clear();
         }
     }
 }

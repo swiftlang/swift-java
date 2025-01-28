@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 import java.nio.file.CopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -434,6 +435,14 @@ public class SwiftKit {
             return memorySegment.get(ValueLayout.JAVA_LONG, offset);
         } else {
             return memorySegment.get(ValueLayout.JAVA_INT, offset);
+        }
+    }
+
+    public static long getSwiftInt(MemorySegment memorySegment, VarHandle handle) {
+        if (SwiftValueLayout.SWIFT_INT == ValueLayout.JAVA_LONG) {
+            return (long) handle.get(memorySegment, 0);
+        } else {
+            return (int) handle.get(memorySegment, 0);
         }
     }
 
