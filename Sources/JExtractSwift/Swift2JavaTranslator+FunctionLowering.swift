@@ -16,6 +16,9 @@ import JavaTypes
 import SwiftSyntax
 
 extension Swift2JavaTranslator {
+  /// Lower the given function declaration to a C-compatible entrypoint,
+  /// providing all of the mappings between the parameter and result types
+  /// of the original function and its `@_cdecl` counterpart.
   @_spi(Testing)
   public func lowerFunctionSignature(
     _ decl: FunctionDeclSyntax,
@@ -124,8 +127,28 @@ extension Swift2JavaTranslator {
     parameterName: String
   ) throws -> LoweredParameters {
     switch type {
-    case .function, .metatype, .optional:
+    case .function, .optional:
       throw LoweringError.unhandledType(type)
+
+    case .metatype(let instanceType):
+      return LoweredParameters(
+        cdeclToOriginal: .unsafeCastPointer(
+          .passDirectly(parameterName),
+          swiftType: instanceType
+        ),
+        cdeclParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: parameterName,
+            type: .nominal(
+              SwiftNominalType(
+                nominalTypeDecl: swiftStdlibTypes.unsafeRawPointerDecl
+              )
+            )
+          )
+        ],
+        javaFFMParameters: [.SwiftPointer]
+      )
 
     case .nominal(let nominal):
       // Types from the Swift standard library that we know about.
@@ -145,8 +168,12 @@ extension Swift2JavaTranslator {
       let mutable = (convention == .inout)
       let loweringStep: LoweringStep
       switch nominal.nominalTypeDecl.kind {
-      case .actor, .class: loweringStep = .passDirectly(parameterName)
-      case .enum, .struct, .protocol: loweringStep = .passIndirectly(parameterName)
+      case .actor, .class:
+        loweringStep = 
+          .unsafeCastPointer(.passDirectly(parameterName), swiftType: type)
+      case .enum, .struct, .protocol:
+        loweringStep =
+          .passIndirectly(.pointee( .typedPointer(.passDirectly(parameterName), swiftType: type)))
       }
 
       return LoweredParameters(
@@ -173,7 +200,7 @@ extension Swift2JavaTranslator {
         try lowerParameter(element, convention: convention, parameterName: name)
       }
       return LoweredParameters(
-        cdeclToOriginal: .tuplify(parameterNames.map { .passDirectly($0) }),
+        cdeclToOriginal: .tuplify(loweredElements.map { $0.cdeclToOriginal }),
         cdeclParameters: loweredElements.flatMap { $0.cdeclParameters },
         javaFFMParameters: loweredElements.flatMap { $0.javaFFMParameters }
       )
@@ -258,10 +285,9 @@ extension Swift2JavaTranslator {
       cdeclToOriginal = .passDirectly(parameterName)
 
     case (true, false):
-      // FIXME: Generic arguments, ugh
-      cdeclToOriginal = .suffixed(
-        .passDirectly(parameterName),
-        ".assumingMemoryBound(to: \(nominal.genericArguments![0]).self)"
+      cdeclToOriginal = .typedPointer(
+        .passDirectly(parameterName + "_pointer"),
+        swiftType: nominal.genericArguments![0]
       )
 
     case (false, true):
@@ -275,9 +301,9 @@ extension Swift2JavaTranslator {
         type,
         arguments: [
           LabeledArgument(label: "start",
-                 argument: .suffixed(
+                 argument: .typedPointer(
                     .passDirectly(parameterName + "_pointer"),
-                                ".assumingMemoryBound(to: \(nominal.genericArguments![0]).self")),
+                    swiftType: nominal.genericArguments![0])),
           LabeledArgument(label: "count",
                  argument: .passDirectly(parameterName + "_count"))
         ]
@@ -338,28 +364,111 @@ struct LabeledArgument<Element> {
 
 extension LabeledArgument: Equatable where Element: Equatable { }
 
-/// How to lower the Swift parameter
+/// Describes the transformation needed to take the parameters of a thunk
+/// and map them to the corresponding parameter (or result value) of the
+/// original function.
 enum LoweringStep: Equatable {
+  /// A direct reference to a parameter of the thunk.
   case passDirectly(String)
-  case passIndirectly(String)
-  indirect case suffixed(LoweringStep, String)
+
+  /// Cast the pointer described by the lowering step to the given
+  /// Swift type using `unsafeBitCast(_:to:)`.
+  indirect case unsafeCastPointer(LoweringStep, swiftType: SwiftType)
+
+  /// Assume at the untyped pointer described by the lowering step to the
+  /// given type, using `assumingMemoryBound(to:).`
+  indirect case typedPointer(LoweringStep, swiftType: SwiftType)
+
+  /// The thing to which the pointer typed, which is the `pointee` property
+  /// of the `Unsafe(Mutable)Pointer` types in Swift.
+  indirect case pointee(LoweringStep)
+
+  /// Pass this value indirectly, via & for explicit `inout` parameters.
+  indirect case passIndirectly(LoweringStep)
+
+  /// Initialize a value of the given Swift type with the set of labeled
+  /// arguments.
   case initialize(SwiftType, arguments: [LabeledArgument<LoweringStep>])
+
+  /// Produce a tuple with the given elements.
+  ///
+  /// This is used for exploding Swift tuple arguments into multiple
+  /// elements, recursively. Note that this always produces unlabeled
+  /// tuples, which Swift will convert to the labeled tuple form.
   case tuplify([LoweringStep])
 }
 
 struct LoweredParameters: Equatable {
-  /// The steps needed to get from the @_cdecl parameter to the original function
+  /// The steps needed to get from the @_cdecl parameters to the original function
   /// parameter.
   var cdeclToOriginal: LoweringStep
 
   /// The lowering of the parameters at the C level in Swift.
   var cdeclParameters: [SwiftParameter]
 
-  /// The lowerung of the parmaeters at the C level as expressed for Java's
+  /// The lowering of the parameters at the C level as expressed for Java's
   /// foreign function and memory interface.
   ///
   /// The elements in this array match up with those of 'cdeclParameters'.
   var javaFFMParameters: [ForeignValueLayout]
+}
+
+extension LoweredParameters {
+  /// Produce an expression that computes the argument for this parameter
+  /// when calling the original function from the cdecl entrypoint.
+  func cdeclToOriginalArgumentExpr(isSelf: Bool)-> ExprSyntax {
+    cdeclToOriginal.asExprSyntax(isSelf: isSelf)
+  }
+}
+
+extension LoweringStep {
+  func asExprSyntax(isSelf: Bool) -> ExprSyntax {
+    switch self {
+    case .passDirectly(let rawArgument):
+      return "\(raw: rawArgument)"
+
+    case .unsafeCastPointer(let step, swiftType: let swiftType):
+      let untypedExpr = step.asExprSyntax(isSelf: false)
+      return "unsafeBitCast(\(untypedExpr), to: \(swiftType.metatypeReferenceExprSyntax))"
+
+    case .typedPointer(let step, swiftType: let type):
+      let untypedExpr = step.asExprSyntax(isSelf: isSelf)
+      return "\(untypedExpr).assumingMemoryBound(to: \(type.metatypeReferenceExprSyntax))"
+
+    case .pointee(let step):
+      let untypedExpr = step.asExprSyntax(isSelf: isSelf)
+      return "\(untypedExpr).pointee"
+
+    case .passIndirectly(let step):
+      let innerExpr = step.asExprSyntax(isSelf: false)
+      return isSelf ? innerExpr : "&\(innerExpr)"
+
+    case .initialize(let type, arguments: let arguments):
+      let renderedArguments: [String] = arguments.map { labeledArgument in
+        let renderedArg = labeledArgument.argument.asExprSyntax(isSelf: false)
+        if let argmentLabel = labeledArgument.label {
+          return "\(argmentLabel): \(renderedArg.description)"
+        } else {
+          return renderedArg.description
+        }
+      }
+
+      // FIXME: Should be able to use structured initializers here instead
+      // of splatting out text.
+      let renderedArgumentList = renderedArguments.joined(separator: ", ")
+      return "\(raw: type.description)(\(raw: renderedArgumentList))"
+
+    case .tuplify(let elements):
+      let renderedElements: [String] = elements.map { element in
+        element.asExprSyntax(isSelf: false).description
+      }
+
+      // FIXME: Should be able to use structured initializers here instead
+      // of splatting out text.
+      let renderedElementList = renderedElements.joined(separator: ", ")
+      return "(\(raw: renderedElementList))"
+    }
+  }
 }
 
 enum LoweringError: Error {
@@ -374,4 +483,75 @@ public struct LoweredFunctionSignature: Equatable {
 
   var parameters: [LoweredParameters]
   var result: LoweredParameters
+}
+
+extension LoweredFunctionSignature {
+  /// Produce the `@_cdecl` thunk for this lowered function signature that will
+  /// call into the original function.
+  @_spi(Testing)
+  public func cdeclThunk(cName: String, inputFunction: FunctionDeclSyntax) -> FunctionDeclSyntax {
+    var loweredCDecl = cdecl.createFunctionDecl(cName)
+
+    // Add the @_cdecl attribute.
+    let cdeclAttribute: AttributeSyntax = "@_cdecl(\(literal: cName))\n"
+    loweredCDecl.attributes.append(.attribute(cdeclAttribute))
+
+    // Create the body.
+
+    // Lower "self", if there is one.
+    let parametersToLower: ArraySlice<LoweredParameters>
+    let cdeclToOriginalSelf: ExprSyntax?
+    if original.selfParameter != nil {
+      cdeclToOriginalSelf = parameters[0].cdeclToOriginalArgumentExpr(isSelf: true)
+      parametersToLower = parameters[1...]
+    } else {
+      cdeclToOriginalSelf = nil
+      parametersToLower = parameters[...]
+    }
+
+    // Lower the remaining arguments.
+    // FIXME: Should be able to use structured initializers here instead
+    // of splatting out text.
+    let cdeclToOriginalArguments = zip(parametersToLower, original.parameters).map { lowering, originalParam in
+      let cdeclToOriginalArg = lowering.cdeclToOriginalArgumentExpr(isSelf: false)
+      if let argumentLabel = originalParam.argumentLabel {
+        return "\(argumentLabel): \(cdeclToOriginalArg.description)"
+      } else {
+        return cdeclToOriginalArg.description
+      }
+    }
+
+    // Form the call expression.
+    var callExpression: ExprSyntax = "\(inputFunction.name)(\(raw: cdeclToOriginalArguments.joined(separator: ", ")))"
+    if let cdeclToOriginalSelf {
+      callExpression = "\(cdeclToOriginalSelf).\(callExpression)"
+    }
+
+    // Handle the return.
+    if cdecl.result.type.isVoid && original.result.type.isVoid {
+      // Nothing to return.
+      loweredCDecl.body = """
+        {
+          \(callExpression)
+        }
+        """
+    } else if cdecl.result.type.isVoid {
+      // Indirect return. This is a regular return in Swift that turns
+      // into a
+      loweredCDecl.body = """
+        {
+          \(result.cdeclToOriginalArgumentExpr(isSelf: true)) = \(callExpression)
+        }
+        """
+    } else {
+      // Direct return.
+      loweredCDecl.body = """
+        {
+          return \(callExpression)
+        }
+        """
+    }
+
+    return loweredCDecl
+  }
 }

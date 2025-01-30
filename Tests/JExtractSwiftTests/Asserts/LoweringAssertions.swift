@@ -46,7 +46,8 @@ func assertLoweredFunction(
     inputFunction,
     enclosingType: enclosingType
   )
-  let loweredCDecl = loweredFunction.cdecl.createFunctionDecl(inputFunction.name.text)
+  let loweredCDecl = loweredFunction.cdeclThunk(cName: "c_\(inputFunction.name.text)", inputFunction: inputFunction)
+
   #expect(
     loweredCDecl.description == expectedCDecl.description,
     sourceLocation: Testing.SourceLocation(
