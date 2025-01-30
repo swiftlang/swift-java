@@ -127,8 +127,28 @@ extension Swift2JavaTranslator {
     parameterName: String
   ) throws -> LoweredParameters {
     switch type {
-    case .function, .metatype, .optional:
+    case .function, .optional:
       throw LoweringError.unhandledType(type)
+
+    case .metatype(let instanceType):
+      return LoweredParameters(
+        cdeclToOriginal: .unsafeCastPointer(
+          .passDirectly(parameterName),
+          swiftType: instanceType
+        ),
+        cdeclParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: parameterName,
+            type: .nominal(
+              SwiftNominalType(
+                nominalTypeDecl: swiftStdlibTypes.unsafeRawPointerDecl
+              )
+            )
+          )
+        ],
+        javaFFMParameters: [.SwiftPointer]
+      )
 
     case .nominal(let nominal):
       // Types from the Swift standard library that we know about.

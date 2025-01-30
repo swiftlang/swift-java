@@ -117,14 +117,15 @@ final class FunctionLoweringTests {
     )
   }
 
-  @Test("Lowering metatypes", .disabled("Metatypes are not yet lowered"))
+  @Test("Lowering metatypes")
   func lowerMetatype() throws {
     try assertLoweredFunction("""
       func f(t: Int.Type) { }
       """,
       expectedCDecl: """
-      func f(t: UnsafeRawPointer) -> () {
-        // implementation
+      @_cdecl("c_f")
+      func c_f(_ t: UnsafeRawPointer) {
+        f(t: unsafeBitCast(t, to: Int.self))
       }
       """
      )
