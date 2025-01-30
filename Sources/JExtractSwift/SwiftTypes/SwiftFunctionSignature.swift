@@ -19,6 +19,7 @@ import SwiftSyntaxBuilder
 /// parameters and return type.
 @_spi(Testing)
 public struct SwiftFunctionSignature: Equatable {
+  // FIXME: isStaticOrClass probably shouldn't be here?
   var isStaticOrClass: Bool
   var selfParameter: SwiftParameter?
   var parameters: [SwiftParameter]
@@ -30,9 +31,16 @@ extension SwiftFunctionSignature {
   /// signature.
   package func createFunctionDecl(_ name: String) -> FunctionDeclSyntax {
     let parametersStr = parameters.map(\.description).joined(separator: ", ")
-    let resultStr = result.type.description
+
+    let resultWithArrow: String
+    if result.type.isVoid {
+      resultWithArrow = ""
+    } else {
+      resultWithArrow = " -> \(result.type.description)"
+    }
+
     let decl: DeclSyntax = """
-      func \(raw: name)(\(raw: parametersStr)) -> \(raw: resultStr) {
+      func \(raw: name)(\(raw: parametersStr))\(raw: resultWithArrow) {
         // implementation
       }
       """
@@ -53,7 +61,7 @@ extension SwiftFunctionSignature {
       var isConsuming = false
       var isStaticOrClass = false
       for modifier in node.modifiers {
-        switch modifier.name {
+        switch modifier.name.tokenKind {
         case .keyword(.mutating): isMutating = true
         case .keyword(.static), .keyword(.class): isStaticOrClass = true
         case .keyword(.consuming): isConsuming = true

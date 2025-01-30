@@ -33,15 +33,34 @@ enum SwiftType: Equatable {
   var asNominalTypeDeclaration: SwiftNominalTypeDeclaration? {
     asNominalType?.nominalTypeDecl
   }
+
+  /// Whether this is the "Void" type, which is actually an empty
+  /// tuple.
+  var isVoid: Bool {
+    return self == .tuple([])
+  }
 }
 
 extension SwiftType: CustomStringConvertible {
+  /// Whether forming a postfix type or expression to this Swift type
+  /// requires parentheses.
+  private var postfixRequiresParentheses: Bool {
+    switch self {
+    case .function: true
+    case .metatype, .nominal, .optional, .tuple: false
+    }
+  }
+
   var description: String {
     switch self {
     case .nominal(let nominal): return nominal.description
     case .function(let functionType): return functionType.description
     case .metatype(let instanceType):
-      return "(\(instanceType.description)).Type"
+      var instanceTypeStr = instanceType.description
+      if instanceType.postfixRequiresParentheses {
+        instanceTypeStr = "(\(instanceTypeStr))"
+      }
+      return "\(instanceTypeStr).Type"
     case .optional(let wrappedType):
       return "\(wrappedType.description)?"
     case .tuple(let elements):
@@ -212,5 +231,15 @@ extension SwiftType {
         genericArguments: genericArguments
       )
     )
+  }
+
+  /// Produce an expression that creates the metatype for this type in
+  /// Swift source code.
+  var metatypeReferenceExprSyntax: ExprSyntax {
+    let type: ExprSyntax = "\(raw: description)"
+    if postfixRequiresParentheses {
+      return "(\(type)).self"
+    }
+    return "\(type).self"
   }
 }
