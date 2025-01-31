@@ -19,6 +19,7 @@ struct SwiftParameter: Equatable {
   var argumentLabel: String?
   var parameterName: String?
   var type: SwiftType
+  var isPrimitive = false
 }
 
 extension SwiftParameter: CustomStringConvertible {

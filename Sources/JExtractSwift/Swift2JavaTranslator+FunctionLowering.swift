@@ -64,19 +64,22 @@ extension Swift2JavaTranslator {
     )
 
     // If the result type doesn't lower to either empty (void) or a single
-    // primitive result, make it indirect.
+    // result, make it indirect.
     let indirectResult: Bool
-    if !(loweredResult.javaFFMParameters.count == 0 ||
-         (loweredResult.javaFFMParameters.count == 1 &&
-          loweredResult.javaFFMParameters[0].isPrimitive)) {
+    if loweredResult.cdeclParameters.count == 0 {
+      // void result type
+      indirectResult = false
+    } else if loweredResult.cdeclParameters.count == 1,
+              loweredResult.cdeclParameters[0].isPrimitive {
+      // Primitive result type
+      indirectResult = false
+    } else {
       loweredResult = try lowerParameter(
         signature.result.type,
         convention: .inout,
         parameterName: "_result"
       )
       indirectResult = true
-    } else {
-      indirectResult = false
     }
 
     // Collect all of the lowered parameters for the @_cdecl function.
@@ -146,8 +149,7 @@ extension Swift2JavaTranslator {
               )
             )
           )
-        ],
-        javaFFMParameters: [.SwiftPointer]
+        ]
       )
 
     case .nominal(let nominal):
@@ -190,8 +192,7 @@ extension Swift2JavaTranslator {
               )
             )
           )
-        ],
-        javaFFMParameters: [.SwiftPointer]
+        ]
       )
 
     case .tuple(let tuple):
@@ -201,8 +202,7 @@ extension Swift2JavaTranslator {
       }
       return LoweredParameters(
         cdeclToOriginal: .tuplify(loweredElements.map { $0.cdeclToOriginal }),
-        cdeclParameters: loweredElements.flatMap { $0.cdeclParameters },
-        javaFFMParameters: loweredElements.flatMap { $0.javaFFMParameters }
+        cdeclParameters: loweredElements.flatMap { $0.cdeclParameters }
       )
     }
   }
@@ -217,6 +217,9 @@ extension Swift2JavaTranslator {
 
     // Swift types that map directly to Java primitive types.
     if let primitiveType = JavaType(swiftTypeName: nominalName) {
+      // FIXME: Should be using C types here, not Java types.
+      _ = primitiveType
+
       // We cannot handle inout on primitive types.
       if convention == .inout {
         throw LoweringError.inoutNotSupported(type)
@@ -228,11 +231,9 @@ extension Swift2JavaTranslator {
           SwiftParameter(
             convention: convention,
             parameterName: parameterName,
-            type: type
+            type: type,
+            isPrimitive: true
           )
-        ],
-        javaFFMParameters: [
-          ForeignValueLayout(javaType: primitiveType)!
         ]
       )
     }
@@ -251,11 +252,9 @@ extension Swift2JavaTranslator {
           SwiftParameter(
             convention: convention,
             parameterName: parameterName,
-            type: type
+            type: type,
+            isPrimitive: true
           )
-        ],
-        javaFFMParameters: [
-          .SwiftInt
         ]
       )
     }
@@ -351,8 +350,7 @@ extension Swift2JavaTranslator {
 
     return LoweredParameters(
       cdeclToOriginal: cdeclToOriginal,
-      cdeclParameters: lowered.map(\.0),
-      javaFFMParameters: lowered.map(\.1)
+      cdeclParameters: lowered.map(\.0)
     )
   }
 }
@@ -405,12 +403,6 @@ struct LoweredParameters: Equatable {
 
   /// The lowering of the parameters at the C level in Swift.
   var cdeclParameters: [SwiftParameter]
-
-  /// The lowering of the parameters at the C level as expressed for Java's
-  /// foreign function and memory interface.
-  ///
-  /// The elements in this array match up with those of 'cdeclParameters'.
-  var javaFFMParameters: [ForeignValueLayout]
 }
 
 extension LoweredParameters {
