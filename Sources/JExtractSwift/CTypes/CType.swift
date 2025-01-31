@@ -195,3 +195,16 @@ extension CType: CustomStringConvertible {
     print(placeholder: nil)
   }
 }
+
+extension CType {
+  /// Apply the rules for function parameter decay to produce the resulting
+  /// decayed type. For example, this will adjust a function type to a
+  /// pointer-to-function type.
+  var parameterDecay: CType {
+    switch self {
+    case .floating, .integral, .pointer, .qualified, .tag, .void: self
+
+    case .function: .pointer(self)
+    }
+  }
+}

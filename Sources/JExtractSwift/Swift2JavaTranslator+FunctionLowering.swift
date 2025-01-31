@@ -145,7 +145,7 @@ extension Swift2JavaTranslator {
             parameterName: parameterName,
             type: .nominal(
               SwiftNominalType(
-                nominalTypeDecl: swiftStdlibTypes.unsafeRawPointerDecl
+                nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]
               )
             )
           )
@@ -187,8 +187,8 @@ extension Swift2JavaTranslator {
             type: .nominal(
               SwiftNominalType(
                 nominalTypeDecl: mutable
-                  ? swiftStdlibTypes.unsafeMutableRawPointerDecl
-                  : swiftStdlibTypes.unsafeRawPointerDecl
+                  ? swiftStdlibTypes[.unsafeMutableRawPointer]
+                  : swiftStdlibTypes[.unsafeRawPointer]
               )
             )
           )
@@ -276,8 +276,8 @@ extension Swift2JavaTranslator {
 
     // At the @_cdecl level, make everything a raw pointer.
     let cdeclPointerType = mutable
-      ? swiftStdlibTypes.unsafeMutableRawPointerDecl
-      : swiftStdlibTypes.unsafeRawPointerDecl
+      ? swiftStdlibTypes[.unsafeMutableRawPointer]
+      : swiftStdlibTypes[.unsafeRawPointer]
     var cdeclToOriginal: LoweringStep
     switch (requiresArgument, hasCount) {
     case (false, false):
@@ -327,7 +327,7 @@ extension Swift2JavaTranslator {
             convention: convention,
             parameterName: parameterName + "_count",
             type: SwiftType.nominal(
-              SwiftNominalType(nominalTypeDecl: swiftStdlibTypes.intDecl)
+              SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int])
             )
           ),
           .SwiftInt
@@ -351,6 +351,33 @@ extension Swift2JavaTranslator {
     return LoweredParameters(
       cdeclToOriginal: cdeclToOriginal,
       cdeclParameters: lowered.map(\.0)
+    )
+  }
+
+  /// Given a Swift function signature that represents a @_cdecl function,
+  /// produce the equivalent C function with the given name.
+  ///
+  /// Lowering to a @_cdecl function should never produce a
+  @_spi(Testing)
+  public func cdeclToCFunctionLowering(
+    _ cdeclSignature: SwiftFunctionSignature,
+    cName: String
+  ) -> CFunction {
+    assert(cdeclSignature.selfParameter == nil)
+
+    let cResultType = try! swiftStdlibTypes.cdeclToCLowering(cdeclSignature.result.type)
+    let cParameters = cdeclSignature.parameters.map { parameter in
+      CParameter(
+        name: parameter.parameterName,
+        type: try! swiftStdlibTypes.cdeclToCLowering(parameter.type).parameterDecay
+      )
+    }
+
+    return CFunction(
+      resultType: cResultType,
+      name: cName,
+      parameters: cParameters,
+      isVariadic: false
     )
   }
 }

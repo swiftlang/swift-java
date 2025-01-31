@@ -25,6 +25,7 @@ func assertLoweredFunction(
   sourceFile: SourceFileSyntax? = nil,
   enclosingType: TypeSyntax? = nil,
   expectedCDecl: DeclSyntax,
+  expectedCFunction: String,
   fileID: String = #fileID,
   filePath: String = #filePath,
   line: Int = #line,
@@ -50,6 +51,20 @@ func assertLoweredFunction(
 
   #expect(
     loweredCDecl.description == expectedCDecl.description,
+    sourceLocation: Testing.SourceLocation(
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+  )
+
+  let cFunction = translator.cdeclToCFunctionLowering(
+    loweredFunction.cdecl,
+    cName: "c_\(inputFunction.name.text)"
+  )
+  #expect(
+    cFunction.description == expectedCFunction,
     sourceLocation: Testing.SourceLocation(
       fileID: fileID,
       filePath: filePath,

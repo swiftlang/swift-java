@@ -14,75 +14,101 @@
 
 import SwiftSyntax
 
+enum KnownStandardLibraryType: Int, Hashable, CaseIterable {
+  case bool = 0
+  case int
+  case uint
+  case int8
+  case uint8
+  case int16
+  case uint16
+  case int32
+  case uint32
+  case int64
+  case uint64
+  case float
+  case double
+  case unsafeRawPointer
+  case unsafeMutableRawPointer
+
+  var typeName: String {
+    switch self {
+      case .bool: return "Bool"
+      case .int: return "Int"
+      case .uint: return "UInt"
+      case .int8: return "Int8"
+      case .uint8: return "UInt8"
+      case .int16: return "Int16"
+      case .uint16: return "UInt16"
+      case .int32: return "Int32"
+      case .uint32: return "UInt32"
+      case .int64: return "Int64"
+      case .uint64: return "UInt64"
+      case .float: return "Float"
+      case .double: return "Double"
+      case .unsafeRawPointer: return "UnsafeRawPointer"
+      case .unsafeMutableRawPointer: return "UnsafeMutableRawPointer"
+    }
+  }
+
+  var isGeneric: Bool {
+    false
+  }
+}
+
 /// Captures many types from the Swift standard library in their most basic
 /// forms, so that the translator can reason about them in source code.
 struct SwiftStandardLibraryTypes {
-  /// Swift.UnsafeRawPointer
-  var unsafeRawPointerDecl: SwiftNominalTypeDeclaration
-
-  /// Swift.UnsafeMutableRawPointer
-  var unsafeMutableRawPointerDecl: SwiftNominalTypeDeclaration
-
   // Swift.UnsafePointer<Element>
-  var unsafePointerDecl: SwiftNominalTypeDeclaration
+  let unsafePointerDecl: SwiftNominalTypeDeclaration
 
   // Swift.UnsafeMutablePointer<Element>
-  var unsafeMutablePointerDecl: SwiftNominalTypeDeclaration
+  let unsafeMutablePointerDecl: SwiftNominalTypeDeclaration
 
   // Swift.UnsafeBufferPointer<Element>
-  var unsafeBufferPointerDecl: SwiftNominalTypeDeclaration
+  let unsafeBufferPointerDecl: SwiftNominalTypeDeclaration
 
   // Swift.UnsafeMutableBufferPointer<Element>
-  var unsafeMutableBufferPointerDecl: SwiftNominalTypeDeclaration
+  let unsafeMutableBufferPointerDecl: SwiftNominalTypeDeclaration
 
-  /// Swift.Bool
-  var boolDecl: SwiftNominalTypeDeclaration
+  /// Mapping from known standard library types to their nominal type declaration.
+  let knownTypeToNominal: [KnownStandardLibraryType: SwiftNominalTypeDeclaration]
 
-  /// Swift.Int8
-  var int8Decl: SwiftNominalTypeDeclaration
+  /// Mapping from nominal type declarations to known types.
+  let nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: KnownStandardLibraryType]
 
-  /// Swift.Int16
-  var int16Decl: SwiftNominalTypeDeclaration
+  private static func recordKnownType(
+    _ type: KnownStandardLibraryType,
+    _ syntax: NominalTypeDeclSyntaxNode,
+    knownTypeToNominal: inout [KnownStandardLibraryType: SwiftNominalTypeDeclaration],
+    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: KnownStandardLibraryType],
+    parsedModule: inout SwiftParsedModuleSymbolTable
+  ) {
+    let nominalDecl = parsedModule.addNominalTypeDeclaration(syntax, parent: nil)
+    knownTypeToNominal[type] = nominalDecl
+    nominalTypeDeclToKnownType[nominalDecl] = type
+  }
 
-  /// Swift.UInt16
-  var uint16Decl: SwiftNominalTypeDeclaration
-
-  /// Swift.Int32
-  var int32Decl: SwiftNominalTypeDeclaration
-
-  /// Swift.Int64
-  var int64Decl: SwiftNominalTypeDeclaration
-
-  /// Swift.Int
-  var intDecl: SwiftNominalTypeDeclaration
-
-  /// Swift.Float
-  var floatDecl: SwiftNominalTypeDeclaration
-
-  /// Swift.Double
-  var doubleDecl: SwiftNominalTypeDeclaration
-
-  /// Swift.String
-  var stringDecl: SwiftNominalTypeDeclaration
+  private static func recordKnownNonGenericStruct(
+    _ type: KnownStandardLibraryType,
+    knownTypeToNominal: inout [KnownStandardLibraryType: SwiftNominalTypeDeclaration],
+    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: KnownStandardLibraryType],
+    parsedModule: inout SwiftParsedModuleSymbolTable
+  ) {
+    recordKnownType(
+      type,
+      StructDeclSyntax(
+        name: .identifier(type.typeName),
+        memberBlock: .init(members: [])
+      ),
+      knownTypeToNominal: &knownTypeToNominal,
+      nominalTypeDeclToKnownType: &nominalTypeDeclToKnownType,
+      parsedModule: &parsedModule
+    )
+  }
 
   init(into parsedModule: inout SwiftParsedModuleSymbolTable) {
     // Pointer types
-    self.unsafeRawPointerDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("UnsafeRawPointer"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-
-    self.unsafeMutableRawPointerDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("UnsafeMutableRawPointer"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-
     self.unsafePointerDecl = parsedModule.addNominalTypeDeclaration(
       StructDeclSyntax(
         name: .identifier("UnsafePointer"),
@@ -127,82 +153,32 @@ struct SwiftStandardLibraryTypes {
       parent: nil
     )
 
-    self.boolDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Bool"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.intDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.int8Decl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int8"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.int16Decl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int16"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.uint16Decl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("UInt16"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.int32Decl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int32"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.int64Decl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int64"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.floatDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Float"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.doubleDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Double"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.intDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("Int"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
-    self.stringDecl = parsedModule.addNominalTypeDeclaration(
-      StructDeclSyntax(
-        name: .identifier("String"),
-        memberBlock: .init(members: [])
-      ),
-      parent: nil
-    )
+    var knownTypeToNominal: [KnownStandardLibraryType: SwiftNominalTypeDeclaration] = [:]
+    var nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: KnownStandardLibraryType] = [:]
+
+    // Handle all of the non-generic types at once.
+    for knownType in KnownStandardLibraryType.allCases {
+      guard !knownType.isGeneric else {
+        continue
+      }
+
+      Self.recordKnownNonGenericStruct(
+        knownType,
+        knownTypeToNominal: &knownTypeToNominal,
+        nominalTypeDeclToKnownType: &nominalTypeDeclToKnownType,
+        parsedModule: &parsedModule
+      )
+    }
+
+    self.knownTypeToNominal = knownTypeToNominal
+    self.nominalTypeDeclToKnownType = nominalTypeDeclToKnownType
+  }
+
+  subscript(knownType: KnownStandardLibraryType) -> SwiftNominalTypeDeclaration {
+    knownTypeToNominal[knownType]!
+  }
+
+  subscript(nominalType: SwiftNominalTypeDeclaration) -> KnownStandardLibraryType? {
+    nominalTypeDeclToKnownType[nominalType]
   }
 }
