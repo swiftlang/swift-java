@@ -49,6 +49,7 @@ extension Swift2JavaTranslator {
 
     return try lowerFunctionSignature(signature)
   }
+
   /// Lower the given Swift function signature to a Swift @_cdecl function signature,
   /// which is C compatible, and the corresponding Java method signature.
   ///
@@ -332,6 +333,11 @@ extension LoweredFunctionSignature {
     // Add the @_cdecl attribute.
     let cdeclAttribute: AttributeSyntax = "@_cdecl(\(literal: cName))\n"
     loweredCDecl.attributes.append(.attribute(cdeclAttribute))
+
+    // Make it public.
+    loweredCDecl.modifiers.append(
+      DeclModifierSyntax(name: .keyword(.public), trailingTrivia: .space)
+    )
 
     // Create the body.
 

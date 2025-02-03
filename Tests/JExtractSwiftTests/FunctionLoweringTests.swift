@@ -26,7 +26,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ x: Int, _ y: Float, _ z_pointer: UnsafeRawPointer, _ z_count: Int) {
+      public func c_f(_ x: Int, _ y: Float, _ z_pointer: UnsafeRawPointer, _ z_count: Int) {
         f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z_pointer.assumingMemoryBound(to: Bool.self), count: z_count))
       }
       """,
@@ -41,7 +41,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ t_0: Int, _ t_1_0: Float, _ t_1_1: Double, _ z_pointer: UnsafeRawPointer) -> Int {
+      public func c_f(_ t_0: Int, _ t_1_0: Float, _ t_1_1: Double, _ z_pointer: UnsafeRawPointer) -> Int {
         return f(t: (t_0, (t_1_0, t_1_1)), z: z_pointer.assumingMemoryBound(to: Int.self))
       }
       """,
@@ -59,7 +59,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ point: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      public func c_shift(_ point: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
         shift(point: &point.assumingMemoryBound(to: Point.self).pointee, by: (delta_0, delta_1))
       }
       """,
@@ -78,7 +78,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shifted")
-      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
+      public func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
         _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
       }
       """,
@@ -97,7 +97,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeMutableRawPointer) {
+      public func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeMutableRawPointer) {
         self.assumingMemoryBound(to: Point.self).pointee.shift(by: (delta_0, delta_1))
       }
       """,
@@ -116,7 +116,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) {
+      public func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) {
         unsafeBitCast(self, to: Point.self).shift(by: (delta_0, delta_1))
       }
       """,
@@ -135,7 +135,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_scaledUnit")
-      func c_scaledUnit(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+      public func c_scaledUnit(_ value: Double, _ _result: UnsafeMutableRawPointer) {
         _result.assumingMemoryBound(to: Point.self).initialize(to: Point.scaledUnit(by: value))
       }
       """,
@@ -151,7 +151,7 @@ final class FunctionLoweringTests {
       enclosingType: "Person",
       expectedCDecl: """
       @_cdecl("c_randomPerson")
-      func c_randomPerson(_ seed: Double) -> UnsafeRawPointer {
+      public func c_randomPerson(_ seed: Double) -> UnsafeRawPointer {
         return unsafeBitCast(Person.randomPerson(seed: seed), to: UnsafeRawPointer.self)
       }
       """,
@@ -170,7 +170,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_init")
-      func c_init(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+      public func c_init(_ value: Double, _ _result: UnsafeMutableRawPointer) {
         _result.assumingMemoryBound(to: Point.self).initialize(to: Point(scaledBy: value))
       }
       """,
@@ -186,7 +186,7 @@ final class FunctionLoweringTests {
       enclosingType: "Person",
       expectedCDecl: """
       @_cdecl("c_init")
-      func c_init(_ seed: Double) -> UnsafeRawPointer {
+      public func c_init(_ seed: Double) -> UnsafeRawPointer {
         return unsafeBitCast(Person(seed: seed), to: UnsafeRawPointer.self)
       }
       """,
@@ -201,7 +201,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ t: UnsafeRawPointer) {
+      public func c_f(_ t: UnsafeRawPointer) {
         f(t: unsafeBitCast(t, to: Int.self))
       }
       """,
@@ -213,7 +213,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f() -> UnsafeRawPointer {
+      public func c_f() -> UnsafeRawPointer {
         return unsafeBitCast(f(), to: UnsafeRawPointer.self)
       }
       """,
@@ -232,7 +232,7 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shifted")
-      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) -> UnsafeRawPointer {
+      public func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) -> UnsafeRawPointer {
         return unsafeBitCast(unsafeBitCast(self, to: Point.self).shifted(by: (delta_0, delta_1)), to: UnsafeRawPointer.self)
       }
       """,
@@ -250,7 +250,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_getPointer")
-      func c_getPointer() -> UnsafeRawPointer {
+      public func c_getPointer() -> UnsafeRawPointer {
         return UnsafeRawPointer(getPointer())
       }
       """,
@@ -268,7 +268,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_getTuple")
-      func c_getTuple(_ _result_0: UnsafeMutableRawPointer, _ _result_1_0: UnsafeMutableRawPointer, _ _result_1_1: UnsafeMutableRawPointer) {
+      public func c_getTuple(_ _result_0: UnsafeMutableRawPointer, _ _result_1_0: UnsafeMutableRawPointer, _ _result_1_1: UnsafeMutableRawPointer) {
         let __swift_result = getTuple()
         _result_0 = __swift_result_0
         _result_1_0 = __swift_result_1_0
@@ -289,7 +289,7 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_getBufferPointer")
-      func c_getBufferPointer(_result_pointer: UnsafeMutableRawPointer, _result_count: UnsafeMutableRawPointer) {
+      public func c_getBufferPointer(_result_pointer: UnsafeMutableRawPointer, _result_count: UnsafeMutableRawPointer) {
         return UnsafeRawPointer(getPointer())
       }
       """,
