@@ -138,7 +138,7 @@ extension Swift2JavaTranslator {
     case .metatype(let instanceType):
       return LoweredParameters(
         cdeclToOriginal: .unsafeCastPointer(
-          .value,
+          .placeholder,
           swiftType: instanceType
         ),
         cdeclParameters: [
@@ -170,14 +170,14 @@ extension Swift2JavaTranslator {
       }
 
       let mutable = (convention == .inout)
-      let loweringStep: LoweringStep
+      let loweringStep: ConversionStep
       switch nominal.nominalTypeDecl.kind {
       case .actor, .class:
         loweringStep = 
-          .unsafeCastPointer(.value, swiftType: type)
+          .unsafeCastPointer(.placeholder, swiftType: type)
       case .enum, .struct, .protocol:
         loweringStep =
-          .passIndirectly(.pointee(.typedPointer(.value, swiftType: type)))
+          .passIndirectly(.pointee(.typedPointer(.placeholder, swiftType: type)))
       }
 
       return LoweredParameters(
@@ -228,7 +228,7 @@ extension Swift2JavaTranslator {
       }
 
       return LoweredParameters(
-        cdeclToOriginal: .value,
+        cdeclToOriginal: .placeholder,
         cdeclParameters: [
           SwiftParameter(
             convention: convention,
@@ -249,7 +249,7 @@ extension Swift2JavaTranslator {
       }
 
       return LoweredParameters(
-        cdeclToOriginal: .value,
+        cdeclToOriginal: .placeholder,
         cdeclParameters: [
           SwiftParameter(
             convention: convention,
@@ -280,21 +280,21 @@ extension Swift2JavaTranslator {
     let cdeclPointerType = mutable
       ? swiftStdlibTypes[.unsafeMutableRawPointer]
       : swiftStdlibTypes[.unsafeRawPointer]
-    var cdeclToOriginal: LoweringStep
+    var cdeclToOriginal: ConversionStep
     switch (requiresArgument, hasCount) {
     case (false, false):
-      cdeclToOriginal = .value
+      cdeclToOriginal = .placeholder
 
     case (true, false):
       cdeclToOriginal = .typedPointer(
-        .explodedComponent(.value, component: "pointer"),
+        .explodedComponent(.placeholder, component: "pointer"),
         swiftType: nominal.genericArguments![0]
       )
 
     case (false, true):
       cdeclToOriginal = .initialize(type, arguments: [
-        LabeledArgument(label: "start", argument: .explodedComponent(.value, component: "pointer")),
-        LabeledArgument(label: "count", argument: .explodedComponent(.value, component: "count"))
+        LabeledArgument(label: "start", argument: .explodedComponent(.placeholder, component: "pointer")),
+        LabeledArgument(label: "count", argument: .explodedComponent(.placeholder, component: "count"))
       ])
 
     case (true, true):
@@ -304,12 +304,12 @@ extension Swift2JavaTranslator {
           LabeledArgument(
             label: "start",
             argument: .typedPointer(
-              .explodedComponent(.value, component: "pointer"),
+              .explodedComponent(.placeholder, component: "pointer"),
               swiftType: nominal.genericArguments![0])
           ),
           LabeledArgument(
             label: "count",
-            argument: .explodedComponent(.value, component: "count")
+            argument: .explodedComponent(.placeholder, component: "count")
           )
         ]
       )
@@ -395,48 +395,11 @@ struct LabeledArgument<Element> {
 
 extension LabeledArgument: Equatable where Element: Equatable { }
 
-/// Describes the transformation needed to take the parameters of a thunk
-/// and map them to the corresponding parameter (or result value) of the
-/// original function.
-enum LoweringStep: Equatable {
-  /// The value being lowered.
-  case value
-
-  /// A reference to a component in a value that has been exploded, such as
-  /// a tuple element or part of a buffer pointer.
-  indirect case explodedComponent(LoweringStep, component: String)
-
-  /// Cast the pointer described by the lowering step to the given
-  /// Swift type using `unsafeBitCast(_:to:)`.
-  indirect case unsafeCastPointer(LoweringStep, swiftType: SwiftType)
-
-  /// Assume at the untyped pointer described by the lowering step to the
-  /// given type, using `assumingMemoryBound(to:).`
-  indirect case typedPointer(LoweringStep, swiftType: SwiftType)
-
-  /// The thing to which the pointer typed, which is the `pointee` property
-  /// of the `Unsafe(Mutable)Pointer` types in Swift.
-  indirect case pointee(LoweringStep)
-
-  /// Pass this value indirectly, via & for explicit `inout` parameters.
-  indirect case passIndirectly(LoweringStep)
-
-  /// Initialize a value of the given Swift type with the set of labeled
-  /// arguments.
-  case initialize(SwiftType, arguments: [LabeledArgument<LoweringStep>])
-
-  /// Produce a tuple with the given elements.
-  ///
-  /// This is used for exploding Swift tuple arguments into multiple
-  /// elements, recursively. Note that this always produces unlabeled
-  /// tuples, which Swift will convert to the labeled tuple form.
-  case tuplify([LoweringStep])
-}
 
 struct LoweredParameters: Equatable {
   /// The steps needed to get from the @_cdecl parameters to the original function
   /// parameter.
-  var cdeclToOriginal: LoweringStep
+  var cdeclToOriginal: ConversionStep
 
   /// The lowering of the parameters at the C level in Swift.
   var cdeclParameters: [SwiftParameter]
@@ -446,60 +409,7 @@ extension LoweredParameters {
   /// Produce an expression that computes the argument for this parameter
   /// when calling the original function from the cdecl entrypoint.
   func cdeclToOriginalArgumentExpr(isSelf: Bool, value: String)-> ExprSyntax {
-    cdeclToOriginal.asExprSyntax(isSelf: isSelf, value: value)
-  }
-}
-
-extension LoweringStep {
-  func asExprSyntax(isSelf: Bool, value: String) -> ExprSyntax {
-    switch self {
-    case .value:
-      return "\(raw: value)"
-
-    case .explodedComponent(let step, component: let component):
-      return step.asExprSyntax(isSelf: false, value: "\(value)_\(component)")
-
-    case .unsafeCastPointer(let step, swiftType: let swiftType):
-      let untypedExpr = step.asExprSyntax(isSelf: false, value: value)
-      return "unsafeBitCast(\(untypedExpr), to: \(swiftType.metatypeReferenceExprSyntax))"
-
-    case .typedPointer(let step, swiftType: let type):
-      let untypedExpr = step.asExprSyntax(isSelf: isSelf, value: value)
-      return "\(untypedExpr).assumingMemoryBound(to: \(type.metatypeReferenceExprSyntax))"
-
-    case .pointee(let step):
-      let untypedExpr = step.asExprSyntax(isSelf: isSelf, value: value)
-      return "\(untypedExpr).pointee"
-
-    case .passIndirectly(let step):
-      let innerExpr = step.asExprSyntax(isSelf: false, value: value)
-      return isSelf ? innerExpr : "&\(innerExpr)"
-
-    case .initialize(let type, arguments: let arguments):
-      let renderedArguments: [String] = arguments.map { labeledArgument in
-        let renderedArg = labeledArgument.argument.asExprSyntax(isSelf: false, value: value)
-        if let argmentLabel = labeledArgument.label {
-          return "\(argmentLabel): \(renderedArg.description)"
-        } else {
-          return renderedArg.description
-        }
-      }
-
-      // FIXME: Should be able to use structured initializers here instead
-      // of splatting out text.
-      let renderedArgumentList = renderedArguments.joined(separator: ", ")
-      return "\(raw: type.description)(\(raw: renderedArgumentList))"
-
-    case .tuplify(let elements):
-      let renderedElements: [String] = elements.enumerated().map { (index, element) in
-        element.asExprSyntax(isSelf: false, value: "\(value)_\(index)").description
-      }
-
-      // FIXME: Should be able to use structured initializers here instead
-      // of splatting out text.
-      let renderedElementList = renderedElements.joined(separator: ", ")
-      return "(\(raw: renderedElementList))"
-    }
+    cdeclToOriginal.asExprSyntax(isSelf: isSelf, placeholder: value)
   }
 }
 
