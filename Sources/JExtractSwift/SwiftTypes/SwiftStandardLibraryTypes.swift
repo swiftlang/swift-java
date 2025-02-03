@@ -58,7 +58,7 @@ enum KnownStandardLibraryType: String, Hashable, CaseIterable {
 
 /// Captures many types from the Swift standard library in their most basic
 /// forms, so that the translator can reason about them in source code.
-struct SwiftStandardLibraryTypes {
+public struct SwiftStandardLibraryTypes {
   // Swift.UnsafePointer<Element>
   let unsafePointerDecl: SwiftNominalTypeDeclaration
 

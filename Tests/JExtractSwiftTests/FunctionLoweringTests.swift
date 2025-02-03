@@ -136,7 +136,90 @@ final class FunctionLoweringTests {
       }
       """,
       expectedCFunction: "void c_f(void const* t)"
-     )
+    )
+
+    try assertLoweredFunction("""
+      func f() -> Int.Type { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_f")
+      func c_f() -> UnsafeRawPointer {
+        return unsafeBitCast(f(), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "void const* c_f(void)"
+    )
+  }
+
+  @Test("Lowering class returns")
+  func lowerClassReturns() throws {
+    try assertLoweredFunction("""
+      func shifted(by delta: (Double, Double)) -> Point { }
+      """,
+      sourceFile: """
+      class Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_shifted")
+      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) -> UnsafeRawPointer {
+        return unsafeBitCast(unsafeBitCast(self, to: Point.self).shifted(by: (delta_0, delta_1)), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "void const* c_shifted(double delta_0, double delta_1, void const* self)"
+    )
+  }
+
+  @Test("Lowering pointer returns")
+  func lowerPointerReturns() throws {
+    try assertLoweredFunction("""
+      func getPointer() -> UnsafePointer<Point> { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getPointer")
+      func c_getPointer() -> UnsafeRawPointer {
+        return UnsafeRawPointer(getPointer())
+      }
+      """,
+      expectedCFunction: "void const* c_getPointer(void)"
+    )
+  }
+
+  @Test("Lowering tuple returns")
+  func lowerTupleReturns() throws {
+    try assertLoweredFunction("""
+      func getTuple() -> (Int, (Float, Double)) { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getTuple")
+      func c_getTuple(_ _result_0: UnsafeMutableRawPointer, _ _result_1_0: UnsafeMutableRawPointer, _ _result_1_1: UnsafeMutableRawPointer) {
+        let __swift_result = getTuple()
+        (_result_0, (_result_1_0, _result_1_1)) = (__swift_result_0, (__swift_result_1_0, __swift_result_1_1))
+      }
+      """,
+      expectedCFunction: "void c_getTuple(void* _result_0, void* _result_1_0, void* _result_1_1)"
+    )
+  }
+
+  @Test("Lowering buffer pointer returns", .disabled("Doesn't turn into the indirect returns"))
+  func lowerBufferPointerReturns() throws {
+    try assertLoweredFunction("""
+      func getBufferPointer() -> UnsafeMutableBufferPointer<Point> { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getBufferPointer")
+      func c_getBufferPointer(_result_pointer: UnsafeMutableRawPointer, _result_count: UnsafeMutableRawPointer) {
+        return UnsafeRawPointer(getPointer())
+      }
+      """,
+      expectedCFunction: "c_getBufferPointer(void* _result_pointer, void* _result_count)"
+    )
   }
 }
 

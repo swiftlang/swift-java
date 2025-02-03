@@ -39,7 +39,7 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
-  var swiftStdlibTypes: SwiftStandardLibraryTypes
+  public var swiftStdlibTypes: SwiftStandardLibraryTypes
 
   let symbolTable: SwiftSymbolTable
   let nominalResolution: NominalTypeResolution = NominalTypeResolution()

@@ -51,6 +51,56 @@ enum ConversionStep: Equatable {
   /// tuples, which Swift will convert to the labeled tuple form.
   case tuplify([ConversionStep])
 
+  /// Create an initialization step that produces the raw pointer type that
+  /// corresponds to the typed pointer.
+  init(
+    initializeRawPointerFromTyped typedStep: ConversionStep,
+    isMutable: Bool,
+    isPartOfBufferPointer: Bool,
+    stdlibTypes: SwiftStandardLibraryTypes
+  ) {
+    // Initialize the corresponding raw pointer type from the typed
+    // pointer we have on the Swift side.
+    let rawPointerType = isMutable
+      ? stdlibTypes[.unsafeMutableRawPointer]
+      : stdlibTypes[.unsafeRawPointer]
+    self = .initialize(
+      .nominal(
+        SwiftNominalType(
+          nominalTypeDecl: rawPointerType
+        )
+      ),
+      arguments: [
+        LabeledArgument(
+          argument: isPartOfBufferPointer
+            ? .explodedComponent(
+              typedStep,
+              component: "pointer"
+            )
+            : typedStep
+        ),
+      ]
+    )
+  }
+
+  /// Count the number of times that the placeholder occurs within this
+  /// conversion step.
+  var placeholderCount: Int {
+    switch self {
+    case .explodedComponent(let inner, component: _),
+        .passIndirectly(let inner), .pointee(let inner),
+        .typedPointer(let inner, swiftType: _),
+        .unsafeCastPointer(let inner, swiftType: _):
+      inner.placeholderCount
+    case .initialize(_, arguments: let arguments):
+      arguments.reduce(0) { $0 + $1.argument.placeholderCount }
+    case .placeholder:
+      1
+    case .tuplify(let elements):
+      elements.reduce(0) { $0 + $1.placeholderCount }
+    }
+  }
+
   /// Convert the conversion step into an expression with the given
   /// value as the placeholder value in the expression.
   func asExprSyntax(isSelf: Bool, placeholder: String) -> ExprSyntax {

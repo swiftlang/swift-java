@@ -63,7 +63,7 @@ extension Swift2JavaTranslator {
       // void result type
       indirectResult = false
     } else if loweredResult.cdeclParameters.count == 1,
-              loweredResult.cdeclParameters[0].isPrimitive {
+              loweredResult.cdeclParameters[0].canBeDirectReturn {
       // Primitive result type
       indirectResult = false
     } else {
@@ -145,7 +145,8 @@ extension Swift2JavaTranslator {
               SwiftNominalType(
                 nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]
               )
-            )
+            ),
+            canBeDirectReturn: true
           )
         ]
       )
@@ -163,7 +164,7 @@ extension Swift2JavaTranslator {
                 convention: convention,
                 parameterName: parameterName,
                 type: type,
-                isPrimitive: true
+                canBeDirectReturn: true
               )
             ]
           )
@@ -183,7 +184,8 @@ extension Swift2JavaTranslator {
                 parameterName: parameterName + "_pointer",
                 type: SwiftType.nominal(
                   SwiftNominalType(nominalTypeDecl: cdeclPointerType)
-                )
+                ),
+                canBeDirectReturn: true
               )
             ]
           )
@@ -217,6 +219,13 @@ extension Swift2JavaTranslator {
         }
       }
 
+      // Arbitrary types are lowered to raw pointers that either "are" the
+      // reference (for classes and actors) or will point to it.
+      let canBeDirectReturn = switch nominal.nominalTypeDecl.kind {
+        case .actor, .class: true
+        case .enum, .protocol, .struct: false
+      }
+
       let isMutable = (convention == .inout)
       return LoweredParameters(
         cdeclParameters: [
@@ -229,7 +238,8 @@ extension Swift2JavaTranslator {
                   ? swiftStdlibTypes[.unsafeMutableRawPointer]
                   : swiftStdlibTypes[.unsafeRawPointer]
               )
-            )
+            ),
+            canBeDirectReturn: canBeDirectReturn
           )
         ]
       )
@@ -289,7 +299,11 @@ extension LoweredFunctionSignature {
   /// Produce the `@_cdecl` thunk for this lowered function signature that will
   /// call into the original function.
   @_spi(Testing)
-  public func cdeclThunk(cName: String, inputFunction: FunctionDeclSyntax) -> FunctionDeclSyntax {
+  public func cdeclThunk(
+    cName: String,
+    inputFunction: FunctionDeclSyntax,
+    stdlibTypes: SwiftStandardLibraryTypes
+  ) -> FunctionDeclSyntax {
     var loweredCDecl = cdecl.createFunctionDecl(cName)
 
     // Add the @_cdecl attribute.
@@ -345,23 +359,70 @@ extension LoweredFunctionSignature {
           \(callExpression)
         }
         """
-    } else if cdecl.result.type.isVoid {
-      // Indirect return. This is a regular return in Swift that turns
-      // into an assignment via the indirect parameters.
-      // FIXME: This should actually be a swiftToCDecl conversion!
-      let resultConversion = try! ConversionStep(cdeclToSwift: original.result.type)
-      loweredCDecl.body = """
-        {
-          \(resultConversion.asExprSyntax(isSelf: true, placeholder: "_result")) = \(callExpression)
-        }
-        """
     } else {
-      // Direct return.
-      loweredCDecl.body = """
-        {
-          return \(callExpression)
-        }
-        """
+      // Determine the necessary conversion of the Swift return value to the
+      // cdecl return value.
+      let resultConversion = try! ConversionStep(
+        swiftToCDecl: original.result.type,
+        stdlibTypes: stdlibTypes
+      )
+
+      var bodyItems: [CodeBlockItemSyntax] = []
+
+      // If the are multiple places in the result conversion that reference
+      // the placeholder, capture the result of the call in a local variable.
+      // This prevents us from calling the function multiple times.
+      let originalResult: ExprSyntax
+      if resultConversion.placeholderCount > 1 {
+        bodyItems.append("""
+            let __swift_result = \(callExpression)
+          """
+        )
+        originalResult = "__swift_result"
+      } else {
+        originalResult = callExpression
+      }
+
+      // FIXME: Check whether there are multiple places in which we reference
+      // the placeholder in resultConversion. If so, we should write it into a
+      // local let "_resultValue" or similar so we don't call the underlying
+      // function multiple times.
+
+      // Convert the result.
+      let convertedResult = resultConversion.asExprSyntax(
+        isSelf: true,
+        placeholder: originalResult.description
+      )
+
+      if cdecl.result.type.isVoid {
+        // Indirect return. This is a regular return in Swift that turns
+        // into an assignment via the indirect parameters. We do a cdeclToSwift
+        // conversion on the left-hand side of the tuple to gather all of the
+        // indirect output parameters we need to assign to, and the result
+        // conversion is the corresponding right-hand side.
+        let cdeclParamConversion = try! ConversionStep(
+          cdeclToSwift: original.result.type
+        )
+        let indirectResults = cdeclParamConversion.asExprSyntax(
+          isSelf: true,
+          placeholder: "_result"
+        )
+        bodyItems.append("""
+            \(indirectResults) = \(convertedResult)
+          """
+        )
+      } else {
+        // Direct return. Just convert the expression.
+        bodyItems.append("""
+            return \(convertedResult)
+          """
+        )
+      }
+
+      loweredCDecl.body = CodeBlockSyntax(
+        leftBrace: .leftBraceToken(trailingTrivia: .newline),
+        statements: .init(bodyItems.map { $0.with(\.trailingTrivia, .newline) })
+      )
     }
 
     return loweredCDecl

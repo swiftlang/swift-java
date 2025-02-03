@@ -87,4 +87,107 @@ extension ConversionStep {
       self = .tuplify(try elements.map { try ConversionStep(cdeclToSwift: $0) })
     }
   }
+
+  /// Produce a conversion that takes in a value that would be available in a
+  /// Swift function and convert that to the corresponding cdecl values.
+  ///
+  /// This conversion goes in the opposite direction of init(cdeclToSwift:), and
+  /// is used for (e.g.) returning the Swift value from a cdecl function. When
+  /// there are multiple cdecl values that correspond to this one Swift value,
+  /// the result will be a tuple that can be assigned to a tuple of the cdecl
+  /// values, e.g., (<placeholder>.baseAddress, <placeholder>.count).
+  init(
+    swiftToCDecl swiftType: SwiftType,
+    stdlibTypes: SwiftStandardLibraryTypes
+  ) throws {
+    switch swiftType {
+    case .function, .optional:
+      throw LoweringError.unhandledType(swiftType)
+
+    case .metatype:
+      self = .unsafeCastPointer(
+        .placeholder,
+        swiftType: .nominal(
+          SwiftNominalType(
+            nominalTypeDecl: stdlibTypes[.unsafeRawPointer]
+          )
+        )
+      )
+      return
+
+    case .nominal(let nominal):
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        // Swift types that map to primitive types in C. These can be passed
+        // through directly.
+        if knownType.primitiveCType != nil {
+          self = .placeholder
+          return
+        }
+
+        // Typed pointers
+        if nominal.genericArguments?.first != nil {
+          switch knownType {
+          case .unsafePointer, .unsafeMutablePointer:
+            let isMutable = knownType == .unsafeMutablePointer
+            self = ConversionStep(
+              initializeRawPointerFromTyped: .placeholder,
+              isMutable: isMutable,
+              isPartOfBufferPointer: false,
+              stdlibTypes: stdlibTypes
+            )
+            return
+
+          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+            let isMutable = knownType == .unsafeMutableBufferPointer
+            self = .tuplify(
+              [
+                ConversionStep(
+                  initializeRawPointerFromTyped: .explodedComponent(
+                    .placeholder,
+                    component: "pointer"
+                  ),
+                  isMutable: isMutable,
+                  isPartOfBufferPointer: true,
+                  stdlibTypes: stdlibTypes
+                ),
+                .explodedComponent(.placeholder, component: "count")
+              ]
+            )
+            return
+
+          default:
+            break
+          }
+        }
+      }
+
+      // Arbitrary nominal types.
+      switch nominal.nominalTypeDecl.kind {
+      case .actor, .class:
+        // For actor and class, we pass around the pointer directly. Case to
+        // the unsafe raw pointer type we use to represent it in C.
+        self = .unsafeCastPointer(
+          .placeholder,
+          swiftType: .nominal(
+            SwiftNominalType(
+              nominalTypeDecl: stdlibTypes[.unsafeRawPointer]
+            )
+          )
+        )
+
+      case .enum, .struct, .protocol:
+        // For enums, structs, and protocol types, we leave the value alone.
+        // The indirection will be handled by the caller.
+        self = .placeholder
+      }
+
+    case .tuple(let elements):
+      // Convert all of the elements.
+      self = .tuplify(
+        try elements.map { element in
+          try ConversionStep(swiftToCDecl: element, stdlibTypes: stdlibTypes)
+        }
+      )
+    }
+  }
 }
