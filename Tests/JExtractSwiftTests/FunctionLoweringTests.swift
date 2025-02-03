@@ -78,11 +78,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shifted")
-      func c_shifted(_ self: UnsafeRawPointer, _ delta_0: Double, _ delta_1: Double, _ _result: UnsafeMutableRawPointer) {
+      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ _result: UnsafeMutableRawPointer, _ self: UnsafeRawPointer) {
         _result.assumingMemoryBound(to: Point.self).pointee = self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1))
       }
       """,
-      expectedCFunction: "void c_shifted(void const* self, double delta_0, double delta_1, void* _result)"
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, void* _result, void const* self)"
     )
   }
 
@@ -97,11 +97,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ self: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeMutableRawPointer) {
         self.assumingMemoryBound(to: Point.self).pointee.shift(by: (delta_0, delta_1))
       }
       """,
-      expectedCFunction: "void c_shift(void* self, double delta_0, double delta_1)"
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, void* self)"
     )
   }
 
@@ -116,11 +116,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ self: UnsafeRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) {
         unsafeBitCast(self, to: Point.self).shift(by: (delta_0, delta_1))
       }
       """,
-      expectedCFunction: "void c_shift(void const* self, double delta_0, double delta_1)"
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, void const* self)"
     )
   }
 

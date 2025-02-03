@@ -41,14 +41,6 @@ extension Swift2JavaTranslator {
     _ signature: SwiftFunctionSignature
   ) throws -> LoweredFunctionSignature {
     // Lower all of the parameters.
-    let loweredSelf = try signature.selfParameter.map { selfParameter in
-      try lowerParameter(
-        selfParameter.type,
-        convention: selfParameter.convention, 
-        parameterName: selfParameter.parameterName ?? "self"
-      )
-    }
-
     let loweredParameters = try signature.parameters.enumerated().map { (index, param) in
       try lowerParameter(
         param.type,
@@ -83,13 +75,17 @@ extension Swift2JavaTranslator {
       indirectResult = true
     }
 
+    let loweredSelf = try signature.selfParameter.map { selfParameter in
+      try lowerParameter(
+        selfParameter.type,
+        convention: selfParameter.convention,
+        parameterName: selfParameter.parameterName ?? "self"
+      )
+    }
+
     // Collect all of the lowered parameters for the @_cdecl function.
     var allLoweredParameters: [LoweredParameters] = []
     var cdeclLoweredParameters: [SwiftParameter] = []
-    if let loweredSelf {
-      allLoweredParameters.append(loweredSelf)
-      cdeclLoweredParameters.append(contentsOf: loweredSelf.cdeclParameters)
-    }
     allLoweredParameters.append(contentsOf: loweredParameters)
     cdeclLoweredParameters.append(
       contentsOf: loweredParameters.flatMap { $0.cdeclParameters }
@@ -108,6 +104,11 @@ extension Swift2JavaTranslator {
       cdeclResult = .init(convention: .direct, type: .tuple([]))
     } else {
       fatalError("Improper lowering of result for \(signature)")
+    }
+
+    if let loweredSelf {
+      allLoweredParameters.append(loweredSelf)
+      cdeclLoweredParameters.append(contentsOf: loweredSelf.cdeclParameters)
     }
 
     let cdeclSignature = SwiftFunctionSignature(
@@ -532,9 +533,10 @@ extension LoweredFunctionSignature {
     // Lower "self", if there is one.
     let parametersToLower: ArraySlice<LoweredParameters>
     let cdeclToOriginalSelf: ExprSyntax?
-    if let originalSelfParam = original.selfParameter {
-      cdeclToOriginalSelf = parameters[0].cdeclToOriginalArgumentExpr(isSelf: true, value: originalSelfParam.parameterName ?? "self")
-      parametersToLower = parameters[1...]
+    if let originalSelfParam = original.selfParameter,
+       let selfParameter = parameters.last {
+      cdeclToOriginalSelf = selfParameter.cdeclToOriginalArgumentExpr(isSelf: true, value: originalSelfParam.parameterName ?? "self")
+      parametersToLower = parameters.dropLast()
     } else {
       cdeclToOriginalSelf = nil
       parametersToLower = parameters[...]
