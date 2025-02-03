@@ -14,45 +14,45 @@
 
 import SwiftSyntax
 
-enum KnownStandardLibraryType: Int, Hashable, CaseIterable {
-  case bool = 0
-  case int
-  case uint
-  case int8
-  case uint8
-  case int16
-  case uint16
-  case int32
-  case uint32
-  case int64
-  case uint64
-  case float
-  case double
-  case unsafeRawPointer
-  case unsafeMutableRawPointer
+enum KnownStandardLibraryType: String, Hashable, CaseIterable {
+  case bool = "Bool"
+  case int = "Int"
+  case uint = "UInt"
+  case int8 = "Int8"
+  case uint8 = "UInt8"
+  case int16 = "Int16"
+  case uint16 = "UInt16"
+  case int32 = "Int32"
+  case uint32 = "UInt32"
+  case int64 = "Int64"
+  case uint64 = "UInt64"
+  case float = "Float"
+  case double = "Double"
+  case unsafeRawPointer = "UnsafeRawPointer"
+  case unsafeMutableRawPointer = "UnsafeMutableRawPointer"
+  case unsafePointer = "UnsafePointer"
+  case unsafeMutablePointer = "UnsafeMutablePointer"
+  case unsafeBufferPointer = "UnsafeBufferPointer"
+  case unsafeMutableBufferPointer = "UnsafeMutableBufferPointer"
 
-  var typeName: String {
-    switch self {
-      case .bool: return "Bool"
-      case .int: return "Int"
-      case .uint: return "UInt"
-      case .int8: return "Int8"
-      case .uint8: return "UInt8"
-      case .int16: return "Int16"
-      case .uint16: return "UInt16"
-      case .int32: return "Int32"
-      case .uint32: return "UInt32"
-      case .int64: return "Int64"
-      case .uint64: return "UInt64"
-      case .float: return "Float"
-      case .double: return "Double"
-      case .unsafeRawPointer: return "UnsafeRawPointer"
-      case .unsafeMutableRawPointer: return "UnsafeMutableRawPointer"
-    }
+  var typeName: String { rawValue }
+
+  init?(typeNameInSwiftModule: String) {
+    self.init(rawValue: typeNameInSwiftModule)
   }
 
+  /// Whether this declaration is generic.
   var isGeneric: Bool {
-    false
+    switch self {
+    case .bool, .double, .float, .int, .int8, .int16, .int32, .int64,
+        .uint, .uint8, .uint16, .uint32, .uint64, .unsafeRawPointer,
+        .unsafeMutableRawPointer:
+      false
+
+    case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer,
+        .unsafeMutableBufferPointer:
+      true
+    }
   }
 }
 

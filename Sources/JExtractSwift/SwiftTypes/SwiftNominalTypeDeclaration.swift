@@ -42,6 +42,12 @@ class SwiftNominalTypeDeclaration {
 
   // TODO: Generic parameters.
 
+  /// Identify this nominal declaration as one of the known standard library
+  /// types, like 'Swift.Int[.
+  lazy var knownStandardLibraryType: KnownStandardLibraryType? = {
+    self.computeKnownStandardLibraryType()
+  }()
+
   /// Create a nominal type declaration from the syntax node for a nominal type
   /// declaration.
   init(
@@ -62,6 +68,16 @@ class SwiftNominalTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
+  }
+
+  /// Determine the known standard library type for this nominal type
+  /// declaration.
+  private func computeKnownStandardLibraryType() -> KnownStandardLibraryType? {
+    if parent != nil || moduleName != "Swift" {
+      return nil
+    }
+
+    return KnownStandardLibraryType(typeNameInSwiftModule: name)
   }
 }
 

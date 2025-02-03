@@ -12,17 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension SwiftStandardLibraryTypes {
+extension CType {
   /// Lower the given Swift type down to a its corresponding C type.
   ///
   /// This operation only supports the subset of Swift types that are
   /// representable in a Swift `@_cdecl` function. If lowering an arbitrary
   /// Swift function, first go through Swift -> cdecl lowering.
-  func cdeclToCLowering(_ swiftType: SwiftType) throws -> CType {
-    switch swiftType {
+  init(cdeclType: SwiftType) throws {
+    switch cdeclType {
     case .nominal(let nominalType):
-      if let knownType = self[nominalType.nominalTypeDecl] {
-        return try knownType.loweredCType()
+      if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType,
+        let primitiveCType = knownType.primitiveCType {
+        self = primitiveCType
+        return
       }
 
       throw CDeclToCLoweringError.invalidNominalType(nominalType.nominalTypeDecl)
@@ -33,12 +35,12 @@ extension SwiftStandardLibraryTypes {
         throw CDeclToCLoweringError.invalidFunctionConvention(functionType)
 
       case .c:
-        let resultType = try cdeclToCLowering(functionType.resultType)
+        let resultType = try CType(cdeclType: functionType.resultType)
         let parameterTypes = try functionType.parameters.map { param in
-          try cdeclToCLowering(param.type)
+          try CType(cdeclType: param.type)
         }
 
-        return .function(
+        self = .function(
           resultType: resultType,
           parameters: parameterTypes,
           variadic: false
@@ -46,16 +48,46 @@ extension SwiftStandardLibraryTypes {
       }
 
     case .tuple([]):
-      return .void
+      self = .void
 
     case .metatype, .optional, .tuple:
-      throw CDeclToCLoweringError.invalidCDeclType(swiftType)
+      throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
 }
 
+extension CFunction {
+  /// Produce a C function that represents the given @_cdecl Swift function.
+  init(cdeclSignature: SwiftFunctionSignature, cName: String) throws {
+    assert(cdeclSignature.selfParameter == nil)
+
+    let cResultType = try CType(cdeclType: cdeclSignature.result.type)
+    let cParameters = try cdeclSignature.parameters.map { parameter in
+      CParameter(
+        name: parameter.parameterName,
+        type: try CType(cdeclType: parameter.type).parameterDecay
+      )
+    }
+
+    self = CFunction(
+      resultType: cResultType,
+      name: cName,
+      parameters: cParameters,
+      isVariadic: false
+    )
+  }
+}
+
+enum CDeclToCLoweringError: Error {
+  case invalidCDeclType(SwiftType)
+  case invalidNominalType(SwiftNominalTypeDeclaration)
+  case invalidFunctionConvention(SwiftFunctionType)
+}
+
 extension KnownStandardLibraryType {
-  func loweredCType() throws -> CType {
+  /// Determine the primitive C type that corresponds to this C standard
+  /// library type, if there is one.
+  var primitiveCType: CType? {
     switch self {
     case .bool: .integral(.bool)
     case .int: .integral(.ptrdiff_t)
@@ -74,12 +106,8 @@ extension KnownStandardLibraryType {
     case .unsafeRawPointer: .pointer(
       .qualified(const: true, volatile: false, type: .void)
     )
+    case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer:
+       nil
     }
   }
 }
-enum CDeclToCLoweringError: Error {
-  case invalidCDeclType(SwiftType)
-  case invalidNominalType(SwiftNominalTypeDeclaration)
-  case invalidFunctionConvention(SwiftFunctionType)
-}
-
