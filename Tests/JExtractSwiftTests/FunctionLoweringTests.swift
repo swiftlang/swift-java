@@ -78,11 +78,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shifted")
-      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ _result: UnsafeMutableRawPointer, _ self: UnsafeRawPointer) {
+      func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
         _result.assumingMemoryBound(to: Point.self).pointee = self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1))
       }
       """,
-      expectedCFunction: "void c_shifted(double delta_0, double delta_1, void* _result, void const* self)"
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, void const* self, void* _result)"
     )
   }
 

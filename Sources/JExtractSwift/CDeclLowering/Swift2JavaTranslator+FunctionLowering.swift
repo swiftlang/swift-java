@@ -113,6 +113,13 @@ extension Swift2JavaTranslator {
       contentsOf: loweredParameters.flatMap { $0.cdeclParameters }
     )
 
+    // Lower self.
+    if let loweredSelf {
+      allLoweredParameters.append(loweredSelf)
+      cdeclLoweredParameters.append(contentsOf: loweredSelf.cdeclParameters)
+    }
+
+    // Lower indirect results.
     let cdeclResult: SwiftResult
     if indirectResult {
       cdeclLoweredParameters.append(
@@ -126,11 +133,6 @@ extension Swift2JavaTranslator {
       cdeclResult = .init(convention: .direct, type: .tuple([]))
     } else {
       fatalError("Improper lowering of result for \(signature)")
-    }
-
-    if let loweredSelf {
-      allLoweredParameters.append(loweredSelf)
-      cdeclLoweredParameters.append(contentsOf: loweredSelf.cdeclParameters)
     }
 
     let cdeclSignature = SwiftFunctionSignature(
