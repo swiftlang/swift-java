@@ -430,17 +430,6 @@ extension LoweredFunctionSignature {
         originalResult = callExpression
       }
 
-      // FIXME: Check whether there are multiple places in which we reference
-      // the placeholder in resultConversion. If so, we should write it into a
-      // local let "_resultValue" or similar so we don't call the underlying
-      // function multiple times.
-
-      // Convert the result.
-      let convertedResult = resultConversion.asExprSyntax(
-        isSelf: true,
-        placeholder: originalResult.description
-      )
-
       if cdecl.result.type.isVoid {
         // Indirect return. This is a regular return in Swift that turns
         // into an assignment via the indirect parameters. We do a cdeclToSwift
@@ -450,16 +439,23 @@ extension LoweredFunctionSignature {
         let cdeclParamConversion = try! ConversionStep(
           cdeclToSwift: original.result.type
         )
-        let indirectResults = cdeclParamConversion.asExprSyntax(
-          isSelf: true,
-          placeholder: "_result"
-        )
-        bodyItems.append("""
-            \(indirectResults) = \(convertedResult)
-          """
+
+        // For each indirect result, initialize the value directly with the
+        // corresponding element in the converted result.
+        bodyItems.append(
+          contentsOf: cdeclParamConversion.initialize(
+            placeholder: "_result",
+            from: resultConversion,
+            otherPlaceholder: originalResult.description
+          )
         )
       } else {
         // Direct return. Just convert the expression.
+        let convertedResult = resultConversion.asExprSyntax(
+          isSelf: true,
+          placeholder: originalResult.description
+        )
+
         bodyItems.append("""
             return \(convertedResult)
           """
@@ -473,5 +469,60 @@ extension LoweredFunctionSignature {
     }
 
     return loweredCDecl
+  }
+}
+
+extension ConversionStep {
+  /// Form a set of statements that initializes the placeholders within
+  /// the given conversion step from ones in the other step, effectively
+  /// exploding something like `(a, (b, c)) = (d, (e, f))` into
+  /// separate initializations for a, b, and c from d, e, and f, respectively.
+  func initialize(
+    placeholder: String,
+    from otherStep: ConversionStep,
+    otherPlaceholder: String
+  ) -> [CodeBlockItemSyntax] {
+    // Create separate assignments for each element in paired tuples.
+    if case .tuplify(let elements) = self,
+        case .tuplify(let otherElements) = otherStep {
+      assert(elements.count == otherElements.count)
+
+      return elements.indices.flatMap { index in
+        elements[index].initialize(
+          placeholder: "\(placeholder)_\(index)",
+          from: otherElements[index],
+          otherPlaceholder: "\(otherPlaceholder)_\(index)"
+        )
+      }
+    }
+
+    // Look through "pass indirectly" steps; they do nothing here.
+    if case .passIndirectly(let conversionStep) = self {
+      return conversionStep.initialize(
+        placeholder: placeholder,
+        from: otherStep,
+        otherPlaceholder: otherPlaceholder
+      )
+    }
+
+    // The value we're initializing from.
+    let otherExpr = otherStep.asExprSyntax(
+      isSelf: false,
+      placeholder: otherPlaceholder
+    )
+
+    // If we have a "pointee" on where we are performing initialization, we
+    // need to instead produce an initialize(to:) call.
+    if case .pointee(let innerSelf) = self {
+      let selfPointerExpr = innerSelf.asExprSyntax(
+        isSelf: true,
+        placeholder: placeholder
+      )
+
+      return [ "  \(selfPointerExpr).initialize(to: \(otherExpr))" ]
+    }
+
+    let selfExpr = self.asExprSyntax(isSelf: true, placeholder: placeholder)
+    return [ "  \(selfExpr) = \(otherExpr)" ]
   }
 }

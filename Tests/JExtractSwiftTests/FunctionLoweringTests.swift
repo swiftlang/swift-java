@@ -79,7 +79,7 @@ final class FunctionLoweringTests {
       expectedCDecl: """
       @_cdecl("c_shifted")
       func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
-        _result.assumingMemoryBound(to: Point.self).pointee = self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1))
+        _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
       }
       """,
       expectedCFunction: "void c_shifted(double delta_0, double delta_1, void const* self, void* _result)"
@@ -136,7 +136,7 @@ final class FunctionLoweringTests {
       expectedCDecl: """
       @_cdecl("c_scaledUnit")
       func c_scaledUnit(_ value: Double, _ _result: UnsafeMutableRawPointer) {
-        _result.assumingMemoryBound(to: Point.self).pointee = Point.scaledUnit(by: value)
+        _result.assumingMemoryBound(to: Point.self).initialize(to: Point.scaledUnit(by: value))
       }
       """,
       expectedCFunction: "void c_scaledUnit(double value, void* _result)"
@@ -171,7 +171,7 @@ final class FunctionLoweringTests {
       expectedCDecl: """
       @_cdecl("c_init")
       func c_init(_ value: Double, _ _result: UnsafeMutableRawPointer) {
-        _result.assumingMemoryBound(to: Point.self).pointee = Point(scaledBy: value)
+        _result.assumingMemoryBound(to: Point.self).initialize(to: Point(scaledBy: value))
       }
       """,
       expectedCFunction: "void c_init(double value, void* _result)"
@@ -261,13 +261,18 @@ final class FunctionLoweringTests {
   @Test("Lowering tuple returns")
   func lowerTupleReturns() throws {
     try assertLoweredFunction("""
-      func getTuple() -> (Int, (Float, Double)) { }
+      func getTuple() -> (Int, (Float, Point)) { }
+      """,
+      sourceFile: """
+      struct Point { }
       """,
       expectedCDecl: """
       @_cdecl("c_getTuple")
       func c_getTuple(_ _result_0: UnsafeMutableRawPointer, _ _result_1_0: UnsafeMutableRawPointer, _ _result_1_1: UnsafeMutableRawPointer) {
         let __swift_result = getTuple()
-        (_result_0, (_result_1_0, _result_1_1)) = (__swift_result_0, (__swift_result_1_0, __swift_result_1_1))
+        _result_0 = __swift_result_0
+        _result_1_0 = __swift_result_1_0
+        _result_1_1.assumingMemoryBound(to: Point.self).initialize(to: __swift_result_1_1)
       }
       """,
       expectedCFunction: "void c_getTuple(void* _result_0, void* _result_1_0, void* _result_1_1)"
