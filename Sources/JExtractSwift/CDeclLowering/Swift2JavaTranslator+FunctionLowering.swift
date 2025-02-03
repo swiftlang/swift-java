@@ -33,6 +33,22 @@ extension Swift2JavaTranslator {
     return try lowerFunctionSignature(signature)
   }
 
+  /// Lower the given initializer to a C-compatible entrypoint,
+  /// providing all of the mappings between the parameter and result types
+  /// of the original function and its `@_cdecl` counterpart.
+  @_spi(Testing)
+  public func lowerFunctionSignature(
+    _ decl: InitializerDeclSyntax,
+    enclosingType: TypeSyntax? = nil
+  ) throws -> LoweredFunctionSignature {
+    let signature = try SwiftFunctionSignature(
+      decl,
+      enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
+      symbolTable: symbolTable
+    )
+
+    return try lowerFunctionSignature(signature)
+  }
   /// Lower the given Swift function signature to a Swift @_cdecl function signature,
   /// which is C compatible, and the corresponding Java method signature.
   ///
@@ -75,12 +91,18 @@ extension Swift2JavaTranslator {
       indirectResult = true
     }
 
-    let loweredSelf = try signature.selfParameter.map { selfParameter in
-      try lowerParameter(
-        selfParameter.type,
-        convention: selfParameter.convention,
-        parameterName: selfParameter.parameterName ?? "self"
-      )
+    // Lower the self parameter.
+    let loweredSelf = try signature.selfParameter.flatMap { selfParameter in
+      switch selfParameter {
+      case .instance(let selfParameter):
+        try lowerParameter(
+          selfParameter.type,
+          convention: selfParameter.convention,
+          parameterName: selfParameter.parameterName ?? "self"
+        )
+      case .initializer, .staticMethod:
+        nil
+      }
     }
 
     // Collect all of the lowered parameters for the @_cdecl function.
@@ -112,7 +134,6 @@ extension Swift2JavaTranslator {
     }
 
     let cdeclSignature = SwiftFunctionSignature(
-      isStaticOrClass: false,
       selfParameter: nil,
       parameters: cdeclLoweredParameters,
       result: cdeclResult
@@ -301,7 +322,7 @@ extension LoweredFunctionSignature {
   @_spi(Testing)
   public func cdeclThunk(
     cName: String,
-    inputFunction: FunctionDeclSyntax,
+    swiftFunctionName: String,
     stdlibTypes: SwiftStandardLibraryTypes
   ) -> FunctionDeclSyntax {
     var loweredCDecl = cdecl.createFunctionDecl(cName)
@@ -315,14 +336,33 @@ extension LoweredFunctionSignature {
     // Lower "self", if there is one.
     let parametersToLower: ArraySlice<LoweredParameters>
     let cdeclToOriginalSelf: ExprSyntax?
-    if let originalSelfParam = original.selfParameter {
-      cdeclToOriginalSelf = try! ConversionStep(
-        cdeclToSwift: originalSelfParam.type
-      ).asExprSyntax(
-        isSelf: true,
-        placeholder: originalSelfParam.parameterName ?? "self"
-      )
-      parametersToLower = parameters.dropLast()
+    var initializerType: SwiftType? = nil
+    if let originalSelf = original.selfParameter {
+      switch originalSelf {
+      case .instance(let originalSelfParam):
+        // The instance was provided to the cdecl thunk, so convert it to
+        // its Swift representation.
+        cdeclToOriginalSelf = try! ConversionStep(
+          cdeclToSwift: originalSelfParam.type
+        ).asExprSyntax(
+          isSelf: true,
+          placeholder: originalSelfParam.parameterName ?? "self"
+        )
+        parametersToLower = parameters.dropLast()
+
+      case .staticMethod(let selfType):
+        // Static methods use the Swift type as "self", but there is no
+        // corresponding cdecl parameter.
+        cdeclToOriginalSelf = "\(raw: selfType.description)"
+        parametersToLower = parameters[...]
+
+      case .initializer(let selfType):
+        // Initializers use the Swift type to create the instance. Save it
+        // for later. There is no corresponding cdecl parameter.
+        initializerType = selfType
+        cdeclToOriginalSelf = nil
+        parametersToLower = parameters[...]
+      }
     } else {
       cdeclToOriginalSelf = nil
       parametersToLower = parameters[...]
@@ -346,9 +386,14 @@ extension LoweredFunctionSignature {
     }
 
     // Form the call expression.
-    var callExpression: ExprSyntax = "\(inputFunction.name)(\(raw: cdeclToOriginalArguments.joined(separator: ", ")))"
-    if let cdeclToOriginalSelf {
-      callExpression = "\(cdeclToOriginalSelf).\(callExpression)"
+    let callArguments: ExprSyntax = "(\(raw: cdeclToOriginalArguments.joined(separator: ", ")))"
+    let callExpression: ExprSyntax
+    if let initializerType {
+      callExpression = "\(raw: initializerType.description)\(callArguments)"
+    } else if let cdeclToOriginalSelf {
+      callExpression = "\(cdeclToOriginalSelf).\(raw: swiftFunctionName)\(callArguments)"
+    } else {
+      callExpression = "\(raw: swiftFunctionName)\(callArguments)"
     }
 
     // Handle the return.

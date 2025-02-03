@@ -124,6 +124,76 @@ final class FunctionLoweringTests {
     )
   }
 
+  @Test("Lowering static methods")
+  func loweringStaticMethods() throws {
+    try assertLoweredFunction("""
+      static func scaledUnit(by value: Double) -> Point { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_scaledUnit")
+      func c_scaledUnit(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+        _result.assumingMemoryBound(to: Point.self).pointee = Point.scaledUnit(by: value)
+      }
+      """,
+      expectedCFunction: "void c_scaledUnit(double value, void* _result)"
+    )
+
+    try assertLoweredFunction("""
+      static func randomPerson(seed: Double) -> Person { }
+      """,
+      sourceFile: """
+      class Person { }
+      """,
+      enclosingType: "Person",
+      expectedCDecl: """
+      @_cdecl("c_randomPerson")
+      func c_randomPerson(_ seed: Double) -> UnsafeRawPointer {
+        return unsafeBitCast(Person.randomPerson(seed: seed), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "void const* c_randomPerson(double seed)"
+    )
+  }
+
+  @Test("Lowering initializers")
+  func loweringInitializers() throws {
+    try assertLoweredFunction("""
+      init(scaledBy value: Double) { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_init")
+      func c_init(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+        _result.assumingMemoryBound(to: Point.self).pointee = Point(scaledBy: value)
+      }
+      """,
+      expectedCFunction: "void c_init(double value, void* _result)"
+    )
+
+    try assertLoweredFunction("""
+      init(seed: Double) { }
+      """,
+      sourceFile: """
+      class Person { }
+      """,
+      enclosingType: "Person",
+      expectedCDecl: """
+      @_cdecl("c_init")
+      func c_init(_ seed: Double) -> UnsafeRawPointer {
+        return unsafeBitCast(Person(seed: seed), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "void const* c_init(double seed)"
+    )
+  }
+
   @Test("Lowering metatypes")
   func lowerMetatype() throws {
     try assertLoweredFunction("""
@@ -222,4 +292,3 @@ final class FunctionLoweringTests {
     )
   }
 }
-

@@ -19,11 +19,23 @@ import SwiftSyntaxBuilder
 /// parameters and return type.
 @_spi(Testing)
 public struct SwiftFunctionSignature: Equatable {
-  // FIXME: isStaticOrClass probably shouldn't be here?
-  var isStaticOrClass: Bool
-  var selfParameter: SwiftParameter?
+  var selfParameter: SwiftSelfParameter?
   var parameters: [SwiftParameter]
   var result: SwiftResult
+}
+
+/// Describes the "self" parameter of a Swift function signature.
+enum SwiftSelfParameter: Equatable {
+  /// 'self' is an instance parameter.
+  case instance(SwiftParameter)
+
+  /// 'self' is a metatype for a static method. We only need the type to
+  /// form the call.
+  case staticMethod(SwiftType)
+
+  /// 'self' is the type for a call to an initializer. We only need the type
+  /// to form the call.
+  case initializer(SwiftType)
 }
 
 extension SwiftFunctionSignature {
@@ -50,6 +62,33 @@ extension SwiftFunctionSignature {
 
 extension SwiftFunctionSignature {
   init(
+    _ node: InitializerDeclSyntax,
+    enclosingType: SwiftType?,
+    symbolTable: SwiftSymbolTable
+  ) throws {
+    guard let enclosingType else {
+      throw SwiftFunctionTranslationError.missingEnclosingType(node)
+    }
+
+    // We do not yet support failable initializers.
+    if node.optionalMark != nil {
+      throw SwiftFunctionTranslationError.failableInitializer(node)
+    }
+
+    // Prohibit generics for now.
+    if let generics = node.genericParameterClause {
+      throw SwiftFunctionTranslationError.generic(generics)
+    }
+
+    self.selfParameter = .initializer(enclosingType)
+    self.result = SwiftResult(convention: .direct, type: enclosingType)
+    self.parameters = try Self.translateFunctionSignature(
+      node.signature,
+      symbolTable: symbolTable
+    )
+  }
+
+  init(
     _ node: FunctionDeclSyntax,
     enclosingType: SwiftType?,
     symbolTable: SwiftSymbolTable
@@ -59,40 +98,36 @@ extension SwiftFunctionSignature {
     if let enclosingType {
       var isMutating = false
       var isConsuming = false
-      var isStaticOrClass = false
+      var isStatic = false
       for modifier in node.modifiers {
         switch modifier.name.tokenKind {
         case .keyword(.mutating): isMutating = true
-        case .keyword(.static), .keyword(.class): isStaticOrClass = true
+        case .keyword(.static): isStatic = true
         case .keyword(.consuming): isConsuming = true
+        case .keyword(.class): throw SwiftFunctionTranslationError.classMethod(modifier.name)
         default: break
         }
       }
 
-      if isStaticOrClass {
-        self.selfParameter = SwiftParameter(
-          convention: .byValue,
-          type: .metatype(
-            enclosingType
+      if isStatic {
+        self.selfParameter = .staticMethod(enclosingType)
+      } else {
+        self.selfParameter = .instance(
+          SwiftParameter(
+            convention: isMutating ? .inout : isConsuming ? .consuming : .byValue,
+            type: enclosingType
           )
         )
-      } else {
-        self.selfParameter = SwiftParameter(
-          convention: isMutating ? .inout : isConsuming ? .consuming : .byValue,
-          type: enclosingType
-        )
       }
-
-      self.isStaticOrClass = isStaticOrClass
     } else {
       self.selfParameter = nil
-      self.isStaticOrClass = false
     }
 
     // Translate the parameters.
-    self.parameters = try node.signature.parameterClause.parameters.map { param in
-      try SwiftParameter(param, symbolTable: symbolTable)
-    }
+    self.parameters = try Self.translateFunctionSignature(
+      node.signature,
+      symbolTable: symbolTable
+    )
 
     // Translate the result type.
     if let resultType = node.signature.returnClause?.type {
@@ -104,17 +139,28 @@ extension SwiftFunctionSignature {
       self.result = SwiftResult(convention: .direct, type: .tuple([]))
     }
 
-    // FIXME: Prohibit effects for now.
-    if let throwsClause = node.signature.effectSpecifiers?.throwsClause {
-      throw SwiftFunctionTranslationError.throws(throwsClause)
-    }
-    if let asyncSpecifier = node.signature.effectSpecifiers?.asyncSpecifier {
-      throw SwiftFunctionTranslationError.async(asyncSpecifier)
-    }
-
     // Prohibit generics for now.
     if let generics = node.genericParameterClause {
       throw SwiftFunctionTranslationError.generic(generics)
+    }
+  }
+
+  /// Translate the function signature, returning the list of translated
+  /// parameters.
+  static func translateFunctionSignature(
+    _ signature: FunctionSignatureSyntax,
+    symbolTable: SwiftSymbolTable
+  ) throws -> [SwiftParameter] {
+    // FIXME: Prohibit effects for now.
+    if let throwsClause = signature.effectSpecifiers?.throwsClause {
+      throw SwiftFunctionTranslationError.throws(throwsClause)
+    }
+    if let asyncSpecifier = signature.effectSpecifiers?.asyncSpecifier {
+      throw SwiftFunctionTranslationError.async(asyncSpecifier)
+    }
+
+    return try signature.parameterClause.parameters.map { param in
+      try SwiftParameter(param, symbolTable: symbolTable)
     }
   }
 }
@@ -123,4 +169,7 @@ enum SwiftFunctionTranslationError: Error {
   case `throws`(ThrowsClauseSyntax)
   case async(TokenSyntax)
   case generic(GenericParameterClauseSyntax)
+  case classMethod(TokenSyntax)
+  case missingEnclosingType(InitializerDeclSyntax)
+  case failableInitializer(InitializerDeclSyntax)
 }

@@ -42,14 +42,27 @@ func assertLoweredFunction(
 
   translator.prepareForTranslation()
 
-  let inputFunction = inputDecl.cast(FunctionDeclSyntax.self)
-  let loweredFunction = try translator.lowerFunctionSignature(
-    inputFunction,
-    enclosingType: enclosingType
-  )
+  let swiftFunctionName: String
+  let loweredFunction: LoweredFunctionSignature
+  if let inputFunction = inputDecl.as(FunctionDeclSyntax.self) {
+    loweredFunction = try translator.lowerFunctionSignature(
+      inputFunction,
+      enclosingType: enclosingType
+    )
+    swiftFunctionName = inputFunction.name.text
+  } else if let inputInitializer = inputDecl.as(InitializerDeclSyntax.self) {
+    loweredFunction = try translator.lowerFunctionSignature(
+      inputInitializer,
+      enclosingType: enclosingType
+    )
+    swiftFunctionName = "init"
+  } else {
+    fatalError("Unhandling declaration kind for lowering")
+  }
+
   let loweredCDecl = loweredFunction.cdeclThunk(
-    cName: "c_\(inputFunction.name.text)",
-    inputFunction: inputFunction,
+    cName: "c_\(swiftFunctionName)",
+    swiftFunctionName: swiftFunctionName,
     stdlibTypes: translator.swiftStdlibTypes
   )
 
@@ -65,7 +78,7 @@ func assertLoweredFunction(
 
   let cFunction = translator.cdeclToCFunctionLowering(
     loweredFunction.cdecl,
-    cName: "c_\(inputFunction.name.text)"
+    cName: "c_\(swiftFunctionName)"
   )
   #expect(
     cFunction.description == expectedCFunction,
