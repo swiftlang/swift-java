@@ -129,12 +129,12 @@ extension SwiftType {
       // Only recognize the "@convention(c)" and "@convention(swift)" attributes, and
       // then only on function types.
       // FIXME: This string matching is a horrible hack.
-      switch attributedType.trimmedDescription {
+      switch attributedType.attributes.trimmedDescription {
       case "@convention(c)", "@convention(swift)":
         let innerType = try SwiftType(attributedType.baseType, symbolTable: symbolTable)
         switch innerType {
         case .function(var functionType):
-          let isConventionC = attributedType.trimmedDescription == "@convention(c)"
+          let isConventionC = attributedType.attributes.trimmedDescription == "@convention(c)"
           let convention: SwiftFunctionType.Convention = isConventionC ? .c : .swift
           functionType.convention = convention
           self = .function(functionType)

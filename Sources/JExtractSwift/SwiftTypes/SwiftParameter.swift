@@ -64,8 +64,10 @@ extension SwiftParameter {
     var type = node.type
     var convention = SwiftParameterConvention.byValue
     if let attributedType = type.as(AttributedTypeSyntax.self) {
+      var sawUnknownSpecifier = false
       for specifier in attributedType.specifiers {
         guard case .simpleTypeSpecifier(let simple) = specifier else {
+          sawUnknownSpecifier = true
           continue
         }
 
@@ -75,13 +77,15 @@ extension SwiftParameter {
         case .keyword(.inout):
           convention = .inout
         default:
+          sawUnknownSpecifier = true
           break
         }
       }
 
       // Ignore anything else in the attributed type.
-      // FIXME: We might want to check for these and ignore them.
-      type = attributedType.baseType
+      if !sawUnknownSpecifier && attributedType.attributes.isEmpty {
+        type = attributedType.baseType
+      }
     }
     self.convention = convention
 

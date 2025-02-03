@@ -155,6 +155,22 @@ extension Swift2JavaTranslator {
     convention: SwiftParameterConvention,
     parameterName: String
   ) throws -> LoweredParameters {
+    // If there is a 1:1 mapping between this Swift type and a C type, we just
+    // need to add the corresponding C [arameter.
+    if let cType = try? CType(cdeclType: type), convention != .inout {
+      _ = cType
+      return LoweredParameters(
+        cdeclParameters: [
+          SwiftParameter(
+            convention: convention,
+            parameterName: parameterName,
+            type: type,
+            canBeDirectReturn: true
+          )
+        ]
+      )
+    }
+
     switch type {
     case .function, .optional:
       throw LoweringError.unhandledType(type)
@@ -179,21 +195,6 @@ extension Swift2JavaTranslator {
       // Types from the Swift standard library that we know about.
       if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType,
          convention != .inout {
-        // Swift types that map to primitive types in C. These can be passed
-        // through directly.
-        if knownType.primitiveCType != nil {
-          return LoweredParameters(
-            cdeclParameters: [
-              SwiftParameter(
-                convention: convention,
-                parameterName: parameterName,
-                type: type,
-                canBeDirectReturn: true
-              )
-            ]
-          )
-        }
-
         // Typed pointers are mapped down to their raw forms in cdecl entry
         // points. These can be passed through directly.
         if knownType == .unsafePointer || knownType == .unsafeMutablePointer {

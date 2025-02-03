@@ -16,8 +16,11 @@ extension CType {
   /// Lower the given Swift type down to a its corresponding C type.
   ///
   /// This operation only supports the subset of Swift types that are
-  /// representable in a Swift `@_cdecl` function. If lowering an arbitrary
-  /// Swift function, first go through Swift -> cdecl lowering.
+  /// representable in a Swift `@_cdecl` function, which means that they are
+  /// also directly representable in C. If lowering an arbitrary Swift
+  /// function, first go through Swift -> cdecl lowering. This function
+  /// will throw an error if it encounters a type that is not expressible in
+  /// C.
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):

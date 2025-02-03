@@ -296,4 +296,21 @@ final class FunctionLoweringTests {
       expectedCFunction: "c_getBufferPointer(void* _result_pointer, void* _result_count)"
     )
   }
+
+  @Test("Lowering C function types")
+  func lowerFunctionTypes() throws {
+    // FIXME: C pretty printing isn't handling parameters of function pointer
+    // type yet.
+    try assertLoweredFunction("""
+      func doSomething(body: @convention(c) (Int32) -> Double) { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_doSomething")
+      public func c_doSomething(_ body: @convention(c) (Int32) -> Double) {
+        doSomething(body: body)
+      }
+      """,
+      expectedCFunction: "void c_doSomething(double* body(int32_t))"
+    )
+  }
 }

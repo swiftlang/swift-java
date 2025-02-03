@@ -17,6 +17,14 @@ extension ConversionStep {
   /// would be available in a @_cdecl function to represent the given Swift
   /// type, and convert that to an instance of the Swift type.
   init(cdeclToSwift swiftType: SwiftType) throws {
+    // If there is a 1:1 mapping between this Swift type and a C type, then
+    // there is no translation to do.
+    if let cType = try? CType(cdeclType: swiftType) {
+      _ = cType
+      self = .placeholder
+      return
+    }
+
     switch swiftType {
     case .function, .optional:
       throw LoweringError.unhandledType(swiftType)
@@ -29,13 +37,6 @@ extension ConversionStep {
 
     case .nominal(let nominal):
       if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
-        // Swift types that map to primitive types in C. These can be passed
-        // through directly.
-        if knownType.primitiveCType != nil {
-          self = .placeholder
-          return
-        }
-
         // Typed pointers
         if let firstGenericArgument = nominal.genericArguments?.first {
           switch knownType {
@@ -100,6 +101,14 @@ extension ConversionStep {
     swiftToCDecl swiftType: SwiftType,
     stdlibTypes: SwiftStandardLibraryTypes
   ) throws {
+    // If there is a 1:1 mapping between this Swift type and a C type, then
+    // there is no translation to do.
+    if let cType = try? CType(cdeclType: swiftType) {
+      _ = cType
+      self = .placeholder
+      return
+    }
+
     switch swiftType {
     case .function, .optional:
       throw LoweringError.unhandledType(swiftType)
@@ -117,13 +126,6 @@ extension ConversionStep {
 
     case .nominal(let nominal):
       if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
-        // Swift types that map to primitive types in C. These can be passed
-        // through directly.
-        if knownType.primitiveCType != nil {
-          self = .placeholder
-          return
-        }
-
         // Typed pointers
         if nominal.genericArguments?.first != nil {
           switch knownType {
