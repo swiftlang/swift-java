@@ -44,7 +44,8 @@ extension Swift2JavaTranslator {
     let loweredSelf = try signature.selfParameter.map { selfParameter in
       try lowerParameter(
         selfParameter.type,
-        convention: selfParameter.convention, parameterName: "self"
+        convention: selfParameter.convention, 
+        parameterName: selfParameter.parameterName ?? "self"
       )
     }
 
@@ -136,7 +137,7 @@ extension Swift2JavaTranslator {
     case .metatype(let instanceType):
       return LoweredParameters(
         cdeclToOriginal: .unsafeCastPointer(
-          .passDirectly(parameterName),
+          .value,
           swiftType: instanceType
         ),
         cdeclParameters: [
@@ -172,10 +173,10 @@ extension Swift2JavaTranslator {
       switch nominal.nominalTypeDecl.kind {
       case .actor, .class:
         loweringStep = 
-          .unsafeCastPointer(.passDirectly(parameterName), swiftType: type)
+          .unsafeCastPointer(.value, swiftType: type)
       case .enum, .struct, .protocol:
         loweringStep =
-          .passIndirectly(.pointee( .typedPointer(.passDirectly(parameterName), swiftType: type)))
+          .passIndirectly(.pointee(.typedPointer(.value, swiftType: type)))
       }
 
       return LoweredParameters(
@@ -226,7 +227,7 @@ extension Swift2JavaTranslator {
       }
 
       return LoweredParameters(
-        cdeclToOriginal: .passDirectly(parameterName),
+        cdeclToOriginal: .value,
         cdeclParameters: [
           SwiftParameter(
             convention: convention,
@@ -247,7 +248,7 @@ extension Swift2JavaTranslator {
       }
 
       return LoweredParameters(
-        cdeclToOriginal: .passDirectly(parameterName),
+        cdeclToOriginal: .value,
         cdeclParameters: [
           SwiftParameter(
             convention: convention,
@@ -281,30 +282,34 @@ extension Swift2JavaTranslator {
     var cdeclToOriginal: LoweringStep
     switch (requiresArgument, hasCount) {
     case (false, false):
-      cdeclToOriginal = .passDirectly(parameterName)
+      cdeclToOriginal = .value
 
     case (true, false):
       cdeclToOriginal = .typedPointer(
-        .passDirectly(parameterName + "_pointer"),
+        .explodedComponent(.value, component: "pointer"),
         swiftType: nominal.genericArguments![0]
       )
 
     case (false, true):
       cdeclToOriginal = .initialize(type, arguments: [
-        LabeledArgument(label: "start", argument: .passDirectly(parameterName + "_pointer")),
-        LabeledArgument(label: "count", argument: .passDirectly(parameterName + "_count"))
+        LabeledArgument(label: "start", argument: .explodedComponent(.value, component: "pointer")),
+        LabeledArgument(label: "count", argument: .explodedComponent(.value, component: "count"))
       ])
 
     case (true, true):
       cdeclToOriginal = .initialize(
         type,
         arguments: [
-          LabeledArgument(label: "start",
-                 argument: .typedPointer(
-                    .passDirectly(parameterName + "_pointer"),
-                    swiftType: nominal.genericArguments![0])),
-          LabeledArgument(label: "count",
-                 argument: .passDirectly(parameterName + "_count"))
+          LabeledArgument(
+            label: "start",
+            argument: .typedPointer(
+              .explodedComponent(.value, component: "pointer"),
+              swiftType: nominal.genericArguments![0])
+          ),
+          LabeledArgument(
+            label: "count",
+            argument: .explodedComponent(.value, component: "count")
+          )
         ]
       )
     }
@@ -393,8 +398,12 @@ extension LabeledArgument: Equatable where Element: Equatable { }
 /// and map them to the corresponding parameter (or result value) of the
 /// original function.
 enum LoweringStep: Equatable {
-  /// A direct reference to a parameter of the thunk.
-  case passDirectly(String)
+  /// The value being lowered.
+  case value
+
+  /// A reference to a component in a value that has been exploded, such as
+  /// a tuple element or part of a buffer pointer.
+  indirect case explodedComponent(LoweringStep, component: String)
 
   /// Cast the pointer described by the lowering step to the given
   /// Swift type using `unsafeBitCast(_:to:)`.
@@ -435,36 +444,39 @@ struct LoweredParameters: Equatable {
 extension LoweredParameters {
   /// Produce an expression that computes the argument for this parameter
   /// when calling the original function from the cdecl entrypoint.
-  func cdeclToOriginalArgumentExpr(isSelf: Bool)-> ExprSyntax {
-    cdeclToOriginal.asExprSyntax(isSelf: isSelf)
+  func cdeclToOriginalArgumentExpr(isSelf: Bool, value: String)-> ExprSyntax {
+    cdeclToOriginal.asExprSyntax(isSelf: isSelf, value: value)
   }
 }
 
 extension LoweringStep {
-  func asExprSyntax(isSelf: Bool) -> ExprSyntax {
+  func asExprSyntax(isSelf: Bool, value: String) -> ExprSyntax {
     switch self {
-    case .passDirectly(let rawArgument):
-      return "\(raw: rawArgument)"
+    case .value:
+      return "\(raw: value)"
+
+    case .explodedComponent(let step, component: let component):
+      return step.asExprSyntax(isSelf: false, value: "\(value)_\(component)")
 
     case .unsafeCastPointer(let step, swiftType: let swiftType):
-      let untypedExpr = step.asExprSyntax(isSelf: false)
+      let untypedExpr = step.asExprSyntax(isSelf: false, value: value)
       return "unsafeBitCast(\(untypedExpr), to: \(swiftType.metatypeReferenceExprSyntax))"
 
     case .typedPointer(let step, swiftType: let type):
-      let untypedExpr = step.asExprSyntax(isSelf: isSelf)
+      let untypedExpr = step.asExprSyntax(isSelf: isSelf, value: value)
       return "\(untypedExpr).assumingMemoryBound(to: \(type.metatypeReferenceExprSyntax))"
 
     case .pointee(let step):
-      let untypedExpr = step.asExprSyntax(isSelf: isSelf)
+      let untypedExpr = step.asExprSyntax(isSelf: isSelf, value: value)
       return "\(untypedExpr).pointee"
 
     case .passIndirectly(let step):
-      let innerExpr = step.asExprSyntax(isSelf: false)
+      let innerExpr = step.asExprSyntax(isSelf: false, value: value)
       return isSelf ? innerExpr : "&\(innerExpr)"
 
     case .initialize(let type, arguments: let arguments):
       let renderedArguments: [String] = arguments.map { labeledArgument in
-        let renderedArg = labeledArgument.argument.asExprSyntax(isSelf: false)
+        let renderedArg = labeledArgument.argument.asExprSyntax(isSelf: false, value: value)
         if let argmentLabel = labeledArgument.label {
           return "\(argmentLabel): \(renderedArg.description)"
         } else {
@@ -478,8 +490,8 @@ extension LoweringStep {
       return "\(raw: type.description)(\(raw: renderedArgumentList))"
 
     case .tuplify(let elements):
-      let renderedElements: [String] = elements.map { element in
-        element.asExprSyntax(isSelf: false).description
+      let renderedElements: [String] = elements.enumerated().map { (index, element) in
+        element.asExprSyntax(isSelf: false, value: "\(value)_\(index)").description
       }
 
       // FIXME: Should be able to use structured initializers here instead
@@ -520,8 +532,8 @@ extension LoweredFunctionSignature {
     // Lower "self", if there is one.
     let parametersToLower: ArraySlice<LoweredParameters>
     let cdeclToOriginalSelf: ExprSyntax?
-    if original.selfParameter != nil {
-      cdeclToOriginalSelf = parameters[0].cdeclToOriginalArgumentExpr(isSelf: true)
+    if let originalSelfParam = original.selfParameter {
+      cdeclToOriginalSelf = parameters[0].cdeclToOriginalArgumentExpr(isSelf: true, value: originalSelfParam.parameterName ?? "self")
       parametersToLower = parameters[1...]
     } else {
       cdeclToOriginalSelf = nil
@@ -529,10 +541,8 @@ extension LoweredFunctionSignature {
     }
 
     // Lower the remaining arguments.
-    // FIXME: Should be able to use structured initializers here instead
-    // of splatting out text.
     let cdeclToOriginalArguments = zip(parametersToLower, original.parameters).map { lowering, originalParam in
-      let cdeclToOriginalArg = lowering.cdeclToOriginalArgumentExpr(isSelf: false)
+      let cdeclToOriginalArg = lowering.cdeclToOriginalArgumentExpr(isSelf: false, value: originalParam.parameterName ?? "FIXME")
       if let argumentLabel = originalParam.argumentLabel {
         return "\(argumentLabel): \(cdeclToOriginalArg.description)"
       } else {
@@ -559,7 +569,7 @@ extension LoweredFunctionSignature {
       // into a
       loweredCDecl.body = """
         {
-          \(result.cdeclToOriginalArgumentExpr(isSelf: true)) = \(callExpression)
+          \(result.cdeclToOriginalArgumentExpr(isSelf: true, value: "_result")) = \(callExpression)
         }
         """
     } else {
