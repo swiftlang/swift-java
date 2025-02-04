@@ -17,7 +17,7 @@ import Testing
 
 @Suite("C type system tests")
 struct CTypeTests {
-  @Test("Function declaration printing")
+  @Test("C function declaration printing")
   func testFunctionDeclarationPrint() {
     let malloc = CFunction(
       resultType: .pointer(.void),
@@ -27,7 +27,7 @@ struct CTypeTests {
       ],
       isVariadic: false
     )
-    #expect(malloc.description == "void* malloc(size_t size)")
+    #expect(malloc.description == "void *malloc(size_t size)")
 
     let free = CFunction(
       resultType: .void,
@@ -37,7 +37,7 @@ struct CTypeTests {
       ],
       isVariadic: false
     )
-    #expect(free.description == "void free(void* ptr)")
+    #expect(free.description == "void free(void *ptr)")
 
     let snprintf = CFunction(
       resultType: .integral(.signed(bits: 32)),
@@ -58,8 +58,8 @@ struct CTypeTests {
       ],
       isVariadic: true
     )
-    #expect(snprintf.description == "int32_t snprintf(int8_t* str, size_t size, int8_t const* format, ...)")
-    #expect(snprintf.functionType.description == "int32_t(int8_t*, size_t, int8_t const*, ...)")
+    #expect(snprintf.description == "int32_t snprintf(int8_t *str, size_t size, int8_t const *format, ...)")
+    #expect(snprintf.functionType.description == "int32_t (int8_t *, size_t, int8_t const *, ...)")
 
     let rand = CFunction(
       resultType: .integral(.signed(bits: 32)),
@@ -68,6 +68,28 @@ struct CTypeTests {
       isVariadic: false
     )
     #expect(rand.description == "int32_t rand(void)")
-    #expect(rand.functionType.description == "int32_t(void)")
+    #expect(rand.functionType.description == "int32_t (void)")
+  }
+
+  @Test("C pointer declarator printing")
+  func testPointerDeclaratorPrinting() {
+    let doit = CFunction(
+      resultType: .void,
+      name: "doit",
+      parameters: [
+        .init(
+          name: "body",
+          type: .pointer(
+            .function(
+              resultType: .void,
+              parameters: [.integral(.bool)],
+              variadic: false
+            )
+          )
+        )
+      ],
+      isVariadic: false
+    )
+    #expect(doit.description == "void doit(void (*body)(_Bool))")
   }
 }

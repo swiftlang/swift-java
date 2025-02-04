@@ -74,7 +74,14 @@ public enum CType {
 extension CType: CustomStringConvertible {
   /// Print the part of this type that comes before the declarator, appending
   /// it to the provided `result` string.
-  func printBefore(result: inout String) {
+  func printBefore(hasEmptyPlaceholder: inout Bool, result: inout String) {
+    // Save the value of hasEmptyPlaceholder and restore it once we're done
+    // here.
+    let previousHasEmptyPlaceholder = hasEmptyPlaceholder
+    defer {
+      hasEmptyPlaceholder = previousHasEmptyPlaceholder
+    }
+
     switch self {
     case .floating(let floating):
       switch floating {
@@ -82,11 +89,25 @@ extension CType: CustomStringConvertible {
       case .double: result += "double"
       }
 
-    case .function(resultType: let resultType, parameters: _, variadic: _):
-      resultType.printBefore(result: &result)
+      spaceBeforePlaceHolder(
+        hasEmptyPlaceholder: hasEmptyPlaceholder,
+        result: &result
+      )
 
-      // FIXME: Clang inserts a parentheses in here if there's a non-empty
-      // placeholder, which is Very Stateful. How should I model that?
+    case .function(resultType: let resultType, parameters: _, variadic: _):
+      let previousHasEmptyPlaceholder = hasEmptyPlaceholder
+      hasEmptyPlaceholder = false
+      defer {
+        hasEmptyPlaceholder = previousHasEmptyPlaceholder
+      }
+      resultType.printBefore(
+        hasEmptyPlaceholder: &hasEmptyPlaceholder,
+        result: &result
+      )
+
+      if !previousHasEmptyPlaceholder {
+        result += "("
+      }
 
     case .integral(let integral):
       switch integral {
@@ -97,21 +118,47 @@ extension CType: CustomStringConvertible {
       case .size_t: result += "size_t"
       }
 
+      spaceBeforePlaceHolder(
+        hasEmptyPlaceholder: hasEmptyPlaceholder,
+        result: &result
+      )
+
     case .pointer(let pointee):
-      pointee.printBefore(result: &result)
+      var innerHasEmptyPlaceholder = false
+      pointee.printBefore(
+        hasEmptyPlaceholder: &innerHasEmptyPlaceholder,
+        result: &result
+      )
       result += "*"
 
     case .qualified(const: let isConst, volatile: let isVolatile, type: let underlying):
-      underlying.printBefore(result: &result)
+      if isConst || isVolatile {
+        hasEmptyPlaceholder = false
+      }
+
+      underlying.printBefore(hasEmptyPlaceholder: &hasEmptyPlaceholder, result: &result)
 
       // FIXME: "east const" is easier to print correctly, so do that. We could
       // follow Clang and decide when it's correct to print "west const" by
       // splitting the qualifiers before we get here.
       if isConst {
-        result += " const"
+        result += "const"
+        hasEmptyPlaceholder = false
+
+        spaceBeforePlaceHolder(
+          hasEmptyPlaceholder: hasEmptyPlaceholder,
+          result: &result
+        )
+
       }
       if isVolatile {
-        result += " volatile"
+        result += "volatile"
+        hasEmptyPlaceholder = false
+
+        spaceBeforePlaceHolder(
+          hasEmptyPlaceholder: hasEmptyPlaceholder,
+          result: &result
+        )
       }
 
     case .tag(let tag):
@@ -121,7 +168,18 @@ extension CType: CustomStringConvertible {
       case .union(let cUnion): result += "union \(cUnion.name)"
       }
 
-    case .void: result += "void"
+      spaceBeforePlaceHolder(
+        hasEmptyPlaceholder: hasEmptyPlaceholder,
+        result: &result
+      )
+
+    case .void:
+      result += "void"
+
+      spaceBeforePlaceHolder(
+        hasEmptyPlaceholder: hasEmptyPlaceholder,
+        result: &result
+      )
     }
   }
 
@@ -146,13 +204,14 @@ extension CType: CustomStringConvertible {
 
   /// Print the part of the type that comes after the declarator, appending
   /// it to the provided `result` string.
-  func printAfter(result: inout String) {
+  func printAfter(hasEmptyPlaceholder: inout Bool, result: inout String) {
     switch self {
     case .floating, .integral, .tag, .void: break
 
     case .function(resultType: let resultType, parameters: let parameters, variadic: let variadic):
-      // FIXME: Clang inserts a parentheses in here if there's a non-empty
-      // placeholder, which is Very Stateful. How should I model that?
+      if !hasEmptyPlaceholder {
+        result += ")"
+      }
 
       result += "("
 
@@ -167,32 +226,52 @@ extension CType: CustomStringConvertible {
 
       result += ")"
 
-      resultType.printAfter(result: &result)
+      var innerHasEmptyPlaceholder = false
+      resultType.printAfter(
+        hasEmptyPlaceholder: &innerHasEmptyPlaceholder,
+        result: &result
+      )
 
     case .pointer(let pointee):
-      pointee.printAfter(result: &result)
+      var innerHasEmptyPlaceholder = false
+      pointee.printAfter(
+        hasEmptyPlaceholder: &innerHasEmptyPlaceholder,
+        result: &result
+      )
 
     case .qualified(const: _, volatile: _, type: let underlying):
-      underlying.printAfter(result: &result)
+      underlying.printAfter(
+        hasEmptyPlaceholder: &hasEmptyPlaceholder,
+        result: &result
+      )
     }
   }
 
   /// Print this type into a string, with the given placeholder as the name
   /// of the entity being declared.
   public func print(placeholder: String?) -> String {
+    var hasEmptyPlaceholder = (placeholder == nil)
     var result = ""
-    printBefore(result: &result)
+    printBefore(hasEmptyPlaceholder: &hasEmptyPlaceholder, result: &result)
     if let placeholder {
-      result += " "
       result += placeholder
     }
-    printAfter(result: &result)
+    printAfter(hasEmptyPlaceholder: &hasEmptyPlaceholder, result: &result)
     return result
   }
 
   /// Render the C type into a string that represents the type in C.
   public var description: String {
     print(placeholder: nil)
+  }
+
+  private func spaceBeforePlaceHolder(
+    hasEmptyPlaceholder: Bool,
+    result: inout String
+  ) {
+    if !hasEmptyPlaceholder {
+      result += " "
+    }
   }
 }
 

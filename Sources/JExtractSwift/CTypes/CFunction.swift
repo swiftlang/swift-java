@@ -48,10 +48,9 @@ extension CFunction: CustomStringConvertible {
   public var description: String {
     var result = ""
 
-    resultType.printBefore(result: &result)
+    var hasEmptyPlaceholder = false
+    resultType.printBefore(hasEmptyPlaceholder: &hasEmptyPlaceholder, result: &result)
 
-    // FIXME: parentheses when needed.
-    result += " "
     result += name
 
     // Function parameters.
@@ -64,7 +63,10 @@ extension CFunction: CustomStringConvertible {
     )
     result += ")"
 
-    resultType.printAfter(result: &result)
+    resultType.printAfter(
+      hasEmptyPlaceholder: &hasEmptyPlaceholder,
+      result: &result
+    )
 
     result += ""
     return result
