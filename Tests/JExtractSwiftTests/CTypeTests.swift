@@ -58,8 +58,8 @@ struct CTypeTests {
       ],
       isVariadic: true
     )
-    #expect(snprintf.description == "int32_t snprintf(int8_t *str, size_t size, int8_t const *format, ...)")
-    #expect(snprintf.functionType.description == "int32_t (int8_t *, size_t, int8_t const *, ...)")
+    #expect(snprintf.description == "int32_t snprintf(int8_t *str, size_t size, const int8_t *format, ...)")
+    #expect(snprintf.functionType.description == "int32_t (int8_t *, size_t, const int8_t *, ...)")
 
     let rand = CFunction(
       resultType: .integral(.signed(bits: 32)),
@@ -91,5 +91,16 @@ struct CTypeTests {
       isVariadic: false
     )
     #expect(doit.description == "void doit(void (*body)(_Bool))")
+
+    let ptrptr = CType.pointer(
+      .qualified(
+        const: true,
+        volatile: false,
+        type: .pointer(
+          .qualified(const: false, volatile: true, type: .void)
+        )
+      )
+    ) 
+    #expect(ptrptr.description == "volatile void *const *")
   }
 }

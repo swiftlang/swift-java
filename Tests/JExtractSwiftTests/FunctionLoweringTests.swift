@@ -30,7 +30,7 @@ final class FunctionLoweringTests {
         f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z_pointer.assumingMemoryBound(to: Bool.self), count: z_count))
       }
       """,
-      expectedCFunction: "void c_f(ptrdiff_t x, float y, void const *z_pointer, ptrdiff_t z_count)"
+      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z_pointer, ptrdiff_t z_count)"
     )
   }
 
@@ -45,7 +45,7 @@ final class FunctionLoweringTests {
         return f(t: (t_0, (t_1_0, t_1_1)), z: z_pointer.assumingMemoryBound(to: Int.self))
       }
       """,
-      expectedCFunction: "ptrdiff_t c_f(ptrdiff_t t_0, float t_1_0, double t_1_1, void const *z_pointer)"
+      expectedCFunction: "ptrdiff_t c_f(ptrdiff_t t_0, float t_1_0, double t_1_1, const void *z_pointer)"
     )
   }
 
@@ -82,7 +82,7 @@ final class FunctionLoweringTests {
         _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
       }
       """,
-      expectedCFunction: "void c_shifted(double delta_0, double delta_1, void const *self, void *_result)"
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)"
     )
   }
 
@@ -120,7 +120,7 @@ final class FunctionLoweringTests {
         unsafeBitCast(self, to: Point.self).shift(by: (delta_0, delta_1))
       }
       """,
-      expectedCFunction: "void c_shift(double delta_0, double delta_1, void const *self)"
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, const void *self)"
     )
   }
 
@@ -155,7 +155,7 @@ final class FunctionLoweringTests {
         return unsafeBitCast(Person.randomPerson(seed: seed), to: UnsafeRawPointer.self)
       }
       """,
-      expectedCFunction: "void const *c_randomPerson(double seed)"
+      expectedCFunction: "const void *c_randomPerson(double seed)"
     )
   }
 
@@ -190,7 +190,7 @@ final class FunctionLoweringTests {
         return unsafeBitCast(Person(seed: seed), to: UnsafeRawPointer.self)
       }
       """,
-      expectedCFunction: "void const *c_init(double seed)"
+      expectedCFunction: "const void *c_init(double seed)"
     )
   }
 
@@ -205,7 +205,7 @@ final class FunctionLoweringTests {
         f(t: unsafeBitCast(t, to: Int.self))
       }
       """,
-      expectedCFunction: "void c_f(void const *t)"
+      expectedCFunction: "void c_f(const void *t)"
     )
 
     try assertLoweredFunction("""
@@ -217,7 +217,7 @@ final class FunctionLoweringTests {
         return unsafeBitCast(f(), to: UnsafeRawPointer.self)
       }
       """,
-      expectedCFunction: "void const *c_f(void)"
+      expectedCFunction: "const void *c_f(void)"
     )
   }
 
@@ -236,7 +236,7 @@ final class FunctionLoweringTests {
         return unsafeBitCast(unsafeBitCast(self, to: Point.self).shifted(by: (delta_0, delta_1)), to: UnsafeRawPointer.self)
       }
       """,
-      expectedCFunction: "void const *c_shifted(double delta_0, double delta_1, void const *self)"
+      expectedCFunction: "const void *c_shifted(double delta_0, double delta_1, const void *self)"
     )
   }
 
@@ -254,7 +254,7 @@ final class FunctionLoweringTests {
         return UnsafeRawPointer(getPointer())
       }
       """,
-      expectedCFunction: "void const *c_getPointer(void)"
+      expectedCFunction: "const void *c_getPointer(void)"
     )
   }
 

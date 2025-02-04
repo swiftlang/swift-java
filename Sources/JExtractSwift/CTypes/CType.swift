@@ -132,33 +132,33 @@ extension CType: CustomStringConvertible {
       result += "*"
 
     case .qualified(const: let isConst, volatile: let isVolatile, type: let underlying):
-      if isConst || isVolatile {
+      func printQualifier(_ qualifier: String, if condition: Bool) {
+        if condition {
+          result += qualifier
+          hasEmptyPlaceholder = false
+
+          spaceBeforePlaceHolder(
+            hasEmptyPlaceholder: hasEmptyPlaceholder,
+            result: &result
+          )
+        }
+      }
+
+      let canPrefixQualifiers = underlying.canPrefixQualifiers
+      if canPrefixQualifiers {
+        printQualifier("const", if: isConst)
+        printQualifier("volatile", if: isVolatile)
+      }
+
+      if (isConst || isVolatile) && !canPrefixQualifiers {
         hasEmptyPlaceholder = false
       }
 
       underlying.printBefore(hasEmptyPlaceholder: &hasEmptyPlaceholder, result: &result)
 
-      // FIXME: "east const" is easier to print correctly, so do that. We could
-      // follow Clang and decide when it's correct to print "west const" by
-      // splitting the qualifiers before we get here.
-      if isConst {
-        result += "const"
-        hasEmptyPlaceholder = false
-
-        spaceBeforePlaceHolder(
-          hasEmptyPlaceholder: hasEmptyPlaceholder,
-          result: &result
-        )
-
-      }
-      if isVolatile {
-        result += "volatile"
-        hasEmptyPlaceholder = false
-
-        spaceBeforePlaceHolder(
-          hasEmptyPlaceholder: hasEmptyPlaceholder,
-          result: &result
-        )
+      if !canPrefixQualifiers {
+        printQualifier("const", if: isConst)
+        printQualifier("volatile", if: isVolatile)
       }
 
     case .tag(let tag):
@@ -265,12 +265,23 @@ extension CType: CustomStringConvertible {
     print(placeholder: nil)
   }
 
+  /// Print a space before the placeholder in a declarator.
   private func spaceBeforePlaceHolder(
     hasEmptyPlaceholder: Bool,
     result: inout String
   ) {
     if !hasEmptyPlaceholder {
       result += " "
+    }
+  }
+
+  /// Determine whether qualifiers can be printed before the given type
+  /// (`const int`) vs. having to be afterward to maintain semantics.
+  var canPrefixQualifiers: Bool {
+    switch self {
+    case .floating, .integral, .tag, .void: true
+    case .function, .pointer: false
+    case .qualified(const: _, volatile: _, type: let type): type.canPrefixQualifiers
     }
   }
 }
