@@ -26,10 +26,11 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ x: Int, _ y: Float, _ z_pointer: UnsafeRawPointer, _ z_count: Int) {
+      public func c_f(_ x: Int, _ y: Float, _ z_pointer: UnsafeRawPointer, _ z_count: Int) {
         f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z_pointer.assumingMemoryBound(to: Bool.self), count: z_count))
       }
-      """
+      """,
+      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z_pointer, ptrdiff_t z_count)"
     )
   }
 
@@ -40,10 +41,11 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ t_0: Int, _ t_1_0: Float, _ t_1_1: Double, _ z_pointer: UnsafeRawPointer) -> Int {
+      public func c_f(_ t_0: Int, _ t_1_0: Float, _ t_1_1: Double, _ z_pointer: UnsafeRawPointer) -> Int {
         return f(t: (t_0, (t_1_0, t_1_1)), z: z_pointer.assumingMemoryBound(to: Int.self))
       }
-      """
+      """,
+      expectedCFunction: "ptrdiff_t c_f(ptrdiff_t t_0, float t_1_0, double t_1_1, const void *z_pointer)"
     )
   }
 
@@ -57,12 +59,14 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ point: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      public func c_shift(_ point: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
         shift(point: &point.assumingMemoryBound(to: Point.self).pointee, by: (delta_0, delta_1))
       }
-      """
+      """,
+      expectedCFunction: "void c_shift(void *point, double delta_0, double delta_1)"
     )
   }
+
   @Test("Lowering methods")
   func loweringMethods() throws {
     try assertLoweredFunction("""
@@ -74,10 +78,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shifted")
-      func c_shifted(_ self: UnsafeRawPointer, _ delta_0: Double, _ delta_1: Double, _ _result: UnsafeMutableRawPointer) {
-        _result.assumingMemoryBound(to: Point.self).pointee = self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1))
+      public func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
+        _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
       }
-      """
+      """,
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)"
     )
   }
 
@@ -92,10 +97,11 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ self: UnsafeMutableRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      public func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeMutableRawPointer) {
         self.assumingMemoryBound(to: Point.self).pointee.shift(by: (delta_0, delta_1))
       }
-      """
+      """,
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, void *self)"
     )
   }
 
@@ -110,10 +116,81 @@ final class FunctionLoweringTests {
       enclosingType: "Point",
       expectedCDecl: """
       @_cdecl("c_shift")
-      func c_shift(_ self: UnsafeRawPointer, _ delta_0: Double, _ delta_1: Double) {
+      public func c_shift(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) {
         unsafeBitCast(self, to: Point.self).shift(by: (delta_0, delta_1))
       }
-      """
+      """,
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, const void *self)"
+    )
+  }
+
+  @Test("Lowering static methods")
+  func loweringStaticMethods() throws {
+    try assertLoweredFunction("""
+      static func scaledUnit(by value: Double) -> Point { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_scaledUnit")
+      public func c_scaledUnit(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+        _result.assumingMemoryBound(to: Point.self).initialize(to: Point.scaledUnit(by: value))
+      }
+      """,
+      expectedCFunction: "void c_scaledUnit(double value, void *_result)"
+    )
+
+    try assertLoweredFunction("""
+      static func randomPerson(seed: Double) -> Person { }
+      """,
+      sourceFile: """
+      class Person { }
+      """,
+      enclosingType: "Person",
+      expectedCDecl: """
+      @_cdecl("c_randomPerson")
+      public func c_randomPerson(_ seed: Double) -> UnsafeRawPointer {
+        return unsafeBitCast(Person.randomPerson(seed: seed), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "const void *c_randomPerson(double seed)"
+    )
+  }
+
+  @Test("Lowering initializers")
+  func loweringInitializers() throws {
+    try assertLoweredFunction("""
+      init(scaledBy value: Double) { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_init")
+      public func c_init(_ value: Double, _ _result: UnsafeMutableRawPointer) {
+        _result.assumingMemoryBound(to: Point.self).initialize(to: Point(scaledBy: value))
+      }
+      """,
+      expectedCFunction: "void c_init(double value, void *_result)"
+    )
+
+    try assertLoweredFunction("""
+      init(seed: Double) { }
+      """,
+      sourceFile: """
+      class Person { }
+      """,
+      enclosingType: "Person",
+      expectedCDecl: """
+      @_cdecl("c_init")
+      public func c_init(_ seed: Double) -> UnsafeRawPointer {
+        return unsafeBitCast(Person(seed: seed), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "const void *c_init(double seed)"
     )
   }
 
@@ -124,11 +201,116 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      func c_f(_ t: UnsafeRawPointer) {
+      public func c_f(_ t: UnsafeRawPointer) {
         f(t: unsafeBitCast(t, to: Int.self))
       }
-      """
-     )
+      """,
+      expectedCFunction: "void c_f(const void *t)"
+    )
+
+    try assertLoweredFunction("""
+      func f() -> Int.Type { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_f")
+      public func c_f() -> UnsafeRawPointer {
+        return unsafeBitCast(f(), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "const void *c_f(void)"
+    )
+  }
+
+  @Test("Lowering class returns")
+  func lowerClassReturns() throws {
+    try assertLoweredFunction("""
+      func shifted(by delta: (Double, Double)) -> Point { }
+      """,
+      sourceFile: """
+      class Point { }
+      """,
+      enclosingType: "Point",
+      expectedCDecl: """
+      @_cdecl("c_shifted")
+      public func c_shifted(_ delta_0: Double, _ delta_1: Double, _ self: UnsafeRawPointer) -> UnsafeRawPointer {
+        return unsafeBitCast(unsafeBitCast(self, to: Point.self).shifted(by: (delta_0, delta_1)), to: UnsafeRawPointer.self)
+      }
+      """,
+      expectedCFunction: "const void *c_shifted(double delta_0, double delta_1, const void *self)"
+    )
+  }
+
+  @Test("Lowering pointer returns")
+  func lowerPointerReturns() throws {
+    try assertLoweredFunction("""
+      func getPointer() -> UnsafePointer<Point> { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getPointer")
+      public func c_getPointer() -> UnsafeRawPointer {
+        return UnsafeRawPointer(getPointer())
+      }
+      """,
+      expectedCFunction: "const void *c_getPointer(void)"
+    )
+  }
+
+  @Test("Lowering tuple returns")
+  func lowerTupleReturns() throws {
+    try assertLoweredFunction("""
+      func getTuple() -> (Int, (Float, Point)) { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getTuple")
+      public func c_getTuple(_ _result_0: UnsafeMutableRawPointer, _ _result_1_0: UnsafeMutableRawPointer, _ _result_1_1: UnsafeMutableRawPointer) {
+        let __swift_result = getTuple()
+        _result_0 = __swift_result_0
+        _result_1_0 = __swift_result_1_0
+        _result_1_1.assumingMemoryBound(to: Point.self).initialize(to: __swift_result_1_1)
+      }
+      """,
+      expectedCFunction: "void c_getTuple(void *_result_0, void *_result_1_0, void *_result_1_1)"
+    )
+  }
+
+  @Test("Lowering buffer pointer returns", .disabled("Doesn't turn into the indirect returns"))
+  func lowerBufferPointerReturns() throws {
+    try assertLoweredFunction("""
+      func getBufferPointer() -> UnsafeMutableBufferPointer<Point> { }
+      """,
+      sourceFile: """
+      struct Point { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_getBufferPointer")
+      public func c_getBufferPointer(_result_pointer: UnsafeMutableRawPointer, _result_count: UnsafeMutableRawPointer) {
+        return UnsafeRawPointer(getPointer())
+      }
+      """,
+      expectedCFunction: "c_getBufferPointer(void* _result_pointer, void* _result_count)"
+    )
+  }
+
+  @Test("Lowering C function types")
+  func lowerFunctionTypes() throws {
+    // FIXME: C pretty printing isn't handling parameters of function pointer
+    // type yet.
+    try assertLoweredFunction("""
+      func doSomething(body: @convention(c) (Int32) -> Double) { }
+      """,
+      expectedCDecl: """
+      @_cdecl("c_doSomething")
+      public func c_doSomething(_ body: @convention(c) (Int32) -> Double) {
+        doSomething(body: body)
+      }
+      """,
+      expectedCFunction: "void c_doSomething(double (*body)(int32_t))"
+    )
   }
 }
-

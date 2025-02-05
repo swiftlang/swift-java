@@ -25,6 +25,7 @@ func assertLoweredFunction(
   sourceFile: SourceFileSyntax? = nil,
   enclosingType: TypeSyntax? = nil,
   expectedCDecl: DeclSyntax,
+  expectedCFunction: String,
   fileID: String = #fileID,
   filePath: String = #filePath,
   line: Int = #line,
@@ -41,15 +42,46 @@ func assertLoweredFunction(
 
   translator.prepareForTranslation()
 
-  let inputFunction = inputDecl.cast(FunctionDeclSyntax.self)
-  let loweredFunction = try translator.lowerFunctionSignature(
-    inputFunction,
-    enclosingType: enclosingType
+  let swiftFunctionName: String
+  let loweredFunction: LoweredFunctionSignature
+  if let inputFunction = inputDecl.as(FunctionDeclSyntax.self) {
+    loweredFunction = try translator.lowerFunctionSignature(
+      inputFunction,
+      enclosingType: enclosingType
+    )
+    swiftFunctionName = inputFunction.name.text
+  } else if let inputInitializer = inputDecl.as(InitializerDeclSyntax.self) {
+    loweredFunction = try translator.lowerFunctionSignature(
+      inputInitializer,
+      enclosingType: enclosingType
+    )
+    swiftFunctionName = "init"
+  } else {
+    fatalError("Unhandling declaration kind for lowering")
+  }
+
+  let loweredCDecl = loweredFunction.cdeclThunk(
+    cName: "c_\(swiftFunctionName)",
+    swiftFunctionName: swiftFunctionName,
+    stdlibTypes: translator.swiftStdlibTypes
   )
-  let loweredCDecl = loweredFunction.cdeclThunk(cName: "c_\(inputFunction.name.text)", inputFunction: inputFunction)
 
   #expect(
     loweredCDecl.description == expectedCDecl.description,
+    sourceLocation: Testing.SourceLocation(
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+  )
+
+  let cFunction = translator.cdeclToCFunctionLowering(
+    loweredFunction.cdecl,
+    cName: "c_\(swiftFunctionName)"
+  )
+  #expect(
+    cFunction.description == expectedCFunction,
     sourceLocation: Testing.SourceLocation(
       fileID: fileID,
       filePath: filePath,
