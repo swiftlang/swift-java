@@ -70,3 +70,53 @@ open class TreeMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func lastKey() -> JavaObject!
 }
+extension TreeMap {
+  @JavaClass("java.util.AbstractMap$SimpleEntry")
+  open class SimpleEntry<K1: AnyJavaObject, V1: AnyJavaObject>: JavaObject {
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  open override func toString() -> String
+
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  @JavaMethod
+  open func getValue() -> JavaObject!
+
+  @JavaMethod
+  open func getKey() -> JavaObject!
+
+  @JavaMethod
+  open func setValue(_ arg0: JavaObject?) -> JavaObject!
+  }
+}
+extension TreeMap {
+  @JavaClass("java.util.AbstractMap$SimpleImmutableEntry")
+  open class SimpleImmutableEntry<K1: AnyJavaObject, V1: AnyJavaObject>: JavaObject {
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  open override func toString() -> String
+
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  @JavaMethod
+  open func getValue() -> JavaObject!
+
+  @JavaMethod
+  open func getKey() -> JavaObject!
+
+  @JavaMethod
+  open func setValue(_ arg0: JavaObject?) -> JavaObject!
+  }
+}

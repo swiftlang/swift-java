@@ -4,18 +4,24 @@ import JavaKitCollection
 import JavaRuntime
 
 @JavaClass("java.net.URLClassLoader")
-open class URLClassLoader: JavaObject {
+open class URLClassLoader: JavaClassLoader {
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: [URL?], _ arg2: JavaClassLoader?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: [URL?], _ arg1: JavaClassLoader?, environment: JNIEnvironment? = nil)
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [URL?], environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  open func findResource(_ arg0: String) -> URL!
+  open override func findResource(_ arg0: String) -> URL!
 
   @JavaMethod
-  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+  open override func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  open func findResources(_ arg0: String) throws -> Enumeration<URL>!
+  open override func findResources(_ arg0: String) throws -> Enumeration<URL>!
 
   @JavaMethod
   open func close() throws
