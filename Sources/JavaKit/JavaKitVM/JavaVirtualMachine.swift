@@ -19,6 +19,11 @@ import Foundation
 #endif
 
 public typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
+#if canImport(Android)
+typealias JNIEnvPointer = UnsafeMutablePointer<JNIEnv?>
+#else
+typealias JNIEnvPointer = UnsafeMutableRawPointer
+#endif
 
 public final class JavaVirtualMachine: @unchecked Sendable {
   /// The JNI version that we depend on.
@@ -61,7 +66,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   ) throws {
     self.classpath = classpath
     var jvm: JavaVMPointer? = nil
-    var environment: UnsafeMutableRawPointer? = nil
+    var environment: JNIEnvPointer? = nil
     var vmArgs = JavaVMInitArgs()
     vmArgs.version = JavaVirtualMachine.jniVersion
     vmArgs.ignoreUnrecognized = jboolean(ignoreUnrecognized ? JNI_TRUE : JNI_FALSE)
@@ -161,12 +166,18 @@ extension JavaVirtualMachine {
       return environment.assumingMemoryBound(to: JNIEnv?.self)
     }
 
+#if canImport(Android)
+    var jniEnv = environment?.assumingMemoryBound(to: JNIEnv?.self)
+#else
+    var jniEnv = environment
+#endif
+
     // Attach the current thread to the JVM.
     let attachResult: jint
     if asDaemon {
-      attachResult = jvm.pointee!.pointee.AttachCurrentThreadAsDaemon(jvm, &environment, nil)
+      attachResult = jvm.pointee!.pointee.AttachCurrentThreadAsDaemon(jvm, &jniEnv, nil)
     } else {
-      attachResult = jvm.pointee!.pointee.AttachCurrentThread(jvm, &environment, nil)
+      attachResult = jvm.pointee!.pointee.AttachCurrentThread(jvm, &jniEnv, nil)
     }
 
     // If we failed to attach, report that.
@@ -175,9 +186,13 @@ extension JavaVirtualMachine {
       throw attachError
     }
 
-    JavaVirtualMachine.destroyTLS.set(environment!)
+    JavaVirtualMachine.destroyTLS.set(jniEnv!)
 
-    return environment!.assumingMemoryBound(to: JNIEnv?.self)
+#if canImport(Android)
+    return jniEnv!
+#else
+    return jniEnv!.assumingMemoryBound(to: JNIEnv?.self)
+#endif
   }
 
   /// Detach the current thread from the Java Virtual Machine. All Java
