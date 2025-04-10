@@ -23,9 +23,9 @@ improve:
     - [ ] [SwiftPM build plugin](https://github.com/swiftlang/swift-package-manager/blob/main/Documentation/Plugins.md) to generate the Swift projections from Java as part of the build
     - [x] Figure out how to launch the Java runtime from Swift code so we don't need to always start via `java`
     - [x] Figure out how to unit-test this framework using Swift Testing
-    - [x] Add a "Jar mode" to `Java2Swift` that translates all classes in the given Jar file.
+    - [x] Add a "Jar mode" to `SwiftJava` that translates all classes in the given Jar file.
     - [ ] Generate Swift projections for more common Java types into JavaKit libraries to make it easier to get started
-    - [ ] Teach `Java2Swift` when to create extensions of already-translated types that pick up any members that couldn't be translated because of missing types. See, for example, how `JavaKitReflection` adds extensions to `JavaClass` based on types like `Method` and `Parameter`
+    - [ ] Teach `SwiftJava` when to create extensions of already-translated types that pick up any members that couldn't be translated because of missing types. See, for example, how `JavaKitReflection` adds extensions to `JavaClass` based on types like `Method` and `Parameter`
 - Performance:
     - [ ] Cache method/field IDs when we can
     - [ ] Investigate noncopyable types to remove excess copies

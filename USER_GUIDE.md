@@ -8,8 +8,8 @@ Before using this package, set the `JAVA_HOME` environment variable to point at 
 
 ### Using Java libraries from Swift
 
-Existing Java libraries can be wrapped for use in Swift with the `Java2Swift`
-tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `Java2Swift.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
+Existing Java libraries can be wrapped for use in Swift with the `SwiftJava`
+tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `SwiftJava.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
 
 ```json
 {
@@ -31,11 +31,11 @@ or, equivalently, adding the following to the package dependencies:
 .package(url: "https://github.com/swiftlang/swift-java", branch: "main"),
 ```
 
-Finally, update `Package.swift` so that the `Java2SwiftPlugin` plugin runs on the target in which you want to generate Swift wrappers. The plugin looks like this:
+Finally, update `Package.swift` so that the `SwiftJavaPlugin` plugin runs on the target in which you want to generate Swift wrappers. The plugin looks like this:
 
 ```swift
       plugins: [
-        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
 ```
 
@@ -101,10 +101,10 @@ let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
 
 ### Importing a Jar file into Swift
 
-Java libraries are often distributed as Jar files. The `Java2Swift` tool can inspect a Jar file to create a `Java2Swift.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
+Java libraries are often distributed as Jar files. The `SwiftJava` tool can inspect a Jar file to create a `SwiftJava.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
 
 ```swift
-swift run Java2Swift --module-name JavaSieve --jar QuadraticSieve-1.0.jar
+swift run SwiftJava --module-name JavaSieve --jar QuadraticSieve-1.0.jar
 ```
 
 The resulting configuration file will look something like this:
@@ -142,7 +142,7 @@ The resulting configuration file will look something like this:
 }
 ```
 
-As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `Java2Swift` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
+As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `SwiftJava` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
 
 If you inspect the build output, there are a number of warnings that look like this:
 
@@ -159,12 +159,12 @@ These warnings mean that some of the APIs in the Java library aren't available i
               .product(name: "JavaKit", package: "swift-java"),
             ],
             plugins: [
-              .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
             ]
         ),
 ```
 
-Then define a a Java2Swift configuration file in `Sources/JavaMath/Java2Swift.config` to bring in the types we need:
+Then define a a SwiftJava configuration file in `Sources/JavaMath/SwiftJava.config` to bring in the types we need:
 
 ```json
 {

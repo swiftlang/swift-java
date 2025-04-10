@@ -76,7 +76,7 @@ let package = Package(
         .swiftLanguageMode(.v5),
       ],
       plugins: [
-        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
 
@@ -94,7 +94,7 @@ let package = Package(
       ],
       plugins: [
 //        .plugin(name: "SwiftJavaBootstrapJavaPlugin", package: "swift-java"),
-        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
 

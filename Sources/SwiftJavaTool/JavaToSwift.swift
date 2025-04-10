@@ -24,24 +24,23 @@ import SwiftSyntaxBuilder
 import JavaKitConfigurationShared
 import JavaKitShared
 
-/// Command-line utility to drive the export of Java classes into Swift types.
 @main
 struct JavaToSwift: AsyncParsableCommand {
-  static var _commandName: String { "Java2Swift" }
+  static var _commandName: String { "swift-java" }
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
   var moduleName: String?
 
   @Option(
     help:
-      "A Java2Swift configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/Java2Swift.config. There should be one of these options for each Swift module that this module depends on (transitively) that contains wrapped Java sources."
+      "A swift-java configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/swift-java.config. There should be one of these options for each Swift module that this module depends on (transitively) that contains wrapped Java sources."
   )
   var dependsOn: [String] = []
 
   // TODO: This should be a "make wrappers" option that just detects when we give it a jar
   @Flag(
     help:
-      "Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to generate wrappers for those public classes."
+      "Specifies that the input is a Jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes."
   )
   var jar: Bool = false
 
@@ -59,7 +58,7 @@ struct JavaToSwift: AsyncParsableCommand {
   )
   var swiftNativeImplementation: [String] = []
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
+  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the swift-java configuration file.")
   var outputDirectory: String? = nil
 
   
@@ -88,7 +87,7 @@ struct JavaToSwift: AsyncParsableCommand {
 
   @Argument(
     help:
-      "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
+      "The input file, which is either a swift-java configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
 

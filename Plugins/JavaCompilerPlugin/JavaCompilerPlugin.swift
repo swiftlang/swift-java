@@ -34,7 +34,7 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
 
     // The name of the configuration file JavaKit.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = URL(filePath: sourceDir).appending(path: "Java2Swift.config")
+    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
     let config: Configuration?
 
     if let configData = try? Data(contentsOf: configFile) {

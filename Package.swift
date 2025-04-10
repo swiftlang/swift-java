@@ -87,8 +87,8 @@ let package = Package(
     ),
 
     .executable(
-      name: "Java2Swift",
-      targets: ["Java2Swift"]
+      name: "SwiftJavaTool",
+      targets: ["SwiftJavaTool"]
     ),
 
     // ==== Plugin for building Java code
@@ -101,9 +101,9 @@ let package = Package(
 
     // ==== Plugin for wrapping Java classes in Swift
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       targets: [
-        "Java2SwiftPlugin"
+        "SwiftJavaPlugin"
       ]
     ),
 
@@ -111,7 +111,7 @@ let package = Package(
 
     .executable(
       name: "jextract-swift",
-      targets: ["JExtractSwiftTool"]
+      targets: ["SwiftJavaTool"]
     ),
 
     // Support library written in Swift for SwiftKit "Java"
@@ -257,10 +257,10 @@ let package = Package(
     ),
 
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       capability: .buildTool(),
       dependencies: [
-        "Java2Swift"
+        "SwiftJavaTool"
       ]
     ),
 
@@ -320,7 +320,7 @@ let package = Package(
     ),
 
     .executableTarget(
-      name: "Java2Swift",
+      name: "SwiftJavaTool",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -330,6 +330,7 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "Java2SwiftLib",
+        "JExtractSwift", // TODO: Swift2JavaLib
         "JavaKitShared",
       ],
 
@@ -356,21 +357,11 @@ let package = Package(
       ]
     ),
 
-    .executableTarget(
-      name: "JExtractSwiftTool",
-      dependencies: [
-        "JExtractSwift",
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-
     .plugin(
       name: "JExtractSwiftPlugin",
       capability: .buildTool(),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
     .plugin(
@@ -380,7 +371,7 @@ let package = Package(
         permissions: [
         ]),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
 
@@ -414,7 +405,9 @@ let package = Package(
 
     .testTarget(
       name: "Java2SwiftTests",
-      dependencies: ["Java2SwiftLib"],
+      dependencies: [
+        "Java2SwiftLib"
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])

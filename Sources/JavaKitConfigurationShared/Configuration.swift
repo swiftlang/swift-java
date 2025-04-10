@@ -29,7 +29,7 @@ public struct Configuration: Codable {
 
   // ==== java 2 swift ---------------------------------------------------------
 
-  /// The Java class path that should be passed along to the Java2Swift tool.
+  /// The Java class path that should be passed along to the SwiftJava tool.
   public var classpath: String? = nil
 
   public var classpathEntries: [String] {
