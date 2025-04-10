@@ -19,6 +19,7 @@ struct SwiftParameter: Equatable {
   var argumentLabel: String?
   var parameterName: String?
   var type: SwiftType
+  var canBeDirectReturn = false
 }
 
 extension SwiftParameter: CustomStringConvertible {
@@ -58,23 +59,38 @@ enum SwiftParameterConvention: Equatable {
 
 extension SwiftParameter {
   init(_ node: FunctionParameterSyntax, symbolTable: SwiftSymbolTable) throws {
-    // Determine the convention. The default is by-value, but modifiers can alter
-    // this.
+    // Determine the convention. The default is by-value, but there are
+    // specifiers on the type for other conventions (like `inout`).
+    var type = node.type
     var convention = SwiftParameterConvention.byValue
-    for modifier in node.modifiers {
-      switch modifier.name {
-      case .keyword(.consuming), .keyword(.__consuming), .keyword(.__owned):
-        convention = .consuming
-      case .keyword(.inout):
-        convention = .inout
-      default:
-        break
+    if let attributedType = type.as(AttributedTypeSyntax.self) {
+      var sawUnknownSpecifier = false
+      for specifier in attributedType.specifiers {
+        guard case .simpleTypeSpecifier(let simple) = specifier else {
+          sawUnknownSpecifier = true
+          continue
+        }
+
+        switch simple.specifier.tokenKind {
+        case .keyword(.consuming), .keyword(.__consuming), .keyword(.__owned):
+          convention = .consuming
+        case .keyword(.inout):
+          convention = .inout
+        default:
+          sawUnknownSpecifier = true
+          break
+        }
+      }
+
+      // Ignore anything else in the attributed type.
+      if !sawUnknownSpecifier && attributedType.attributes.isEmpty {
+        type = attributedType.baseType
       }
     }
     self.convention = convention
 
     // Determine the type.
-    self.type = try SwiftType(node.type, symbolTable: symbolTable)
+    self.type = try SwiftType(type, symbolTable: symbolTable)
 
     // FIXME: swift-syntax itself should have these utilities based on identifiers.
     if let secondName = node.secondName {

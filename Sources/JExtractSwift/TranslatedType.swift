@@ -21,10 +21,10 @@ extension Swift2JavaVisitor {
   func cCompatibleType(for type: TypeSyntax) throws -> TranslatedType {
     switch type.as(TypeSyntaxEnum.self) {
     case .arrayType, .attributedType, .classRestrictionType, .compositionType,
-        .dictionaryType, .implicitlyUnwrappedOptionalType, .metatypeType,
-        .missingType, .namedOpaqueReturnType,
-        .optionalType, .packElementType, .packExpansionType, .someOrAnyType,
-        .suppressedType, .tupleType:
+      .dictionaryType, .implicitlyUnwrappedOptionalType, .metatypeType,
+      .missingType, .namedOpaqueReturnType,
+      .optionalType, .packElementType, .packExpansionType, .someOrAnyType,
+      .suppressedType, .tupleType:
       throw TypeTranslationError.unimplementedType(type)
 
     case .functionType(let functionType):
@@ -33,6 +33,7 @@ extension Swift2JavaVisitor {
         return TranslatedType(
           cCompatibleConvention: .direct,
           originalSwiftType: type,
+          originalSwiftTypeKind: .function,
           cCompatibleSwiftType: "@convention(c) () -> Void",
           cCompatibleJavaMemoryLayout: .cFunction,
           javaType: .javaLangRunnable
@@ -64,6 +65,7 @@ extension Swift2JavaVisitor {
         for: type,
         parent: parentType,
         name: memberType.name.text,
+        kind: nil,
         genericArguments: genericArgs
       )
 
@@ -80,6 +82,7 @@ extension Swift2JavaVisitor {
         for: type,
         parent: nil,
         name: identifierType.name.text,
+        kind: nil,
         genericArguments: genericArgs
       )
     }
@@ -90,6 +93,7 @@ extension Swift2JavaVisitor {
     for type: TypeSyntax,
     parent: TranslatedType?,
     name: String,
+    kind: NominalTypeKind?,
     genericArguments: [TranslatedType]?
   ) throws -> TranslatedType {
     // Look for a primitive type with this name.
@@ -97,6 +101,7 @@ extension Swift2JavaVisitor {
       return TranslatedType(
         cCompatibleConvention: .direct,
         originalSwiftType: "\(raw: name)",
+        originalSwiftTypeKind: .primitive,
         cCompatibleSwiftType: "Swift.\(raw: name)",
         cCompatibleJavaMemoryLayout: .primitive(primitiveType),
         javaType: primitiveType
@@ -110,6 +115,7 @@ extension Swift2JavaVisitor {
       return TranslatedType(
         cCompatibleConvention: .direct,
         originalSwiftType: "\(raw: name)",
+        originalSwiftTypeKind: .primitive,
         cCompatibleSwiftType: "Swift.\(raw: name)",
         cCompatibleJavaMemoryLayout: .int,
         javaType: translator.javaPrimitiveForSwiftInt
@@ -121,8 +127,9 @@ extension Swift2JavaVisitor {
       return TranslatedType(
         cCompatibleConvention: .direct,
         originalSwiftType: "\(raw: name)",
+        originalSwiftTypeKind: kind,
         cCompatibleSwiftType: "Swift.\(raw: name)",
-        cCompatibleJavaMemoryLayout: .heapObject, // FIXME: or specialize string?
+        cCompatibleJavaMemoryLayout: .heapObject,  // FIXME: or specialize string?
         javaType: .javaLangString
       )
     }
@@ -157,9 +164,10 @@ extension Swift2JavaVisitor {
     }
 
     // Look up the imported types by name to resolve it to a nominal type.
-    let swiftTypeName = type.trimmedDescription // FIXME: This is a hack.
+    let swiftTypeName = type.trimmedDescription  // FIXME: This is a hack.
     guard let resolvedNominal = translator.nominalResolution.resolveNominalType(swiftTypeName),
-          let importedNominal = translator.importedNominalType(resolvedNominal) else {
+      let importedNominal = translator.importedNominalType(resolvedNominal)
+    else {
       throw TypeTranslationError.unknown(type)
     }
 
@@ -220,6 +228,9 @@ public struct TranslatedType {
   /// The original Swift type, as written in the source.
   var originalSwiftType: TypeSyntax
 
+  ///
+  var originalSwiftTypeKind: NominalTypeKind?
+
   /// The C-compatible Swift type that should be used in any C -> Swift thunks
   /// emitted in Swift.
   var cCompatibleSwiftType: TypeSyntax
@@ -239,9 +250,17 @@ public struct TranslatedType {
   /// Produce the "unqualified" Java type name.
   var unqualifiedJavaTypeName: String {
     switch javaType {
-    case .class(package: _, name: let name): name
+    case .class(package: _, let name): name
     default: javaType.description
     }
+  }
+
+  var isReferenceType: Bool {
+    originalSwiftTypeKind == .class || originalSwiftTypeKind == .actor
+  }
+
+  var isValueType: Bool {
+    originalSwiftTypeKind == .struct || originalSwiftTypeKind == .enum
   }
 }
 
@@ -250,6 +269,7 @@ extension TranslatedType {
     TranslatedType(
       cCompatibleConvention: .direct,
       originalSwiftType: "Void",
+      originalSwiftTypeKind: .void,
       cCompatibleSwiftType: "Swift.Void",
       cCompatibleJavaMemoryLayout: .primitive(.void),
       javaType: JavaType.void)
@@ -272,6 +292,15 @@ enum CCompatibleJavaMemoryLayout: Hashable {
   /// A C function pointer. In Swift, this will be a @convention(c) function.
   /// In Java, a downcall handle to a function.
   case cFunction
+}
+
+enum SwiftTypeKind {
+  case `class`
+  case `actor`
+  case `enum`
+  case `struct`
+  case primitive
+  case `void`
 }
 
 extension TranslatedType {

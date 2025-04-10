@@ -12,7 +12,7 @@ DerivedData/
 bin/
 BuildLogic/out/
 **/.index-build/
-.build-vscode/
+**/.build-vscode/
 
 # Ignore gradle build artifacts
 .gradle

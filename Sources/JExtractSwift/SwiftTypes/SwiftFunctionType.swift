@@ -27,7 +27,12 @@ struct SwiftFunctionType: Equatable {
 
 extension SwiftFunctionType: CustomStringConvertible {
   var description: String {
-    return  "(\(parameters.map { $0.descriptionInType } )) -> \(resultType.description)"
+    let parameterString = parameters.map { $0.descriptionInType }.joined(separator: ", ")
+    let conventionPrefix = switch convention {
+    case .c: "@convention(c) "
+    case .swift: ""
+    }
+    return  "\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
   }
 }
 

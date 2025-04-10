@@ -24,15 +24,13 @@ import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 import org.swift.swiftkit.SwiftValueWitnessTable;
 
-import java.util.Arrays;
-
 public class HelloJava2Swift {
 
     public static void main(String[] args) {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.print("Property: java.library.path = " +SwiftKit.getJavaLibraryPath());
+        System.out.print("Property: java.library.path = " + SwiftKit.getJavaLibraryPath());
 
         examples();
     }
@@ -44,23 +42,23 @@ public class HelloJava2Swift {
 
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = SwiftArena.ofConfined()) {
-            MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
+             MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
 
-            // just checking retains/releases work
-            SwiftKit.retain(obj.$memorySegment());
-            SwiftKit.release(obj.$memorySegment());
+             // just checking retains/releases work
+             SwiftKit.retain(obj.$memorySegment());
+             SwiftKit.release(obj.$memorySegment());
 
-            obj.voidMethod();
-            obj.takeIntMethod(42);
+             obj.voidMethod();
+             obj.takeIntMethod(42);
 
-            MySwiftStruct swiftValue = new MySwiftStruct(12);
-
+            MySwiftStruct swiftValue = new MySwiftStruct(arena, 2222, 1111);
         }
 
         System.out.println("DONE.");
     }
 
     public static native long jniWriteString(String str);
+
     public static native long jniGetInt();
 
 }

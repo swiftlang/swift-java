@@ -31,18 +31,21 @@ interface SwiftInstanceCleanup extends Runnable {
 // non-final for testing
 class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
 
-    final MemorySegment selfPointer;
-    final SwiftAnyType selfType;
+    private final MemorySegment selfPointer;
+    private final SwiftAnyType selfType;
+    private final Runnable markAsDestroyed;
 
     /**
      * This constructor on purpose does not just take a {@link SwiftHeapObject} in order to make it very
      * clear that it does not take ownership of it, but we ONLY manage the native resource here.
-     *
+     * </p>
      * This is important for {@link AutoSwiftMemorySession} which relies on the wrapper type to be GC-able,
      * when no longer "in use" on the Java side.
      */
-    SwiftHeapObjectCleanup(MemorySegment selfPointer, SwiftAnyType selfType) {
+    SwiftHeapObjectCleanup(MemorySegment selfPointer,
+                           SwiftAnyType selfType, Runnable markAsDestroyed) {
         this.selfPointer  = selfPointer;
+        this.markAsDestroyed = markAsDestroyed;
         this.selfType = selfType;
     }
 
@@ -54,6 +57,8 @@ class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
             throw new UnexpectedRetainCountException(selfPointer, retainedCount, 1);
         }
 
+        this.markAsDestroyed.run();
+
         // Destroy (and deinit) the object:
         SwiftValueWitnessTable.destroy(selfType, selfPointer);
 
@@ -62,9 +67,17 @@ class SwiftHeapObjectCleanup implements SwiftInstanceCleanup {
     }
 }
 
-record SwiftValueCleanup(MemorySegment resource) implements SwiftInstanceCleanup {
+record SwiftValueCleanup(
+        MemorySegment selfPointer,
+        SwiftAnyType selfType,
+        Runnable markAsDestroyed
+) implements SwiftInstanceCleanup {
+
     @Override
     public void run() {
-        throw new RuntimeException("not implemented yet");
+        System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
+
+        markAsDestroyed.run();
+        SwiftValueWitnessTable.destroy(selfType, selfPointer);
     }
 }

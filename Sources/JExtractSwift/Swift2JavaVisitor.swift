@@ -26,8 +26,10 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   /// store this along with type names as we import them.
   let targetJavaPackage: String
 
+  var currentType: ImportedNominalType? = nil
+
   /// The current type name as a nested name like A.B.C.
-  var currentTypeName: String? = nil
+  var currentTypeName: String? { self.currentType?.swiftTypeName }
 
   var log: Logger { translator.log }
 
@@ -45,34 +47,34 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.swiftTypeName
+    self.currentType = importedNominalType
     return .visitChildren
   }
 
   override func visitPost(_ node: ClassDeclSyntax) {
-    if currentTypeName != nil {
+    if currentType != nil {
       log.debug("Completed import: \(node.kind) \(node.name)")
-      currentTypeName = nil
+      self.currentType = nil
     }
   }
-  
+
   override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     log.debug("Visit \(node.kind): \(node)")
     guard let importedNominalType = translator.importedNominalType(node) else {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.swiftTypeName
+    self.currentType = importedNominalType
     return .visitChildren
   }
 
   override func visitPost(_ node: StructDeclSyntax) {
-    if currentTypeName != nil {
+    if currentType != nil {
       log.debug("Completed import: \(node.kind) \(node.name)")
-      currentTypeName = nil
+      self.currentType = nil
     }
   }
-  
+
   override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
@@ -82,13 +84,13 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    currentTypeName = importedNominalType.swiftTypeName
+    self.currentType = importedNominalType
     return .visitChildren
   }
 
   override func visitPost(_ node: ExtensionDeclSyntax) {
-    if currentTypeName != nil {
-      currentTypeName = nil
+    if currentType != nil {
+      self.currentType = nil
     }
   }
 
@@ -266,6 +268,7 @@ extension InitializerDeclSyntax {
     }
 
     // Ok, import it
+    log.warning("Import initializer: \(self)")
     return true
   }
 }

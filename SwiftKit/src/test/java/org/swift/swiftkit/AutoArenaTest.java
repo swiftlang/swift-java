@@ -18,11 +18,10 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.ref.Cleaner;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoArenaTest {
-
 
     @Test
     @SuppressWarnings("removal") // System.runFinalization() will be removed
@@ -34,16 +33,21 @@ public class AutoArenaTest {
 
         // we're retaining the `object`, register it with the arena:
         AutoSwiftMemorySession arena = (AutoSwiftMemorySession) SwiftArena.ofAuto();
-        arena.register(object, new SwiftHeapObjectCleanup(object.$memorySegment(), object.$swiftType()) {
-            @Override
-            public void run() throws UnexpectedRetainCountException {
-                cleanupLatch.countDown();
-            }
-        });
+
+        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+
+        arena.register(object,
+                new SwiftHeapObjectCleanup(object.$memorySegment(), object.$swiftType(), markAsDestroyed) {
+                    @Override
+                    public void run() throws UnexpectedRetainCountException {
+                        cleanupLatch.countDown();
+                    }
+                });
 
         // Release the object and hope it gets GC-ed soon
 
-        //noinspection UnusedAssignment
+        // noinspection UnusedAssignment
         object = null;
 
         var i = 1_000;
@@ -75,6 +79,11 @@ public class AutoArenaTest {
         @Override
         public SwiftAnyType $swiftType() {
             return null;
+        }
+
+        @Override
+        public AtomicBoolean $statusDestroyedFlag() {
+            return new AtomicBoolean();
         }
     }
 }

@@ -50,15 +50,15 @@ struct SwiftThunkTranslator {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
-// TODO: handle variables
-//    for v in nominal.variables {
-//      if let acc = v.accessorFunc(kind: .get) {
-//        decls.append(contentsOf: render(forFunc: acc))
-//      }
-//      if let acc = v.accessorFunc(kind: .set) {
-//        decls.append(contentsOf: render(forFunc: acc))
-//      }
-//    }
+    // TODO: handle variables
+    //    for v in nominal.variables {
+    //      if let acc = v.accessorFunc(kind: .get) {
+    //        decls.append(contentsOf: render(forFunc: acc))
+    //      }
+    //      if let acc = v.accessorFunc(kind: .set) {
+    //        decls.append(contentsOf: render(forFunc: acc))
+    //      }
+    //    }
 
     return decls
   }
@@ -80,23 +80,45 @@ struct SwiftThunkTranslator {
 
   func renderSwiftInitAccessor(_ function: ImportedFunc) -> [DeclSyntax] {
     guard let parent = function.parent else {
-      fatalError("Cannot render initializer accessor if init function has no parent! Was: \(function)")
+      fatalError(
+        "Cannot render initializer accessor if init function has no parent! Was: \(function)")
     }
 
     let thunkName = self.st.thunkNameRegistry.functionThunkName(
       module: st.swiftModuleName, decl: function)
 
-    return
-      [
+    let cDecl =
+      """
+      @_cdecl("\(thunkName)")
+      """
+    let typeName = "\(parent.swiftTypeName)"
+
+    if parent.isReferenceType {
+      return [
         """
-        @_cdecl("\(raw: thunkName)")
-        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: parent.swiftTypeName) */ {
-          let _self = \(raw: parent.swiftTypeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+        \(raw: cDecl)
+        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: typeName) */ {
+          var _self = \(raw: typeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
           let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
-          return _swiftjava_swift_retain(object: self$)
+          _swiftjava_swift_retain(object: self$)
+          return self$
         }
         """
       ]
+    } else {
+      return [
+        """
+        \(raw: cDecl)
+        public func \(raw: thunkName)(
+            \(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil)),
+            resultBuffer: /* \(raw: typeName) */ UnsafeMutableRawPointer
+        ) {
+          var _self = \(raw: typeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+          resultBuffer.assumingMemoryBound(to: \(raw: typeName).self).initialize(to: _self)
+        }
+        """
+      ]
+    }
   }
 
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
@@ -109,20 +131,25 @@ struct SwiftThunkTranslator {
       } else {
         "-> \(decl.returnType.cCompatibleSwiftType) /* \(decl.returnType.swiftTypeName) */"
       }
-    
+
     // Do we need to pass a self parameter?
     let paramPassingStyle: SelfParameterVariant?
     let callBase: String
     let callBaseDot: String
-      if let parent = decl.parent {
-        paramPassingStyle = .swiftThunkSelf
-        callBase = "let self$ = unsafeBitCast(_self, to: \(parent.originalSwiftType).self)"
-        callBaseDot = "self$."
-      } else {
-        paramPassingStyle = nil
-        callBase = ""
-        callBaseDot = ""
-      }
+    if let parent = decl.parent, parent.isReferenceType {
+      paramPassingStyle = .swiftThunkSelf
+      callBase = "let self$ = unsafeBitCast(_self, to: \(parent.originalSwiftType).self)"
+      callBaseDot = "self$."
+    } else if let parent = decl.parent, !parent.isReferenceType {
+      paramPassingStyle = .swiftThunkSelf
+      callBase =
+        "var self$ = _self.assumingMemoryBound(to: \(parent.originalSwiftType).self).pointee"
+      callBaseDot = "self$."
+    } else {
+      paramPassingStyle = nil
+      callBase = ""
+      callBaseDot = ""
+    }
 
     // FIXME: handle in thunk: errors
 
@@ -155,7 +182,7 @@ struct SwiftThunkTranslator {
         """
       ]
   }
-  
+
   func adaptArgumentsInThunk(_ decl: ImportedFunc) -> String {
     var lines: [String] = []
     for p in decl.parameters {
@@ -165,11 +192,11 @@ struct SwiftThunkTranslator {
           """
           let \(p.effectiveValueName) = String(cString: \(p.effectiveValueName))
           """
-          
+
         lines += [adaptedType]
       }
     }
-    
+
     return lines.joined(separator: "\n")
   }
 }
