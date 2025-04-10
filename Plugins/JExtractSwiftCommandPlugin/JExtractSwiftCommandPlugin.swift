@@ -79,6 +79,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     }
 
     var arguments: [String] = [
+      "jextract",
       "--swift-module", sourceModule.name,
       "--package-name", javaPackage,
       "--output-directory-java", context.outputDirectoryJava.path(percentEncoded: false),

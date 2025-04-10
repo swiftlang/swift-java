@@ -20,11 +20,14 @@ import JavaKitShared
 
 /// Command-line utility, similar to `jextract` to export Swift types to Java.
 public struct SwiftToJava: ParsableCommand {
-  public init() {}
+  public static var _commandName: String { "jextract" }
 
-  public static var _commandName: String {
-    "jextract-swift"
-  }
+  public static var configuration = CommandConfiguration(
+          commandName: Self._commandName,
+          abstract: "Generate Java wrappers for Swift code.")
+
+
+  public init() {}
 
   @Option(help: "The package the generated Java code should be emitted into.")
   var packageName: String
@@ -49,18 +52,23 @@ public struct SwiftToJava: ParsableCommand {
   var input: [String]
 
   public func run() throws {
-    let inputPaths = self.input.dropFirst().map { URL(string: $0)! }
+    let inputPaths = self.input.map { URL(string: $0)! }
 
     let translator = Swift2JavaTranslator(
       javaPackage: packageName,
       swiftModuleName: swiftModule
     )
     translator.log.logLevel = logLevel
-
+    
     var allFiles: [URL] = []
     let fileManager = FileManager.default
     let log = translator.log
-    
+
+    guard !inputPaths.isEmpty else {
+      log.warning("Input paths are empty!")
+      return
+    }
+
     for path in inputPaths {
       log.debug("Input path: \(path)")
       if isDirectory(url: path) {
@@ -73,6 +81,8 @@ public struct SwiftToJava: ParsableCommand {
         allFiles.append(path)
       }
     }
+
+    log.trace("Input file: \(allFiles)")
 
     for file in allFiles where canExtract(from: file) {
       translator.log.debug("Importing module '\(swiftModule)', file: \(file)")

@@ -54,6 +54,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let outputDirectorySwift = context.outputDirectorySwift
 
     var arguments: [String] = [
+      "jextract",
       "--swift-module", sourceModule.name,
       "--package-name", javaPackage,
       "--output-directory-java", outputDirectoryJava.path(percentEncoded: false),
