@@ -261,7 +261,7 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var swiftDecl: any DeclSyntaxProtocol
 
   public var syntax: String? {
-    "\(self.swiftDecl)"
+    self.swiftDecl.signatureString
   }
 
   public var isInit: Bool = false

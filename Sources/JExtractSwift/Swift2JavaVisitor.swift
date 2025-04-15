@@ -26,7 +26,11 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   /// store this along with type names as we import them.
   let targetJavaPackage: String
 
-  var currentType: ImportedNominalType? = nil
+  /// Type context stack associated with the syntax.
+  var typeContext: [(syntaxID: Syntax.ID, type: ImportedNominalType)] = []
+
+  /// Innermost type context.
+  var currentType: ImportedNominalType? { typeContext.last?.type }
 
   /// The current type name as a nested name like A.B.C.
   var currentTypeName: String? { self.currentType?.swiftTypeName }
@@ -41,37 +45,50 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     super.init(viewMode: .all)
   }
 
+  /// Push specified type to the type context associated with the syntax.
+  func pushTypeContext(syntax: some SyntaxProtocol, importedNominal: ImportedNominalType) {
+    typeContext.append((syntax.id, importedNominal))
+  }
+
+  /// Pop type context if the current context is associated with the syntax.
+  func popTypeContext(syntax: some SyntaxProtocol) -> Bool {
+    if typeContext.last?.syntaxID == syntax.id {
+      typeContext.removeLast()
+      return true
+    } else {
+      return false
+    }
+  }
+
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    log.debug("Visit \(node.kind): \(node)")
+    log.debug("Visit \(node.kind): '\(node.qualifiedNameForDebug)'")
     guard let importedNominalType = translator.importedNominalType(node) else {
       return .skipChildren
     }
 
-    self.currentType = importedNominalType
+    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
     return .visitChildren
   }
 
   override func visitPost(_ node: ClassDeclSyntax) {
-    if currentType != nil {
+    if self.popTypeContext(syntax: node) {
       log.debug("Completed import: \(node.kind) \(node.name)")
-      self.currentType = nil
     }
   }
 
   override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-    log.debug("Visit \(node.kind): \(node)")
+    log.debug("Visit \(node.kind): \(node.qualifiedNameForDebug)")
     guard let importedNominalType = translator.importedNominalType(node) else {
       return .skipChildren
     }
 
-    self.currentType = importedNominalType
+    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
     return .visitChildren
   }
 
   override func visitPost(_ node: StructDeclSyntax) {
-    if currentType != nil {
-      log.debug("Completed import: \(node.kind) \(node.name)")
-      self.currentType = nil
+    if self.popTypeContext(syntax: node) {
+      log.debug("Completed import: \(node.kind) \(node.qualifiedNameForDebug)")
     }
   }
 
@@ -84,13 +101,13 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.currentType = importedNominalType
+    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
     return .visitChildren
   }
 
   override func visitPost(_ node: ExtensionDeclSyntax) {
-    if currentType != nil {
-      self.currentType = nil
+    if self.popTypeContext(syntax: node) {
+      log.debug("Completed import: \(node.kind) \(node.qualifiedNameForDebug)")
     }
   }
 
@@ -148,6 +165,10 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   }
 
   override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+    guard node.shouldImport(log: log) else {
+      return .skipChildren
+    }
+
     guard let binding = node.bindings.first else {
       return .skipChildren
     }
@@ -156,7 +177,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     // TODO: filter out kinds of variables we cannot import
 
-    self.log.debug("Import variable: \(node.kind) \(fullName)")
+    self.log.debug("Import variable: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
     let returnTy: TypeSyntax
     if let typeAnnotation = binding.typeAnnotation {
@@ -169,7 +190,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     do {
       javaResultType = try cCompatibleType(for: returnTy)
     } catch {
-      self.log.info("Unable to import variable \(node.debugDescription) - \(error)")
+      log.info("Unable to import variable '\(node.qualifiedNameForDebug)' - \(error)")
       return .skipChildren
     }
 
@@ -190,7 +211,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       log.debug("Record variable in \(currentTypeName)")
       translator.importedTypes[currentTypeName]!.variables.append(varDecl)
     } else {
-      fatalError("Global variables are not supported yet: \(node.debugDescription)")
+      fatalError("Global variables are not supported yet: \(node.qualifiedNameForDebug)")
     }
 
     return .skipChildren
@@ -206,7 +227,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       return .skipChildren
     }
 
-    self.log.debug("Import initializer: \(node.kind) \(currentType.javaType.description)")
+    self.log.debug("Import initializer: \(node.kind) '\(node.qualifiedNameForDebug)'")
     let params: [ImportedParam]
     do {
       params = try node.signature.parameterClause.parameters.map { param in
@@ -247,37 +268,24 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   }
 }
 
-extension DeclGroupSyntax where Self: NamedDeclSyntax {
+extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
   func shouldImport(log: Logger) -> Bool {
-    guard (accessControlModifiers.first { $0.isPublic }) != nil else {
-      log.trace("Cannot import \(self.name) because: is not public")
+    guard accessControlModifiers.contains(where: { $0.isPublic }) else {
+      log.trace("Skip import '\(self.qualifiedNameForDebug)': not public")
+      return false
+    }
+    guard !attributes.contains(where: { $0.isJava }) else {
+      log.trace("Skip import '\(self.qualifiedNameForDebug)': is Java")
       return false
     }
 
-    return true
-  }
-}
+    if let node = self.as(InitializerDeclSyntax.self) {
+      let isFailable = node.optionalMark != nil
 
-extension InitializerDeclSyntax {
-  func shouldImport(log: Logger) -> Bool {
-    let isFailable = self.optionalMark != nil
-
-    if isFailable {
-      log.warning("Skip importing failable initializer: \(self)")
-      return false
-    }
-
-    // Ok, import it
-    log.warning("Import initializer: \(self)")
-    return true
-  }
-}
-
-extension FunctionDeclSyntax {
-  func shouldImport(log: Logger) -> Bool {
-    guard (accessControlModifiers.first { $0.isPublic }) != nil else {
-      log.trace("Cannot import \(self.name) because: is not public")
-      return false
+      if isFailable {
+        log.warning("Skip import '\(self.qualifiedNameForDebug)': failable initializer")
+        return false
+      }
     }
 
     return true
