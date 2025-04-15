@@ -74,16 +74,23 @@ public struct SwiftToJava: ParsableCommand {
       }
     }
 
-    for file in allFiles where canExtract(from: file) {
-      translator.log.debug("Importing module '\(swiftModule)', file: \(file)")
-
-      try translator.analyze(file: file.path)
-      try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
-      try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
-
-      log.debug("[swift-java] Imported interface file: \(file.path)")
+    // Register files to the translator.
+    for file in allFiles {
+      guard canExtract(from: file) else {
+        continue
+      }
+      guard let data = fileManager.contents(atPath: file.path) else {
+        continue
+      }
+      guard let text = String(data:data, encoding: .utf8) else {
+        continue
+      }
+      translator.add(filePath: file.path, text: text)
     }
 
+    try translator.analyze()
+    try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
+    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
     try translator.writeExportedJavaModule(outputDirectory: outputDirectoryJava)
     print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
