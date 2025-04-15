@@ -40,14 +40,6 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     // Plugin can't have dependencies, so we have some naive argument parsing instead:
     self.verbose = arguments.contains("-v") || arguments.contains("--verbose")
 
-    let selectedTargets: [String] =
-      if let last = arguments.lastIndex(where: { $0.starts(with: "-")}),
-         last < arguments.endIndex {
-        Array(arguments[..<last])
-      } else {
-        []
-      }
-
     for target in context.package.targets {
       guard getSwiftJavaConfigPath(target: target) != nil else {
         log("[swift-java-command] Skipping jextract step: Missing swift-java.config for target '\(target.name)'")
@@ -55,8 +47,11 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
       }
 
       do {
+        let extraArguments = arguments.filter { arg in
+          arg != "-v" && arg != "--verbose"
+        }
         print("[swift-java-command] Extracting Java wrappers from target: '\(target.name)'...")
-        try performCommand(context: context, target: target, extraArguments: arguments)
+        try performCommand(context: context, target: target, extraArguments: extraArguments)
       } catch {
         print("[swift-java-command] error: Failed to extract from target '\(target.name)': \(error)")
       }
@@ -94,7 +89,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
   }
 
   /// Perform the command on a specific target.
-  func performCommand(context: PluginContext, target: Target, extraArguments _: [String]) throws {
+  func performCommand(context: PluginContext, target: Target, extraArguments: [String]) throws {
     guard let sourceModule = target.sourceModule else { return }
 
     if self.buildInputs {
@@ -110,7 +105,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
 
     let arguments = try prepareJExtractArguments(context: context, target: target)
 
-    try runExtract(context: context, target: target, arguments: arguments)
+    try runExtract(context: context, target: target, arguments: arguments + extraArguments)
 
     if self.buildOutputs {
       // Building the *products* since we need to build the dylib that contains our newly generated sources,
