@@ -24,6 +24,15 @@ public final class Swift2JavaTranslator {
 
   package var log = Logger(label: "translator", logLevel: .info)
 
+  // ==== Input
+
+  struct Input {
+    let filePath: String
+    let syntax: Syntax
+  }
+
+  var inputs: [Input] = []
+
   // ==== Output configuration
   let javaPackage: String
 
@@ -39,7 +48,7 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
-  public var swiftStdlibTypes: SwiftStandardLibraryTypes
+  package var swiftStdlibTypes: SwiftStandardLibraryTypes
 
   let symbolTable: SwiftSymbolTable
   let nominalResolution: NominalTypeResolution = NominalTypeResolution()
@@ -78,26 +87,24 @@ extension Swift2JavaTranslator {
   /// a checked truncation operation at the Java/Swift board.
   var javaPrimitiveForSwiftInt: JavaType { .long }
 
-  public func analyze(
-    file: String,
-    text: String? = nil
-  ) throws {
-    guard text != nil || FileManager.default.fileExists(atPath: file) else {
-      throw Swift2JavaTranslatorError(message: "Missing input file: \(file)")
-    }
-
-    log.trace("Analyze: \(file)")
-    let text = try text ?? String(contentsOfFile: file)
-
-    try analyzeSwiftInterface(interfaceFilePath: file, text: text)
-
-    log.debug("Done processing: \(file)")
+  package func add(filePath: String, text: String) {
+    log.trace("Adding: \(filePath)")
+    let sourceFileSyntax = Parser.parse(source: text)
+    self.nominalResolution.addSourceFile(sourceFileSyntax)
+    self.inputs.append(Input(filePath: filePath, syntax: Syntax(sourceFileSyntax)))
   }
 
-  package func analyzeSwiftInterface(interfaceFilePath: String, text: String) throws {
-    let sourceFileSyntax = Parser.parse(source: text)
+  /// Convenient method for analyzing single file.
+  package func analyze(
+    file: String,
+    text: String
+  ) throws {
+    self.add(filePath: file, text: text)
+    try self.analyze()
+  }
 
-    addSourceFile(sourceFileSyntax)
+  /// Analyze registered inputs.
+  func analyze() throws {
     prepareForTranslation()
 
     let visitor = Swift2JavaVisitor(
@@ -105,16 +112,17 @@ extension Swift2JavaTranslator {
       targetJavaPackage: self.javaPackage,
       translator: self
     )
-    visitor.walk(sourceFileSyntax)
-  }
 
-  package func addSourceFile(_ sourceFile: SourceFileSyntax) {
-    nominalResolution.addSourceFile(sourceFile)
+    for input in self.inputs {
+      log.trace("Analyzing \(input.filePath)")
+      visitor.walk(input.syntax)
+    }
   }
 
   package func prepareForTranslation() {
     nominalResolution.bindExtensions()
 
+    // Prepare symbol table for nominal type names.
     for (_, node) in nominalResolution.topLevelNominalTypes {
       symbolTable.parsedModule.addNominalTypeDeclaration(node, parent: nil)
     }

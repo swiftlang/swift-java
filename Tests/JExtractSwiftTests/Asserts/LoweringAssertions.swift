@@ -22,7 +22,7 @@ func assertLoweredFunction(
   _ inputDecl: DeclSyntax,
   javaPackage: String = "org.swift.mypackage",
   swiftModuleName: String = "MyModule",
-  sourceFile: SourceFileSyntax? = nil,
+  sourceFile: String? = nil,
   enclosingType: TypeSyntax? = nil,
   expectedCDecl: DeclSyntax,
   expectedCFunction: String,
@@ -37,7 +37,7 @@ func assertLoweredFunction(
   )
 
   if let sourceFile {
-    translator.addSourceFile(sourceFile)
+    translator.add(filePath: "Fake.swift", text: sourceFile)
   }
 
   translator.prepareForTranslation()
