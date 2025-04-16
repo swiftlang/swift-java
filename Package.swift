@@ -202,7 +202,9 @@ let package = Package(
             "-L\(javaHome)/lib"
           ],
           .when(platforms: [.windows])),
-        .linkedLibrary("jvm"),
+        .linkedLibrary(
+          "jvm",
+          .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .macCatalyst, .linux, .openbsd, .wasi, .windows])),
       ]
     ),
     .target(
