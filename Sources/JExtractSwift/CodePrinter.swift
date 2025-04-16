@@ -33,6 +33,8 @@ public struct CodePrinter {
     }
   }
   public var indentationText: String = ""
+  /// If true, next print() should starts with indentation.
+  var atNewline = true
 
   public static func toString(_ block: (inout CodePrinter) throws -> ()) rethrows -> String {
     var printer = CodePrinter()
@@ -73,8 +75,8 @@ public struct CodePrinter {
     line: UInt = #line,
     body: (inout CodePrinter) -> ()
   ) {
-    indent()
     print("\(text) {")
+    indent()
     body(&self)
     outdent()
     print("}", .sloc, function: function, file: file, line: line)
@@ -113,27 +115,27 @@ public struct CodePrinter {
     file: String = #fileID,
     line: UInt = #line
   ) {
-    append(indentationText)
-
-    let lines = "\(text)".split(separator: "\n")
-    if indentationDepth > 0 && lines.count > 1 {
-      for line in lines {
-        append(indentationText)
-        append(contentsOf: line)
+    let lines = "\(text)".split(separator: "\n", omittingEmptySubsequences: false)
+    var first = true
+    for line in lines {
+      if !first {
         append("\n")
+        append(indentationText)
+      } else {
+        if atNewline {
+          append(indentationText)
+        }
+        first = false
       }
-    } else {
-      append("\(text)")
+      append(contentsOf: line)
     }
 
     if terminator == .sloc {
       append(" // \(function) @ \(file):\(line)\n")
-      append(indentationText)
+      atNewline = true
     } else {
       append(terminator.rawValue)
-      if terminator == .newLine || terminator == .commaNewLine {
-        append(indentationText)
-      }
+      atNewline = terminator == .newLine || terminator == .commaNewLine
     }
   }
 

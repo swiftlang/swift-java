@@ -22,9 +22,9 @@ extension ImportedFunc {
   var renderCommentSnippet: String? {
     if let syntax {
       """
-      * {@snippet lang=swift :
-      * \(syntax)
-      * }
+       * {@snippet lang=swift :
+       * \(syntax)
+       * }
       """
     } else {
       nil

@@ -510,7 +510,7 @@ extension Swift2JavaTranslator {
       /**
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        *
-       \(decl.renderCommentSnippet ?? " *")
+      \(decl.renderCommentSnippet ?? " *")
        */
       public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
         this(/*arena=*/null, \(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
@@ -543,7 +543,7 @@ extension Swift2JavaTranslator {
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
        *
-       \(decl.renderCommentSnippet ?? " *")
+      \(decl.renderCommentSnippet ?? " *")
        */
       public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
         var mh$ = \(descClassIdentifier).HANDLE;
@@ -601,7 +601,7 @@ extension Swift2JavaTranslator {
       """
       /**
        * Address for:
-       \(snippet)
+      \(snippet)
        */
       public static MemorySegment \(decl.baseIdentifier)\(methodNameSegment)$address() {
           return \(decl.baseIdentifier).\(addrName);
@@ -623,7 +623,7 @@ extension Swift2JavaTranslator {
       """
       /**
        * Downcall method handle for:
-       \(snippet)
+      \(snippet)
        */
       public static MethodHandle \(decl.baseIdentifier)\(methodNameSegment)$handle() {
           return \(decl.baseIdentifier).\(handleName);
@@ -645,7 +645,7 @@ extension Swift2JavaTranslator {
       """
       /**
        * Function descriptor for:
-       \(snippet)
+      \(snippet)
        */
       public static FunctionDescriptor \(decl.baseIdentifier)\(methodNameSegment)$descriptor() {
           return \(decl.baseIdentifier).\(descName);
@@ -744,7 +744,7 @@ extension Swift2JavaTranslator {
       """
       /**
        * Downcall to Swift:
-       \(decl.renderCommentSnippet ?? "* ")
+      \(decl.renderCommentSnippet ?? "* ")
        */
       """
 
@@ -1065,7 +1065,6 @@ extension Swift2JavaTranslator {
     } else {
       printer.print("FunctionDescriptor.of(")
       printer.indent()
-      printer.print("", .continue)
 
       // Write return type
       let returnTyIsLastTy = decl.parameters.isEmpty && !decl.hasParent

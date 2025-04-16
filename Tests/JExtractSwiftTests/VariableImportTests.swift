@@ -47,7 +47,7 @@ final class VariableImportTests {
       expectedChunks: [
         """
         private static class counterInt {
-          public static final FunctionDescriptor DESC_GET =     FunctionDescriptor.of(
+          public static final FunctionDescriptor DESC_GET = FunctionDescriptor.of(
               /* -> */SWIFT_INT,
               /*self$*/SWIFT_POINTER
           );
@@ -55,7 +55,7 @@ final class VariableImportTests {
           FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt");
 
           public static final MethodHandle HANDLE_GET = Linker.nativeLinker().downcallHandle(ADDR_GET, DESC_GET);
-          public static final FunctionDescriptor DESC_SET =     FunctionDescriptor.ofVoid(
+          public static final FunctionDescriptor DESC_SET = FunctionDescriptor.ofVoid(
               /*newValue*/SWIFT_INT,
               /*self$*/SWIFT_POINTER
           );
