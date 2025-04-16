@@ -159,7 +159,7 @@ extension Swift2JavaTranslator {
   /// Try to resolve the given nominal type node into its imported
   /// representation.
   func importedNominalType(
-    _ nominal: some DeclGroupSyntax & NamedDeclSyntax
+    _ nominal: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax
   ) -> ImportedNominalType? {
     if !nominal.shouldImport(log: log) {
       return nil

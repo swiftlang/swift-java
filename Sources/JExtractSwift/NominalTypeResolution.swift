@@ -38,7 +38,7 @@ public class NominalTypeResolution {
 
 /// A syntax node for a nominal type declaration.
 @_spi(Testing)
-public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax
+public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax
 
 // MARK: Nominal type name resolution.
 extension NominalTypeResolution {

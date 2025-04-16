@@ -49,7 +49,7 @@ final class FunctionDescriptorTests {
       //  #MySwiftClass.counter!getter: (MySwiftClass) -> () -> Int32 : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvg\t// MySwiftClass.counter.getter
       //  #MySwiftClass.counter!setter: (MySwiftClass) -> (Int32) -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvs\t// MySwiftClass.counter.setter
       //  #MySwiftClass.counter!modify: (MySwiftClass) -> () -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32VvM\t// MySwiftClass.counter.modify
-      var counter: Int32
+      public var counter: Int32
     }
     """
 
