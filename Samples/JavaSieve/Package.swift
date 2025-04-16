@@ -58,7 +58,7 @@ let package = Package(
               .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
             ],
             plugins: [
-              .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
             ]
         ),
 
@@ -75,7 +75,7 @@ let package = Package(
               .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
             ],
             plugins: [
-              .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
             ]
         ),
     ]

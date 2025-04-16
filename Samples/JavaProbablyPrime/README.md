@@ -8,5 +8,5 @@ swift run JavaProbablyPrime <very big number>
 
 The package itself demonstrates how to:
 
-* Use the Java2Swift build tool plugin to wrap the `java.math.BigInteger` type in Swift.
+* Use the SwiftJava build tool plugin to wrap the `java.math.BigInteger` type in Swift.
 * Create an instance of `BigInteger` in Swift and use its `isProbablyPrime`.

@@ -56,29 +56,29 @@ SAMPLES_DIR := "Samples"
 all:
 	@echo "Welcome to swift-java! There are several makefile targets to choose from:"
 	@echo "  javakit-run: Run the JavaKit example program that uses Java libraries from Swift."
-	@echo "  javakit-generate: Regenerate the Swift wrapper code for the various JavaKit libraries from Java. This only has to be done when changing the Java2Swift tool."
+	@echo "  javakit-generate: Regenerate the Swift wrapper code for the various JavaKit libraries from Java. This only has to be done when changing the SwiftJava tool."
 
-$(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/Java2Swift:
+$(BUILD_DIR)/debug/libJavaKit.$(LIB_SUFFIX) $(BUILD_DIR)/debug/SwiftJava:
 	swift build
 
 javakit-run:
 	cd Samples/JavaKitSampleApp && swift build && java -cp .build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java -Djava.library.path=.build/debug com.example.swift.JavaKitSampleMain
 
-Java2Swift: $(BUILD_DIR)/debug/Java2Swift
+SwiftJava: $(BUILD_DIR)/debug/SwiftJava
 
-generate-JavaKit: Java2Swift
+generate-JavaKit: SwiftJava
 	mkdir -p Sources/JavaKit/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKit -o Sources/JavaKit/generated Sources/JavaKit/swift-java.config
+	$(BUILD_DIR)/debug/SwiftJava --module-name JavaKit -o Sources/JavaKit/generated Sources/JavaKit/swift-java.config
 
-generate-JavaKitCollection: Java2Swift
+generate-JavaKitCollection: SwiftJava
 	mkdir -p Sources/JavaKitCollection/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitCollection  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitCollection/generated Sources/JavaKitCollection/swift-java.config
+	$(BUILD_DIR)/debug/SwiftJava --module-name JavaKitCollection  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitCollection/generated Sources/JavaKitCollection/swift-java.config
 
-generate-JavaKitFunction: Java2Swift
+generate-JavaKitFunction: SwiftJava
 	mkdir -p Sources/JavaKitFunction/generated
-	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitFunction  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitFunction/generated Sources/JavaKitFunction/swift-java.config
+	$(BUILD_DIR)/debug/SwiftJava --module-name JavaKitFunction  --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitFunction/generated Sources/JavaKitFunction/swift-java.config
 
-generate-JavaKitReflection: Java2Swift generate-JavaKit generate-JavaKitCollection
+generate-JavaKitReflection: SwiftJava generate-JavaKit generate-JavaKitCollection
 	mkdir -p Sources/JavaKitReflection/generated
 	$(BUILD_DIR)/debug/Java2Swift --module-name JavaKitReflection --depends-on JavaKit=Sources/JavaKit/swift-java.config --depends-on JavaKitCollection=Sources/JavaKitCollection/swift-java.config -o Sources/JavaKitReflection/generated Sources/JavaKitReflection/swift-java.config
 

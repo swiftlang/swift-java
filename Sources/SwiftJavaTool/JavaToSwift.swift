@@ -24,24 +24,26 @@ import SwiftSyntaxBuilder
 import JavaKitConfigurationShared
 import JavaKitShared
 
-/// Command-line utility to drive the export of Java classes into Swift types.
-@main
 struct JavaToSwift: AsyncParsableCommand {
-  static var _commandName: String { "Java2Swift" }
+  static var _commandName: String { "java2swift" }
+
+  static var configuration = CommandConfiguration(
+          commandName: Self._commandName,
+          abstract: "Generate Swift wrappers for Java code.")
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
   var moduleName: String?
 
   @Option(
     help:
-      "A Java2Swift configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/Java2Swift.config. There should be one of these options for each Swift module that this module depends on (transitively) that contains wrapped Java sources."
+      "A swift-java configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/swift-java.config. There should be one of these options for each Swift module that this module depends on (transitively) that contains wrapped Java sources."
   )
   var dependsOn: [String] = []
 
   // TODO: This should be a "make wrappers" option that just detects when we give it a jar
   @Flag(
     help:
-      "Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to generate wrappers for those public classes."
+      "Specifies that the input is a Jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes."
   )
   var jar: Bool = false
 
@@ -59,13 +61,13 @@ struct JavaToSwift: AsyncParsableCommand {
   )
   var swiftNativeImplementation: [String] = []
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
+  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the swift-java configuration file.")
   var outputDirectory: String? = nil
 
-  
+
   @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
   var cacheDirectory: String? = nil
-  
+
   var effectiveCacheDirectory: String? {
     if let cacheDirectory {
       return cacheDirectory
@@ -75,7 +77,7 @@ struct JavaToSwift: AsyncParsableCommand {
       return nil
     }
   }
-  
+
   @Option(name: .shortAndLong, help: "How to handle an existing swift-java.config; by default 'overwrite' by can be changed to amending a configuration")
   var existingConfig: ExistingConfigFileMode = .overwrite
   public enum ExistingConfigFileMode: String, ExpressibleByArgument, Codable {
@@ -88,7 +90,7 @@ struct JavaToSwift: AsyncParsableCommand {
 
   @Argument(
     help:
-      "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
+      "The input file, which is either a swift-java configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
 
@@ -169,7 +171,7 @@ struct JavaToSwift: AsyncParsableCommand {
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
     do {
       let config: Configuration
-      
+
       // Determine the mode in which we'll execute.
       let toolMode: ToolMode
       if jar {
@@ -218,14 +220,14 @@ struct JavaToSwift: AsyncParsableCommand {
       let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
       let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
       print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
-      
+
       var classpathEntries: [String] = classpathFromConfig
-      
+
       let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(
         in: self.effectiveCacheDirectory ?? FileManager.default.currentDirectoryPath)
       print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
       classpathEntries += swiftJavaCachedModuleClasspath
-      
+
       if !classpathOptionEntries.isEmpty {
         print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
         classpathEntries += classpathOptionEntries

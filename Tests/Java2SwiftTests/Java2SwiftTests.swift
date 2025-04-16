@@ -100,7 +100,7 @@ class Java2SwiftTests: XCTestCase {
                 if let APRIL = classObj.APRIL {
                   self = APRIL
                 } else {
-                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run SwiftJava on the most updated Java class")
                 }
         """,
         """
@@ -361,7 +361,7 @@ class Java2SwiftTests: XCTestCase {
                 if let APRIL = classObj.APRIL {
                   self.init(javaHolder: APRIL.javaHolder)
                 } else {
-                  fatalError("Enum value APRIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+                  fatalError("Enum value APRIL was unexpectedly nil, please re-run SwiftJava on the most updated Java class")
                 }
         """,
         """

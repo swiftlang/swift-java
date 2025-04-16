@@ -18,7 +18,7 @@ import PackagePlugin
 fileprivate let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
-struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
@@ -27,7 +27,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
-    let executable = try context.tool(named: "Java2Swift").url
+    let executable = try context.tool(named: "SwiftJavaTool").url
     var commands: [Command] = []
     
     // Note: Target doesn't have a directoryURL counterpart to directory,
@@ -44,7 +44,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Config was: \(config)")
     var javaDependencies = config.dependencies ?? []
 
-    /// Find the manifest files from other Java2Swift executions in any targets
+    /// Find the manifest files from other SwiftJava executions in any targets
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
@@ -107,7 +107,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let classes = config.classes ?? [:]
     print("Classes to wrap: \(classes.map(\.key))")
 
-    /// Determine the set of Swift files that will be emitted by the Java2Swift tool.
+    /// Determine the set of Swift files that will be emitted by the SwiftJava tool.
     // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
     let outputDirectoryGenerated = self.outputDirectory(context: context, generated: true)
     let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
@@ -199,7 +199,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   }
 }
 
-extension Java2SwiftBuildToolPlugin {
+extension SwiftJavaBuildToolPlugin {
   func argumentsModuleName(sourceModule: Target) -> [String] {
     return [
       "--module-name", sourceModule.name

@@ -263,12 +263,12 @@ extension InitializerDeclSyntax {
     let isFailable = self.optionalMark != nil
 
     if isFailable {
-      log.warning("Skip importing failable initializer: \(self)")
+      log.debug("Skip importing failable initializer: \(self)")
       return false
     }
 
     // Ok, import it
-    log.warning("Import initializer: \(self)")
+    log.debug("Import initializer: \(self)")
     return true
   }
 }

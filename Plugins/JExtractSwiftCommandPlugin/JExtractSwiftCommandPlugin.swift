@@ -74,6 +74,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     }
 
     var arguments: [String] = [
+      "jextract",
       "--swift-module", sourceModule.name,
       "--package-name", javaPackage,
       "--output-directory-java", context.outputDirectoryJava.path(percentEncoded: false),
@@ -130,7 +131,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
 
   func runExtract(context: PluginContext, target: Target, arguments: [String]) throws {
     let process = Process()
-    process.executableURL = try context.tool(named: "JExtractSwiftTool").url
+    process.executableURL = try context.tool(named: "SwiftJavaTool").url
     process.arguments = arguments
 
     do {

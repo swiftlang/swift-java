@@ -2,8 +2,8 @@
 
 This package contains an example program that demonstrates importing a Java library distributed as a Jar file into Swift and using some APIs from that library. It demonstrates how to:
 
-* Use the Java2Swift tool to discover the classes in a Jar file and make them available in Swift
-* Layer Swift wrappers for Java classes as separate Swift modules using Java2Swift
+* Use the SwiftJava tool to discover the classes in a Jar file and make them available in Swift
+* Layer Swift wrappers for Java classes as separate Swift modules using SwiftJava
 * Access static methods of Java classes from Swift
 
 This example wraps an [open-source Java library](https://github.com/gazman-sdk/quadratic-sieve-Java) implementing the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) algorithm for finding prime numbers, among other algorithms. To get started, clone that repository and build a Jar file containing the library:
