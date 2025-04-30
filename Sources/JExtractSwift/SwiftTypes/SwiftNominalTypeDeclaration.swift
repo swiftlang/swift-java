@@ -14,9 +14,13 @@
 
 import SwiftSyntax
 
+///// A syntax node for a nominal type declaration.
+@_spi(Testing)
+public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax
+
 /// Describes a nominal type declaration, which can be of any kind (class, struct, etc.)
 /// and has a name, parent type (if nested), and owning module.
-class SwiftNominalTypeDeclaration {
+package class SwiftNominalTypeDeclaration {
   enum Kind {
     case actor
     case `class`
@@ -79,16 +83,24 @@ class SwiftNominalTypeDeclaration {
 
     return KnownStandardLibraryType(typeNameInSwiftModule: name)
   }
+
+  package var qualifiedName: String {
+    if let parent = self.parent {
+      return parent.qualifiedName + "." + name
+    } else {
+      return name
+    }
+  }
 }
 
 extension SwiftNominalTypeDeclaration: Equatable {
-  static func ==(lhs: SwiftNominalTypeDeclaration, rhs: SwiftNominalTypeDeclaration) -> Bool {
+  package static func ==(lhs: SwiftNominalTypeDeclaration, rhs: SwiftNominalTypeDeclaration) -> Bool {
     lhs === rhs
   }
 }
 
 extension SwiftNominalTypeDeclaration: Hashable {
-  func hash(into hasher: inout Hasher) {
+  package func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
 }

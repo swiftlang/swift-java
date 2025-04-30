@@ -158,16 +158,13 @@ extension Swift2JavaVisitor {
       )
     }
 
-    // Generic types aren't mapped into Java.
+    // FIXME: Generic types aren't mapped into Java.
     if let genericArguments {
       throw TypeTranslationError.unexpectedGenericArguments(type, genericArguments)
     }
 
     // Look up the imported types by name to resolve it to a nominal type.
-    let swiftTypeName = type.trimmedDescription  // FIXME: This is a hack.
-    guard let resolvedNominal = translator.nominalResolution.resolveNominalType(swiftTypeName),
-      let importedNominal = translator.importedNominalType(resolvedNominal)
-    else {
+    guard let importedNominal = translator.importedNominalType(type) else {
       throw TypeTranslationError.unknown(type)
     }
 

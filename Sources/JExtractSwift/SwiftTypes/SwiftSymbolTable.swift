@@ -14,7 +14,7 @@
 
 import SwiftSyntax
 
-protocol SwiftSymbolTableProtocol {
+package protocol SwiftSymbolTableProtocol {
   /// The module name that this symbol table describes.
   var moduleName: String { get }
 
@@ -28,7 +28,7 @@ protocol SwiftSymbolTableProtocol {
 
 extension SwiftSymbolTableProtocol {
   /// Look for a type
-  func lookupType(_ name: String, parent: SwiftNominalTypeDeclaration?) -> SwiftNominalTypeDeclaration? {
+  package func lookupType(_ name: String, parent: SwiftNominalTypeDeclaration?) -> SwiftNominalTypeDeclaration? {
     if let parent {
       return lookupNestedType(name, parent: parent)
     }
@@ -37,19 +37,62 @@ extension SwiftSymbolTableProtocol {
   }
 }
 
-class SwiftSymbolTable {
+package class SwiftSymbolTable {
   var importedModules: [SwiftModuleSymbolTable] = []
   var parsedModule: SwiftParsedModuleSymbolTable
 
-  init(parsedModuleName: String) {
+  package init(parsedModuleName: String) {
     self.parsedModule = SwiftParsedModuleSymbolTable(moduleName: parsedModuleName)
   }
 
   func addImportedModule(symbolTable: SwiftModuleSymbolTable) {
     importedModules.append(symbolTable)
   }
+}
 
-  func addTopLevelNominalTypeDeclarations(_ sourceFile: SourceFileSyntax) {
+extension SwiftSymbolTable {
+  package func setup(_ sourceFiles: some Collection<SourceFileSyntax>) {
+    // First, register top-level and nested nominal types to the symbol table.
+    for sourceFile in sourceFiles {
+      self.addNominalTypeDeclarations(sourceFile)
+    }
+
+    // Next bind the extensions.
+
+    // The work queue is required because, the extending type might be declared
+    // in another extension that hasn't been processed. E.g.:
+    //
+    //   extension Outer.Inner { struct Deeper {} }
+    //   extension Outer { struct Inner {} }
+    //   struct Outer {}
+    //
+    var unresolvedExtensions: [ExtensionDeclSyntax] = []
+    for sourceFile in sourceFiles {
+      // Find extensions.
+      for statement in sourceFile.statements {
+        // We only care about extensions at top-level.
+        if case .decl(let decl) = statement.item, let extNode = decl.as(ExtensionDeclSyntax.self) {
+          let resolved = handleExtension(extNode)
+          if !resolved {
+            unresolvedExtensions.append(extNode)
+          }
+        }
+      }
+    }
+
+    while !unresolvedExtensions.isEmpty {
+      let numExtensionsBefore = unresolvedExtensions.count
+      unresolvedExtensions.removeAll(where: handleExtension(_:))
+
+      // If we didn't resolve anything, we're done.
+      if numExtensionsBefore == unresolvedExtensions.count {
+        break
+      }
+      assert(numExtensionsBefore > unresolvedExtensions.count)
+    }
+  }
+
+  private func addNominalTypeDeclarations(_ sourceFile: SourceFileSyntax) {
     // Find top-level nominal type declarations.
     for statement in sourceFile.statements {
       // We only care about declarations.
@@ -62,31 +105,31 @@ class SwiftSymbolTable {
     }
   }
 
-  func addExtensions(
-    _ sourceFile: SourceFileSyntax,
-    nominalResolution: NominalTypeResolution
-  ) {
-    // Find extensions.
-    for statement in sourceFile.statements {
-      // We only care about declarations.
-      guard case .decl(let decl) = statement.item,
-          let extNode = decl.as(ExtensionDeclSyntax.self),
-            let extendedTypeNode = nominalResolution.extendedType(of: extNode),
-            let extendedTypeDecl = parsedModule.nominalTypeDeclarations[extendedTypeNode.id] else {
-        continue
-      }
-
-      parsedModule.addExtension(extNode, extending: extendedTypeDecl)
+  private func handleExtension(_ extensionDecl: ExtensionDeclSyntax) -> Bool {
+    // Try to resolve the type referenced by this extension declaration.
+    // If it fails, we'll try again later.
+    guard let extendedType = try? SwiftType(extensionDecl.extendedType, symbolTable: self) else {
+      return false
     }
+    guard let extendedNominal = extendedType.asNominalTypeDeclaration else {
+      // Extending type was not a nominal type. Ignore it.
+      return true
+    }
+
+    // Register nested nominals in extensions to the symbol table.
+    parsedModule.addExtension(extensionDecl, extending: extendedNominal)
+
+    // We have successfully resolved the extended type. Record it.
+    return true
   }
 }
 
 extension SwiftSymbolTable: SwiftSymbolTableProtocol {
-  var moduleName: String { parsedModule.moduleName }
+  package var moduleName: String { parsedModule.moduleName }
 
   /// Look for a top-level nominal type with the given name. This should only
   /// return nominal types within this module.
-  func lookupTopLevelNominalType(_ name: String) -> SwiftNominalTypeDeclaration? {
+  package func lookupTopLevelNominalType(_ name: String) -> SwiftNominalTypeDeclaration? {
     if let parsedResult = parsedModule.lookupTopLevelNominalType(name) {
       return parsedResult
     }
@@ -101,7 +144,7 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
   }
 
   // Look for a nested type with the given name.
-  func lookupNestedType(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftNominalTypeDeclaration? {
+  package func lookupNestedType(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftNominalTypeDeclaration? {
     if let parsedResult = parsedModule.lookupNestedType(name, parent: parent) {
       return parsedResult
     }
