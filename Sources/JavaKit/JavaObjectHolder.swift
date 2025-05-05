@@ -17,7 +17,8 @@ import JavaRuntime
 /// Stores a reference to a Java object, managing it as a global reference so
 /// that the Java virtual machine will not move or deallocate the object
 /// while this instance is live.
-public class JavaObjectHolder {
+public final class JavaObjectHolder {
+  // FIXME: thread safety!
   public private(set) var object: jobject?
   public let environment: JNIEnvironment
 
@@ -38,6 +39,6 @@ public class JavaObjectHolder {
   }
 
   deinit {
-    self.forget()
+    // self.forget()
   }
 }

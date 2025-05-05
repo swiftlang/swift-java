@@ -546,7 +546,8 @@ extension JavaClassTranslator {
     let resultType = try translator.getSwiftTypeNameAsString(
       javaMethod.getGenericReturnType()!,
       preferValueTypes: true,
-      outerOptional: .implicitlyUnwrappedOptional
+      // outerOptional: .implicitlyUnwrappedOptional // FIXME: why? it's allowed to return null objects hmmm
+      outerOptional: .optional // FIXME: why? it's allowed to return null objects hmmm
     )
 
     // FIXME: cleanup the checking here
@@ -555,6 +556,7 @@ extension JavaClassTranslator {
     } else {
       resultTypeStr = ""
     }
+    assert(!resultTypeStr.contains("!"), "contained !: '\(resultTypeStr)'")
 
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
