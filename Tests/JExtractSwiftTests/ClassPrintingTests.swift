@@ -55,6 +55,9 @@ struct ClassPrintingTests {
       }
 
       private static final GroupLayout $LAYOUT = (GroupLayout) SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
+      public static final GroupLayout $LAYOUT() {
+          return $LAYOUT;
+      }
       public final GroupLayout $layout() {
           return $LAYOUT;
       }

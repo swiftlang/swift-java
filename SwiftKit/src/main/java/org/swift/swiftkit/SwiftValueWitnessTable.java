@@ -220,12 +220,8 @@ public abstract class SwiftValueWitnessTable {
 
         var mh = destroy.handle(type);
 
-        try (var arena = Arena.ofConfined()) {
-            // we need to make a pointer to the self pointer when calling witness table functions:
-            MemorySegment indirect = arena.allocate(SwiftValueLayout.SWIFT_POINTER); // TODO: remove this and just have classes have this always anyway
-            MemorySegmentUtils.setSwiftPointerAddress(indirect, object);
-
-            mh.invokeExact(indirect, wtable);
+        try {
+            mh.invokeExact(object, wtable);
         } catch (Throwable th) {
             throw new AssertionError("Failed to destroy '" + type + "' at " + object, th);
         }

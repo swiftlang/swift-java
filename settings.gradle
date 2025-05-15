@@ -20,9 +20,10 @@ rootProject.name = "swift-java"
 
 include "SwiftKit"
 
+include ":Samples:SwiftKitSampleApp"
 // Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
-}
+//new File(rootDir, "Samples").listFiles().each {
+//    if (it.directory && new File(it, 'build.gradle').exists()) {
+//        include ":Samples:${it.name}"
+//    }
+//}

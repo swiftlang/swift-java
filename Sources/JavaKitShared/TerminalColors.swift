@@ -12,6 +12,27 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+
+private var isColorSupported: Bool {
+    #if os(Windows)
+    // Let's not support color in Windows for now.
+    return false
+    #else
+    guard isatty(STDOUT_FILENO) != 0 else { return false }
+    #endif
+
+    if ProcessInfo.processInfo.environment["NO_COLOR"] != nil {
+        return false
+    }
+
+    let env = ProcessInfo.processInfo.environment
+    if let term = env["TERM"], term.contains("color") || env["COLORTERM"] != nil {
+        return true
+    }
+    return false
+}
+
 package enum Rainbow: String {
   case black = "\u{001B}[0;30m"
   case red = "\u{001B}[0;31m"
@@ -145,7 +166,11 @@ package extension String {
   }
 
   func colored(as color: Rainbow) -> String {
-    "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    return if isColorSupported {
+      "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    } else {
+      self
+    }
   }
 }
 
@@ -191,6 +216,10 @@ package extension Substring {
   }
 
   func colored(as color: Rainbow) -> String {
-    "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    return if isColorSupported {
+      "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    } else {
+      String(self)
+    }
   }
 }

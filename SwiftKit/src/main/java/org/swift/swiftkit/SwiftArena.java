@@ -36,12 +36,6 @@ public interface SwiftArena extends SegmentAllocator {
     }
 
     /**
-     * Register a Swift reference counted heap object with this arena (such as a {@code class} or {@code actor}).
-     * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
-     */
-    void register(SwiftHeapObject object);
-
-    /**
      * Register a struct, enum or other non-reference counted Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
      */

@@ -26,7 +26,7 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
 
   public init(inlineComment: String? = nil, javaConstant: String) {
     self.inlineComment = inlineComment
-    self.value = javaConstant
+    self.value = "SwiftValueLayout.\(javaConstant)"
     self.needsMemoryLayoutCall = false
   }
 
@@ -57,12 +57,12 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
       result.append("/*\(inlineComment)*/")
     }
 
-    result.append("SwiftValueLayout.\(value)")
+    result.append(value)
 
     // When the type is some custom type, e.g. another Swift struct that we imported,
-    // we need to import its layout. We do this by calling $layout() on it.
+    // we need to import its layout. We do this by calling $LAYOUT() on it.
     if needsMemoryLayoutCall {
-      result.append(".$layout()")
+      result.append(".$LAYOUT()")
     }
 
     return result

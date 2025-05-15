@@ -48,28 +48,6 @@ final class AutoSwiftMemorySession implements SwiftArena {
     }
 
     @Override
-    public void register(SwiftHeapObject object) {
-        var statusDestroyedFlag = object.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        SwiftHeapObjectCleanup cleanupAction = new SwiftHeapObjectCleanup(
-                object.$memorySegment(),
-                object.$swiftType(),
-                markAsDestroyed
-        );
-        register(object, cleanupAction);
-    }
-
-    // visible for testing
-    void register(SwiftHeapObject object, SwiftHeapObjectCleanup cleanupAction) {
-        Objects.requireNonNull(object, "obj");
-        Objects.requireNonNull(cleanupAction, "cleanupAction");
-
-
-        cleaner.register(object, cleanupAction);
-    }
-
-    @Override
     public void register(SwiftValue value) {
         Objects.requireNonNull(value, "value");
 

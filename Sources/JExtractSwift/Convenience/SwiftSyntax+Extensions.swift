@@ -37,21 +37,6 @@ extension ImplicitlyUnwrappedOptionalTypeSyntax {
 }
 
 extension SyntaxProtocol {
-
-  var asNominalTypeKind: NominalTypeKind {
-    if isClass {
-      .class
-    } else if isActor {
-      .actor
-    } else if isStruct {
-      .struct
-    } else if isEnum {
-      .enum
-    } else {
-      fatalError("Unknown nominal kind: \(self)")
-    }
-  }
-
   var isClass: Bool {
     return self.is(ClassDeclSyntax.self)
   }
