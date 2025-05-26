@@ -16,6 +16,7 @@ package org.swift.swiftkit;
 
 import java.lang.foreign.AddressLayout;
 import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
 
 import static java.lang.foreign.ValueLayout.*;
