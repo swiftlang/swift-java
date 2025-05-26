@@ -298,7 +298,6 @@ extension Swift2JavaTranslator {
 
       // Constants
       printClassConstants(printer: &printer)
-      printTypeMappingDecls(&printer)
 
       body(&printer)
     }
@@ -310,7 +309,6 @@ extension Swift2JavaTranslator {
 
       // Constants
       printClassConstants(printer: &printer)
-      printTypeMappingDecls(&printer)
 
       printer.print(
         """
@@ -439,45 +437,6 @@ extension Swift2JavaTranslator {
       public final GroupLayout $layout() {
           return $LAYOUT;
       }
-      """
-    )
-  }
-
-  public func printTypeMappingDecls(_ printer: inout CodePrinter) {
-    // TODO: use some dictionary for those
-    printer.print(
-      """
-      // TODO: rather than the C ones offer the Swift mappings
-      public static final ValueLayout.OfBoolean C_BOOL = ValueLayout.JAVA_BOOLEAN;
-      public static final ValueLayout.OfByte C_CHAR = ValueLayout.JAVA_BYTE;
-      public static final ValueLayout.OfShort C_SHORT = ValueLayout.JAVA_SHORT;
-      public static final ValueLayout.OfInt C_INT = ValueLayout.JAVA_INT;
-      public static final ValueLayout.OfLong C_LONG_LONG = ValueLayout.JAVA_LONG;
-      public static final ValueLayout.OfFloat C_FLOAT = ValueLayout.JAVA_FLOAT;
-      public static final ValueLayout.OfDouble C_DOUBLE = ValueLayout.JAVA_DOUBLE;
-      public static final AddressLayout C_POINTER = ValueLayout.ADDRESS
-              .withTargetLayout(MemoryLayout.sequenceLayout(java.lang.Long.MAX_VALUE, ValueLayout.JAVA_BYTE));
-      public static final ValueLayout.OfLong C_LONG = ValueLayout.JAVA_LONG;
-      """
-    )
-    printer.print("")
-    printer.print(
-      """
-      public static final ValueLayout.OfBoolean SWIFT_BOOL = ValueLayout.JAVA_BOOLEAN;
-      public static final ValueLayout.OfByte SWIFT_INT8 = ValueLayout.JAVA_BYTE;
-      public static final ValueLayout.OfChar SWIFT_UINT16 = ValueLayout.JAVA_CHAR;
-      public static final ValueLayout.OfShort SWIFT_INT16 = ValueLayout.JAVA_SHORT;
-      public static final ValueLayout.OfInt SWIFT_INT32 = ValueLayout.JAVA_INT;
-      public static final ValueLayout.OfLong SWIFT_INT64 = ValueLayout.JAVA_LONG;
-      public static final ValueLayout.OfFloat SWIFT_FLOAT = ValueLayout.JAVA_FLOAT;
-      public static final ValueLayout.OfDouble SWIFT_DOUBLE = ValueLayout.JAVA_DOUBLE;
-      public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS;
-      // On the platform this was generated on, Int was Int64
-      public static final SequenceLayout SWIFT_BYTE_ARRAY = MemoryLayout.sequenceLayout(8, ValueLayout.JAVA_BYTE);
-      public static final ValueLayout.OfLong SWIFT_INT = SWIFT_INT64;
-      public static final ValueLayout.OfLong SWIFT_UINT = SWIFT_INT64;
-
-      public static final AddressLayout SWIFT_SELF = SWIFT_POINTER;
       """
     )
   }
@@ -1054,7 +1013,7 @@ extension Swift2JavaTranslator {
 
     let isIndirectReturn = decl.isIndirectReturn
 
-    var parameterLayoutDescriptors: [ForeignValueLayout] = javaMemoryLayoutDescriptors(
+    let parameterLayoutDescriptors: [ForeignValueLayout] = javaMemoryLayoutDescriptors(
       forParametersOf: decl,
       paramPassingStyle: .pointer
     )
