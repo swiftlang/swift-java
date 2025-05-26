@@ -57,7 +57,7 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
       result.append("/*\(inlineComment)*/")
     }
 
-    result.append("\(value)")
+    result.append("SwiftValueLayout.\(value)")
 
     // When the type is some custom type, e.g. another Swift struct that we imported,
     // we need to import its layout. We do this by calling $layout() on it.
