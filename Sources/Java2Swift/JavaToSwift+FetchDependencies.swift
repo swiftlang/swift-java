@@ -40,6 +40,10 @@ extension JavaToSwift {
     print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)', classpath entries: \(classpathEntries.count), ", terminator: "")
     print("done.".green)
 
+    for entry in classpathEntries {
+      print("[info][swift-java] Classpath entry: \(entry)")
+    }
+
     return ResolvedDependencyClasspath(for: dependencies, classpath: dependenciesClasspath)
   }
 
@@ -132,6 +136,8 @@ extension JavaToSwift {
 
     // The file contents are just plain
     let contents = resolvedClasspath.classpath
+
+      print("[debug][swift-java] Resolved dependency: \(classpath)")
 
     // Write the file
     try writeContents(

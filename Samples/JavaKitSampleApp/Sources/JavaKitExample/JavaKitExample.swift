@@ -85,6 +85,11 @@ extension HelloSwift: HelloSwiftNativeMethods {
     return i * j
   }
 
+  @JavaMethod
+  func addIntegers(_ i: Int, _ j: Int) -> Int {
+    fatalError()
+  }
+
   func checkOptionals(helper: ThreadSafeHelperClass) {
     let text: JavaString? = helper.textOptional
     let value: String? = helper.getValueOptional(Optional<JavaString>.none)
