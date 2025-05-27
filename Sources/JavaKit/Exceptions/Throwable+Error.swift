@@ -13,7 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 // Translate all Java Throwable instances in a Swift error.
-extension Throwable: Error {
+extension Throwable: Error, CustomStringConvertible {
+  public var description: String {
+    return toString()
+  }
 }
 
 extension JavaClass<Throwable> {
