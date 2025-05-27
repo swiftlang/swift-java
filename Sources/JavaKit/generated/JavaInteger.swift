@@ -3,6 +3,12 @@ import JavaRuntime
 
 @JavaClass("java.lang.Integer")
 open class JavaInteger: JavaNumber {
+
+  // FIXME: move ot extension?
+  public required init(fromJNI value: JNIType, in environment: JNIEnvironment) {
+    fatalError()
+  }
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 

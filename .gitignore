@@ -41,3 +41,7 @@ Package.resolved
 */**/*.o
 */**/*.swiftdeps
 */**/*.swiftdeps~
+
+*/**/*.index-build
+.index-build
+.build-vscode

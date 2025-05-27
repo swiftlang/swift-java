@@ -20,7 +20,16 @@ package com.example.swift;
  */
 public class JavaKitSampleMain {
     public static void main(String[] args) {
-        int result = new HelloSubclass("Swift").sayHello(17, 25);
-        System.out.println("sayHello(17, 25) = " + result);
+        var subclass = new HelloSubclass("Swift");
+
+        int intResult = subclass.sayHello(17, 25);
+        System.out.println("sayHello(17, 25) = " + intResult);
+
+        Integer integerResult = subclass.compute(16, 25);
+        System.out.println("compute(17, 25) = " + integerResult);
+
+        if (integerResult == null) {
+            throw AssertionError("integerResult was null!")
+        }
     }
 }

@@ -21,6 +21,21 @@ enum SwiftWrappedError: Error {
 
 @JavaImplementation("com.example.swift.HelloSwift")
 extension HelloSwift: HelloSwiftNativeMethods {
+
+  @JavaMethod
+  func compute(_ a: JavaInteger?, _ b: JavaInteger?) -> JavaInteger? {
+    guard let a else { fatalError("parameter 'a' must not be null!") }
+    guard let b else { fatalError("parameter 'b' must not be null!") }
+
+    print("[swift] a = \(a.intValue())")
+    print("[swift] b = \(b.intValue())")
+    print("[swift] a + b = \(a.intValue() + b.intValue())")
+    let result = JavaInteger(a.intValue() + b.intValue())
+    let x = JavaObjectHolder(object: result.javaThis, environment: try! JavaVirtualMachine.shared().environment())
+    print("[swift] Integer(a + b) = \(result)")
+    return result
+  }
+
   @JavaMethod
   func sayHello(_ i: Int32, _ j: Int32) -> Int32 {
     print("Hello from Swift!")
