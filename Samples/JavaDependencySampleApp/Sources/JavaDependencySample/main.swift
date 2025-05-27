@@ -14,6 +14,7 @@
 
 import JavaKit
 import JavaKitFunction
+import JavaKitIO
 import JavaKitConfigurationShared
 import Foundation
 
@@ -41,5 +42,14 @@ print("Path = \(path)")
 let ext = try! FilenameUtilsClass.getExtension(path)
 print("org.apache.commons.io.FilenameUtils.getExtension = \(ext)")
 precondition(ext == "exe")
+
+let CSCFormatClass = try JavaClass<CSVFormat>()
+
+let reader = StringReader("hello,example")
+for record in try CSCFormatClass.RFC4180.parse(reader)!.getRecords()! {
+  for field in record.toList()! {
+    print("Field: \(field)")
+  }
+}
 
 print("Done.")

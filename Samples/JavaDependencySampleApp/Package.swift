@@ -86,6 +86,8 @@ let package = Package(
         .product(name: "JavaKit", package: "swift-java"),
         .product(name: "JavaKitFunction", package: "swift-java"),
         .product(name: "JavaKitCollection", package: "swift-java"),
+        .product(name: "JavaKitIO", package: "swift-java"),
+        .product(name: "JavaKitNetwork", package: "swift-java"),
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
@@ -97,6 +99,8 @@ let package = Package(
         .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
       ]
     ),
+
+    .target(name: "JavaExample"),
 
   ]
 )
