@@ -30,8 +30,6 @@ public class HelloSwift {
     }
 
     native int sayHello(int x, int y);
-    native Integer addIntegers(Integer x, Integer y);
-
     native String throwMessageFromSwift(String message) throws Exception;
 
     // To be called back by the native code
