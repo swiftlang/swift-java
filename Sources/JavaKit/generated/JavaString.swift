@@ -52,16 +52,16 @@ open class JavaString: JavaObject {
   open func getChars(_ arg0: Int32, _ arg1: Int32, _ arg2: [UInt16], _ arg3: Int32)
 
   @JavaMethod
-  open func compareTo(_ arg0: JavaObject?) -> Int32
-
-  @JavaMethod
   open func compareTo(_ arg0: String) -> Int32
 
   @JavaMethod
-  open func indexOf(_ arg0: String, _ arg1: Int32, _ arg2: Int32) -> Int32
+  open func compareTo(_ arg0: JavaObject?) -> Int32
 
   @JavaMethod
-  open func indexOf(_ arg0: String) -> Int32
+  open func indexOf(_ arg0: String, _ arg1: Int32) -> Int32
+
+  @JavaMethod
+  open func indexOf(_ arg0: String, _ arg1: Int32, _ arg2: Int32) -> Int32
 
   @JavaMethod
   open func indexOf(_ arg0: Int32) -> Int32
@@ -73,7 +73,7 @@ open class JavaString: JavaObject {
   open func indexOf(_ arg0: Int32, _ arg1: Int32, _ arg2: Int32) -> Int32
 
   @JavaMethod
-  open func indexOf(_ arg0: String, _ arg1: Int32) -> Int32
+  open func indexOf(_ arg0: String) -> Int32
 
   @JavaMethod
   open func charAt(_ arg0: Int32) -> UInt16
@@ -91,19 +91,19 @@ open class JavaString: JavaObject {
   open func offsetByCodePoints(_ arg0: Int32, _ arg1: Int32) -> Int32
 
   @JavaMethod
-  open func getBytes() -> [Int8]
-
-  @JavaMethod
   open func getBytes(_ arg0: String) throws -> [Int8]
 
   @JavaMethod
   open func getBytes(_ arg0: Int32, _ arg1: Int32, _ arg2: [Int8], _ arg3: Int32)
 
   @JavaMethod
-  open func regionMatches(_ arg0: Bool, _ arg1: Int32, _ arg2: String, _ arg3: Int32, _ arg4: Int32) -> Bool
+  open func getBytes() -> [Int8]
 
   @JavaMethod
   open func regionMatches(_ arg0: Int32, _ arg1: String, _ arg2: Int32, _ arg3: Int32) -> Bool
+
+  @JavaMethod
+  open func regionMatches(_ arg0: Bool, _ arg1: Int32, _ arg2: String, _ arg3: Int32, _ arg4: Int32) -> Bool
 
   @JavaMethod
   open func startsWith(_ arg0: String) -> Bool
@@ -112,22 +112,22 @@ open class JavaString: JavaObject {
   open func startsWith(_ arg0: String, _ arg1: Int32) -> Bool
 
   @JavaMethod
-  open func lastIndexOf(_ arg0: String) -> Int32
+  open func lastIndexOf(_ arg0: Int32) -> Int32
 
   @JavaMethod
-  open func lastIndexOf(_ arg0: Int32, _ arg1: Int32) -> Int32
+  open func lastIndexOf(_ arg0: String) -> Int32
 
   @JavaMethod
   open func lastIndexOf(_ arg0: String, _ arg1: Int32) -> Int32
 
   @JavaMethod
-  open func lastIndexOf(_ arg0: Int32) -> Int32
-
-  @JavaMethod
-  open func substring(_ arg0: Int32) -> String
+  open func lastIndexOf(_ arg0: Int32, _ arg1: Int32) -> Int32
 
   @JavaMethod
   open func substring(_ arg0: Int32, _ arg1: Int32) -> String
+
+  @JavaMethod
+  open func substring(_ arg0: Int32) -> String
 
   @JavaMethod
   open func isEmpty() -> Bool
@@ -216,38 +216,38 @@ open class JavaString: JavaObject {
 }
 extension JavaClass<JavaString> {
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int64) -> String
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: [UInt16]) -> String
-
-  @JavaStaticMethod
   public func valueOf(_ arg0: JavaObject?) -> String
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: Float) -> String
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: Double) -> String
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: UInt16) -> String
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: Bool) -> String
+  public func valueOf(_ arg0: Int64) -> String
 
   @JavaStaticMethod
   public func valueOf(_ arg0: Int32) -> String
 
   @JavaStaticMethod
+  public func valueOf(_ arg0: UInt16) -> String
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: Bool) -> String
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: Double) -> String
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: [UInt16]) -> String
+
+  @JavaStaticMethod
+  public func valueOf(_ arg0: Float) -> String
+
+  @JavaStaticMethod
   public func format(_ arg0: String, _ arg1: [JavaObject?]) -> String
 
   @JavaStaticMethod
-  public func copyValueOf(_ arg0: [UInt16]) -> String
+  public func copyValueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
 
   @JavaStaticMethod
-  public func copyValueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
+  public func copyValueOf(_ arg0: [UInt16]) -> String
 }
