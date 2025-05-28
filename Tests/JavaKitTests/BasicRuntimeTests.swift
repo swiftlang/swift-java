@@ -56,7 +56,7 @@ class BasicRuntimeTests: XCTestCase {
     do {
       _ = try URL("bad url", environment: environment)
     } catch {
-      XCTAssert(String(describing: error) == "no protocol: bad url")
+      XCTAssertEqual(String(describing: error), "java.net.MalformedURLException: no protocol: bad url")
     }
   }
 
@@ -73,7 +73,7 @@ class BasicRuntimeTests: XCTestCase {
     do {
       _ = try JavaClass<Nonexistent>(environment: environment)
     } catch {
-      XCTAssertEqual(String(describing: error), "org/swift/javakit/Nonexistent")
+      XCTAssertEqual(String(describing: error), "java.lang.NoClassDefFoundError: org/swift/javakit/Nonexistent")
     }
   }
 

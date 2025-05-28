@@ -168,10 +168,16 @@ extension JavaClass<JavaLong> {
   public func rotateRight(_ arg0: Int64, _ arg1: Int32) -> Int64
 
   @JavaStaticMethod
+  public func parseLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
+
+  @JavaStaticMethod
   public func parseLong(_ arg0: String, _ arg1: Int32) throws -> Int64
 
   @JavaStaticMethod
   public func parseLong(_ arg0: String) throws -> Int64
+
+  @JavaStaticMethod
+  public func parseUnsignedLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
 
   @JavaStaticMethod
   public func parseUnsignedLong(_ arg0: String, _ arg1: Int32) throws -> Int64

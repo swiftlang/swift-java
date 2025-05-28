@@ -77,6 +77,11 @@ let package = Package(
     ),
 
     .library(
+      name: "JavaKitIO",
+      targets: ["JavaKitIO"]
+    ),
+
+    .library(
       name: "JavaKitReflection",
       targets: ["JavaKitReflection"]
     ),
@@ -234,6 +239,15 @@ let package = Package(
     ),
     .target(
       name: "JavaKitNetwork",
+      dependencies: ["JavaKit", "JavaKitCollection"],
+      exclude: ["swift-java.config"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+    .target(
+      name: "JavaKitIO",
       dependencies: ["JavaKit", "JavaKitCollection"],
       exclude: ["swift-java.config"],
       swiftSettings: [
@@ -448,6 +462,6 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ]
-    )
+    ),
   ]
 )

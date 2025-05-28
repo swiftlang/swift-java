@@ -5,37 +5,19 @@ import JavaRuntime
 @JavaClass("java.util.BitSet")
 open class BitSet: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
-
-  @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  open func cardinality() -> Int32
-
-  @JavaMethod
-  open func nextSetBit(_ arg0: Int32) -> Int32
-
-  @JavaMethod
-  open func toLongArray() -> [Int64]
-
-  @JavaMethod
-  open func previousSetBit(_ arg0: Int32) -> Int32
-
-  @JavaMethod
-  open func previousClearBit(_ arg0: Int32) -> Int32
-
-  @JavaMethod
-  open func intersects(_ arg0: BitSet?) -> Bool
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   open func size() -> Int32
 
   @JavaMethod
-  open func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
+  open func get(_ arg0: Int32) -> Bool
 
   @JavaMethod
-  open func get(_ arg0: Int32) -> Bool
+  open func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
 
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
@@ -53,28 +35,28 @@ open class BitSet: JavaObject {
   open override func clone() -> JavaObject!
 
   @JavaMethod
-  open func clear(_ arg0: Int32)
-
-  @JavaMethod
   open func clear(_ arg0: Int32, _ arg1: Int32)
 
   @JavaMethod
   open func clear()
 
   @JavaMethod
+  open func clear(_ arg0: Int32)
+
+  @JavaMethod
   open func isEmpty() -> Bool
 
   @JavaMethod
-  open func set(_ arg0: Int32, _ arg1: Int32, _ arg2: Bool)
-
-  @JavaMethod
-  open func set(_ arg0: Int32, _ arg1: Int32)
+  open func set(_ arg0: Int32, _ arg1: Bool)
 
   @JavaMethod
   open func set(_ arg0: Int32)
 
   @JavaMethod
-  open func set(_ arg0: Int32, _ arg1: Bool)
+  open func set(_ arg0: Int32, _ arg1: Int32)
+
+  @JavaMethod
+  open func set(_ arg0: Int32, _ arg1: Int32, _ arg2: Bool)
 
   @JavaMethod
   open func flip(_ arg0: Int32, _ arg1: Int32)
@@ -99,6 +81,24 @@ open class BitSet: JavaObject {
 
   @JavaMethod
   open func andNot(_ arg0: BitSet?)
+
+  @JavaMethod
+  open func cardinality() -> Int32
+
+  @JavaMethod
+  open func nextSetBit(_ arg0: Int32) -> Int32
+
+  @JavaMethod
+  open func toLongArray() -> [Int64]
+
+  @JavaMethod
+  open func previousSetBit(_ arg0: Int32) -> Int32
+
+  @JavaMethod
+  open func previousClearBit(_ arg0: Int32) -> Int32
+
+  @JavaMethod
+  open func intersects(_ arg0: BitSet?) -> Bool
 }
 extension JavaClass<BitSet> {
   @JavaStaticMethod

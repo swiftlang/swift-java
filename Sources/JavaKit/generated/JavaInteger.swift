@@ -3,6 +3,7 @@ import JavaRuntime
 
 @JavaClass("java.lang.Integer")
 open class JavaInteger: JavaNumber {
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
