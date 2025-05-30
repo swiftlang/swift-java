@@ -62,7 +62,7 @@ func assertLoweredFunction(
 
   let loweredCDecl = loweredFunction.cdeclThunk(
     cName: "c_\(swiftFunctionName)",
-    swiftFunctionName: swiftFunctionName,
+    swiftAPIName: swiftFunctionName,
     stdlibTypes: translator.swiftStdlibTypes
   )
 
@@ -76,12 +76,73 @@ func assertLoweredFunction(
     )
   )
 
-  let cFunction = translator.cdeclToCFunctionLowering(
-    loweredFunction.cdecl,
+  let cFunction = try loweredFunction.cFunctionDecl(
     cName: "c_\(swiftFunctionName)"
   )
+
   #expect(
     cFunction.description == expectedCFunction,
+    sourceLocation: Testing.SourceLocation(
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+  )
+}
+
+/// Assert that the lowering of the function function declaration to a @_cdecl
+/// entrypoint matches the expected form.
+func assertLoweredVariableAccessor(
+  _ inputDecl: VariableDeclSyntax,
+  isSet: Bool,
+  javaPackage: String = "org.swift.mypackage",
+  swiftModuleName: String = "MyModule",
+  sourceFile: String? = nil,
+  enclosingType: TypeSyntax? = nil,
+  expectedCDecl: DeclSyntax?,
+  expectedCFunction: String?,
+  fileID: String = #fileID,
+  filePath: String = #filePath,
+  line: Int = #line,
+  column: Int = #column
+) throws {
+  let translator = Swift2JavaTranslator(
+    javaPackage: javaPackage,
+    swiftModuleName: swiftModuleName
+  )
+
+  if let sourceFile {
+    translator.add(filePath: "Fake.swift", text: sourceFile)
+  }
+
+  translator.prepareForTranslation()
+
+  let swiftVariableName = inputDecl.bindings.first!.pattern.description
+  let loweredFunction = try translator.lowerFunctionSignature(inputDecl, isSet: isSet, enclosingType: enclosingType)
+
+  let loweredCDecl = loweredFunction?.cdeclThunk(
+    cName: "c_\(swiftVariableName)",
+    swiftAPIName: swiftVariableName,
+    stdlibTypes: translator.swiftStdlibTypes
+  )
+
+  #expect(
+    loweredCDecl?.description == expectedCDecl?.description,
+    sourceLocation: Testing.SourceLocation(
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+  )
+
+  let cFunction = try loweredFunction?.cFunctionDecl(
+    cName: "c_\(swiftVariableName)"
+  )
+
+  #expect(
+    cFunction?.description == expectedCFunction,
     sourceLocation: Testing.SourceLocation(
       fileID: fileID,
       filePath: filePath,
