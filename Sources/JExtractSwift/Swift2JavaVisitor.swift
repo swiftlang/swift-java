@@ -195,7 +195,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     }
 
     do {
-      let supportedAccessors = supportedAccessorKinds(varDecl: node, binding: binding)
+      let supportedAccessors = node.supportedAccessorKinds(binding: binding)
       if supportedAccessors.contains(.get) {
         try importAccessor(kind: .getter)
       }
@@ -271,48 +271,4 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
 
     return true
   }
-}
-
-
-struct SupportedAccessorKinds: OptionSet {
-  var rawValue: UInt8
-
-  static var get: Self = .init(rawValue: 1 << 0)
-  static var set: Self = .init(rawValue: 1 << 1)
-}
-
-private func supportedAccessorKinds(varDecl: VariableDeclSyntax, binding: PatternBindingSyntax) -> SupportedAccessorKinds {
-  if varDecl.bindingSpecifier == .keyword(.let) {
-    return [.get]
-  }
-
-  if let accessorBlock = binding.accessorBlock {
-    switch accessorBlock.accessors {
-    case .getter:
-      return [.get]
-    case .accessors(let accessors):
-      var hasGetter = false
-      var hasSetter = false
-
-      for accessor in accessors {
-        switch accessor.accessorSpecifier {
-        case .keyword(.get), .keyword(._read), .keyword(.unsafeAddress):
-          hasGetter = true
-        case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress):
-          hasSetter = true
-        default: // Ignore willSet/didSet and unknown accessors.
-          break
-        }
-      }
-
-      switch (hasGetter, hasSetter) {
-      case (true, true): return [.get, .set]
-      case (true, false): return [.get]
-      case (false, true): return [.set]
-      case (false, false): break
-      }
-    }
-  }
-
-  return [.get, .set]
 }
