@@ -20,8 +20,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2', '6.1.0']
+        swift_version: ['6.0.2', '6.1.0', 'nightly-main']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -47,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         # swift_version: ['nightly-main']
-        swift_version: ['6.0.2', '6.1.0']
+        swift_version: ['6.0.2', '6.1.0', 'nightly-main']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -71,7 +70,7 @@ jobs:
       fail-fast: false
       matrix:
         # swift_version: ['nightly-main']
-        swift_version: ['6.0.2', '6.1.0']
+        swift_version: ['6.0.2', '6.1.0', 'nightly-main']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
