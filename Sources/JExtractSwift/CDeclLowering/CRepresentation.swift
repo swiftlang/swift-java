@@ -21,7 +21,7 @@ extension CType {
   /// function, first go through Swift -> cdecl lowering. This function
   /// will throw an error if it encounters a type that is not expressible in
   /// C.
-init(cdeclType: SwiftType) throws {
+  init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
       if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
