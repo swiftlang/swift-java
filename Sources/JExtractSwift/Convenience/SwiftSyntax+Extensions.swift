@@ -36,24 +36,6 @@ extension ImplicitlyUnwrappedOptionalTypeSyntax {
   }
 }
 
-extension SyntaxProtocol {
-  var isClass: Bool {
-    return self.is(ClassDeclSyntax.self)
-  }
-
-  var isActor: Bool {
-    return self.is(ActorDeclSyntax.self)
-  }
-
-  var isEnum: Bool {
-    return self.is(EnumDeclSyntax.self)
-  }
-
-  var isStruct: Bool {
-    return self.is(StructDeclSyntax.self)
-  }
-}
-
 extension DeclModifierSyntax {
   var isAccessControl: Bool {
     switch self.name.tokenKind {
