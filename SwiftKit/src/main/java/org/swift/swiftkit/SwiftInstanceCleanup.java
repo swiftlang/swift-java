@@ -27,9 +27,12 @@ record SwiftInstanceCleanup(
 
     @Override
     public void run() {
-        System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
-
         markAsDestroyed.run();
-        SwiftValueWitnessTable.destroy(selfType, selfPointer);
+
+        // Allow null pointers just for AutoArena tests.
+        if (selfType != null && selfPointer != null) {
+            System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
+            SwiftValueWitnessTable.destroy(selfType, selfPointer);
+        }
     }
 }

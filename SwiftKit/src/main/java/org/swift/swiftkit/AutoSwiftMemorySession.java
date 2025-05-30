@@ -60,6 +60,14 @@ final class AutoSwiftMemorySession implements SwiftArena {
         cleaner.register(instance, cleanupAction);
     }
 
+    // visible for testing
+    void register(SwiftInstance object, SwiftInstanceCleanup cleanupAction) {
+        Objects.requireNonNull(object, "obj");
+        Objects.requireNonNull(cleanupAction, "cleanupAction");
+
+        cleaner.register(object, cleanupAction);
+    }
+
     @Override
     public MemorySegment allocate(long byteSize, long byteAlignment) {
         return arena.allocate(byteSize, byteAlignment);
