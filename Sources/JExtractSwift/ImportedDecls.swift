@@ -25,17 +25,17 @@ public typealias JavaPackage = String
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
-public struct ImportedNominalType: ImportedDecl {
-  public let swiftTypeName: String
-  public let javaType: JavaType
-  public var kind: NominalTypeKind
+package struct ImportedNominalType: ImportedDecl {
+  let swiftNominal: SwiftNominalTypeDeclaration
+  let javaType: JavaType
+  var kind: NominalTypeKind
 
-  public var initializers: [ImportedFunc] = []
-  public var methods: [ImportedFunc] = []
-  public var variables: [ImportedVariable] = []
+  package var initializers: [ImportedFunc] = []
+  package var methods: [ImportedFunc] = []
+  package var variables: [ImportedVariable] = []
 
-  public init(swiftTypeName: String, javaType: JavaType, kind: NominalTypeKind) {
-    self.swiftTypeName = swiftTypeName
+  init(swiftNominal: SwiftNominalTypeDeclaration, javaType: JavaType, kind: NominalTypeKind) {
+    self.swiftNominal = swiftNominal
     self.javaType = javaType
     self.kind = kind
   }
@@ -43,7 +43,7 @@ public struct ImportedNominalType: ImportedDecl {
   var translatedType: TranslatedType {
     TranslatedType(
       cCompatibleConvention: .direct,
-      originalSwiftType: "\(raw: swiftTypeName)",
+      originalSwiftType: "\(raw: swiftNominal.qualifiedName)",
       originalSwiftTypeKind: self.kind,
       cCompatibleSwiftType: "UnsafeRawPointer",
       cCompatibleJavaMemoryLayout: .heapObject,

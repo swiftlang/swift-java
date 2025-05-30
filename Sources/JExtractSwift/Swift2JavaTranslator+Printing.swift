@@ -87,7 +87,7 @@ extension Swift2JavaTranslator {
 
     // === All types
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
-      let fileNameBase = "\(ty.swiftTypeName)+SwiftJava"
+      let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
       log.info("Printing contents: \(filename)")
 
@@ -132,7 +132,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ImportedNominalType) throws {
+  package func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ImportedNominalType) throws {
     let stt = SwiftThunkTranslator(self)
 
     printer.print(
@@ -192,7 +192,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func printImportedClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  package func printImportedClass(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
@@ -280,7 +280,7 @@ extension Swift2JavaTranslator {
     printer.print("")
   }
 
-  public func printNominal(
+  package func printNominal(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
   ) {
     let parentProtocol: String
@@ -1048,7 +1048,7 @@ extension Swift2JavaTranslator {
     printer.print(");")
   }
 
-  public func printHeapObjectToStringMethod(
+  package func printHeapObjectToStringMethod(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType
   ) {
     printer.print(

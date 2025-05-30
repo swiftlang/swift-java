@@ -73,7 +73,7 @@ struct SwiftThunkTranslator {
       """
       @_cdecl("\(raw: funcName)")
       public func \(raw: funcName)() -> UnsafeMutableRawPointer /* Any.Type */ {
-        return unsafeBitCast(\(raw: nominal.swiftTypeName).self, to: UnsafeMutableRawPointer.self)
+        return unsafeBitCast(\(raw: nominal.swiftNominal.qualifiedName).self, to: UnsafeMutableRawPointer.self)
       }
       """
   }

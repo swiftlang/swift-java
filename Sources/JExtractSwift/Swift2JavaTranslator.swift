@@ -28,7 +28,7 @@ public final class Swift2JavaTranslator {
 
   struct Input {
     let filePath: String
-    let syntax: Syntax
+    let syntax: SourceFileSyntax
   }
 
   var inputs: [Input] = []
@@ -51,7 +51,6 @@ public final class Swift2JavaTranslator {
   package var swiftStdlibTypes: SwiftStandardLibraryTypes
 
   let symbolTable: SwiftSymbolTable
-  let nominalResolution: NominalTypeResolution = NominalTypeResolution()
 
   var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
@@ -90,8 +89,7 @@ extension Swift2JavaTranslator {
   package func add(filePath: String, text: String) {
     log.trace("Adding: \(filePath)")
     let sourceFileSyntax = Parser.parse(source: text)
-    self.nominalResolution.addSourceFile(sourceFileSyntax)
-    self.inputs.append(Input(filePath: filePath, syntax: Syntax(sourceFileSyntax)))
+    self.inputs.append(Input(filePath: filePath, syntax: sourceFileSyntax))
   }
 
   /// Convenient method for analyzing single file.
@@ -120,20 +118,8 @@ extension Swift2JavaTranslator {
   }
 
   package func prepareForTranslation() {
-    nominalResolution.bindExtensions()
-
-    // Prepare symbol table for nominal type names.
-    for (_, node) in nominalResolution.topLevelNominalTypes {
-      symbolTable.parsedModule.addNominalTypeDeclaration(node, parent: nil)
-    }
-
-    for (ext, nominalNode) in nominalResolution.resolvedExtensions {
-      guard let nominalDecl = symbolTable.parsedModule.lookup(nominalNode) else {
-        continue
-      }
-
-      symbolTable.parsedModule.addExtension(ext, extending: nominalDecl)
-    }
+    /// Setup the symbol table.
+    symbolTable.setup(inputs.map({ $0.syntax }))
   }
 }
 
@@ -164,18 +150,42 @@ extension Swift2JavaTranslator {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Type translation
 extension Swift2JavaTranslator {
-  /// Try to resolve the given nominal type node into its imported
-  /// representation.
+  /// Try to resolve the given nominal declaration node into its imported representation.
   func importedNominalType(
-    _ nominal: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax
+    _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
+    parent: ImportedNominalType?
   ) -> ImportedNominalType? {
-    if !nominal.shouldImport(log: log) {
+    if !nominalNode.shouldImport(log: log) {
       return nil
     }
 
-    guard let fullName = nominalResolution.fullyQualifiedName(of: nominal) else {
+    guard let nominal = symbolTable.lookupType(nominalNode.name.text, parent: parent?.swiftNominal) else {
       return nil
     }
+    return self.importedNominalType(nominal)
+  }
+
+  /// Try to resolve the given nominal type node into its imported representation.
+  func importedNominalType(
+    _ typeNode: TypeSyntax
+  ) -> ImportedNominalType? {
+    guard let swiftType = try? SwiftType(typeNode, symbolTable: self.symbolTable) else {
+      return nil
+    }
+    guard let swiftNominalDecl = swiftType.asNominalTypeDeclaration else {
+      return nil
+    }
+    guard let nominalNode = symbolTable.parsedModule.nominalTypeSyntaxNodes[swiftNominalDecl] else {
+      return nil
+    }
+    guard nominalNode.shouldImport(log: log) else {
+      return nil
+    }
+    return importedNominalType(swiftNominalDecl)
+  }
+
+  func importedNominalType(_ nominal: SwiftNominalTypeDeclaration) -> ImportedNominalType? {
+    let fullName = nominal.qualifiedName
 
     if let alreadyImported = importedTypes[fullName] {
       return alreadyImported
@@ -183,19 +193,19 @@ extension Swift2JavaTranslator {
 
     // Determine the nominal type kind.
     let kind: NominalTypeKind
-    switch Syntax(nominal).as(SyntaxEnum.self) {
-    case .actorDecl:  kind = .actor
-    case .classDecl:  kind = .class
-    case .enumDecl:   kind = .enum
-    case .structDecl: kind = .struct
+    switch nominal.kind {
+    case .actor:  kind = .actor
+    case .class:  kind = .class
+    case .enum:   kind = .enum
+    case .struct: kind = .struct
     default: return nil
     }
 
     let importedNominal = ImportedNominalType(
-      swiftTypeName: fullName,
+      swiftNominal: nominal,
       javaType: .class(
         package: javaPackage,
-        name: fullName
+        name: nominal.qualifiedName
       ),
       kind: kind
     )

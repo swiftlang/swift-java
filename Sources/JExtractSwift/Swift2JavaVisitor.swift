@@ -33,7 +33,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   var currentType: ImportedNominalType? { typeContext.last?.type }
 
   /// The current type name as a nested name like A.B.C.
-  var currentTypeName: String? { self.currentType?.swiftTypeName }
+  var currentTypeName: String? { self.currentType?.swiftNominal.qualifiedName }
 
   var log: Logger { translator.log }
 
@@ -62,7 +62,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
     log.debug("Visit \(node.kind): '\(node.qualifiedNameForDebug)'")
-    guard let importedNominalType = translator.importedNominalType(node) else {
+    guard let importedNominalType = translator.importedNominalType(node, parent: self.currentType) else {
       return .skipChildren
     }
 
@@ -78,7 +78,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     log.debug("Visit \(node.kind): \(node.qualifiedNameForDebug)")
-    guard let importedNominalType = translator.importedNominalType(node) else {
+    guard let importedNominalType = translator.importedNominalType(node, parent: self.currentType) else {
       return .skipChildren
     }
 
@@ -95,9 +95,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
   override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
     // Resolve the extended type of the extension as an imported nominal, and
     // recurse if we found it.
-    guard let nominal = translator.nominalResolution.extendedType(of: node),
-      let importedNominalType = translator.importedNominalType(nominal)
-    else {
+    guard let importedNominalType = translator.importedNominalType(node.extendedType) else {
       return .skipChildren
     }
 
