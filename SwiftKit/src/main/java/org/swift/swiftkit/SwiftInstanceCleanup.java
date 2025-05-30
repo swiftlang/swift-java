@@ -19,14 +19,11 @@ import java.lang.foreign.MemorySegment;
 /**
  * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
  */
-interface SwiftInstanceCleanup extends Runnable {
-}
-
-record SwiftValueCleanup(
+record SwiftInstanceCleanup(
         MemorySegment selfPointer,
         SwiftAnyType selfType,
         Runnable markAsDestroyed
-) implements SwiftInstanceCleanup {
+) implements Runnable {
 
     @Override
     public void run() {

@@ -20,9 +20,12 @@ import java.lang.foreign.MemorySegment;
  * Represents a wrapper around a Swift heap object, e.g. a {@code class} or an {@code actor}.
  */
 public interface SwiftHeapObject {
-    default MemorySegment $instance() {
+    MemorySegment $memorySegment();
+
+    /**
+     * Pointer to the instance.
+     */
+    public default MemorySegment $instance() {
         return this.$memorySegment().get(SwiftValueLayout.SWIFT_POINTER, 0);
     }
-
-    MemorySegment $memorySegment();
 }

@@ -36,10 +36,10 @@ public interface SwiftArena extends SegmentAllocator {
     }
 
     /**
-     * Register a struct, enum or other non-reference counted Swift object.
+     * Register a Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
      */
-    void register(SwiftValue value);
+    void register(SwiftInstance value);
 
 }
 

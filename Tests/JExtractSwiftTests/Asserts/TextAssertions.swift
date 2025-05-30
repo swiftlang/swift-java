@@ -41,7 +41,7 @@ func assertOutput(
   case .swift:
     try translator.writeSwiftThunkSources(outputDirectory: "/fake", printer: &printer)
   case .java:
-    try translator.writeExportedJavaSources(outputDirectory: "/fake", printer: &printer)
+    try translator.writeJavaBindingsSources(outputDirectory: "/fake", printer: &printer)
   }
   output = printer.finalize()
 

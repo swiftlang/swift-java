@@ -127,68 +127,11 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 }
 
-public final class ImportedVariable: ImportedDecl, CustomStringConvertible {
-
-  public var module: String
-
-  /// Parent type if this is a type member.
-  var parentType: SwiftType
-
-  /// The variable name.
-  public var name: String
-
-  /// The value type
-  var type: SwiftType
-
-  /// The syntax of the variable
-  public var swiftDecl: any DeclSyntaxProtocol
-
-  /// Function signatures for accessors.
-  var accessors: [ImportedFunc]
-
-  init(
-    module: String,
-    parentType: SwiftType,
-    name: String,
-    type: SwiftType,
-    swiftDecl: any DeclSyntaxProtocol,
-    accessors: [ImportedFunc]
-  ) {
-    self.module = module
-    self.parentType = parentType
-    self.name = name
-    self.type = type
-    self.swiftDecl = swiftDecl
-    self.accessors = accessors
-  }
-
-  public var description: String {
-    """
-    ImportedVaraiable {
-      module: \(module)
-      parentType: \(parentType)
-      name: \(name)
-      type: \(type)
-      signature: \(self.swiftDecl.signatureString)
-    }
-    """
-  }
-}
-
 extension ImportedFunc: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Bool {
-    return lhs === rhs
-  }
-}
-
-extension ImportedVariable: Hashable {
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(self))
-  }
-  public static func == (lhs: ImportedVariable, rhs: ImportedVariable) -> Bool {
     return lhs === rhs
   }
 }

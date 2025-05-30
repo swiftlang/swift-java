@@ -13,11 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import JavaTypes
 import SwiftBasicFormat
 import SwiftParser
 import SwiftSyntax
-
-import JavaTypes
 
 // ==== ---------------------------------------------------------------------------------------------------------------
 // MARK: File writing
@@ -27,12 +26,12 @@ let PATH_SEPARATOR = "/"  // TODO: Windows
 extension Swift2JavaTranslator {
 
   /// Every imported public type becomes a public class in its own file in Java.
-  public func writeExportedJavaSources(outputDirectory: String) throws {
+  public func writeJavaBindingsSources(outputDirectory: String) throws {
     var printer = CodePrinter()
-    try writeExportedJavaSources(outputDirectory: outputDirectory, printer: &printer)
+    try writeJavaBindingsSources(outputDirectory: outputDirectory, printer: &printer)
   }
 
-  public func writeExportedJavaSources(outputDirectory: String, printer: inout CodePrinter) throws {
+  public func writeJavaBindingsSources(outputDirectory: String, printer: inout CodePrinter) throws {
     for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.swiftNominal.name).java"
       log.info("Printing contents: \(filename)")
@@ -120,12 +119,12 @@ extension Swift2JavaTranslator {
         }
         """
       )
-      printer.print("")
+      printer.println()
 
       // Layout of the class
       printClassMemoryLayout(&printer, decl)
 
-      printer.print("")
+      printer.println()
 
       printer.print(
         """
@@ -184,14 +183,9 @@ extension Swift2JavaTranslator {
   package func printNominal(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
   ) {
-    let parentProtocol: String
-    if decl.swiftNominal.isReferenceType {
-      parentProtocol = " implements SwiftHeapObject"
-    } else {
-      parentProtocol = ""
-    }
+    let baseProtocol = decl.swiftNominal.isReferenceType ? "SwiftHeapObject" : "SwiftValue"
 
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends SwiftValue\(parentProtocol)") { printer in
+    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends SwiftInstance implements \(baseProtocol)") { printer in
       // Constants
       printClassConstants(printer: &printer)
 
