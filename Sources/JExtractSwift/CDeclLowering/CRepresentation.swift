@@ -24,10 +24,22 @@ extension CType {
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
-      if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType,
-        let primitiveCType = knownType.primitiveCType {
-        self = primitiveCType
-        return
+      if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
+        if let primitiveCType = knownType.primitiveCType {
+          self = primitiveCType
+          return
+        }
+
+        switch knownType {
+        case .unsafePointer where nominalType.genericArguments?.count == 1:
+          self = .pointer(.qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0])))
+          return
+        case .unsafeMutablePointer where nominalType.genericArguments?.count == 1:
+          self = .pointer(try CType(cdeclType: nominalType.genericArguments![0]))
+          return
+        default:
+          break
+        }
       }
 
       throw CDeclToCLoweringError.invalidNominalType(nominalType.nominalTypeDecl)
@@ -109,7 +121,8 @@ extension KnownStandardLibraryType {
     case .unsafeRawPointer: .pointer(
       .qualified(const: true, volatile: false, type: .void)
     )
-    case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer:
+    case .void: .void
+    case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string:
        nil
     }
   }

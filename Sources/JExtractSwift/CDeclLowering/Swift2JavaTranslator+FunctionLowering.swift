@@ -29,8 +29,7 @@ extension Swift2JavaTranslator {
       enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
       symbolTable: symbolTable
     )
-
-    return try lowerFunctionSignature(signature)
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: .function)
   }
 
   /// Lower the given initializer to a C-compatible entrypoint,
@@ -47,16 +46,57 @@ extension Swift2JavaTranslator {
       symbolTable: symbolTable
     )
 
-    return try lowerFunctionSignature(signature)
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: .initializer)
   }
+
+  /// Lower the given variable decl to a C-compatible entrypoint,
+  /// providing all of the mappings between the parameter and result types
+  /// of the original function and its `@_cdecl` counterpart.
+  @_spi(Testing)
+  public func lowerFunctionSignature(
+    _ decl: VariableDeclSyntax,
+    isSet: Bool,
+    enclosingType: TypeSyntax? = nil
+  ) throws -> LoweredFunctionSignature? {
+    let supportedAccessors = decl.supportedAccessorKinds(binding: decl.bindings.first!)
+    guard supportedAccessors.contains(isSet ? .set : .get) else {
+      return nil
+    }
+
+    let signature = try SwiftFunctionSignature(
+      decl,
+      isSet: isSet,
+      enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
+      symbolTable: symbolTable
+    )
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: isSet ? .setter : .getter)
+  }
+}
+
+/// Responsible for lowering Swift API to C API.
+struct CdeclLowering {
+  var swiftStdlibTypes: SwiftStandardLibraryTypes
 
   /// Lower the given Swift function signature to a Swift @_cdecl function signature,
   /// which is C compatible, and the corresponding Java method signature.
   ///
   /// Throws an error if this function cannot be lowered for any reason.
   func lowerFunctionSignature(
-    _ signature: SwiftFunctionSignature
+    _ signature: SwiftFunctionSignature,
+    apiKind: SwiftAPIKind
   ) throws -> LoweredFunctionSignature {
+    // Lower the self parameter.
+    let loweredSelf: LoweredParameter? = switch signature.selfParameter {
+    case .instance(let selfParameter):
+      try lowerParameter(
+        selfParameter.type,
+        convention: selfParameter.convention,
+        parameterName: selfParameter.parameterName ?? "self"
+      )
+    case nil, .initializer(_), .staticMethod(_):
+      nil
+    }
+
     // Lower all of the parameters.
     let loweredParameters = try signature.parameters.enumerated().map { (index, param) in
       try lowerParameter(
@@ -67,116 +107,46 @@ extension Swift2JavaTranslator {
     }
 
     // Lower the result.
-    var loweredResult = try lowerParameter(
-      signature.result.type,
-      convention: .byValue,
-      parameterName: "_result"
-    )
-
-    // If the result type doesn't lower to either empty (void) or a single
-    // result, make it indirect.
-    let indirectResult: Bool
-    if loweredResult.cdeclParameters.count == 0 {
-      // void result type
-      indirectResult = false
-    } else if loweredResult.cdeclParameters.count == 1,
-              loweredResult.cdeclParameters[0].canBeDirectReturn {
-      // Primitive result type
-      indirectResult = false
-    } else {
-      loweredResult = try lowerParameter(
-        signature.result.type,
-        convention: .inout,
-        parameterName: "_result"
-      )
-      indirectResult = true
-    }
-
-    // Lower the self parameter.
-    let loweredSelf = try signature.selfParameter.flatMap { selfParameter in
-      switch selfParameter {
-      case .instance(let selfParameter):
-        try lowerParameter(
-          selfParameter.type,
-          convention: selfParameter.convention,
-          parameterName: selfParameter.parameterName ?? "self"
-        )
-      case .initializer, .staticMethod:
-        nil
-      }
-    }
-
-    // Collect all of the lowered parameters for the @_cdecl function.
-    var allLoweredParameters: [LoweredParameters] = []
-    var cdeclLoweredParameters: [SwiftParameter] = []
-    allLoweredParameters.append(contentsOf: loweredParameters)
-    cdeclLoweredParameters.append(
-      contentsOf: loweredParameters.flatMap { $0.cdeclParameters }
-    )
-
-    // Lower self.
-    if let loweredSelf {
-      allLoweredParameters.append(loweredSelf)
-      cdeclLoweredParameters.append(contentsOf: loweredSelf.cdeclParameters)
-    }
-
-    // Lower indirect results.
-    let cdeclResult: SwiftResult
-    if indirectResult {
-      cdeclLoweredParameters.append(
-        contentsOf: loweredResult.cdeclParameters
-      )
-      cdeclResult = .init(convention: .direct, type: .tuple([]))
-    } else if loweredResult.cdeclParameters.count == 1,
-              let primitiveResult = loweredResult.cdeclParameters.first {
-      cdeclResult = .init(convention: .direct, type: primitiveResult.type)
-    } else if loweredResult.cdeclParameters.count == 0 {
-      cdeclResult = .init(convention: .direct, type: .tuple([]))
-    } else {
-      fatalError("Improper lowering of result for \(signature)")
-    }
-
-    let cdeclSignature = SwiftFunctionSignature(
-      selfParameter: nil,
-      parameters: cdeclLoweredParameters,
-      result: cdeclResult
-    )
+    let loweredResult = try lowerResult(signature.result.type)
 
     return LoweredFunctionSignature(
       original: signature,
-      cdecl: cdeclSignature,
-      parameters: allLoweredParameters,
+      apiKind: apiKind,
+      selfParameter: loweredSelf,
+      parameters: loweredParameters,
       result: loweredResult
     )
   }
 
+  /// Lower a Swift function parameter type to cdecl parameters.
+  ///
+  /// For example, Swift parameter `arg value: inout Int` can be lowered with
+  /// `lowerParameter(intTy, .inout, "value")`.
+  ///
+  /// - Parameters:
+  ///   - type: The parameter type.
+  ///   - convention: the parameter convention, e.g. `inout`.
+  ///   - parameterName: The name of the parameter.
+  ///
   func lowerParameter(
     _ type: SwiftType,
     convention: SwiftParameterConvention,
     parameterName: String
-  ) throws -> LoweredParameters {
+  ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, we just
-    // need to add the corresponding C [arameter.
-    if let cType = try? CType(cdeclType: type), convention != .inout {
-      _ = cType
-      return LoweredParameters(
-        cdeclParameters: [
-          SwiftParameter(
-            convention: convention,
-            parameterName: parameterName,
-            type: type,
-            canBeDirectReturn: true
-          )
-        ]
-      )
+    // return it.
+    if let _ = try? CType(cdeclType: type) {
+      if convention != .inout {
+        return LoweredParameter(
+          cdeclParameters: [SwiftParameter(convention: .byValue, parameterName: parameterName, type: type)],
+          conversion: .placeholder
+        )
+      }
     }
 
     switch type {
-    case .function, .optional:
-      throw LoweringError.unhandledType(type)
-
-    case .metatype:
-      return LoweredParameters(
+    case .metatype(let instanceType):
+      return LoweredParameter(
         cdeclParameters: [
           SwiftParameter(
             convention: .byValue,
@@ -185,98 +155,271 @@ extension Swift2JavaTranslator {
               SwiftNominalType(
                 nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]
               )
-            ),
-            canBeDirectReturn: true
+            )
           )
-        ]
+        ],
+        conversion: .unsafeCastPointer(.placeholder, swiftType: instanceType)
       )
 
     case .nominal(let nominal):
-      // Types from the Swift standard library that we know about.
-      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType,
-         convention != .inout {
-        // Typed pointers are mapped down to their raw forms in cdecl entry
-        // points. These can be passed through directly.
-        if knownType == .unsafePointer || knownType == .unsafeMutablePointer {
-          let isMutable = knownType == .unsafeMutablePointer
-          let cdeclPointerType = isMutable
-            ? swiftStdlibTypes[.unsafeMutableRawPointer]
-            : swiftStdlibTypes[.unsafeRawPointer]
-          return LoweredParameters(
-            cdeclParameters: [
-              SwiftParameter(
-                convention: convention,
-                parameterName: parameterName + "_pointer",
-                type: SwiftType.nominal(
-                  SwiftNominalType(nominalTypeDecl: cdeclPointerType)
-                ),
-                canBeDirectReturn: true
-              )
-            ]
-          )
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        if convention == .inout {
+          // FIXME: Support non-trivial 'inout' for builtin types.
+          throw LoweringError.inoutNotSupported(type)
         }
+        switch knownType {
+        case .unsafePointer, .unsafeMutablePointer:
+          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
+            throw LoweringError.unhandledType(type)
+          }
+          // Typed pointers are mapped down to their raw forms in cdecl entry
+          // points. These can be passed through directly.
+          let isMutable = knownType == .unsafeMutablePointer
+          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
+          let paramType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
+          return LoweredParameter(
+            cdeclParameters: [SwiftParameter(convention: .byValue, parameterName: parameterName, type: paramType)],
+            conversion: .typedPointer(.placeholder, swiftType: genericArgs[0])
+          )
 
-        // Typed buffer pointers are mapped down to a (pointer, count) pair
-        // so those parts can be passed through directly.
-        if knownType == .unsafeBufferPointer || knownType == .unsafeMutableBufferPointer {
+        case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
+            throw LoweringError.unhandledType(type)
+          }
+          // Typed pointers are lowered to (raw-pointer, count) pair.
           let isMutable = knownType == .unsafeMutableBufferPointer
-          let cdeclPointerType = isMutable
-            ? swiftStdlibTypes[.unsafeMutableRawPointer]
-            : swiftStdlibTypes[.unsafeRawPointer]
-          return LoweredParameters(
+          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
+
+          return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
-                convention: convention,
-                parameterName: parameterName + "_pointer",
-                type: SwiftType.nominal(
-                  SwiftNominalType(nominalTypeDecl: cdeclPointerType)
-                )
+                convention: .byValue, parameterName: "\(parameterName)_pointer",
+                type: .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
               ),
               SwiftParameter(
-                convention: convention,
-                parameterName: parameterName + "_count",
-                type: SwiftType.nominal(
-                  SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int])
+                convention: .byValue, parameterName: "\(parameterName)_count",
+                type: .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int]))
+              ),
+            ], conversion: .initialize(
+              type,
+              arguments: [
+                LabeledArgument(
+                  label: "start",
+                  argument: .typedPointer(.explodedComponent(.placeholder, component: "pointer"), swiftType: genericArgs[0])
+                ),
+                LabeledArgument(
+                  label: "count",
+                  argument: .explodedComponent(.placeholder, component: "count")
                 )
-              )
-            ]
+              ]
+            )
           )
+
+        case .string:
+          // 'String' is passed in by C string. i.e. 'UnsafePointer<Int8>' ('const uint8_t *')
+          if knownType == .string {
+            return LoweredParameter(
+              cdeclParameters: [
+                SwiftParameter(
+                  convention: .byValue,
+                  parameterName: parameterName,
+                  type: .nominal(SwiftNominalType(
+                    nominalTypeDecl: swiftStdlibTypes.unsafePointerDecl,
+                    genericArguments: [
+                      .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int8]))
+                    ]
+                  ))
+                )
+              ],
+              conversion: .initialize(type, arguments: [
+                LabeledArgument(label: "cString", argument: .placeholder)
+              ])
+            )
+          }
+
+        default:
+          // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
+          throw LoweringError.unhandledType(type)
         }
       }
 
-      // Arbitrary types are lowered to raw pointers that either "are" the
-      // reference (for classes and actors) or will point to it.
-      let canBeDirectReturn = switch nominal.nominalTypeDecl.kind {
-        case .actor, .class: true
-        case .enum, .protocol, .struct: false
-      }
-
+      // Arbitrary nominal types are passed-in as an pointer.
       let isMutable = (convention == .inout)
-      return LoweredParameters(
+      let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
+      let parameterType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
+
+      return LoweredParameter(
         cdeclParameters: [
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .nominal(
-              SwiftNominalType(
-                nominalTypeDecl: isMutable
-                  ? swiftStdlibTypes[.unsafeMutableRawPointer]
-                  : swiftStdlibTypes[.unsafeRawPointer]
-              )
-            ),
-            canBeDirectReturn: canBeDirectReturn
-          )
-        ]
+            type: parameterType
+          ),
+        ],
+        conversion: .pointee(.typedPointer(.placeholder, swiftType: type))
       )
 
     case .tuple(let tuple):
-      let parameterNames = tuple.indices.map { "\(parameterName)_\($0)" }
-      let loweredElements: [LoweredParameters] = try zip(tuple, parameterNames).map { element, name in
-        try lowerParameter(element, convention: convention, parameterName: name)
+      if tuple.count == 1 {
+        return try lowerParameter(tuple[0], convention: convention, parameterName: parameterName)
       }
-      return LoweredParameters(
-        cdeclParameters: loweredElements.flatMap { $0.cdeclParameters }
+      if convention == .inout {
+        throw LoweringError.inoutNotSupported(type)
+      }
+      var parameters: [SwiftParameter] = []
+      var conversions: [ConversionStep] = []
+      for (idx, element) in tuple.enumerated() {
+        // FIXME: Use tuple element label.
+        let cdeclName = "\(parameterName)_\(idx)"
+        let lowered = try lowerParameter(element, convention: convention, parameterName: cdeclName)
+
+        parameters.append(contentsOf: lowered.cdeclParameters)
+        conversions.append(lowered.conversion)
+      }
+      return LoweredParameter(cdeclParameters: parameters, conversion: .tuplify(conversions))
+
+    case .function(let fn) where fn.parameters.isEmpty && fn.resultType.isVoid:
+      return LoweredParameter(
+        cdeclParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: parameterName,
+            type: .function(SwiftFunctionType(convention: .c, parameters: [], resultType: fn.resultType))
+          )
+        ],
+        // '@convention(c) () -> ()' is compatible with '() -> Void'.
+        conversion: .placeholder
       )
+
+    case .function, .optional:
+      // FIXME: Support other function types than '() -> Void'.
+      throw LoweringError.unhandledType(type)
+    }
+  }
+
+  /// Lower a Swift result type to cdecl parameters and return type.
+  ///
+  /// - Parameters:
+  ///   - type: The return type.
+  ///   - outParameterName: If the type is lowered to a indirect return, this parameter name should be used.
+  func lowerResult(
+    _ type: SwiftType,
+    outParameterName: String = "_result"
+  ) throws -> LoweredResult {
+    // If there is a 1:1 mapping between this Swift type and a C type, we just
+    // return it.
+    if let cType = try? CType(cdeclType: type) {
+      _ = cType
+      return LoweredResult(cdeclResultType: type, cdeclOutParameters: [], conversion: .placeholder);
+    }
+
+    switch type {
+    case .metatype:
+      // 'unsafeBitcast(<result>, to: UnsafeRawPointer.self)' as  'UnsafeRawPointer'
+
+      let resultType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]))
+      return LoweredResult(
+        cdeclResultType: resultType,
+        cdeclOutParameters: [],
+        conversion: .unsafeCastPointer(.placeholder, swiftType: resultType)
+      )
+
+    case .nominal(let nominal):
+      // Types from the Swift standard library that we know about.
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        switch knownType {
+        case .unsafePointer, .unsafeMutablePointer:
+          // Typed pointers are lowered to corresponding raw forms.
+          let isMutable = knownType == .unsafeMutablePointer
+          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
+          let resultType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
+          return LoweredResult(
+            cdeclResultType: resultType,
+            cdeclOutParameters: [],
+            conversion: .initialize(resultType, arguments: [LabeledArgument(argument: .placeholder)])
+          )
+
+        case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+          // Typed pointers are lowered to (raw-pointer, count) pair.
+          let isMutable = knownType == .unsafeMutableBufferPointer
+          let rawPointerType = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
+          return try lowerResult(
+            .tuple([
+              .nominal(SwiftNominalType(nominalTypeDecl: rawPointerType)),
+              .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int]))
+            ]),
+            outParameterName: outParameterName
+          )
+
+        case .void:
+          return LoweredResult(cdeclResultType: .void, cdeclOutParameters: [], conversion: .placeholder)
+
+        case .string:
+          // Returning string is not supported at this point.
+          throw LoweringError.unhandledType(type)
+
+        default:
+          // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
+          throw LoweringError.unhandledType(type)
+        }
+      }
+
+      // Arbitrary nominal types are indirectly returned.
+      return LoweredResult(
+        cdeclResultType: .void,
+        cdeclOutParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: outParameterName,
+            type: .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.unsafeMutableRawPointer]))
+          )
+        ],
+        conversion: .populatePointer(name: outParameterName, assumingType: type, to: .placeholder)
+      )
+
+    case .tuple(let tuple):
+      if tuple.count == 1 {
+        return try lowerResult(tuple[0], outParameterName: outParameterName)
+      }
+
+      var parameters: [SwiftParameter] = []
+      var conversions: [ConversionStep] = []
+      for (idx, element) in tuple.enumerated() {
+        let outName = "\(outParameterName)_\(idx)"
+        let lowered = try lowerResult(element, outParameterName: outName)
+
+        // Convert direct return values to typed mutable pointers.
+        // E.g. (Int8, Int8) is lowered to '_ result_0: UnsafePointer<Int8>, _ result_1: UnsafePointer<Int8>'
+        if !lowered.cdeclResultType.isVoid {
+          let parameterName = lowered.cdeclOutParameters.isEmpty ? outName : "\(outName)_return"
+          let parameter = SwiftParameter(
+            convention: .byValue,
+            parameterName: parameterName,
+            type: .nominal(SwiftNominalType(
+              nominalTypeDecl: swiftStdlibTypes.unsafeMutablePointerDecl,
+              genericArguments: [lowered.cdeclResultType]
+            ))
+          )
+          parameters.append(parameter)
+          conversions.append(.populatePointer(
+            name: parameterName,
+            to: lowered.conversion
+          ))
+        } else {
+          // If the element returns void, it should already be a no-result conversion.
+          parameters.append(contentsOf: lowered.cdeclOutParameters)
+          conversions.append(lowered.conversion)
+        }
+      }
+
+      return LoweredResult(
+        cdeclResultType: .void,
+        cdeclOutParameters: parameters,
+        conversion: .tupleExplode(conversions, name: outParameterName)
+      )
+
+    case .function(_), .optional(_):
+      throw LoweringError.unhandledType(type)
     }
   }
 
@@ -293,243 +436,201 @@ extension Swift2JavaTranslator {
   }
 }
 
-struct LabeledArgument<Element> {
-  var label: String?
-  var argument: Element
+package enum SwiftAPIKind {
+  case function
+  case initializer
+  case getter
+  case setter
 }
 
-extension LabeledArgument: Equatable where Element: Equatable { }
-
-
-struct LoweredParameters: Equatable {
-  /// The lowering of the parameters at the C level in Swift.
+/// Represent a Swift parameter in the cdecl thunk.
+struct LoweredParameter: Equatable {
+  /// Lowered parameters in cdecl thunk.
+  /// One Swift parameter can be lowered to multiple parameters.
+  /// E.g. 'Data' as (baseAddress, length) pair.
   var cdeclParameters: [SwiftParameter]
+
+  /// Conversion to convert the cdecl thunk parameters to the original Swift argument.
+  var conversion: ConversionStep
+
+  init(cdeclParameters: [SwiftParameter], conversion: ConversionStep) {
+    self.cdeclParameters = cdeclParameters
+    self.conversion = conversion
+
+    assert(cdeclParameters.count == conversion.placeholderCount)
+  }
 }
 
-enum LoweringError: Error {
-  case inoutNotSupported(SwiftType)
-  case unhandledType(SwiftType)
+struct LoweredResult: Equatable {
+  /// The return type of the cdecl thunk.
+  var cdeclResultType: SwiftType
+
+  /// Out parameters for populating the returning values.
+  ///
+  /// Currently, if this is not empty, `cdeclResultType` is `Void`. But the thunk
+  /// may utilize both in the future, for example returning the status while
+  /// populating the out parameter.
+  var cdeclOutParameters: [SwiftParameter]
+
+  /// The conversion from the Swift result to cdecl result.
+  var conversion: ConversionStep
+}
+
+extension LoweredResult {
+  /// Whether the result is returned by populating the passed-in pointer parameters.
+  var hasIndirectResult: Bool {
+    !cdeclOutParameters.isEmpty
+  }
 }
 
 @_spi(Testing)
 public struct LoweredFunctionSignature: Equatable {
   var original: SwiftFunctionSignature
-  public var cdecl: SwiftFunctionSignature
 
-  var parameters: [LoweredParameters]
-  var result: LoweredParameters
+  var apiKind: SwiftAPIKind
+
+  var selfParameter: LoweredParameter?
+  var parameters: [LoweredParameter]
+  var result: LoweredResult
+
+  var allLoweredParameters: [SwiftParameter] {
+    var all: [SwiftParameter] = []
+    // Original parameters.
+    for loweredParam in parameters {
+      all += loweredParam.cdeclParameters
+    }
+    // Self.
+    if let selfParameter = self.selfParameter {
+      all += selfParameter.cdeclParameters
+    }
+    // Out parameters.
+    all += result.cdeclOutParameters
+    return all
+  }
+
+  var cdeclSignature: SwiftFunctionSignature {
+    SwiftFunctionSignature(
+      selfParameter: nil,
+      parameters: allLoweredParameters,
+      result: SwiftResult(convention: .direct, type: result.cdeclResultType)
+    )
+  }
 }
 
 extension LoweredFunctionSignature {
   /// Produce the `@_cdecl` thunk for this lowered function signature that will
   /// call into the original function.
-  @_spi(Testing)
   public func cdeclThunk(
     cName: String,
-    swiftFunctionName: String,
+    swiftAPIName: String,
     stdlibTypes: SwiftStandardLibraryTypes
   ) -> FunctionDeclSyntax {
-    var loweredCDecl = cdecl.createFunctionDecl(cName)
 
-    // Add the @_cdecl attribute.
-    let cdeclAttribute: AttributeSyntax = "@_cdecl(\(literal: cName))\n"
-    loweredCDecl.attributes.append(.attribute(cdeclAttribute))
+    let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
+    let returnClause = !result.cdeclResultType.isVoid ? " -> \(result.cdeclResultType.description)" : ""
 
-    // Make it public.
-    loweredCDecl.modifiers.append(
-      DeclModifierSyntax(name: .keyword(.public), trailingTrivia: .space)
+    var loweredCDecl = try! FunctionDeclSyntax(
+      """
+      @_cdecl(\(literal: cName))
+      public func \(raw: cName)(\(raw: cdeclParams))\(raw: returnClause) {
+      }
+      """
     )
 
-    // Create the body.
+    var bodyItems: [CodeBlockItemSyntax] = []
 
-    // Lower "self", if there is one.
-    let parametersToLower: ArraySlice<LoweredParameters>
-    let cdeclToOriginalSelf: ExprSyntax?
-    var initializerType: SwiftType? = nil
-    if let originalSelf = original.selfParameter {
-      switch originalSelf {
-      case .instance(let originalSelfParam):
-        // The instance was provided to the cdecl thunk, so convert it to
-        // its Swift representation.
-        cdeclToOriginalSelf = try! ConversionStep(
-          cdeclToSwift: originalSelfParam.type
-        ).asExprSyntax(
-          isSelf: true,
-          placeholder: originalSelfParam.parameterName ?? "self"
-        )
-        parametersToLower = parameters.dropLast()
-
-      case .staticMethod(let selfType):
-        // Static methods use the Swift type as "self", but there is no
-        // corresponding cdecl parameter.
-        cdeclToOriginalSelf = "\(raw: selfType.description)"
-        parametersToLower = parameters[...]
-
-      case .initializer(let selfType):
-        // Initializers use the Swift type to create the instance. Save it
-        // for later. There is no corresponding cdecl parameter.
-        initializerType = selfType
-        cdeclToOriginalSelf = nil
-        parametersToLower = parameters[...]
-      }
-    } else {
-      cdeclToOriginalSelf = nil
-      parametersToLower = parameters[...]
-    }
-
-    // Lower the remaining arguments.
-    let cdeclToOriginalArguments = parametersToLower.indices.map { index in
-      let originalParam = original.parameters[index]
-      let cdeclToOriginalArg = try! ConversionStep(
-        cdeclToSwift: originalParam.type
-      ).asExprSyntax(
-        isSelf: false,
-        placeholder: originalParam.parameterName ?? "_\(index)"
+    let selfExpr: ExprSyntax?
+    switch original.selfParameter {
+    case .instance(let swiftSelf):
+      // Raise the 'self' from cdecl parameters.
+      selfExpr = self.selfParameter!.conversion.asExprSyntax(
+        placeholder: swiftSelf.parameterName ?? "self",
+        bodyItems: &bodyItems
       )
+    case .staticMethod(let selfType), .initializer(let selfType):
+      selfExpr = "\(raw: selfType.description)"
+    case .none:
+      selfExpr = nil
+    }
 
-      if let argumentLabel = originalParam.argumentLabel {
-        return "\(argumentLabel): \(cdeclToOriginalArg.description)"
+    /// Raise the other parameters.
+    let paramExprs = parameters.enumerated().map { idx, param in
+      param.conversion.asExprSyntax(
+        placeholder: original.parameters[idx].parameterName ?? "_\(idx)",
+        bodyItems: &bodyItems
+      )!
+    }
+
+    // Build callee expression.
+    let callee: ExprSyntax = if let selfExpr {
+      if case .initializer = self.apiKind {
+        // Don't bother to create explicit ${Self}.init expression.
+        selfExpr
       } else {
-        return cdeclToOriginalArg.description
+        ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
       }
-    }
-
-    // Form the call expression.
-    let callArguments: ExprSyntax = "(\(raw: cdeclToOriginalArguments.joined(separator: ", ")))"
-    let callExpression: ExprSyntax
-    if let initializerType {
-      callExpression = "\(raw: initializerType.description)\(callArguments)"
-    } else if let cdeclToOriginalSelf {
-      callExpression = "\(cdeclToOriginalSelf).\(raw: swiftFunctionName)\(callArguments)"
     } else {
-      callExpression = "\(raw: swiftFunctionName)\(callArguments)"
+      ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(swiftAPIName)))
     }
 
-    // Handle the return.
-    if cdecl.result.type.isVoid && original.result.type.isVoid {
-      // Nothing to return.
-      loweredCDecl.body = """
-        {
-          \(callExpression)
+    // Build the result.
+    let resultExpr: ExprSyntax
+    switch apiKind {
+    case .function, .initializer:
+      let arguments = paramExprs.enumerated()
+        .map { (i, argument) -> String in
+          let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument
+          return LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argExpr).description
         }
-        """
+        .joined(separator: ", ")
+      resultExpr = "\(callee)(\(raw: arguments))"
+
+    case .getter:
+      assert(paramExprs.isEmpty)
+      resultExpr = callee
+
+    case .setter:
+      assert(paramExprs.count == 1)
+      resultExpr = "\(callee) = \(paramExprs[0])"
+    }
+
+    // Lower the result.
+    if !original.result.type.isVoid {
+      let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(
+        placeholder: resultExpr.description,
+        bodyItems: &bodyItems
+      )
+
+      if let loweredResult {
+        bodyItems.append(!result.cdeclResultType.isVoid ? "return \(loweredResult)" : "\(loweredResult)")
+      }
     } else {
-      // Determine the necessary conversion of the Swift return value to the
-      // cdecl return value.
-      let resultConversion = try! ConversionStep(
-        swiftToCDecl: original.result.type,
-        stdlibTypes: stdlibTypes
-      )
+      bodyItems.append("\(resultExpr)")
+    }
 
-      var bodyItems: [CodeBlockItemSyntax] = []
-
-      // If the are multiple places in the result conversion that reference
-      // the placeholder, capture the result of the call in a local variable.
-      // This prevents us from calling the function multiple times.
-      let originalResult: ExprSyntax
-      if resultConversion.placeholderCount > 1 {
-        bodyItems.append("""
-            let __swift_result = \(callExpression)
-          """
-        )
-        originalResult = "__swift_result"
-      } else {
-        originalResult = callExpression
+    loweredCDecl.body!.statements = CodeBlockItemListSyntax {
+      bodyItems.map {
+        $0.with(\.leadingTrivia, [.newlines(1), .spaces(2)])
       }
-
-      if cdecl.result.type.isVoid {
-        // Indirect return. This is a regular return in Swift that turns
-        // into an assignment via the indirect parameters. We do a cdeclToSwift
-        // conversion on the left-hand side of the tuple to gather all of the
-        // indirect output parameters we need to assign to, and the result
-        // conversion is the corresponding right-hand side.
-        let cdeclParamConversion = try! ConversionStep(
-          cdeclToSwift: original.result.type
-        )
-
-        // For each indirect result, initialize the value directly with the
-        // corresponding element in the converted result.
-        bodyItems.append(
-          contentsOf: cdeclParamConversion.initialize(
-            placeholder: "_result",
-            from: resultConversion,
-            otherPlaceholder: originalResult.description
-          )
-        )
-      } else {
-        // Direct return. Just convert the expression.
-        let convertedResult = resultConversion.asExprSyntax(
-          isSelf: true,
-          placeholder: originalResult.description
-        )
-
-        bodyItems.append("""
-            return \(convertedResult)
-          """
-        )
-      }
-
-      loweredCDecl.body = CodeBlockSyntax(
-        leftBrace: .leftBraceToken(trailingTrivia: .newline),
-        statements: .init(bodyItems.map { $0.with(\.trailingTrivia, .newline) })
-      )
     }
 
     return loweredCDecl
   }
+
+  @_spi(Testing)
+  public func cFunctionDecl(cName: String) throws -> CFunction {
+    return CFunction(
+      resultType: try CType(cdeclType: self.result.cdeclResultType),
+      name: cName,
+      parameters: try self.allLoweredParameters.map {
+        try CParameter(name: $0.parameterName, type: CType(cdeclType: $0.type).parameterDecay)
+      },
+      isVariadic: false
+    )
+  }
 }
 
-extension ConversionStep {
-  /// Form a set of statements that initializes the placeholders within
-  /// the given conversion step from ones in the other step, effectively
-  /// exploding something like `(a, (b, c)) = (d, (e, f))` into
-  /// separate initializations for a, b, and c from d, e, and f, respectively.
-  func initialize(
-    placeholder: String,
-    from otherStep: ConversionStep,
-    otherPlaceholder: String
-  ) -> [CodeBlockItemSyntax] {
-    // Create separate assignments for each element in paired tuples.
-    if case .tuplify(let elements) = self,
-        case .tuplify(let otherElements) = otherStep {
-      assert(elements.count == otherElements.count)
-
-      return elements.indices.flatMap { index in
-        elements[index].initialize(
-          placeholder: "\(placeholder)_\(index)",
-          from: otherElements[index],
-          otherPlaceholder: "\(otherPlaceholder)_\(index)"
-        )
-      }
-    }
-
-    // Look through "pass indirectly" steps; they do nothing here.
-    if case .passIndirectly(let conversionStep) = self {
-      return conversionStep.initialize(
-        placeholder: placeholder,
-        from: otherStep,
-        otherPlaceholder: otherPlaceholder
-      )
-    }
-
-    // The value we're initializing from.
-    let otherExpr = otherStep.asExprSyntax(
-      isSelf: false,
-      placeholder: otherPlaceholder
-    )
-
-    // If we have a "pointee" on where we are performing initialization, we
-    // need to instead produce an initialize(to:) call.
-    if case .pointee(let innerSelf) = self {
-      let selfPointerExpr = innerSelf.asExprSyntax(
-        isSelf: true,
-        placeholder: placeholder
-      )
-
-      return [ "  \(selfPointerExpr).initialize(to: \(otherExpr))" ]
-    }
-
-    let selfExpr = self.asExprSyntax(isSelf: true, placeholder: placeholder)
-    return [ "  \(selfExpr) = \(otherExpr)" ]
-  }
+enum LoweringError: Error {
+  case inoutNotSupported(SwiftType)
+  case unhandledType(SwiftType)
 }

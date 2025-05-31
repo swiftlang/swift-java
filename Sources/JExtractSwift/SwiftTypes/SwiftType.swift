@@ -22,6 +22,10 @@ enum SwiftType: Equatable {
   indirect case optional(SwiftType)
   case tuple([SwiftType])
 
+  static var void: Self {
+    return .tuple([])
+  }
+
   var asNominalType: SwiftNominalType? {
     switch self {
     case .nominal(let nominal): nominal
@@ -37,7 +41,29 @@ enum SwiftType: Equatable {
   /// Whether this is the "Void" type, which is actually an empty
   /// tuple.
   var isVoid: Bool {
-    return self == .tuple([])
+    switch self {
+    case .tuple([]):
+      return true
+    case .nominal(let nominal):
+      return nominal.parent == nil && nominal.nominalTypeDecl.moduleName == "Swift" && nominal.nominalTypeDecl.name == "Void"
+    default:
+      return false
+    }
+  }
+
+  /// Reference type
+  ///
+  ///  * Mutations don't require 'inout' convention.
+  ///  * The value is a pointer of the instance data,
+  var isReferenceType: Bool {
+    switch self {
+    case .nominal(let nominal):
+      return nominal.nominalTypeDecl.isReferenceType
+    case .metatype, .function:
+      return true
+    case .optional, .tuple:
+      return false
+    }
   }
 }
 
@@ -83,7 +109,7 @@ struct SwiftNominalType: Equatable {
     nominalTypeDecl: SwiftNominalTypeDeclaration,
     genericArguments: [SwiftType]? = nil
   ) {
-    self.storedParent = parent.map { .nominal($0) }
+    self.storedParent = parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
     self.nominalTypeDecl = nominalTypeDecl
     self.genericArguments = genericArguments
   }
@@ -229,6 +255,27 @@ extension SwiftType {
         parent: parent?.asNominalType,
         nominalTypeDecl: nominalTypeDecl,
         genericArguments: genericArguments
+      )
+    )
+  }
+
+  init?(
+    nominalDecl: NamedDeclSyntax & DeclGroupSyntax,
+    parent: SwiftType?,
+    symbolTable: SwiftSymbolTable
+  ) {
+    guard let nominalTypeDecl = symbolTable.lookupType(
+      nominalDecl.name.text,
+      parent: parent?.asNominalTypeDeclaration
+    ) else {
+      return nil
+    }
+
+    self = .nominal(
+      SwiftNominalType(
+        parent: parent?.asNominalType,
+        nominalTypeDecl: nominalTypeDecl,
+        genericArguments: nil
       )
     )
   }

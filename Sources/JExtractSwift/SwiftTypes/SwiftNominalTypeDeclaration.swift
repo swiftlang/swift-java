@@ -29,6 +29,10 @@ package class SwiftNominalTypeDeclaration {
     case `struct`
   }
 
+  /// The syntax node this declaration is derived from.
+  /// Can be `nil` if this is loaded from a .swiftmodule.
+  var syntax: NominalTypeDeclSyntaxNode?
+
   /// The kind of nominal type.
   var kind: Kind
 
@@ -89,6 +93,15 @@ package class SwiftNominalTypeDeclaration {
       return parent.qualifiedName + "." + name
     } else {
       return name
+    }
+  }
+
+  var isReferenceType: Bool {
+    switch kind {
+    case .actor, .class:
+      return true
+    case .enum, .struct, .protocol:
+      return false
     }
   }
 }

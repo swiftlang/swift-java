@@ -15,11 +15,17 @@
 import SwiftSyntax
 
 struct SwiftResult: Equatable {
-  var convention: SwiftResultConvention
+  var convention: SwiftResultConvention // currently not used.
   var type: SwiftType
 }
 
 enum SwiftResultConvention: Equatable {
   case direct
   case indirect
+}
+
+extension SwiftResult {
+  static var void: Self {
+    return Self(convention: .direct, type: .void)
+  }
 }
