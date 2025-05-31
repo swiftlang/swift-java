@@ -23,6 +23,8 @@ import Glibc
 import CRT
 #elseif canImport(Darwin)
 import Darwin.C
+#elseif canImport(Android)
+import Android
 #endif
 
 public func helloWorld() {
