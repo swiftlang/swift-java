@@ -227,26 +227,17 @@ extension VariableDeclSyntax {
       case .getter:
         return [.get]
       case .accessors(let accessors):
-        var hasGetter = false
-        var hasSetter = false
-
         for accessor in accessors {
-          switch accessor.accessorSpecifier {
-          case .keyword(.get), .keyword(._read), .keyword(.unsafeAddress):
-            hasGetter = true
-          case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress):
-            hasSetter = true
+          switch accessor.accessorSpecifier.tokenKind {
+            // Existence of any write accessor or observer implies this supports read/write.
+          case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress),
+              .keyword(.willSet), .keyword(.didSet):
+            return [.get, .set]
           default: // Ignore willSet/didSet and unknown accessors.
             break
           }
         }
-
-        switch (hasGetter, hasSetter) {
-        case (true, true): return [.get, .set]
-        case (true, false): return [.get]
-        case (false, true): return [.set]
-        case (false, false): break
-        }
+        return [.get]
       }
     }
 

@@ -50,8 +50,8 @@ extension Swift2JavaTranslator {
   }
 
   /// Lower the given variable decl to a C-compatible entrypoint,
-  /// providing all of the mappings between the parameter and result types
-  /// of the original function and its `@_cdecl` counterpart.
+  /// providing the mappings between the `self` and value type of the variable
+  /// and its `@_cdecl` counterpart.
   @_spi(Testing)
   public func lowerFunctionSignature(
     _ decl: VariableDeclSyntax,
@@ -297,7 +297,7 @@ struct CdeclLowering {
     }
   }
 
-  /// Lower a Swift result type to cdecl parameters and return type.
+  /// Lower a Swift result type to cdecl out parameters and return type.
   ///
   /// - Parameters:
   ///   - type: The return type.
