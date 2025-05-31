@@ -68,16 +68,16 @@ public struct CodePrinter {
     }
   }
 
-  public mutating func printTypeDecl(
-    _ text: Any,
+  public mutating func printBraceBlock(
+    _ header: Any,
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
-    body: (inout CodePrinter) -> ()
-  ) {
-    print("\(text) {")
+    body: (inout CodePrinter) throws -> ()
+  ) rethrows {
+    print("\(header) {")
     indent()
-    body(&self)
+    try body(&self)
     outdent()
     print("}", .sloc, function: function, file: file, line: line)
   }
@@ -145,9 +145,10 @@ public struct CodePrinter {
 
   // TODO: remove this in real mode, this just helps visually while working on it
   public mutating func printSeparator(_ text: String) {
-    // TODO: actually use the indentationDepth
+    assert(!text.contains(where: \.isNewline))
     print(
       """
+
       // ==== --------------------------------------------------
       // \(text)
 

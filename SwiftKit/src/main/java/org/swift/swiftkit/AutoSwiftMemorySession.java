@@ -48,38 +48,24 @@ final class AutoSwiftMemorySession implements SwiftArena {
     }
 
     @Override
-    public void register(SwiftHeapObject object) {
-        var statusDestroyedFlag = object.$statusDestroyedFlag();
+    public void register(SwiftInstance instance) {
+        Objects.requireNonNull(instance, "value");
+
+        // We're doing this dance to avoid keeping a strong reference to the value itself
+        var statusDestroyedFlag = instance.$statusDestroyedFlag();
         Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 
-        SwiftHeapObjectCleanup cleanupAction = new SwiftHeapObjectCleanup(
-                object.$memorySegment(),
-                object.$swiftType(),
-                markAsDestroyed
-        );
-        register(object, cleanupAction);
+        MemorySegment resource = instance.$memorySegment();
+        var cleanupAction = new SwiftInstanceCleanup(resource, instance.$swiftType(), markAsDestroyed);
+        cleaner.register(instance, cleanupAction);
     }
 
     // visible for testing
-    void register(SwiftHeapObject object, SwiftHeapObjectCleanup cleanupAction) {
+    void register(SwiftInstance object, SwiftInstanceCleanup cleanupAction) {
         Objects.requireNonNull(object, "obj");
         Objects.requireNonNull(cleanupAction, "cleanupAction");
 
-
         cleaner.register(object, cleanupAction);
-    }
-
-    @Override
-    public void register(SwiftValue value) {
-        Objects.requireNonNull(value, "value");
-
-        // We're doing this dance to avoid keeping a strong reference to the value itself
-        var statusDestroyedFlag = value.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        MemorySegment resource = value.$memorySegment();
-        var cleanupAction = new SwiftValueCleanup(resource, value.$swiftType(), markAsDestroyed);
-        cleaner.register(value, cleanupAction);
     }
 
     @Override

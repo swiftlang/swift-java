@@ -35,15 +35,11 @@ public class MySwiftLibraryTest {
     @Test
     void call_helloWorld() {
         MySwiftLibrary.helloWorld();
-
-        assertNotNull(MySwiftLibrary.helloWorld$address());
     }
 
     @Test
     void call_globalTakeInt() {
         MySwiftLibrary.globalTakeInt(12);
-
-        assertNotNull(MySwiftLibrary.globalTakeInt$address());
     }
 
     @Test

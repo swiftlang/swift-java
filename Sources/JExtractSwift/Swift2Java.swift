@@ -90,8 +90,7 @@ public struct SwiftToJava: ParsableCommand {
 
     try translator.analyze()
     try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
-    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
-    try translator.writeExportedJavaModule(outputDirectory: outputDirectoryJava)
+    try translator.writeJavaBindingsSources(outputDirectory: outputDirectoryJava)
     print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
