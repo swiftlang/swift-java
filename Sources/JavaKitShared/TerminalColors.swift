@@ -12,6 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+
+private var isColorSupported: Bool {
+  let env = ProcessInfo.processInfo.environment
+  if env["NO_COLOR"] != nil {
+    return false
+  }
+  if let term = env["TERM"], term.contains("color") || env["COLORTERM"] != nil {
+    return true
+  }
+  return false
+}
+
 package enum Rainbow: String {
   case black = "\u{001B}[0;30m"
   case red = "\u{001B}[0;31m"
@@ -139,13 +152,17 @@ package extension String {
       self
     }
   }
-  
+
   var `default`: String {
     self.colored(as: .default)
   }
 
   func colored(as color: Rainbow) -> String {
-    "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    return if isColorSupported {
+      "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    } else {
+      self
+    }
   }
 }
 
@@ -185,12 +202,16 @@ package extension Substring {
   var bold: String {
     self.colored(as: .bold)
   }
-  
+
   var `default`: String {
     self.colored(as: .default)
   }
 
   func colored(as color: Rainbow) -> String {
-    "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    return if isColorSupported {
+      "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
+    } else {
+      String(self)
+    }
   }
 }
