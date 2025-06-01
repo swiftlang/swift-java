@@ -45,7 +45,7 @@ public class JavaToSwiftBenchmark {
             System.setProperty("jextract.trace.downcalls", "false");
 
             arena = SwiftArena.ofConfined();
-            obj = new MySwiftClass(arena, 1, 2);
+            obj = new MySwiftClass(1, 2, arena);
         }
 
         @TearDown(Level.Trial)

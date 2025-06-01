@@ -440,7 +440,7 @@ extension Swift2JavaTranslator {
        *
       \(decl.renderCommentSnippet ?? " *")
        */
-      public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
+      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper)), SwiftArena arena) {
         super(() -> {
           var mh$ = \(descClassIdentifier).HANDLE;
           try {

@@ -423,7 +423,7 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public MySwiftClass(SwiftArena arena, long len, long cap) {
+        public MySwiftClass(long len, long cap, SwiftArena arena) {
           super(() -> {
             var mh$ = init_len_cap.HANDLE;
             try {
@@ -475,7 +475,7 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public MySwiftStruct(SwiftArena arena, long len, long cap) {
+        public MySwiftStruct(long len, long cap, SwiftArena arena) {
           super(() -> {
             var mh$ = init_len_cap.HANDLE;
             try {

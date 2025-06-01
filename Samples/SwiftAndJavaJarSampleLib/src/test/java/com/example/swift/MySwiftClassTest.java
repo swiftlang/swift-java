@@ -43,7 +43,7 @@ public class MySwiftClassTest {
     @Test
     void test_MySwiftClass_voidMethod() {
         try(var arena = SwiftArena.ofConfined()) {
-            MySwiftClass o = new MySwiftClass(arena, 12, 42);
+            MySwiftClass o = new MySwiftClass(12, 42, arena);
             o.voidMethod();
         } catch (Throwable throwable) {
             checkPaths(throwable);
@@ -53,7 +53,7 @@ public class MySwiftClassTest {
     @Test
     void test_MySwiftClass_makeIntMethod() {
         try(var arena = SwiftArena.ofConfined()) {
-            MySwiftClass o = new MySwiftClass(arena, 12, 42);
+            MySwiftClass o = new MySwiftClass(12, 42, arena);
             var got = o.makeIntMethod();
             assertEquals(12, got);
         }
@@ -63,7 +63,7 @@ public class MySwiftClassTest {
     @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_len() {
         try(var arena = SwiftArena.ofConfined()) {
-            MySwiftClass o = new MySwiftClass(arena, 12, 42);
+            MySwiftClass o = new MySwiftClass(12, 42, arena);
             var got = o.getLen();
             assertEquals(12, got);
         }
