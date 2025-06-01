@@ -34,20 +34,6 @@ public final class SwiftAnyType {
         this.memorySegment = memorySegment.asReadOnly();
     }
 
-//    public SwiftAnyType(SwiftHeapObject object) {
-//        if (object.$layout().name().isEmpty()) {
-//            throw new IllegalArgumentException("SwiftHeapObject must have a mangled name in order to obtain its SwiftType.");
-//        }
-//
-//        String mangledName = object.$layout().name().get();
-//        var type = SwiftKit.getTypeByMangledNameInEnvironment(mangledName);
-//        if (type.isEmpty()) {
-//            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
-//        }
-//        this.memorySegment = type.get().memorySegment;
-//    }
-
-
     public MemorySegment $memorySegment() {
         return memorySegment;
     }

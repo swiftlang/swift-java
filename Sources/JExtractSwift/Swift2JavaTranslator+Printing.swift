@@ -436,19 +436,6 @@ extension Swift2JavaTranslator {
       """
       /**
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
-       *
-      \(decl.renderCommentSnippet ?? " *")
-       */
-      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
-        this(SwiftArena.ofAuto(), \(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
-      }
-      """
-    )
-
-    printer.print(
-      """
-      /**
-       * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
        *
       \(decl.renderCommentSnippet ?? " *")

@@ -417,16 +417,6 @@ final class MethodImportTests {
         """
         /**
          * Create an instance of {@code MySwiftClass}.
-         *
-         * {@snippet lang=swift :
-         * public init(len: Swift.Int, cap: Swift.Int)
-         * }
-         */
-        public MySwiftClass(long len, long cap) {
-          this(SwiftArena.ofAuto(), len, cap);
-        }
-        /**
-         * Create an instance of {@code MySwiftClass}.
          * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
          *
          * {@snippet lang=swift :
@@ -477,16 +467,6 @@ final class MethodImportTests {
       output,
       expected:
         """
-        /**
-         * Create an instance of {@code MySwiftStruct}.
-         *
-         * {@snippet lang=swift :
-         * public init(len: Swift.Int, cap: Swift.Int)
-         * }
-         */
-        public MySwiftStruct(long len, long cap) {
-          this(SwiftArena.ofAuto(), len, cap);
-        }
         /**
          * Create an instance of {@code MySwiftStruct}.
          * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.

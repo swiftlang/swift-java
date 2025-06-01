@@ -266,8 +266,8 @@ public class SwiftKit {
         }
     }
 
-    public static long release(SwiftHeapObject object) {
-        return retainCount(object.$instance());
+    public static void release(SwiftHeapObject object) {
+        release(object.$instance());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------

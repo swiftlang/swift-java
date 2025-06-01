@@ -41,11 +41,11 @@ public class SwiftArenaTest {
         try (var arena = SwiftArena.ofConfined()) {
             var obj = new MySwiftClass(arena,1, 2);
 
-            retain(obj.$memorySegment());
-            assertEquals(2, retainCount(obj.$memorySegment()));
+            retain(obj);
+            assertEquals(2, retainCount(obj));
 
-            release(obj.$memorySegment());
-            assertEquals(1, retainCount(obj.$memorySegment()));
+            release(obj);
+            assertEquals(1, retainCount(obj));
         }
 
         // TODO: should we zero out the $memorySegment perhaps?

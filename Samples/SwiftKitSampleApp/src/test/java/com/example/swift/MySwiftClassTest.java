@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.SwiftArena;
 import org.swift.swiftkit.SwiftKit;
 
 import java.io.File;
@@ -40,8 +41,8 @@ public class MySwiftClassTest {
 
     @Test
     void test_MySwiftClass_voidMethod() {
-        try {
-            MySwiftClass o = new MySwiftClass(12, 42);
+        try(var arena = SwiftArena.ofConfined()) {
+            MySwiftClass o = new MySwiftClass(arena, 12, 42);
             o.voidMethod();
         } catch (Throwable throwable) {
             checkPaths(throwable);
@@ -50,17 +51,21 @@ public class MySwiftClassTest {
 
     @Test
     void test_MySwiftClass_makeIntMethod() {
-        MySwiftClass o = new MySwiftClass(12, 42);
-        var got = o.makeIntMethod();
-        assertEquals(12, got);
+        try(var arena = SwiftArena.ofConfined()) {
+            MySwiftClass o = new MySwiftClass(arena, 12, 42);
+            var got = o.makeIntMethod();
+            assertEquals(12, got);
+        }
     }
 
     @Test
     @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_len() {
-        MySwiftClass o = new MySwiftClass(12, 42);
-        var got = o.getLen();
-        assertEquals(12, got);
+        try(var arena = SwiftArena.ofConfined()) {
+            MySwiftClass o = new MySwiftClass(arena, 12, 42);
+            var got = o.getLen();
+            assertEquals(12, got);
+        }
     }
 
 }

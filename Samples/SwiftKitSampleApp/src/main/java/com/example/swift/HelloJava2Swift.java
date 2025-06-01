@@ -45,8 +45,11 @@ public class HelloJava2Swift {
              MySwiftClass obj = new MySwiftClass(arena, 2222, 7777);
 
              // just checking retains/releases work
-             SwiftKit.retain(obj.$memorySegment());
-             SwiftKit.release(obj.$memorySegment());
+             SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
+             SwiftKit.retain(obj);
+             SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
+             SwiftKit.release(obj);
+             SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
 
              obj.voidMethod();
              obj.takeIntMethod(42);
