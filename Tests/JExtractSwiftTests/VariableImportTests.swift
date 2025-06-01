@@ -158,9 +158,7 @@ final class VariableImportTests {
          * }
          */
         public long getCounterInt() {
-          if (this.$state$destroyed.get()) {
-            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().
-          }
+          $ensureAlive();
           return (long) getCounterInt($memorySegment());
         }
         """,
@@ -191,9 +189,7 @@ final class VariableImportTests {
          * }
          */
         public void setCounterInt(long newValue) {
-          if (this.$state$destroyed.get()) {
-            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
-          }
+          $ensureAlive();
           setCounterInt(newValue, $memorySegment());
         }
         """,

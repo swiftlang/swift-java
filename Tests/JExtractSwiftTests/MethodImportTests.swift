@@ -349,9 +349,7 @@ final class MethodImportTests {
          * }
          */
         public void helloMemberFunction() {
-            if (this.$state$destroyed.get()) {
-              throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!")
-            }
+            $ensureAlive();
             helloMemberFunction($memorySegment());
         }
         """
@@ -387,9 +385,7 @@ final class MethodImportTests {
          * }
          */
         public long makeInt() {
-          if (this.$state$destroyed.get()) {
-            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!")
-          }
+          $ensureAlive();
 
           return (long) makeInt($memorySegment());
         }
@@ -427,7 +423,7 @@ final class MethodImportTests {
          * }
          */
         public MySwiftClass(long len, long cap) {
-          this(/*arena=*/null, len, cap);
+          this(SwiftArena.ofAuto(), len, cap);
         }
         /**
          * Create an instance of {@code MySwiftClass}.
@@ -438,20 +434,22 @@ final class MethodImportTests {
          * }
          */
         public MySwiftClass(SwiftArena arena, long len, long cap) {
-          var mh$ = init_len_cap.HANDLE;
-          try {
+          super(() -> {
+            var mh$ = init_len_cap.HANDLE;
+            try {
+              MemorySegment _result = arena.allocate($LAYOUT);
               if (SwiftKit.TRACE_DOWNCALLS) {
                 SwiftKit.traceDowncall(len, cap);
               }
-              this.selfMemorySegment = (MemorySegment) mh$.invokeExact(
-                  len, cap
+              mh$.invokeExact(
+                len, cap,
+                /* indirect return buffer */_result
               );
-              if (arena != null) {
-                  arena.register(this);
-              }
-          } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-          }
+              return _result;
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+          }, arena);
         }
         """
     )
@@ -487,7 +485,7 @@ final class MethodImportTests {
          * }
          */
         public MySwiftStruct(long len, long cap) {
-          this(/*arena=*/null, len, cap);
+          this(SwiftArena.ofAuto(), len, cap);
         }
         /**
          * Create an instance of {@code MySwiftStruct}.
@@ -497,24 +495,23 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-
         public MySwiftStruct(SwiftArena arena, long len, long cap) {
-          var mh$ = init_len_cap.HANDLE;
-          try {
+          super(() -> {
+            var mh$ = init_len_cap.HANDLE;
+            try {
+              MemorySegment _result = arena.allocate($LAYOUT);
               if (SwiftKit.TRACE_DOWNCALLS) {
                 SwiftKit.traceDowncall(len, cap);
               }
-              this.selfMemorySegment = arena.allocate($layout());
               mh$.invokeExact(
-                  len, cap,
-                  /* indirect return buffer */this.selfMemorySegment
+                len, cap,
+                /* indirect return buffer */_result
               );
-              if (arena != null) {
-                  arena.register(this);
-              }
-          } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-          }
+              return _result;
+            } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+            }
+          }, arena);
         }
         """
     )

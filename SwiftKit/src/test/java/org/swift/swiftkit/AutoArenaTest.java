@@ -26,24 +26,11 @@ public class AutoArenaTest {
     @Test
     @SuppressWarnings("removal") // System.runFinalization() will be removed
     public void cleaner_releases_native_resource() {
-        SwiftHeapObject object = new FakeSwiftHeapObject();
+        SwiftArena arena = SwiftArena.ofAuto();
 
-        // Latch waiting for the cleanup of the object
-        var cleanupLatch = new CountDownLatch(1);
-
-        // we're retaining the `object`, register it with the arena:
-        AutoSwiftMemorySession arena = (AutoSwiftMemorySession) SwiftArena.ofAuto();
-
+        // This object is registered to the arena.
+        var object = new FakeSwiftInstance(arena);
         var statusDestroyedFlag = object.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        arena.register(object,
-                new SwiftHeapObjectCleanup(object.$memorySegment(), object.$swiftType(), markAsDestroyed) {
-                    @Override
-                    public void run() throws UnexpectedRetainCountException {
-                        cleanupLatch.countDown();
-                    }
-                });
 
         // Release the object and hope it gets GC-ed soon
 
@@ -51,7 +38,7 @@ public class AutoArenaTest {
         object = null;
 
         var i = 1_000;
-        while (cleanupLatch.getCount() != 0) {
+        while (!statusDestroyedFlag.get()) {
             System.runFinalization();
             System.gc();
 
@@ -59,16 +46,11 @@ public class AutoArenaTest {
                 throw new RuntimeException("Reference was not cleaned up! Did Cleaner not pick up the release?");
             }
         }
-
     }
 
-    private static class FakeSwiftHeapObject implements SwiftHeapObject {
-        public FakeSwiftHeapObject() {
-        }
-
-        @Override
-        public MemorySegment $memorySegment() {
-            return MemorySegment.NULL;
+    private static class FakeSwiftInstance extends SwiftInstance implements SwiftHeapObject {
+        public FakeSwiftInstance(SwiftArena arena) {
+            super(MemorySegment.NULL, arena);
         }
 
         @Override
@@ -79,11 +61,6 @@ public class AutoArenaTest {
         @Override
         public SwiftAnyType $swiftType() {
             return null;
-        }
-
-        @Override
-        public AtomicBoolean $statusDestroyedFlag() {
-            return new AtomicBoolean();
         }
     }
 }

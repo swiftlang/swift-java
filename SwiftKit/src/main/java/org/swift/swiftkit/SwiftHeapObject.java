@@ -14,9 +14,18 @@
 
 package org.swift.swiftkit;
 
+import java.lang.foreign.MemorySegment;
+
 /**
  * Represents a wrapper around a Swift heap object, e.g. a {@code class} or an {@code actor}.
  */
-public interface SwiftHeapObject extends SwiftInstance {
-    SwiftAnyType $swiftType();
+public interface SwiftHeapObject {
+    MemorySegment $memorySegment();
+
+    /**
+     * Pointer to the instance.
+     */
+    public default MemorySegment $instance() {
+        return this.$memorySegment().get(SwiftValueLayout.SWIFT_POINTER, 0);
+    }
 }

@@ -14,6 +14,8 @@
 
 package org.swift.swiftkit;
 
-public interface SwiftValue extends SwiftInstance {
-    SwiftAnyType $swiftType();
+/**
+ * Represent a wrapper around a Swift value object. e.g. {@code struct} or {@code enum}.
+ */
+public interface SwiftValue {
 }

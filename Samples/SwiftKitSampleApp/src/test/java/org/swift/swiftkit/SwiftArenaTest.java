@@ -89,27 +89,6 @@ public class SwiftArenaTest {
     }
 
     @Test
-    public void arena_releaseClassOnClose_class_leaked() {
-        String memorySegmentDescription = "<none>";
-
-        try {
-            try (var arena = SwiftArena.ofConfined()) {
-                var obj = new MySwiftClass(arena,1, 2);
-                memorySegmentDescription = obj.$memorySegment().toString();
-
-                // Pretend that we "leaked" the class, something still holds a reference to it while we try to destroy it
-                retain(obj.$memorySegment());
-                assertEquals(2, retainCount(obj.$memorySegment()));
-            }
-
-            fail("Expected exception to be thrown while the arena is closed!");
-        } catch (Exception ex) {
-            // The message should point out which objects "leaked":
-            assertTrue(ex.getMessage().contains(memorySegmentDescription));
-        }
-    }
-
-    @Test
     public void arena_initializeWithCopy_struct() {
 
     }

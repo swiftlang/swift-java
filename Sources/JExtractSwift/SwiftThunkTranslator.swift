@@ -93,32 +93,18 @@ struct SwiftThunkTranslator {
       """
     let typeName = "\(parent.swiftTypeName)"
 
-    if parent.isReferenceType {
-      return [
-        """
-        \(raw: cDecl)
-        public func \(raw: thunkName)(\(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil))) -> UnsafeMutableRawPointer /* \(raw: typeName) */ {
-          var _self = \(raw: typeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
-          let self$ = unsafeBitCast(_self, to: UnsafeMutableRawPointer.self)
-          _swiftjava_swift_retain(object: self$)
-          return self$
-        }
-        """
-      ]
-    } else {
-      return [
-        """
-        \(raw: cDecl)
-        public func \(raw: thunkName)(
-            \(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil)),
-            resultBuffer: /* \(raw: typeName) */ UnsafeMutableRawPointer
-        ) {
-          var _self = \(raw: typeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
-          resultBuffer.assumingMemoryBound(to: \(raw: typeName).self).initialize(to: _self)
-        }
-        """
-      ]
-    }
+    return [
+      """
+      \(raw: cDecl)
+      public func \(raw: thunkName)(
+          \(raw: st.renderSwiftParamDecls(function, paramPassingStyle: nil)),
+          resultBuffer: /* \(raw: typeName) */ UnsafeMutableRawPointer
+      ) {
+        var _self = \(raw: typeName)(\(raw: st.renderForwardSwiftParams(function, paramPassingStyle: nil)))
+        resultBuffer.assumingMemoryBound(to: \(raw: typeName).self).initialize(to: _self)
+      }
+      """
+    ]
   }
 
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
@@ -136,11 +122,7 @@ struct SwiftThunkTranslator {
     let paramPassingStyle: SelfParameterVariant?
     let callBase: String
     let callBaseDot: String
-    if let parent = decl.parent, parent.isReferenceType {
-      paramPassingStyle = .swiftThunkSelf
-      callBase = "let self$ = unsafeBitCast(_self, to: \(parent.originalSwiftType).self)"
-      callBaseDot = "self$."
-    } else if let parent = decl.parent, !parent.isReferenceType {
+    if let parent = decl.parent {
       paramPassingStyle = .swiftThunkSelf
       callBase =
         "var self$ = _self.assumingMemoryBound(to: \(parent.originalSwiftType).self).pointee"
