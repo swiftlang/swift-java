@@ -290,11 +290,8 @@ extension Swift2JavaTranslator {
       parentProtocol = "SwiftValue"
     }
 
-    printer.printTypeDecl("public final class \(decl.javaClassName) implements \(parentProtocol)") {
+    printer.printTypeDecl("public final class \(decl.javaClassName) extends SwiftInstance implements \(parentProtocol)") {
       printer in
-      // ==== Storage of the class
-      printClassSelfProperty(&printer, decl)
-      printStatusFlagsField(&printer, decl)
 
       // Constants
       printClassConstants(printer: &printer)
@@ -400,35 +397,6 @@ extension Swift2JavaTranslator {
     )
   }
 
-  /// Print a property where we can store the "self" pointer of a class.
-  private func printClassSelfProperty(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.print(
-      """
-      // Pointer to the referred to class instance's "self".
-      private final MemorySegment selfMemorySegment;
-
-      public final MemorySegment $memorySegment() {
-        return this.selfMemorySegment;
-      }
-      """
-    )
-  }
-
-  private func printStatusFlagsField(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.print(
-      """
-      // TODO: make this a flagset integer and/or use a field updater
-      /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
-      private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
-
-      @Override
-      public final AtomicBoolean $statusDestroyedFlag() {
-        return this.$state$destroyed;
-      }
-      """
-    )
-  }
-
   private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print(
       """
@@ -468,57 +436,28 @@ extension Swift2JavaTranslator {
       """
       /**
        * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
-       *
-      \(decl.renderCommentSnippet ?? " *")
-       */
-      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
-        this(/*arena=*/null, \(renderForwardJavaParams(decl, paramPassingStyle: .wrapper)));
-      }
-      """
-    )
-
-    let initializeMemorySegment =
-      if let parent = decl.parent,
-        parent.isReferenceType
-      {
-        """
-        this.selfMemorySegment = (MemorySegment) mh$.invokeExact(
-          \(renderForwardJavaParams(decl, paramPassingStyle: nil))
-          );
-        """
-      } else {
-        """
-        this.selfMemorySegment = arena.allocate($layout());
-        mh$.invokeExact(
-          \(renderForwardJavaParams(decl, paramPassingStyle: nil)),
-          /* indirect return buffer */this.selfMemorySegment
-        );
-        """
-      }
-
-    printer.print(
-      """
-      /**
-       * Create an instance of {@code \(parentName.unqualifiedJavaTypeName)}.
        * This instance is managed by the passed in {@link SwiftArena} and may not outlive the arena's lifetime.
        *
       \(decl.renderCommentSnippet ?? " *")
        */
-      public \(parentName.unqualifiedJavaTypeName)(SwiftArena arena, \(renderJavaParamDecls(decl, paramPassingStyle: .wrapper))) {
-        var mh$ = \(descClassIdentifier).HANDLE;
-        try {
+      public \(parentName.unqualifiedJavaTypeName)(\(renderJavaParamDecls(decl, paramPassingStyle: .wrapper)), SwiftArena arena) {
+        super(() -> {
+          var mh$ = \(descClassIdentifier).HANDLE;
+          try {
+            MemorySegment _result = arena.allocate($LAYOUT);
+      
             if (SwiftKit.TRACE_DOWNCALLS) {
               SwiftKit.traceDowncall(\(renderForwardJavaParams(decl, paramPassingStyle: nil)));
             }
-
-            \(initializeMemorySegment)
-
-            if (arena != null) {
-                arena.register(this);
-            }
-        } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-        }
+            mh$.invokeExact(
+              \(renderForwardJavaParams(decl, paramPassingStyle: nil)),
+              /* indirect return buffer */_result
+            );
+            return _result;
+          } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+          }
+        }, arena);
       }
       """
     )
@@ -714,9 +653,7 @@ extension Swift2JavaTranslator {
       let guardFromDestroyedObjectCalls: String =
       if decl.hasParent {
         """
-        if (this.$state$destroyed.get()) {
-          throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
-        }
+        $ensureAlive();
         """
       } else { "" }
 

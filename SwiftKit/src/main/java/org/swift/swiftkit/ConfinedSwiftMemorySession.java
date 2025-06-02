@@ -61,28 +61,15 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     }
 
     @Override
-    public void register(SwiftHeapObject object) {
+    public void register(SwiftInstance instance) {
         checkValid();
 
-        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        var statusDestroyedFlag = instance.$statusDestroyedFlag();
         Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 
-        var cleanup = new SwiftHeapObjectCleanup(
-                object.$memorySegment(), object.$swiftType(),
-                markAsDestroyed);
-        this.resources.add(cleanup);
-    }
-
-    @Override
-    public void register(SwiftValue value) {
-        checkValid();
-
-        var statusDestroyedFlag = value.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        var cleanup = new SwiftValueCleanup(
-                value.$memorySegment(),
-                value.$swiftType(),
+        var cleanup = new SwiftInstanceCleanup(
+                instance.$memorySegment(),
+                instance.$swiftType(),
                 markAsDestroyed);
         this.resources.add(cleanup);
     }

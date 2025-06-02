@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.file.CopyOption;
 import java.nio.file.FileSystems;
@@ -206,7 +207,7 @@ public class SwiftKit {
     }
 
     public static long retainCount(SwiftHeapObject object) {
-        return retainCount(object.$memorySegment());
+        return retainCount(object.$instance());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -236,7 +237,7 @@ public class SwiftKit {
     }
 
     public static void retain(SwiftHeapObject object) {
-        retain(object.$memorySegment());
+        retain(object.$instance());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -265,8 +266,8 @@ public class SwiftKit {
         }
     }
 
-    public static long release(SwiftHeapObject object) {
-        return retainCount(object.$memorySegment());
+    public static void release(SwiftHeapObject object) {
+        release(object.$instance());
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
@@ -446,6 +447,28 @@ public class SwiftKit {
         }
     }
 
+    /**
+     * Convert String to a MemorySegment filled with the C string.
+     */
+    public static MemorySegment toCString(String str, Arena arena) {
+        return arena.allocateFrom(str);
+    }
+
+    /**
+     * Convert Runnable to a MemorySegment which is an upcall stub for it.
+     */
+    public static MemorySegment toUpcallStub(Runnable callback, Arena arena) {
+        try {
+            FunctionDescriptor descriptor = FunctionDescriptor.ofVoid();
+            MethodHandle handle = MethodHandles.lookup()
+                    .findVirtual(Runnable.class, "run", descriptor.toMethodType())
+                    .bindTo(callback);
+            return Linker.nativeLinker()
+                    .upcallStub(handle, descriptor, arena);
+        } catch (Exception e) {
+            throw new AssertionError("should be unreachable");
+        }
+    }
 
     private static class swift_getTypeName {
 

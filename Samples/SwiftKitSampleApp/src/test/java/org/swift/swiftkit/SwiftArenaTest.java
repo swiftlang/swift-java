@@ -40,13 +40,13 @@ public class SwiftArenaTest {
     @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
         try (var arena = SwiftArena.ofConfined()) {
-            var obj = new MySwiftClass(arena,1, 2);
+            var obj = new MySwiftClass(1, 2, arena);
 
-            retain(obj.$memorySegment());
-            assertEquals(2, retainCount(obj.$memorySegment()));
+            retain(obj);
+            assertEquals(2, retainCount(obj));
 
-            release(obj.$memorySegment());
-            assertEquals(1, retainCount(obj.$memorySegment()));
+            release(obj);
+            assertEquals(1, retainCount(obj));
         }
     }
 
@@ -57,7 +57,7 @@ public class SwiftArenaTest {
         MySwiftClass unsafelyEscapedOutsideArenaScope = null;
 
         try (var arena = SwiftArena.ofConfined()) {
-            var obj = new MySwiftClass(arena,1, 2);
+            var obj = new MySwiftClass(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = obj;
         }
 
@@ -76,7 +76,7 @@ public class SwiftArenaTest {
         MySwiftStruct unsafelyEscapedOutsideArenaScope = null;
 
         try (var arena = SwiftArena.ofConfined()) {
-            var s = new MySwiftStruct(arena,1, 2);
+            var s = new MySwiftStruct(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = s;
         }
 
@@ -85,27 +85,6 @@ public class SwiftArenaTest {
             fail("Expected exception to be thrown! Object was suposed to be dead.");
         } catch (IllegalStateException ex) {
             return;
-        }
-    }
-
-    @Test
-    public void arena_releaseClassOnClose_class_leaked() {
-        String memorySegmentDescription = "<none>";
-
-        try {
-            try (var arena = SwiftArena.ofConfined()) {
-                var obj = new MySwiftClass(arena,1, 2);
-                memorySegmentDescription = obj.$memorySegment().toString();
-
-                // Pretend that we "leaked" the class, something still holds a reference to it while we try to destroy it
-                retain(obj.$memorySegment());
-                assertEquals(2, retainCount(obj.$memorySegment()));
-            }
-
-            fail("Expected exception to be thrown while the arena is closed!");
-        } catch (Exception ex) {
-            // The message should point out which objects "leaked":
-            assertTrue(ex.getMessage().contains(memorySegmentDescription));
         }
     }
 

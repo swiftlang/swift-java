@@ -25,15 +25,15 @@ public class MySwiftClassTest {
     @Test
     void call_retain_retainCount_release() {
         var arena = SwiftArena.ofConfined();
-        var obj = new MySwiftClass(arena, 1, 2);
+        var obj = new MySwiftClass(1, 2, arena);
 
-        assertEquals(1, SwiftKit.retainCount(obj.$memorySegment()));
+        assertEquals(1, SwiftKit.retainCount(obj));
         // TODO: test directly on SwiftHeapObject inheriting obj
 
-        SwiftKit.retain(obj.$memorySegment());
-        assertEquals(2, SwiftKit.retainCount(obj.$memorySegment()));
+        SwiftKit.retain(obj);
+        assertEquals(2, SwiftKit.retainCount(obj));
 
-        SwiftKit.release(obj.$memorySegment());
-        assertEquals(1, SwiftKit.retainCount(obj.$memorySegment()));
+        SwiftKit.release(obj);
+        assertEquals(1, SwiftKit.retainCount(obj));
     }
 }

@@ -267,8 +267,12 @@ public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
   public var isInit: Bool = false
 
   public var isIndirectReturn: Bool {
-    returnType.isValueType ||
-      (isInit && (parent?.isValueType ?? false))
+    switch returnType.originalSwiftTypeKind {
+    case .actor, .class, .struct, .enum:
+      return true
+    default:
+      return false
+    }
   }
 
   public init(

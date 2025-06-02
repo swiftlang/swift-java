@@ -33,6 +33,7 @@ public class JavaToSwiftBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
+        ClosableSwiftArena arena;
         MySwiftClass obj;
 
         @Setup(Level.Trial)
@@ -43,7 +44,13 @@ public class JavaToSwiftBenchmark {
             // Tune down debug statements so they don't fill up stdout
             System.setProperty("jextract.trace.downcalls", "false");
 
-            obj = new MySwiftClass(1, 2);
+            arena = SwiftArena.ofConfined();
+            obj = new MySwiftClass(1, 2, arena);
+        }
+
+        @TearDown(Level.Trial)
+        public void afterAll() {
+            arena.close();
         }
     }
 
