@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import JavaTypes
 
 /// Represents a value of a `java.lang.foreign.Self` that we want to render in generated Java code.
@@ -22,18 +21,16 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
   var inlineComment: String?
   var value: String
 
-  var needsMemoryLayoutCall: Bool = false
-
   public init(inlineComment: String? = nil, javaConstant: String) {
     self.inlineComment = inlineComment
-    self.value = javaConstant
-    self.needsMemoryLayoutCall = false
+    self.value = "SwiftValueLayout.\(javaConstant)"
   }
 
   public init(inlineComment: String? = nil, customType: String) {
     self.inlineComment = inlineComment
-    self.value = customType
-    self.needsMemoryLayoutCall = true
+    // When the type is some custom type, e.g. another Swift struct that we imported,
+    // we need to import its layout. We do this by referring $LAYOUT on it.
+    self.value = "\(customType).$LAYOUT"
   }
 
   public init?(javaType: JavaType) {
@@ -57,13 +54,7 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
       result.append("/*\(inlineComment)*/")
     }
 
-    result.append("SwiftValueLayout.\(value)")
-
-    // When the type is some custom type, e.g. another Swift struct that we imported,
-    // we need to import its layout. We do this by calling $layout() on it.
-    if needsMemoryLayoutCall {
-      result.append(".$layout()")
-    }
+    result.append(value)
 
     return result
   }
@@ -83,9 +74,4 @@ extension ForeignValueLayout {
 
   public static let SwiftFloat = Self(javaConstant: "SWIFT_FLOAT")
   public static let SwiftDouble = Self(javaConstant: "SWIFT_DOUBLE")
-
-  var isPrimitive: Bool {
-    // FIXME: This is a hack, we need an enum to better describe this!
-    value != "SWIFT_POINTER"
-  }
 }

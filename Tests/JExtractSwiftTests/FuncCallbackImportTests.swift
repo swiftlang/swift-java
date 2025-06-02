@@ -29,7 +29,6 @@ final class FuncCallbackImportTests {
     import _StringProcessing
     import _SwiftConcurrencyShims
 
-    // MANGLED NAME: $mockName
     public func callMe(callback: () -> ())
     """
 
@@ -43,10 +42,10 @@ final class FuncCallbackImportTests {
 
     try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.baseIdentifier == "callMe" }!
+    let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, decl: funcDecl, paramPassingStyle: nil)
+      st.printFuncDowncallMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -60,23 +59,16 @@ final class FuncCallbackImportTests {
          * }
          */
         public static void callMe(java.lang.Runnable callback) {
-            var mh$ = callMe.HANDLE;
-            try (var arena = Arena.ofConfined()) {
-                FunctionDescriptor callMe_callback_desc$ = FunctionDescriptor.ofVoid();
-                MethodHandle callMe_callback_handle$ = MethodHandles.lookup()
-                         .findVirtual(Runnable.class, "run",
-                                 callMe_callback_desc$.toMethodType());
-                callMe_callback_handle$ = callMe_callback_handle$.bindTo(callback);
-                Linker linker = Linker.nativeLinker();
-                MemorySegment callback$ = linker.upcallStub(callMe_callback_handle$, callMe_callback_desc$, arena);
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(callback$);
-                }
-                
-                mh$.invokeExact(callback$);
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
+          var mh$ = swiftjava___FakeModule_callMe_callback.HANDLE;
+          try(var arena$ = Arena.ofConfined()) {
+            var callback$ = SwiftKit.toUpcallStub(callback, arena$);
+            if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(callback$);
             }
+            mh$.invokeExact(callback$);
+          } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+          }
         }
         """
     )

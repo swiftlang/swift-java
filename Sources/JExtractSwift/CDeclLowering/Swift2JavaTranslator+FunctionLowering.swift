@@ -619,14 +619,7 @@ extension LoweredFunctionSignature {
 
   @_spi(Testing)
   public func cFunctionDecl(cName: String) throws -> CFunction {
-    return CFunction(
-      resultType: try CType(cdeclType: self.result.cdeclResultType),
-      name: cName,
-      parameters: try self.allLoweredParameters.map {
-        try CParameter(name: $0.parameterName, type: CType(cdeclType: $0.type).parameterDecay)
-      },
-      isVariadic: false
-    )
+    try CFunction(cdeclSignature: self.cdeclSignature, cName: cName)
   }
 }
 

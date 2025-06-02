@@ -20,8 +20,14 @@ final class MethodThunkTests {
     """
     import Swift
 
+    public var globalVar: MyClass = MyClass()
     public func globalFunc(a: Int32, b: Int64) {}
     public func globalFunc(a: Double, b: Int64) {}
+    
+    public class MyClass {
+      public var property: Int
+      public init(arg: Int32) {}
+    }
     """
 
   @Test("Thunk overloads: globalFunc(a: Int32, b: Int64) & globalFunc(i32: Int32, l: Int64)")
@@ -38,17 +44,51 @@ final class MethodThunkTests {
       expectedChunks:
       [
         """
+        @_cdecl("swiftjava_FakeModule_globalVar$get")
+        public func swiftjava_FakeModule_globalVar$get(_ _result: UnsafeMutableRawPointer) {
+          _result.assumingMemoryBound(to: MyClass.self).initialize(to: globalVar)
+        }
+        """,
+        """
+        @_cdecl("swiftjava_FakeModule_globalVar$set")
+        public func swiftjava_FakeModule_globalVar$set(_ newValue: UnsafeRawPointer) {
+          globalVar = newValue.assumingMemoryBound(to: MyClass.self).pointee
+        }
+        """,
+        """
         @_cdecl("swiftjava_FakeModule_globalFunc_a_b")
-        public func swiftjava_FakeModule_globalFunc_a_b(a: Int32, b: Int64) /* Void */ {
-          let returnValue = globalFunc(a: a, b: b)
-          return returnValue
+        public func swiftjava_FakeModule_globalFunc_a_b(_ a: Int32, _ b: Int64) {
+          globalFunc(a: a, b: b)
         }
         """,
         """
         @_cdecl("swiftjava_FakeModule_globalFunc_a_b$1")
-        public func swiftjava_FakeModule_globalFunc_a_b$1(a: Double, b: Int64) /* Void */ {
-          let returnValue = globalFunc(a: a, b: b)
-          return returnValue
+        public func swiftjava_FakeModule_globalFunc_a_b$1(_ a: Double, _ b: Int64) {
+          globalFunc(a: a, b: b)
+        }
+        """,
+        """
+        @_cdecl("swiftjava_getType_FakeModule_MyClass")
+        public func swiftjava_getType_FakeModule_MyClass() -> UnsafeMutableRawPointer /* Any.Type */ {
+          return unsafeBitCast(MyClass.self, to: UnsafeMutableRawPointer.self)
+        }
+        """,
+        """
+        @_cdecl("swiftjava_FakeModule_MyClass_init_arg")
+        public func swiftjava_FakeModule_MyClass_init_arg(_ arg: Int32, _ _result: UnsafeMutableRawPointer) {
+          _result.assumingMemoryBound(to: MyClass.self).initialize(to: MyClass(arg: arg))
+        }
+        """,
+        """
+        @_cdecl("swiftjava_FakeModule_MyClass_property$get")
+        public func swiftjava_FakeModule_MyClass_property$get(_ self: UnsafeRawPointer) -> Int {
+          return self.assumingMemoryBound(to: MyClass.self).pointee.property
+        }
+        """,
+        """
+        @_cdecl("swiftjava_FakeModule_MyClass_property$set")
+        public func swiftjava_FakeModule_MyClass_property$set(_ newValue: Int, _ self: UnsafeRawPointer) {
+          self.assumingMemoryBound(to: MyClass.self).pointee.property = newValue
         }
         """
       ]
