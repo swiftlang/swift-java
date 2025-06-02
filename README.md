@@ -62,29 +62,22 @@ The extract tool may become able to generate legacy compatible sources, which wo
 
 ## Development and Testing
 
-This project contains quite a few builds, Swift, Java, and depends on some custom steps.
+This project contains multiple builds, living sid3e by side together.
 
-Easiest way to get going is to:
+Depending on which part you are developing, you may want to run just the swift tests:
 
 ```bash
-make javakit-run # Run the JavaKit example of Swift code using Java libraries
-make jextract-run # Run the jextract-swift example of Java code using Swift libraries
-swift test # test all Swift code, e.g. jextract-swift
-./gradlew test # test all Java code, including integration tests that actually use jextract-ed sources
+> swift test
 ```
 
-To test on Linux using Docker you can:
+or the Java tests through the Gradle build. The Gradle build may also trigger some Swift compilation because of 
+interlinked dependencies of the two parts of Swift-Java. To run the Java build and tests use the Gradle wrapper script:
 
-```bash 
-# run only Swift tests (i.e. swift test)
-docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test-swift
-
-# run only Java tests (i.e. gradle test)
-docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test-java
-
-# run all tests
-docker-compose -f docker/docker-compose.yaml -f docker/docker-compose.2204.main.yaml run test 
+```bash
+> ./gradlew test
 ```
+
+Currently it is suggested to use Swift 6.0 and a Java 24+.
 
 ### Sample Apps
 
