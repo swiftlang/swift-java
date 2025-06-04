@@ -259,11 +259,13 @@ extension Swift2JavaTranslator {
     } else if decl.translatedSignature.result.javaResultType == .void {
       printer.print("\(downCall);")
     } else {
-      let placeholder = if decl.translatedSignature.result.outParameters.isEmpty {
-        downCall
+      let placeholder: String
+      if decl.translatedSignature.result.outParameters.isEmpty {
+        placeholder = downCall
       } else {
         // FIXME: Support cdecl thunk returning a value while populating the out parameters.
-        "_result"
+        printer.print("\(downCall);")
+        placeholder = "_result"
       }
       let result = decl.translatedSignature.result.conversion.render(&printer, placeholder)
 

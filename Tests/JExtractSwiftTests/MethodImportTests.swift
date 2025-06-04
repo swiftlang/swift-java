@@ -33,6 +33,8 @@ final class MethodImportTests {
     public func globalTakeInt(i: Int)
 
     public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
+    
+    public func globalReturnClass() -> MySwiftClass
 
     extension MySwiftClass {
       public func helloMemberInExtension()
@@ -178,6 +180,52 @@ final class MethodImportTests {
             } catch (Throwable ex$) {
                 throw new AssertionError("should not reach here", ex$);
             }
+        }
+        """
+    )
+  }
+
+  @Test("Import: public func globalReturnClass() -> MySwiftClass")
+  func func_globalReturnClass() throws {
+    let st = Swift2JavaTranslator(
+      javaPackage: "com.example.swift",
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .error
+
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = st.importedGlobalFuncs.first {
+      $0.name == "globalReturnClass"
+    }!
+
+    let output = CodePrinter.toString { printer in
+      st.printFuncDowncallMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      dump: true,
+      output,
+      expected:
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func globalReturnClass() -> MySwiftClass
+         * }
+         */
+        public static MySwiftClass globalReturnClass(SwiftArena swiftArena$) {
+          var mh$ = swiftjava___FakeModule_globalReturnClass.HANDLE;
+          try {
+            MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+            if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(_result);
+            }
+            mh$.invokeExact(_result);
+            return new MySwiftClass(_result, swiftArena$);
+          } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+          }
         }
         """
     )
