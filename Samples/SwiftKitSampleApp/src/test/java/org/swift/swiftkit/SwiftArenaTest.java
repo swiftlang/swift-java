@@ -40,7 +40,7 @@ public class SwiftArenaTest {
     @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
         try (var arena = SwiftArena.ofConfined()) {
-            var obj = new MySwiftClass(1, 2, arena);
+            var obj = MySwiftClass.init(1, 2, arena);
 
             retain(obj);
             assertEquals(2, retainCount(obj));
@@ -57,7 +57,7 @@ public class SwiftArenaTest {
         MySwiftClass unsafelyEscapedOutsideArenaScope = null;
 
         try (var arena = SwiftArena.ofConfined()) {
-            var obj = new MySwiftClass(1, 2, arena);
+            var obj = MySwiftClass.init(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = obj;
         }
 
@@ -76,7 +76,7 @@ public class SwiftArenaTest {
         MySwiftStruct unsafelyEscapedOutsideArenaScope = null;
 
         try (var arena = SwiftArena.ofConfined()) {
-            var s = new MySwiftStruct(1, 2, arena);
+            var s = MySwiftStruct.init(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = s;
         }
 

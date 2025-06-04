@@ -46,7 +46,7 @@ public class StringPassingBenchmark {
     @Setup(Level.Trial)
     public void beforeAll() {
         arena = SwiftArena.ofConfined();
-        obj = new MySwiftClass(1, 2, arena);
+        obj = MySwiftClass.init(1, 2, arena);
         string = makeString(stringLen);
     }
 

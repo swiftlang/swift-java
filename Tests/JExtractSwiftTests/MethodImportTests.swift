@@ -334,7 +334,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printInitializerDowncallConstructor(&printer, initDecl)
+      st.printFuncDowncallMethod(&printer, initDecl)
     }
 
     assertOutput(
@@ -342,26 +342,23 @@ final class MethodImportTests {
       expected:
         """
         /**
-         * Create an instance of {@code MySwiftClass}.
-         *
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public MySwiftClass(long len, long cap, SwiftArena swiftArena$) {
-          super(() -> {
-            var mh$ = swiftjava___FakeModule_MySwiftClass_init_len_cap.HANDLE;
-            try {
-              MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                  SwiftKit.traceDowncall(len, cap, _result);
-              }
-              mh$.invokeExact(len, cap, _result);
-              return _result;
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
+        public static MySwiftClass init(long len, long cap, SwiftArena swiftArena$) {
+          var mh$ = swiftjava___FakeModule_MySwiftClass_init_len_cap.HANDLE;
+          try {
+            MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+            if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(len, cap, _result);
             }
-          }, swiftArena$);
+            mh$.invokeExact(len, cap, _result);
+            return new MySwiftClass(_result, swiftArena$);
+          } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+          }
         }
         """
     )
@@ -382,7 +379,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printInitializerDowncallConstructor(&printer, initDecl)
+      st.printFuncDowncallMethod(&printer, initDecl)
     }
 
     assertOutput(
@@ -390,26 +387,23 @@ final class MethodImportTests {
       expected:
         """
         /**
-         * Create an instance of {@code MySwiftStruct}.
-         *
+         * Downcall to Swift:
          * {@snippet lang=swift :
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public MySwiftStruct(long len, long cap, SwiftArena swiftArena$) {
-          super(() -> {
-            var mh$ = swiftjava___FakeModule_MySwiftStruct_init_len_cap.HANDLE;
-            try {
-              MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
-              if (SwiftKit.TRACE_DOWNCALLS) {
+        public static MySwiftStruct init(long len, long cap, SwiftArena swiftArena$) {
+          var mh$ = swiftjava___FakeModule_MySwiftStruct_init_len_cap.HANDLE;
+          try {
+            MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
+            if (SwiftKit.TRACE_DOWNCALLS) {
                 SwiftKit.traceDowncall(len, cap, _result);
-              }
-              mh$.invokeExact(len, cap, _result);
-              return _result;
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
             }
-          }, swiftArena$);
+            mh$.invokeExact(len, cap, _result);
+            return new MySwiftStruct(_result, swiftArena$);
+          } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+          }
         }
         """
     )

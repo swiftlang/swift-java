@@ -67,19 +67,6 @@ public abstract class SwiftInstance {
     }
 
     /**
-     * Convenience constructor subclasses can call like:
-     * {@snippet :
-     * super(() -> { ...; return segment; }, swiftArena$)
-     * }
-     *
-     * @param segmentSupplier Should return the memory segment of the value
-     * @param arena the arena where the supplied segment belongs to. When the arena goes out of scope, this value is destroyed.
-     */
-    protected SwiftInstance(Supplier<MemorySegment> segmentSupplier, SwiftArena arena) {
-        this(segmentSupplier.get(), arena);
-    }
-
-    /**
      * Ensures that this instance has not been destroyed.
      * <p/>
      * If this object has been destroyed, calling this method will cause an {@link IllegalStateException}
