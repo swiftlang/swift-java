@@ -62,7 +62,7 @@ The extract tool may become able to generate legacy compatible sources, which wo
 
 ## Development and Testing
 
-This project contains multiple builds, living sid3e by side together.
+This project contains multiple builds, living side by side together.
 
 Depending on which part you are developing, you may want to run just the swift tests:
 
