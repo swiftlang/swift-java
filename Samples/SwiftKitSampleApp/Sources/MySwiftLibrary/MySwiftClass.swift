@@ -34,6 +34,10 @@ public class MySwiftClass {
 
   public var counter: Int32 = 0
 
+  public static func factory(len: Int, cap: Int) -> MySwiftClass {
+    return MySwiftClass(len: len, cap: cap)
+  }
+
   public func voidMethod() {
     p("")
   }

@@ -12,466 +12,132 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-import JavaTypes
 import SwiftSyntax
 
 /// Any imported (Swift) declaration
-protocol ImportedDecl {
-
-}
+protocol ImportedDecl: AnyObject {}
 
 public typealias JavaPackage = String
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
-package struct ImportedNominalType: ImportedDecl {
+package class ImportedNominalType: ImportedDecl {
   let swiftNominal: SwiftNominalTypeDeclaration
-  let javaType: JavaType
-  var kind: NominalTypeKind
 
   package var initializers: [ImportedFunc] = []
   package var methods: [ImportedFunc] = []
-  package var variables: [ImportedVariable] = []
+  package var variables: [ImportedFunc] = []
 
-  init(swiftNominal: SwiftNominalTypeDeclaration, javaType: JavaType, kind: NominalTypeKind) {
+  init(swiftNominal: SwiftNominalTypeDeclaration) {
     self.swiftNominal = swiftNominal
-    self.javaType = javaType
-    self.kind = kind
   }
 
-  var translatedType: TranslatedType {
-    TranslatedType(
-      cCompatibleConvention: .direct,
-      originalSwiftType: "\(raw: swiftNominal.qualifiedName)",
-      originalSwiftTypeKind: self.kind,
-      cCompatibleSwiftType: "UnsafeRawPointer",
-      cCompatibleJavaMemoryLayout: .heapObject,
-      javaType: javaType
-    )
-  }
-
-  public var isReferenceType: Bool {
-    switch self.kind {
-    case .class, .actor:
-      true
-    default:
-      false
-    }
-  }
-
-  /// The Java class name without the package.
-  public var javaClassName: String {
-    switch javaType {
-    case .class(package: _, let name): name
-    default: javaType.description
-    }
+  var javaClassName: String {
+    swiftNominal.name
   }
 }
 
-// TODO: replace this with `SwiftNominalTypeDeclaration.Kind`
-public enum NominalTypeKind {
-  case `actor`
-  case `class`
-  case `enum`
-  case `struct`
-  case `void`  // TODO: NOT NOMINAL, BUT...
-  case function  // TODO: NOT NOMINAL, BUT...
-  case primitive  // TODO: NOT NOMINAL, BUT...
-
-  var isReferenceType: Bool {
-    switch self {
-    case .actor, .class: true
-    case .enum, .struct: false
-    case .void, .function, .primitive: false
-    }
-  }
-
-  var isValueType: Bool {
-    switch self {
-    case .actor, .class: false
-    case .enum, .struct: true
-    case .void, .function, .primitive: false
-    }
-  }
-
-  var isVoid: Bool {
-    switch self {
-    case .actor, .class: false
-    case .enum, .struct: false
-    case .void: true
-    case .function, .primitive: false
-    }
-  }
-}
-
-public struct ImportedParam {
-  let syntax: FunctionParameterSyntax
-
-  var firstName: String? {
-    let text = syntax.firstName.trimmed.text
-    guard text != "_" else {
-      return nil
-    }
-
-    return text
-  }
-
-  var secondName: String? {
-    let text = syntax.secondName?.trimmed.text
-    guard text != "_" else {
-      return nil
-    }
-
-    return text
-  }
-
-  var effectiveName: String? {
-    firstName ?? secondName
-  }
-
-  var effectiveValueName: String {
-    secondName ?? firstName ?? "_"
-  }
-
-  // The Swift type as-is from the swift interface
-  var swiftType: String {
-    syntax.type.trimmed.description
-  }
-
-  // The mapped-to Java type of the above Java type, collections and optionals may be replaced with Java ones etc.
-  var type: TranslatedType
-}
-
-extension ImportedParam {
-  func renderParameterForwarding() -> String? {
-    if type.javaType.isPrimitive {
-      effectiveName
-    } else if type.javaType.isSwiftClosure {
-      // use the name of the upcall handle we'll have emitted by now
-      "\(effectiveName!)$"
-    } else {
-      "\(effectiveName!).$memorySegment()"
-    }
-  }
-}
-
-public enum ParameterVariant {
-  /// Used when declaring the "Swift thunks" we call through into Swift.
-  ///
-  /// Some types need to be represented as raw pointers and recovered into
-  /// Swift types inside the thunks when we do this.
-  case cDeclThunk
-}
-
-// TODO: this is used in different contexts and needs a cleanup
-//       Perhaps this is "which parameter passing style"?
-public enum SelfParameterVariant {
-  // ==== Java forwarding patterns
-
-  /// Make a method that accepts the raw memory pointer as a MemorySegment
-  case memorySegment
-  /// Make a method that accepts the the Java wrapper class of the type
-  case wrapper
-  /// Raw SWIFT_POINTER
-  case pointer
-
-  // ==== Swift forwarding patterns
-
-  case swiftThunkSelf
-}
-
-public struct ImportedFunc: ImportedDecl, CustomStringConvertible {
-
+public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// Swift module name (e.g. the target name where a type or function was declared)
   public var module: String
+
+  /// The function name.
+  /// e.g., "init" for an initializer or "foo" for "foo(a:b:)".
+  public var name: String
+
+  public var swiftDecl: any DeclSyntaxProtocol
+
+  var translatedSignature: TranslatedFunctionSignature
+
+  public var signatureString: String {
+    // FIXME: Remove comments and normalize trivia.
+    self.swiftDecl.signatureString
+  }
+
+  var loweredSignature: LoweredFunctionSignature {
+    translatedSignature.loweredSignature
+  }
+
+  var swiftSignature: SwiftFunctionSignature {
+    loweredSignature.original
+  }
+
+  package func cFunctionDecl(cName: String) -> CFunction {
+    // 'try!' because we know 'loweredSignature' can be described with C.
+    try! loweredSignature.cFunctionDecl(cName: cName)
+  }
+
+  package var kind: SwiftAPIKind {
+    loweredSignature.apiKind
+  }
+
+  var parentType: SwiftType? {
+    guard let selfParameter = swiftSignature.selfParameter else {
+      return nil
+    }
+    switch selfParameter {
+    case .instance(let parameter):
+      return parameter.type
+    case .staticMethod(let type):
+      return type
+    case .initializer(let type):
+      return type
+    }
+  }
 
   /// If this function/method is member of a class/struct/protocol,
   /// this will contain that declaration's imported name.
   ///
   /// This is necessary when rendering accessor Java code we need the type that "self" is expecting to have.
-  public var parent: TranslatedType?
-  public var hasParent: Bool { parent != nil }
-
-  /// This is a full name such as init(cap:name:).
-  public var identifier: String
-
-  /// This is the base identifier for the function, e.g., "init" for an
-  /// initializer or "f" for "f(a:b:)".
-  public var baseIdentifier: String {
-    guard let idx = identifier.firstIndex(of: "(") else {
-      return identifier
-    }
-    return String(identifier[..<idx])
-  }
+  public var hasParent: Bool { translatedSignature.selfParameter != nil }
 
   /// A display name to use to refer to the Swift declaration with its
   /// enclosing type, if there is one.
   public var displayName: String {
-    if let parent {
-      return "\(parent.swiftTypeName).\(identifier)"
+    let prefix = switch self.kind {
+    case .getter: "getter:"
+    case .setter: "setter:"
+    case .function, .initializer: ""
     }
 
-    return identifier
-  }
-
-  public var returnType: TranslatedType
-  public var parameters: [ImportedParam]
-
-  public func effectiveParameters(paramPassingStyle: SelfParameterVariant?) -> [ImportedParam] {
-    if let parent {
-      var params = parameters
-
-      // Add `self: Self` for method calls on a member
-      //
-      // allocating initializer takes a Self.Type instead, but it's also a pointer
-      switch paramPassingStyle {
-      case nil, .wrapper:
-        break
-
-      case .pointer where !isInit:
-        let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
-        params.append(
-          ImportedParam(syntax: selfParam, type: parent)
-        )
-
-      case .memorySegment where !isInit:
-        let selfParam: FunctionParameterSyntax = "self$: $java_lang_foreign_MemorySegment"
-        var parentForSelf = parent
-        parentForSelf.javaType = .javaForeignMemorySegment
-        params.append(
-          ImportedParam(syntax: selfParam, type: parentForSelf)
-        )
-
-      case .swiftThunkSelf:
-        break
-
-      default:
-        break
-      }
-
-      // TODO: add any metadata for generics and other things we may need to add here
-
-      return params
+    let context = if let parentType {
+      "\(parentType)."
     } else {
-      return self.parameters
+      ""
     }
+
+    return prefix + context + self.name
   }
 
-  public var swiftDecl: any DeclSyntaxProtocol
-
-  public var syntax: String? {
-    self.swiftDecl.signatureString
-  }
-
-  public var isInit: Bool = false
-
-  public var isIndirectReturn: Bool {
-    switch returnType.originalSwiftTypeKind {
-    case .actor, .class, .struct, .enum:
-      return true
-    default:
-      return false
-    }
-  }
-
-  public init(
+  init(
     module: String,
-    decl: any DeclSyntaxProtocol,
-    parent: TranslatedType?,
-    identifier: String,
-    returnType: TranslatedType,
-    parameters: [ImportedParam]
+    swiftDecl: any DeclSyntaxProtocol,
+    name: String,
+    translatedSignature: TranslatedFunctionSignature
   ) {
-    self.swiftDecl = decl
     self.module = module
-    self.parent = parent
-    self.identifier = identifier
-    self.returnType = returnType
-    self.parameters = parameters
+    self.name = name
+    self.swiftDecl = swiftDecl
+    self.translatedSignature = translatedSignature
   }
 
   public var description: String {
     """
     ImportedFunc {
-      identifier: \(identifier)
-      returnType: \(returnType)
-      parameters: \(parameters)
-
-    Swift mangled name:
-      Imported from:
-      \(syntax?.description ?? "<no swift source>")
+      kind: \(kind)
+      module: \(module)
+      name: \(name)
+      signature: \(self.swiftDecl.signatureString)
     }
     """
   }
 }
 
 extension ImportedFunc: Hashable {
-  public func hash(into hasher: inout Swift.Hasher) {
-    self.swiftDecl.id.hash(into: &hasher)
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
   }
-
-  public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Swift.Bool {
-    lhs.parent?.originalSwiftType.id == rhs.parent?.originalSwiftType.id
-      && lhs.swiftDecl.id == rhs.swiftDecl.id
-  }
-}
-
-public enum VariableAccessorKind {
-  case get
-  case set
-}
-
-public struct ImportedVariable: ImportedDecl, CustomStringConvertible {
-
-  public var module: String
-
-  /// If this function/method is member of a class/struct/protocol,
-  /// this will contain that declaration's imported name.
-  ///
-  /// This is necessary when rendering accessor Java code we need the type that "self" is expecting to have.
-  public var parentName: TranslatedType?
-  public var hasParent: Bool { parentName != nil }
-
-  /// This is a full name such as "counter".
-  public var identifier: String
-
-  /// Which accessors are we able to expose.
-  ///
-  /// Usually this will be all the accessors the variable declares,
-  /// however if the getter is async or throwing we may not be able to import it
-  /// (yet), and therefore would skip it from the supported set.
-  public var supportedAccessorKinds: [VariableAccessorKind] = [.get, .set]
-
-  /// This is the base identifier for the function, e.g., "init" for an
-  /// initializer or "f" for "f(a:b:)".
-  public var baseIdentifier: String {
-    guard let idx = identifier.firstIndex(of: "(") else {
-      return identifier
-    }
-    return String(identifier[..<idx])
-  }
-
-  /// A display name to use to refer to the Swift declaration with its
-  /// enclosing type, if there is one.
-  public var displayName: String {
-    if let parentName {
-      return "\(parentName.swiftTypeName).\(identifier)"
-    }
-
-    return identifier
-  }
-
-  public var returnType: TranslatedType
-
-  /// Synthetic signature of an accessor function of the given kind of this property
-  public func accessorFunc(kind: VariableAccessorKind) -> ImportedFunc? {
-    guard self.supportedAccessorKinds.contains(kind) else {
-      return nil
-    }
-
-    switch kind {
-    case .set:
-      let newValueParam: FunctionParameterSyntax =
-        "_ newValue: \(self.returnType.cCompatibleSwiftType)"
-      let funcDecl = ImportedFunc(
-        module: self.module,
-        decl: self.syntax!,
-        parent: self.parentName,
-        identifier: self.identifier,
-        returnType: TranslatedType.void,
-        parameters: [.init(syntax: newValueParam, type: self.returnType)])
-      return funcDecl
-
-    case .get:
-      let funcDecl = ImportedFunc(
-        module: self.module,
-        decl: self.syntax!,
-        parent: self.parentName,
-        identifier: self.identifier,
-        returnType: self.returnType,
-        parameters: [])
-      return funcDecl
-    }
-  }
-
-  public func effectiveAccessorParameters(
-    _ kind: VariableAccessorKind, paramPassingStyle: SelfParameterVariant?
-  ) -> [ImportedParam] {
-    var params: [ImportedParam] = []
-
-    if kind == .set {
-      let newValueParam: FunctionParameterSyntax =
-        "_ newValue: \(raw: self.returnType.swiftTypeName)"
-      params.append(
-        ImportedParam(
-          syntax: newValueParam,
-          type: self.returnType)
-      )
-    }
-
-    if let parentName {
-      // Add `self: Self` for method calls on a member
-      //
-      // allocating initializer takes a Self.Type instead, but it's also a pointer
-      switch paramPassingStyle {
-      case .pointer:
-        let selfParam: FunctionParameterSyntax = "self$: $swift_pointer"
-        params.append(
-          ImportedParam(
-            syntax: selfParam,
-            type: parentName
-          )
-        )
-
-      case .memorySegment:
-        let selfParam: FunctionParameterSyntax = "self$: $java_lang_foreign_MemorySegment"
-        var parentForSelf = parentName
-        parentForSelf.javaType = .javaForeignMemorySegment
-        params.append(
-          ImportedParam(
-            syntax: selfParam,
-            type: parentForSelf
-          )
-        )
-
-      case nil,
-        .wrapper,
-        .swiftThunkSelf:
-        break
-      }
-    }
-
-    return params
-  }
-
-  public var swiftMangledName: String = ""
-
-  public var syntax: VariableDeclSyntax? = nil
-
-  public init(
-    module: String,
-    parentName: TranslatedType?,
-    identifier: String,
-    returnType: TranslatedType
-  ) {
-    self.module = module
-    self.parentName = parentName
-    self.identifier = identifier
-    self.returnType = returnType
-  }
-
-  public var description: String {
-    """
-    ImportedFunc {
-      mangledName: \(swiftMangledName)
-      identifier: \(identifier)
-      returnType: \(returnType)
-
-    Swift mangled name:
-      Imported from:
-      \(syntax?.description ?? "<no swift source>")
-    }
-    """
+  public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Bool {
+    return lhs === rhs
   }
 }

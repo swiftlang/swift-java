@@ -46,108 +46,14 @@ final class VariableImportTests {
       detectChunkByInitialLines: 7,
       expectedChunks: [
         """
-        private static class counterInt {
-          public static final FunctionDescriptor DESC_GET = FunctionDescriptor.of(
-              /* -> */SwiftValueLayout.SWIFT_INT,
-              /*self$*/SwiftValueLayout.SWIFT_POINTER
+        private static class swiftjava_FakeModule_MySwiftClass_counterInt$get {
+          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_INT,
+            /* self: */SwiftValueLayout.SWIFT_POINTER
           );
-          public static final MemorySegment ADDR_GET =
-          FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt");
-
-          public static final MethodHandle HANDLE_GET = Linker.nativeLinker().downcallHandle(ADDR_GET, DESC_GET);
-          public static final FunctionDescriptor DESC_SET = FunctionDescriptor.ofVoid(
-              /*newValue*/SwiftValueLayout.SWIFT_INT,
-              /*self$*/SwiftValueLayout.SWIFT_POINTER
-          );
-          public static final MemorySegment ADDR_SET =
-              FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt");
-
-          public static final MethodHandle HANDLE_SET = Linker.nativeLinker().downcallHandle(ADDR_SET, DESC_SET);
-        }
-        """,
-        """
-        /**
-         * Function descriptor for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static FunctionDescriptor counterInt$get$descriptor() {
-            return counterInt.DESC_GET;
-        }
-        """,
-        """
-        /**
-         * Downcall method handle for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static MethodHandle counterInt$get$handle() {
-            return counterInt.HANDLE_GET;
-        }
-        """,
-        """
-        /**
-         * Address for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-        */
-        public static MemorySegment counterInt$get$address() {
-            return counterInt.ADDR_GET;
-        }
-        """,
-        """
-        /**
-         * Function descriptor for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static FunctionDescriptor counterInt$set$descriptor() {
-            return counterInt.DESC_SET;
-        }
-        """,
-        """
-        /**
-         * Downcall method handle for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static MethodHandle counterInt$set$handle() {
-            return counterInt.HANDLE_SET;
-        }
-        """,
-        """
-        /**
-         * Address for:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static MemorySegment counterInt$set$address() {
-            return counterInt.ADDR_SET;
-        }
-        """,
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static long getCounterInt(java.lang.foreign.MemorySegment self$) {
-            var mh$ = counterInt.HANDLE_GET;
-            try {
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(self$);
-                }
-                return (long) mh$.invokeExact(self$);
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
-            }
+          public static final MemorySegment ADDR =
+            FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$get");
+          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
         }
         """,
         """
@@ -159,26 +65,26 @@ final class VariableImportTests {
          */
         public long getCounterInt() {
           $ensureAlive();
-          return (long) getCounterInt($memorySegment());
-        }
-        """,
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public var counterInt: Int
-         * }
-         */
-        public static void setCounterInt(long newValue, java.lang.foreign.MemorySegment self$) {
-          var mh$ = counterInt.HANDLE_SET;
+          var mh$ = swiftjava_FakeModule_MySwiftClass_counterInt$get.HANDLE;
           try {
             if (SwiftKit.TRACE_DOWNCALLS) {
-              SwiftKit.traceDowncall(newValue, self$);
+                SwiftKit.traceDowncall(this.$memorySegment());
             }
-            mh$.invokeExact(newValue, self$);
+            return (long) mh$.invokeExact(this.$memorySegment());
           } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
           }
+        }
+        """,
+        """
+        private static class swiftjava_FakeModule_MySwiftClass_counterInt$set {
+          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* newValue: */SwiftValueLayout.SWIFT_INT,
+            /* self: */SwiftValueLayout.SWIFT_POINTER
+          );
+          public static final MemorySegment ADDR =
+            FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$set");
+          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
         }
         """,
         """
@@ -190,7 +96,15 @@ final class VariableImportTests {
          */
         public void setCounterInt(long newValue) {
           $ensureAlive();
-          setCounterInt(newValue, $memorySegment());
+          var mh$ = swiftjava_FakeModule_MySwiftClass_counterInt$set.HANDLE;
+          try {
+            if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(newValue, this.$memorySegment());
+            }
+            mh$.invokeExact(newValue, this.$memorySegment());
+          } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+          }
         }
         """,
       ]

@@ -298,3 +298,12 @@ extension CType {
     }
   }
 }
+
+extension CType {
+  var isVoid: Bool {
+    return switch self {
+    case .void: true
+    default: false
+    }
+  }
+}

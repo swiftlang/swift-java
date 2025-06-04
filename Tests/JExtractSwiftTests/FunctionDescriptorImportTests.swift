@@ -29,26 +29,17 @@ final class FunctionDescriptorTests {
     import _StringProcessing
     import _SwiftConcurrencyShims
 
-    // MANGLED NAME: $s14MySwiftLibrary10helloWorldyyF
     public func helloWorld()
-    // MANGLED NAME: $s14MySwiftLibrary13globalTakeInt1iySi_tF
     public func globalTakeInt(i: Swift.Int)
 
-    // MANGLED NAME: $s14MySwiftLibrary23globalTakeLongIntString1l3i321sys5Int64V_s5Int32VSStF
     public func globalTakeLongInt(l: Int64, i32: Int32)
 
-    // MANGLED NAME: $s14MySwiftLibrary7echoInt1iS2i_tFs
     public func echoInt(i: Int) -> Int
 
-    // MANGLED NAME: $s14MySwiftLibrary0aB5ClassCMa
     public class MySwiftClass {
-      // MANGLED NAME: $s14MySwiftLibrary0aB5ClassC3len3capACSi_SitcfC
       public init(len: Swift.Int, cap: Swift.Int)
       @objc deinit
 
-      //  #MySwiftClass.counter!getter: (MySwiftClass) -> () -> Int32 : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvg\t// MySwiftClass.counter.getter
-      //  #MySwiftClass.counter!setter: (MySwiftClass) -> (Int32) -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32Vvs\t// MySwiftClass.counter.setter
-      //  #MySwiftClass.counter!modify: (MySwiftClass) -> () -> () : @$s14MySwiftLibrary0aB5ClassC7counters5Int32VvM\t// MySwiftClass.counter.modify
       public var counter: Int32
     }
     """
@@ -61,7 +52,7 @@ final class FunctionDescriptorTests {
         expected:
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /*i*/SwiftValueLayout.SWIFT_INT
+            /* i: */SwiftValueLayout.SWIFT_INT
           );
           """
       )
@@ -76,8 +67,8 @@ final class FunctionDescriptorTests {
         expected:
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /*l*/SwiftValueLayout.SWIFT_INT64,
-            /*i32*/SwiftValueLayout.SWIFT_INT32
+            /* l: */SwiftValueLayout.SWIFT_INT64,
+            /* i32: */SwiftValueLayout.SWIFT_INT32
           );
           """
       )
@@ -93,7 +84,7 @@ final class FunctionDescriptorTests {
           """
           public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             /* -> */SwiftValueLayout.SWIFT_INT,
-            /*i*/SwiftValueLayout.SWIFT_INT
+            /* i: */SwiftValueLayout.SWIFT_INT
           );
           """
       )
@@ -102,14 +93,14 @@ final class FunctionDescriptorTests {
 
   @Test
   func FunctionDescriptor_class_counter_get() throws {
-    try variableAccessorDescriptorTest("counter", .get) { output in
+    try variableAccessorDescriptorTest("counter", .getter) { output in
       assertOutput(
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC_GET = FunctionDescriptor.of(
+          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             /* -> */SwiftValueLayout.SWIFT_INT32,
-            /*self$*/SwiftValueLayout.SWIFT_POINTER
+            /* self: */SwiftValueLayout.SWIFT_POINTER
           );
           """
       )
@@ -117,14 +108,14 @@ final class FunctionDescriptorTests {
   }
   @Test
   func FunctionDescriptor_class_counter_set() throws {
-    try variableAccessorDescriptorTest("counter", .set) { output in
+    try variableAccessorDescriptorTest("counter", .setter) { output in
       assertOutput(
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC_SET = FunctionDescriptor.ofVoid(
-            /*newValue*/SwiftValueLayout.SWIFT_INT32,
-            /*self$*/SwiftValueLayout.SWIFT_POINTER
+          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* newValue: */SwiftValueLayout.SWIFT_INT32,
+            /* self: */SwiftValueLayout.SWIFT_POINTER
           );
           """
       )
@@ -151,11 +142,13 @@ extension FunctionDescriptorTests {
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
-      $0.baseIdentifier == methodIdentifier
+      $0.name == methodIdentifier
     }!
 
+    let thunkName = st.thunkNameRegistry.functionThunkName(decl: funcDecl)
+    let cFunc = funcDecl.cFunctionDecl(cName: thunkName)
     let output = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(&printer, funcDecl)
+      st.printFunctionDescriptorValue(&printer, cFunc)
     }
 
     try body(output)
@@ -163,7 +156,7 @@ extension FunctionDescriptorTests {
 
   func variableAccessorDescriptorTest(
     _ identifier: String,
-    _ accessorKind: VariableAccessorKind,
+    _ accessorKind: SwiftAPIKind,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
     logLevel: Logger.Level = .trace,
@@ -177,22 +170,22 @@ extension FunctionDescriptorTests {
 
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
 
-    let varDecl: ImportedVariable? =
+    let accessorDecl: ImportedFunc? =
       st.importedTypes.values.compactMap {
         $0.variables.first {
-          $0.identifier == identifier
+          $0.name == identifier && $0.kind == accessorKind
         }
       }.first
-    guard let varDecl else {
+    guard let accessorDecl else {
       fatalError("Cannot find descriptor of: \(identifier)")
     }
 
+    let thunkName = st.thunkNameRegistry.functionThunkName(decl: accessorDecl)
+    let cFunc = accessorDecl.cFunctionDecl(cName: thunkName)
     let getOutput = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(
-        &printer, varDecl.accessorFunc(kind: accessorKind)!, accessorKind: accessorKind)
+      st.printFunctionDescriptorValue(&printer, cFunc)
     }
 
     try body(getOutput)
   }
-
 }

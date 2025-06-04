@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftSyntax
-
 /// Registry of names we've already emitted as @_cdecl and must be kept unique.
 /// In order to avoid duplicate symbols, the registry can append some unique identifier to duplicated names
 package struct ThunkNameRegistry {
@@ -25,28 +23,30 @@ package struct ThunkNameRegistry {
   package init() {}
 
   package mutating func functionThunkName(
-    module: String, decl: ImportedFunc,
-    file: String = #fileID, line: UInt = #line) -> String {
+    decl: ImportedFunc,
+    file: String = #fileID, line: UInt = #line
+  ) -> String {
     if let existingName = self.registry[decl] {
       return existingName
     }
 
-    let params = decl.effectiveParameters(paramPassingStyle: .swiftThunkSelf)
-    var paramsPart = ""
-    if !params.isEmpty {
-      paramsPart = "_" + params.map { param in
-        param.firstName ?? "_"
-      }.joined(separator: "_")
+    let suffix: String
+    switch decl.kind {
+    case .getter:
+      suffix = "$get"
+    case .setter:
+      suffix = "$set"
+    default:
+      suffix = decl.swiftSignature.parameters
+        .map { "_" + ($0.argumentLabel ?? "_") }
+        .joined()
     }
-      
-      
 
-    let name =
-      if let parent = decl.parent {
-        "swiftjava_\(module)_\(parent.swiftTypeName)_\(decl.baseIdentifier)\(paramsPart)"
-      } else {
-        "swiftjava_\(module)_\(decl.baseIdentifier)\(paramsPart)"
-      }
+    let name = if let parent = decl.parentType {
+      "swiftjava_\(decl.module)_\(parent)_\(decl.name)\(suffix)"
+    } else {
+      "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
+    }
 
     let emittedCount = self.duplicateNames[name, default: 0]
     defer { self.duplicateNames[name] = emittedCount + 1 }

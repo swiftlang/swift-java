@@ -290,3 +290,14 @@ extension SwiftType {
     return "\(type).self"
   }
 }
+
+enum TypeTranslationError: Error {
+  /// We haven't yet implemented support for this type.
+  case unimplementedType(TypeSyntax)
+
+  /// Missing generic arguments.
+  case missingGenericArguments(TypeSyntax)
+
+  /// Unknown nominal type.
+  case unknown(TypeSyntax)
+}

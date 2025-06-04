@@ -42,6 +42,8 @@ public final class Swift2JavaTranslator {
 
   // ==== Output state
 
+  package var importedGlobalVariables: [ImportedFunc] = []
+
   package var importedGlobalFuncs: [ImportedFunc] = []
 
   /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
@@ -50,9 +52,9 @@ public final class Swift2JavaTranslator {
 
   package var swiftStdlibTypes: SwiftStandardLibraryTypes
 
-  let symbolTable: SwiftSymbolTable
+  package let symbolTable: SwiftSymbolTable
 
-  var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
+  package var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   /// The name of the Swift module being translated.
   var swiftModuleName: String {
@@ -175,12 +177,15 @@ extension Swift2JavaTranslator {
     guard let swiftNominalDecl = swiftType.asNominalTypeDeclaration else {
       return nil
     }
+
+    // Whether to import this extension?
     guard let nominalNode = symbolTable.parsedModule.nominalTypeSyntaxNodes[swiftNominalDecl] else {
       return nil
     }
     guard nominalNode.shouldImport(log: log) else {
       return nil
     }
+
     return importedNominalType(swiftNominalDecl)
   }
 
@@ -191,24 +196,7 @@ extension Swift2JavaTranslator {
       return alreadyImported
     }
 
-    // Determine the nominal type kind.
-    let kind: NominalTypeKind
-    switch nominal.kind {
-    case .actor:  kind = .actor
-    case .class:  kind = .class
-    case .enum:   kind = .enum
-    case .struct: kind = .struct
-    default: return nil
-    }
-
-    let importedNominal = ImportedNominalType(
-      swiftNominal: nominal,
-      javaType: .class(
-        package: javaPackage,
-        name: nominal.qualifiedName
-      ),
-      kind: kind
-    )
+    let importedNominal = ImportedNominalType(swiftNominal: nominal)
 
     importedTypes[fullName] = importedNominal
     return importedNominal
