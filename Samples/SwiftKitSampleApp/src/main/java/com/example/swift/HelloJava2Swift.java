@@ -62,6 +62,9 @@ public class HelloJava2Swift {
             obj.voidMethod();
             obj.takeIntMethod(42);
 
+            MySwiftClass otherObj = MySwiftClass.factory(12, 42, arena);
+            otherObj.voidMethod();
+
             MySwiftStruct swiftValue = new MySwiftStruct(2222, 1111, arena);
             SwiftKit.trace("swiftValue.capacity = " + swiftValue.getCapacity());
         }
