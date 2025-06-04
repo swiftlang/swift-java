@@ -26,7 +26,7 @@ public class MySwiftStructTest {
         try (var arena = SwiftArena.ofConfined()) {
             long cap = 12;
             long len = 34;
-            var struct = new MySwiftStruct(cap, len, arena);
+            var struct = MySwiftStruct.init(cap, len, arena);
 
             assertEquals(cap, struct.getCapacity());
             assertEquals(len, struct.getLength());

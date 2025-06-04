@@ -15,18 +15,6 @@
 import JavaTypes
 
 extension Swift2JavaTranslator {
-  public func printInitializerDowncallConstructors(
-    _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
-  ) {
-    printer.printSeparator(decl.displayName)
-
-    printJavaBindingDescriptorClass(&printer, decl)
-
-    // Render the "make the downcall" functions.
-    printInitializerDowncallConstructor(&printer, decl)
-  }
-
   public func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
@@ -86,43 +74,6 @@ extension Swift2JavaTranslator {
     printer.print(");")
   }
 
-  public func printInitializerDowncallConstructor(
-    _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
-  ) {
-    guard let className = decl.parentType?.asNominalTypeDeclaration?.name else {
-      return
-    }
-    let modifiers = "public"
-
-    var paramDecls = decl.translatedSignature.parameters
-      .flatMap(\.javaParameters)
-      .map { "\($0.type) \($0.name)" }
-
-    assert(decl.translatedSignature.requiresSwiftArena, "constructor always require the SwiftArena")
-    paramDecls.append("SwiftArena swiftArena$")
-
-    printer.printBraceBlock(
-      """
-      /**
-       * Create an instance of {@code \(className)}.
-       *
-       * {@snippet lang=swift :
-       * \(decl.signatureString)
-       * }
-       */
-      \(modifiers) \(className)(\(paramDecls.joined(separator: ", ")))
-      """
-    ) { printer in
-      // Call super constructor `SwiftValue(Supplier <MemorySegment>, SwiftArena)`.
-      printer.print("super(() -> {")
-      printer.indent()
-      printDowncall(&printer, decl, isConstructor: true)
-      printer.outdent()
-      printer.print("}, swiftArena$);")
-    }
-  }
-
   /// Print the calling body that forwards all the parameters to the `methodName`,
   /// with adding `SwiftArena.ofAuto()` at the end.
   public func printFuncDowncallMethod(
@@ -131,13 +82,12 @@ extension Swift2JavaTranslator {
     let methodName: String = switch decl.kind {
     case .getter: "get\(decl.name.toCamelCase)"
     case .setter: "set\(decl.name.toCamelCase)"
-    case .function: decl.name
-    case .initializer: fatalError("initializers must use printInitializerDowncallConstructor()")
+    case .function, .initializer: decl.name
     }
 
     var modifiers = "public"
     switch decl.swiftSignature.selfParameter {
-    case .staticMethod(_), nil:
+    case .staticMethod, .initializer, nil:
       modifiers.append(" static")
     default:
       break
@@ -178,8 +128,7 @@ extension Swift2JavaTranslator {
   /// This assumes that all the parameters are passed-in with appropriate names.
   package func printDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
-    isConstructor: Bool = false
+    _ decl: ImportedFunc
   ) {
     //===  Part 1: MethodHandle
     let descriptorClassIdentifier = thunkNameRegistry.functionThunkName(decl: decl)
@@ -252,11 +201,7 @@ extension Swift2JavaTranslator {
     let downCall = "mh$.invokeExact(\(downCallArguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
-    if isConstructor {
-      // For constructors, the caller expects the "self" memory segment.
-      printer.print("\(downCall);")
-      printer.print("return _result;")
-    } else if decl.translatedSignature.result.javaResultType == .void {
+    if decl.translatedSignature.result.javaResultType == .void {
       printer.print("\(downCall);")
     } else {
       let placeholder: String

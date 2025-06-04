@@ -125,7 +125,7 @@ extension Swift2JavaTranslator {
 
       // Initializers
       for initDecl in decl.initializers {
-        printInitializerDowncallConstructors(&printer, initDecl)
+        printFunctionDowncallMethods(&printer, initDecl)
       }
 
       // Properties
