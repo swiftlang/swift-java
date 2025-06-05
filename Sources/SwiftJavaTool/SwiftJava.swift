@@ -14,7 +14,7 @@
 
 import ArgumentParser
 import Foundation
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKit
 import JavaKitJar
 import JavaKitNetwork
@@ -26,8 +26,8 @@ import JavaKitShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
-struct JavaToSwift: AsyncParsableCommand {
-  static var _commandName: String { "Java2Swift" }
+struct SwiftJava: AsyncParsableCommand {
+  static var _commandName: String { "swift-java" }
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
   var moduleName: String?
@@ -382,7 +382,7 @@ struct JavaToSwift: AsyncParsableCommand {
   }
 }
 
-extension JavaToSwift {
+extension SwiftJava {
   /// Get base configuration, depending on if we are to 'amend' or 'overwrite' the existing configuration.
   package func getBaseConfigurationForWrite() throws -> (Bool, Configuration) {
     guard let actualOutputDirectory = self.actualOutputDirectory else {

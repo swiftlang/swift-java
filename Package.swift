@@ -92,8 +92,8 @@ let package = Package(
     ),
 
     .executable(
-      name: "Java2Swift",
-      targets: ["Java2Swift"]
+      name: "swift-java",
+      targets: ["SwiftJavaTool"]
     ),
 
     // ==== Plugin for building Java code
@@ -274,7 +274,7 @@ let package = Package(
       name: "Java2SwiftPlugin",
       capability: .buildTool(),
       dependencies: [
-        "Java2Swift"
+        "SwiftJavaTool"
       ]
     ),
 
@@ -312,7 +312,7 @@ let package = Package(
     ),
 
     .target(
-      name: "Java2SwiftLib",
+      name: "SwiftJavaLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -334,7 +334,7 @@ let package = Package(
     ),
 
     .executableTarget(
-      name: "Java2Swift",
+      name: "SwiftJavaTool",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -343,7 +343,7 @@ let package = Package(
         "JavaKit",
         "JavaKitJar",
         "JavaKitNetwork",
-        "Java2SwiftLib",
+        "SwiftJavaLib",
         "JavaKitShared",
       ],
 
@@ -427,8 +427,8 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "Java2SwiftTests",
-      dependencies: ["Java2SwiftLib"],
+      name: "SwiftJavaTests",
+      dependencies: ["SwiftJavaLib"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
