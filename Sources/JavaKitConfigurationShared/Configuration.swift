@@ -27,6 +27,10 @@ public struct Configuration: Codable {
 
   public var javaPackage: String?
 
+  public var inputSwift: String?
+  public var outputSwift: String?
+  public var outputJava: String?
+
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the Java2Swift tool.

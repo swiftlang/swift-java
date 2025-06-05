@@ -130,7 +130,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
 
   func runExtract(context: PluginContext, target: Target, arguments: [String]) throws {
     let process = Process()
-    process.executableURL = try context.tool(named: "JExtractSwiftTool").url
+    process.executableURL = try context.tool(named: "SwiftJavaTool").url
     process.arguments = arguments
 
     do {
