@@ -106,9 +106,9 @@ let package = Package(
 
     // ==== Plugin for wrapping Java classes in Swift
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       targets: [
-        "Java2SwiftPlugin"
+        "SwiftJavaPlugin"
       ]
     ),
 
@@ -271,7 +271,7 @@ let package = Package(
     ),
 
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       capability: .buildTool(),
       dependencies: [
         "SwiftJavaTool"
