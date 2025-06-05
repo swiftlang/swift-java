@@ -68,7 +68,7 @@ final class MethodImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "helloWorld" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -82,16 +82,7 @@ final class MethodImportTests {
          * }
          */
         public static void helloWorld() {
-            var mh$ = swiftjava___FakeModule_helloWorld.HANDLE;
-            try {
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall();
-                }
-                
-                mh$.invokeExact();
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
-            }
+            swiftjava___FakeModule_helloWorld.call();
         }
         """
     )
@@ -112,7 +103,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -126,15 +117,7 @@ final class MethodImportTests {
          * }
          */
         public static void globalTakeInt(long i) {
-            var mh$ = swiftjava___FakeModule_globalTakeInt_i.HANDLE;
-            try {
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                  SwiftKit.traceDowncall(i);
-                }
-                mh$.invokeExact(i);
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
-            }
+            swiftjava___FakeModule_globalTakeInt_i.call(i);
         }
         """
     )
@@ -155,7 +138,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -170,15 +153,8 @@ final class MethodImportTests {
          * }
          */
         public static void globalTakeIntLongString(int i32, long l, java.lang.String s) {
-            var mh$ = swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.HANDLE;
             try(var arena$ = Arena.ofConfined()) {
-                var s$ = SwiftKit.toCString(s, arena$);
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(i32, l, s$);
-                }
-                mh$.invokeExact(i32, l, s$);
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
+                swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.call(i32, l, SwiftKit.toCString(s, arena$));
             }
         }
         """
@@ -200,7 +176,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -215,17 +191,9 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftClass globalReturnClass(SwiftArena swiftArena$) {
-          var mh$ = swiftjava___FakeModule_globalReturnClass.HANDLE;
-          try {
-            MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(_result);
-            }
-            mh$.invokeExact(_result);
-            return new MySwiftClass(_result, swiftArena$);
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-          }
+          MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+          swiftjava___FakeModule_globalReturnClass.call(_result);
+          return new MySwiftClass(_result, swiftArena$);
         }
         """
     )
@@ -246,7 +214,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -261,15 +229,7 @@ final class MethodImportTests {
          */
         public void helloMemberFunction() {
             $ensureAlive()
-            var mh$ = swiftjava___FakeModule_MySwiftClass_helloMemberFunction.HANDLE;
-            try {
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(this.$memorySegment());
-                }
-                mh$.invokeExact(this.$memorySegment());
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
-            }
+            swiftjava___FakeModule_MySwiftClass_helloMemberFunction.call(this.$memorySegment());
         }
         """
     )
@@ -290,7 +250,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -304,16 +264,8 @@ final class MethodImportTests {
          * }
          */
         public long makeInt() {
-            $ensureAlive()
-            var mh$ = swiftjava___FakeModule_MySwiftClass_makeInt.HANDLE;
-            try {
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(this.$memorySegment());
-                }
-                return (long) mh$.invokeExact(this.$memorySegment());
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
-            }
+            $ensureAlive();
+            return swiftjava___FakeModule_MySwiftClass_makeInt.call(this.$memorySegment());
         }
         """
     )
@@ -334,7 +286,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, initDecl)
+      st.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
     assertOutput(
@@ -348,17 +300,9 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftClass init(long len, long cap, SwiftArena swiftArena$) {
-          var mh$ = swiftjava___FakeModule_MySwiftClass_init_len_cap.HANDLE;
-          try {
             MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(len, cap, _result);
-            }
-            mh$.invokeExact(len, cap, _result);
+            swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
             return new MySwiftClass(_result, swiftArena$);
-          } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-          }
         }
         """
     )
@@ -379,7 +323,7 @@ final class MethodImportTests {
     }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, initDecl)
+      st.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
     assertOutput(
@@ -393,17 +337,9 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftStruct init(long len, long cap, SwiftArena swiftArena$) {
-          var mh$ = swiftjava___FakeModule_MySwiftStruct_init_len_cap.HANDLE;
-          try {
             MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(len, cap, _result);
-            }
-            mh$.invokeExact(len, cap, _result);
+            swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
             return new MySwiftStruct(_result, swiftArena$);
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-          }
         }
         """
     )

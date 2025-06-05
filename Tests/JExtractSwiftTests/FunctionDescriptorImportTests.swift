@@ -51,9 +51,29 @@ final class FunctionDescriptorTests {
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* i: */SwiftValueLayout.SWIFT_INT
-          );
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_globalTakeInt_i(ptrdiff_t i)
+           * }
+           */
+          private static class swiftjava_SwiftModule_globalTakeInt_i {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+              /* i: */SwiftValueLayout.SWIFT_INT
+            );
+            public static final MemorySegment ADDR =
+              SwiftModule.findOrThrow("swiftjava_SwiftModule_globalTakeInt_i");
+            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            public static void call(long i) {
+              try {
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall(i);
+                }
+                HANDLE.invokeExact(i);
+              } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+              }
+            }
+          }
           """
       )
     }
@@ -66,10 +86,30 @@ final class FunctionDescriptorTests {
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* l: */SwiftValueLayout.SWIFT_INT64,
-            /* i32: */SwiftValueLayout.SWIFT_INT32
-          );
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_globalTakeLongInt_l_i32(int64_t l, int32_t i32)
+           * }
+           */
+          private static class swiftjava_SwiftModule_globalTakeLongInt_l_i32 {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+              /* l: */SwiftValueLayout.SWIFT_INT64,
+              /* i32: */SwiftValueLayout.SWIFT_INT32
+            );
+            public static final MemorySegment ADDR =
+              SwiftModule.findOrThrow("swiftjava_SwiftModule_globalTakeLongInt_l_i32");
+            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            public static void call(long l, int i32) {
+              try {
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall(l, i32);
+                }
+                HANDLE.invokeExact(l, i32);
+              } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+              }
+            }
+          }
           """
       )
     }
@@ -82,10 +122,30 @@ final class FunctionDescriptorTests {
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            /* -> */SwiftValueLayout.SWIFT_INT,
-            /* i: */SwiftValueLayout.SWIFT_INT
-          );
+          /**
+           * {@snippet lang=c :
+           * ptrdiff_t swiftjava_SwiftModule_echoInt_i(ptrdiff_t i)
+           * }
+           */
+          private static class swiftjava_SwiftModule_echoInt_i {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+              /* -> */SwiftValueLayout.SWIFT_INT,
+              /* i: */SwiftValueLayout.SWIFT_INT
+            );
+            public static final MemorySegment ADDR =
+              SwiftModule.findOrThrow("swiftjava_SwiftModule_echoInt_i");
+            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            public static long call(long i) {
+              try {
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall(i);
+                }
+                return (long) HANDLE.invokeExact(i);
+              } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+              }
+            }
+          }
           """
       )
     }
@@ -98,10 +158,30 @@ final class FunctionDescriptorTests {
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            /* -> */SwiftValueLayout.SWIFT_INT32,
-            /* self: */SwiftValueLayout.SWIFT_POINTER
-          );
+          /**
+           * {@snippet lang=c :
+           * int32_t swiftjava_SwiftModule_MySwiftClass_counter$get(const void *self)
+           * }
+           */
+          private static class swiftjava_SwiftModule_MySwiftClass_counter$get {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+              /* -> */SwiftValueLayout.SWIFT_INT32,
+              /* self: */SwiftValueLayout.SWIFT_POINTER
+            );
+            public static final MemorySegment ADDR =
+              SwiftModule.findOrThrow("swiftjava_SwiftModule_MySwiftClass_counter$get");
+            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            public static int call(java.lang.foreign.MemorySegment self) {
+              try {
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall(self);
+                }
+                return (int) HANDLE.invokeExact(self);
+              } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+              }
+            }
+          }
           """
       )
     }
@@ -113,10 +193,30 @@ final class FunctionDescriptorTests {
         output,
         expected:
           """
-          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* newValue: */SwiftValueLayout.SWIFT_INT32,
-            /* self: */SwiftValueLayout.SWIFT_POINTER
-          );
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_MySwiftClass_counter$set(int32_t newValue, const void *self)
+           * }
+           */
+          private static class swiftjava_SwiftModule_MySwiftClass_counter$set {
+            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+              /* newValue: */SwiftValueLayout.SWIFT_INT32,
+              /* self: */SwiftValueLayout.SWIFT_POINTER
+            );
+            public static final MemorySegment ADDR =
+              SwiftModule.findOrThrow("swiftjava_SwiftModule_MySwiftClass_counter$set");
+            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            public static void call(int newValue, java.lang.foreign.MemorySegment self) {
+              try {
+                if (SwiftKit.TRACE_DOWNCALLS) {
+                  SwiftKit.traceDowncall(newValue, self);
+                }
+                HANDLE.invokeExact(newValue, self);
+              } catch (Throwable ex$) {
+                throw new AssertionError("should not reach here", ex$);
+              }
+            }
+          }
           """
       )
     }
@@ -145,10 +245,8 @@ extension FunctionDescriptorTests {
       $0.name == methodIdentifier
     }!
 
-    let thunkName = st.thunkNameRegistry.functionThunkName(decl: funcDecl)
-    let cFunc = funcDecl.cFunctionDecl(cName: thunkName)
     let output = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(&printer, cFunc)
+      st.printJavaBindingDescriptorClass(&printer, funcDecl)
     }
 
     try body(output)
@@ -180,10 +278,8 @@ extension FunctionDescriptorTests {
       fatalError("Cannot find descriptor of: \(identifier)")
     }
 
-    let thunkName = st.thunkNameRegistry.functionThunkName(decl: accessorDecl)
-    let cFunc = accessorDecl.cFunctionDecl(cName: thunkName)
     let getOutput = CodePrinter.toString { printer in
-      st.printFunctionDescriptorValue(&printer, cFunc)
+      st.printJavaBindingDescriptorClass(&printer, accessorDecl)
     }
 
     try body(getOutput)

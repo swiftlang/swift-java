@@ -24,18 +24,27 @@ extension Swift2JavaTranslator {
     printJavaBindingDescriptorClass(&printer, decl)
 
     // Render the "make the downcall" functions.
-    printFuncDowncallMethod(&printer, decl)
+    printJavaBindingWrapperMethod(&printer, decl)
   }
 
   /// Print FFM Java binding descriptors for the imported Swift API.
-  func printJavaBindingDescriptorClass(
+  package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let cFunc = decl.cFunctionDecl(cName: thunkName)
 
-    printer.printBraceBlock("private static class \(cFunc.name)") { printer in
+    printer.printBraceBlock(
+      """
+      /**
+       * {@snippet lang=c :
+       * \(cFunc.description)
+       * }
+       */
+      private static class \(cFunc.name)
+      """
+    ) { printer in
       printFunctionDescriptorValue(&printer, cFunc)
       printer.print(
         """
@@ -44,11 +53,12 @@ extension Swift2JavaTranslator {
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
         """
       )
+      printJavaBindingDowncallMethod(&printer, cFunc)
     }
   }
 
   /// Print the 'FunctionDescriptor' of the lowered cdecl thunk.
-  public func printFunctionDescriptorValue(
+  func printFunctionDescriptorValue(
     _ printer: inout CodePrinter,
     _ cFunc: CFunction
   ) {
@@ -74,9 +84,42 @@ extension Swift2JavaTranslator {
     printer.print(");")
   }
 
+  func printJavaBindingDowncallMethod(
+    _ printer: inout CodePrinter,
+    _ cFunc: CFunction
+  ) {
+    let returnTy = cFunc.resultType.javaType
+    let maybeReturn = cFunc.resultType.isVoid ? "" : "return (\(returnTy)) "
+
+    var params: [String] = []
+    var args: [String] = []
+    for param in cFunc.parameters {
+      // ! unwrapping because cdecl lowering guarantees the parameter named.
+      params.append("\(param.type.javaType) \(param.name!)")
+      args.append(param.name!)
+    }
+    let paramsStr = params.joined(separator: ", ")
+    let argsStr = args.joined(separator: ", ")
+
+    printer.print(
+      """
+      public static \(returnTy) call(\(paramsStr)) {
+        try {
+          if (SwiftKit.TRACE_DOWNCALLS) {
+            SwiftKit.traceDowncall(\(argsStr));
+          }
+          \(maybeReturn)HANDLE.invokeExact(\(argsStr));
+        } catch (Throwable ex$) {
+          throw new AssertionError("should not reach here", ex$);
+        }
+      }
+      """
+    )
+  }
+
   /// Print the calling body that forwards all the parameters to the `methodName`,
   /// with adding `SwiftArena.ofAuto()` at the end.
-  public func printFuncDowncallMethod(
+  public func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc) {
     let methodName: String = switch decl.kind {
@@ -130,19 +173,11 @@ extension Swift2JavaTranslator {
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
-    //===  Part 1: MethodHandle
-    let descriptorClassIdentifier = thunkNameRegistry.functionThunkName(decl: decl)
-    printer.print(
-      "var mh$ = \(descriptorClassIdentifier).HANDLE;"
-    )
-
-    let tryHead = if decl.translatedSignature.requiresTemporaryArena {
-      "try(var arena$ = Arena.ofConfined()) {"
-    } else {
-      "try {"
+    //===  Part 1: prepare temporary arena if needed.
+    if decl.translatedSignature.requiresTemporaryArena {
+      printer.print("try(var arena$ = Arena.ofConfined()) {")
+      printer.indent();
     }
-    printer.print(tryHead);
-    printer.indent();
 
     //===  Part 2: prepare all arguments.
     var downCallArguments: [String] = []
@@ -151,15 +186,7 @@ extension Swift2JavaTranslator {
     for (i, parameter) in decl.translatedSignature.parameters.enumerated() {
       let original = decl.swiftSignature.parameters[i]
       let parameterName = original.parameterName ?? "_\(i)"
-      let converted = parameter.conversion.render(&printer, parameterName)
-      let lowered: String
-      if parameter.conversion.isTrivial {
-        lowered = converted
-      } else {
-        // Store the conversion to a temporary variable.
-        lowered = "\(parameterName)$"
-        printer.print("var \(lowered) = \(converted);")
-      }
+      let lowered = parameter.conversion.render(&printer, parameterName)
       downCallArguments.append(lowered)
     }
 
@@ -191,14 +218,8 @@ extension Swift2JavaTranslator {
     }
 
     //=== Part 3: Downcall.
-    printer.print(
-      """
-      if (SwiftKit.TRACE_DOWNCALLS) {
-          SwiftKit.traceDowncall(\(downCallArguments.joined(separator: ", ")));
-      }
-      """
-    )
-    let downCall = "mh$.invokeExact(\(downCallArguments.joined(separator: ", ")))"
+    let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
+    let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if decl.translatedSignature.result.javaResultType == .void {
@@ -221,14 +242,10 @@ extension Swift2JavaTranslator {
       }
     }
 
-    printer.outdent()
-    printer.print(
-      """
-      } catch (Throwable ex$) {
-        throw new AssertionError("should not reach here", ex$);
-      }
-      """
-    )
+    if decl.translatedSignature.requiresTemporaryArena {
+      printer.outdent()
+      printer.print("}")
+    }
   }
 
   func renderMemoryLayoutValue(for javaType: JavaType) -> String {

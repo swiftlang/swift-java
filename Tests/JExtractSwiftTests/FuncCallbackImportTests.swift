@@ -45,7 +45,7 @@ final class FuncCallbackImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
 
     let output = CodePrinter.toString { printer in
-      st.printFuncDowncallMethod(&printer, funcDecl)
+      st.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -59,15 +59,8 @@ final class FuncCallbackImportTests {
          * }
          */
         public static void callMe(java.lang.Runnable callback) {
-          var mh$ = swiftjava___FakeModule_callMe_callback.HANDLE;
           try(var arena$ = Arena.ofConfined()) {
-            var callback$ = SwiftKit.toUpcallStub(callback, arena$);
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(callback$);
-            }
-            mh$.invokeExact(callback$);
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
+            swiftjava___FakeModule_callMe_callback.call(SwiftKit.toUpcallStub(callback, arena$))
           }
         }
         """
