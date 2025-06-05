@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JExtractSwift
+import JExtractSwiftLib
 
 @main
 struct JExtractSwift {
