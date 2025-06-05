@@ -89,6 +89,19 @@ public struct SwiftToJava {
 
     try translator.analyze()
 
+    let generator = FFMSwift2JavaGenerator(
+      analysis: translator.result,
+      swiftModuleName: self.swiftModule,
+      javaPackage: self.packageName,
+      swiftOutputDirectory: outputDirectorySwift,
+      javaOutputDirectory: outputDirectoryJava
+    )
+
+    try generator.generate()
+
+
+    print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
+
     try translator.writeSwiftThunkSources(outputDirectory: outputSwiftDirectory)
     print("[swift-java] Generated Swift sources (module: '\(config.swiftModule ?? "")') in: \(outputSwiftDirectory)/")
 
