@@ -112,13 +112,6 @@ let package = Package(
       ]
     ),
 
-    // ==== jextract-swift (extract Java accessors from Swift interface files)
-
-    .executable(
-      name: "jextract-swift",
-      targets: ["JExtractSwiftTool"]
-    ),
-
     // Support library written in Swift for SwiftKit "Java"
     .library(
       name: "SwiftKitSwift",
@@ -367,16 +360,6 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
-      ]
-    ),
-
-    .executableTarget(
-      name: "JExtractSwiftTool",
-      dependencies: [
-        "JExtractSwiftLib",
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
       ]
     ),
 
