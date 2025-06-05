@@ -14,13 +14,13 @@
 
 import Foundation
 import ArgumentParser
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKit
 import JavaKitJar
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKitConfigurationShared
 
-extension JavaToSwift {
+extension SwiftJava {
   mutating func generateWrappers(
     config: Configuration,
     classpath: String,

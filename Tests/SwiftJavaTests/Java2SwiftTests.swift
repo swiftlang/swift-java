@@ -14,7 +14,7 @@
 
 @_spi(Testing)
 import JavaKit
-import Java2SwiftLib
+import SwiftJavaLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 /// Handy reference to the JVM abstraction.
