@@ -128,7 +128,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         enclosingType: self.currentSwiftType,
         symbolTable: self.translator.symbolTable
       )
-      translatedSignature = try translator.translate(swiftSignature: swiftSignature, as: .function)
+      translatedSignature = try translator.translate(swiftSignature: swiftSignature)
     } catch {
       self.log.debug("Failed to translate: '\(node.qualifiedNameForDebug)'; \(error)")
       return .skipChildren
@@ -138,6 +138,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       module: translator.swiftModuleName,
       swiftDecl: node,
       name: node.name.text,
+      apiKind: .function,
       translatedSignature: translatedSignature
     )
 
@@ -173,7 +174,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
           enclosingType: self.currentSwiftType,
           symbolTable: self.translator.symbolTable
         )
-        translatedSignature = try translator.translate(swiftSignature: swiftSignature, as: kind)
+        translatedSignature = try translator.translate(swiftSignature: swiftSignature)
       } catch {
         self.log.debug("Failed to translate: \(node.qualifiedNameForDebug); \(error)")
         throw error
@@ -183,6 +184,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         module: translator.swiftModuleName,
         swiftDecl: node,
         name: varName,
+        apiKind: kind,
         translatedSignature: translatedSignature
       )
       
@@ -227,7 +229,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         enclosingType: self.currentSwiftType,
         symbolTable: self.translator.symbolTable
       )
-      translatedSignature = try translator.translate(swiftSignature: swiftSignature, as: .initializer)
+      translatedSignature = try translator.translate(swiftSignature: swiftSignature)
     } catch {
       self.log.debug("Failed to translate: \(node.qualifiedNameForDebug); \(error)")
       return .skipChildren
@@ -236,6 +238,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       module: translator.swiftModuleName,
       swiftDecl: node,
       name: "init",
+      apiKind: .initializer,
       translatedSignature: translatedSignature
     )
 

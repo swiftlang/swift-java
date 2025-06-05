@@ -122,7 +122,7 @@ extension Swift2JavaTranslator {
   public func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc) {
-    let methodName: String = switch decl.kind {
+    let methodName: String = switch decl.apiKind {
     case .getter: "get\(decl.name.toCamelCase)"
     case .setter: "set\(decl.name.toCamelCase)"
     case .function, .initializer: decl.name

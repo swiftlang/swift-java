@@ -31,7 +31,7 @@ package struct ThunkNameRegistry {
     }
 
     let suffix: String
-    switch decl.kind {
+    switch decl.apiKind {
     case .getter:
       suffix = "$get"
     case .setter:

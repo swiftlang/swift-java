@@ -178,6 +178,7 @@ struct SwiftThunkTranslator {
     let thunkFunc = decl.loweredSignature.cdeclThunk(
       cName: thunkName,
       swiftAPIName: decl.name,
+      as: decl.apiKind,
       stdlibTypes: st.swiftStdlibTypes
     )
     return [DeclSyntax(thunkFunc)]
