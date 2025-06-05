@@ -127,8 +127,8 @@ let package = Package(
     ),
 
     .library(
-      name: "JExtractSwift",
-      targets: ["JExtractSwift"]
+      name: "JExtractSwiftLib",
+      targets: ["JExtractSwiftLib"]
     ),
 
     // ==== Plugin for wrapping Java classes in Swift
@@ -355,7 +355,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JExtractSwift",
+      name: "JExtractSwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -373,7 +373,7 @@ let package = Package(
     .executableTarget(
       name: "JExtractSwiftTool",
       dependencies: [
-        "JExtractSwift",
+        "JExtractSwiftLib",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
@@ -438,7 +438,7 @@ let package = Package(
     .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [
-        "JExtractSwift"
+        "JExtractSwiftLib"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

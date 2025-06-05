@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_spi(Testing) import JExtractSwift
+@_spi(Testing) import JExtractSwiftLib
 import SwiftSyntax
 import Testing
 

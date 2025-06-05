@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JExtractSwift
+import JExtractSwiftLib
 import Testing
 import struct Foundation.CharacterSet
 
