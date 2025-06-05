@@ -337,6 +337,7 @@ let package = Package(
         "JavaKitJar",
         "JavaKitNetwork",
         "SwiftJavaLib",
+        "JExtractSwiftLib",
         "JavaKitShared",
       ],
 
@@ -367,7 +368,7 @@ let package = Package(
       name: "JExtractSwiftPlugin",
       capability: .buildTool(),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
     .plugin(
@@ -377,7 +378,7 @@ let package = Package(
         permissions: [
         ]),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
 

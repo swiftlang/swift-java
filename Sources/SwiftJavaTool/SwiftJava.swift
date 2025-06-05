@@ -59,10 +59,19 @@ struct SwiftJava: AsyncParsableCommand {
   )
   var swiftNativeImplementation: [String] = []
 
-  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the Java2Swift configuration file.")
+  @Option(name: .shortAndLong, help: "Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.")
+  var inputSwift: String? = nil
+
+  @Option(name: .shortAndLong, help: "The directory where generated Swift files should be written. Generally used with jextract mode.")
+  var outputSwift: String? = nil
+
+  @Option(name: .shortAndLong, help: "The directory where generated Java files should be written. Generally used with jextract mode.")
+  var outputJava: String? = nil
+
+  // TODO: clarify this vs outputSwift (history: outputSwift is jextract, and this was java2swift)
+  @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the SwiftJava configuration file.")
   var outputDirectory: String? = nil
 
-  
   @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
   var cacheDirectory: String? = nil
   
@@ -87,8 +96,7 @@ struct SwiftJava: AsyncParsableCommand {
   var javaPackageFilter: String? = nil
 
   @Argument(
-    help:
-      "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
+    help: "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
   )
   var input: String
 
@@ -163,6 +171,9 @@ struct SwiftJava: AsyncParsableCommand {
 
     /// Fetch dependencies for a module
     case fetchDependencies
+
+    /// Extract Java bindings from provided Swift sources.
+    case jextract // TODO: carry jextract specific config here?
   }
 
   mutating func run() async {
@@ -172,7 +183,24 @@ struct SwiftJava: AsyncParsableCommand {
       
       // Determine the mode in which we'll execute.
       let toolMode: ToolMode
-      if jar {
+      // TODO: some options are exclusive to eachother so we should detect that
+      if let inputSwift {
+        guard let outputSwift else {
+          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-swift directory was provided!")
+          return
+        }
+        guard let outputJava else {
+          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-java directory was provided!")
+          return
+        }
+        var c = Configuration()
+        c.inputSwift = inputSwift
+        c.outputSwift = outputSwift
+        c.outputJava = outputJava
+        config = c
+
+        toolMode = .jextract
+      } else if jar {
         if let moduleBaseDir {
           config = try readConfiguration(sourceDir: moduleBaseDir.path)
         } else {
@@ -251,7 +279,7 @@ struct SwiftJava: AsyncParsableCommand {
 //          print("[debug][swift-java] Found cached dependency resolver classpath: \(dependencyResolverClasspath)")
 //          classpathEntries += dependencyResolverClasspath
 //        }
-      case .classWrappers:
+      case .classWrappers, .jextract:
         break;
       }
 
@@ -310,6 +338,9 @@ struct SwiftJava: AsyncParsableCommand {
           moduleName: moduleName,
           cacheDir: effectiveCacheDirectory,
           resolvedClasspath: dependencyClasspath)
+
+        case .jextract:
+          try jextractSwift(config: config)
       }
     } catch {
       // We fail like this since throwing out of the run often ends up hiding the failure reason when it is executed as SwiftPM plugin (!)

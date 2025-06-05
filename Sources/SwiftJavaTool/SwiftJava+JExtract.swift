@@ -12,12 +12,29 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+import ArgumentParser
+import SwiftJavaLib
+import JavaKit
+import JavaKitJar
+import SwiftJavaLib
 import JExtractSwiftLib
+import JavaKitConfigurationShared
 
-@main
-struct JExtractSwift {
-  static func main() throws {
-    let command = SwiftToJava.parseOrExit(CommandLine.arguments)
-    try command.run()
+/// Extract Java bindings from Swift sources or interface files.
+///
+/// Example usage:
+/// ```
+/// > swift-java --input-swift Sources/SwiftyBusiness \
+///              --output-swift .build/.../outputs/SwiftyBusiness \
+///              --output-Java .build/.../outputs/Java
+/// ```
+extension SwiftJava {
+
+  mutating func jextractSwift(
+    config: Configuration
+  ) throws {
+
   }
+
 }
