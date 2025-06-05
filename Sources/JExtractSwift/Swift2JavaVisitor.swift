@@ -121,16 +121,15 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     self.log.debug("Import function: '\(node.qualifiedNameForDebug)'")
 
-    let translatedSignature: TranslatedFunctionSignature
+    let signature: SwiftFunctionSignature
     do {
-      let swiftSignature = try SwiftFunctionSignature(
+      signature = try SwiftFunctionSignature(
         node,
         enclosingType: self.currentSwiftType,
         symbolTable: self.translator.symbolTable
       )
-      translatedSignature = try translator.translate(swiftSignature: swiftSignature)
     } catch {
-      self.log.debug("Failed to translate: '\(node.qualifiedNameForDebug)'; \(error)")
+      self.log.debug("Failed to import: '\(node.qualifiedNameForDebug)'; \(error)")
       return .skipChildren
     }
 
@@ -139,7 +138,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       swiftDecl: node,
       name: node.name.text,
       apiKind: .function,
-      translatedSignature: translatedSignature
+      functionSignature: signature
     )
 
     log.debug("Record imported method \(node.qualifiedNameForDebug)")
@@ -166,26 +165,19 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     self.log.debug("Import variable: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
     func importAccessor(kind: SwiftAPIKind) throws {
-      let translatedSignature: TranslatedFunctionSignature
-      do {
-        let swiftSignature = try SwiftFunctionSignature(
-          node,
-          isSet: kind == .setter,
-          enclosingType: self.currentSwiftType,
-          symbolTable: self.translator.symbolTable
-        )
-        translatedSignature = try translator.translate(swiftSignature: swiftSignature)
-      } catch {
-        self.log.debug("Failed to translate: \(node.qualifiedNameForDebug); \(error)")
-        throw error
-      }
+      let signature = try SwiftFunctionSignature(
+        node,
+        isSet: kind == .setter,
+        enclosingType: self.currentSwiftType,
+        symbolTable: self.translator.symbolTable
+      )
 
       let imported = ImportedFunc(
         module: translator.swiftModuleName,
         swiftDecl: node,
         name: varName,
         apiKind: kind,
-        translatedSignature: translatedSignature
+        functionSignature: signature
       )
       
       log.debug("Record imported variable accessor \(kind == .getter ? "getter" : "setter"):\(node.qualifiedNameForDebug)")
@@ -205,7 +197,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         try importAccessor(kind: .setter)
       }
     } catch {
-      self.log.debug("Failed to translate: \(node.qualifiedNameForDebug); \(error)")
+      self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
       return .skipChildren
     }
 
@@ -222,16 +214,15 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
     self.log.debug("Import initializer: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
-    let translatedSignature: TranslatedFunctionSignature
+    let signature: SwiftFunctionSignature
     do {
-      let swiftSignature = try SwiftFunctionSignature(
+      signature = try SwiftFunctionSignature(
         node,
         enclosingType: self.currentSwiftType,
         symbolTable: self.translator.symbolTable
       )
-      translatedSignature = try translator.translate(swiftSignature: swiftSignature)
     } catch {
-      self.log.debug("Failed to translate: \(node.qualifiedNameForDebug); \(error)")
+      self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
       return .skipChildren
     }
     let imported = ImportedFunc(
@@ -239,7 +230,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       swiftDecl: node,
       name: "init",
       apiKind: .initializer,
-      translatedSignature: translatedSignature
+      functionSignature: signature
     )
 
     currentType.initializers.append(imported)

@@ -52,30 +52,18 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
 
   public var swiftDecl: any DeclSyntaxProtocol
 
-  var translatedSignature: TranslatedFunctionSignature
-
   package var apiKind: SwiftAPIKind
+
+  var functionSignature: SwiftFunctionSignature
 
   public var signatureString: String {
     // FIXME: Remove comments and normalize trivia.
     self.swiftDecl.signatureString
   }
 
-  var loweredSignature: LoweredFunctionSignature {
-    translatedSignature.loweredSignature
-  }
-
-  var swiftSignature: SwiftFunctionSignature {
-    loweredSignature.original
-  }
-
-  package func cFunctionDecl(cName: String) -> CFunction {
-    // 'try!' because we know 'loweredSignature' can be described with C.
-    try! loweredSignature.cFunctionDecl(cName: cName)
-  }
 
   var parentType: SwiftType? {
-    guard let selfParameter = swiftSignature.selfParameter else {
+    guard let selfParameter = functionSignature.selfParameter else {
       return nil
     }
     switch selfParameter {
@@ -92,7 +80,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// this will contain that declaration's imported name.
   ///
   /// This is necessary when rendering accessor Java code we need the type that "self" is expecting to have.
-  public var hasParent: Bool { translatedSignature.selfParameter != nil }
+  public var hasParent: Bool { functionSignature.selfParameter != nil }
 
   /// A display name to use to refer to the Swift declaration with its
   /// enclosing type, if there is one.
@@ -117,13 +105,13 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     swiftDecl: any DeclSyntaxProtocol,
     name: String,
     apiKind: SwiftAPIKind,
-    translatedSignature: TranslatedFunctionSignature
+    functionSignature: SwiftFunctionSignature
   ) {
     self.module = module
     self.name = name
     self.swiftDecl = swiftDecl
     self.apiKind = apiKind
-    self.translatedSignature = translatedSignature
+    self.functionSignature = functionSignature
   }
 
   public var description: String {

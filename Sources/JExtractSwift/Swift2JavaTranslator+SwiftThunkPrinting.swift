@@ -174,8 +174,13 @@ struct SwiftThunkTranslator {
 
   func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
     st.log.trace("Rendering thunks for: \(decl.displayName)")
+
     let thunkName = st.thunkNameRegistry.functionThunkName(decl: decl)
-    let thunkFunc = decl.loweredSignature.cdeclThunk(
+    guard let translatedSignatures = st.translatedSignature(for: decl) else {
+      return []
+    }
+
+    let thunkFunc = translatedSignatures.loweredSignature.cdeclThunk(
       cName: thunkName,
       swiftAPIName: decl.name,
       as: decl.apiKind,
