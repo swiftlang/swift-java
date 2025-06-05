@@ -14,6 +14,8 @@
 
 import Foundation
 
+let PATH_SEPARATOR = "/"  // TODO: Windows
+
 public struct CodePrinter {
   var contents: String = ""
 

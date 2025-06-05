@@ -91,6 +91,13 @@ extension Swift2JavaTranslator {
   /// a checked truncation operation at the Java/Swift board.
   var javaPrimitiveForSwiftInt: JavaType { .long }
 
+  var result: AnalysisResult {
+    AnalysisResult(
+      importedTypes: self.importedTypes,
+      importedGlobalFuncs: self.importedGlobalFuncs
+    )
+  }
+
   package func add(filePath: String, text: String) {
     log.trace("Adding: \(filePath)")
     let sourceFileSyntax = Parser.parse(source: text)
@@ -126,30 +133,6 @@ extension Swift2JavaTranslator {
     /// Setup the symbol table.
     symbolTable.setup(inputs.map({ $0.syntax }))
   }
-}
-
-// ===== --------------------------------------------------------------------------------------------------------------
-// MARK: Defaults
-
-extension Swift2JavaTranslator {
-  /// Default formatting options.
-  static let defaultFormat = BasicFormat(indentationWidth: .spaces(2))
-
-  /// Default set Java imports for every generated file
-  static let defaultJavaImports: Array<String> = [
-    "org.swift.swiftkit.*",
-    "org.swift.swiftkit.SwiftKit",
-    "org.swift.swiftkit.util.*",
-
-    // Necessary for native calls and type mapping
-    "java.lang.foreign.*",
-    "java.lang.invoke.*",
-    "java.util.Arrays",
-    "java.util.stream.Collectors",
-    "java.util.concurrent.atomic.*",
-    "java.nio.charset.StandardCharsets",
-  ]
-
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------

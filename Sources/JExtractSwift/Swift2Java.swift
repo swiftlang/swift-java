@@ -89,8 +89,19 @@ public struct SwiftToJava: ParsableCommand {
     }
 
     try translator.analyze()
-    try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
-    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
+
+    let generator = FFMSwift2JavaGenerator(
+      analysis: translator.result,
+      swiftModuleName: self.swiftModule,
+      javaPackage: self.packageName,
+      swiftOutputDirectory: outputDirectorySwift,
+      javaOutputDirectory: outputDirectoryJava
+    )
+
+    try generator.generate()
+
+//    try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
+//    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
     print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
