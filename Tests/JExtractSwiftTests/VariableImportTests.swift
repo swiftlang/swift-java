@@ -54,6 +54,16 @@ final class VariableImportTests {
           public static final MemorySegment ADDR =
             FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$get");
           public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static long call(java.lang.foreign.MemorySegment self) {
+            try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(self);
+              }
+              return (long) HANDLE.invokeExact(self);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
         }
         """,
         """
@@ -65,15 +75,7 @@ final class VariableImportTests {
          */
         public long getCounterInt() {
           $ensureAlive();
-          var mh$ = swiftjava_FakeModule_MySwiftClass_counterInt$get.HANDLE;
-          try {
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(this.$memorySegment());
-            }
-            return (long) mh$.invokeExact(this.$memorySegment());
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-          }
+          return swiftjava_FakeModule_MySwiftClass_counterInt$get.call(this.$memorySegment());
         }
         """,
         """
@@ -85,6 +87,16 @@ final class VariableImportTests {
           public static final MemorySegment ADDR =
             FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$set");
           public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static void call(long newValue, java.lang.foreign.MemorySegment self) {
+            try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(newValue, self);
+              }
+              HANDLE.invokeExact(newValue, self);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
         }
         """,
         """
@@ -96,15 +108,7 @@ final class VariableImportTests {
          */
         public void setCounterInt(long newValue) {
           $ensureAlive();
-          var mh$ = swiftjava_FakeModule_MySwiftClass_counterInt$set.HANDLE;
-          try {
-            if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(newValue, this.$memorySegment());
-            }
-            mh$.invokeExact(newValue, this.$memorySegment());
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-          }
+          swiftjava_FakeModule_MySwiftClass_counterInt$set.call(newValue, this.$memorySegment())
         }
         """,
       ]

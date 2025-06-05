@@ -270,7 +270,7 @@ struct JavaTranslation {
       return TranslatedResult(
         javaResultType: javaType,
         outParameters: [],
-        conversion: .cast(javaType)
+        conversion: .pass
       )
     }
 

@@ -33,8 +33,33 @@ final class StringPassingTests {
 
     try assertOutput(
       st, input: class_interfaceFile, .java,
-      detectChunkByInitialLines: 1,
       expectedChunks: [
+        """
+        /**
+         * {@snippet lang=c :
+         * ptrdiff_t swiftjava___FakeModule_writeString_string(const int8_t *string)
+         * }
+         */
+        private static class swiftjava___FakeModule_writeString_string {
+          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_INT,
+            /* string: */SwiftValueLayout.SWIFT_POINTER
+          );
+          public static final MemorySegment ADDR =
+            __FakeModule.findOrThrow("swiftjava___FakeModule_writeString_string");
+          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static long call(java.lang.foreign.MemorySegment string) {
+            try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(string);
+              }
+              return (long) HANDLE.invokeExact(string);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+        }
+        """,
         """
         /**
          * Downcall to Swift:
@@ -43,15 +68,8 @@ final class StringPassingTests {
          * }
          */
         public static long writeString(java.lang.String string) {
-            var mh$ = swiftjava___FakeModule_writeString_string.HANDLE;
             try(var arena$ = Arena.ofConfined()) {
-                var string$ = SwiftKit.toCString(string, arena$);
-                if (SwiftKit.TRACE_DOWNCALLS) {
-                    SwiftKit.traceDowncall(string$);
-                }
-                return (long) mh$.invokeExact(string$);
-            } catch (Throwable ex$) {
-                throw new AssertionError("should not reach here", ex$);
+                return swiftjava___FakeModule_writeString_string.call(SwiftKit.toCString(string, arena$));
             }
         }
         """
