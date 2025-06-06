@@ -18,7 +18,7 @@ import PackagePlugin
 fileprivate let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
-struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
@@ -27,7 +27,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
-    let executable = try context.tool(named: "Java2Swift").url
+    let executable = try context.tool(named: "SwiftJavaTool").url
     var commands: [Command] = []
     
     // Note: Target doesn't have a directoryURL counterpart to directory,
@@ -199,7 +199,7 @@ struct Java2SwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   }
 }
 
-extension Java2SwiftBuildToolPlugin {
+extension SwiftJavaBuildToolPlugin {
   func argumentsModuleName(sourceModule: Target) -> [String] {
     return [
       "--module-name", sourceModule.name

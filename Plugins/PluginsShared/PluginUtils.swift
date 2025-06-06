@@ -60,14 +60,14 @@ func getEnvironmentBool(_ name: String) -> Bool {
 }
 
 extension PluginContext {
-  var outputDirectoryJava: URL {
+  var outputJavaDirectory: URL {
     self.pluginWorkDirectoryURL
       .appending(path: "src")
       .appending(path: "generated")
       .appending(path: "java")
   }
   
-  var outputDirectorySwift: URL {
+  var outputSwiftDirectory: URL {
     self.pluginWorkDirectoryURL
       .appending(path: "Sources")
   }

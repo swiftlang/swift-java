@@ -4,8 +4,7 @@
 import CompilerPluginSupport
 import PackageDescription
 
-import class Foundation.FileManager
-import class Foundation.ProcessInfo
+import Foundation
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,
@@ -25,9 +24,53 @@ func findJavaHome() -> String {
 
     return home
   }
+    
+  if let home = getJavaHomeFromLibexecJavaHome(),
+     !home.isEmpty {
+    return home
+  }
 
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
 }
+
+/// On MacOS we can use the java_home tool as a fallback if we can't find JAVA_HOME environment variable.
+func getJavaHomeFromLibexecJavaHome() -> String? {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/libexec/java_home")
+
+    // Check if the executable exists before trying to run it
+    guard FileManager.default.fileExists(atPath: task.executableURL!.path) else {
+        print("/usr/libexec/java_home does not exist")
+        return nil
+    }
+
+    let pipe = Pipe()
+    task.standardOutput = pipe
+    task.standardError = pipe // Redirect standard error to the same pipe for simplicity
+
+    do {
+        try task.run()
+        task.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if task.terminationStatus == 0 {
+            return output
+        } else {
+            print("java_home terminated with status: \(task.terminationStatus)")
+            // Optionally, log the error output for debugging
+            if let errorOutput = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
+                print("Error output: \(errorOutput)")
+            }
+            return nil
+        }
+    } catch {
+        print("Error running java_home: \(error)")
+        return nil
+    }
+}
+
 let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
@@ -92,8 +135,8 @@ let package = Package(
     ),
 
     .executable(
-      name: "Java2Swift",
-      targets: ["Java2Swift"]
+      name: "swift-java",
+      targets: ["SwiftJavaTool"]
     ),
 
     // ==== Plugin for building Java code
@@ -106,17 +149,10 @@ let package = Package(
 
     // ==== Plugin for wrapping Java classes in Swift
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       targets: [
-        "Java2SwiftPlugin"
+        "SwiftJavaPlugin"
       ]
-    ),
-
-    // ==== jextract-swift (extract Java accessors from Swift interface files)
-
-    .executable(
-      name: "jextract-swift",
-      targets: ["JExtractSwiftTool"]
     ),
 
     // Support library written in Swift for SwiftKit "Java"
@@ -127,8 +163,8 @@ let package = Package(
     ),
 
     .library(
-      name: "JExtractSwift",
-      targets: ["JExtractSwift"]
+      name: "JExtractSwiftLib",
+      targets: ["JExtractSwiftLib"]
     ),
 
     // ==== Plugin for wrapping Java classes in Swift
@@ -271,10 +307,10 @@ let package = Package(
     ),
 
     .plugin(
-      name: "Java2SwiftPlugin",
+      name: "SwiftJavaPlugin",
       capability: .buildTool(),
       dependencies: [
-        "Java2Swift"
+        "SwiftJavaTool"
       ]
     ),
 
@@ -312,7 +348,7 @@ let package = Package(
     ),
 
     .target(
-      name: "Java2SwiftLib",
+      name: "SwiftJavaLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -334,7 +370,7 @@ let package = Package(
     ),
 
     .executableTarget(
-      name: "Java2Swift",
+      name: "SwiftJavaTool",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -343,7 +379,8 @@ let package = Package(
         "JavaKit",
         "JavaKitJar",
         "JavaKitNetwork",
-        "Java2SwiftLib",
+        "SwiftJavaLib",
+        "JExtractSwiftLib",
         "JavaKitShared",
       ],
 
@@ -355,7 +392,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JExtractSwift",
+      name: "JExtractSwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -370,21 +407,11 @@ let package = Package(
       ]
     ),
 
-    .executableTarget(
-      name: "JExtractSwiftTool",
-      dependencies: [
-        "JExtractSwift",
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-
     .plugin(
       name: "JExtractSwiftPlugin",
       capability: .buildTool(),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
     .plugin(
@@ -394,7 +421,7 @@ let package = Package(
         permissions: [
         ]),
       dependencies: [
-        "JExtractSwiftTool"
+        "SwiftJavaTool"
       ]
     ),
 
@@ -427,8 +454,8 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "Java2SwiftTests",
-      dependencies: ["Java2SwiftLib"],
+      name: "SwiftJavaTests",
+      dependencies: ["SwiftJavaLib"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -438,7 +465,7 @@ let package = Package(
     .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [
-        "JExtractSwift"
+        "JExtractSwiftLib"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

@@ -14,13 +14,12 @@
 
 import Foundation
 import ArgumentParser
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKit
 import JavaKitJar
-import Java2SwiftLib
 import JavaKitConfigurationShared
 
-extension JavaToSwift {
+extension SwiftJava {
 
   // TODO: make this perhaps "emit type mappings"
   mutating func emitConfiguration(

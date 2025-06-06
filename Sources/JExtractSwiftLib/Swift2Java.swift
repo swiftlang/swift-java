@@ -12,57 +12,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ArgumentParser
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import JavaKitShared
+import JavaKitConfigurationShared // TODO: this should become SwiftJavaConfigurationShared
 
-/// Command-line utility, similar to `jextract` to export Swift types to Java.
-public struct SwiftToJava: ParsableCommand {
-  public init() {}
+public struct SwiftToJava {
+  let config: Configuration
 
-  public static var _commandName: String {
-    "jextract-swift"
+  public init(config: Configuration) {
+    self.config = config
   }
 
-  @Option(help: "The package the generated Java code should be emitted into.")
-  var packageName: String
-
-  @Option(
-    name: .shortAndLong,
-    help: "The directory in which to output the generated Swift files and manifest.")
-  var outputDirectoryJava: String = ".build/jextract-swift/generated"
-
-  @Option(help: "Swift output directory")
-  var outputDirectorySwift: String
-
-  @Option(
-    name: .long,
-    help: "Name of the Swift module to import (and the swift interface files belong to)")
-  var swiftModule: String
-
-  @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
-  var logLevel: Logger.Level = .info
-
-  @Argument(help: "The Swift files or directories to recursively export to Java.")
-  var input: [String]
-
   public func run() throws {
-    let inputPaths = self.input.dropFirst().map { URL(string: $0)! }
+    guard let swiftModule = config.swiftModule else {
+      fatalError("Missing '--swift-module' name.")
+    }
 
     let translator = Swift2JavaTranslator(
-      javaPackage: packageName,
+      javaPackage: config.javaPackage ?? "", // no package is ok, we'd generate all into top level
       swiftModuleName: swiftModule
     )
-    translator.log.logLevel = logLevel
+    translator.log.logLevel = config.logLevel ?? .info
+
+    if config.javaPackage == nil || config.javaPackage!.isEmpty {
+      translator.log.warning("Configured java package is '', consider specifying concrete package for generated sources.")
+    }
+
+    print("===== CONFIG ==== \(config)")
+
+    guard let inputSwift = config.inputSwiftDirectory else {
+      fatalError("Missing '--swift-input' directory!")
+    }
+
+    let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
+    translator.log.info("Input paths = \(inputPaths)")
 
     var allFiles: [URL] = []
     let fileManager = FileManager.default
     let log = translator.log
-    
+
     for path in inputPaths {
-      log.debug("Input path: \(path)")
+      log.info("Input path: \(path)")
       if isDirectory(url: path) {
         if let enumerator = fileManager.enumerator(at: path, includingPropertiesForKeys: nil) {
           for case let fileURL as URL in enumerator {
@@ -88,10 +80,21 @@ public struct SwiftToJava: ParsableCommand {
       translator.add(filePath: file.path, text: text)
     }
 
+    guard let outputSwiftDirectory = config.outputSwiftDirectory else {
+      fatalError("Missing --output-swift directory!")
+    }
+    guard let outputJavaDirectory = config.outputJavaDirectory else {
+      fatalError("Missing --output-java directory!")
+    }
+
     try translator.analyze()
-    try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
-    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
-    print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
+
+    try translator.writeSwiftThunkSources(outputDirectory: outputSwiftDirectory)
+    print("[swift-java] Generated Swift sources (module: '\(config.swiftModule ?? "")') in: \(outputSwiftDirectory)/")
+
+    try translator.writeExportedJavaSources(outputDirectory: outputJavaDirectory)
+    print("[swift-java] Generated Java sources (package: '\(config.javaPackage ?? "")') in: \(outputJavaDirectory)/")
+
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
   
@@ -100,16 +103,6 @@ public struct SwiftToJava: ParsableCommand {
     file.lastPathComponent.hasSuffix(".swiftinterface")
   }
 
-}
-
-extension Logger.Level: ExpressibleByArgument {
-  public var defaultValueDescription: String {
-    "log level"
-  }
-  public private(set) static var allValueStrings: [String] =
-    ["trace", "debug", "info", "notice", "warning", "error", "critical"]
-
-  public private(set) static var defaultCompletionKind: CompletionKind = .default
 }
 
 func isDirectory(url: URL) -> Bool {
