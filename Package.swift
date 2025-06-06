@@ -4,8 +4,7 @@
 import CompilerPluginSupport
 import PackageDescription
 
-import class Foundation.FileManager
-import class Foundation.ProcessInfo
+import Foundation
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,
@@ -25,9 +24,53 @@ func findJavaHome() -> String {
 
     return home
   }
+    
+  if let home = getJavaHomeFromLibexecJavaHome(),
+     !home.isEmpty {
+    return home
+  }
 
   fatalError("Please set the JAVA_HOME environment variable to point to where Java is installed.")
 }
+
+/// On MacOS we can use the java_home tool as a fallback if we can't find JAVA_HOME environment variable.
+func getJavaHomeFromLibexecJavaHome() -> String? {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/libexec/java_home")
+
+    // Check if the executable exists before trying to run it
+    guard FileManager.default.fileExists(atPath: task.executableURL!.path) else {
+        print("/usr/libexec/java_home does not exist")
+        return nil
+    }
+
+    let pipe = Pipe()
+    task.standardOutput = pipe
+    task.standardError = pipe // Redirect standard error to the same pipe for simplicity
+
+    do {
+        try task.run()
+        task.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if task.terminationStatus == 0 {
+            return output
+        } else {
+            print("java_home terminated with status: \(task.terminationStatus)")
+            // Optionally, log the error output for debugging
+            if let errorOutput = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
+                print("Error output: \(errorOutput)")
+            }
+            return nil
+        }
+    } catch {
+        print("Error running java_home: \(error)")
+        return nil
+    }
+}
+
 let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
