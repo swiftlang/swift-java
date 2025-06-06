@@ -15,6 +15,7 @@
 import ArgumentParser
 import Foundation
 import SwiftJavaLib
+import JExtractSwiftLib
 import JavaKit
 import JavaKitJar
 import JavaKitNetwork
@@ -30,7 +31,7 @@ struct SwiftJava: AsyncParsableCommand {
   static var _commandName: String { "swift-java" }
 
   @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
-  var moduleName: String?
+  var moduleName: String? // TODO: rename to --swift-module?
 
   @Option(
     help:
@@ -59,14 +60,17 @@ struct SwiftJava: AsyncParsableCommand {
   )
   var swiftNativeImplementation: [String] = []
 
-  @Option(name: .shortAndLong, help: "Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.")
+  @Option(help: "Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.")
   var inputSwift: String? = nil
 
-  @Option(name: .shortAndLong, help: "The directory where generated Swift files should be written. Generally used with jextract mode.")
+  @Option(help: "The directory where generated Swift files should be written. Generally used with jextract mode.")
   var outputSwift: String? = nil
 
-  @Option(name: .shortAndLong, help: "The directory where generated Java files should be written. Generally used with jextract mode.")
+  @Option(help: "The directory where generated Java files should be written. Generally used with jextract mode.")
   var outputJava: String? = nil
+
+  @Option(help: "The Java package the generated Java code should be emitted into.")
+  var javaPackage: String? = nil
 
   // TODO: clarify this vs outputSwift (history: outputSwift is jextract, and this was java2swift)
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the SwiftJava configuration file.")
@@ -74,7 +78,10 @@ struct SwiftJava: AsyncParsableCommand {
 
   @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
   var cacheDirectory: String? = nil
-  
+
+  @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
+  var logLevel: Logger.Level = .info
+
   var effectiveCacheDirectory: String? {
     if let cacheDirectory {
       return cacheDirectory
@@ -98,7 +105,7 @@ struct SwiftJava: AsyncParsableCommand {
   @Argument(
     help: "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
   )
-  var input: String
+  var input: String?
 
   /// Whether we have ensured that the output directory exists.
   var createdOutputDirectory: Bool = false
@@ -151,6 +158,7 @@ struct SwiftJava: AsyncParsableCommand {
     // The configuration file goes at the top level.
     let outputDir: Foundation.URL
     if jar {
+      precondition(self.input != nil, "-jar mode requires path to jar to be specified as input path")
       outputDir = baseDir
     } else {
       outputDir = baseDir
@@ -179,35 +187,48 @@ struct SwiftJava: AsyncParsableCommand {
   mutating func run() async {
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
     do {
-      let config: Configuration
-      
+      var config: Configuration = Configuration()
+      if let moduleBaseDir {
+        print("[debug][swift-java] Load config from module base directory: \(moduleBaseDir.path)")
+        config = try readConfiguration(sourceDir: moduleBaseDir.path)
+      } else if let inputSwift {
+        print("[debug][swift-java] Load config from module swift input directory: \(inputSwift)")
+        config = try readConfiguration(sourceDir: inputSwift)
+      }
+
+      config.logLevel = self.logLevel
+      if let javaPackage {
+        config.javaPackage = javaPackage
+      }
+      assert(config.javaPackage != nil, "java-package was nil!")
+
       // Determine the mode in which we'll execute.
       let toolMode: ToolMode
-      // TODO: some options are exclusive to eachother so we should detect that
+      // TODO: some options are exclusive to each other so we should detect that
       if let inputSwift {
         guard let outputSwift else {
-          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-swift directory was provided!")
+          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-swift directory was provided!\n\(Self.helpMessage())")
           return
         }
         guard let outputJava else {
-          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-java directory was provided!")
+          print("[swift-java] --input-swift enabled 'jextract' mode, however no --output-java directory was provided!\n\(Self.helpMessage())")
           return
         }
-        var c = Configuration()
-        c.inputSwift = inputSwift
-        c.outputSwift = outputSwift
-        c.outputJava = outputJava
-        config = c
+        config.swiftModule = self.moduleName // FIXME: rename the moduleName
+        config.inputSwiftDirectory = self.inputSwift
+        config.outputSwiftDirectory = self.outputSwift
+        config.outputJavaDirectory = self.outputJava
 
         toolMode = .jextract
       } else if jar {
-        if let moduleBaseDir {
-          config = try readConfiguration(sourceDir: moduleBaseDir.path)
-        } else {
-          config = Configuration()
+        guard let input else {
+          fatalError("Mode -jar requires <input> path\n\(Self.helpMessage())")
         }
         toolMode = .configuration(extraClasspath: input)
       } else if fetch {
+        guard let input else {
+          fatalError("Mode -jar requires <input> path\n\(Self.helpMessage())")
+        }
         config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
         guard let dependencies = config.dependencies else {
           print("[swift-java] Running in 'fetch dependencies' mode but dependencies list was empty!")
@@ -216,13 +237,23 @@ struct SwiftJava: AsyncParsableCommand {
         }
         toolMode = .fetchDependencies
       } else {
+        guard let input else {
+          fatalError("Mode -jar requires <input> path\n\(Self.helpMessage())")
+        }
         config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
         toolMode = .classWrappers
       }
 
-      let moduleName = self.moduleName ??
-        input.split(separator: "/").dropLast().last.map(String.init) ??
-        "__UnknownModule"
+      print("[debug][swift-java] Running swift-java in mode: " + "\(toolMode.prettyName)".bold)
+
+      let moduleName: String =
+        if let name = self.moduleName {
+          name
+        } else if let input {
+          input.split(separator: "/").dropLast().last.map(String.init) ?? "__UnknownModule"
+        } else {
+          "__UnknownModule"
+        }
 
       // Load all of the dependent configurations and associate them with Swift
       // modules.
@@ -283,14 +314,20 @@ struct SwiftJava: AsyncParsableCommand {
         break;
       }
 
-      // Bring up the Java VM.
+      // Bring up the Java VM when necessary
       // TODO: print only in verbose mode
       let classpath = classpathEntries.joined(separator: ":")
-      print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
 
-      let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
+      let jvm: JavaVirtualMachine!
+      switch toolMode {
+        case .configuration, .classWrappers:
+          print("[debug][swift-java] Initialize JVM with classpath: \(classpath)")
+          jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
+        default:
+          jvm = nil
+      }
 
-      //   * Classespaths from all dependent configuration files
+      //   * Classpaths from all dependent configuration files
       for (_, config) in dependentConfigs {
         // TODO: may need to resolve the dependent configs rather than just get their configs
         // TODO: We should cache the resolved classpaths as well so we don't do it many times
@@ -319,9 +356,6 @@ struct SwiftJava: AsyncParsableCommand {
       case .fetchDependencies:
         guard let dependencies = config.dependencies else {
           fatalError("Configuration for fetching dependencies must have 'dependencies' defined!")
-        }
-        guard let moduleName = self.moduleName else {
-          fatalError("Fetching dependencies must specify module name (--module-name)!")
         }
         guard let effectiveCacheDirectory else {
           fatalError("Fetching dependencies must effective cache directory! Specify --output-directory or --cache-directory")
@@ -456,3 +490,13 @@ extension JavaClass<ClassLoader> {
   public func getSystemClassLoader() -> ClassLoader?
 }
 
+extension SwiftJava.ToolMode {
+  var prettyName: String {
+    switch self {
+      case .configuration: "Configuration"
+      case .fetchDependencies: "Fetch dependencies"
+      case .classWrappers: "Wrap Java classes"
+      case .jextract: "JExtract Swift for Java"
+    }
+  }
+}

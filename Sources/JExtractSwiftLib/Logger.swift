@@ -14,6 +14,8 @@
 
 import Foundation
 import SwiftSyntax
+import ArgumentParser
+import JavaKitConfigurationShared
 
 // Placeholder for some better logger, we could depend on swift-log
 public struct Logger {
@@ -95,47 +97,17 @@ public struct Logger {
 }
 
 extension Logger {
-  public enum Level: String, Hashable {
-    case trace = "trace"
-    case debug = "debug"
-    case info = "info"
-    case notice = "notice"
-    case warning = "warning"
-    case error = "error"
-    case critical = "critical"
-  }
+  public typealias Level = JavaKitConfigurationShared.LogLevel
 }
 
-extension Logger.Level {
-  public init(from decoder: any Decoder) throws {
-    var container = try decoder.unkeyedContainer()
-    let string = try container.decode(String.self)
-    switch string {
-    case "trace": self = .trace
-    case "debug": self = .debug
-    case "info": self = .info
-    case "notice": self = .notice
-    case "warning": self = .warning
-    case "error": self = .error
-    case "critical": self = .critical
-    default: fatalError("Unknown value for \(Logger.Level.self): \(string)")
-    }
+extension Logger.Level: ExpressibleByArgument {
+  public var defaultValueDescription: String {
+    "log level"
   }
+  public private(set) static var allValueStrings: [String] =
+    ["trace", "debug", "info", "notice", "warning", "error", "critical"]
 
-  public func encode(to encoder: any Encoder) throws {
-    var container = encoder.singleValueContainer()
-    let text =
-      switch self {
-      case .trace: "trace"
-      case .debug: "debug"
-      case .info: "info"
-      case .notice: "notice"
-      case .warning: "warning"
-      case .error: "error"
-      case .critical: "critical"
-      }
-    try container.encode(text)
-  }
+  public private(set) static var defaultCompletionKind: CompletionKind = .default
 }
 
 extension Logger.Level {
