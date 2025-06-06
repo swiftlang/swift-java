@@ -50,20 +50,23 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     
     // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
     // that is common in JVM ecosystem
-    let outputDirectoryJava = context.outputDirectoryJava
-    let outputDirectorySwift = context.outputDirectorySwift
+    let outputJavaDirectory = context.outputJavaDirectory
+    let outputSwiftDirectory = context.outputSwiftDirectory
 
     var arguments: [String] = [
-      "--swift-module", sourceModule.name,
-      "--package-name", javaPackage,
-      "--output-directory-java", outputDirectoryJava.path(percentEncoded: false),
-      "--output-directory-swift", outputDirectorySwift.path(percentEncoded: false),
+      "--input-swift", sourceDir,
+      "--module-name", sourceModule.name,
+      "--output-java", outputJavaDirectory.path(percentEncoded: false),
+      "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...
       //       Since plugins cannot depend on libraries we cannot detect what the output files will be,
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
-    arguments.append(sourceDir)
+    // arguments.append(sourceDir)
+    if !javaPackage.isEmpty {
+      arguments.append(contentsOf: ["--java-package", javaPackage])
+    }
 
     return [
       .prebuildCommand(
@@ -72,7 +75,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         arguments: arguments,
         // inputFiles: [ configFile ] + swiftFiles,
         // outputFiles: outputJavaFiles
-        outputFilesDirectory: outputDirectorySwift
+        outputFilesDirectory: outputSwiftDirectory
       )
     ]
   }

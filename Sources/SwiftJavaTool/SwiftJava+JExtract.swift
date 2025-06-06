@@ -34,7 +34,7 @@ extension SwiftJava {
   mutating func jextractSwift(
     config: Configuration
   ) throws {
-
+    try SwiftToJava(config: config).run()
   }
 
 }

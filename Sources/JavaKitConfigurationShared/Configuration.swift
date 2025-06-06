@@ -21,15 +21,22 @@ import Foundation
 
 public typealias JavaVersion = Int
 
-/// Configuration for the SwiftJava plugins, provided on a per-target basis.
+/// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.
 public struct Configuration: Codable {
-  // ==== swift 2 java ---------------------------------------------------------
+
+  public var logLevel: LogLevel?
+
+  // ==== swift 2 java / jextract swift ---------------------------------------
 
   public var javaPackage: String?
 
-  public var inputSwift: String?
-  public var outputSwift: String?
-  public var outputJava: String?
+  public var swiftModule: String?
+
+  public var inputSwiftDirectory: String?
+
+  public var outputSwiftDirectory: String?
+
+  public var outputJavaDirectory: String?
 
   // ==== java 2 swift ---------------------------------------------------------
 
@@ -202,5 +209,47 @@ public struct ConfigurationError: Error {
     self.error = error
     self.file = file
     self.line = line
+  }
+}
+
+public enum LogLevel: String, Codable, Hashable {
+  case trace = "trace"
+  case debug = "debug"
+  case info = "info"
+  case notice = "notice"
+  case warning = "warning"
+  case error = "error"
+  case critical = "critical"
+}
+
+extension LogLevel {
+  public init(from decoder: any Decoder) throws {
+    var container = try decoder.unkeyedContainer()
+    let string = try container.decode(String.self)
+    switch string {
+    case "trace": self = .trace
+    case "debug": self = .debug
+    case "info": self = .info
+    case "notice": self = .notice
+    case "warning": self = .warning
+    case "error": self = .error
+    case "critical": self = .critical
+    default: fatalError("Unknown value for \(LogLevel.self): \(string)")
+    }
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    let text =
+      switch self {
+      case .trace: "trace"
+      case .debug: "debug"
+      case .info: "info"
+      case .notice: "notice"
+      case .warning: "warning"
+      case .error: "error"
+      case .critical: "critical"
+      }
+    try container.encode(text)
   }
 }
