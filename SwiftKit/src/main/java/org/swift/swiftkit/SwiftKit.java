@@ -77,9 +77,10 @@ public class SwiftKit {
         String traceArgs = Arrays.stream(args)
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
-        System.out.printf("[java][%s:%d] Downcall: %s(%s)\n",
+        System.out.printf("[java][%s:%d] Downcall: %s.%s(%s)\n",
                 ex.getStackTrace()[1].getFileName(),
                 ex.getStackTrace()[1].getLineNumber(),
+                ex.getStackTrace()[1].getClassName(),
                 ex.getStackTrace()[1].getMethodName(),
                 traceArgs);
     }
@@ -448,26 +449,26 @@ public class SwiftKit {
     }
 
     /**
+     * Get the method handle of a functional interface.
+     *
+     * @param fi functional interface.
+     * @param name name of the single abstraction method.
+     * @param fdesc function descriptor of the method.
+     * @return unbound method handle.
+     */
+    public static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
+        try {
+            return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
+        } catch (ReflectiveOperationException ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    /**
      * Convert String to a MemorySegment filled with the C string.
      */
     public static MemorySegment toCString(String str, Arena arena) {
         return arena.allocateFrom(str);
-    }
-
-    /**
-     * Convert Runnable to a MemorySegment which is an upcall stub for it.
-     */
-    public static MemorySegment toUpcallStub(Runnable callback, Arena arena) {
-        try {
-            FunctionDescriptor descriptor = FunctionDescriptor.ofVoid();
-            MethodHandle handle = MethodHandles.lookup()
-                    .findVirtual(Runnable.class, "run", descriptor.toMethodType())
-                    .bindTo(callback);
-            return Linker.nativeLinker()
-                    .upcallStub(handle, descriptor, arena);
-        } catch (Exception e) {
-            throw new AssertionError("should be unreachable");
-        }
     }
 
     private static class swift_getTypeName {
