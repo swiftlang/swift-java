@@ -15,26 +15,23 @@
 import JavaTypes
 
 extension FFMSwift2JavaGenerator {
-  func translatedSignature(
+  func translatedDecl(
     for decl: ImportedFunc
-  ) -> TranslatedFunctionSignature? {
-    if let cached = translatedSignatures[decl] {
+  ) -> TranslatedFunctionDecl? {
+    if let cached = translatedDecls[decl] {
       return cached
     }
 
-    let translated: TranslatedFunctionSignature?
+    let translated: TranslatedFunctionDecl?
     do {
-      let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
-      let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
-
       let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
-      translated = try translation.translate(loweredFunctionSignature: loweredSignature)
+      translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
       translated = nil
     }
 
-    translatedSignatures[decl] = translated
+    translatedDecls[decl] = translated
     return translated
   }
 }
@@ -82,17 +79,45 @@ struct TranslatedResult {
   var conversion: JavaConversionStep
 }
 
-/// Translated function signature representing a Swift API.
+
+/// Translated Java API representing a Swift API.
 ///
 /// Since this holds the lowered signature, and the original `SwiftFunctionSignature`
 /// in it, this contains all the API information (except the name) to generate the
 /// cdecl thunk, Java binding, and the Java wrapper function.
-struct TranslatedFunctionSignature {
-  var loweredSignature: LoweredFunctionSignature
+struct TranslatedFunctionDecl {
+  /// Java function name.
+  let name: String
 
+  /// Functional interfaces required for the Java method.
+  let functionTypes: [TranslatedFunctionType]
+
+  /// Function signature.
+  let translatedSignature: TranslatedFunctionSignature
+
+  /// Cdecl lowerd signature.
+  let loweredSignature: LoweredFunctionSignature
+}
+
+/// Function signature for a Java API.
+struct TranslatedFunctionSignature {
   var selfParameter: TranslatedParameter?
   var parameters: [TranslatedParameter]
   var result: TranslatedResult
+}
+
+/// Represent a Swift closure type in the user facing Java API.
+///
+/// Closures are translated to named functional interfaces in Java.
+struct TranslatedFunctionType {
+  var name: String
+  var parameters: [TranslatedParameter]
+  var result: TranslatedResult
+
+  /// Whether or not this functional interface with C ABI compatible.
+  var isCompatibleWithC: Bool {
+    result.conversion.isPass && parameters.allSatisfy(\.conversion.isPass)
+  }
 }
 
 extension TranslatedFunctionSignature {
@@ -121,12 +146,92 @@ extension TranslatedFunctionSignature {
 struct JavaTranslation {
   var swiftStdlibTypes: SwiftStandardLibraryTypes
 
-  /// Translate Swift API to user-facing Java API.
+  func translate(
+    _ decl: ImportedFunc
+  ) throws -> TranslatedFunctionDecl {
+    let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
+    let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
+
+    // Name.
+    let javaName = switch decl.apiKind {
+    case .getter: "get\(decl.name.toCamelCase)"
+    case .setter: "set\(decl.name.toCamelCase)"
+    case .function, .initializer: decl.name
+    }
+
+    // Closures.
+    var funcTypes: [TranslatedFunctionType] = []
+    for (idx, param) in decl.functionSignature.parameters.enumerated() {
+      switch param.type {
+      case .function(let funcTy):
+        let paramName = param.parameterName ?? "_\(idx)"
+        let translatedClosure = try translateFunctionType(name: paramName, swiftType: funcTy)
+        funcTypes.append(translatedClosure)
+      case .tuple:
+        // TODO: Implement
+        break
+      default:
+        break
+      }
+    }
+
+    // Signature.
+    let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
+
+    return TranslatedFunctionDecl(
+      name: javaName,
+      functionTypes: funcTypes,
+      translatedSignature: translatedSignature,
+      loweredSignature: loweredSignature
+    )
+  }
+
+  /// Translate Swift closure type to Java functional interface.
+  func translateFunctionType(
+    name: String,
+    swiftType: SwiftFunctionType
+  ) throws -> TranslatedFunctionType {
+    var translatedParams: [TranslatedParameter] = []
+
+    for (i, param) in swiftType.parameters.enumerated() {
+      let paramName = param.parameterName ?? "_\(i)"
+      if let cType = try? CType(cdeclType: param.type) {
+        let translatedParam = TranslatedParameter(
+          javaParameters: [
+            JavaParameter(type: cType.javaType, name: paramName)
+          ],
+          conversion: .pass
+        )
+        translatedParams.append(translatedParam)
+        continue
+      }
+      throw JavaTranslationError.unhandledType(.function(swiftType))
+    }
+
+    guard let resultCType = try? CType(cdeclType: swiftType.resultType) else {
+      throw JavaTranslationError.unhandledType(.function(swiftType))
+    }
+
+    let transltedResult = TranslatedResult(
+      javaResultType: resultCType.javaType,
+      outParameters: [],
+      conversion: .pass
+    )
+
+    return TranslatedFunctionType(
+      name: name,
+      parameters: translatedParams,
+      result: transltedResult
+    )
+  }
+
+  /// Translate a Swift API signature to the user-facing Java API signature.
   ///
   /// Note that the result signature is for the high-level Java API, not the
   /// low-level FFM down-calling interface.
   func translate(
-    loweredFunctionSignature: LoweredFunctionSignature
+    loweredFunctionSignature: LoweredFunctionSignature,
+    methodName: String
   ) throws -> TranslatedFunctionSignature {
     let swiftSignature = loweredFunctionSignature.original
 
@@ -136,6 +241,7 @@ struct JavaTranslation {
       selfParameter = try self.translate(
         swiftParam: swiftSelf,
         loweredParam: loweredFunctionSignature.selfParameter!,
+        methodName: methodName,
         parameterName: swiftSelf.parameterName ?? "self"
       )
     } else {
@@ -150,6 +256,7 @@ struct JavaTranslation {
         return try self.translate(
           swiftParam: swiftParam,
           loweredParam: loweredParam,
+          methodName: methodName,
           parameterName: parameterName
         )
       }
@@ -161,17 +268,17 @@ struct JavaTranslation {
     )
 
     return TranslatedFunctionSignature(
-      loweredSignature: loweredFunctionSignature,
       selfParameter: selfParameter,
       parameters: parameters,
       result: result
     )
   }
 
-  /// Translate
+  /// Translate a Swift API parameter to the user-facing Java API parameter.
   func translate(
     swiftParam: SwiftParameter,
     loweredParam: LoweredParameter,
+    methodName: String,
     parameterName: String
   ) throws -> TranslatedParameter {
     let swiftType = swiftParam.type
@@ -184,7 +291,7 @@ struct JavaTranslation {
         javaParameters: [
           JavaParameter(
             type: javaType,
-            name: loweredParam.cdeclParameters[0].parameterName!
+            name: parameterName
           )
         ],
         conversion: .pass
@@ -198,7 +305,7 @@ struct JavaTranslation {
         javaParameters: [
           JavaParameter(
             type: JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType"),
-            name: loweredParam.cdeclParameters[0].parameterName!)
+            name: parameterName)
         ],
         conversion: .swiftValueSelfSegment
       )
@@ -222,7 +329,7 @@ struct JavaTranslation {
             javaParameters: [
               JavaParameter(
                 type: .javaLangString,
-                name: loweredParam.cdeclParameters[0].parameterName!
+                name: parameterName
               )
             ],
             conversion: .call(function: "SwiftKit.toCString", withArena: true)
@@ -242,7 +349,7 @@ struct JavaTranslation {
         javaParameters: [
           JavaParameter(
             type: try translate(swiftType: swiftType),
-            name: loweredParam.cdeclParameters[0].parameterName!
+            name: parameterName
           )
         ],
         conversion: .swiftValueSelfSegment
@@ -252,21 +359,22 @@ struct JavaTranslation {
       // TODO: Implement.
       throw JavaTranslationError.unhandledType(swiftType)
 
-    case .function(let fn) where fn.parameters.isEmpty && fn.resultType.isVoid:
+    case .function:
       return TranslatedParameter(
         javaParameters: [
           JavaParameter(
-            type: JavaType.class(package: "java.lang", name: "Runnable"),
-            name: loweredParam.cdeclParameters[0].parameterName!)
+            type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"),
+            name: parameterName)
         ],
-        conversion: .call(function: "SwiftKit.toUpcallStub", withArena: true)
+        conversion: .call(function: "\(methodName).$toUpcallStub", withArena: true)
       )
 
-    case .optional, .function:
+    case .optional:
       throw JavaTranslationError.unhandledType(swiftType)
     }
   }
 
+  /// Translate a Swift API result to the user-facing Java API result.
   func translate(
     swiftResult: SwiftResult,
     loweredResult: LoweredResult
@@ -357,6 +465,10 @@ enum JavaConversionStep {
   // If `withArena` is true, `arena$` argument is added.
   case call(function: String, withArena: Bool)
 
+  // Apply a method on the placeholder.
+  // If `withArena` is true, `arena$` argument is added.
+  case method(methodName: String, arguments: [String] = [], withArena: Bool)
+
   // Call 'new \(Type)(\(placeholder), swiftArena$)'.
   case constructSwiftValue(JavaType)
 
@@ -365,6 +477,10 @@ enum JavaConversionStep {
 
   // Casting the placeholder to the certain type.
   case cast(JavaType)
+
+  var isPass: Bool {
+    return if case .pass = self { true } else { false }
+  }
 }
 
 extension CType {
@@ -443,5 +559,5 @@ extension CType {
 
 enum JavaTranslationError: Error {
   case inoutNotSupported(SwiftType)
-  case unhandledType(SwiftType)
+  case unhandledType(SwiftType, file: String = #file, line: Int = #line)
 }

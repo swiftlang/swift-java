@@ -15,11 +15,11 @@
 import JavaTypes
 
 extension FFMSwift2JavaGenerator {
-  func printFunctionDowncallMethods(
+  package func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
-    guard let _ = translatedSignature(for: decl) else {
+    guard let _ = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
       return
     }
@@ -27,6 +27,8 @@ extension FFMSwift2JavaGenerator {
     printer.printSeparator(decl.displayName)
 
     printJavaBindingDescriptorClass(&printer, decl)
+
+    printJavaBindingWrapperHelperClass(&printer, decl)
 
     // Render the "make the downcall" functions.
     printJavaBindingWrapperMethod(&printer, decl)
@@ -38,9 +40,9 @@ extension FFMSwift2JavaGenerator {
     _ decl: ImportedFunc
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
-    let translatedSignature = self.translatedSignature(for: decl)!
+    let translated = self.translatedDecl(for: decl)!
     // 'try!' because we know 'loweredSignature' can be described with C.
-    let cFunc = try! translatedSignature.loweredSignature.cFunctionDecl(cName: thunkName)
+    let cFunc = try! translated.loweredSignature.cFunctionDecl(cName: thunkName)
 
     printer.printBraceBlock(
       """
@@ -52,37 +54,39 @@ extension FFMSwift2JavaGenerator {
       private static class \(cFunc.name)
       """
     ) { printer in
-      printFunctionDescriptorValue(&printer, cFunc)
+      printFunctionDescriptorDefinition(&printer, cFunc.resultType, cFunc.parameters)
       printer.print(
         """
-        public static final MemorySegment ADDR =
+        private static final MemorySegment ADDR =
           \(self.swiftModuleName).findOrThrow("\(cFunc.name)");
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+        private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
         """
       )
       printJavaBindingDowncallMethod(&printer, cFunc)
+      printParameterDescriptorClasses(&printer, cFunc)
     }
   }
 
   /// Print the 'FunctionDescriptor' of the lowered cdecl thunk.
-  func printFunctionDescriptorValue(
+  func printFunctionDescriptorDefinition(
     _ printer: inout CodePrinter,
-    _ cFunc: CFunction
+    _ resultType: CType,
+    _ parameters: [CParameter]
   ) {
-    printer.start("public static final FunctionDescriptor DESC = ")
+    printer.start("private static final FunctionDescriptor DESC = ")
 
-    let isEmptyParam = cFunc.parameters.isEmpty
-    if cFunc.resultType.isVoid {
+    let isEmptyParam = parameters.isEmpty
+    if resultType.isVoid {
       printer.print("FunctionDescriptor.ofVoid(", isEmptyParam ? .continue : .newLine)
       printer.indent()
     } else {
       printer.print("FunctionDescriptor.of(")
       printer.indent()
       printer.print("/* -> */", .continue)
-      printer.print(cFunc.resultType.foreignValueLayout, .parameterNewlineSeparator(isEmptyParam))
+      printer.print(resultType.foreignValueLayout, .parameterNewlineSeparator(isEmptyParam))
     }
 
-    for (param, isLast) in cFunc.parameters.withIsLast {
+    for (param, isLast) in parameters.withIsLast {
       printer.print("/* \(param.name ?? "_"): */", .continue)
       printer.print(param.type.foreignValueLayout, .parameterNewlineSeparator(isLast))
     }
@@ -124,16 +128,158 @@ extension FFMSwift2JavaGenerator {
     )
   }
 
+  /// Print required helper classes/interfaces for describing the CFunction.
+  ///
+  /// * function pointer parameter as a functional interface.
+  /// * Unnamed-struct parameter as a record. (unimplemented)
+  func printParameterDescriptorClasses(
+    _ printer: inout CodePrinter,
+    _ cFunc: CFunction
+  ) {
+    for param in cFunc.parameters {
+      switch param.type {
+      case .pointer(.function):
+        let name = "$\(param.name!)"
+        printFunctionPointerParameterDescriptorClass(&printer, name, param.type)
+      default:
+        continue
+      }
+    }
+  }
+
+  /// Print a class describing a function pointer parameter type.
+  ///
+  ///   ```java
+  ///   class $<parameter-name> {
+  ///     @FunctionalInterface
+  ///     interface Function {
+  ///       <return-type> apply(<parameters>);
+  ///     }
+  ///     static final MethodDescriptor DESC = FunctionDescriptor.of(...);
+  ///     static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+  ///     static MemorySegment toUpcallStub(Function fi, Arena arena) {
+  ///       return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+  ///     }
+  ///   }
+  ///   ```
+  func printFunctionPointerParameterDescriptorClass(
+    _ printer: inout CodePrinter,
+    _ name: String,
+    _ cType: CType
+  ) {
+    guard case .pointer(.function(let cResultType, let cParameterTypes, variadic: false)) = cType else {
+      preconditionFailure("must be a C function pointer type; name=\(name), cType=\(cType)")
+    }
+
+    let cParams = cParameterTypes.enumerated().map { i, ty in
+      CParameter(name: "_\(i)", type: ty)
+    }
+    let paramDecls = cParams.map({"\($0.type.javaType) \($0.name!)"})
+
+    printer.printBraceBlock(
+      """
+      /**
+       * {snippet lang=c :
+       * \(cType)
+       * }
+       */
+      private static class \(name)
+      """
+    ) { printer in
+      printer.print(
+        """
+        @FunctionalInterface
+        public interface Function {
+          \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
+        }
+        """
+      )
+      printFunctionDescriptorDefinition(&printer, cResultType, cParams)
+      printer.print(
+        """
+        private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+        private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+          return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+        }
+        """
+      )
+    }
+  }
+
+  /// Print the helper type container for a user-facing Java API.
+  ///
+  /// * User-facing functional interfaces.
+  func printJavaBindingWrapperHelperClass(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc
+  ) {
+    let translated = self.translatedDecl(for: decl)!
+    let bindingDescriptorName = self.thunkNameRegistry.functionThunkName(decl: decl)
+    if translated.functionTypes.isEmpty {
+      return
+    }
+
+    printer.printBraceBlock(
+      """
+      public static class \(translated.name)
+      """
+    ) { printer in
+      for functionType in translated.functionTypes {
+        printJavaBindingWrapperFunctionTypeHelper(&printer, functionType, bindingDescriptorName)
+      }
+    }
+  }
+
+  /// Print "wrapper" functional interface representing a Swift closure type.
+  func printJavaBindingWrapperFunctionTypeHelper(
+    _ printer: inout CodePrinter,
+    _ functionType: TranslatedFunctionType,
+    _ bindingDescriptorName: String
+  ) {
+    let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
+    if functionType.isCompatibleWithC {
+      // If the user-facing functional interface is C ABI compatible, just extend
+      // the lowered function pointer parameter interface.
+      printer.print(
+        """
+        @FunctionalInterface
+        public interface \(functionType.name) extends \(cdeclDescriptor).Function {}
+        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
+          return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
+        }
+        """
+      )
+    } else {
+      // Otherwise, the lambda must be wrapped with the lowered function instance.
+      assertionFailure("should be unreachable at this point")
+      let apiParams = functionType.parameters.flatMap {
+        $0.javaParameters.map { param in "\(param.type) \(param.name)" }
+      }
+
+      printer.print(
+        """
+        @FunctionalInterface
+        public interface \(functionType.name) {
+          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: ", ")));
+        }
+        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
+          return \(cdeclDescriptor).toUpcallStub((<cdecl-params>) -> {
+            <maybe-return> fi(<converted-args>)
+          }, arena);
+        }
+        """
+      )
+    }
+  }
+
   /// Print the calling body that forwards all the parameters to the `methodName`,
   /// with adding `SwiftArena.ofAuto()` at the end.
-  public func printJavaBindingWrapperMethod(
+  package func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc) {
-    let methodName: String = switch decl.apiKind {
-    case .getter: "get\(decl.name.toCamelCase)"
-    case .setter: "set\(decl.name.toCamelCase)"
-    case .function, .initializer: decl.name
-    }
+    _ decl: ImportedFunc
+  ) {
+    let translated = self.translatedDecl(for: decl)!
+    let methodName = translated.name
 
     var modifiers = "public"
     switch decl.functionSignature.selfParameter {
@@ -143,7 +289,7 @@ extension FFMSwift2JavaGenerator {
       break
     }
 
-    let translatedSignature = self.translatedSignature(for: decl)!
+    let translatedSignature = translated.translatedSignature
     let returnTy = translatedSignature.result.javaResultType
 
     var paramDecls = translatedSignature.parameters
@@ -182,7 +328,7 @@ extension FFMSwift2JavaGenerator {
     _ decl: ImportedFunc
   ) {
     //===  Part 1: prepare temporary arena if needed.
-    let translatedSignature = self.translatedSignature(for: decl)!
+    let translatedSignature = self.translatedDecl(for: decl)!.translatedSignature
 
     if translatedSignature.requiresTemporaryArena {
       printer.print("try(var arena$ = Arena.ofConfined()) {")
@@ -273,7 +419,7 @@ extension JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {
-    case .pass, .swiftValueSelfSegment, .construct, .cast, .call:
+    case .pass, .swiftValueSelfSegment, .construct, .cast, .call, .method:
       return false
     case .constructSwiftValue:
       return true
@@ -285,7 +431,7 @@ extension JavaConversionStep {
     switch self {
     case .pass, .swiftValueSelfSegment, .construct, .constructSwiftValue, .cast:
       return false
-    case .call(_, let withArena):
+    case .call(_, let withArena), .method(_, _, let withArena):
       return withArena
     }
   }
@@ -297,7 +443,7 @@ extension JavaConversionStep {
     switch self {
     case .pass, .swiftValueSelfSegment:
       return true
-    case .cast, .construct, .constructSwiftValue, .call:
+    case .cast, .construct, .constructSwiftValue, .call, .method:
       return false
     }
   }
@@ -316,6 +462,10 @@ extension JavaConversionStep {
     case .call(let function, let withArena):
       let arenaArg = withArena ? ", arena$" : ""
       return "\(function)(\(placeholder)\(arenaArg))"
+
+    case .method(let methodName, let arguments, let withArena):
+      let argsStr = (arguments + (withArena ? ["arena$"] : [])).joined(separator: " ,")
+      return "\(placeholder).\(methodName)(\(argsStr))"
 
     case .constructSwiftValue(let javaType):
       return "new \(javaType.className!)(\(placeholder), swiftArena$)"

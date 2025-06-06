@@ -40,13 +40,13 @@ final class StringPassingTests {
          * }
          */
         private static class swiftjava___FakeModule_writeString_string {
-          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
             /* -> */SwiftValueLayout.SWIFT_INT,
             /* string: */SwiftValueLayout.SWIFT_POINTER
           );
-          public static final MemorySegment ADDR =
+          private static final MemorySegment ADDR =
             __FakeModule.findOrThrow("swiftjava___FakeModule_writeString_string");
-          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment string) {
             try {
               if (SwiftKit.TRACE_DOWNCALLS) {

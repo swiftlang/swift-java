@@ -67,6 +67,9 @@ public class HelloJava2Swift {
 
             MySwiftStruct swiftValue = MySwiftStruct.init(2222, 1111, arena);
             SwiftKit.trace("swiftValue.capacity = " + swiftValue.getCapacity());
+            swiftValue.withCapLen((cap, len) -> {
+                SwiftKit.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
+            });
         }
 
         System.out.println("DONE.");
