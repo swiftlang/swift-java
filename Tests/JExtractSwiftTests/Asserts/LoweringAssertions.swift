@@ -43,6 +43,7 @@ func assertLoweredFunction(
   translator.prepareForTranslation()
 
   let swiftFunctionName: String
+  let apiKind: SwiftAPIKind
   let loweredFunction: LoweredFunctionSignature
   if let inputFunction = inputDecl.as(FunctionDeclSyntax.self) {
     loweredFunction = try translator.lowerFunctionSignature(
@@ -50,12 +51,14 @@ func assertLoweredFunction(
       enclosingType: enclosingType
     )
     swiftFunctionName = inputFunction.name.text
+    apiKind = .function
   } else if let inputInitializer = inputDecl.as(InitializerDeclSyntax.self) {
     loweredFunction = try translator.lowerFunctionSignature(
       inputInitializer,
       enclosingType: enclosingType
     )
     swiftFunctionName = "init"
+    apiKind = .initializer
   } else {
     fatalError("Unhandling declaration kind for lowering")
   }
@@ -63,6 +66,7 @@ func assertLoweredFunction(
   let loweredCDecl = loweredFunction.cdeclThunk(
     cName: "c_\(swiftFunctionName)",
     swiftAPIName: swiftFunctionName,
+    as: apiKind,
     stdlibTypes: translator.swiftStdlibTypes
   )
 
@@ -124,6 +128,7 @@ func assertLoweredVariableAccessor(
   let loweredCDecl = loweredFunction?.cdeclThunk(
     cName: "c_\(swiftVariableName)",
     swiftAPIName: swiftVariableName,
+    as: isSet ? .setter : .getter,
     stdlibTypes: translator.swiftStdlibTypes
   )
 

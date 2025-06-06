@@ -28,11 +28,16 @@ final class MethodImportTests {
     import _StringProcessing
     import _SwiftConcurrencyShims
 
-    public func helloWorld()
+    /// Hello World!
+    public func /*comment*/helloWorld()
 
     public func globalTakeInt(i: Int)
 
-    public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)
+    public func globalTakeIntLongString(
+      i32: Int32,
+      l: Int64,
+      s: String
+    )
     
     public func globalReturnClass() -> MySwiftClass
 

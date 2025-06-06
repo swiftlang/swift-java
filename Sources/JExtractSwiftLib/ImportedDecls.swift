@@ -17,7 +17,12 @@ import SwiftSyntax
 /// Any imported (Swift) declaration
 protocol ImportedDecl: AnyObject {}
 
-public typealias JavaPackage = String
+package enum SwiftAPIKind {
+  case function
+  case initializer
+  case getter
+  case setter
+}
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
@@ -47,32 +52,17 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
 
   public var swiftDecl: any DeclSyntaxProtocol
 
-  var translatedSignature: TranslatedFunctionSignature
+  package var apiKind: SwiftAPIKind
+
+  var functionSignature: SwiftFunctionSignature
 
   public var signatureString: String {
-    // FIXME: Remove comments and normalize trivia.
     self.swiftDecl.signatureString
   }
 
-  var loweredSignature: LoweredFunctionSignature {
-    translatedSignature.loweredSignature
-  }
-
-  var swiftSignature: SwiftFunctionSignature {
-    loweredSignature.original
-  }
-
-  package func cFunctionDecl(cName: String) -> CFunction {
-    // 'try!' because we know 'loweredSignature' can be described with C.
-    try! loweredSignature.cFunctionDecl(cName: cName)
-  }
-
-  package var kind: SwiftAPIKind {
-    loweredSignature.apiKind
-  }
 
   var parentType: SwiftType? {
-    guard let selfParameter = swiftSignature.selfParameter else {
+    guard let selfParameter = functionSignature.selfParameter else {
       return nil
     }
     switch selfParameter {
@@ -89,12 +79,12 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// this will contain that declaration's imported name.
   ///
   /// This is necessary when rendering accessor Java code we need the type that "self" is expecting to have.
-  public var hasParent: Bool { translatedSignature.selfParameter != nil }
+  public var hasParent: Bool { functionSignature.selfParameter != nil }
 
   /// A display name to use to refer to the Swift declaration with its
   /// enclosing type, if there is one.
   public var displayName: String {
-    let prefix = switch self.kind {
+    let prefix = switch self.apiKind {
     case .getter: "getter:"
     case .setter: "setter:"
     case .function, .initializer: ""
@@ -113,18 +103,20 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     module: String,
     swiftDecl: any DeclSyntaxProtocol,
     name: String,
-    translatedSignature: TranslatedFunctionSignature
+    apiKind: SwiftAPIKind,
+    functionSignature: SwiftFunctionSignature
   ) {
     self.module = module
     self.name = name
     self.swiftDecl = swiftDecl
-    self.translatedSignature = translatedSignature
+    self.apiKind = apiKind
+    self.functionSignature = functionSignature
   }
 
   public var description: String {
     """
     ImportedFunc {
-      kind: \(kind)
+      apiKind: \(apiKind)
       module: \(module)
       name: \(name)
       signature: \(self.swiftDecl.signatureString)
