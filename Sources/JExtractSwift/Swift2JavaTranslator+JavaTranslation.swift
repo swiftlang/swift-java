@@ -15,15 +15,26 @@
 import JavaTypes
 
 extension Swift2JavaTranslator {
-  func translate(
-    swiftSignature: SwiftFunctionSignature
-  ) throws -> TranslatedFunctionSignature {
-    let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
-    let loweredSignature = try lowering.lowerFunctionSignature(swiftSignature)
+  func translatedSignature(
+    for decl: ImportedFunc
+  ) -> TranslatedFunctionSignature? {
+    if let cached = translatedSignatures[decl] {
+      return cached
+    }
 
-    let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
-    let translated = try translation.translate(loweredFunctionSignature: loweredSignature)
+    let translated: TranslatedFunctionSignature?
+    do {
+      let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
+      let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
+      let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
+      translated = try translation.translate(loweredFunctionSignature: loweredSignature)
+    } catch {
+      self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
+      translated = nil
+    }
+
+    translatedSignatures[decl] = translated
     return translated
   }
 }

@@ -19,6 +19,11 @@ extension Swift2JavaTranslator {
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
+    guard let _ = translatedSignature(for: decl) else {
+      // Failed to translate. Skip.
+      return
+    }
+
     printer.printSeparator(decl.displayName)
 
     printJavaBindingDescriptorClass(&printer, decl)
@@ -33,7 +38,9 @@ extension Swift2JavaTranslator {
     _ decl: ImportedFunc
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
-    let cFunc = decl.cFunctionDecl(cName: thunkName)
+    let translatedSignature = self.translatedSignature(for: decl)!
+    // 'try!' because we know 'loweredSignature' can be described with C.
+    let cFunc = try! translatedSignature.loweredSignature.cFunctionDecl(cName: thunkName)
 
     printer.printBraceBlock(
       """
@@ -129,19 +136,20 @@ extension Swift2JavaTranslator {
     }
 
     var modifiers = "public"
-    switch decl.swiftSignature.selfParameter {
+    switch decl.functionSignature.selfParameter {
     case .staticMethod, .initializer, nil:
       modifiers.append(" static")
     default:
       break
     }
 
-    let returnTy = decl.translatedSignature.result.javaResultType
+    let translatedSignature = self.translatedSignature(for: decl)!
+    let returnTy = translatedSignature.result.javaResultType
 
-    var paramDecls = decl.translatedSignature.parameters
+    var paramDecls = translatedSignature.parameters
       .flatMap(\.javaParameters)
       .map { "\($0.type) \($0.name)" }
-    if decl.translatedSignature.requiresSwiftArena {
+    if translatedSignature.requiresSwiftArena {
       paramDecls.append("SwiftArena swiftArena$")
     }
 
@@ -157,7 +165,7 @@ extension Swift2JavaTranslator {
       \(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
       """
     ) { printer in
-      if case .instance(_) =  decl.swiftSignature.selfParameter {
+      if case .instance(_) =  decl.functionSignature.selfParameter {
         // Make sure the object has not been destroyed.
         printer.print("$ensureAlive();")
       }
@@ -174,7 +182,9 @@ extension Swift2JavaTranslator {
     _ decl: ImportedFunc
   ) {
     //===  Part 1: prepare temporary arena if needed.
-    if decl.translatedSignature.requiresTemporaryArena {
+    let translatedSignature = self.translatedSignature(for: decl)!
+
+    if translatedSignature.requiresTemporaryArena {
       printer.print("try(var arena$ = Arena.ofConfined()) {")
       printer.indent();
     }
@@ -183,21 +193,21 @@ extension Swift2JavaTranslator {
     var downCallArguments: [String] = []
 
     // Regular parameters.
-    for (i, parameter) in decl.translatedSignature.parameters.enumerated() {
-      let original = decl.swiftSignature.parameters[i]
+    for (i, parameter) in translatedSignature.parameters.enumerated() {
+      let original = decl.functionSignature.parameters[i]
       let parameterName = original.parameterName ?? "_\(i)"
       let lowered = parameter.conversion.render(&printer, parameterName)
       downCallArguments.append(lowered)
     }
 
     // 'self' parameter.
-    if let selfParameter = decl.translatedSignature.selfParameter {
+    if let selfParameter = translatedSignature.selfParameter {
       let lowered = selfParameter.conversion.render(&printer, "this")
       downCallArguments.append(lowered)
     }
 
     // Indirect return receivers.
-    for outParameter in decl.translatedSignature.result.outParameters {
+    for outParameter in translatedSignature.result.outParameters {
       let memoryLayout = renderMemoryLayoutValue(for: outParameter.type)
 
       let arena = if let className = outParameter.type.className,
@@ -222,27 +232,27 @@ extension Swift2JavaTranslator {
     let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
-    if decl.translatedSignature.result.javaResultType == .void {
+    if translatedSignature.result.javaResultType == .void {
       printer.print("\(downCall);")
     } else {
       let placeholder: String
-      if decl.translatedSignature.result.outParameters.isEmpty {
+      if translatedSignature.result.outParameters.isEmpty {
         placeholder = downCall
       } else {
         // FIXME: Support cdecl thunk returning a value while populating the out parameters.
         printer.print("\(downCall);")
         placeholder = "_result"
       }
-      let result = decl.translatedSignature.result.conversion.render(&printer, placeholder)
+      let result = translatedSignature.result.conversion.render(&printer, placeholder)
 
-      if decl.translatedSignature.result.javaResultType != .void {
+      if translatedSignature.result.javaResultType != .void {
         printer.print("return \(result);")
       } else {
         printer.print("\(result);")
       }
     }
 
-    if decl.translatedSignature.requiresTemporaryArena {
+    if translatedSignature.requiresTemporaryArena {
       printer.outdent()
       printer.print("}")
     }
