@@ -16,11 +16,10 @@ import JavaTypes
 
 extension Swift2JavaTranslator {
   func translate(
-    swiftSignature: SwiftFunctionSignature,
-    as apiKind: SwiftAPIKind
+    swiftSignature: SwiftFunctionSignature
   ) throws -> TranslatedFunctionSignature {
     let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
-    let loweredSignature = try lowering.lowerFunctionSignature(swiftSignature, apiKind: apiKind)
+    let loweredSignature = try lowering.lowerFunctionSignature(swiftSignature)
 
     let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
     let translated = try translation.translate(loweredFunctionSignature: loweredSignature)

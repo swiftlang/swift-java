@@ -17,7 +17,12 @@ import SwiftSyntax
 /// Any imported (Swift) declaration
 protocol ImportedDecl: AnyObject {}
 
-public typealias JavaPackage = String
+package enum SwiftAPIKind {
+  case function
+  case initializer
+  case getter
+  case setter
+}
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
@@ -49,6 +54,8 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
 
   var translatedSignature: TranslatedFunctionSignature
 
+  package var apiKind: SwiftAPIKind
+
   public var signatureString: String {
     self.swiftDecl.signatureString
   }
@@ -64,10 +71,6 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   package func cFunctionDecl(cName: String) -> CFunction {
     // 'try!' because we know 'loweredSignature' can be described with C.
     try! loweredSignature.cFunctionDecl(cName: cName)
-  }
-
-  package var kind: SwiftAPIKind {
-    loweredSignature.apiKind
   }
 
   var parentType: SwiftType? {
@@ -93,7 +96,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// A display name to use to refer to the Swift declaration with its
   /// enclosing type, if there is one.
   public var displayName: String {
-    let prefix = switch self.kind {
+    let prefix = switch self.apiKind {
     case .getter: "getter:"
     case .setter: "setter:"
     case .function, .initializer: ""
@@ -112,18 +115,20 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     module: String,
     swiftDecl: any DeclSyntaxProtocol,
     name: String,
+    apiKind: SwiftAPIKind,
     translatedSignature: TranslatedFunctionSignature
   ) {
     self.module = module
     self.name = name
     self.swiftDecl = swiftDecl
+    self.apiKind = apiKind
     self.translatedSignature = translatedSignature
   }
 
   public var description: String {
     """
     ImportedFunc {
-      kind: \(kind)
+      apiKind: \(apiKind)
       module: \(module)
       name: \(name)
       signature: \(self.swiftDecl.signatureString)

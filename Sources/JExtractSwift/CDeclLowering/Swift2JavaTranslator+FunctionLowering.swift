@@ -29,7 +29,7 @@ extension Swift2JavaTranslator {
       enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
       symbolTable: symbolTable
     )
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: .function)
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
   }
 
   /// Lower the given initializer to a C-compatible entrypoint,
@@ -46,7 +46,7 @@ extension Swift2JavaTranslator {
       symbolTable: symbolTable
     )
 
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: .initializer)
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
   }
 
   /// Lower the given variable decl to a C-compatible entrypoint,
@@ -69,7 +69,7 @@ extension Swift2JavaTranslator {
       enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
       symbolTable: symbolTable
     )
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature, apiKind: isSet ? .setter : .getter)
+    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
   }
 }
 
@@ -82,8 +82,7 @@ struct CdeclLowering {
   ///
   /// Throws an error if this function cannot be lowered for any reason.
   func lowerFunctionSignature(
-    _ signature: SwiftFunctionSignature,
-    apiKind: SwiftAPIKind
+    _ signature: SwiftFunctionSignature
   ) throws -> LoweredFunctionSignature {
     // Lower the self parameter.
     let loweredSelf: LoweredParameter? = switch signature.selfParameter {
@@ -111,7 +110,6 @@ struct CdeclLowering {
 
     return LoweredFunctionSignature(
       original: signature,
-      apiKind: apiKind,
       selfParameter: loweredSelf,
       parameters: loweredParameters,
       result: loweredResult
@@ -436,13 +434,6 @@ struct CdeclLowering {
   }
 }
 
-package enum SwiftAPIKind {
-  case function
-  case initializer
-  case getter
-  case setter
-}
-
 /// Represent a Swift parameter in the cdecl thunk.
 struct LoweredParameter: Equatable {
   /// Lowered parameters in cdecl thunk.
@@ -487,8 +478,6 @@ extension LoweredResult {
 public struct LoweredFunctionSignature: Equatable {
   var original: SwiftFunctionSignature
 
-  var apiKind: SwiftAPIKind
-
   var selfParameter: LoweredParameter?
   var parameters: [LoweredParameter]
   var result: LoweredResult
@@ -520,9 +509,10 @@ public struct LoweredFunctionSignature: Equatable {
 extension LoweredFunctionSignature {
   /// Produce the `@_cdecl` thunk for this lowered function signature that will
   /// call into the original function.
-  public func cdeclThunk(
+  package func cdeclThunk(
     cName: String,
     swiftAPIName: String,
+    as apiKind: SwiftAPIKind,
     stdlibTypes: SwiftStandardLibraryTypes
   ) -> FunctionDeclSyntax {
 
@@ -563,7 +553,7 @@ extension LoweredFunctionSignature {
 
     // Build callee expression.
     let callee: ExprSyntax = if let selfExpr {
-      if case .initializer = self.apiKind {
+      if case .initializer = apiKind {
         // Don't bother to create explicit ${Self}.init expression.
         selfExpr
       } else {

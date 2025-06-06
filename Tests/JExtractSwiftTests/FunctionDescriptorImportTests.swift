@@ -271,7 +271,7 @@ extension FunctionDescriptorTests {
     let accessorDecl: ImportedFunc? =
       st.importedTypes.values.compactMap {
         $0.variables.first {
-          $0.name == identifier && $0.kind == accessorKind
+          $0.name == identifier && $0.apiKind == accessorKind
         }
       }.first
     guard let accessorDecl else {
