@@ -57,7 +57,6 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   var functionSignature: SwiftFunctionSignature
 
   public var signatureString: String {
-    // FIXME: Remove comments and normalize trivia.
     self.swiftDecl.signatureString
   }
 
