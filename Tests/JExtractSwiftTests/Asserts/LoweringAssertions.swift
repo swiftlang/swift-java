@@ -32,7 +32,6 @@ func assertLoweredFunction(
   column: Int = #column
 ) throws {
   let translator = Swift2JavaTranslator(
-    javaPackage: javaPackage,
     swiftModuleName: swiftModuleName
   )
 
@@ -42,18 +41,25 @@ func assertLoweredFunction(
 
   translator.prepareForTranslation()
 
+  let generator = FFMSwift2JavaGenerator(
+    translator: translator,
+    javaPackage: "com.example.swift",
+    swiftOutputDirectory: "/fake",
+    javaOutputDirectory: "/fake"
+  )
+
   let swiftFunctionName: String
   let apiKind: SwiftAPIKind
   let loweredFunction: LoweredFunctionSignature
   if let inputFunction = inputDecl.as(FunctionDeclSyntax.self) {
-    loweredFunction = try translator.lowerFunctionSignature(
+    loweredFunction = try generator.lowerFunctionSignature(
       inputFunction,
       enclosingType: enclosingType
     )
     swiftFunctionName = inputFunction.name.text
     apiKind = .function
   } else if let inputInitializer = inputDecl.as(InitializerDeclSyntax.self) {
-    loweredFunction = try translator.lowerFunctionSignature(
+    loweredFunction = try generator.lowerFunctionSignature(
       inputInitializer,
       enclosingType: enclosingType
     )
@@ -112,7 +118,6 @@ func assertLoweredVariableAccessor(
   column: Int = #column
 ) throws {
   let translator = Swift2JavaTranslator(
-    javaPackage: javaPackage,
     swiftModuleName: swiftModuleName
   )
 
@@ -122,8 +127,15 @@ func assertLoweredVariableAccessor(
 
   translator.prepareForTranslation()
 
+  let generator = FFMSwift2JavaGenerator(
+    translator: translator,
+    javaPackage: javaPackage,
+    swiftOutputDirectory: "/fake",
+    javaOutputDirectory: "/fake"
+  )
+
   let swiftVariableName = inputDecl.bindings.first!.pattern.description
-  let loweredFunction = try translator.lowerFunctionSignature(inputDecl, isSet: isSet, enclosingType: enclosingType)
+  let loweredFunction = try generator.lowerFunctionSignature(inputDecl, isSet: isSet, enclosingType: enclosingType)
 
   let loweredCDecl = loweredFunction?.cdeclThunk(
     cName: "c_\(swiftVariableName)",

@@ -15,7 +15,7 @@
 import JavaTypes
 import SwiftSyntax
 
-extension Swift2JavaTranslator {
+extension FFMSwift2JavaGenerator {
   /// Lower the given function declaration to a C-compatible entrypoint,
   /// providing all of the mappings between the parameter and result types
   /// of the original function and its `@_cdecl` counterpart.

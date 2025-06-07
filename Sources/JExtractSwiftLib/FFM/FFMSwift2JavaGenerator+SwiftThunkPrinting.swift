@@ -15,14 +15,13 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-extension Swift2JavaTranslator {
-  public func writeSwiftThunkSources(outputDirectory: String) throws {
+extension FFMSwift2JavaGenerator {
+  package func writeSwiftThunkSources() throws {
     var printer = CodePrinter()
-
-    try writeSwiftThunkSources(outputDirectory: outputDirectory, printer: &printer)
+    try writeSwiftThunkSources(printer: &printer)
   }
 
-  public func writeSwiftThunkSources(outputDirectory: String, printer: inout CodePrinter) throws {
+  package func writeSwiftThunkSources(printer: inout CodePrinter) throws {
     let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
     let moduleFilename = "\(moduleFilenameBase).swift"
     do {
@@ -31,7 +30,7 @@ extension Swift2JavaTranslator {
       try printGlobalSwiftThunkSources(&printer)
 
       if let outputFile = try printer.writeContents(
-        outputDirectory: outputDirectory,
+        outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
         filename: moduleFilename)
       {
@@ -42,7 +41,7 @@ extension Swift2JavaTranslator {
     }
 
     // === All types
-    for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
+    for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
       log.info("Printing contents: \(filename)")
@@ -51,7 +50,7 @@ extension Swift2JavaTranslator {
         try printSwiftThunkSources(&printer, ty: ty)
 
         if let outputFile = try printer.writeContents(
-          outputDirectory: outputDirectory,
+          outputDirectory: self.swiftOutputDirectory,
           javaPackagePath: nil,
           filename: filename)
         {
@@ -110,23 +109,23 @@ extension Swift2JavaTranslator {
 
 struct SwiftThunkTranslator {
 
-  let st: Swift2JavaTranslator
+  let st: FFMSwift2JavaGenerator
 
-  init(_ st: Swift2JavaTranslator) {
+  init(_ st: FFMSwift2JavaGenerator) {
     self.st = st
   }
 
   func renderGlobalThunks() -> [DeclSyntax] {
     var decls: [DeclSyntax] = []
     decls.reserveCapacity(
-      st.importedGlobalVariables.count + st.importedGlobalFuncs.count
+      st.analysis.importedGlobalVariables.count + st.analysis.importedGlobalFuncs.count
     )
 
-    for decl in st.importedGlobalVariables {
+    for decl in st.analysis.importedGlobalVariables {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
-    for decl in st.importedGlobalFuncs {
+    for decl in st.analysis.importedGlobalFuncs {
       decls.append(contentsOf: render(forFunc: decl))
     }
 

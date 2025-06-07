@@ -33,7 +33,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   /// Print FFM Java binding descriptors for the imported Swift API.
-  func printJavaBindingDescriptorClass(
+  package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {

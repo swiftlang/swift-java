@@ -16,8 +16,8 @@ import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-class FFMSwift2JavaGenerator: Swift2JavaGenerator {
-  private let log = Logger(label: "ffm-generator", logLevel: .info)
+package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
+  let log = Logger(label: "ffm-generator", logLevel: .info)
 
   let analysis: AnalysisResult
   let swiftModuleName: String
@@ -25,6 +25,7 @@ class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
   let swiftStdlibTypes: SwiftStandardLibraryTypes
+  let symbolTable: SwiftSymbolTable
 
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
@@ -32,25 +33,27 @@ class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
-  init(
-    analysis: AnalysisResult,
-    swiftModuleName: String,
+  /// Cached Java translation result. 'nil' indicates failed translation.
+  var translatedSignatures: [ImportedFunc: TranslatedFunctionSignature?] = [:]
+
+  package init(
+    translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
-    javaOutputDirectory: String
+    javaOutputDirectory: String,
   ) {
-    self.analysis = analysis
-    self.swiftModuleName = swiftModuleName
+    self.analysis = translator.result
+    self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
-
-    var parsedSwiftModule = SwiftParsedModuleSymbolTable(moduleName: "Swift")
-    self.swiftStdlibTypes = SwiftStandardLibraryTypes(into: &parsedSwiftModule)
+    self.symbolTable = translator.symbolTable
+    self.swiftStdlibTypes = translator.swiftStdlibTypes
   }
 
   func generate() throws {
     try writeExportedJavaSources()
+    try writeSwiftThunkSources()
   }
 }
 
@@ -80,10 +83,13 @@ extension FFMSwift2JavaGenerator {
 
 
 extension FFMSwift2JavaGenerator {
+  package func writeExportedJavaSources() throws {
+    var printer = CodePrinter()
+    try writeExportedJavaSources(printer: &printer)
+  }
 
   /// Every imported public type becomes a public class in its own file in Java.
-  func writeExportedJavaSources() throws {
-    var printer = CodePrinter()
+  package func writeExportedJavaSources(printer: inout CodePrinter) throws {
     for (_, ty) in analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.swiftNominal.name).java"
       log.info("Printing contents: \(filename)")

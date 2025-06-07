@@ -14,7 +14,7 @@
 
 import JavaTypes
 
-extension Swift2JavaTranslator {
+extension FFMSwift2JavaGenerator {
   func translatedSignature(
     for decl: ImportedFunc
   ) -> TranslatedFunctionSignature? {
