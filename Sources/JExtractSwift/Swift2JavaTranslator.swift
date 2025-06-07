@@ -57,7 +57,7 @@ public final class Swift2JavaTranslator {
   package var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   /// Cached Java translation result. 'nil' indicates failed translation.
-  var translatedSignatures: [ImportedFunc: TranslatedFunctionSignature?] = [:]
+  var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
 
   /// The name of the Swift module being translated.
   var swiftModuleName: String {

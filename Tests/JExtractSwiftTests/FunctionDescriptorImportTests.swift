@@ -57,12 +57,12 @@ final class FunctionDescriptorTests {
            * }
            */
           private static class swiftjava_SwiftModule_globalTakeInt_i {
-            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
               /* i: */SwiftValueLayout.SWIFT_INT
             );
-            public static final MemorySegment ADDR =
+            private static final MemorySegment ADDR =
               SwiftModule.findOrThrow("swiftjava_SwiftModule_globalTakeInt_i");
-            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(long i) {
               try {
                 if (SwiftKit.TRACE_DOWNCALLS) {
@@ -92,13 +92,13 @@ final class FunctionDescriptorTests {
            * }
            */
           private static class swiftjava_SwiftModule_globalTakeLongInt_l_i32 {
-            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
               /* l: */SwiftValueLayout.SWIFT_INT64,
               /* i32: */SwiftValueLayout.SWIFT_INT32
             );
-            public static final MemorySegment ADDR =
+            private static final MemorySegment ADDR =
               SwiftModule.findOrThrow("swiftjava_SwiftModule_globalTakeLongInt_l_i32");
-            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(long l, int i32) {
               try {
                 if (SwiftKit.TRACE_DOWNCALLS) {
@@ -128,13 +128,13 @@ final class FunctionDescriptorTests {
            * }
            */
           private static class swiftjava_SwiftModule_echoInt_i {
-            public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
               /* -> */SwiftValueLayout.SWIFT_INT,
               /* i: */SwiftValueLayout.SWIFT_INT
             );
-            public static final MemorySegment ADDR =
+            private static final MemorySegment ADDR =
               SwiftModule.findOrThrow("swiftjava_SwiftModule_echoInt_i");
-            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static long call(long i) {
               try {
                 if (SwiftKit.TRACE_DOWNCALLS) {
@@ -164,13 +164,13 @@ final class FunctionDescriptorTests {
            * }
            */
           private static class swiftjava_SwiftModule_MySwiftClass_counter$get {
-            public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
               /* -> */SwiftValueLayout.SWIFT_INT32,
               /* self: */SwiftValueLayout.SWIFT_POINTER
             );
-            public static final MemorySegment ADDR =
+            private static final MemorySegment ADDR =
               SwiftModule.findOrThrow("swiftjava_SwiftModule_MySwiftClass_counter$get");
-            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static int call(java.lang.foreign.MemorySegment self) {
               try {
                 if (SwiftKit.TRACE_DOWNCALLS) {
@@ -199,13 +199,13 @@ final class FunctionDescriptorTests {
            * }
            */
           private static class swiftjava_SwiftModule_MySwiftClass_counter$set {
-            public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
               /* newValue: */SwiftValueLayout.SWIFT_INT32,
               /* self: */SwiftValueLayout.SWIFT_POINTER
             );
-            public static final MemorySegment ADDR =
+            private static final MemorySegment ADDR =
               SwiftModule.findOrThrow("swiftjava_SwiftModule_MySwiftClass_counter$set");
-            public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+            private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(int newValue, java.lang.foreign.MemorySegment self) {
               try {
                 if (SwiftKit.TRACE_DOWNCALLS) {

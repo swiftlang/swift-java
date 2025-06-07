@@ -48,6 +48,10 @@ public struct MySwiftStruct {
     self.len
   }
 
+  public func withCapLen(_ body: (Int, Int) -> Void) {
+    body(cap, len)
+  }
+
   public mutating func increaseCap(by value: Int) -> Int {
     precondition(value > 0)
      self.cap += value

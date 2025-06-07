@@ -116,7 +116,7 @@ struct CdeclLowering {
     )
   }
 
-  /// Lower a Swift function parameter type to cdecl parameters.
+  /// Lower a Swift function parameter to cdecl parameters.
   ///
   /// For example, Swift parameter `arg value: inout Int` can be lowered with
   /// `lowerParameter(intTy, .inout, "value")`.
@@ -276,23 +276,61 @@ struct CdeclLowering {
       }
       return LoweredParameter(cdeclParameters: parameters, conversion: .tuplify(conversions))
 
-    case .function(let fn) where fn.parameters.isEmpty && fn.resultType.isVoid:
+    case .function(let fn):
+      let (loweredTy, conversion) = try lowerFunctionType(fn)
       return LoweredParameter(
         cdeclParameters: [
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .function(SwiftFunctionType(convention: .c, parameters: [], resultType: fn.resultType))
+            type: loweredTy
           )
         ],
-        // '@convention(c) () -> ()' is compatible with '() -> Void'.
-        conversion: .placeholder
+        conversion: conversion
       )
 
-    case .function, .optional:
-      // FIXME: Support other function types than '() -> Void'.
+    case .optional:
       throw LoweringError.unhandledType(type)
     }
+  }
+
+  /// Lower a Swift function type (i.e. closure) to cdecl function type.
+  ///
+  /// - Parameters:
+  ///   - fn: the Swift function type to lower.
+  func lowerFunctionType(
+    _ fn: SwiftFunctionType
+  ) throws -> (type: SwiftType, conversion: ConversionStep) {
+    var parameters: [SwiftParameter] = []
+    var parameterConversions: [ConversionStep] = []
+
+    for parameter in fn.parameters {
+      if let _ = try? CType(cdeclType: parameter.type) {
+        parameters.append(SwiftParameter(convention: .byValue, type: parameter.type))
+        parameterConversions.append(.placeholder)
+      } else {
+        // Non-trivial types are not yet supported.
+        throw LoweringError.unhandledType(.function(fn))
+      }
+    }
+
+    let resultType: SwiftType
+    let resultConversion: ConversionStep
+    if let _ = try? CType(cdeclType: fn.resultType) {
+      resultType = fn.resultType
+      resultConversion = .placeholder
+    } else {
+      // Non-trivial types are not yet supported.
+      throw LoweringError.unhandledType(.function(fn))
+    }
+
+    // Ignore the conversions for now, since we don't support non-trivial types yet.
+    _ = (parameterConversions, resultConversion)
+
+    return (
+      type: .function(SwiftFunctionType(convention: .c, parameters: parameters, resultType: resultType)),
+      conversion: .placeholder
+    )
   }
 
   /// Lower a Swift result type to cdecl out parameters and return type.

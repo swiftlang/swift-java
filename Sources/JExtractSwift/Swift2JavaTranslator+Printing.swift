@@ -206,18 +206,6 @@ extension Swift2JavaTranslator {
 
       printer.print(
         """
-        static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
-            try {
-                return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-            } catch (ReflectiveOperationException ex) {
-                throw new AssertionError(ex);
-            }
-        }
-        """
-      )
-
-      printer.print(
-        """
         static MemoryLayout align(MemoryLayout layout, long align) {
             return switch (layout) {
                 case PaddingLayout p -> p;
