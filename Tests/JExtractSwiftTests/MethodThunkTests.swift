@@ -33,7 +33,6 @@ final class MethodThunkTests {
   @Test("Thunk overloads: globalFunc(a: Int32, b: Int64) & globalFunc(i32: Int32, l: Int64)")
   func thunk_overloads() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "FakeModule"
     )
     st.log.logLevel = .error

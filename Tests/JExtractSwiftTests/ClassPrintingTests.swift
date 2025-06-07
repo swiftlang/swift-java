@@ -42,7 +42,6 @@ struct ClassPrintingTests {
   @Test("Import: class layout")
   func class_layout() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
 

@@ -33,13 +33,6 @@ public final class Swift2JavaTranslator {
 
   var inputs: [Input] = []
 
-  // ==== Output configuration
-  let javaPackage: String
-
-  var javaPackagePath: String {
-    javaPackage.replacingOccurrences(of: ".", with: "/")
-  }
-
   // ==== Output state
 
   package var importedGlobalVariables: [ImportedFunc] = []
@@ -54,21 +47,14 @@ public final class Swift2JavaTranslator {
 
   package let symbolTable: SwiftSymbolTable
 
-  package var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
-
-  /// Cached Java translation result. 'nil' indicates failed translation.
-  var translatedSignatures: [ImportedFunc: TranslatedFunctionSignature?] = [:]
-
   /// The name of the Swift module being translated.
   var swiftModuleName: String {
     symbolTable.moduleName
   }
 
   public init(
-    javaPackage: String,
     swiftModuleName: String
   ) {
-    self.javaPackage = javaPackage
     self.symbolTable = SwiftSymbolTable(parsedModuleName: swiftModuleName)
 
     // Create a mock of the Swift standard library.
@@ -82,18 +68,10 @@ public final class Swift2JavaTranslator {
 // MARK: Analysis
 
 extension Swift2JavaTranslator {
-  /// The primitive Java type to use for Swift's Int type, which follows the
-  /// size of a pointer.
-  ///
-  /// FIXME: Consider whether to extract this information from the Swift
-  /// interface file, so that it would be 'int' for 32-bit targets or 'long' for
-  /// 64-bit targets but make the Java code different for the two, vs. adding
-  /// a checked truncation operation at the Java/Swift board.
-  var javaPrimitiveForSwiftInt: JavaType { .long }
-
   var result: AnalysisResult {
     AnalysisResult(
       importedTypes: self.importedTypes,
+      importedGlobalVariables: self.importedGlobalVariables,
       importedGlobalFuncs: self.importedGlobalFuncs
     )
   }
@@ -117,11 +95,7 @@ extension Swift2JavaTranslator {
   func analyze() throws {
     prepareForTranslation()
 
-    let visitor = Swift2JavaVisitor(
-      moduleName: self.swiftModuleName,
-      targetJavaPackage: self.javaPackage,
-      translator: self
-    )
+    let visitor = Swift2JavaVisitor(translator: self)
 
     for input in self.inputs {
       log.trace("Analyzing \(input.filePath)")

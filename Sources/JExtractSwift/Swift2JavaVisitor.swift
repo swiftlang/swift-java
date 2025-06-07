@@ -19,13 +19,6 @@ import SwiftSyntax
 final class Swift2JavaVisitor: SyntaxVisitor {
   let translator: Swift2JavaTranslator
 
-  /// The Swift module we're visiting declarations in
-  let moduleName: String
-
-  /// The target java package we are going to generate types into eventually,
-  /// store this along with type names as we import them.
-  let targetJavaPackage: String
-
   /// Type context stack associated with the syntax.
   var typeContext: [(syntaxID: Syntax.ID, type: ImportedNominalType)] = []
 
@@ -42,9 +35,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
 
   var log: Logger { translator.log }
 
-  init(moduleName: String, targetJavaPackage: String, translator: Swift2JavaTranslator) {
-    self.moduleName = moduleName
-    self.targetJavaPackage = targetJavaPackage
+  init(translator: Swift2JavaTranslator) {
     self.translator = translator
 
     super.init(viewMode: .all)

@@ -234,7 +234,6 @@ extension FunctionDescriptorTests {
     body: (String) throws -> Void
   ) throws {
     let st = Swift2JavaTranslator(
-      javaPackage: javaPackage,
       swiftModuleName: swiftModuleName
     )
     st.log.logLevel = logLevel
@@ -245,8 +244,15 @@ extension FunctionDescriptorTests {
       $0.name == methodIdentifier
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: javaPackage,
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingDescriptorClass(&printer, funcDecl)
+      generator.printJavaBindingDescriptorClass(&printer, funcDecl)
     }
 
     try body(output)
@@ -261,12 +267,18 @@ extension FunctionDescriptorTests {
     body: (String) throws -> Void
   ) throws {
     let st = Swift2JavaTranslator(
-      javaPackage: javaPackage,
       swiftModuleName: swiftModuleName
     )
     st.log.logLevel = logLevel
 
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
+
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: javaPackage,
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
 
     let accessorDecl: ImportedFunc? =
       st.importedTypes.values.compactMap {
@@ -279,7 +291,7 @@ extension FunctionDescriptorTests {
     }
 
     let getOutput = CodePrinter.toString { printer in
-      st.printJavaBindingDescriptorClass(&printer, accessorDecl)
+      generator.printJavaBindingDescriptorClass(&printer, accessorDecl)
     }
 
     try body(getOutput)
