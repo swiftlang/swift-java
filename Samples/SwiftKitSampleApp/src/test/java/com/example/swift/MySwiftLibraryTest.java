@@ -64,9 +64,11 @@ public class MySwiftLibraryTest {
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        MySwiftLibrary.globalCallMeRunnable.run fn = () -> {};
-        MySwiftLibrary.globalCallMeRunnable(() -> {
-            countDownLatch.countDown();
+        MySwiftLibrary.globalCallMeRunnable(new MySwiftLibrary.globalCallMeRunnable.run() {
+            @Override
+            public void apply() {
+                countDownLatch.countDown();
+            }
         });
         assertEquals(2, countDownLatch.getCount());
 

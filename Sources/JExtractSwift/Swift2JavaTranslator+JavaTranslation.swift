@@ -24,7 +24,8 @@ extension Swift2JavaTranslator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      translated = try self.translate(decl)
+      let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
+      translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
       translated = nil
@@ -32,11 +33,6 @@ extension Swift2JavaTranslator {
 
     translatedDecls[decl] = translated
     return translated
-  }
-
-  private func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
-    let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
-    return try translation.translate(decl)
   }
 }
 
@@ -83,18 +79,27 @@ struct TranslatedResult {
   var conversion: JavaConversionStep
 }
 
-struct TranslatedFunctionDecl {
-  let name: String
-  let functionTypes: [TranslatedFunctionType]
-  let translatedSignature: TranslatedFunctionSignature
-  let loweredSignature: LoweredFunctionSignature
-}
 
-/// Translated function signature representing a Swift API.
+/// Translated Java API representing a Swift API.
 ///
 /// Since this holds the lowered signature, and the original `SwiftFunctionSignature`
 /// in it, this contains all the API information (except the name) to generate the
 /// cdecl thunk, Java binding, and the Java wrapper function.
+struct TranslatedFunctionDecl {
+  /// Java function name.
+  let name: String
+
+  /// Function interfaces (i.e. lambda types) required for the Java method.
+  let functionTypes: [TranslatedFunctionType]
+
+  /// Function signature.
+  let translatedSignature: TranslatedFunctionSignature
+
+  /// Cdecl lowerd signature.
+  let loweredSignature: LoweredFunctionSignature
+}
+
+/// Function signature for a Java API.
 struct TranslatedFunctionSignature {
   var selfParameter: TranslatedParameter?
   var parameters: [TranslatedParameter]
@@ -219,7 +224,7 @@ struct JavaTranslation {
     )
   }
 
-  /// Translate Swift API to user-facing Java API.
+  /// Translate a Swift API signature to the user-facing Java API signature.
   ///
   /// Note that the result signature is for the high-level Java API, not the
   /// low-level FFM down-calling interface.
@@ -268,7 +273,7 @@ struct JavaTranslation {
     )
   }
 
-  /// Translate
+  /// Translate a Swift API parameter to the user-facing Java API parameter.
   func translate(
     swiftParam: SwiftParameter,
     loweredParam: LoweredParameter,
@@ -368,6 +373,7 @@ struct JavaTranslation {
     }
   }
 
+  /// Translate a Swift API result to the user-facing Java API result.
   func translate(
     swiftResult: SwiftResult,
     loweredResult: LoweredResult

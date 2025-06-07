@@ -128,6 +128,10 @@ extension Swift2JavaTranslator {
     )
   }
 
+  /// Print required helper classes/interfaces for describing the CFunction.
+  ///
+  /// * function pointer parameter as a function interface.
+  /// * Unnamed-struct parameter as a record. (unimplemented)
   func printParameterDescriptorClasses(
     _ printer: inout CodePrinter,
     _ cFunc: CFunction
@@ -143,13 +147,14 @@ extension Swift2JavaTranslator {
     }
   }
 
-  /// Print a class describing a closure parameter type.
-  ///   ```
-  ///   class <paramter-name> {
+  /// Print a class describing a function pointer parameter type.
+  ///
+  ///   ```java
+  ///   class $<parameter-name> {
   ///     interface Function {
   ///       <return-type> apply(<parameters>);
   ///     }
-  ///     static final MethodDescriptor DESC = FunctionDescriptor.of(...);s
+  ///     static final MethodDescriptor DESC = FunctionDescriptor.of(...);
   ///     static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
   ///     static MemorySegment toUpcallStub(Function fi, Arena arena) {
   ///       return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
@@ -199,6 +204,9 @@ extension Swift2JavaTranslator {
     }
   }
 
+  /// Print the helper type container for a user-facing Java API.
+  ///
+  /// * User-facing function interfaces.
   func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
@@ -220,6 +228,7 @@ extension Swift2JavaTranslator {
     }
   }
 
+  /// Print "wrapper" function interface representing a Swift closure type.
   func printJavaBindingWrapperFunctionTypeHelper(
     _ printer: inout CodePrinter,
     _ functionType: TranslatedFunctionType,
@@ -227,6 +236,8 @@ extension Swift2JavaTranslator {
   ) {
     let cdeclDescritor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isTrivial {
+      // If the usser-facing function interface is C-compatible, just extend the
+      // lowered function pointer parameter interface.
       printer.print(
         """
         public interface \(functionType.name) extends \(cdeclDescritor).Function {
@@ -237,6 +248,7 @@ extension Swift2JavaTranslator {
         """
       )
     } else {
+      // Otherwise, the lambda must be wrapped with the lowered function instance.
       assertionFailure("should be unreachable at this point")
       let apiParams = functionType.parameters.flatMap {
         $0.javaParameters.map { param in "\(param.type) \(param.name)" }

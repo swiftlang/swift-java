@@ -116,7 +116,7 @@ struct CdeclLowering {
     )
   }
 
-  /// Lower a Swift function parameter type to cdecl parameters.
+  /// Lower a Swift function parameter to cdecl parameters.
   ///
   /// For example, Swift parameter `arg value: inout Int` can be lowered with
   /// `lowerParameter(intTy, .inout, "value")`.
@@ -294,6 +294,10 @@ struct CdeclLowering {
     }
   }
 
+  /// Lower a Swift function type (i.e. closure) to cdecl function type.
+  ///
+  /// - Parameters:
+  ///   - fn: the Swift function type to lower.
   func lowerFunctionType(
     _ fn: SwiftFunctionType
   ) throws -> (type: SwiftType, conversion: ConversionStep) {
