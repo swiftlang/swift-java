@@ -14,8 +14,8 @@
 
 import JavaTypes
 
-extension Swift2JavaTranslator {
-  public func printFunctionDowncallMethods(
+extension FFMSwift2JavaGenerator {
+  func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
@@ -211,7 +211,7 @@ extension Swift2JavaTranslator {
       let memoryLayout = renderMemoryLayoutValue(for: outParameter.type)
 
       let arena = if let className = outParameter.type.className,
-         self.importedTypes[className] != nil {
+         analysis.importedTypes[className] != nil {
         // Use passed-in 'SwiftArena' for 'SwiftValue'.
         "swiftArena$"
       } else {

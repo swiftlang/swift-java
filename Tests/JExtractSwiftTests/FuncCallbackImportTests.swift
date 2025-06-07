@@ -35,7 +35,6 @@ final class FuncCallbackImportTests {
   @Test("Import: public func callMe(callback: () -> ())")
   func func_callMeFunc_Runnable() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
@@ -44,8 +43,15 @@ final class FuncCallbackImportTests {
 
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(

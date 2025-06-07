@@ -35,13 +35,20 @@ func assertOutput(
 ) throws {
   try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
 
+  let generator = FFMSwift2JavaGenerator(
+    translator: translator,
+    javaPackage: "com.example.swift",
+    swiftOutputDirectory: "/fake",
+    javaOutputDirectory: "/fake"
+  )
+
   let output: String
   var printer: CodePrinter = CodePrinter(mode: .accumulateAll)
   switch renderKind {
   case .swift:
-    try translator.writeSwiftThunkSources(outputDirectory: "/fake", printer: &printer)
+    try generator.writeSwiftThunkSources(printer: &printer)
   case .java:
-    try translator.writeExportedJavaSources(outputDirectory: "/fake", printer: &printer)
+    try generator.writeExportedJavaSources(printer: &printer)
   }
   output = printer.finalize()
 

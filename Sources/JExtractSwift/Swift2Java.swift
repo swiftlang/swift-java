@@ -45,6 +45,11 @@ public struct SwiftToJava: ParsableCommand {
   @Option(name: .shortAndLong, help: "Configure the level of lots that should be printed")
   var logLevel: Logger.Level = .info
 
+  @Option(
+    name: .long,
+    help: "The mode of generation to use for the output files.")
+  var mode: GenerationMode = .ffm
+
   @Argument(help: "The Swift files or directories to recursively export to Java.")
   var input: [String]
 
@@ -52,7 +57,6 @@ public struct SwiftToJava: ParsableCommand {
     let inputPaths = self.input.dropFirst().map { URL(string: $0)! }
 
     let translator = Swift2JavaTranslator(
-      javaPackage: packageName,
       swiftModuleName: swiftModule
     )
     translator.log.logLevel = logLevel
@@ -89,8 +93,19 @@ public struct SwiftToJava: ParsableCommand {
     }
 
     try translator.analyze()
-    try translator.writeSwiftThunkSources(outputDirectory: outputDirectorySwift)
-    try translator.writeExportedJavaSources(outputDirectory: outputDirectoryJava)
+
+    switch mode {
+    case .ffm:
+      let generator = FFMSwift2JavaGenerator(
+        translator: translator,
+        javaPackage: self.packageName,
+        swiftOutputDirectory: outputDirectorySwift,
+        javaOutputDirectory: outputDirectoryJava
+      )
+
+      try generator.generate()
+    }
+
     print("[swift-java] Generated Java sources (\(packageName)) in: \(outputDirectoryJava)/")
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
