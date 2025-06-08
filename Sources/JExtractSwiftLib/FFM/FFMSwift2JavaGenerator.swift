@@ -40,7 +40,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
-    javaOutputDirectory: String,
+    javaOutputDirectory: String
   ) {
     self.analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
