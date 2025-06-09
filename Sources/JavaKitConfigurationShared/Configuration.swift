@@ -113,7 +113,7 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
   }
 }
 
-public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration {
+public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
   // Workaround since filePath is macOS 13
   let sourcePath =
   if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
@@ -122,12 +122,15 @@ public func readConfiguration(sourceDir: String, file: String = #fileID, line: U
   return try readConfiguration(configPath: configPath, file: file, line: line)
 }
 
-public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration {
+public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
+  guard let configData = try? Data(contentsOf: configPath) else {
+    return nil
+  }
+
   do {
-    let configData = try Data(contentsOf: configPath)
     return try JSONDecoder().decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.absoluteURL)'!", error: error,
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.absoluteURL)'! \(#fileID):\(#line)", error: error,
       file: file, line: line)
   }
 }

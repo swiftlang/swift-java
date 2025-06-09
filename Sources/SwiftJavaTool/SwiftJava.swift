@@ -116,6 +116,7 @@ struct SwiftJava: AsyncParsableCommand {
           return nil
         }
 
+        print("[debug][swift-java] Module base directory based on outputDirectory!")
         return URL(fileURLWithPath: outputDirectory)
       }
 
@@ -186,21 +187,23 @@ struct SwiftJava: AsyncParsableCommand {
 
   mutating func run() async {
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
+    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: "."))")
+    print("[info][swift-java] Module base directory: \(moduleBaseDir)")
     do {
-      var config: Configuration = Configuration()
+      var earlyConfig: Configuration?
       if let moduleBaseDir {
         print("[debug][swift-java] Load config from module base directory: \(moduleBaseDir.path)")
-        config = try readConfiguration(sourceDir: moduleBaseDir.path)
+        earlyConfig = try readConfiguration(sourceDir: moduleBaseDir.path)
       } else if let inputSwift {
         print("[debug][swift-java] Load config from module swift input directory: \(inputSwift)")
-        config = try readConfiguration(sourceDir: inputSwift)
+        earlyConfig = try readConfiguration(sourceDir: inputSwift)
       }
+      var config = earlyConfig ?? Configuration()
 
       config.logLevel = self.logLevel
       if let javaPackage {
         config.javaPackage = javaPackage
       }
-      assert(config.javaPackage != nil, "java-package was nil!")
 
       // Determine the mode in which we'll execute.
       let toolMode: ToolMode
@@ -461,7 +464,10 @@ extension SwiftJava {
       return (false, .init())
     case .amend:
       let configPath = actualOutputDirectory
-      return (true, try readConfiguration(sourceDir: configPath.path))
+      guard let config = try readConfiguration(sourceDir: configPath.path) else {
+        return (false, .init())
+      }
+      return (true, config)
     }
   }
 }

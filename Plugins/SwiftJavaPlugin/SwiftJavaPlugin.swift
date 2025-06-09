@@ -38,7 +38,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
       .appending(path: SwiftJavaConfigFileName)
-    let config = try readConfiguration(sourceDir: sourceDir)
+    let config = try readConfiguration(sourceDir: sourceDir) ?? Configuration()
 
     log("Config on path: \(configFile.path(percentEncoded: false))")
     log("Config was: \(config)")

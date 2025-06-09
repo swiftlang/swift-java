@@ -42,7 +42,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let sourceDir = target.directory.string
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
     
-    guard let javaPackage = configuration.javaPackage else {
+    guard let javaPackage = configuration?.javaPackage else {
       // throw SwiftJavaPluginError.missingConfiguration(sourceDir: "\(sourceDir)", key: "javaPackage")
       log("Skipping jextract step, no 'javaPackage' configuration in \(getSwiftJavaConfigPath(target: target) ?? "")")
       return []
