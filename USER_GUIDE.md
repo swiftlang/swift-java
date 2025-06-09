@@ -104,7 +104,7 @@ let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
 Java libraries are often distributed as Jar files. The `Java2Swift` tool can inspect a Jar file to create a `Java2Swift.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
 
 ```swift
-swift run Java2Swift --module-name JavaSieve --jar QuadraticSieve-1.0.jar
+swift-java generate  JavaSieve --jar QuadraticSieve-1.0.jar
 ```
 
 The resulting configuration file will look something like this:
@@ -473,6 +473,8 @@ OPTIONS:
                           be a configuration file (Java2Swift.config) that can
                           be used as input to a subsequent Java2Swift
                           invocation to generate wrappers for those public
+  --fetch                 Fetch dependencies from given target (containing swift-java configuration) or dependency string
+  --swift-native-implementation <swift-native-implementation>
                           classes.
   --cp, --classpath <cp>  Class search path of directories and zip/jar files
                           from which Java classes can be loaded.
@@ -486,10 +488,10 @@ OPTIONS:
 For example, the `JavaKitJar` library is generated with this command line:
 
 ```swift
-swift run Java2Swift --module-name JavaKitJar --depends-on JavaKit=Sources/JavaKit/Java2Swift.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/Java2Swift.config
+swift run swift-java --swift-module JavaKitJar --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
 ```
 
-The `--module-name JavaKitJar` parameter describes the name of the Swift module in which the code will be generated. 
+The `--swift-module JavaKitJar` parameter describes the name of the Swift module in which the code will be generated. 
 
 The `--depends-on` option is followed by the Java2Swift configuration files for any library on which this Swift library depends. Each `--depends-on` option is of the form `<swift library name>=<Java2Swift.config path>`, and tells Java2Swift which other Java classes have already been translated to Swift. For example, if your Java class uses `java.net.URL`, then you should include
 `JavaKitNetwork`'s configuration file as a dependency here.

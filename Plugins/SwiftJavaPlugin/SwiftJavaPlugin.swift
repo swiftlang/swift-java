@@ -166,8 +166,9 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           displayName: displayName,
           executable: executable,
           arguments: [
+            // FIXME: change to 'resolve' subcommand
             "--fetch", configFile.path(percentEncoded: false),
-            "--module-name", sourceModule.name,
+            "--swift-module", sourceModule.name,
             "--output-directory", outputDirectory(context: context, generated: false).path(percentEncoded: false)
           ],
           environment: [:],
@@ -202,7 +203,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 extension SwiftJavaBuildToolPlugin {
   func argumentsModuleName(sourceModule: Target) -> [String] {
     return [
-      "--module-name", sourceModule.name
+     "--swift-module", sourceModule.name
     ]
   }
   

@@ -27,11 +27,8 @@ extension SwiftJava {
     dependentConfigs: [(String, Configuration)],
     environment: JNIEnvironment
   ) throws {
-    guard let moduleName else {
-      fatalError("--module-name must be set in 'generate wrappers' mode!")
-    }
     let translator = JavaTranslator(
-      swiftModuleName: moduleName,
+      swiftModuleName: effectiveSwiftModule,
       environment: environment,
       translateAsClass: true
     )
@@ -49,7 +46,7 @@ extension SwiftJava {
     }
 
     // Add the configuration for this module.
-    translator.addConfiguration(config, forSwiftModule: moduleName)
+    translator.addConfiguration(config, forSwiftModule: effectiveSwiftModule)
 
     // Load all of the explicitly-requested classes.
     let classLoader = try JavaClass<ClassLoader>(environment: environment)
