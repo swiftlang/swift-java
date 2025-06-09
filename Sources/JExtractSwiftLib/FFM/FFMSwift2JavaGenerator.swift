@@ -17,8 +17,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
-  let log = Logger(label: "ffm-generator", logLevel: .info)
-
+  let log: Logger
   let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
@@ -42,6 +41,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     swiftOutputDirectory: String,
     javaOutputDirectory: String
   ) {
+    self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
     self.analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
