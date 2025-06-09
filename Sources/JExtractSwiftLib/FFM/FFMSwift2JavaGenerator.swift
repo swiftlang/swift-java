@@ -52,8 +52,8 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   }
 
   func generate() throws {
-    try writeExportedJavaSources()
     try writeSwiftThunkSources()
+    try writeExportedJavaSources()
   }
 }
 
