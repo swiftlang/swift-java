@@ -186,6 +186,12 @@ struct SwiftJava: AsyncParsableCommand {
   }
 
   mutating func run() async {
+    guard CommandLine.arguments.count > 1 else {
+      // there's no "default" command, print USAGE when no arguments/parameters are passed.
+      print("Must specify run mode.\n\(Self.helpMessage())")
+      return
+    }
+
     print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
     print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: "."))")
     print("[info][swift-java] Module base directory: \(moduleBaseDir)")
@@ -230,7 +236,7 @@ struct SwiftJava: AsyncParsableCommand {
         toolMode = .configuration(extraClasspath: input)
       } else if fetch {
         guard let input else {
-          fatalError("Mode -jar requires <input> path\n\(Self.helpMessage())")
+          fatalError("Mode 'fetch' requires <input> path\n\(Self.helpMessage())")
         }
         config = try JavaTranslator.readConfiguration(from: URL(fileURLWithPath: input))
         guard let dependencies = config.dependencies else {
