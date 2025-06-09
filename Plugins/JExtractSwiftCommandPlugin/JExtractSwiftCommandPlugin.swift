@@ -69,21 +69,21 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     let sourceDir = target.directory.string
 
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
-    guard let javaPackage = configuration.javaPackage else {
-      throw SwiftJavaPluginError.missingConfiguration(sourceDir: "\(sourceDir)", key: "javaPackage")
-    }
 
     var arguments: [String] = [
-      "--swift-module", sourceModule.name,
-      "--package-name", javaPackage,
-      "--output-directory-java", context.outputDirectoryJava.path(percentEncoded: false),
-      "--output-directory-swift", context.outputDirectorySwift.path(percentEncoded: false),
+      "--input-swift", sourceDir,
+      "--module-name", sourceModule.name,
+      "--output-java", context.outputJavaDirectory.path(percentEncoded: false),
+      "--output-swift", context.outputSwiftDirectory.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...
       //       Since plugins cannot depend on libraries we cannot detect what the output files will be,
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
-    arguments.append(sourceDir)
+    // arguments.append(sourceDir) // TODO: we could do this shape maybe? to have the dirs last?
+    if let package = configuration?.javaPackage, !package.isEmpty {
+      ["--java-package", package]
+    }
 
     return arguments
   }
@@ -130,7 +130,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
 
   func runExtract(context: PluginContext, target: Target, arguments: [String]) throws {
     let process = Process()
-    process.executableURL = try context.tool(named: "JExtractSwiftTool").url
+    process.executableURL = try context.tool(named: "SwiftJavaTool").url
     process.arguments = arguments
 
     do {

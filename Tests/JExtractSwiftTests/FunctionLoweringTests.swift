@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JExtractSwift
+import JExtractSwiftLib
 import SwiftSyntax
 import Testing
 

@@ -13,16 +13,16 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKit
 import Foundation
 import JavaKitJar
-import Java2SwiftLib
+import SwiftJavaLib
 import JavaKitConfigurationShared
 import JavaKitShared
 import _Subprocess
 
-extension JavaToSwift {
+extension SwiftJava {
 
   var SwiftJavaClasspathPrefix: String { "SWIFT_JAVA_CLASSPATH:" }
 
