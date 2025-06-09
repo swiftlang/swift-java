@@ -385,6 +385,7 @@ let package = Package(
         "SwiftJavaLib",
         "JExtractSwiftLib",
         "JavaKitShared",
+        "JavaKitConfigurationShared",
       ],
 
       swiftSettings: [
@@ -403,6 +404,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaTypes",
         "JavaKitShared",
+        "JavaKitConfigurationShared",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
