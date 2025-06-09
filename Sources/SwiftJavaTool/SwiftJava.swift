@@ -72,6 +72,9 @@ struct SwiftJava: AsyncParsableCommand {
   @Option(help: "The Java package the generated Java code should be emitted into.")
   var javaPackage: String? = nil
 
+  @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
+  var mode: GenerationMode = .ffm
+
   // TODO: clarify this vs outputSwift (history: outputSwift is jextract, and this was java2swift)
   @Option(name: .shortAndLong, help: "The directory in which to output the generated Swift files or the SwiftJava configuration file.")
   var outputDirectory: String? = nil
@@ -227,6 +230,7 @@ struct SwiftJava: AsyncParsableCommand {
         config.inputSwiftDirectory = self.inputSwift
         config.outputSwiftDirectory = self.outputSwift
         config.outputJavaDirectory = self.outputJava
+        config.mode = self.mode
 
         toolMode = .jextract
       } else if jar {
@@ -512,3 +516,5 @@ extension SwiftJava.ToolMode {
     }
   }
 }
+
+extension GenerationMode: ExpressibleByArgument {}

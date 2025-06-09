@@ -53,7 +53,10 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   func generate() throws {
     try writeSwiftThunkSources()
+    print("[swift-java] Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
+
     try writeExportedJavaSources()
+    print("[swift-java] Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
   }
 }
 

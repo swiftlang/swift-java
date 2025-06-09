@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ArgumentParser
-
-public enum GenerationMode: String, ExpressibleByArgument {
+public enum GenerationMode: String, Codable {
   /// Foreign Value and Memory API
   case ffm
 }
