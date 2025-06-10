@@ -16,27 +16,90 @@ import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
+package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
+  let log: Logger
+  let analysis: AnalysisResult
+  let swiftModuleName: String
+  let javaPackage: String
+  let swiftOutputDirectory: String
+  let javaOutputDirectory: String
+  let swiftStdlibTypes: SwiftStandardLibraryTypes
+  let symbolTable: SwiftSymbolTable
+
+  var javaPackagePath: String {
+    javaPackage.replacingOccurrences(of: ".", with: "/")
+  }
+
+  var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
+
+  /// Cached Java translation result. 'nil' indicates failed translation.
+  var translatedSignatures: [ImportedFunc: TranslatedFunctionSignature?] = [:]
+
+  package init(
+    translator: Swift2JavaTranslator,
+    javaPackage: String,
+    swiftOutputDirectory: String,
+    javaOutputDirectory: String
+  ) {
+    self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
+    self.analysis = translator.result
+    self.swiftModuleName = translator.swiftModuleName
+    self.javaPackage = javaPackage
+    self.swiftOutputDirectory = swiftOutputDirectory
+    self.javaOutputDirectory = javaOutputDirectory
+    self.symbolTable = translator.symbolTable
+    self.swiftStdlibTypes = translator.swiftStdlibTypes
+  }
+
+  func generate() throws {
+    try writeSwiftThunkSources()
+    print("[swift-java] Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
+
+    try writeExportedJavaSources()
+    print("[swift-java] Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
+  }
+}
+
+// ===== --------------------------------------------------------------------------------------------------------------
+// MARK: Defaults
+
+extension FFMSwift2JavaGenerator {
+
+  /// Default set Java imports for every generated file
+  static let defaultJavaImports: Array<String> = [
+    "org.swift.swiftkit.*",
+    "org.swift.swiftkit.SwiftKit",
+    "org.swift.swiftkit.util.*",
+
+    // Necessary for native calls and type mapping
+    "java.lang.foreign.*",
+    "java.lang.invoke.*",
+    "java.util.Arrays",
+    "java.util.stream.Collectors",
+    "java.util.concurrent.atomic.*",
+    "java.nio.charset.StandardCharsets",
+  ]
+}
+
 // ==== ---------------------------------------------------------------------------------------------------------------
 // MARK: File writing
 
-let PATH_SEPARATOR = "/"  // TODO: Windows
 
-extension Swift2JavaTranslator {
-
-  /// Every imported public type becomes a public class in its own file in Java.
-  public func writeExportedJavaSources(outputDirectory: String) throws {
+extension FFMSwift2JavaGenerator {
+  package func writeExportedJavaSources() throws {
     var printer = CodePrinter()
-    try writeExportedJavaSources(outputDirectory: outputDirectory, printer: &printer)
+    try writeExportedJavaSources(printer: &printer)
   }
 
-  public func writeExportedJavaSources(outputDirectory: String, printer: inout CodePrinter) throws {
-    for (_, ty) in importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
+  /// Every imported public type becomes a public class in its own file in Java.
+  package func writeExportedJavaSources(printer: inout CodePrinter) throws {
+    for (_, ty) in analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.swiftNominal.name).java"
       log.info("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
 
       if let outputFile = try printer.writeContents(
-        outputDirectory: outputDirectory,
+        outputDirectory: javaOutputDirectory,
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
@@ -50,7 +113,7 @@ extension Swift2JavaTranslator {
       printModule(&printer)
 
       if let outputFile = try printer.writeContents(
-        outputDirectory: outputDirectory,
+        outputDirectory: javaOutputDirectory,
         javaPackagePath: javaPackagePath,
         filename: filename)
       {
@@ -63,26 +126,26 @@ extension Swift2JavaTranslator {
 // ==== ---------------------------------------------------------------------------------------------------------------
 // MARK: Java/text printing
 
-extension Swift2JavaTranslator {
+extension FFMSwift2JavaGenerator {
 
   /// Render the Java file contents for an imported Swift module.
   ///
   /// This includes any Swift global functions in that module, and some general type information and helpers.
-  public func printModule(_ printer: inout CodePrinter) {
+  func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
       // TODO: print all "static" methods
-      for decl in importedGlobalFuncs {
+      for decl in analysis.importedGlobalFuncs {
         self.log.trace("Print imported decl: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
       }
     }
   }
 
-  package func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
@@ -143,7 +206,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func printHeader(_ printer: inout CodePrinter) {
+  func printHeader(_ printer: inout CodePrinter) {
     printer.print(
       """
       // Generated by jextract-swift
@@ -153,7 +216,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  public func printPackage(_ printer: inout CodePrinter) {
+  func printPackage(_ printer: inout CodePrinter) {
     printer.print(
       """
       package \(javaPackage);
@@ -162,14 +225,14 @@ extension Swift2JavaTranslator {
     )
   }
 
-  public func printImports(_ printer: inout CodePrinter) {
-    for i in Swift2JavaTranslator.defaultJavaImports {
+  func printImports(_ printer: inout CodePrinter) {
+    for i in FFMSwift2JavaGenerator.defaultJavaImports {
       printer.print("import \(i);")
     }
     printer.print("")
   }
 
-  package func printNominal(
+  func printNominal(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
   ) {
     let parentProtocol: String
@@ -188,7 +251,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  public func printModuleClass(_ printer: inout CodePrinter, body: (inout CodePrinter) -> Void) {
+  func printModuleClass(_ printer: inout CodePrinter, body: (inout CodePrinter) -> Void) {
     printer.printBraceBlock("public final class \(swiftModuleName)") { printer in
       printPrivateConstructor(&printer, swiftModuleName)
 
@@ -261,7 +324,7 @@ extension Swift2JavaTranslator {
     }
   }
 
-  private func printClassConstants(printer: inout CodePrinter) {
+  func printClassConstants(printer: inout CodePrinter) {
     printer.print(
       """
       static final String LIB_NAME = "\(swiftModuleName)";
@@ -270,7 +333,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  private func printPrivateConstructor(_ printer: inout CodePrinter, _ typeName: String) {
+  func printPrivateConstructor(_ printer: inout CodePrinter, _ typeName: String) {
     printer.print(
       """
       private \(typeName)() {
@@ -296,7 +359,7 @@ extension Swift2JavaTranslator {
     )
   }
 
-  package func printToStringMethod(
+  func printToStringMethod(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType
   ) {
     printer.print(
@@ -312,3 +375,4 @@ extension Swift2JavaTranslator {
       """)
   }
 }
+

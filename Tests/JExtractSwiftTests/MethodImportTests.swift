@@ -63,17 +63,23 @@ final class MethodImportTests {
   @Test("Import: public func helloWorld()")
   func method_helloWorld() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "helloWorld" }!
 
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -96,7 +102,6 @@ final class MethodImportTests {
   @Test("Import: public func globalTakeInt(i: Int)")
   func func_globalTakeInt() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
@@ -107,8 +112,15 @@ final class MethodImportTests {
       $0.name == "globalTakeInt"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -131,7 +143,6 @@ final class MethodImportTests {
   @Test("Import: public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)")
   func func_globalTakeIntLongString() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
@@ -142,8 +153,15 @@ final class MethodImportTests {
       $0.name == "globalTakeIntLongString"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -169,7 +187,6 @@ final class MethodImportTests {
   @Test("Import: public func globalReturnClass() -> MySwiftClass")
   func func_globalReturnClass() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
@@ -180,8 +197,15 @@ final class MethodImportTests {
       $0.name == "globalReturnClass"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -207,7 +231,6 @@ final class MethodImportTests {
   @Test
   func method_class_helloMemberFunction() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .error
@@ -218,8 +241,15 @@ final class MethodImportTests {
       $0.name == "helloMemberFunction"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -243,7 +273,6 @@ final class MethodImportTests {
   @Test
   func method_class_makeInt() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .info
@@ -254,8 +283,15 @@ final class MethodImportTests {
       $0.name == "makeInt"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, funcDecl)
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
     assertOutput(
@@ -279,7 +315,6 @@ final class MethodImportTests {
   @Test
   func class_constructor() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .info
@@ -290,8 +325,15 @@ final class MethodImportTests {
       $0.name == "init"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, initDecl)
+      generator.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
     assertOutput(
@@ -316,7 +358,6 @@ final class MethodImportTests {
   @Test
   func struct_constructor() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .info
@@ -327,8 +368,15 @@ final class MethodImportTests {
       $0.name == "init"
     }!
 
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
     let output = CodePrinter.toString { printer in
-      st.printJavaBindingWrapperMethod(&printer, initDecl)
+      generator.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
     assertOutput(

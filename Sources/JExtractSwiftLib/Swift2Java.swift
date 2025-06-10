@@ -31,7 +31,6 @@ public struct SwiftToJava {
     }
 
     let translator = Swift2JavaTranslator(
-      javaPackage: config.javaPackage ?? "", // no package is ok, we'd generate all into top level
       swiftModuleName: swiftModule
     )
     translator.log.logLevel = config.logLevel ?? .info
@@ -89,11 +88,17 @@ public struct SwiftToJava {
 
     try translator.analyze()
 
-    try translator.writeSwiftThunkSources(outputDirectory: outputSwiftDirectory)
-    print("[swift-java] Generated Swift sources (module: '\(config.swiftModule ?? "")') in: \(outputSwiftDirectory)/")
+    switch config.mode {
+    case .some(.ffm), .none:
+      let generator = FFMSwift2JavaGenerator(
+        translator: translator,
+        javaPackage: config.javaPackage ?? "",
+        swiftOutputDirectory: outputSwiftDirectory,
+        javaOutputDirectory: outputJavaDirectory
+      )
 
-    try translator.writeExportedJavaSources(outputDirectory: outputJavaDirectory)
-    print("[swift-java] Generated Java sources (package: '\(config.javaPackage ?? "")') in: \(outputJavaDirectory)/")
+      try generator.generate()
+    }
 
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }

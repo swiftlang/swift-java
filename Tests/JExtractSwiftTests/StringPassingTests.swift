@@ -26,7 +26,6 @@ final class StringPassingTests {
   @Test("Import: public func writeString(string: String) -> Int")
   func method_helloWorld() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "__FakeModule"
     )
     st.log.logLevel = .trace

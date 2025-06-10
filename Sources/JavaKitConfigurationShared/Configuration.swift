@@ -38,6 +38,8 @@ public struct Configuration: Codable {
 
   public var outputJavaDirectory: String?
 
+  public var mode: GenerationMode?
+
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the Java2Swift tool.

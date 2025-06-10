@@ -36,7 +36,6 @@ final class VariableImportTests {
   @Test("Import: var counter: Int")
   func variable_int() throws {
     let st = Swift2JavaTranslator(
-      javaPackage: "com.example.swift",
       swiftModuleName: "FakeModule"
     )
     st.log.logLevel = .error
