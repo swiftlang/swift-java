@@ -42,17 +42,17 @@ final class VariableImportTests {
 
     try assertOutput(
       st, input: class_interfaceFile, .java,
-      detectChunkByInitialLines: 7,
+      detectChunkByInitialLines: 8,
       expectedChunks: [
         """
         private static class swiftjava_FakeModule_MySwiftClass_counterInt$get {
-          public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
             /* -> */SwiftValueLayout.SWIFT_INT,
             /* self: */SwiftValueLayout.SWIFT_POINTER
           );
-          public static final MemorySegment ADDR =
+          private static final MemorySegment ADDR =
             FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$get");
-          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment self) {
             try {
               if (SwiftKit.TRACE_DOWNCALLS) {
@@ -79,13 +79,13 @@ final class VariableImportTests {
         """,
         """
         private static class swiftjava_FakeModule_MySwiftClass_counterInt$set {
-          public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
             /* newValue: */SwiftValueLayout.SWIFT_INT,
             /* self: */SwiftValueLayout.SWIFT_POINTER
           );
-          public static final MemorySegment ADDR =
+          private static final MemorySegment ADDR =
             FakeModule.findOrThrow("swiftjava_FakeModule_MySwiftClass_counterInt$set");
-          public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(long newValue, java.lang.foreign.MemorySegment self) {
             try {
               if (SwiftKit.TRACE_DOWNCALLS) {

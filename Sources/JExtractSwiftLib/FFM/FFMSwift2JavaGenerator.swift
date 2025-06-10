@@ -33,7 +33,8 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   /// Cached Java translation result. 'nil' indicates failed translation.
-  var translatedSignatures: [ImportedFunc: TranslatedFunctionSignature?] = [:]
+  var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
+
 
   package init(
     translator: Swift2JavaTranslator,
@@ -263,18 +264,6 @@ extension FFMSwift2JavaGenerator {
         static MemorySegment findOrThrow(String symbol) {
             return SYMBOL_LOOKUP.find(symbol)
                     .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
-        }
-        """
-      )
-
-      printer.print(
-        """
-        static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
-            try {
-                return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-            } catch (ReflectiveOperationException ex) {
-                throw new AssertionError(ex);
-            }
         }
         """
       )
