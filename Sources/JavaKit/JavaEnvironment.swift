@@ -14,6 +14,10 @@
 
 import JavaRuntime
 
+#if canImport(Android)
+typealias JNINativeInterface_ = JNINativeInterface
+#endif
+
 extension UnsafeMutablePointer<JNIEnv?> {
   var interface: JNINativeInterface_ { self.pointee!.pointee }
 }
