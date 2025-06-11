@@ -123,15 +123,15 @@ extension Subprocess {
                 errorError = error // lolol
             }
 
-            if let inputError = inputError {
+            if let inputError {
                 throw inputError
             }
 
-            if let outputError = outputError {
+            if let outputError {
                 throw outputError
             }
 
-            if let errorError = errorError {
+            if let errorError {
                 throw errorError
             }
         }
@@ -165,13 +165,13 @@ extension Subprocess {
                 errorError = error
             }
 
-            if let inputError = inputError {
+            if let inputError  {
                 throw inputError
             }
-            if let outputError = outputError {
+            if let outputError {
                 throw outputError
             }
-            if let errorError = errorError {
+            if let errorError  {
                 throw errorError
             }
         }

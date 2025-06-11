@@ -1070,7 +1070,7 @@ extension FileDescriptor {
                         }
                     }
                 }
-                if let lastError = lastError {
+                if let lastError {
                     continuation.resume(throwing: CocoaError.windowsError(
                         underlying: lastError,
                         errorCode: .fileReadUnknown)

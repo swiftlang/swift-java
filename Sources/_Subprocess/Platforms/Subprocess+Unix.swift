@@ -404,7 +404,7 @@ extension FileDescriptor {
                     continuation.resume(throwing: POSIXError(.init(rawValue: error) ?? .ENODEV))
                     return
                 }
-                if let data = data {
+                if let data {
                     buffer += Data(data)
                 }
                 if done {

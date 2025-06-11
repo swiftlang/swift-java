@@ -262,7 +262,7 @@ private let setup: () = {
                 default:
                     fatalError("Unexpected exit status: \(siginfo.si_code)")
                 }
-                if let status = status {
+                if let status {
                     let pid = siginfo._sifields._sigchld.si_pid
                     if let existing = continuations.removeValue(forKey: pid),
                        case .continuation(let c) = existing {
