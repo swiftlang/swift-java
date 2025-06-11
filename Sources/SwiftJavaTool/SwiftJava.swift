@@ -90,9 +90,9 @@ struct SwiftJava: SwiftJavaBaseAsyncParsableCommand { // FIXME: this is just a n
     }
   }
 
-//  @Argument(
-//    help: "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
-//  )
+  @Argument(
+    help: "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
+  )
   var input: String? // FIXME: top level command cannot have input argument like this
 
   // FIXME: this is subcommands
@@ -172,6 +172,7 @@ struct SwiftJava: SwiftJavaBaseAsyncParsableCommand { // FIXME: this is just a n
     print("[debug][swift-java] Running swift-java in mode: " + "\(toolMode.prettyName)".bold)
 
     let swiftModule: String =
+      self.swiftModule ??
       self.effectiveSwiftModule.split(separator: "/").dropLast().last.map(String.init) ?? "__UnknownModule"
 
     // Load all of the dependent configurations and associate them with Swift

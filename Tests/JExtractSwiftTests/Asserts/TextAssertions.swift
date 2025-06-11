@@ -34,7 +34,6 @@ func assertOutput(
   column: Int = #column
 ) throws {
   try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
-  self.log.logLevel = translator.log.logLevel
 
   let generator = FFMSwift2JavaGenerator(
     translator: translator,

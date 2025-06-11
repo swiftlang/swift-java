@@ -110,14 +110,14 @@ extension SwiftJavaBaseAsyncParsableCommand {
 extension SwiftJavaBaseAsyncParsableCommand {
 
   var moduleBaseDir: Foundation.URL? {
-    if let outputDirectory = commonOptions.outputDirectory {
-      if outputDirectory == "-" {
-        return nil
-      }
-
-      print("[debug][swift-java] Module base directory based on outputDirectory!")
-      return URL(fileURLWithPath: outputDirectory)
-    }
+//    if let outputDirectory = commonOptions.outputDirectory {
+//      if outputDirectory == "-" {
+//        return nil
+//      }
+//
+//      print("[debug][swift-java] Module base directory based on outputDirectory!")
+//      return URL(fileURLWithPath: outputDirectory)
+//    }
 
 //    guard let swiftModule else {
 //      return nil

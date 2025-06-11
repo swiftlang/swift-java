@@ -15,10 +15,7 @@
 import JavaKit
 import JavaMath
 
-let jvm = try JavaVirtualMachine.shared(classpath: [
-  "quadratic-sieve-Java/build/libs/QuadraticSieve-1.0.jar",
-  ".",
-])
+let jvm = try JavaVirtualMachine.shared()
 
 do {
   let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
@@ -26,7 +23,7 @@ do {
     print("Found prime: \(prime.intValue())")
   }
 
-  try JavaClass<RoundingMode>().HALF_UP
+  _ = try JavaClass<RoundingMode>().HALF_UP // can import a Java enum value
 } catch {
   print("Failure: \(error)")
 }

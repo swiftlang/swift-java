@@ -181,21 +181,21 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
     
     if !outputSwiftFiles.isEmpty {
+      let displayName = "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'"
+      log("Prepared: \(displayName)")
       commands += [
         .buildCommand(
-          displayName: "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'",
+          displayName: displayName,
           executable: executable,
           arguments: arguments,
-          inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [
-            configFile
-          ],
+          inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [ configFile ],
           outputFiles: outputSwiftFiles
         )
       ]
     } else {
       log("No Swift output files, skip wrapping")
     }
-    
+
     return commands
   }
 }
@@ -203,7 +203,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 extension SwiftJavaBuildToolPlugin {
   func argumentsModuleName(sourceModule: Target) -> [String] {
     return [
-     "--swift-module", sourceModule.name
+      "--swift-module", sourceModule.name
     ]
   }
   
