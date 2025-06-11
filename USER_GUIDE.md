@@ -8,8 +8,8 @@ Before using this package, set the `JAVA_HOME` environment variable to point at 
 
 ### Using Java libraries from Swift
 
-Existing Java libraries can be wrapped for use in Swift with the `Java2Swift`
-tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `Java2Swift.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
+Existing Java libraries can be wrapped for use in Swift with the `swift-java`
+tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `swift-java.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
 
 ```json
 {
@@ -31,11 +31,11 @@ or, equivalently, adding the following to the package dependencies:
 .package(url: "https://github.com/swiftlang/swift-java", branch: "main"),
 ```
 
-Finally, update `Package.swift` so that the `Java2SwiftPlugin` plugin runs on the target in which you want to generate Swift wrappers. The plugin looks like this:
+Finally, update `Package.swift` so that the `SwiftJavaPlugin` plugin runs on the target in which you want to generate Swift wrappers. The plugin looks like this:
 
 ```swift
       plugins: [
-        .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
 ```
 
@@ -101,10 +101,10 @@ let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
 
 ### Importing a Jar file into Swift
 
-Java libraries are often distributed as Jar files. The `Java2Swift` tool can inspect a Jar file to create a `Java2Swift.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
+Java libraries are often distributed as Jar files. The `swift-java` tool can inspect a Jar file to create a `swift-java.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
 
 ```swift
-swift-java generate  JavaSieve --jar QuadraticSieve-1.0.jar
+swift-java generate --module-name JavaSieve --jar QuadraticSieve-1.0.jar
 ```
 
 The resulting configuration file will look something like this:
@@ -142,7 +142,7 @@ The resulting configuration file will look something like this:
 }
 ```
 
-As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `Java2Swift` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
+As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `swift-java` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
 
 If you inspect the build output, there are a number of warnings that look like this:
 
@@ -159,12 +159,12 @@ These warnings mean that some of the APIs in the Java library aren't available i
               .product(name: "JavaKit", package: "swift-java"),
             ],
             plugins: [
-              .plugin(name: "Java2SwiftPlugin", package: "swift-java"),
+              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
             ]
         ),
 ```
 
-Then define a a Java2Swift configuration file in `Sources/JavaMath/Java2Swift.config` to bring in the types we need:
+Then define a a swift-java configuration file in `Sources/JavaMath/swift-java.config` to bring in the types we need:
 
 ```json
 {
@@ -255,7 +255,7 @@ public class HelloSwift {
 }
 ```
 
-On the Swift side, the Java class needs to be exposed to Swift through `Java2Swift.config`, e.g.,:
+On the Swift side, the Java class needs to be exposed to Swift through `swift-java.config`, e.g.,:
 
 ```swift
 {
@@ -393,7 +393,7 @@ A number of JavaKit modules provide Swift projections of Java classes and interf
 | `java.lang.Throwable` | `Throwable`    | `JavaKit`        |
 | `java.net.URL`        | `URL`          | `JavaKitNetwork` |
 
-The `Java2Swift` tool can translate any other Java classes into Swift projections. The easiest way to use `Java2Swift` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document
+The `swift-java` tool can translate any other Java classes into Swift projections. The easiest way to use `swift-java` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document
 
 #### Improve parameter names of imported Java methods
 When building Java libraries you can pass the `-parameters` option to javac
@@ -438,67 +438,71 @@ public struct Enumeration<E: AnyJavaObject> {
 }
 ```
 
-## Translating Java classes with `Java2Swift`
+## Translating Java classes with `swift-java`
 
-The `Java2Swift` is a Swift program that uses Java's runtime reflection facilities to translate the requested Java classes into their Swift projections. The output is a number of Swift source files, each of which corresponds to a
-single Java class. The `Java2Swift` can be executed like this:
+The `swift-java` is a Swift program that uses Java's runtime reflection facilities to translate the requested Java classes into their Swift projections. The output is a number of Swift source files, each of which corresponds to a
+single Java class. The `swift-java` can be executed like this:
 
 ```
-swift run Java2Swift
+swift-java
 ```
 
 to produce help output like the following:
 
 ```
-USAGE: Java2Swift --module-name <module-name> [--depends-on <depends-on> ...] [--jar] [--cp <cp> ...] [--output-directory <output-directory>] <input>
+OVERVIEW: Generate sources and configuration for Swift and Java interoperability.
 
-ARGUMENTS:
-  <input>                 The input file, which is either a Java2Swift
-                          configuration file or (if '-jar' was specified)
-                          a Jar file.
+USAGE: swift-java <options> <subcommand>
 
 OPTIONS:
-  --module-name <module-name>
-                          The name of the Swift module into which the resulting
-                          Swift types will be generated.
   --depends-on <depends-on>
-                          A Java2Swift configuration file for a given Swift
-                          module name on which this module depends, e.g.,
-                          JavaKitJar=Sources/JavaKitJar/Java2Swift.config.
-                          There should be one of these options for each Swift
-                          module that this module depends on (transitively)
-                          that contains wrapped Java sources.
-  --jar                   Specifies that the input is a Jar file whose public
-                          classes will be loaded. The output of Java2Swift will
-                          be a configuration file (Java2Swift.config) that can
-                          be used as input to a subsequent Java2Swift
-                          invocation to generate wrappers for those public
+                          A Java2Swift configuration file for a given Swift module name on which this module depends, e.g., JavaKitJar=Sources/JavaKitJar/Java2Swift.config. There should be one of these options for each Swift module that this
+                          module depends on (transitively) that contains wrapped Java sources.
+  --jar                   Specifies that the input is a Jar file whose public classes will be loaded. The output of Java2Swift will be a configuration file (Java2Swift.config) that can be used as input to a subsequent Java2Swift invocation to
+                          generate wrappers for those public classes.
   --fetch                 Fetch dependencies from given target (containing swift-java configuration) or dependency string
   --swift-native-implementation <swift-native-implementation>
-                          classes.
-  --cp, --classpath <cp>  Class search path of directories and zip/jar files
-                          from which Java classes can be loaded.
+                          The names of Java classes whose declared native methods will be implemented in Swift.
+  --output-swift <output-swift>
+                          The directory where generated Swift files should be written. Generally used with jextract mode.
+  --output-java <output-java>
+                          The directory where generated Java files should be written. Generally used with jextract mode.
+  --java-package <java-package>
+                          The Java package the generated Java code should be emitted into.
+  -c, --cache-directory <cache-directory>
+                          Directory where to write cached values (e.g. swift-java.classpath files)
   -o, --output-directory <output-directory>
-                          The directory in which to output the generated Swift
-                          files or the Java2Swift configuration file. (default:
-                          .)
+                          The directory in which to output the generated Swift files or the SwiftJava configuration file.
+  --input-swift <input-swift>
+                          Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.
+  -l, --log-level <log-level>
+                          Configure the level of logs that should be printed (values: trace, debug, info, notice, warning, error, critical; default: log level)
+  --cp, --classpath <cp>  Class search path of directories and zip/jar files from which Java classes can be loaded.
+  -f, --filter-java-package <filter-java-package>
+                          While scanning a classpath, inspect only types included in this package
   -h, --help              Show help information.
+
+SUBCOMMANDS:
+  configure               Configure and emit a swift-java.config file based on an input dependency or jar file
+  resolve                 Resolve dependencies and write the resulting swift-java.classpath file
+
+  See 'swift-java help <subcommand>' for detailed help.
 ```
 
 For example, the `JavaKitJar` library is generated with this command line:
 
 ```swift
-swift run swift-java --swift-module JavaKitJar --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
+swift run swift-java --module-name JavaKitJar --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
 ```
 
 The `--swift-module JavaKitJar` parameter describes the name of the Swift module in which the code will be generated. 
 
-The `--depends-on` option is followed by the Java2Swift configuration files for any library on which this Swift library depends. Each `--depends-on` option is of the form `<swift library name>=<Java2Swift.config path>`, and tells Java2Swift which other Java classes have already been translated to Swift. For example, if your Java class uses `java.net.URL`, then you should include
+The `--depends-on` option is followed by the swift-java configuration files for any library on which this Swift library depends. Each `--depends-on` option is of the form `<swift library name>=<swift-java.config path>`, and tells swift-java which other Java classes have already been translated to Swift. For example, if your Java class uses `java.net.URL`, then you should include
 `JavaKitNetwork`'s configuration file as a dependency here.
 
 The `-o` option specifies the output directory. Typically, this will be `Sources/<module name>/generated` or similar to keep the generated Swift files separate from any hand-written ones. To see the output on the terminal rather than writing files to disk, pass `-` for this option.
 
-Finally, the command line should contain the `Java2Swift.config` file containing the list of classes that should be translated into Swift and their corresponding Swift type names. The tool will output a single `.swift` file for each class, along with warnings for any public API that cannot be translated into Swift. The most common warnings are due to missing Swift projections for Java classes. For example, here we have not translated (or provided the translation manifests for) the Java classes
+Finally, the command line should contain the `swift-java.config` file containing the list of classes that should be translated into Swift and their corresponding Swift type names. The tool will output a single `.swift` file for each class, along with warnings for any public API that cannot be translated into Swift. The most common warnings are due to missing Swift projections for Java classes. For example, here we have not translated (or provided the translation manifests for) the Java classes
 `java.util.zip.ZipOutputStream` and `java.io.OutputStream`:
 
 ```
@@ -509,7 +513,7 @@ warning: Unable to translate 'java.util.jar.JarInputStream' method 'transferTo':
 
 The result of such warnings is that certain information won't be statically available in Swift, e.g., the superclass won't be known (so we will assume it is `JavaObject`), or the specified constructors or methods won't be translated. If you don't need these APIs, the warnings can be safely ignored. The APIs can still be called dynamically via JNI.
 
-The `--jar` option changes the operation of `Java2Swift`. Instead of wrapping Java classes in Swift, it scans the given input Jar file to find all public classes and outputs a configuration file `Java2Swift.config` mapping all of the Java classes in the Jar file to Swift types. The `--jar` mode is expected to be used to help import a Java library into Swift wholesale, after which Java2Swift should invoked again given the generated configuration file.
+The `--jar` option changes the operation of `swift-java`. Instead of wrapping Java classes in Swift, it scans the given input Jar file to find all public classes and outputs a configuration file `swift-java.config` mapping all of the Java classes in the Jar file to Swift types. The `--jar` mode is expected to be used to help import a Java library into Swift wholesale, after which swift-java should invoked again given the generated configuration file.
 
 ### Under construction: Create a Java class to wrap the Swift library
 
@@ -653,6 +657,7 @@ A Swift function may accept a closure which is used as a callback:
 func callMe(maybe: () -> ()) {}
 ```
 
+Minimal support for c-compatible closures is implemented, more documentation soon.
 
 
 ## `jextract-swift` importer behavior
