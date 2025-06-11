@@ -33,7 +33,7 @@ extension Subprocess {
     /// spawning a subprocess.
     public struct Configuration: Sendable, Hashable {
 
-        internal enum RunState<Result: Sendable>: Sendable {
+        enum RunState<Result: Sendable>: Sendable {
             case workBody(Result)
             case monitorChildProcess(TerminationStatus)
         }
@@ -138,7 +138,7 @@ extension Subprocess {
 
         /// Close each input individually, and throw the first error if there's multiple errors thrown
         @Sendable
-        internal func cleanupAll(
+        func cleanupAll(
             input: ExecutionInput,
             output: ExecutionOutput,
             error: ExecutionOutput
@@ -176,7 +176,7 @@ extension Subprocess {
             }
         }
 
-        internal func run<R>(
+        func run<R>(
             output: RedirectedOutputMethod,
             error: RedirectedOutputMethod,
             _ body: sending @escaping (Subprocess, StandardInputWriter) async throws -> R
@@ -251,7 +251,7 @@ extension Subprocess {
             }
         }
 
-        internal func run<R>(
+        func run<R>(
             input: InputMethod,
             output: RedirectedOutputMethod,
             error: RedirectedOutputMethod,
@@ -357,12 +357,12 @@ extension Subprocess {
     /// `Subprocess.Executable` defines how should the executable
     /// be looked up for execution.
     public struct Executable: Sendable, Hashable {
-        internal enum Configuration: Sendable, Hashable {
+        enum Configuration: Sendable, Hashable {
             case executable(String)
             case path(FilePath)
         }
 
-        internal let storage: Configuration
+        let storage: Configuration
 
         private init(_config: Configuration) {
             self.storage = _config
@@ -415,8 +415,8 @@ extension Subprocess {
     public struct Arguments: Sendable, ExpressibleByArrayLiteral, Hashable {
         public typealias ArrayLiteralElement = String
 
-        internal let storage: [StringOrRawBytes]
-        internal let executablePathOverride: StringOrRawBytes?
+        let storage: [StringOrRawBytes]
+        let executablePathOverride: StringOrRawBytes?
 
         /// Create an Arguments object using the given literal values
         public init(arrayLiteral elements: String...) {
@@ -489,12 +489,12 @@ extension Subprocess.Arguments : CustomStringConvertible, CustomDebugStringConve
 extension Subprocess {
     /// A set of environment variables to use when executing the subprocess.
     public struct Environment: Sendable, Hashable {
-        internal enum Configuration: Sendable, Hashable {
+        enum Configuration: Sendable, Hashable {
             case inherit([StringOrRawBytes : StringOrRawBytes])
             case custom([StringOrRawBytes : StringOrRawBytes])
         }
 
-        internal let config: Configuration
+        let config: Configuration
 
         init(config: Configuration) {
             self.config = config
@@ -630,7 +630,7 @@ extension Subprocess.TerminationStatus : CustomStringConvertible, CustomDebugStr
 
 // MARK: - Internal
 extension Subprocess {
-    internal enum StringOrRawBytes: Sendable, Hashable {
+    enum StringOrRawBytes: Sendable, Hashable {
         case string(String)
         case rawBytes([CChar])
 
@@ -737,7 +737,7 @@ public enum QualityOfService: Int, Sendable {
     case `default`          = -1
 }
 
-internal func withAsyncTaskCancellationHandler<R>(
+func withAsyncTaskCancellationHandler<R>(
     _ body: sending @escaping () async throws -> R,
     onCancel handler: sending @escaping () async -> Void
 ) async rethrows -> R {

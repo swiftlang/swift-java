@@ -43,18 +43,18 @@ extension Subprocess {
     /// `InputMethod` defines how should the standard input
     /// of the subprocess receive inputs.
     public struct InputMethod: Sendable, Hashable {
-        internal enum Storage: Sendable, Hashable {
+        enum Storage: Sendable, Hashable {
             case noInput
             case fileDescriptor(FileDescriptor, Bool)
         }
 
-        internal let method: Storage
+        let method: Storage
 
-        internal init(method: Storage) {
+        init(method: Storage) {
             self.method = method
         }
 
-        internal func createExecutionInput() throws -> ExecutionInput {
+        func createExecutionInput() throws -> ExecutionInput {
             switch self.method {
             case .noInput:
                 let devnull: FileDescriptor = try .openDevNull(withAcessMode: .readOnly)
@@ -88,15 +88,15 @@ extension Subprocess {
     /// `CollectedOutputMethod` defines how should Subprocess collect
     /// output from child process' standard output and standard error
     public struct CollectedOutputMethod: Sendable, Hashable {
-        internal enum Storage: Sendable, Hashable {
+        enum Storage: Sendable, Hashable {
             case discarded
             case fileDescriptor(FileDescriptor, Bool)
             case collected(Int)
         }
 
-        internal let method: Storage
+        let method: Storage
 
-        internal init(method: Storage) {
+        init(method: Storage) {
             self.method = method
         }
 
@@ -122,7 +122,7 @@ extension Subprocess {
             return .init(method: .collected(limit))
         }
 
-        internal func createExecutionOutput() throws -> ExecutionOutput {
+        func createExecutionOutput() throws -> ExecutionOutput {
             switch self.method {
             case .discarded:
                 // Bind to /dev/null
@@ -142,9 +142,9 @@ extension Subprocess {
     public struct RedirectedOutputMethod: Sendable, Hashable {
         typealias Storage = CollectedOutputMethod.Storage
 
-        internal let method: Storage
+        let method: Storage
 
-        internal init(method: Storage) {
+        init(method: Storage) {
             self.method = method
         }
 
@@ -173,7 +173,7 @@ extension Subprocess {
             return .init(method: .fileDescriptor(fd, closeAfterSpawningProcess))
         }
 
-        internal func createExecutionOutput() throws -> ExecutionOutput {
+        func createExecutionOutput() throws -> ExecutionOutput {
             switch self.method {
             case .discarded:
                 // Bind to /dev/null
@@ -191,10 +191,10 @@ extension Subprocess {
 
 // MARK: - Execution IO
 extension Subprocess {
-    internal final class ExecutionInput: Sendable, Hashable {
+    final class ExecutionInput: Sendable, Hashable {
         
 
-        internal enum Storage: Sendable, Hashable {
+        enum Storage: Sendable, Hashable {
             case noInput(FileDescriptor?)
             case customWrite(FileDescriptor?, FileDescriptor?)
             case fileDescriptor(FileDescriptor?, Bool)
@@ -202,11 +202,11 @@ extension Subprocess {
         
         let storage: _Mutex<Storage>
 
-        internal init(storage: Storage) {
+        init(storage: Storage) {
             self.storage = .init(storage)
         }
 
-        internal func getReadFileDescriptor() -> FileDescriptor? {
+        func getReadFileDescriptor() -> FileDescriptor? {
             return self.storage.withLock {
                 switch $0 {
                 case .noInput(let readFd):
@@ -219,7 +219,7 @@ extension Subprocess {
             }
         }
 
-        internal func getWriteFileDescriptor() -> FileDescriptor? {
+        func getWriteFileDescriptor() -> FileDescriptor? {
             return self.storage.withLock {
                 switch $0 {
                 case .noInput(_), .fileDescriptor(_, _):
@@ -230,7 +230,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeChildSide() throws {
+        func closeChildSide() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .noInput(let devnull):
@@ -249,7 +249,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeParentSide() throws {
+        func closeParentSide() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .noInput(_), .fileDescriptor(_, _):
@@ -264,7 +264,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeAll() throws {
+        func closeAll() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .noInput(let readFd):
@@ -317,8 +317,8 @@ extension Subprocess {
         }
     }
 
-    internal final class ExecutionOutput: Sendable {
-        internal enum Storage: Sendable {
+    final class ExecutionOutput: Sendable {
+        enum Storage: Sendable {
             case discarded(FileDescriptor?)
             case fileDescriptor(FileDescriptor?, Bool)
             case collected(Int, FileDescriptor?, FileDescriptor?)
@@ -326,11 +326,11 @@ extension Subprocess {
         
         private let storage: _Mutex<Storage>
 
-        internal init(storage: Storage) {
+        init(storage: Storage) {
             self.storage = .init(storage)
         }
 
-        internal func getWriteFileDescriptor() -> FileDescriptor? {
+        func getWriteFileDescriptor() -> FileDescriptor? {
             return self.storage.withLock {
                 switch $0 {
                 case .discarded(let writeFd):
@@ -343,7 +343,7 @@ extension Subprocess {
             }
         }
 
-        internal func getReadFileDescriptor() -> FileDescriptor? {
+        func getReadFileDescriptor() -> FileDescriptor? {
             return self.storage.withLock {
                 switch $0 {
                 case .discarded(_), .fileDescriptor(_, _):
@@ -354,7 +354,7 @@ extension Subprocess {
             }
         }
         
-        internal func consumeCollectedFileDescriptor() -> (limit: Int, fd: FileDescriptor?)? {
+        func consumeCollectedFileDescriptor() -> (limit: Int, fd: FileDescriptor?)? {
             return self.storage.withLock {
                 switch $0 {
                 case .discarded(_), .fileDescriptor(_, _):
@@ -367,7 +367,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeChildSide() throws {
+        func closeChildSide() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .discarded(let writeFd):
@@ -386,7 +386,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeParentSide() throws {
+        func closeParentSide() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .discarded(_), .fileDescriptor(_, _):
@@ -398,7 +398,7 @@ extension Subprocess {
             }
         }
 
-        internal func closeAll() throws {
+        func closeAll() throws {
             try self.storage.withLock {
                 switch $0 {
                 case .discarded(let writeFd):

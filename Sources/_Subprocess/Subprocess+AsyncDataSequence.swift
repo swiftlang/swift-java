@@ -36,7 +36,7 @@ extension Subprocess {
             private var currentPosition: Int
             private var finished: Bool
 
-            internal init(fileDescriptor: FileDescriptor) {
+            init(fileDescriptor: FileDescriptor) {
                 self.fileDescriptor = fileDescriptor
                 self.buffer = []
                 self.currentPosition = 0

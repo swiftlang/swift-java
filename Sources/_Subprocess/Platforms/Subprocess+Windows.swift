@@ -21,7 +21,7 @@ import FoundationEssentials
 
 // Windows specific implementation
 extension Subprocess.Configuration {
-    internal func spawn(
+    func spawn(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -44,7 +44,7 @@ extension Subprocess.Configuration {
         }
     }
 
-    internal func spawnDirect(
+    func spawnDirect(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -141,7 +141,7 @@ extension Subprocess.Configuration {
         )
     }
 
-    internal func spawnAsUser(
+    func spawnAsUser(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput,
@@ -274,13 +274,13 @@ extension Subprocess {
         /// `ConsoleBehavior` defines how should the console appear
         /// when spawning a new process
         public struct ConsoleBehavior: Sendable, Hashable {
-            internal enum Storage: Sendable, Hashable {
+            enum Storage: Sendable, Hashable {
                 case createNew
                 case detatch
                 case inherit
             }
 
-            internal let storage: Storage
+            let storage: Storage
 
             private init(_ storage: Storage) {
                 self.storage = storage
@@ -301,16 +301,16 @@ extension Subprocess {
         /// `ConsoleBehavior` defines how should the window appear
         /// when spawning a new process
         public struct WindowStyle: Sendable, Hashable {
-            internal enum Storage: Sendable, Hashable {
+            enum Storage: Sendable, Hashable {
                 case normal
                 case hidden
                 case maximized
                 case minimized
             }
 
-            internal let storage: Storage
+            let storage: Storage
 
-            internal var platformStyle: WORD {
+            var platformStyle: WORD {
                 switch self.storage {
                 case .hidden: return WORD(SW_HIDE)
                 case .maximized: return WORD(SW_SHOWMAXIMIZED)
@@ -401,7 +401,7 @@ extension Subprocess.PlatformOptions: Hashable {
 }
 
 extension Subprocess.PlatformOptions : CustomStringConvertible, CustomDebugStringConvertible {
-    internal func description(withIndent indent: Int) -> String {
+    func description(withIndent indent: Int) -> String {
         let indent = String(repeating: " ", count: indent * 4)
         return """
 PlatformOptions(
@@ -425,7 +425,7 @@ PlatformOptions(
 
 // MARK: - Process Monitoring
 @Sendable
-internal func monitorProcessTermination(
+func monitorProcessTermination(
     forProcessWithIdentifier pid: Subprocess.ProcessIdentifier
 ) async throws -> Subprocess.TerminationStatus {
     // Once the continuation resumes, it will need to unregister the wait, so
@@ -580,7 +580,7 @@ extension Subprocess {
         }
     }
 
-    internal func tryTerminate() -> Error? {
+    func tryTerminate() -> Error? {
         do {
             try self.terminate(withExitCode: 0)
         } catch {
@@ -595,7 +595,7 @@ extension Subprocess.Executable {
     // Technically not needed for CreateProcess since
     // it takes process name. It's here to support
     // Executable.resolveExecutablePath
-    internal func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
+    func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
         switch self.storage {
         case .executable(let executableName):
             return executableName.withCString(
@@ -634,9 +634,9 @@ extension Subprocess.Executable {
 
 // MARK: - Environment Resolution
 extension Subprocess.Environment {
-    internal static let pathEnvironmentVariableName = "Path"
+    static let pathEnvironmentVariableName = "Path"
 
-    internal func pathValue() -> String? {
+    func pathValue() -> String? {
         switch self.config {
         case .inherit(let overrides):
             // If PATH value exists in overrides, use it
@@ -663,7 +663,7 @@ extension Subprocess {
         /// Windows specific thread identifier associated with process
         public let threadID: DWORD
 
-        internal init(
+        init(
             processID: DWORD,
             threadID: DWORD
         ) {
@@ -940,13 +940,13 @@ extension Subprocess.Configuration {
 
 // MARK: - PlatformFileDescriptor Type
 extension Subprocess {
-    internal typealias PlatformFileDescriptor = HANDLE
+    typealias PlatformFileDescriptor = HANDLE
 }
 
 // MARK: - Read Buffer Size
 extension Subprocess {
     @inline(__always)
-    internal static var readBufferSize: Int {
+    static var readBufferSize: Int {
         // FIXME: Use Platform.pageSize here
         var sysInfo: SYSTEM_INFO = SYSTEM_INFO()
         GetSystemInfo(&sysInfo)
@@ -956,7 +956,7 @@ extension Subprocess {
 
 // MARK: - Pipe Support
 extension FileDescriptor {
-    internal static func pipe() throws -> (
+    static func pipe() throws -> (
         readEnd: FileDescriptor,
         writeEnd: FileDescriptor
     ) {
@@ -992,7 +992,7 @@ extension FileDescriptor {
         )
     }
 
-    internal static func openDevNull(
+    static func openDevNull(
         withAcessMode mode: FileDescriptor.AccessMode
     ) throws -> FileDescriptor {
         return try "NUL".withPlatformString {
@@ -1024,7 +1024,7 @@ extension FileDescriptor {
         return HANDLE(bitPattern: _get_osfhandle(self.rawValue))!
     }
 
-    internal func read(upToLength maxLength: Int) async throws -> Data {
+    func read(upToLength maxLength: Int) async throws -> Data {
         // TODO: Figure out a better way to asynchornously read
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -1082,7 +1082,7 @@ extension FileDescriptor {
         }
     }
 
-    internal func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
+    func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
         // TODO: Figure out a better way to asynchornously write
         try await withCheckedThrowingContinuation { (
             continuation: CheckedContinuation<Void, Error>
@@ -1117,7 +1117,7 @@ extension String {
 }
 
 // MARK: - CocoaError + Win32
-internal let NSUnderlyingErrorKey = "NSUnderlyingError"
+let NSUnderlyingErrorKey = "NSUnderlyingError"
 
 extension CocoaError {
     static func windowsError(underlying: DWORD, errorCode: Code) -> CocoaError {
@@ -1155,7 +1155,7 @@ private extension Optional where Wrapped == String {
 
 // MARK: - Remove these when merging back to SwiftFoundation
 extension String {
-    internal func withNTPathRepresentation<Result>(
+    func withNTPathRepresentation<Result>(
         _ body: (UnsafePointer<WCHAR>) throws -> Result
     ) throws -> Result {
         guard !isEmpty else {
@@ -1199,7 +1199,7 @@ struct Win32Error: Error {
     }
 }
 
-internal extension UInt8 {
+extension UInt8 {
     static var _slash: UInt8 { UInt8(ascii: "/") }
     static var _backslash: UInt8 { UInt8(ascii: "\\") }
     static var _colon: UInt8 { UInt8(ascii: ":") }

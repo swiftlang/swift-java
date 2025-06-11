@@ -32,9 +32,9 @@ import _CShims
 
 // Darwin specific implementation
 extension Subprocess.Configuration {
-    internal typealias StringOrRawBytes = Subprocess.StringOrRawBytes
+    typealias StringOrRawBytes = Subprocess.StringOrRawBytes
 
-    internal func spawn(
+    func spawn(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -288,7 +288,7 @@ extension Subprocess.PlatformOptions: Hashable {
 }
 
 extension Subprocess.PlatformOptions : CustomStringConvertible, CustomDebugStringConvertible {
-    internal func description(withIndent indent: Int) -> String {
+    func description(withIndent indent: Int) -> String {
         let indent = String(repeating: " ", count: indent * 4)
         return """
 PlatformOptions(
@@ -315,7 +315,7 @@ PlatformOptions(
 
 // MARK: - Process Monitoring
 @Sendable
-internal func monitorProcessTermination(
+func monitorProcessTermination(
     forProcessWithIdentifier pid: Subprocess.ProcessIdentifier
 ) async throws -> Subprocess.TerminationStatus {
     return try await withCheckedThrowingContinuation { continuation in

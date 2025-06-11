@@ -32,7 +32,7 @@ extension Subprocess {
     /// number of nanoseconds allowed for the child process to exit
     /// before proceeding to the next step.
     public struct TeardownStep: Sendable, Hashable {
-        internal enum Storage: Sendable, Hashable {
+        enum Storage: Sendable, Hashable {
             case sendSignal(Signal, allowedNanoseconds: UInt64)
             case kill
         }
@@ -56,7 +56,7 @@ extension Subprocess {
 }
 
 extension Subprocess {
-    internal func runTeardownSequence(_ sequence: [TeardownStep]) async {
+    func runTeardownSequence(_ sequence: [TeardownStep]) async {
         // First insert the `.kill` step
         let finalSequence = sequence + [TeardownStep(storage: .kill)]
         for step in finalSequence {

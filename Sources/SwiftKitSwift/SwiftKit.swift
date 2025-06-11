@@ -34,7 +34,7 @@ public func _swiftjava_swift_isUniquelyReferenced(object: UnsafeMutableRawPointe
 
 
  @_alwaysEmitIntoClient @_transparent
- internal func _swiftjava_withHeapObject<R>(
+func _swiftjava_withHeapObject<R>(
    of object: AnyObject,
    _ body: (UnsafeMutableRawPointer) -> R
  ) -> R {
