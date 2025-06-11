@@ -22,26 +22,9 @@ To build and use this project, currently, you will need to download a custom too
 
 **Required toolchain download:**
 
-- Go to https://www.swift.org/download/
-- Find the "latest" `Trunk Development (main)` toolchain for your OS
+Currently this project supports Swift `6.0.x` and we are working on supporting later releases.
 
-If these are too old, you can resort to one of these fallback toolchains:
-
-Fallback development toolchain on **macOS**:
-
-- https://ci.swift.org/job/swift-PR-toolchain-macos/1539/artifact/branch-main/swift-PR-76905-1539-osx.tar.gz
-
-Fallback development toolchain on **Linux (Ubuntu 22.04)**:
-
-```
-URL=$(curl -s "https://ci.swift.org/job/oss-swift-package-ubuntu-22_04/lastSuccessfulBuild/consoleText" | grep 'Toolchain: ' | sed 's/Toolchain: //g')
-wget ${URL} 
-```
-
-or just use the provided docker image (explained below).
-
-https://www.swift.org/download/
-
+You can use Swiftly ([macOS](https://www.swift.org/install/macos/swiftly/) / [linux](https://www.swift.org/install/linux/swiftly/)) the Swift toolchain installer to install the necessary Swift versions.
 
 ### Required JDK versions
 
@@ -50,15 +33,17 @@ This project consists of different modules which have different Swift and Java r
 **JavaKit** – the Swift macros allowing the invocation of Java libraries from Swift
 
 - **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integration
-- **Swift 6.0+**, because the library uses modern Swift macros
+- **Swift 6.0.x**, because the library uses modern Swift macros
 
 **jextract-swift** – the source generator that ingests .swiftinterface files and makes them available to be called from generated Java sources
 
-- **Swift 6.x development snapshots**, because of dependence on rich swift interface files  
+- **Swift 6.0.x development snapshots**, because of dependence on rich swift interface files  
 - **JDK 22+** because of dependence on [JEP-454: Foreign Function & Memory API](https://openjdk.org/jeps/454)
   - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-23.  
 
 The extract tool may become able to generate legacy compatible sources, which would not require JEP-454 and would instead rely on existing JNI facilities. Currently though, efforts are focused on the forward-looking implementation using modern foreign function and memory APIs. 
+
+Support for more recent Swift versions will be provided, for now please stick to 6.0 while evaluating this early version of swift-java.
 
 ## Development and Testing
 
@@ -89,8 +74,7 @@ To run a simple app showcasing a Swift process calling into a Java library you c
 
 ```bash
 cd Samples/JavaKitSampleApp
-swift build
-java -cp .build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java -Djava.library.path=.build/debug com.example.swift.JavaKitSampleMain
+./ci-validate.sh # which is just `swift build` and a `java -cp ...` invocation of the compiled program
 ```
 
 #### jextract (Java -> Swift)
