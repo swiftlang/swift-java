@@ -65,7 +65,7 @@ extension Subprocess {
         }
 
         /// Subprocess should read no input. This option is equivalent
-        /// to bind the stanard input to `/dev/null`.
+        /// to bind the standard input to `/dev/null`.
         public static var noInput: Self {
             return .init(method: .noInput)
         }
@@ -100,7 +100,7 @@ extension Subprocess {
             self.method = method
         }
 
-        /// Subprocess shold dicard the child process output.
+        /// Subprocess should discard the child process output.
         /// This option is equivalent to binding the child process
         /// output to `/dev/null`.
         public static var discard: Self {
@@ -148,7 +148,7 @@ extension Subprocess {
             self.method = method
         }
 
-        /// Subprocess shold dicard the child process output.
+        /// Subprocess should discard the child process output.
         /// This option is equivalent to binding the child process
         /// output to `/dev/null`.
         public static var discard: Self {
@@ -160,7 +160,7 @@ extension Subprocess {
         public static var redirectToSequence: Self {
             return .init(method: .collected(128 * 1024))
         }
-        /// Subprocess shold write the child process output
+        /// Subprocess should write the child process output
         /// to the file descriptor specified.
         /// - Parameters:
         ///   - fd: the file descriptor to write to
@@ -257,7 +257,7 @@ extension Subprocess {
                 case .customWrite(let readFd, let writeFd):
                     // The parent fd should have been closed
                     // in the `body` when writer.finish() is called
-                    // But in case it isn't call it agian
+                    // But in case it isn't call it again
                     try writeFd?.close()
                     $0 = .customWrite(readFd, nil)
                 }

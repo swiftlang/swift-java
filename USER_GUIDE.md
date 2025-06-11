@@ -221,7 +221,7 @@ Note that we are passing the Jar file in the `classpath` argument when initializ
 
 ### Downcasting
 
-All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checkin whether a given object is of the specified type, e.g.,
+All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checking whether a given object is of the specified type, e.g.,
 
 ```swift
 if myObject.is(URL.self) {
@@ -620,7 +620,7 @@ The project is still very early days, however the general outline of using this 
 - These `.swiftinterface` files are imported by jextract-swift which generates `*.java` files
 - The generated Java files contain generated code for efficient native invocations.
 
-You can then use Swift libraries in Java just by calling the apropriate methods and initializers.
+You can then use Swift libraries in Java just by calling the appropriate methods and initializers.
 
 ## `jextract-swift`: Generating Java bridging files
 

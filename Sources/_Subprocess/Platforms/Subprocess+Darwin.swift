@@ -224,7 +224,7 @@ extension Subprocess {
         public var launchRequirementData: Data? = nil
         /// An ordered list of steps in order to tear down the child
         /// process in case the parent task is cancelled before
-        /// the child proces terminates.
+        /// the child process terminates.
         /// Always ends in sending a `.kill` signal at the end.
         public var teardownSequence: [TeardownStep] = []
         /// A closure to configure platform-specific

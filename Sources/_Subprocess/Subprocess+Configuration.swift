@@ -46,7 +46,7 @@ extension Subprocess {
         public var environment: Environment
         /// The working directory to use when running the executable.
         public var workingDirectory: FilePath
-        /// The platform specifc options to use when
+        /// The platform specific options to use when
         /// running the subprocess.
         public var platformOptions: PlatformOptions
 
@@ -532,7 +532,7 @@ extension Subprocess.Environment : CustomStringConvertible, CustomDebugStringCon
         case .custom(let customDictionary):
             return customDictionary.dictionaryDescription
         case .inherit(let updateValue):
-            return "Inherting current environment with updates: \(updateValue.dictionaryDescription)"
+            return "Inheriting current environment with updates: \(updateValue.dictionaryDescription)"
         }
     }
 

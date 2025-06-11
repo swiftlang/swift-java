@@ -79,7 +79,7 @@ extension Subprocess {
                             try await Task.sleep(nanoseconds: allowedNanoseconds)
                             return .processStillAlive
                         } catch {
-                            // teardown(using:) cancells this task
+                            // teardown(using:) cancels this task
                             // when process has exited
                             return .processHasExited
                         }

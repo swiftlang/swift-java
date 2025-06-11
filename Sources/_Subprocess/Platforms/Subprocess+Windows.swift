@@ -276,7 +276,7 @@ extension Subprocess {
         public struct ConsoleBehavior: Sendable, Hashable {
             enum Storage: Sendable, Hashable {
                 case createNew
-                case detatch
+                case detach
                 case inherit
             }
 
@@ -293,7 +293,7 @@ extension Subprocess {
             /// inherit its parent's console (the default).
             /// The new process can call the `AllocConsole`
             /// function at a later time to create a console.
-            public static let detatch: Self = .init(.detatch)
+            public static let detach: Self = .init(.detach)
             /// The subprocess inherits its parent's console.
             public static let inherit: Self = .init(.inherit)
         }
@@ -658,7 +658,7 @@ extension Subprocess.Environment {
 extension Subprocess {
     /// A platform independent identifier for a subprocess.
     public struct ProcessIdentifier: Sendable, Hashable, Codable {
-        /// Windows specifc process identifier value
+        /// Windows specific process identifier value
         public let processID: DWORD
         /// Windows specific thread identifier associated with process
         public let threadID: DWORD
@@ -755,7 +755,7 @@ extension Subprocess.Configuration {
         switch self.platformOptions.consoleBehavior.storage {
         case .createNew:
             flags |= CREATE_NEW_CONSOLE
-        case .detatch:
+        case .detach:
             flags |= DETACHED_PROCESS
         case .inherit:
             break
@@ -853,7 +853,7 @@ extension Subprocess.Configuration {
         }
         // The first parameter of CreateProcessW, `lpApplicationName`
         // is optional. If it's nil, CreateProcessW uses argument[0]
-        // as the execuatble name.
+        // as the executable name.
         // We should only set lpApplicationName if it's different from
         // argument[0] (i.e. executablePathOverride)
         var applicationName: String? = nil
@@ -1025,7 +1025,7 @@ extension FileDescriptor {
     }
 
     func read(upToLength maxLength: Int) async throws -> Data {
-        // TODO: Figure out a better way to asynchornously read
+        // TODO: Figure out a better way to asynchronously read
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var totalBytesRead: Int = 0
@@ -1060,7 +1060,7 @@ extension FileDescriptor {
                             }
                             break
                         } else {
-                            // We succesfully read the current round
+                            // We successfully read the current round
                             totalBytesRead += Int(bytesRead)
                         }
 
@@ -1083,7 +1083,7 @@ extension FileDescriptor {
     }
 
     func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
-        // TODO: Figure out a better way to asynchornously write
+        // TODO: Figure out a better way to asynchronously write
         try await withCheckedThrowingContinuation { (
             continuation: CheckedContinuation<Void, Error>
         ) -> Void in

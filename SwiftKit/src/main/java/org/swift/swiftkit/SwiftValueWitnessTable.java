@@ -56,7 +56,7 @@ public abstract class SwiftValueWitnessTable {
                     MemoryLayout.PathElement.groupElement("vwt"));
 
     /**
-     * Given the address of Swift type metadata for a type, return the addres
+     * Given the address of Swift type metadata for a type, return the address
      * of the "full" type metadata that can be accessed via fullTypeMetadataLayout.
      */
     public static MemorySegment fullTypeMetadata(MemorySegment typeMetadata) {
