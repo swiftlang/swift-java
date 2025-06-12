@@ -32,9 +32,9 @@ import _CShims
 
 // Darwin specific implementation
 extension Subprocess.Configuration {
-    typealias StringOrRawBytes = Subprocess.StringOrRawBytes
+    internal typealias StringOrRawBytes = Subprocess.StringOrRawBytes
 
-    func spawn(
+    internal func spawn(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -224,7 +224,7 @@ extension Subprocess {
         public var launchRequirementData: Data? = nil
         /// An ordered list of steps in order to tear down the child
         /// process in case the parent task is cancelled before
-        /// the child process terminates.
+        /// the child proces terminates.
         /// Always ends in sending a `.kill` signal at the end.
         public var teardownSequence: [TeardownStep] = []
         /// A closure to configure platform-specific
@@ -288,7 +288,7 @@ extension Subprocess.PlatformOptions: Hashable {
 }
 
 extension Subprocess.PlatformOptions : CustomStringConvertible, CustomDebugStringConvertible {
-    func description(withIndent indent: Int) -> String {
+    internal func description(withIndent indent: Int) -> String {
         let indent = String(repeating: " ", count: indent * 4)
         return """
 PlatformOptions(
@@ -315,7 +315,7 @@ PlatformOptions(
 
 // MARK: - Process Monitoring
 @Sendable
-func monitorProcessTermination(
+internal func monitorProcessTermination(
     forProcessWithIdentifier pid: Subprocess.ProcessIdentifier
 ) async throws -> Subprocess.TerminationStatus {
     return try await withCheckedThrowingContinuation { continuation in

@@ -290,7 +290,7 @@ public final class ConditionLock<T: Equatable> {
 /// This is currently the only way to do this in Swift: see
 /// https://forums.swift.org/t/support-debug-only-code/11037 for a discussion.
 @inlinable
-func debugOnly(_ body: () -> Void) {
+internal func debugOnly(_ body: () -> Void) {
     assert({ body(); return true }())
 }
 
@@ -460,7 +460,7 @@ extension LockStorage: @unchecked Sendable { }
 /// `SRWLOCK` type.
 public struct NIOLock {
     @usableFromInline
-    let _storage: LockStorage<Void>
+    internal let _storage: LockStorage<Void>
     
     /// Create a new lock.
     @inlinable
@@ -487,7 +487,7 @@ public struct NIOLock {
     }
 
     @inlinable
-    func withLockPrimitive<T>(_ body: (UnsafeMutablePointer<LockPrimitive>) throws -> T) rethrows -> T {
+    internal func withLockPrimitive<T>(_ body: (UnsafeMutablePointer<LockPrimitive>) throws -> T) rethrows -> T {
         return try self._storage.withLockPrimitive(body)
     }
 }

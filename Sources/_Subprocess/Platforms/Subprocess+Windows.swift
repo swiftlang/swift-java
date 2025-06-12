@@ -21,7 +21,7 @@ import FoundationEssentials
 
 // Windows specific implementation
 extension Subprocess.Configuration {
-    func spawn(
+    internal func spawn(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -44,7 +44,7 @@ extension Subprocess.Configuration {
         }
     }
 
-    func spawnDirect(
+    internal func spawnDirect(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput
@@ -141,7 +141,7 @@ extension Subprocess.Configuration {
         )
     }
 
-    func spawnAsUser(
+    internal func spawnAsUser(
         withInput input: Subprocess.ExecutionInput,
         output: Subprocess.ExecutionOutput,
         error: Subprocess.ExecutionOutput,
@@ -274,13 +274,13 @@ extension Subprocess {
         /// `ConsoleBehavior` defines how should the console appear
         /// when spawning a new process
         public struct ConsoleBehavior: Sendable, Hashable {
-            enum Storage: Sendable, Hashable {
+            internal enum Storage: Sendable, Hashable {
                 case createNew
-                case detach
+                case detatch
                 case inherit
             }
 
-            let storage: Storage
+            internal let storage: Storage
 
             private init(_ storage: Storage) {
                 self.storage = storage
@@ -293,7 +293,7 @@ extension Subprocess {
             /// inherit its parent's console (the default).
             /// The new process can call the `AllocConsole`
             /// function at a later time to create a console.
-            public static let detach: Self = .init(.detach)
+            public static let detatch: Self = .init(.detatch)
             /// The subprocess inherits its parent's console.
             public static let inherit: Self = .init(.inherit)
         }
@@ -301,16 +301,16 @@ extension Subprocess {
         /// `ConsoleBehavior` defines how should the window appear
         /// when spawning a new process
         public struct WindowStyle: Sendable, Hashable {
-            enum Storage: Sendable, Hashable {
+            internal enum Storage: Sendable, Hashable {
                 case normal
                 case hidden
                 case maximized
                 case minimized
             }
 
-            let storage: Storage
+            internal let storage: Storage
 
-            var platformStyle: WORD {
+            internal var platformStyle: WORD {
                 switch self.storage {
                 case .hidden: return WORD(SW_HIDE)
                 case .maximized: return WORD(SW_SHOWMAXIMIZED)
@@ -401,7 +401,7 @@ extension Subprocess.PlatformOptions: Hashable {
 }
 
 extension Subprocess.PlatformOptions : CustomStringConvertible, CustomDebugStringConvertible {
-    func description(withIndent indent: Int) -> String {
+    internal func description(withIndent indent: Int) -> String {
         let indent = String(repeating: " ", count: indent * 4)
         return """
 PlatformOptions(
@@ -425,7 +425,7 @@ PlatformOptions(
 
 // MARK: - Process Monitoring
 @Sendable
-func monitorProcessTermination(
+internal func monitorProcessTermination(
     forProcessWithIdentifier pid: Subprocess.ProcessIdentifier
 ) async throws -> Subprocess.TerminationStatus {
     // Once the continuation resumes, it will need to unregister the wait, so
@@ -580,7 +580,7 @@ extension Subprocess {
         }
     }
 
-    func tryTerminate() -> Error? {
+    internal func tryTerminate() -> Error? {
         do {
             try self.terminate(withExitCode: 0)
         } catch {
@@ -595,7 +595,7 @@ extension Subprocess.Executable {
     // Technically not needed for CreateProcess since
     // it takes process name. It's here to support
     // Executable.resolveExecutablePath
-    func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
+    internal func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
         switch self.storage {
         case .executable(let executableName):
             return executableName.withCString(
@@ -634,9 +634,9 @@ extension Subprocess.Executable {
 
 // MARK: - Environment Resolution
 extension Subprocess.Environment {
-    static let pathEnvironmentVariableName = "Path"
+    internal static let pathEnvironmentVariableName = "Path"
 
-    func pathValue() -> String? {
+    internal func pathValue() -> String? {
         switch self.config {
         case .inherit(let overrides):
             // If PATH value exists in overrides, use it
@@ -658,12 +658,12 @@ extension Subprocess.Environment {
 extension Subprocess {
     /// A platform independent identifier for a subprocess.
     public struct ProcessIdentifier: Sendable, Hashable, Codable {
-        /// Windows specific process identifier value
+        /// Windows specifc process identifier value
         public let processID: DWORD
         /// Windows specific thread identifier associated with process
         public let threadID: DWORD
 
-        init(
+        internal init(
             processID: DWORD,
             threadID: DWORD
         ) {
@@ -755,7 +755,7 @@ extension Subprocess.Configuration {
         switch self.platformOptions.consoleBehavior.storage {
         case .createNew:
             flags |= CREATE_NEW_CONSOLE
-        case .detach:
+        case .detatch:
             flags |= DETACHED_PROCESS
         case .inherit:
             break
@@ -853,7 +853,7 @@ extension Subprocess.Configuration {
         }
         // The first parameter of CreateProcessW, `lpApplicationName`
         // is optional. If it's nil, CreateProcessW uses argument[0]
-        // as the executable name.
+        // as the execuatble name.
         // We should only set lpApplicationName if it's different from
         // argument[0] (i.e. executablePathOverride)
         var applicationName: String? = nil
@@ -940,13 +940,13 @@ extension Subprocess.Configuration {
 
 // MARK: - PlatformFileDescriptor Type
 extension Subprocess {
-    typealias PlatformFileDescriptor = HANDLE
+    internal typealias PlatformFileDescriptor = HANDLE
 }
 
 // MARK: - Read Buffer Size
 extension Subprocess {
     @inline(__always)
-    static var readBufferSize: Int {
+    internal static var readBufferSize: Int {
         // FIXME: Use Platform.pageSize here
         var sysInfo: SYSTEM_INFO = SYSTEM_INFO()
         GetSystemInfo(&sysInfo)
@@ -956,7 +956,7 @@ extension Subprocess {
 
 // MARK: - Pipe Support
 extension FileDescriptor {
-    static func pipe() throws -> (
+    internal static func pipe() throws -> (
         readEnd: FileDescriptor,
         writeEnd: FileDescriptor
     ) {
@@ -992,7 +992,7 @@ extension FileDescriptor {
         )
     }
 
-    static func openDevNull(
+    internal static func openDevNull(
         withAcessMode mode: FileDescriptor.AccessMode
     ) throws -> FileDescriptor {
         return try "NUL".withPlatformString {
@@ -1024,8 +1024,8 @@ extension FileDescriptor {
         return HANDLE(bitPattern: _get_osfhandle(self.rawValue))!
     }
 
-    func read(upToLength maxLength: Int) async throws -> Data {
-        // TODO: Figure out a better way to asynchronously read
+    internal func read(upToLength maxLength: Int) async throws -> Data {
+        // TODO: Figure out a better way to asynchornously read
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var totalBytesRead: Int = 0
@@ -1060,7 +1060,7 @@ extension FileDescriptor {
                             }
                             break
                         } else {
-                            // We successfully read the current round
+                            // We succesfully read the current round
                             totalBytesRead += Int(bytesRead)
                         }
 
@@ -1070,7 +1070,7 @@ extension FileDescriptor {
                         }
                     }
                 }
-                if let lastError {
+                if let lastError = lastError {
                     continuation.resume(throwing: CocoaError.windowsError(
                         underlying: lastError,
                         errorCode: .fileReadUnknown)
@@ -1082,8 +1082,8 @@ extension FileDescriptor {
         }
     }
 
-    func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
-        // TODO: Figure out a better way to asynchronously write
+    internal func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
+        // TODO: Figure out a better way to asynchornously write
         try await withCheckedThrowingContinuation { (
             continuation: CheckedContinuation<Void, Error>
         ) -> Void in
@@ -1117,7 +1117,7 @@ extension String {
 }
 
 // MARK: - CocoaError + Win32
-let NSUnderlyingErrorKey = "NSUnderlyingError"
+internal let NSUnderlyingErrorKey = "NSUnderlyingError"
 
 extension CocoaError {
     static func windowsError(underlying: DWORD, errorCode: Code) -> CocoaError {
@@ -1155,7 +1155,7 @@ private extension Optional where Wrapped == String {
 
 // MARK: - Remove these when merging back to SwiftFoundation
 extension String {
-    func withNTPathRepresentation<Result>(
+    internal func withNTPathRepresentation<Result>(
         _ body: (UnsafePointer<WCHAR>) throws -> Result
     ) throws -> Result {
         guard !isEmpty else {
@@ -1199,7 +1199,7 @@ struct Win32Error: Error {
     }
 }
 
-extension UInt8 {
+internal extension UInt8 {
     static var _slash: UInt8 { UInt8(ascii: "/") }
     static var _backslash: UInt8 { UInt8(ascii: "\\") }
     static var _colon: UInt8 { UInt8(ascii: ":") }

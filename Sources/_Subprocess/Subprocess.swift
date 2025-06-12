@@ -30,11 +30,11 @@ public struct Subprocess: Sendable {
     /// The process identifier of the current subprocess
     public let processIdentifier: ProcessIdentifier
 
-    let executionInput: ExecutionInput
-    let executionOutput: ExecutionOutput
-    let executionError: ExecutionOutput
+    internal let executionInput: ExecutionInput
+    internal let executionOutput: ExecutionOutput
+    internal let executionError: ExecutionOutput
 #if os(Windows)
-    let consoleBehavior: PlatformOptions.ConsoleBehavior
+    internal let consoleBehavior: PlatformOptions.ConsoleBehavior
 #endif
 
     /// The standard output of the subprocess.
@@ -149,7 +149,7 @@ extension Subprocess {
         /// The result returned by the closure passed to `.run` methods
         public let value: T
 
-        init(terminationStatus: TerminationStatus, value: T) {
+        internal init(terminationStatus: TerminationStatus, value: T) {
             self.terminationStatus = terminationStatus
             self.value = value
         }
@@ -186,7 +186,7 @@ extension Subprocess {
             return output
         }
 
-        init(
+        internal init(
             processIdentifier: ProcessIdentifier,
             terminationStatus: TerminationStatus,
             standardOutput: Data?,
@@ -253,18 +253,18 @@ Subprocess.CollectedResult(
 
 // MARK: - Internal
 extension Subprocess {
-    enum OutputCapturingState {
+    internal enum OutputCapturingState {
         case standardOutputCaptured(Data?)
         case standardErrorCaptured(Data?)
     }
 
-    typealias CapturedIOs = (standardOutput: Data?, standardError: Data?)
+    internal typealias CapturedIOs = (standardOutput: Data?, standardError: Data?)
 
     private func capture(fileDescriptor: FileDescriptor, maxLength: Int) async throws -> Data {
         return try await fileDescriptor.readUntilEOF(upToLength: maxLength)
     }
 
-    func captureStandardOutput() async throws -> Data? {
+    internal func captureStandardOutput() async throws -> Data? {
         guard let (limit, readFd) = self.executionOutput
             .consumeCollectedFileDescriptor(),
               let readFd = readFd else {
@@ -276,7 +276,7 @@ extension Subprocess {
         return try await self.capture(fileDescriptor: readFd, maxLength: limit)
     }
 
-    func captureStandardError() async throws -> Data? {
+    internal func captureStandardError() async throws -> Data? {
         guard let (limit, readFd) = self.executionError
             .consumeCollectedFileDescriptor(),
               let readFd = readFd else {
@@ -288,7 +288,7 @@ extension Subprocess {
         return try await self.capture(fileDescriptor: readFd, maxLength: limit)
     }
 
-    func captureIOs() async throws -> CapturedIOs {
+    internal func captureIOs() async throws -> CapturedIOs {
         return try await withThrowingTaskGroup(of: OutputCapturingState.self) { group in
             group.addTask {
                 let stdout = try await self.captureStandardOutput()

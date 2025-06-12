@@ -106,7 +106,7 @@ extension Subprocess {
         }
     }
 
-    func tryTerminate() -> Error? {
+    internal func tryTerminate() -> Error? {
         do {
             try self.send(.kill, toProcessGroup: true)
         } catch {
@@ -124,9 +124,9 @@ extension Subprocess {
 
 // MARK: - Environment Resolution
 extension Subprocess.Environment {
-    static let pathEnvironmentVariableName = "PATH"
+    internal static let pathEnvironmentVariableName = "PATH"
 
-    func pathValue() -> String? {
+    internal func pathValue() -> String? {
         switch self.config {
         case .inherit(let overrides):
             // If PATH value exists in overrides, use it
@@ -145,7 +145,7 @@ extension Subprocess.Environment {
 
     // This method follows the standard "create" rule: `env` needs to be
     // manually deallocated
-    func createEnv() -> [UnsafeMutablePointer<CChar>?] {
+    internal func createEnv() -> [UnsafeMutablePointer<CChar>?] {
         func createFullCString(
             fromKey keyContainer: Subprocess.StringOrRawBytes,
             value valueContainer: Subprocess.StringOrRawBytes
@@ -212,7 +212,7 @@ extension Subprocess.Environment {
 extension Subprocess.Arguments {
     // This method follows the standard "create" rule: `args` needs to be
     // manually deallocated
-    func createArgs(withExecutablePath executablePath: String) -> [UnsafeMutablePointer<CChar>?] {
+    internal func createArgs(withExecutablePath executablePath: String) -> [UnsafeMutablePointer<CChar>?] {
         var argv: [UnsafeMutablePointer<CChar>?] = self.storage.map { $0.createRawBytes() }
         // argv[0] = executable path
         if let override = self.executablePathOverride {
@@ -246,7 +246,7 @@ extension Subprocess.ProcessIdentifier : CustomStringConvertible, CustomDebugStr
 
 // MARK: -  Executable Searching
 extension Subprocess.Executable {
-    static var defaultSearchPaths: Set<String> {
+    internal static var defaultSearchPaths: Set<String> {
         return Set([
             "/usr/bin",
             "/bin",
@@ -256,7 +256,7 @@ extension Subprocess.Executable {
         ])
     }
 
-    func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
+    internal func resolveExecutablePath(withPathValue pathValue: String?) -> String? {
         switch self.storage {
         case .executable(let executableName):
             // If the executableName in is already a full path, return it directly
@@ -289,7 +289,7 @@ extension Subprocess.Executable {
 
 // MARK: - Configuration
 extension Subprocess.Configuration {
-    func preSpawn() throws -> (
+    internal func preSpawn() throws -> (
         executablePath: String,
         env: [UnsafeMutablePointer<CChar>?],
         argv: [UnsafeMutablePointer<CChar>?],
@@ -343,7 +343,7 @@ extension Subprocess.Configuration {
         )
     }
 
-    static func pathAccessible(_ path: String, mode: Int32) -> Bool {
+    internal static func pathAccessible(_ path: String, mode: Int32) -> Bool {
         return path.withCString {
             return access($0, mode) == 0
         }
@@ -352,18 +352,18 @@ extension Subprocess.Configuration {
 
 // MARK: - FileDescriptor extensions
 extension FileDescriptor {
-    static func openDevNull(
+    internal static func openDevNull(
         withAcessMode mode: FileDescriptor.AccessMode
     ) throws -> FileDescriptor {
         let devnull: FileDescriptor = try .open("/dev/null", mode)
         return devnull
     }
 
-    var platformDescriptor: Subprocess.PlatformFileDescriptor {
+    internal var platformDescriptor: Subprocess.PlatformFileDescriptor {
         return self
     }
 
-    func readChunk(upToLength maxLength: Int) async throws -> Data? {
+    internal func readChunk(upToLength maxLength: Int) async throws -> Data? {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchIO.read(
                 fromFileDescriptor: self.rawValue,
@@ -383,7 +383,7 @@ extension FileDescriptor {
         }
     }
 
-    func readUntilEOF(upToLength maxLength: Int) async throws -> Data {
+    internal func readUntilEOF(upToLength maxLength: Int) async throws -> Data {
         return try await withCheckedThrowingContinuation { continuation in
             let dispatchIO = DispatchIO(
                 type: .stream,
@@ -404,7 +404,7 @@ extension FileDescriptor {
                     continuation.resume(throwing: POSIXError(.init(rawValue: error) ?? .ENODEV))
                     return
                 }
-                if let data {
+                if let data = data {
                     buffer += Data(data)
                 }
                 if done {
@@ -415,7 +415,7 @@ extension FileDescriptor {
         }
     }
 
-    func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
+    internal func write<S: Sequence>(_ data: S) async throws where S.Element == UInt8 {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
             let dispatchData: DispatchData = Array(data).withUnsafeBytes {
                 return DispatchData(bytes: $0)
@@ -439,13 +439,13 @@ extension FileDescriptor {
 }
 
 extension Subprocess {
-    typealias PlatformFileDescriptor = FileDescriptor
+    internal typealias PlatformFileDescriptor = FileDescriptor
 }
 
 // MARK: - Read Buffer Size
 extension Subprocess {
     @inline(__always)
-    static var readBufferSize: Int {
+    internal static var readBufferSize: Int {
 #if canImport(Darwin)
         return 16384
 #else

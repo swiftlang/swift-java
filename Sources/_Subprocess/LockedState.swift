@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 #if canImport(os)
-import os
+internal import os
 #if FOUNDATION_FRAMEWORK && canImport(C.os.lock)
-import C.os.lock
+internal import C.os.lock
 #endif
 #elseif canImport(Bionic)
 import Bionic
