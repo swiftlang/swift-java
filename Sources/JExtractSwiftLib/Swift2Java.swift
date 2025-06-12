@@ -98,6 +98,16 @@ public struct SwiftToJava {
       )
 
       try generator.generate()
+
+    case .jni:
+      let generator = JNISwift2JavaGenerator(
+        translator: translator,
+        javaPackage: config.javaPackage ?? "",
+        swiftOutputDirectory: outputSwiftDirectory,
+        javaOutputDirectory: outputJavaDirectory
+      )
+
+      try generator.generate()
     }
 
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)

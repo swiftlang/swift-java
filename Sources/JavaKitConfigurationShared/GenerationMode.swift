@@ -15,4 +15,7 @@
 public enum GenerationMode: String, Codable {
   /// Foreign Value and Memory API
   case ffm
+
+  /// Java Native Interface
+  case jni
 }
