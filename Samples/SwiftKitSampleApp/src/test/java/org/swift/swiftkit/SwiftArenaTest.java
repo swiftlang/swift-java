@@ -63,7 +63,7 @@ public class SwiftArenaTest {
 
         try {
             unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was suposed to be dead.");
+            fail("Expected exception to be thrown! Object was supposed to be dead.");
         } catch (IllegalStateException ex) {
             return;
         }
@@ -82,7 +82,7 @@ public class SwiftArenaTest {
 
         try {
             unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was suposed to be dead.");
+            fail("Expected exception to be thrown! Object was supposed to be dead.");
         } catch (IllegalStateException ex) {
             return;
         }
