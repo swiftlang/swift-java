@@ -14,7 +14,7 @@
 
 import SwiftSyntax
 
-enum KnownStandardLibraryType: String, Hashable, CaseIterable {
+enum SwiftStandardLibraryTypeKind: String, Hashable, CaseIterable {
   case bool = "Bool"
   case int = "Int"
   case uint = "UInt"
@@ -60,7 +60,7 @@ enum KnownStandardLibraryType: String, Hashable, CaseIterable {
 
 /// Captures many types from the Swift standard library in their most basic
 /// forms, so that the translator can reason about them in source code.
-public struct SwiftStandardLibraryTypes {
+public struct SwiftStandardLibraryTypeDecls {
   // Swift.UnsafePointer<Element>
   let unsafePointerDecl: SwiftNominalTypeDeclaration
 
@@ -74,16 +74,16 @@ public struct SwiftStandardLibraryTypes {
   let unsafeMutableBufferPointerDecl: SwiftNominalTypeDeclaration
 
   /// Mapping from known standard library types to their nominal type declaration.
-  let knownTypeToNominal: [KnownStandardLibraryType: SwiftNominalTypeDeclaration]
+  let knownTypeToNominal: [SwiftStandardLibraryTypeKind: SwiftNominalTypeDeclaration]
 
   /// Mapping from nominal type declarations to known types.
-  let nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: KnownStandardLibraryType]
+  let nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: SwiftStandardLibraryTypeKind]
 
   private static func recordKnownType(
-    _ type: KnownStandardLibraryType,
+    _ type: SwiftStandardLibraryTypeKind,
     _ syntax: NominalTypeDeclSyntaxNode,
-    knownTypeToNominal: inout [KnownStandardLibraryType: SwiftNominalTypeDeclaration],
-    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: KnownStandardLibraryType],
+    knownTypeToNominal: inout [SwiftStandardLibraryTypeKind: SwiftNominalTypeDeclaration],
+    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: SwiftStandardLibraryTypeKind],
     parsedModule: inout SwiftParsedModuleSymbolTable
   ) {
     let nominalDecl = parsedModule.addNominalTypeDeclaration(syntax, parent: nil)
@@ -92,9 +92,9 @@ public struct SwiftStandardLibraryTypes {
   }
 
   private static func recordKnownNonGenericStruct(
-    _ type: KnownStandardLibraryType,
-    knownTypeToNominal: inout [KnownStandardLibraryType: SwiftNominalTypeDeclaration],
-    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: KnownStandardLibraryType],
+    _ type: SwiftStandardLibraryTypeKind,
+    knownTypeToNominal: inout [SwiftStandardLibraryTypeKind: SwiftNominalTypeDeclaration],
+    nominalTypeDeclToKnownType: inout [SwiftNominalTypeDeclaration: SwiftStandardLibraryTypeKind],
     parsedModule: inout SwiftParsedModuleSymbolTable
   ) {
     recordKnownType(
@@ -155,11 +155,11 @@ public struct SwiftStandardLibraryTypes {
       parent: nil
     )
 
-    var knownTypeToNominal: [KnownStandardLibraryType: SwiftNominalTypeDeclaration] = [:]
-    var nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: KnownStandardLibraryType] = [:]
+    var knownTypeToNominal: [SwiftStandardLibraryTypeKind: SwiftNominalTypeDeclaration] = [:]
+    var nominalTypeDeclToKnownType: [SwiftNominalTypeDeclaration: SwiftStandardLibraryTypeKind] = [:]
 
     // Handle all of the non-generic types at once.
-    for knownType in KnownStandardLibraryType.allCases {
+    for knownType in SwiftStandardLibraryTypeKind.allCases {
       guard !knownType.isGeneric else {
         continue
       }
@@ -176,11 +176,11 @@ public struct SwiftStandardLibraryTypes {
     self.nominalTypeDeclToKnownType = nominalTypeDeclToKnownType
   }
 
-  subscript(knownType: KnownStandardLibraryType) -> SwiftNominalTypeDeclaration {
+  subscript(knownType: SwiftStandardLibraryTypeKind) -> SwiftNominalTypeDeclaration {
     knownTypeToNominal[knownType]!
   }
 
-  subscript(nominalType: SwiftNominalTypeDeclaration) -> KnownStandardLibraryType? {
+  subscript(nominalType: SwiftNominalTypeDeclaration) -> SwiftStandardLibraryTypeKind? {
     nominalTypeDeclToKnownType[nominalType]
   }
 }

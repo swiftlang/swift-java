@@ -99,7 +99,7 @@ enum CDeclToCLoweringError: Error {
   case invalidFunctionConvention(SwiftFunctionType)
 }
 
-extension KnownStandardLibraryType {
+extension SwiftStandardLibraryTypeKind {
   /// Determine the primitive C type that corresponds to this C standard
   /// library type, if there is one.
   var primitiveCType: CType? {
