@@ -54,6 +54,7 @@ let package = Package(
               .product(name: "JavaKit", package: "swift-java"),
               .product(name: "JavaKitJar", package: "swift-java"),
             ],
+            exclude: ["swift-java.config"],
             swiftSettings: [
               .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
             ],
@@ -71,6 +72,7 @@ let package = Package(
                 .product(name: "JavaKit", package: "swift-java"),
                 .product(name: "JavaKitCollection", package: "swift-java"),
             ],
+            exclude: ["swift-java.config"],
             swiftSettings: [
               .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
             ],

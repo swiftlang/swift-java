@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import ArgumentParser
 import Foundation
 import SwiftJavaLib
 import JavaKit
@@ -23,12 +24,37 @@ import JavaKitShared
 import _Subprocess
 
 extension SwiftJava {
+  struct ResolveCommand: SwiftJavaBaseAsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+      commandName: "resolve",
+      abstract: "Resolve dependencies and write the resulting swift-java.classpath file")
 
+    @OptionGroup var commonOptions: SwiftJava.CommonOptions
+
+    @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
+    var swiftModule: String
+
+    var effectiveSwiftModule: String {
+      swiftModule
+    }
+
+  }
+}
+
+extension SwiftJava.ResolveCommand {
+  mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
+    fatalError("NOT IMPLEMENTED: resolve")
+  }
+}
+
+
+
+extension SwiftJava {
   var SwiftJavaClasspathPrefix: String { "SWIFT_JAVA_CLASSPATH:" }
 
   var printRuntimeClasspathTaskName: String { "printRuntimeClasspath" }
 
-  func fetchDependencies(moduleName: String,
+  func fetchDependencies(swiftModule: String,
                          dependencies: [JavaDependencyDescriptor]) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
@@ -37,7 +63,7 @@ extension SwiftJava {
     let classpathEntries = dependenciesClasspath.split(separator: ":")
 
 
-    print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(moduleName)', classpath entries: \(classpathEntries.count), ", terminator: "")
+    print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ", terminator: "")
     print("done.".green)
 
     for entry in classpathEntries {
@@ -128,7 +154,7 @@ extension SwiftJava {
   }
 
   mutating func writeFetchedDependenciesClasspath(
-    moduleName: String,
+    swiftModule: String,
     cacheDir: String,
     resolvedClasspath: ResolvedDependencyClasspath) throws {
     // Convert the artifact name to a module name
@@ -137,14 +163,14 @@ extension SwiftJava {
     // The file contents are just plain
     let contents = resolvedClasspath.classpath
 
-      print("[debug][swift-java] Resolved dependency: \(classpath)")
+    print("[debug][swift-java] Resolved dependency: \(commonJVMOptions.classpath)")
 
     // Write the file
     try writeContents(
       contents,
       outputDirectoryOverride: URL(fileURLWithPath: cacheDir),
-      to: "\(moduleName).swift-java.classpath",
-      description: "swift-java.classpath file for module \(moduleName)"
+      to: "\(swiftModule).swift-java.classpath",
+      description: "swift-java.classpath file for module \(swiftModule)"
     )
   }
 

@@ -26,12 +26,12 @@ public struct SwiftToJava {
   }
 
   public func run() throws {
-    guard let swiftModule = config.swiftModule else {
+    guard let moduleName = config.swiftModule else {
       fatalError("Missing '--swift-module' name.")
     }
 
     let translator = Swift2JavaTranslator(
-      swiftModuleName: swiftModule
+      swiftModuleName: moduleName
     )
     translator.log.logLevel = config.logLevel ?? .info
 
@@ -100,7 +100,7 @@ public struct SwiftToJava {
       try generator.generate()
     }
 
-    print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
+    print("[swift-java] Imported Swift module '\(moduleName)': " + "done.".green)
   }
   
   func canExtract(from file: URL) -> Bool {
