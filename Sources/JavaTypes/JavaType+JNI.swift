@@ -14,7 +14,7 @@
 
 extension JavaType {
   /// Map this Java type to the appropriate JNI type name.
-  var jniTypeName: String {
+  package var jniTypeName: String {
     switch self {
     case .boolean: "jboolean"
     case .float: "jfloat"
