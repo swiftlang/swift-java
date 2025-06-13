@@ -144,7 +144,7 @@ extension TranslatedFunctionSignature {
 }
 
 struct JavaTranslation {
-  var swiftStdlibTypes: SwiftStandardLibraryTypes
+  var swiftStdlibTypes: SwiftStandardLibraryTypeDecls
 
   func translate(
     _ decl: ImportedFunc

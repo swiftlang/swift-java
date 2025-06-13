@@ -43,7 +43,7 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
-  package var swiftStdlibTypes: SwiftStandardLibraryTypes
+  package var swiftStdlibTypeDecls: SwiftStandardLibraryTypeDecls
 
   package let symbolTable: SwiftSymbolTable
 
@@ -59,7 +59,7 @@ public final class Swift2JavaTranslator {
 
     // Create a mock of the Swift standard library.
     var parsedSwiftModule = SwiftParsedModuleSymbolTable(moduleName: "Swift")
-    self.swiftStdlibTypes = SwiftStandardLibraryTypes(into: &parsedSwiftModule)
+    self.swiftStdlibTypeDecls = SwiftStandardLibraryTypeDecls(into: &parsedSwiftModule)
     self.symbolTable.importedModules.append(parsedSwiftModule.symbolTable)
   }
 }

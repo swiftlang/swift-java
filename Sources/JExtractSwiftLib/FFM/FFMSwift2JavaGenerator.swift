@@ -23,7 +23,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let javaPackage: String
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
-  let swiftStdlibTypes: SwiftStandardLibraryTypes
+  let swiftStdlibTypes: SwiftStandardLibraryTypeDecls
   let symbolTable: SwiftSymbolTable
 
   var javaPackagePath: String {
@@ -49,7 +49,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
     self.symbolTable = translator.symbolTable
-    self.swiftStdlibTypes = translator.swiftStdlibTypes
+    self.swiftStdlibTypes = translator.swiftStdlibTypeDecls
   }
 
   func generate() throws {

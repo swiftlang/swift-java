@@ -73,7 +73,7 @@ func assertLoweredFunction(
     cName: "c_\(swiftFunctionName)",
     swiftAPIName: swiftFunctionName,
     as: apiKind,
-    stdlibTypes: translator.swiftStdlibTypes
+    stdlibTypes: translator.swiftStdlibTypeDecls
   )
 
   #expect(
@@ -141,7 +141,7 @@ func assertLoweredVariableAccessor(
     cName: "c_\(swiftVariableName)",
     swiftAPIName: swiftVariableName,
     as: isSet ? .setter : .getter,
-    stdlibTypes: translator.swiftStdlibTypes
+    stdlibTypes: translator.swiftStdlibTypeDecls
   )
 
   #expect(

@@ -75,7 +75,11 @@ extension FFMSwift2JavaGenerator {
 
 /// Responsible for lowering Swift API to C API.
 struct CdeclLowering {
-  var swiftStdlibTypes: SwiftStandardLibraryTypes
+  var knownTypes: SwiftKnownTypes
+
+  init(swiftStdlibTypes: SwiftStandardLibraryTypeDecls) {
+    self.knownTypes = SwiftKnownTypes(decls: swiftStdlibTypes)
+  }
 
   /// Lower the given Swift function signature to a Swift @_cdecl function signature,
   /// which is C compatible, and the corresponding Java method signature.
@@ -149,11 +153,7 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .nominal(
-              SwiftNominalType(
-                nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]
-              )
-            )
+            type: knownTypes.unsafeRawPointer
           )
         ],
         conversion: .unsafeCastPointer(.placeholder, swiftType: instanceType)
@@ -173,10 +173,14 @@ struct CdeclLowering {
           // Typed pointers are mapped down to their raw forms in cdecl entry
           // points. These can be passed through directly.
           let isMutable = knownType == .unsafeMutablePointer
-          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
-          let paramType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
           return LoweredParameter(
-            cdeclParameters: [SwiftParameter(convention: .byValue, parameterName: parameterName, type: paramType)],
+            cdeclParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: parameterName,
+                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
+              )
+            ],
             conversion: .typedPointer(.placeholder, swiftType: genericArgs[0])
           )
 
@@ -186,17 +190,15 @@ struct CdeclLowering {
           }
           // Typed pointers are lowered to (raw-pointer, count) pair.
           let isMutable = knownType == .unsafeMutableBufferPointer
-          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
-
           return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
                 convention: .byValue, parameterName: "\(parameterName)_pointer",
-                type: .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
+                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
               ),
               SwiftParameter(
                 convention: .byValue, parameterName: "\(parameterName)_count",
-                type: .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int]))
+                type: knownTypes.int
               ),
             ], conversion: .initialize(
               type,
@@ -221,12 +223,7 @@ struct CdeclLowering {
                 SwiftParameter(
                   convention: .byValue,
                   parameterName: parameterName,
-                  type: .nominal(SwiftNominalType(
-                    nominalTypeDecl: swiftStdlibTypes.unsafePointerDecl,
-                    genericArguments: [
-                      .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int8]))
-                    ]
-                  ))
+                  type: knownTypes.unsafePointer(knownTypes.int8)
                 )
               ],
               conversion: .initialize(type, arguments: [
@@ -243,15 +240,12 @@ struct CdeclLowering {
 
       // Arbitrary nominal types are passed-in as an pointer.
       let isMutable = (convention == .inout)
-      let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
-      let parameterType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
-
       return LoweredParameter(
         cdeclParameters: [
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: parameterType
+            type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
           ),
         ],
         conversion: .pointee(.typedPointer(.placeholder, swiftType: type))
@@ -352,12 +346,10 @@ struct CdeclLowering {
     switch type {
     case .metatype:
       // 'unsafeBitcast(<result>, to: UnsafeRawPointer.self)' as  'UnsafeRawPointer'
-
-      let resultType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.unsafeRawPointer]))
       return LoweredResult(
-        cdeclResultType: resultType,
+        cdeclResultType: knownTypes.unsafeRawPointer,
         cdeclOutParameters: [],
-        conversion: .unsafeCastPointer(.placeholder, swiftType: resultType)
+        conversion: .unsafeCastPointer(.placeholder, swiftType: knownTypes.unsafeRawPointer)
       )
 
     case .nominal(let nominal):
@@ -367,8 +359,7 @@ struct CdeclLowering {
         case .unsafePointer, .unsafeMutablePointer:
           // Typed pointers are lowered to corresponding raw forms.
           let isMutable = knownType == .unsafeMutablePointer
-          let rawPointerNominal = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
-          let resultType: SwiftType = .nominal(SwiftNominalType(nominalTypeDecl: rawPointerNominal))
+          let resultType: SwiftType = isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
           return LoweredResult(
             cdeclResultType: resultType,
             cdeclOutParameters: [],
@@ -378,11 +369,10 @@ struct CdeclLowering {
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
           // Typed pointers are lowered to (raw-pointer, count) pair.
           let isMutable = knownType == .unsafeMutableBufferPointer
-          let rawPointerType = swiftStdlibTypes[isMutable ? .unsafeMutableRawPointer : .unsafeRawPointer]
           return try lowerResult(
             .tuple([
-              .nominal(SwiftNominalType(nominalTypeDecl: rawPointerType)),
-              .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.int]))
+              isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
+              knownTypes.int
             ]),
             outParameterName: outParameterName
           )
@@ -407,7 +397,7 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: outParameterName,
-            type: .nominal(SwiftNominalType(nominalTypeDecl: swiftStdlibTypes[.unsafeMutableRawPointer]))
+            type: knownTypes.unsafeMutableRawPointer
           )
         ],
         conversion: .populatePointer(name: outParameterName, assumingType: type, to: .placeholder)
@@ -431,10 +421,7 @@ struct CdeclLowering {
           let parameter = SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .nominal(SwiftNominalType(
-              nominalTypeDecl: swiftStdlibTypes.unsafeMutablePointerDecl,
-              genericArguments: [lowered.cdeclResultType]
-            ))
+            type: knownTypes.unsafeMutablePointer(lowered.cdeclResultType)
           )
           parameters.append(parameter)
           conversions.append(.populatePointer(
@@ -551,7 +538,7 @@ extension LoweredFunctionSignature {
     cName: String,
     swiftAPIName: String,
     as apiKind: SwiftAPIKind,
-    stdlibTypes: SwiftStandardLibraryTypes
+    stdlibTypes: SwiftStandardLibraryTypeDecls
   ) -> FunctionDeclSyntax {
 
     let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
