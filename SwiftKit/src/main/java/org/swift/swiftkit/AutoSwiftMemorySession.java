@@ -14,10 +14,14 @@
 
 package org.swift.swiftkit;
 
+import sun.misc.Unsafe;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.ref.Cleaner;
+import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -39,12 +43,16 @@ import java.util.concurrent.ThreadFactory;
  */
 final class AutoSwiftMemorySession implements SwiftArena {
 
-    private final Arena arena;
+    private final SwiftMemoryAllocator allocator;
     private final Cleaner cleaner;
 
     public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
+        this.allocator = SwiftMemoryAllocator.getBestAvailable();
         this.cleaner = Cleaner.create(cleanerThreadFactory);
-        this.arena = Arena.ofAuto();
+    }
+    public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory, SwiftMemoryAllocator allocator) {
+        this.allocator = allocator;
+        this.cleaner = Cleaner.create(cleanerThreadFactory);
     }
 
     @Override
@@ -62,6 +70,136 @@ final class AutoSwiftMemorySession implements SwiftArena {
 
     @Override
     public MemorySegment allocate(long byteSize, long byteAlignment) {
-        return arena.allocate(byteSize, byteAlignment);
+        SwiftAllocation allocation = allocator.allocate(byteSize, byteAlignment);
+        return MemorySegment.ofAddress(allocation.address());
+    }
+}
+
+/**
+ * Represents a native memory allocation, regardless of mechanism used to perform the allocation.
+ * This memory must be manually free-d using the same allocator that was used to create it.
+ *
+ * @param address the memory address of the allocation
+ * @param size    the size of the allocation in bytes
+ */
+record SwiftAllocation(long address, long size) {
+}
+
+interface SwiftMemoryAllocator {
+
+    static SwiftMemoryAllocator getBestAvailable() {
+        return UnsafeSwiftMemoryAllocator.get()
+                .orElseThrow(() -> new IllegalStateException("No SwiftMemoryAllocator available!"));
+    }
+
+    SwiftAllocation allocate(long bytes, long byteAlignment);
+
+    /**
+     * Frees previously allocated memory.
+     *
+     * @param allocation the allocation returned by allocate()
+     */
+    default void free(SwiftAllocation allocation) {
+        free(allocation.address());
+    }
+
+    void free(long address);
+
+    void close();
+}
+
+final class ArenaSwiftMemoryAllocator implements SwiftMemoryAllocator {
+
+    final Arena arena;
+
+    public ArenaSwiftMemoryAllocator() {
+        this.arena = Arena.ofConfined();
+    }
+
+    @Override
+    public SwiftAllocation allocate(long bytes, long byteAlignment) {
+        var segment = arena.allocate(bytes, byteAlignment);
+        return new SwiftAllocation(segment.address(), bytes);
+    }
+
+    @Override
+    public void free(long address) {
+
+    }
+
+    @Override
+    public void close() {
+        arena.close();
+    }
+}
+
+final class UnsafeSwiftMemoryAllocator implements SwiftMemoryAllocator {
+    private static final Unsafe unsafe;
+
+    static {
+        Unsafe u = null;
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            u = (Unsafe) theUnsafe.get(null);
+        } catch (Exception e) {
+            // we ignore the error because we're able to fallback to other mechanisms...
+            System.out.println("[trace][swift-java] Cannot obtain Unsafe instance, will not be able to use UnsafeSwiftMemoryAllocator. Fallback to other allocator."); // FIXME: logger infra
+        } finally {
+            unsafe = u;
+        }
+    }
+
+    private static final Optional<SwiftMemoryAllocator> INSTANCE = Optional.of(new UnsafeSwiftMemoryAllocator());
+
+    static Optional<SwiftMemoryAllocator> get() {
+        if (UnsafeSwiftMemoryAllocator.unsafe == null) {
+            return Optional.empty();
+        } else {
+            return UnsafeSwiftMemoryAllocator.INSTANCE;
+        }
+    }
+
+    /**
+     * Allocates n bytes of off-heap memory.
+     *
+     * @param bytes         number of bytes to allocate
+     * @param byteAlignment alignment
+     * @return the base memory address
+     */
+    @Override
+    public SwiftAllocation allocate(long bytes, long byteAlignment) {
+        if (bytes <= 0) {
+            throw new IllegalArgumentException("Bytes must be positive");
+        }
+        var addr = unsafe.allocateMemory(bytes);
+        return new SwiftAllocation(addr, bytes);
+    }
+
+    @Override
+    public void free(long address) {
+        if (address == 0) {
+            throw new IllegalArgumentException("Address cannot be zero");
+        }
+        unsafe.freeMemory(address);
+    }
+
+    @Override
+    public void close() {
+        // close should maybe assert that everything was freed?
+    }
+
+    /**
+     * Writes a byte value to the given address.
+     */
+    public void putByte(long address, byte value) {
+        unsafe.putByte(address, value);
+    }
+
+    /**
+     * Reads a byte value from the given address.
+     */
+    public byte getByte(long address) {
+        return unsafe.getByte(address);
     }
 }
