@@ -14,7 +14,7 @@
 
 import JavaTypes
 
-class JNISwift2JavaGenerator: Swift2JavaGenerator {
+package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
@@ -28,7 +28,7 @@ class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry = ThunkNameRegistry()
 
-  init(
+  package init(
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
@@ -51,7 +51,10 @@ class JNISwift2JavaGenerator: Swift2JavaGenerator {
 extension JNISwift2JavaGenerator {
   func writeExportedJavaSources() throws {
     var printer = CodePrinter()
+    try writeExportedJavaSources(&printer)
+  }
 
+  package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
     let filename = "\(self.swiftModuleName).java"
     logger.trace("Printing module class: \(filename)")
     printModule(&printer)
@@ -67,20 +70,27 @@ extension JNISwift2JavaGenerator {
 
   func writeSwiftThunkSources() throws {
     var printer = CodePrinter()
+    try writeSwiftThunkSources(&printer)
+  }
 
+  package func writeSwiftThunkSources(_ printer: inout CodePrinter) throws {
     let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
     let moduleFilename = "\(moduleFilenameBase).swift"
 
-    logger.trace("Printing swift module class: \(moduleFilename)")
+    do {
+      logger.trace("Printing swift module class: \(moduleFilename)")
 
-    try printGlobalSwiftThunkSources(&printer)
+      try printGlobalSwiftThunkSources(&printer)
 
-    if let outputFile = try printer.writeContents(
-      outputDirectory: self.swiftOutputDirectory,
-      javaPackagePath: nil,
-      filename: moduleFilename)
-    {
-      print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+      if let outputFile = try printer.writeContents(
+        outputDirectory: self.swiftOutputDirectory,
+        javaPackagePath: javaPackagePath,
+        filename: moduleFilename
+      ) {
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+      }
+    } catch {
+      logger.warning("Failed to write to Swift thunks: \(moduleFilename)")
     }
   }
 }
@@ -125,10 +135,9 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       let downcallParameters = zip(decl.functionSignature.parameters, translatedParameters).map { originalParam, translatedParam in
         let label = originalParam.argumentLabel ?? originalParam.parameterName ?? ""
-        return "\(label)\(!label.isEmpty ? ": " : "")\(translatedParam.0)"
+        return "\(label)\(!label.isEmpty ? ": " : "")\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
       }
       let functionDowncall = "\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
-      printer.print("\(functionDowncall)")
 
       if swiftReturnType.isVoid {
         printer.print(functionDowncall)
