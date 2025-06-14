@@ -32,13 +32,9 @@ final class MethodThunkTests {
 
   @Test("Thunk overloads: globalFunc(a: Int32, b: Int64) & globalFunc(i32: Int32, l: Int64)")
   func thunk_overloads() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "FakeModule"
-    )
-    st.log.logLevel = .error
-
     try assertOutput(
-      st, input: input, .swift,
+      input: input, .ffm, .swift,
+      swiftModuleName: "FakeModule",
       detectChunkByInitialLines: 1,
       expectedChunks:
       [
