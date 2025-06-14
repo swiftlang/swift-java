@@ -14,6 +14,7 @@
 
 import JExtractSwiftLib
 import Testing
+import JavaKitConfigurationShared
 import struct Foundation.CharacterSet
 
 enum RenderKind {
@@ -23,9 +24,10 @@ enum RenderKind {
 
 func assertOutput(
   dump: Bool = false,
-  _ translator: Swift2JavaTranslator,
   input: String,
+  _ mode: GenerationMode,
   _ renderKind: RenderKind,
+  swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines: Int = 4,
   expectedChunks: [String],
   fileID: String = #fileID,
@@ -33,22 +35,42 @@ func assertOutput(
   line: Int = #line,
   column: Int = #column
 ) throws {
-  try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
+  let translator = Swift2JavaTranslator(swiftModuleName: swiftModuleName)
 
-  let generator = FFMSwift2JavaGenerator(
-    translator: translator,
-    javaPackage: "com.example.swift",
-    swiftOutputDirectory: "/fake",
-    javaOutputDirectory: "/fake"
-  )
+  try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
 
   let output: String
   var printer: CodePrinter = CodePrinter(mode: .accumulateAll)
-  switch renderKind {
-  case .swift:
-    try generator.writeSwiftThunkSources(printer: &printer)
-  case .java:
-    try generator.writeExportedJavaSources(printer: &printer)
+  switch mode {
+  case .ffm:
+    let generator = FFMSwift2JavaGenerator(
+      translator: translator,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    switch renderKind {
+    case .swift:
+      try generator.writeSwiftThunkSources(printer: &printer)
+    case .java:
+      try generator.writeExportedJavaSources(printer: &printer)
+    }
+
+  case .jni:
+    let generator = JNISwift2JavaGenerator(
+      translator: translator,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    switch renderKind {
+    case .swift:
+      try generator.writeSwiftThunkSources(&printer)
+    case .java:
+      try generator.writeExportedJavaSources(&printer)
+    }
   }
   output = printer.finalize()
 
