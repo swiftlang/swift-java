@@ -234,20 +234,20 @@ extension SwiftType {
   }
 }
 
-extension KnownStandardLibraryType {
+extension SwiftStandardLibraryTypeKind {
   var javaType: JavaType? {
     switch self {
     case .bool: .boolean
-    case .int, .uint: .long // TODO: Handle 32-bit or 64-bit
-    case .int8, .uint8: .byte
+    case .int: .long // TODO: Handle 32-bit or 64-bit
+    case .int8: .byte
     case .uint16: .char
     case .int16: .short
-    case .int32, .uint32: .int
-    case .int64, .uint64: .long
+    case .int32: .int
+    case .int64: .long
     case .float: .float
     case .double: .double
     case .void: .void
-    case .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string: nil
+    case .uint, .uint8, .uint32, .uint64, .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string: nil
     }
   }
 }
