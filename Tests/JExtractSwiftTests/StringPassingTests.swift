@@ -25,13 +25,9 @@ final class StringPassingTests {
 
   @Test("Import: public func writeString(string: String) -> Int")
   func method_helloWorld() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
-    st.log.logLevel = .trace
-
     try assertOutput(
-      st, input: class_interfaceFile, .java,
+      input: class_interfaceFile, .ffm, .java,
+      swiftModuleName: "__FakeModule",
       expectedChunks: [
         """
         /**

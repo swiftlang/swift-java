@@ -41,11 +41,7 @@ struct ClassPrintingTests {
 
   @Test("Import: class layout")
   func class_layout() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
-
-    try assertOutput(st, input: class_interfaceFile, .java, expectedChunks: [
+    try assertOutput(input: class_interfaceFile, .ffm, .java, swiftModuleName: "__FakeModule", expectedChunks: [
       """
       public static final SwiftAnyType TYPE_METADATA =
           new SwiftAnyType(SwiftKit.swiftjava.getType("__FakeModule", "MySwiftClass"));

@@ -60,7 +60,6 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     self.swiftDecl.signatureString
   }
 
-
   var parentType: SwiftType? {
     guard let selfParameter = functionSignature.selfParameter else {
       return nil
