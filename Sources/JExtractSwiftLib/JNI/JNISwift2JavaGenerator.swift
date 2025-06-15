@@ -134,8 +134,8 @@ extension JNISwift2JavaGenerator {
       """
     ) { printer in
       let downcallParameters = zip(decl.functionSignature.parameters, translatedParameters).map { originalParam, translatedParam in
-        let label = originalParam.argumentLabel ?? originalParam.parameterName ?? ""
-        return "\(label)\(!label.isEmpty ? ": " : "")\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
+        let label = originalParam.argumentLabel.map { "\($0): "} ?? ""
+        return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
       }
       let functionDowncall = "\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
 
@@ -247,7 +247,8 @@ extension SwiftStandardLibraryTypeKind {
     case .float: .float
     case .double: .double
     case .void: .void
-    case .uint, .uint8, .uint32, .uint64, .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string: nil
+    case .string: .javaLangString
+    case .uint, .uint8, .uint32, .uint64, .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer: nil
     }
   }
 }
