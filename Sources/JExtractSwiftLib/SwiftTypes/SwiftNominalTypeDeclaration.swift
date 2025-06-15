@@ -52,7 +52,7 @@ package class SwiftNominalTypeDeclaration {
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
-  lazy var knownStandardLibraryType: KnownStandardLibraryType? = {
+  lazy var knownStandardLibraryType: SwiftStandardLibraryTypeKind? = {
     self.computeKnownStandardLibraryType()
   }()
 
@@ -80,12 +80,12 @@ package class SwiftNominalTypeDeclaration {
 
   /// Determine the known standard library type for this nominal type
   /// declaration.
-  private func computeKnownStandardLibraryType() -> KnownStandardLibraryType? {
+  private func computeKnownStandardLibraryType() -> SwiftStandardLibraryTypeKind? {
     if parent != nil || moduleName != "Swift" {
       return nil
     }
 
-    return KnownStandardLibraryType(typeNameInSwiftModule: name)
+    return SwiftStandardLibraryTypeKind(typeNameInSwiftModule: name)
   }
 
   package var qualifiedName: String {
