@@ -12,18 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJavaLib
+import JavaKitShared
+import JavaRuntime
 import JavaKit
-import JavaMath
 
-let jvm = try JavaVirtualMachine.shared()
+@JavaClass("java.lang.ClassLoader")
+public struct ClassLoader {
+  @JavaMethod
+  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
+}
 
-do {
-  let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
-  for prime in sieveClass.findPrimes(100)! {
-    print("Found prime: \(prime.intValue())")
-  }
-
-  _ = try JavaClass<RoundingMode>().HALF_UP // can import a Java enum value
-} catch {
-  print("Failure: \(error)")
+extension JavaClass<ClassLoader> {
+  @JavaStaticMethod
+  public func getSystemClassLoader() -> ClassLoader?
 }

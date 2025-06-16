@@ -55,7 +55,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     var arguments: [String] = [
       "--input-swift", sourceDir,
-      "--module-name", sourceModule.name,
+      "--swift-module", sourceModule.name,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...
