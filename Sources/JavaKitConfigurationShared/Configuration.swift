@@ -46,11 +46,7 @@ public struct Configuration: Codable {
   public var classpath: String? = nil
 
   public var classpathEntries: [String] {
-    guard let classpath else {
-      return []
-    }
-
-    return classpath.split(separator: ":").map(String.init)
+    return classpath?.split(separator: ":").map(String.init) ?? []
   }
 
   /// The Java classes that should be translated to Swift. The keys are
@@ -79,6 +75,12 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
   public var groupID: String
   public var artifactID: String
   public var version: String
+
+  public init(groupID: String, artifactID: String, version: String) {
+    self.groupID = groupID
+    self.artifactID = artifactID
+    self.version = version
+  }
 
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()

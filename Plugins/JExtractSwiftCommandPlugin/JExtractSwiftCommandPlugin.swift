@@ -82,7 +82,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     ]
     // arguments.append(sourceDir) // TODO: we could do this shape maybe? to have the dirs last?
     if let package = configuration?.javaPackage, !package.isEmpty {
-      ["--java-package", package]
+      arguments += ["--java-package", package]
     }
 
     return arguments
