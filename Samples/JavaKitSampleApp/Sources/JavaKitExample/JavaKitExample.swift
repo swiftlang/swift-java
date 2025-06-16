@@ -27,7 +27,10 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let answer = self.sayHelloBack(i + j)
     print("Swift got back \(answer) from Java")
 
+#if !canImport(Android)
+    // no class variables in Kotlin
     print("We expect the above value to be the initial value, \(self.javaClass.initialValue)")
+#endif
 
     print("Updating Java field value to something different")
     self.value = 2.71828
