@@ -180,7 +180,12 @@ extension SwiftType {
       // Translate the generic arguments.
       let genericArgs = try identifierType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          try SwiftType(argument.argument, symbolTable: symbolTable)
+          switch argument.argument {
+          case .type(let argumentTy):
+            try SwiftType(argumentTy, symbolTable: symbolTable)
+          default:
+            throw TypeTranslationError.unimplementedType(type)
+          }
         }
       }
 
@@ -210,7 +215,12 @@ extension SwiftType {
       // Translate the generic arguments.
       let genericArgs = try memberType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
-          try SwiftType(argument.argument, symbolTable: symbolTable)
+          switch argument.argument {
+          case .type(let argumentTy):
+            try SwiftType(argumentTy, symbolTable: symbolTable)
+          default:
+            throw TypeTranslationError.unimplementedType(type)
+          }
         }
       }
 
