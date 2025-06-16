@@ -23,6 +23,10 @@ struct JNIModuleTests {
     public func otherPrimitives(b: Bool, f: Float, d: Double)
   """
 
+  let globalMethodWithString = """
+    public func copy(_ string: String) -> String
+  """
+
   @Test
   func generatesModuleJavaClass() throws {
     let input = "public func helloWorld()"
@@ -104,6 +108,45 @@ struct JNIModuleTests {
           SwiftModule.otherPrimitives(b: Bool(fromJNI: b, in: environment!), f: Float(fromJNI: f, in: environment!), d: Double(fromJNI: d, in: environment!))
         }
         """
+      ]
+    )
+  }
+
+  @Test
+  func globalMethodWithString_javaBindings() throws {
+    try assertOutput(
+      input: globalMethodWithString,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public func copy(_ string: String) -> String
+          * }
+          */
+        public static native java.lang.String copy(java.lang.String string);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func globalMethodWithString_swiftThunks() throws {
+    try assertOutput(
+      input: globalMethodWithString,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+          """
+          @_cdecl("Java_com_example_swift_SwiftModule_copy")
+          func swiftjava_SwiftModule_copy__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
+            let result = SwiftModule.copy(String(fromJNI: string, in: environment!))
+            return result.getJNIValue(in: environment)
+          }
+          """,
       ]
     )
   }
