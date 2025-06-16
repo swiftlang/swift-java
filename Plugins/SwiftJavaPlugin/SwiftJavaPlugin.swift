@@ -88,24 +88,13 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     var arguments: [String] = []
-    arguments += argumentsModuleName(sourceModule: sourceModule)
+    arguments += argumentsSwiftModuleDeprecated(sourceModule: sourceModule)
     arguments += argumentsOutputDirectory(context: context)
-    
-    arguments += dependentConfigFiles.flatMap { moduleAndConfigFile in
-      let (moduleName, configFile) = moduleAndConfigFile
-      return [
-        "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))"
-      ]
-    }
+    arguments += argumentsDependedOnConfigs(dependentConfigFiles)
     arguments.append(configFile.path(percentEncoded: false))
 
-//    guard let classes = config.classes else {
-//      log("Config at \(configFile) did not have 'classes' configured, skipping java2swift step.")
-//      return []
-//    }
     let classes = config.classes ?? [:]
-    print("Classes to wrap: \(classes.map(\.key))")
+    print("[swift-java-plugin] Classes to wrap (\(classes.count)): \(classes.map(\.key))")
 
     /// Determine the set of Swift files that will be emitted by the Java2Swift tool.
     // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
@@ -165,12 +154,14 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .buildCommand(
           displayName: displayName,
           executable: executable,
-          arguments: [
-            // FIXME: change to 'resolve' subcommand
-            "--fetch", configFile.path(percentEncoded: false),
-            "--swift-module", sourceModule.name,
-            "--output-directory", outputDirectory(context: context, generated: false).path(percentEncoded: false)
-          ],
+          arguments: ["resolve"]
+            + argumentsOutputDirectory(context: context, generated: false)
+            + argumentsSwiftModule(sourceModule: sourceModule)
+            // + [
+            //  // explicitly provide config path
+            //   configFile.path(percentEncoded: false)
+            // ]
+            ,
           environment: [:],
           inputFiles: [configFile],
           outputFiles: fetchDependenciesOutputFiles
@@ -192,8 +183,10 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           outputFiles: outputSwiftFiles
         )
       ]
-    } else {
-      log("No Swift output files, skip wrapping")
+    }
+
+    if commands.isEmpty {
+      log("No swift-java commands for module '\(sourceModule.name)'")
     }
 
     return commands
@@ -201,19 +194,38 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 }
 
 extension SwiftJavaBuildToolPlugin {
-  func argumentsModuleName(sourceModule: Target) -> [String] {
+  func argumentsSwiftModule(sourceModule: Target) -> [String] {
     return [
       "--swift-module", sourceModule.name
     ]
   }
-  
+
+  // FIXME: remove this and the deprecated property inside SwiftJava, this is a workaround
+  //        since we cannot have the same option in common options and in the top level
+  //        command from which we get into sub commands. The top command will NOT have this option.
+  func argumentsSwiftModuleDeprecated(sourceModule: Target) -> [String] {
+    return [
+      "--swift-module-deprecated", sourceModule.name
+    ]
+  }
+
   func argumentsOutputDirectory(context: PluginContext, generated: Bool = true) -> [String] {
     return [
       "--output-directory",
       outputDirectory(context: context, generated: generated).path(percentEncoded: false)
     ]
   }
-  
+
+  func argumentsDependedOnConfigs(_ dependentConfigFiles: [(String, URL)]) -> [String] {
+    dependentConfigFiles.flatMap { moduleAndConfigFile in
+      let (moduleName, configFile) = moduleAndConfigFile
+      return [
+        "--depends-on",
+        "\(moduleName)=\(configFile.path(percentEncoded: false))"
+      ]
+    }
+  }
+
   func outputDirectory(context: PluginContext, generated: Bool = true) -> URL {
     let dir = context.pluginWorkDirectoryURL
     if generated {

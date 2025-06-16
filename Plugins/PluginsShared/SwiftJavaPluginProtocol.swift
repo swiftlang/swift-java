@@ -21,8 +21,6 @@ protocol SwiftJavaPluginProtocol {
 
 extension SwiftJavaPluginProtocol {
   func log(_ message: @autoclosure () -> String, terminator: String = "\n") {
-//    if self.verbose {
-      print("[\(pluginName)] \(message())", terminator: terminator)
-//    }
+    print("[\(pluginName)] \(message())", terminator: terminator)
   }
 }

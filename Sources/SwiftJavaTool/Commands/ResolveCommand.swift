@@ -24,12 +24,13 @@ import JavaKitShared
 import _Subprocess
 
 extension SwiftJava {
-  struct ResolveCommand: SwiftJavaBaseAsyncParsableCommand {
+  struct ResolveCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
     static let configuration = CommandConfiguration(
       commandName: "resolve",
       abstract: "Resolve dependencies and write the resulting swift-java.classpath file")
 
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
+    @OptionGroup var commonJVMOptions: SwiftJava.CommonJVMOptions
 
     @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
     var swiftModule: String
@@ -38,30 +39,78 @@ extension SwiftJava {
       swiftModule
     }
 
+    @Argument(
+      help: """
+            Additional configuration paths (swift-java.config) files, with defined 'dependencies', \
+            or dependency descriptors formatted as 'groupID:artifactID:version' separated by ','. \
+            May be empty, in which case the target Swift module's configuration's 'dependencies' will be used.
+            """
+    )
+    var input: String?
   }
 }
 
 extension SwiftJava.ResolveCommand {
-  mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    fatalError("NOT IMPLEMENTED: resolve")
-  }
-}
-
-
-
-extension SwiftJava {
   var SwiftJavaClasspathPrefix: String { "SWIFT_JAVA_CLASSPATH:" }
-
   var printRuntimeClasspathTaskName: String { "printRuntimeClasspath" }
 
-  func fetchDependencies(swiftModule: String,
-                         dependencies: [JavaDependencyDescriptor]) async throws -> ResolvedDependencyClasspath {
+  mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
+    // Form a class path from all of our input sources:
+    let classpathOptionEntries: [String] = self.classpathEntries
+    let classpathFromEnv = self.classpathEnvEntries
+    let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
+    print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
+
+    var classpathEntries: [String] = classpathFromConfig
+
+    let classPathFilesSearchDirectory = self.effectiveSwiftModuleURL.absoluteString
+    print("[debug][swift-java] Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
+    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(in: classPathFilesSearchDirectory)
+
+    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
+    classpathEntries += swiftJavaCachedModuleClasspath
+
+    if logLevel >= .debug {
+      let classpathString = classpathEntries.joined(separator: ":")
+      print("[debug][swift-java] Initialize JVM with classpath: \(classpathString)")
+    }
+    let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
+
+    var dependenciesToResolve: [JavaDependencyDescriptor] = []
+    if let input, let inputDependencies = parseDependencyDescriptor(input) {
+      dependenciesToResolve.append(inputDependencies)
+    }
+    if let dependencies = config.dependencies {
+      dependenciesToResolve += dependencies
+    }
+
+    if dependenciesToResolve.isEmpty {
+      print("[warn][swift-java] Attempted to 'resolve' dependencies but no dependencies specified in swift-java.config or command input!")
+      return
+    }
+
+    let dependenciesClasspath =
+      try await resolveDependencies(swiftModule: swiftModule, dependencies: dependenciesToResolve)
+
+    // FIXME: disentangle the output directory from SwiftJava and then make it a required option in this Command
+    guard let outputDirectory = self.commonOptions.outputDirectory else {
+      fatalError("error: Must specify --output-directory in 'resolve' mode! This option will become explicitly required")
+    }
+
+    try writeSwiftJavaClasspathFile(
+      swiftModule: swiftModule,
+      outputDirectory: outputDirectory,
+      resolvedClasspath: dependenciesClasspath)
+  }
+
+  func resolveDependencies(
+    swiftModule: String, dependencies: [JavaDependencyDescriptor]
+  ) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
 
     let dependenciesClasspath = await resolveDependencies(dependencies: dependencies)
     let classpathEntries = dependenciesClasspath.split(separator: ":")
-
 
     print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ", terminator: "")
     print("done.".green)
@@ -153,9 +202,9 @@ extension SwiftJava {
     try settingsGradleText.write(to: settingsGradle, atomically: true, encoding: .utf8)
   }
 
-  mutating func writeFetchedDependenciesClasspath(
+  mutating func writeSwiftJavaClasspathFile(
     swiftModule: String,
-    cacheDir: String,
+    outputDirectory: String,
     resolvedClasspath: ResolvedDependencyClasspath) throws {
     // Convert the artifact name to a module name
     // e.g. reactive-streams -> ReactiveStreams
@@ -163,13 +212,14 @@ extension SwiftJava {
     // The file contents are just plain
     let contents = resolvedClasspath.classpath
 
-    print("[debug][swift-java] Resolved dependency: \(commonJVMOptions.classpath)")
+    let filename = "\(swiftModule).swift-java.classpath"
+    print("[debug][swift-java] Write resolved dependencies to: \(outputDirectory)/\(filename)")
 
     // Write the file
     try writeContents(
       contents,
-      outputDirectoryOverride: URL(fileURLWithPath: cacheDir),
-      to: "\(swiftModule).swift-java.classpath",
+      outputDirectory: URL(fileURLWithPath: outputDirectory),
+      to: filename,
       description: "swift-java.classpath file for module \(swiftModule)"
     )
   }
@@ -184,8 +234,6 @@ extension SwiftJava {
     var searchDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
     
     while searchDir.pathComponents.count > 1 {
-      print("[COPY] Search dir: \(searchDir)")
-      
       let gradlewFile = searchDir.appendingPathComponent("gradlew")
       let gradlewExists = FileManager.default.fileExists(atPath: gradlewFile.path)
       guard gradlewExists else {

@@ -85,7 +85,7 @@ let javaIncludePath = "\(javaHome)/include"
 let package = Package(
   name: "SwiftJava",
   platforms: [
-    .macOS(.v10_15)
+    .macOS(.v13)
   ],
   products: [
     // ==== JavaKit (i.e. calling Java directly Swift utilities)
@@ -461,6 +461,15 @@ let package = Package(
     .testTarget(
       name: "SwiftJavaTests",
       dependencies: ["SwiftJavaLib"],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+
+    .testTarget(
+      name: "JavaKitConfigurationSharedTests",
+      dependencies: ["JavaKitConfigurationShared"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
