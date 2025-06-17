@@ -214,7 +214,7 @@ extension SwiftFunctionSignature {
         effectSpecifiers = Self.effectSpecifiers(from: getter)
       }
     case .accessors(let accessors):
-      if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
+      if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
         effectSpecifiers = Self.effectSpecifiers(from: getter)
       }
     default:
