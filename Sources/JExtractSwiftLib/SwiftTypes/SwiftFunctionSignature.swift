@@ -21,11 +21,18 @@ public struct SwiftFunctionSignature: Equatable {
   var selfParameter: SwiftSelfParameter?
   var parameters: [SwiftParameter]
   var result: SwiftResult
+  var effectSpecifiers: [SwiftEffectSpecifier]
 
-  init(selfParameter: SwiftSelfParameter? = nil, parameters: [SwiftParameter], result: SwiftResult) {
+  init(
+    selfParameter: SwiftSelfParameter? = nil,
+    parameters: [SwiftParameter],
+    result: SwiftResult,
+    effectSpecifiers: [SwiftEffectSpecifier]
+  ) {
     self.selfParameter = selfParameter
     self.parameters = parameters
     self.result = result
+    self.effectSpecifiers = effectSpecifiers
   }
 }
 
@@ -68,13 +75,16 @@ extension SwiftFunctionSignature {
       throw SwiftFunctionTranslationError.generic(generics)
     }
 
+    let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
+      node.signature,
+      symbolTable: symbolTable
+    )
+
     self.init(
       selfParameter: .initializer(enclosingType),
-      parameters: try Self.translateFunctionSignature(
-        node.signature,
-        symbolTable: symbolTable
-      ),
-      result: SwiftResult(convention: .direct, type: enclosingType)
+      parameters: parameters,
+      result: SwiftResult(convention: .direct, type: enclosingType),
+      effectSpecifiers: effectSpecifiers
     )
   }
 
@@ -120,7 +130,7 @@ extension SwiftFunctionSignature {
     }
 
     // Translate the parameters.
-    let parameters = try Self.translateFunctionSignature(
+    let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
       node.signature,
       symbolTable: symbolTable
     )
@@ -136,26 +146,28 @@ extension SwiftFunctionSignature {
       result = .void
     }
 
-    self.init(selfParameter: selfParameter, parameters: parameters, result: result)
+    self.init(selfParameter: selfParameter, parameters: parameters, result: result, effectSpecifiers: effectSpecifiers)
   }
 
   /// Translate the function signature, returning the list of translated
-  /// parameters.
+  /// parameters and effect specifiers.
   static func translateFunctionSignature(
     _ signature: FunctionSignatureSyntax,
     symbolTable: SwiftSymbolTable
-  ) throws -> [SwiftParameter] {
-    // FIXME: Prohibit effects for now.
-    if let throwsClause = signature.effectSpecifiers?.throwsClause {
-      throw SwiftFunctionTranslationError.throws(throwsClause)
+  ) throws -> ([SwiftParameter], [SwiftEffectSpecifier]) {
+    var effectSpecifiers = [SwiftEffectSpecifier]()
+    if signature.effectSpecifiers?.throwsClause != nil {
+      effectSpecifiers.append(.throws)
     }
     if let asyncSpecifier = signature.effectSpecifiers?.asyncSpecifier {
       throw SwiftFunctionTranslationError.async(asyncSpecifier)
     }
 
-    return try signature.parameterClause.parameters.map { param in
+    let parameters = try signature.parameterClause.parameters.map { param in
       try SwiftParameter(param, symbolTable: symbolTable)
     }
+
+    return (parameters, effectSpecifiers)
   }
 
   init(_ varNode: VariableDeclSyntax, isSet: Bool, enclosingType: SwiftType?, symbolTable: SwiftSymbolTable) throws {
@@ -195,6 +207,22 @@ extension SwiftFunctionSignature {
     }
     let valueType = try SwiftType(varTypeNode, symbolTable: symbolTable)
 
+    var effectSpecifiers: [SwiftEffectSpecifier]? = nil
+    switch binding.accessorBlock?.accessors {
+    case .getter(let getter):
+      if let getter = getter.as(AccessorDeclSyntax.self) {
+        effectSpecifiers = Self.effectSpecifiers(from: getter)
+      }
+    case .accessors(let accessors):
+      if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+        effectSpecifiers = Self.effectSpecifiers(from: getter)
+      }
+    default:
+      break
+    }
+
+    self.effectSpecifiers = effectSpecifiers ?? []
+
     if isSet {
       self.parameters = [SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType)]
       self.result = .void
@@ -202,6 +230,14 @@ extension SwiftFunctionSignature {
       self.parameters = []
       self.result = .init(convention: .direct, type: valueType)
     }
+  }
+
+  private static func effectSpecifiers(from decl: AccessorDeclSyntax) -> [SwiftEffectSpecifier] {
+    var effectSpecifiers = [SwiftEffectSpecifier]()
+    if decl.effectSpecifiers?.throwsClause != nil {
+      effectSpecifiers.append(.throws)
+    }
+    return effectSpecifiers
   }
 }
 

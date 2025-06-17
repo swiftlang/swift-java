@@ -98,6 +98,10 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     return prefix + context + self.name
   }
 
+  var isThrowing: Bool {
+    self.functionSignature.effectSpecifiers.contains(.throws)
+  }
+
   init(
     module: String,
     swiftDecl: any DeclSyntaxProtocol,

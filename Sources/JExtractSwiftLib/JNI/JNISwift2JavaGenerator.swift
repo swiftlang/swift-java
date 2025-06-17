@@ -124,7 +124,6 @@ extension JNISwift2JavaGenerator {
       "thisClass: jclass"
     ] + translatedParameters.map { "\($0.0): \($0.1.jniTypeName)"}
     let swiftReturnType = decl.functionSignature.result.type
-
     let thunkReturnType = !swiftReturnType.isVoid ? " -> \(swiftReturnType.javaType.jniTypeName)" : ""
 
     printer.printBraceBlock(
@@ -137,17 +136,32 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): "} ?? ""
         return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
       }
-      let functionDowncall = "\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
+      let tryClause: String = decl.isThrowing ? "try " : ""
+      let functionDowncall = "\(tryClause)\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
 
-      if swiftReturnType.isVoid {
-        printer.print(functionDowncall)
+      let innerBody = if swiftReturnType.isVoid {
+        functionDowncall
       } else {
+        """
+        let result = \(functionDowncall)
+        return result.getJNIValue(in: environment)")
+        """
+      }
+
+      if decl.isThrowing {
+        let dummyReturn = !swiftReturnType.isVoid ? "return \(swiftReturnType).jniPlaceholderValue" : ""
         printer.print(
           """
-          let result = \(functionDowncall)
-          return result.getJNIValue(in: environment)")
+          do {
+            \(innerBody)
+          } catch {
+            environment.throwAsException(error)
+            \(dummyReturn)
+          }
           """
         )
+      } else {
+        printer.print(innerBody)
       }
     }
   }
@@ -197,6 +211,7 @@ extension JNISwift2JavaGenerator {
     let params = decl.functionSignature.parameters.enumerated().map { idx, param in
       "\(param.type.javaType) \(param.parameterName ?? "arg\(idx))")"
     }
+    let throwsClause = decl.isThrowing ? " throws Exception" : ""
 
     printer.print(
       """
@@ -208,7 +223,7 @@ extension JNISwift2JavaGenerator {
       */
       """
     )
-    printer.print("public static native \(returnType) \(decl.name)(\(params.joined(separator: ", ")));")
+    printer.print("public static native \(returnType) \(decl.name)(\(params.joined(separator: ", ")))\(throwsClause);")
   }
 }
 
