@@ -22,6 +22,9 @@ import SwiftJavaLib
 import JavaKitConfigurationShared
 import JavaKitShared
 import _Subprocess
+import System
+
+typealias Configuration = JavaKitConfigurationShared.Configuration
 
 extension SwiftJava {
   struct ResolveCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
@@ -137,37 +140,39 @@ extension SwiftJava.ResolveCommand {
 
     try! printGradleProject(directory: resolverDir, dependencies: dependencies)
 
-    let process = try! await Subprocess.run(
-      .at(.init(resolverDir.appendingPathComponent("gradlew").path)),
-      arguments: [
-        "--no-daemon",
-        "--rerun-tasks",
-        "\(printRuntimeClasspathTaskName)",
-      ],
-      workingDirectory: .init(platformString: resolverDir.path)
-    )
+    if #available(macOS 15, *) {
+      let process = try! await _Subprocess.run(
+        .path(FilePath(resolverDir.appendingPathComponent("gradlew").path)),
+        arguments: [
+          "--no-daemon",
+          "--rerun-tasks",
+          "\(printRuntimeClasspathTaskName)",
+        ],
+        workingDirectory: FilePath(resolverDir.path),
+        // TODO: we could move to stream processing the outputs
+        output: .string(limit: Int.max, encoding: UTF8.self), // Don't limit output, we know it will be reasonable size
+        error: .string(limit: Int.max, encoding: UTF8.self) // Don't limit output, we know it will be reasonable size
+      )
 
-    let outString = String(
-      data: process.standardOutput,
-      encoding: .utf8
-    )
-    let errString = String(
-      data: process.standardError,
-      encoding: .utf8
-    )
+      let outString = process.standardOutput ?? ""
+      let errString = process.standardError ?? ""
 
-    let classpathOutput: String
-    if let found = outString?.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
-      classpathOutput = String(found)
-    } else if let found = errString?.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
-      classpathOutput = String(found)
+      let classpathOutput: String
+      if let found = outString.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
+        classpathOutput = String(found)
+      } else if let found = errString.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
+        classpathOutput = String(found)
+      } else {
+        let suggestDisablingSandbox = "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
+        fatalError("Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n" +
+          "Output was:<<<\(outString ?? "<empty>")>>>; Err was:<<<\(errString ?? "<empty>")>>>")
+      }
+
+      return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))
     } else {
-      let suggestDisablingSandbox = "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
-      fatalError("Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n" +
-        "Output was:<<<\(outString ?? "<empty>")>>>; Err was:<<<\(errString ?? "<empty>")>>>")
+      // Subprocess is unavailable
+      fatalError("Subprocess is unavailable yet required to execute `gradlew` subprocess. Please update to macOS 15+")
     }
-
-    return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))
   }
 
   func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor]) throws {

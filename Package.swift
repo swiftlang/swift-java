@@ -195,6 +195,10 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
 
+//    // FIXME: swift-subprocess stopped supporting 6.0 when it moved into a package;
+//    //        we'll need to drop 6.0 as well, but currently blocked on doing so by swiftpm plugin pending design questions
+//    .package(url: "https://github.com/swiftlang/swift-subprocess.git", revision: "de15b67f7871c8a039ef7f4813eb39a8878f61a6"),
+
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
@@ -363,6 +367,7 @@ let package = Package(
         "JavaTypes",
         "JavaKitShared",
         "JavaKitConfigurationShared",
+        // .product(name: "Subprocess", package: "swift-subprocess")
         "_Subprocess", // using process spawning
       ],
       swiftSettings: [
@@ -489,7 +494,7 @@ let package = Package(
     
     // Experimental Foundation Subprocess Copy
     .target(
-      name: "_CShims",
+      name: "_SubprocessCShims",
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ]
@@ -497,7 +502,7 @@ let package = Package(
     .target(
       name: "_Subprocess",
       dependencies: [
-        "_CShims",
+        "_SubprocessCShims",
         .product(name: "SystemPackage", package: "swift-system"),
       ],
       swiftSettings: [

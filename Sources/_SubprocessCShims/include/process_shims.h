@@ -2,26 +2,27 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
-// Licensed under Apache License v2.0
+// Copyright (c) 2025 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See LICENSE.txt for license information
-// See CONTRIBUTORS.txt for the list of Swift.org project authors
-//
-// SPDX-License-Identifier: Apache-2.0
+// See https://swift.org/LICENSE.txt for license information
 //
 //===----------------------------------------------------------------------===//
 
 #ifndef process_shims_h
 #define process_shims_h
 
-#include "_CShimsTargetConditionals.h"
+#include "target_conditionals.h"
 
 #if !TARGET_OS_WINDOWS
 #include <unistd.h>
 
 #if _POSIX_SPAWN
 #include <spawn.h>
+#endif
+
+#if __has_include(<mach/vm_page_size.h>)
+vm_size_t _subprocess_vm_size(void);
 #endif
 
 #if TARGET_OS_MAC
@@ -60,6 +61,10 @@ int _was_process_signaled(int status);
 int _get_signal_code(int status);
 int _was_process_suspended(int status);
 
+void _subprocess_lock_environ(void);
+void _subprocess_unlock_environ(void);
+char * _Nullable * _Nullable _subprocess_get_environ(void);
+
 #if TARGET_OS_LINUX
 int _shims_snprintf(
     char * _Nonnull str,
@@ -71,5 +76,16 @@ int _shims_snprintf(
 #endif
 
 #endif // !TARGET_OS_WINDOWS
+
+#if TARGET_OS_WINDOWS
+
+#ifndef _WINDEF_
+typedef unsigned long DWORD;
+typedef int BOOL;
+#endif
+
+BOOL _subprocess_windows_send_vm_close(DWORD pid);
+
+#endif
 
 #endif /* process_shims_h */
