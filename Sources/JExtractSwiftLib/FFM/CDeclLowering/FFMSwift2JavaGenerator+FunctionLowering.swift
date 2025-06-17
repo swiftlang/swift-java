@@ -109,6 +109,11 @@ struct CdeclLowering {
       )
     }
 
+    for effect in signature.effectSpecifiers {
+      // Prohibit any effects for now.
+      throw LoweringError.effectNotSupported(effect)
+    }
+
     // Lower the result.
     let loweredResult = try lowerResult(signature.result.type)
 
@@ -642,4 +647,5 @@ extension LoweredFunctionSignature {
 enum LoweringError: Error {
   case inoutNotSupported(SwiftType)
   case unhandledType(SwiftType)
+  case effectNotSupported(SwiftEffectSpecifier)
 }
