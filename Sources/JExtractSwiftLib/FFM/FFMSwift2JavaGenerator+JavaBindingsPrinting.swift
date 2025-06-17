@@ -365,7 +365,7 @@ extension FFMSwift2JavaGenerator {
         "arena$"
       }
 
-      let varName = "_result" + outParameter.name
+      let varName = outParameter.name.isEmpty ? "_result" : "_result_" + outParameter.name
 
       printer.print(
         "MemorySegment \(varName) = \(arena).allocate(\(memoryLayout));"
@@ -419,32 +419,35 @@ extension JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {
-    case .pass, .swiftValueSelfSegment, .construct, .cast, .call, .method:
+    case .placeholder, .constant, .readOutParameter:
       return false
     case .constructSwiftValue:
       return true
+
+    case .call(let inner, _, _), .cast(let inner, _), .construct(let inner, _),
+        .method(let inner, _, _, _), .swiftValueSelfSegment(let inner):
+      return inner.requiresSwiftArena
+
+    case .commaSeparated(let list):
+      return list.contains(where: { $0.requiresSwiftArena })
     }
   }
 
   /// Whether the conversion uses temporary Arena.
   var requiresTemporaryArena: Bool {
     switch self {
-    case .pass, .swiftValueSelfSegment, .construct, .constructSwiftValue, .cast:
+    case .placeholder, .constant:
       return false
-    case .call(_, let withArena), .method(_, _, let withArena):
-      return withArena
-    }
-  }
-
-  /// Whether if the result evaluation is trivial.
-  ///
-  /// If this is false, it's advised to store it to a variable if it's used multiple times
-  var isTrivial: Bool {
-    switch self {
-    case .pass, .swiftValueSelfSegment:
+    case .readOutParameter:
       return true
-    case .cast, .construct, .constructSwiftValue, .call, .method:
-      return false
+    case .cast(let inner, _), .construct(let inner, _), .constructSwiftValue(let inner, _), .swiftValueSelfSegment(let inner):
+      return inner.requiresSwiftArena
+    case .call(let inner, _, let withArena):
+      return withArena || inner.requiresTemporaryArena
+    case .method(let inner, _, let args, let withArena):
+      return withArena || inner.requiresTemporaryArena || args.contains(where: { $0.requiresTemporaryArena })
+    case .commaSeparated(let list):
+      return list.contains(where: { $0.requiresTemporaryArena })
     }
   }
 
@@ -453,28 +456,43 @@ extension JavaConversionStep {
     // NOTE: 'printer' is used if the conversion wants to cause side-effects.
     // E.g. storing a temporary values into a variable.
     switch self {
-    case .pass:
+    case .placeholder:
       return placeholder
 
     case .swiftValueSelfSegment:
       return "\(placeholder).$memorySegment()"
 
-    case .call(let function, let withArena):
+    case .call(let inner, let function, let withArena):
+      let inner = inner.render(&printer, placeholder)
       let arenaArg = withArena ? ", arena$" : ""
-      return "\(function)(\(placeholder)\(arenaArg))"
+      return "\(function)(\(inner)\(arenaArg))"
 
-    case .method(let methodName, let arguments, let withArena):
-      let argsStr = (arguments + (withArena ? ["arena$"] : [])).joined(separator: " ,")
-      return "\(placeholder).\(methodName)(\(argsStr))"
+    case .method(let inner, let methodName, let arguments, let withArena):
+      let inner = inner.render(&printer, placeholder)
+      let args = arguments.map { $0.render(&printer, placeholder) }
+      let argsStr = (args + (withArena ? ["arena$"] : [])).joined(separator: " ,")
+      return "\(inner).\(methodName)(\(argsStr))"
 
-    case .constructSwiftValue(let javaType):
-      return "new \(javaType.className!)(\(placeholder), swiftArena$)"
+    case .constructSwiftValue(let inner, let javaType):
+      let inner = inner.render(&printer, placeholder)
+      return "new \(javaType.className!)(\(inner), swiftArena$)"
 
-    case .construct(let javaType):
-      return "new \(javaType)(\(placeholder))"
+    case .construct(let inner, let javaType):
+      let inner = inner.render(&printer, placeholder)
+      return "new \(javaType)(\(inner))"
 
-    case .cast(let javaType):
-      return "(\(javaType)) \(placeholder)"
+    case .cast(let inner, let javaType):
+      let inner = inner.render(&printer, placeholder)
+      return "(\(javaType)) \(inner)"
+
+    case .commaSeparated(let list):
+      return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
+
+    case .constant(let value):
+      return value
+
+    case .readOutParameter(let javaType, let name):
+      return "\(placeholder)_\(name).get(\(ForeignValueLayout(javaType: javaType)!), 0)"
     }
   }
 }

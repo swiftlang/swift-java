@@ -30,6 +30,8 @@ enum SwiftStandardLibraryTypeKind: String, Hashable, CaseIterable {
   case double = "Double"
   case unsafeRawPointer = "UnsafeRawPointer"
   case unsafeMutableRawPointer = "UnsafeMutableRawPointer"
+  case unsafeRawBufferPointer = "UnsafeRawBufferPointer"
+  case unsafeMutableRawBufferPointer = "UnsafeMutableRawBufferPointer"
   case unsafePointer = "UnsafePointer"
   case unsafeMutablePointer = "UnsafeMutablePointer"
   case unsafeBufferPointer = "UnsafeBufferPointer"
@@ -48,12 +50,22 @@ enum SwiftStandardLibraryTypeKind: String, Hashable, CaseIterable {
     switch self {
     case .bool, .double, .float, .int, .int8, .int16, .int32, .int64,
         .uint, .uint8, .uint16, .uint32, .uint64, .unsafeRawPointer,
-        .unsafeMutableRawPointer, .string, .void:
+        .unsafeMutableRawPointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+        .string, .void:
       false
 
     case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer,
         .unsafeMutableBufferPointer:
       true
+    }
+  }
+
+  var isPointer: Bool {
+    switch self {
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawPointer, .unsafeMutableRawPointer:
+      return true
+    default:
+      return false
     }
   }
 }

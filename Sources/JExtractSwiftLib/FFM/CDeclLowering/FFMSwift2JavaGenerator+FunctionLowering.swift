@@ -215,6 +215,35 @@ struct CdeclLowering {
             )
           )
 
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          // pointer buffers are lowered to (raw-pointer, count) pair.
+          let isMutable = knownType == .unsafeMutableRawBufferPointer
+          return LoweredParameter(
+            cdeclParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(parameterName)_pointer",
+                type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+              ),
+              SwiftParameter(
+                convention: .byValue, parameterName: "\(parameterName)_count",
+                type: knownTypes.int
+              )
+            ],
+            conversion: .initialize(
+              type,
+              arguments: [
+                LabeledArgument(
+                  label: "start",
+                  argument: .explodedComponent(.placeholder, component: "pointer")
+                ),
+                LabeledArgument(
+                  label: "count",
+                  argument: .explodedComponent(.placeholder, component: "count")
+                )
+              ]
+            ))
+
         case .string:
           // 'String' is passed in by C string. i.e. 'UnsafePointer<Int8>' ('const uint8_t *')
           if knownType == .string {
@@ -375,6 +404,37 @@ struct CdeclLowering {
               knownTypes.int
             ]),
             outParameterName: outParameterName
+          )
+
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          // pointer buffers are lowered to (raw-pointer, count) pair.
+          let isMutable = knownType == .unsafeMutableRawBufferPointer
+          return LoweredResult(
+            cdeclResultType: .void,
+            cdeclOutParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(outParameterName)_pointer",
+                type: knownTypes.unsafeMutablePointer(
+                  .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+                )
+              ),
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(outParameterName)_count",
+                type: knownTypes.unsafeMutablePointer(knownTypes.int)
+              ),
+            ],
+            conversion: .aggregate([
+              .populatePointer(
+                name: "\(outParameterName)_pointer",
+                to: .member(.placeholder, member: "baseAddress")
+              ),
+              .populatePointer(
+                name: "\(outParameterName)_count",
+                to: .member(.placeholder, member: "count")
+              )
+            ], name: outParameterName)
           )
 
         case .void:

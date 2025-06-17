@@ -138,7 +138,12 @@ extension FFMSwift2JavaGenerator {
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
-      // TODO: print all "static" methods
+
+      for decl in analysis.importedGlobalVariables {
+        self.log.trace("Print imported decl: \(decl)")
+        printFunctionDowncallMethods(&printer, decl)
+      }
+
       for decl in analysis.importedGlobalFuncs {
         self.log.trace("Print imported decl: \(decl)")
         printFunctionDowncallMethods(&printer, decl)

@@ -52,8 +52,13 @@ enum ConversionStep: Equatable {
   /// Initialize mutable raw pointer with a typed value.
   indirect case populatePointer(name: String, assumingType: SwiftType? = nil, to: ConversionStep)
 
-  /// Perform multiple conversions, but discard the result.
+  /// Perform multiple conversions for each tuple input elements, but discard the result.
   case tupleExplode([ConversionStep], name: String?)
+
+  /// Perform multiple conversions using the same input.
+  case aggregate([ConversionStep], name: String?)
+
+  indirect case member(ConversionStep, member: String)
 
   /// Count the number of times that the placeholder occurs within this
   /// conversion step.
@@ -63,13 +68,14 @@ enum ConversionStep: Equatable {
         .pointee(let inner),
         .typedPointer(let inner, swiftType: _),
         .unsafeCastPointer(let inner, swiftType: _),
-        .populatePointer(name: _, assumingType: _, to: let inner):
+        .populatePointer(name: _, assumingType: _, to: let inner),
+        .member(let inner, member: _):
       inner.placeholderCount
     case .initialize(_, arguments: let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
     case .placeholder, .tupleExplode:
       1
-    case .tuplify(let elements):
+    case .tuplify(let elements), .aggregate(let elements, _):
       elements.reduce(0) { $0 + $1.placeholderCount }
     }
   }
@@ -136,6 +142,25 @@ enum ConversionStep: Equatable {
       }
       for (i, step) in steps.enumerated() {
         if let result = step.asExprSyntax(placeholder: "\(toExplode).\(i)", bodyItems: &bodyItems) {
+          bodyItems.append(CodeBlockItemSyntax(item: .expr(result)))
+        }
+      }
+      return nil
+
+    case .member(let step, let member):
+      let inner = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
+      return "\(inner).\(raw: member)"
+
+    case .aggregate(let steps, let name):
+      let toExplode: String
+      if let name {
+        bodyItems.append("let \(raw: name) = \(raw: placeholder)")
+        toExplode = name
+      } else {
+        toExplode = placeholder
+      }
+      for step in steps {
+        if let result = step.asExprSyntax(placeholder: toExplode, bodyItems: &bodyItems) {
           bodyItems.append(CodeBlockItemSyntax(item: .expr(result)))
         }
       }

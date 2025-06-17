@@ -40,6 +40,8 @@ final class MethodImportTests {
     )
     
     public func globalReturnClass() -> MySwiftClass
+    
+    public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
 
     extension MySwiftClass {
       public func helloMemberInExtension()
@@ -223,6 +225,53 @@ final class MethodImportTests {
           MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
           swiftjava___FakeModule_globalReturnClass.call(_result);
           return new MySwiftClass(_result, swiftArena$);
+        }
+        """
+    )
+  }
+
+  @Test("Import: func swapRawBufferPointer(buffer: _)")
+  func func_globalSwapRawBufferPointer() throws {
+    let st = Swift2JavaTranslator(
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .error
+
+    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = st.importedGlobalFuncs.first {
+      $0.name == "swapRawBufferPointer"
+    }!
+
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = CodePrinter.toString { printer in
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      dump: true,
+      output,
+      expected:
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
+         * }
+         */
+        public static java.lang.foreign.MemorySegment swapRawBufferPointer(java.lang.foreign.MemorySegment buffer) {
+          try(var arena$ = Arena.ofConfined()) {
+            MemorySegment _result_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegment _result_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            swiftjava___FakeModule_swapRawBufferPointer_buffer.call(buffer, buffer.byteSize(), _result_pointer, _result_count);
+            return _result_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(_result_count.get(SwiftValueLayout.SWIFT_INT64, 0));
+          }
         }
         """
     )

@@ -43,6 +43,7 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
     case .long: self =  .SwiftInt64
     case .float: self =  .SwiftFloat
     case .double: self =  .SwiftDouble
+    case .javaForeignMemorySegment: self = .SwiftPointer
     case .array, .class, .void: return nil
     }
   }

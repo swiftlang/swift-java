@@ -315,6 +315,24 @@ final class FunctionLoweringTests {
     )
   }
 
+  @Test("Lowering UnsafeRawBufferPointer")
+  func lowerRawBufferPointer() throws {
+    try assertLoweredFunction(
+      """
+      func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer {}
+      """,
+      expectedCDecl: """
+      @_cdecl("c_swapRawBufferPointer")
+      public func c_swapRawBufferPointer(_ buffer_pointer: UnsafeRawPointer?, _ buffer_count: Int, _ _result_pointer: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ _result_count: UnsafeMutablePointer<Int>) {
+        let _result = swapRawBufferPointer(buffer: UnsafeRawBufferPointer(start: buffer_pointer, count: buffer_count))
+        _result_pointer.initialize(to: _result.baseAddress)
+        _result_count.initialize(to: _result.count)
+      }
+      """,
+      expectedCFunction: "void c_swapRawBufferPointer(const void *buffer_pointer, ptrdiff_t buffer_count, void **_result_pointer, ptrdiff_t *_result_count)"
+    )
+  }
+
   @Test("Lowering () -> Void type")
   func lowerSimpleClosureTypes() throws {
     try assertLoweredFunction("""

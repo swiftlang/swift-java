@@ -116,7 +116,7 @@ struct TranslatedFunctionType {
 
   /// Whether or not this functional interface with C ABI compatible.
   var isCompatibleWithC: Bool {
-    result.conversion.isPass && parameters.allSatisfy(\.conversion.isPass)
+    result.conversion.isPlaceholder && parameters.allSatisfy(\.conversion.isPlaceholder)
   }
 }
 
@@ -200,7 +200,7 @@ struct JavaTranslation {
           javaParameters: [
             JavaParameter(type: cType.javaType, name: paramName)
           ],
-          conversion: .pass
+          conversion: .placeholder
         )
         translatedParams.append(translatedParam)
         continue
@@ -215,7 +215,7 @@ struct JavaTranslation {
     let transltedResult = TranslatedResult(
       javaResultType: resultCType.javaType,
       outParameters: [],
-      conversion: .pass
+      conversion: .placeholder
     )
 
     return TranslatedFunctionType(
@@ -294,7 +294,7 @@ struct JavaTranslation {
             name: parameterName
           )
         ],
-        conversion: .pass
+        conversion: .placeholder
       )
     }
 
@@ -307,7 +307,7 @@ struct JavaTranslation {
             type: JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType"),
             name: parameterName)
         ],
-        conversion: .swiftValueSelfSegment
+        conversion: .swiftValueSelfSegment(.placeholder)
       )
 
     case .nominal(let swiftNominalType):
@@ -324,6 +324,17 @@ struct JavaTranslation {
           // FIXME: Implement
           throw JavaTranslationError.unhandledType(swiftType)
 
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          return TranslatedParameter(
+            javaParameters: [
+              JavaParameter(type: .javaForeignMemorySegment, name: parameterName),
+            ],
+            conversion: .commaSeparated([
+              .placeholder,
+              .method(.placeholder, methodName: "byteSize", arguments: [], withArena: false)
+            ])
+          )
+
         case .string:
           return TranslatedParameter(
             javaParameters: [
@@ -332,7 +343,7 @@ struct JavaTranslation {
                 name: parameterName
               )
             ],
-            conversion: .call(function: "SwiftKit.toCString", withArena: true)
+            conversion: .call(.placeholder, function: "SwiftKit.toCString", withArena: true)
           )
 
         default:
@@ -352,7 +363,7 @@ struct JavaTranslation {
             name: parameterName
           )
         ],
-        conversion: .swiftValueSelfSegment
+        conversion: .swiftValueSelfSegment(.placeholder)
       )
 
     case .tuple:
@@ -366,7 +377,7 @@ struct JavaTranslation {
             type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"),
             name: parameterName)
         ],
-        conversion: .call(function: "\(methodName).$toUpcallStub", withArena: true)
+        conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
       )
 
     case .optional:
@@ -388,7 +399,7 @@ struct JavaTranslation {
       return TranslatedResult(
         javaResultType: javaType,
         outParameters: [],
-        conversion: .pass
+        conversion: .placeholder
       )
     }
 
@@ -399,12 +410,29 @@ struct JavaTranslation {
       return TranslatedResult(
         javaResultType: javaType,
         outParameters: [],
-        conversion: .construct(javaType)
+        conversion: .construct(.placeholder, javaType)
       )
 
     case .nominal(let swiftNominalType):
       if let knownType = swiftNominalType.nominalTypeDecl.knownStandardLibraryType {
         switch knownType {
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          return TranslatedResult(
+            javaResultType: .javaForeignMemorySegment,
+            outParameters: [
+              JavaParameter(type: .javaForeignMemorySegment, name: "pointer"),
+              JavaParameter(type: .long, name: "count"),
+            ],
+            conversion: .method(
+              .readOutParameter(.javaForeignMemorySegment, component: "pointer"),
+              methodName: "reinterpret",
+              arguments: [
+                .readOutParameter(.long, component: "count")
+              ],
+              withArena: false
+            )
+          )
+
         case .unsafePointer, .unsafeMutablePointer:
           // FIXME: Implement
           throw JavaTranslationError.unhandledType(swiftType)
@@ -430,7 +458,7 @@ struct JavaTranslation {
         outParameters: [
           JavaParameter(type: javaType, name: "")
         ],
-        conversion: .constructSwiftValue(javaType)
+        conversion: .constructSwiftValue(.placeholder, javaType)
       )
 
     case .tuple:
@@ -456,30 +484,39 @@ struct JavaTranslation {
 /// Describes how to convert values between Java types and FFM types.
 enum JavaConversionStep {
   // Pass through.
-  case pass
+  case placeholder
+
+  // A fixed value
+  case constant(String)
 
   // 'value.$memorySegment()'
-  case swiftValueSelfSegment
+  indirect case swiftValueSelfSegment(JavaConversionStep)
 
   // call specified function using the placeholder as arguments.
   // If `withArena` is true, `arena$` argument is added.
-  case call(function: String, withArena: Bool)
+  indirect case call(JavaConversionStep, function: String, withArena: Bool)
 
   // Apply a method on the placeholder.
   // If `withArena` is true, `arena$` argument is added.
-  case method(methodName: String, arguments: [String] = [], withArena: Bool)
+  indirect case method(JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)
 
   // Call 'new \(Type)(\(placeholder), swiftArena$)'.
-  case constructSwiftValue(JavaType)
+  indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
   // Construct the type using the placeholder as arguments.
-  case construct(JavaType)
+  indirect case construct(JavaConversionStep, JavaType)
 
   // Casting the placeholder to the certain type.
-  case cast(JavaType)
+  indirect case cast(JavaConversionStep, JavaType)
 
-  var isPass: Bool {
-    return if case .pass = self { true } else { false }
+  // Convert the results of the inner steps to a comma separated list.
+  indirect case commaSeparated([JavaConversionStep])
+
+  // Refer an exploded argument suffixed with `_\(name)`.
+  indirect case readOutParameter(JavaType, component: String)
+
+  var isPlaceholder: Bool {
+    return if case .placeholder = self { true } else { false }
   }
 }
 

@@ -41,6 +41,10 @@ public func globalCallMeRunnable(run: () -> ()) {
   run()
 }
 
+public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
+  return buf.count
+}
+
 public class MySwiftClass {
 
   public var len: Int
