@@ -16,7 +16,7 @@ import SwiftDiagnostics
 import SwiftSyntax
 
 extension WithModifiersSyntax {
-  internal var accessControlModifiers: DeclModifierListSyntax {
+  var accessControlModifiers: DeclModifierListSyntax {
     modifiers.filter { modifier in
       modifier.isAccessControl
     }
@@ -24,7 +24,7 @@ extension WithModifiersSyntax {
 }
 
 extension ImplicitlyUnwrappedOptionalTypeSyntax {
-  internal var asOptionalTypeSyntax: any TypeSyntaxProtocol {
+  var asOptionalTypeSyntax: any TypeSyntaxProtocol {
     OptionalTypeSyntax(
       leadingTrivia: leadingTrivia,
       unexpectedBeforeWrappedType,

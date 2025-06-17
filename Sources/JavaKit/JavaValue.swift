@@ -34,7 +34,7 @@ import JavaTypes
 /// The protocol provides operations to bridge values in both directions:
 /// - `getJNIValue(in:)`: produces the JNI value (of type `JNIType`) for the
 ///   `self` Swift value in the given JNI environment.
-/// - `init(fromJNI:in:)`: intializes a Swift value from the JNI value (of
+/// - `init(fromJNI:in:)`: initializes a Swift value from the JNI value (of
 ///   type `JNIType`) in the given JNI environment.
 ///
 /// The protocol also provides hooks to tie into JNI, including operations to
