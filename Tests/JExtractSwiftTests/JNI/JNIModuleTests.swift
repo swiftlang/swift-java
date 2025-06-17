@@ -27,6 +27,11 @@ struct JNIModuleTests {
     public func copy(_ string: String) -> String
   """
 
+  let globalMethodThrowing = """
+    public func methodA() throws
+    public func methodB() throws -> Int64
+  """
+
   @Test
   func generatesModuleJavaClass() throws {
     let input = "public func helloWorld()"
@@ -145,6 +150,69 @@ struct JNIModuleTests {
           func swiftjava_SwiftModule_copy__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
             let result = SwiftModule.copy(String(fromJNI: string, in: environment!))
             return result.getJNIValue(in: environment)
+          }
+          """,
+      ]
+    )
+  }
+
+  @Test
+  func globalMethodThrowing_javaBindings() throws {
+    try assertOutput(
+      input: globalMethodThrowing,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public func methodA() throws
+          * }
+          */
+        public static native void methodA() throws Exception;
+        """,
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public func methodB() throws -> Int64
+          * }
+          */
+        public static native long methodB() throws Exception;
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func globalMethodThrowing_swiftThunks() throws {
+    try assertOutput(
+      input: globalMethodThrowing,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+          """
+          @_cdecl("Java_com_example_swift_SwiftModule_methodA")
+          func swiftjava_SwiftModule_methodA(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+            do { 
+              try SwiftModule.methodA()
+            } catch {
+              environment.throwAsException(error)
+            }
+          }
+          """,
+          """
+          @_cdecl("Java_com_example_swift_SwiftModule_methodB")
+          func swiftjava_SwiftModule_methodB(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+            do { 
+              let result = try SwiftModule.methodB()
+              return result.getJNIValue(in: environment)
+            } catch {
+              environment.throwAsException(error)
+              return Int64.jniPlaceholderValue
+            }
           }
           """,
       ]

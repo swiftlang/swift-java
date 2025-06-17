@@ -526,7 +526,8 @@ public struct LoweredFunctionSignature: Equatable {
     SwiftFunctionSignature(
       selfParameter: nil,
       parameters: allLoweredParameters,
-      result: SwiftResult(convention: .direct, type: result.cdeclResultType)
+      result: SwiftResult(convention: .direct, type: result.cdeclResultType),
+      effectSpecifiers: []
     )
   }
 }
