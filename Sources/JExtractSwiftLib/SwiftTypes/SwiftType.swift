@@ -38,8 +38,7 @@ enum SwiftType: Equatable {
     asNominalType?.nominalTypeDecl
   }
 
-  /// Whether this is the "Void" type, which is actually an empty
-  /// tuple.
+  /// Whether this is the "Void" type, which is actually an empty tuple.
   var isVoid: Bool {
     switch self {
     case .tuple([]):
@@ -49,6 +48,19 @@ enum SwiftType: Equatable {
     default:
       return false
     }
+  }
+
+  /// Whether this is a pointer type. I.e 'Unsafe[Mutable][Raw]Pointer'
+  var isPointer: Bool {
+    switch self {
+    case .nominal(let nominal):
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        return knownType.isPointer
+      }
+    default:
+      break
+    }
+    return false;
   }
 
   /// Reference type

@@ -47,6 +47,12 @@ public func globalCallMeRunnable(run: () -> ()) {
   run()
 }
 
+public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
+  return buf.count
+}
+
+public var globalBuffer: UnsafeRawBufferPointer = UnsafeRawBufferPointer(UnsafeMutableRawBufferPointer.allocate(byteCount: 124, alignment: 1))
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

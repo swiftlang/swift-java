@@ -45,6 +45,8 @@ public class HelloJava2Swift {
             SwiftKit.trace("running runnable");
         });
 
+        SwiftKit.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
+
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);

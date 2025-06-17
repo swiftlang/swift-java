@@ -65,6 +65,9 @@ extension CType {
     case .tuple([]):
       self = .void
 
+    case .optional(let wrapped) where wrapped.isPointer:
+      try self.init(cdeclType: wrapped)
+
     case .metatype, .optional, .tuple:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
@@ -122,7 +125,7 @@ extension SwiftStandardLibraryTypeKind {
       .qualified(const: true, volatile: false, type: .void)
     )
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string:
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string:
        nil
     }
   }

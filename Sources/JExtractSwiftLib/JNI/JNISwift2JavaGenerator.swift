@@ -263,7 +263,12 @@ extension SwiftStandardLibraryTypeKind {
     case .double: .double
     case .void: .void
     case .string: .javaLangString
-    case .uint, .uint8, .uint32, .uint64, .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer, .unsafeBufferPointer, .unsafeMutableBufferPointer: nil
+    case .uint, .uint8, .uint32, .uint64,
+        .unsafeRawPointer, .unsafeMutableRawPointer,
+        .unsafePointer, .unsafeMutablePointer,
+        .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+        .unsafeBufferPointer, .unsafeMutableBufferPointer:
+      nil
     }
   }
 }
