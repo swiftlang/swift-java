@@ -385,6 +385,7 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "SystemPackage", package: "swift-system"),
         "JavaKit",
         "JavaKitJar",
         "JavaKitNetwork",
