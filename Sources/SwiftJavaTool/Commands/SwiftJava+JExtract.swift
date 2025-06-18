@@ -64,3 +64,5 @@ extension SwiftJava {
   }
 
 }
+
+extension GenerationMode: ExpressibleByArgument {}

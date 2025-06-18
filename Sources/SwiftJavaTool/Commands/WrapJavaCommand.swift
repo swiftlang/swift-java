@@ -68,8 +68,6 @@ extension SwiftJava.WrapJavaCommand {
       config.javaPackage = javaPackage
     }
 
-
-
     // Get base classpath configuration for this target and configuration
     var classpathSearchDirs = [self.effectiveSwiftModuleURL]
     if let cacheDir = self.cacheDirectory {
