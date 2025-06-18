@@ -87,8 +87,10 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       searchForConfigFiles(in: dependency)
     }
 
-    var arguments: [String] = []
-    arguments += argumentsSwiftModuleDeprecated(sourceModule: sourceModule)
+    var arguments: [String] = [
+      "wrap-java"
+    ]
+    arguments += argumentsSwiftModule(sourceModule: sourceModule)
     arguments += argumentsOutputDirectory(context: context)
     arguments += argumentsDependedOnConfigs(dependentConfigFiles)
     arguments.append(configFile.path(percentEncoded: false))
