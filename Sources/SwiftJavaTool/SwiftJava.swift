@@ -35,6 +35,7 @@ struct SwiftJava: SwiftJavaBaseAsyncParsableCommand, HasCommonJVMOptions { // FI
     subcommands: [
       ConfigureCommand.self,
       ResolveCommand.self,
+      WrapJavaCommand.self,
     ])
 
   // FIXME: this must be removed when we move things out from the SwiftJava main file!
