@@ -11,6 +11,7 @@ import Foundation
 //   Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home.
 func findJavaHome() -> String {
   if let home = ProcessInfo.processInfo.environment["JAVA_HOME"] {
+    print("JAVA_HOME = \(home)")
     return home
   }
 
