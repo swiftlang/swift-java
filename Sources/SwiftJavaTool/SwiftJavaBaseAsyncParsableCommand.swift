@@ -149,15 +149,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
     // For generated Swift sources, put them into a "generated" subdirectory.
     // The configuration file goes at the top level.
-    let outputDir: Foundation.URL
-      //    if jar {
-            // precondition(self.input != nil, "-jar mode requires path to jar to be specified as input path")
-      outputDir = baseDir
-      //    } else {
-      //      outputDir = baseDir
-      //        .appendingPathComponent("generated", isDirectory: true)
-      //    }
-
+    let outputDir: Foundation.URL = baseDir
     return outputDir
   }
 
