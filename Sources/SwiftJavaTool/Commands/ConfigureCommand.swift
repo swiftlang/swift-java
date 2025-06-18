@@ -66,8 +66,8 @@ extension SwiftJava {
 
 extension SwiftJava.ConfigureCommand {
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    let classpathEntries =
-      self.configureCommandJVMClasspath(effectiveSwiftModuleURL: self.effectiveSwiftModuleURL, config: config)
+    let classpathEntries = self.configureCommandJVMClasspath(
+        searchDirs: [self.effectiveSwiftModuleURL], config: config)
 
     let jvm =
       try self.makeJVM(classpathEntries: classpathEntries)

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -156,7 +156,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   let baseURL = URL(fileURLWithPath: basePath)
   var classpathEntries: [String] = []
 
-  print("[debug][swift-java] Searching for *.swift-java.classpath files in: \(baseURL)")
+  print("[debug][swift-java] Searching for *.swift-java.classpath files in: \(baseURL.absoluteString)")
   guard let enumerator = fileManager.enumerator(at: baseURL, includingPropertiesForKeys: []) else {
     print("[warning][swift-java] Failed to get enumerator for \(baseURL)")
     return []
@@ -164,7 +164,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   
   for case let fileURL as URL in enumerator {
     if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
-      print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.relativePath)")
+      print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.path)")
       if let contents = try? String(contentsOf: fileURL) {
         let entries = contents.split(separator: ":").map(String.init)
         for entry in entries {

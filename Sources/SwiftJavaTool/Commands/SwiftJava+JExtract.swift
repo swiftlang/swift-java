@@ -31,6 +31,32 @@ import JavaKitConfigurationShared
 /// ```
 extension SwiftJava {
 
+  struct JExtractCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions {
+    static let configuration = CommandConfiguration(
+      commandName: "jextract", // TODO: wrap-swift?
+      abstract: "Resolve dependencies and write the resulting swift-java.classpath file")
+
+    @OptionGroup var commonOptions: SwiftJava.CommonOptions
+
+    @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
+    var mode: GenerationMode = .ffm
+
+    @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
+    var swiftModule: String
+
+    var effectiveSwiftModule: String {
+      swiftModule
+    }
+  }
+}
+
+extension SwiftJava.JExtractCommand {
+  func runSwiftJavaCommand(config: inout Configuration) async throws {
+    fatalError("not implemented yet")
+  }
+}
+
+extension SwiftJava {
   mutating func jextractSwift(
     config: Configuration
   ) throws {
