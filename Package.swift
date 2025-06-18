@@ -369,7 +369,7 @@ let package = Package(
         "JavaKitShared",
         "JavaKitConfigurationShared",
         // .product(name: "Subprocess", package: "swift-subprocess")
-        "_Subprocess", // using process spawning
+        "_Subprocess",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -394,11 +394,14 @@ let package = Package(
         "JavaKitShared",
         "JavaKitConfigurationShared",
       ],
-
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
         .enableUpcomingFeature("BareSlashRegexLiterals"),
+        .define(
+          "SYSTEM_PACKAGE_DARWIN",
+          .when(platforms: [.macOS, .macCatalyst, .iOS, .watchOS, .tvOS, .visionOS])),
+        .define("SYSTEM_PACKAGE"),
       ]
     ),
 
@@ -508,7 +511,11 @@ let package = Package(
         .product(name: "SystemPackage", package: "swift-system"),
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
+        .define(
+          "SYSTEM_PACKAGE_DARWIN",
+          .when(platforms: [.macOS, .macCatalyst, .iOS, .watchOS, .tvOS, .visionOS])),
+        .define("SYSTEM_PACKAGE"),
       ]
     ),
   ]
