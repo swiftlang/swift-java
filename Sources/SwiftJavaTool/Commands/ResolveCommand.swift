@@ -22,7 +22,11 @@ import SwiftJavaLib
 import JavaKitConfigurationShared
 import JavaKitShared
 import _Subprocess
+#if canImport(System)
 import System
+#else
+@preconcurrency import SystemPackage
+#endif
 
 typealias Configuration = JavaKitConfigurationShared.Configuration
 
@@ -58,31 +62,10 @@ extension SwiftJava.ResolveCommand {
   var printRuntimeClasspathTaskName: String { "printRuntimeClasspath" }
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    // Form a class path from all of our input sources:
-    let classpathOptionEntries: [String] = self.classpathEntries
-    let classpathFromEnv = self.classpathEnvEntries
-    let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
-    print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
-
-    var classpathEntries: [String] = classpathFromConfig
-
-    let classPathFilesSearchDirectory = self.effectiveSwiftModuleURL.absoluteString
-    print("[debug][swift-java] Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
-    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(in: classPathFilesSearchDirectory)
-
-    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
-    classpathEntries += swiftJavaCachedModuleClasspath
-
-    if logLevel >= .debug {
-      let classpathString = classpathEntries.joined(separator: ":")
-      print("[debug][swift-java] Initialize JVM with classpath: \(classpathString)")
-    }
-    let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
-
     var dependenciesToResolve: [JavaDependencyDescriptor] = []
     if let input, let inputDependencies = parseDependencyDescriptor(input) {
       dependenciesToResolve.append(inputDependencies)
-    }
+    } 
     if let dependencies = config.dependencies {
       dependenciesToResolve += dependencies
     }
@@ -148,7 +131,7 @@ extension SwiftJava.ResolveCommand {
           "--rerun-tasks",
           "\(printRuntimeClasspathTaskName)",
         ],
-        workingDirectory: FilePath(resolverDir.path),
+        workingDirectory: Optional(FilePath(resolverDir.path)),
         // TODO: we could move to stream processing the outputs
         output: .string(limit: Int.max, encoding: UTF8.self), // Don't limit output, we know it will be reasonable size
         error: .string(limit: Int.max, encoding: UTF8.self) // Don't limit output, we know it will be reasonable size
