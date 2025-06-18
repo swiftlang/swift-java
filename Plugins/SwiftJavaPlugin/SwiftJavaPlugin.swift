@@ -87,13 +87,10 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       searchForConfigFiles(in: dependency)
     }
 
-    var arguments: [String] = [
-      "wrap-java"
-    ]
+    var arguments: [String] = []
     arguments += argumentsSwiftModule(sourceModule: sourceModule)
     arguments += argumentsOutputDirectory(context: context)
     arguments += argumentsDependedOnConfigs(dependentConfigFiles)
-    arguments.append(configFile.path(percentEncoded: false))
 
     let classes = config.classes ?? [:]
     print("[swift-java-plugin] Classes to wrap (\(classes.count)): \(classes.map(\.key))")
@@ -158,12 +155,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           executable: executable,
           arguments: ["resolve"]
             + argumentsOutputDirectory(context: context, generated: false)
-            + argumentsSwiftModule(sourceModule: sourceModule)
-            // + [
-            //  // explicitly provide config path
-            //   configFile.path(percentEncoded: false)
-            // ]
-            ,
+            + argumentsSwiftModule(sourceModule: sourceModule),
           environment: [:],
           inputFiles: [configFile],
           outputFiles: fetchDependenciesOutputFiles
@@ -174,13 +166,16 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
     
     if !outputSwiftFiles.isEmpty {
+      arguments += [ configFile.path(percentEncoded: false) ]
+
       let displayName = "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'"
       log("Prepared: \(displayName)")
       commands += [
         .buildCommand(
           displayName: displayName,
           executable: executable,
-          arguments: arguments,
+          arguments: ["wrap-java"]
+            + arguments,
           inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [ configFile ],
           outputFiles: outputSwiftFiles
         )

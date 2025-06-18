@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -52,6 +52,9 @@ extension SwiftJava {
     @Option(help: "The names of Java classes whose declared native methods will be implemented in Swift.")
     var swiftNativeImplementation: [String] = []
 
+    @Option(help: "Cache directory for intermediate results and other outputs between runs")
+    var cacheDirectory: String?
+
     @Argument(help: "Path to .jar file whose Java classes should be wrapped using Swift bindings")
     var input: String
   }
@@ -60,34 +63,46 @@ extension SwiftJava {
 extension SwiftJava.WrapJavaCommand {
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
+    // Perform any config overrides by command options:
     if let javaPackage {
       config.javaPackage = javaPackage
     }
 
-    // Load all of the dependent configurations and associate them with Swift
-    // modules.
-    let dependentConfigs = try loadDependentConfigs()
 
-    // Configure our own classpath based on config
-    var classpathEntries =
-      self.configureCommandJVMClasspath(effectiveSwiftModuleURL: self.effectiveSwiftModuleURL, config: config)
+
+    // Get base classpath configuration for this target and configuration
+    var classpathSearchDirs = [self.effectiveSwiftModuleURL]
+    if let cacheDir = self.cacheDirectory {
+      print("[trace][swift-java] Cache directory: \(cacheDir)")
+      classpathSearchDirs += [URL(fileURLWithPath: cacheDir)]
+    } else {
+      print("[trace][swift-java] Cache directory: none")
+    }
+    print("[trace][swift-java] INPUT: \(input)")
+
+    var classpathEntries = self.configureCommandJVMClasspath(
+        searchDirs: classpathSearchDirs, config: config)
+
+    // Load all of the dependent configurations and associate them with Swift modules.
+    let dependentConfigs = try self.loadDependentConfigs()
+    print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
 
     // Include classpath entries which libs we depend on require...
     for (fromModule, config) in dependentConfigs {
+      print("[trace][swift-java] Add dependent config (\(fromModule)) classpath elements: \(config.classpathEntries.count)")
       // TODO: may need to resolve the dependent configs rather than just get their configs
       // TODO: We should cache the resolved classpaths as well so we don't do it many times
-      config.classpath.map { entry in
+      for entry in config.classpathEntries {
         print("[trace][swift-java] Add dependent config (\(fromModule)) classpath element: \(entry)")
         classpathEntries.append(entry)
       }
     }
 
-    let completeClasspath = classpathEntries.joined(separator: ":")
     let jvm = try self.makeJVM(classpathEntries: classpathEntries)
 
     try self.generateWrappers(
       config: config,
-      classpath: completeClasspath,
+      // classpathEntries: classpathEntries,
       dependentConfigs: dependentConfigs,
       environment: jvm.environment()
     )
@@ -118,7 +133,7 @@ extension SwiftJava.WrapJavaCommand {
 extension SwiftJava.WrapJavaCommand {
   mutating func generateWrappers(
     config: Configuration,
-    classpath: String,
+    // classpathEntries: [String],
     dependentConfigs: [(String, Configuration)],
     environment: JNIEnvironment
   ) throws {

@@ -77,19 +77,19 @@ struct SwiftJava: SwiftJavaBaseAsyncParsableCommand, HasCommonJVMOptions { // FI
   @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
   var mode: GenerationMode = .ffm
 
-  @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
-  var cacheDirectory: String? = nil
+//  @Option(name: .shortAndLong, help: "Directory where to write cached values (e.g. swift-java.classpath files)")
+//  var cacheDirectory: String? = nil
 
   @OptionGroup var commonOptions: SwiftJava.CommonOptions
   @OptionGroup var commonJVMOptions: SwiftJava.CommonJVMOptions
 
-  var effectiveCacheDirectory: String? {
-    if let cacheDirectory {
-      return cacheDirectory
-    } else {
-      return nil
-    }
-  }
+//  var effectiveCacheDirectory: String? {
+//    if let cacheDirectory {
+//      return cacheDirectory
+//    } else {
+//      return nil
+//    }
+//  }
 
 //  @Argument(
 //    help: "The input file, which is either a Java2Swift configuration file or (if '-jar' was specified) a Jar file."
@@ -193,10 +193,10 @@ struct SwiftJava: SwiftJavaBaseAsyncParsableCommand, HasCommonJVMOptions { // FI
 
     var classpathEntries: [String] = classpathFromConfig
 
-    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(
-      in: self.effectiveCacheDirectory ?? FileManager.default.currentDirectoryPath)
-    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
-    classpathEntries += swiftJavaCachedModuleClasspath
+//    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(
+//      in: self.effectiveCacheDirectory ?? FileManager.default.currentDirectoryPath)
+//    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
+//    classpathEntries += swiftJavaCachedModuleClasspath
 
     if !classpathOptionEntries.isEmpty {
       print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")

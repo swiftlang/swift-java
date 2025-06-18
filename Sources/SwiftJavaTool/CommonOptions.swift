@@ -73,22 +73,30 @@ extension HasCommonJVMOptions {
 }
 
 extension HasCommonJVMOptions {
-  func configureCommandJVMClasspath(effectiveSwiftModuleURL: Foundation.URL, config: Configuration) -> [String] {
+
+  /// Collect classpath information from various sources such as CLASSPATH, `-cp` option and
+  /// swift-java.classpath files as configured.
+  /// Parameters:
+  ///   - searchDirs: search directories where we can find swift.java.classpath files to include in the configuration
+  func configureCommandJVMClasspath(searchDirs: [Foundation.URL], config: Configuration) -> [String] {
     // Form a class path from all of our input sources:
     //   * Command-line option --classpath
     let classpathOptionEntries: [String] = self.classpathEntries
     let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
+    print("[debug][swift-java] Base classpath from CLASSPATH environment: \(classpathFromEnv)")
     let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
     print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
 
     var classpathEntries: [String] = classpathFromConfig
 
-    let classPathFilesSearchDirectory = effectiveSwiftModuleURL.absoluteString
-    print("[debug][swift-java] Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
-    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(in: classPathFilesSearchDirectory)
+    for searchDir in searchDirs {
+      let classPathFilesSearchDirectory = searchDir.path
+      print("[debug][swift-java] Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
+      let foundSwiftJavaClasspath = findSwiftJavaClasspaths(in: classPathFilesSearchDirectory)
 
-    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
-    classpathEntries += swiftJavaCachedModuleClasspath
+      print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(foundSwiftJavaClasspath)")
+      classpathEntries += foundSwiftJavaClasspath
+    }
 
     if !classpathOptionEntries.isEmpty {
       print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")

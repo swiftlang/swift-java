@@ -46,7 +46,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 extension SwiftJavaBaseAsyncParsableCommand {
   public mutating func run() async {
     print("[info][swift-java] Run \(Self.self): \(CommandLine.arguments.joined(separator: " "))")
-    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: "."))")
+    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: ".").path)")
 
     do {
       var config = try readInitialConfiguration(command: self)
@@ -64,16 +64,6 @@ extension SwiftJavaBaseAsyncParsableCommand {
 }
 
 extension SwiftJavaBaseAsyncParsableCommand {
-//  mutating func writeContents(
-//    _ contents: String,
-//    to filename: String, description: String) throws {
-//    try writeContents(
-//      contents,
-//      outputDirectoryOverride: self.actualOutputDirectory,
-//      to: filename,
-//      description: description)
-//  }
-
   mutating func writeContents(
     _ contents: String,
     outputDirectory: Foundation.URL?,
