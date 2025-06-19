@@ -44,7 +44,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Config was: \(config)")
     var javaDependencies = config.dependencies ?? []
 
-    /// Find the manifest files from other Java2Swift executions in any targets
+    /// Find the manifest files from other swift-java executions in any targets
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
@@ -95,7 +95,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let classes = config.classes ?? [:]
     print("[swift-java-plugin] Classes to wrap (\(classes.count)): \(classes.map(\.key))")
 
-    /// Determine the set of Swift files that will be emitted by the Java2Swift tool.
+    /// Determine the set of Swift files that will be emitted by the swift-java tool.
     // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
     let outputDirectoryGenerated = self.outputDirectory(context: context, generated: true)
     let outputSwiftFiles = classes.map { (javaClassName, swiftName) in

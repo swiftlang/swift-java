@@ -72,8 +72,8 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
-      "--input-swift", sourceDir,
       "--swift-module", sourceModule.name,
+      "--input-swift", sourceDir,
       "--output-java", context.outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", context.outputSwiftDirectory.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...

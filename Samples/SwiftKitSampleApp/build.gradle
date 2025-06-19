@@ -81,7 +81,7 @@ def jextract = tasks.register("jextract", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args("package", "jextract", "-v", "--log-level", "debug") // TODO: pass log level from Gradle build
+    args("run", "swift-java", "jextract", "-v", "--log-level", "info") // TODO: pass log level from Gradle build
 }
 
 // Add the java-swift generated Java sources
