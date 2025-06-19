@@ -46,9 +46,6 @@ extension SwiftJava {
     )
     var dependsOn: [String] = []
 
-    @Option(help: "The Java package the generated Java code should be emitted into.")
-    var javaPackage: String? = nil
-
     @Option(help: "The names of Java classes whose declared native methods will be implemented in Swift.")
     var swiftNativeImplementation: [String] = []
 
@@ -63,11 +60,6 @@ extension SwiftJava {
 extension SwiftJava.WrapJavaCommand {
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    // Perform any config overrides by command options:
-    if let javaPackage {
-      config.javaPackage = javaPackage
-    }
-
     // Get base classpath configuration for this target and configuration
     var classpathSearchDirs = [self.effectiveSwiftModuleURL]
     if let cacheDir = self.cacheDirectory {

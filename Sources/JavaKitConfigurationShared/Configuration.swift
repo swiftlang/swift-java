@@ -38,7 +38,7 @@ public struct Configuration: Codable {
 
   public var outputJavaDirectory: String?
 
-  public var mode: GenerationMode?
+  public var mode: JExtractGenerationMode?
 
   // ==== java 2 swift ---------------------------------------------------------
 

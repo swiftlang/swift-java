@@ -34,7 +34,7 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: nil,
         filename: moduleFilename)
       {
-        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
       }
     } catch {
       log.warning("Failed to write to Swift thunks: \(moduleFilename)")
@@ -54,7 +54,7 @@ extension FFMSwift2JavaGenerator {
           javaPackagePath: nil,
           filename: filename)
         {
-          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile)")
+          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile))")
         }
       } catch {
         log.warning("Failed to write to Swift thunks: \(filename)")
