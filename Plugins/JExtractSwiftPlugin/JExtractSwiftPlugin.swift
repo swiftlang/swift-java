@@ -40,6 +40,10 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     let sourceDir = target.directory.string
+
+    // The name of the configuration file JavaKit.config from the target for
+    // which we are generating Swift wrappers for Java classes.
+    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
     
     guard let javaPackage = configuration?.javaPackage else {
@@ -65,18 +69,53 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
     if !javaPackage.isEmpty {
-      arguments.append(contentsOf: ["--java-package", javaPackage])
+      arguments += ["--java-package", javaPackage]
+    }
+
+    let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
+      $0.pathExtension == "swift"
+    }
+
+    let outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
+      guard sourceFileURL.isFileURL else {
+        return nil as URL?
+      }
+
+      let sourceFilePath = sourceFileURL.path
+      guard sourceFilePath.starts(with: sourceDir) else {
+        fatalError("Could not get relative path for source file \(sourceFilePath)")
+      }
+      var outputURL = outputSwiftDirectory
+        .appending(path: String(sourceFilePath.dropFirst(sourceDir.count).dropLast(sourceFileURL.lastPathComponent.count + 1)))
+
+      let inputFileName = sourceFileURL.deletingPathExtension().lastPathComponent
+      print(" inputFileName = \(inputFileName)")
+      let isModuleFile = inputFileName.contains("Library") // FIXME: this is a hack
+      print(" isModuleFile = \(isModuleFile)")
+
+      return if isModuleFile {
+        outputURL.appending(path: "\(inputFileName)Module+SwiftJava.swift")
+      } else {
+        outputURL.appending(path: "\(inputFileName)+SwiftJava.swift")
+      }
     }
 
     return [
-      .prebuildCommand(
+      .buildCommand(
         displayName: "Generate Java wrappers for Swift types",
         executable: toolURL,
         arguments: arguments,
-        // inputFiles: [ configFile ] + swiftFiles,
-        // outputFiles: outputJavaFiles
-        outputFilesDirectory: outputSwiftDirectory
+        inputFiles: [ configFile ] + swiftFiles,
+        outputFiles: outputSwiftFiles
       )
+//      .prebuildCommand(
+//        displayName: "Generate Java wrappers for Swift types",
+//        executable: toolURL,
+//        arguments: arguments,
+//        // inputFiles: [ configFile ] + swiftFiles,
+//        // outputFiles: outputJavaFiles
+//        outputFilesDirectory: outputSwiftDirectory
+//      )
     ]
   }
 }

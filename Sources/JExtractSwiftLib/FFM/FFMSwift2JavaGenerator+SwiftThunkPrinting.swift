@@ -41,6 +41,7 @@ extension FFMSwift2JavaGenerator {
     }
 
     // === All types
+    // FIXME: write them all into the same file they were declared from +SwiftJava
     for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
