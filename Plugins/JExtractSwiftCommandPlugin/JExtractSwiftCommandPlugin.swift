@@ -71,6 +71,7 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
 
     var arguments: [String] = [
+      /*subcommand=*/"jextract",
       "--input-swift", sourceDir,
       "--swift-module", sourceModule.name,
       "--output-java", context.outputJavaDirectory.path(percentEncoded: false),
@@ -80,7 +81,6 @@ final class JExtractSwiftCommandPlugin: SwiftJavaPluginProtocol, BuildToolPlugin
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
-    // arguments.append(sourceDir) // TODO: we could do this shape maybe? to have the dirs last?
     if let package = configuration?.javaPackage, !package.isEmpty {
       arguments += ["--java-package", package]
     }

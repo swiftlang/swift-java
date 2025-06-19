@@ -51,8 +51,8 @@ dependencies {
 
 // This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
 // Thus, we also need to watch and re-build the top level project.
-def compileSwiftJExtractPlugin = tasks.register("compileSwiftJExtractPlugin", Exec) {
-    description = "Rebuild the swift-java root project"
+def compileSwiftJExtractPlugin = tasks.register("compileSwiftJava", Exec) {
+    description = "Rebuild the swift-java root project (" + swiftBuildConfiguration() + ")"
 
     inputs.file(new File(rootDir, "Package.swift"))
     inputs.dir(new File(rootDir, "Sources"))
@@ -62,9 +62,7 @@ def compileSwiftJExtractPlugin = tasks.register("compileSwiftJExtractPlugin", Ex
     commandLine "swift"
     args("build",
             "-c", swiftBuildConfiguration(),
-            "--product", "SwiftKitSwift",
-            "--product", "JExtractSwiftPlugin",
-            "--product", "JExtractSwiftCommandPlugin")
+            "--product", "swift-java")
 }
 
 def jextract = tasks.register("jextract", Exec) {
@@ -96,7 +94,7 @@ def jextract = tasks.register("jextract", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args("package", "jextract", "-v", "--log-level", "info") // TODO: pass log level from Gradle build
+    args("run", "swift-java", "jextract", "-v", "--log-level", "info") // TODO: pass log level from Gradle build
 }
 
 

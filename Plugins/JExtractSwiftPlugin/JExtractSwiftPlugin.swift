@@ -54,8 +54,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let outputSwiftDirectory = context.outputSwiftDirectory
 
     var arguments: [String] = [
-      "--input-swift", sourceDir,
+      /*subcommand=*/"jextract",
       "--swift-module", sourceModule.name,
+      "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
       // TODO: "--build-cache-directory", ...
@@ -63,7 +64,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
-    // arguments.append(sourceDir)
     if !javaPackage.isEmpty {
       arguments.append(contentsOf: ["--java-package", javaPackage])
     }
