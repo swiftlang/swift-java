@@ -27,7 +27,7 @@ import JavaKitShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
-struct SwiftJava: AsyncParsableCommand { // FIXME: this is just a normal async command, no parsing happening here
+struct SwiftJava: AsyncParsableCommand {
   static var _commandName: String { "swift-java" }
 
   static let configuration = CommandConfiguration(
@@ -38,10 +38,6 @@ struct SwiftJava: AsyncParsableCommand { // FIXME: this is just a normal async c
       WrapJavaCommand.self,
       JExtractCommand.self
     ])
-
-  var effectiveSwiftModule: String {
-    fatalError("SHOULD NOT BE USED")
-  }
 
   mutating func run() async throws {
     guard CommandLine.arguments.count >= 2 else {

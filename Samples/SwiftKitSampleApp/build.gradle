@@ -34,24 +34,6 @@ java {
     }
 }
 
-
-// This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
-// Thus, we also need to watch and re-build the top level project.
-def compileSwiftJExtractPlugin = tasks.register("compileSwiftJExtractPlugin", Exec) {
-    description = "Rebuild the swift-java root project"
-
-    inputs.file(new File(rootDir, "Package.swift"))
-    inputs.dir(new File(rootDir, "Sources"))
-    outputs.dir(new File(rootDir, ".build"))
-
-    workingDir = rootDir
-    commandLine "swift"
-    args("build",
-            "--product", "SwiftKitSwift",
-            "--product", "JExtractSwiftPlugin",
-            "--product", "JExtractSwiftCommandPlugin")
-}
-
 def jextract = tasks.register("jextract", Exec) {
     description = "Builds swift sources, including swift-java source generation"
     dependsOn compileSwiftJExtractPlugin

@@ -108,14 +108,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         inputFiles: [ configFile ] + swiftFiles,
         outputFiles: outputSwiftFiles
       )
-//      .prebuildCommand(
-//        displayName: "Generate Java wrappers for Swift types",
-//        executable: toolURL,
-//        arguments: arguments,
-//        // inputFiles: [ configFile ] + swiftFiles,
-//        // outputFiles: outputJavaFiles
-//        outputFilesDirectory: outputSwiftDirectory
-//      )
     ]
   }
 }
