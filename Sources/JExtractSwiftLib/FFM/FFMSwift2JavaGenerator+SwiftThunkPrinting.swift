@@ -34,13 +34,14 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: nil,
         filename: moduleFilename)
       {
-        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
       }
     } catch {
       log.warning("Failed to write to Swift thunks: \(moduleFilename)")
     }
 
     // === All types
+    // FIXME: write them all into the same file they were declared from +SwiftJava
     for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
@@ -54,7 +55,7 @@ extension FFMSwift2JavaGenerator {
           javaPackagePath: nil,
           filename: filename)
         {
-          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile)")
+          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile))")
         }
       } catch {
         log.warning("Failed to write to Swift thunks: \(filename)")

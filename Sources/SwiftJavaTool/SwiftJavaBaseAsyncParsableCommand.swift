@@ -28,6 +28,7 @@ import JavaKitShared
 protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
   var logLevel: Logger.Level { get set }
 
+  /// Must be implemented with an `@OptionGroup` in Command implementations
   var commonOptions: SwiftJava.CommonOptions { get set }
 
   var effectiveSwiftModule: String { get }
@@ -37,9 +38,15 @@ protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
 }
 
 extension SwiftJavaBaseAsyncParsableCommand {
+  var outputDirectory: String? {
+    self.commonOptions.outputDirectory
+  }
+}
+
+extension SwiftJavaBaseAsyncParsableCommand {
   public mutating func run() async {
-    print("[info][swift-java] Run: \(CommandLine.arguments.joined(separator: " "))")
-    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: "."))")
+    print("[info][swift-java] Run \(Self.self): \(CommandLine.arguments.joined(separator: " "))")
+    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: ".").path)")
 
     do {
       var config = try readInitialConfiguration(command: self)
@@ -59,20 +66,10 @@ extension SwiftJavaBaseAsyncParsableCommand {
 extension SwiftJavaBaseAsyncParsableCommand {
   mutating func writeContents(
     _ contents: String,
-    to filename: String, description: String) throws {
-    try writeContents(
-      contents,
-      outputDirectoryOverride: self.actualOutputDirectory,
-      to: filename,
-      description: description)
-  }
-
-  mutating func writeContents(
-    _ contents: String,
-    outputDirectoryOverride: Foundation.URL?,
+    outputDirectory: Foundation.URL?,
     to filename: String,
     description: String) throws {
-    guard let outputDir = (outputDirectoryOverride ?? actualOutputDirectory) else {
+    guard let outputDir = outputDirectory else {
       print("// \(filename) - \(description)")
       print(contents)
       return
@@ -90,7 +87,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
     // Write the file:
     let file = outputDir.appendingPathComponent(filename)
-    print("[debug][swift-java] Writing \(description) to '\(file.path)'... ", terminator: "")
+    print("[trace][swift-java] Writing \(description) to '\(file.path)'... ", terminator: "")
     try contents.write(to: file, atomically: true, encoding: .utf8)
     print("done.".green)
   }
@@ -106,22 +103,22 @@ extension SwiftJavaBaseAsyncParsableCommand {
     self.commonOptions.logLevel = newValue
     }
   }
+
+  var effectiveSwiftModuleURL: Foundation.URL {
+    let fm = FileManager.default
+    return URL(fileURLWithPath: fm.currentDirectoryPath + "/Sources/\(self.effectiveSwiftModule)")
+  }
 }
 extension SwiftJavaBaseAsyncParsableCommand {
 
   var moduleBaseDir: Foundation.URL? {
-//    if let outputDirectory = commonOptions.outputDirectory {
-//      if outputDirectory == "-" {
-//        return nil
-//      }
-//
+    if let outputDirectory = commonOptions.outputDirectory {
+      if outputDirectory == "-" {
+        return nil
+      }
 //      print("[debug][swift-java] Module base directory based on outputDirectory!")
 //      return URL(fileURLWithPath: outputDirectory)
-//    }
-
-//    guard let swiftModule else {
-//      return nil
-//    }
+    }
 
     // Put the result into Sources/\(swiftModule).
     let baseDir = URL(fileURLWithPath: ".")
@@ -137,7 +134,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
   ///
   /// Returns `nil` only when we should emit the files to standard output.
   var actualOutputDirectory: Foundation.URL? {
-    if let outputDirectory = commonOptions.outputDirectory {
+    if let outputDirectory = self.commonOptions.outputDirectory {
       if outputDirectory == "-" {
         return nil
       }
@@ -152,15 +149,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
     // For generated Swift sources, put them into a "generated" subdirectory.
     // The configuration file goes at the top level.
-    let outputDir: Foundation.URL
-      //    if jar {
-            // precondition(self.input != nil, "-jar mode requires path to jar to be specified as input path")
-      outputDir = baseDir
-      //    } else {
-      //      outputDir = baseDir
-      //        .appendingPathComponent("generated", isDirectory: true)
-      //    }
-
+    let outputDir: Foundation.URL = baseDir
     return outputDir
   }
 

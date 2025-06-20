@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum GenerationMode: String, Codable {
+public enum JExtractGenerationMode: String, Codable {
   /// Foreign Value and Memory API
   case ffm
 

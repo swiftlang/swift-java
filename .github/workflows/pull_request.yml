@@ -36,7 +36,7 @@ jobs:
       - name: Gradle :SwiftKit:build
         run: ./gradlew build -x test
       - name: Gradle :SwiftKit:check
-        run: ./gradlew :SwiftKit:check --info
+        run: ./gradlew :SwiftKit:check --debug
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 

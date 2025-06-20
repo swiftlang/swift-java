@@ -39,12 +39,11 @@ public struct SwiftToJava {
       translator.log.warning("Configured java package is '', consider specifying concrete package for generated sources.")
     }
 
-    print("===== CONFIG ==== \(config)")
-
     guard let inputSwift = config.inputSwiftDirectory else {
       fatalError("Missing '--swift-input' directory!")
     }
 
+    translator.log.info("Input swift = \(inputSwift)")
     let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
     translator.log.info("Input paths = \(inputPaths)")
 

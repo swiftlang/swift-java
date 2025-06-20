@@ -25,7 +25,7 @@ enum RenderKind {
 func assertOutput(
   dump: Bool = false,
   input: String,
-  _ mode: GenerationMode,
+  _ mode: JExtractGenerationMode,
   _ renderKind: RenderKind,
   swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines: Int = 4,

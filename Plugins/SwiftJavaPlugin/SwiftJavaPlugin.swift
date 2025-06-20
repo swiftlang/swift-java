@@ -44,7 +44,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Config was: \(config)")
     var javaDependencies = config.dependencies ?? []
 
-    /// Find the manifest files from other Java2Swift executions in any targets
+    /// Find the manifest files from other swift-java executions in any targets
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
@@ -88,26 +88,14 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     var arguments: [String] = []
-    arguments += argumentsModuleName(sourceModule: sourceModule)
+    arguments += argumentsSwiftModule(sourceModule: sourceModule)
     arguments += argumentsOutputDirectory(context: context)
-    
-    arguments += dependentConfigFiles.flatMap { moduleAndConfigFile in
-      let (moduleName, configFile) = moduleAndConfigFile
-      return [
-        "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))"
-      ]
-    }
-    arguments.append(configFile.path(percentEncoded: false))
+    arguments += argumentsDependedOnConfigs(dependentConfigFiles)
 
-//    guard let classes = config.classes else {
-//      log("Config at \(configFile) did not have 'classes' configured, skipping java2swift step.")
-//      return []
-//    }
     let classes = config.classes ?? [:]
-    print("Classes to wrap: \(classes.map(\.key))")
+    print("[swift-java-plugin] Classes to wrap (\(classes.count)): \(classes.map(\.key))")
 
-    /// Determine the set of Swift files that will be emitted by the Java2Swift tool.
+    /// Determine the set of Swift files that will be emitted by the swift-java tool.
     // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
     let outputDirectoryGenerated = self.outputDirectory(context: context, generated: true)
     let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
@@ -165,12 +153,9 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .buildCommand(
           displayName: displayName,
           executable: executable,
-          arguments: [
-            // FIXME: change to 'resolve' subcommand
-            "--fetch", configFile.path(percentEncoded: false),
-            "--swift-module", sourceModule.name,
-            "--output-directory", outputDirectory(context: context, generated: false).path(percentEncoded: false)
-          ],
+          arguments: ["resolve"]
+            + argumentsOutputDirectory(context: context, generated: false)
+            + argumentsSwiftModule(sourceModule: sourceModule),
           environment: [:],
           inputFiles: [configFile],
           outputFiles: fetchDependenciesOutputFiles
@@ -181,19 +166,24 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
     
     if !outputSwiftFiles.isEmpty {
+      arguments += [ configFile.path(percentEncoded: false) ]
+
       let displayName = "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'"
       log("Prepared: \(displayName)")
       commands += [
         .buildCommand(
           displayName: displayName,
           executable: executable,
-          arguments: arguments,
+          arguments: ["wrap-java"]
+            + arguments,
           inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [ configFile ],
           outputFiles: outputSwiftFiles
         )
       ]
-    } else {
-      log("No Swift output files, skip wrapping")
+    }
+
+    if commands.isEmpty {
+      log("No swift-java commands for module '\(sourceModule.name)'")
     }
 
     return commands
@@ -201,19 +191,38 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 }
 
 extension SwiftJavaBuildToolPlugin {
-  func argumentsModuleName(sourceModule: Target) -> [String] {
+  func argumentsSwiftModule(sourceModule: Target) -> [String] {
     return [
       "--swift-module", sourceModule.name
     ]
   }
-  
+
+  // FIXME: remove this and the deprecated property inside SwiftJava, this is a workaround
+  //        since we cannot have the same option in common options and in the top level
+  //        command from which we get into sub commands. The top command will NOT have this option.
+  func argumentsSwiftModuleDeprecated(sourceModule: Target) -> [String] {
+    return [
+      "--swift-module-deprecated", sourceModule.name
+    ]
+  }
+
   func argumentsOutputDirectory(context: PluginContext, generated: Bool = true) -> [String] {
     return [
       "--output-directory",
       outputDirectory(context: context, generated: generated).path(percentEncoded: false)
     ]
   }
-  
+
+  func argumentsDependedOnConfigs(_ dependentConfigFiles: [(String, URL)]) -> [String] {
+    dependentConfigFiles.flatMap { moduleAndConfigFile in
+      let (moduleName, configFile) = moduleAndConfigFile
+      return [
+        "--depends-on",
+        "\(moduleName)=\(configFile.path(percentEncoded: false))"
+      ]
+    }
+  }
+
   func outputDirectory(context: PluginContext, generated: Bool = true) -> URL {
     let dir = context.pluginWorkDirectoryURL
     if generated {
