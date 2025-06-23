@@ -113,6 +113,8 @@ struct TranslatedFunctionType {
   var name: String
   var parameters: [TranslatedParameter]
   var result: TranslatedResult
+  var swiftType: SwiftFunctionType
+  var cdeclType: SwiftFunctionType
 
   /// Whether or not this functional interface with C ABI compatible.
   var isCompatibleWithC: Bool {
@@ -159,13 +161,19 @@ struct JavaTranslation {
     case .function, .initializer: decl.name
     }
 
+    // Signature.
+    let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
+
     // Closures.
     var funcTypes: [TranslatedFunctionType] = []
     for (idx, param) in decl.functionSignature.parameters.enumerated() {
       switch param.type {
       case .function(let funcTy):
         let paramName = param.parameterName ?? "_\(idx)"
-        let translatedClosure = try translateFunctionType(name: paramName, swiftType: funcTy)
+        guard case .function( let cdeclTy)  = loweredSignature.parameters[idx].cdeclParameters[0].type else {
+          preconditionFailure("closure parameter wasn't lowered to a function type; \(funcTy)")
+        }
+        let translatedClosure = try translateFunctionType(name: paramName, swiftType: funcTy, cdeclType: cdeclTy)
         funcTypes.append(translatedClosure)
       case .tuple:
         // TODO: Implement
@@ -174,9 +182,6 @@ struct JavaTranslation {
         break
       }
     }
-
-    // Signature.
-    let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
 
     return TranslatedFunctionDecl(
       name: javaName,
@@ -189,23 +194,16 @@ struct JavaTranslation {
   /// Translate Swift closure type to Java functional interface.
   func translateFunctionType(
     name: String,
-    swiftType: SwiftFunctionType
+    swiftType: SwiftFunctionType,
+    cdeclType: SwiftFunctionType
   ) throws -> TranslatedFunctionType {
     var translatedParams: [TranslatedParameter] = []
 
     for (i, param) in swiftType.parameters.enumerated() {
       let paramName = param.parameterName ?? "_\(i)"
-      if let cType = try? CType(cdeclType: param.type) {
-        let translatedParam = TranslatedParameter(
-          javaParameters: [
-            JavaParameter(type: cType.javaType, name: paramName)
-          ],
-          conversion: .placeholder
-        )
-        translatedParams.append(translatedParam)
-        continue
-      }
-      throw JavaTranslationError.unhandledType(.function(swiftType))
+      translatedParams.append(
+        try translateClosureParameter(param.type, convention: param.convention, parameterName: paramName)
+      )
     }
 
     guard let resultCType = try? CType(cdeclType: swiftType.resultType) else {
@@ -221,9 +219,54 @@ struct JavaTranslation {
     return TranslatedFunctionType(
       name: name,
       parameters: translatedParams,
-      result: transltedResult
+      result: transltedResult,
+      swiftType: swiftType,
+      cdeclType: cdeclType
     )
   }
+
+  func translateClosureParameter(
+    _ type: SwiftType,
+    convention: SwiftParameterConvention,
+    parameterName: String
+  ) throws -> TranslatedParameter {
+    if let cType = try? CType(cdeclType: type) {
+      return TranslatedParameter(
+        javaParameters: [
+          JavaParameter(type: cType.javaType, name: parameterName)
+        ],
+        conversion: .placeholder
+      )
+    }
+
+    switch type {
+    case .nominal(let nominal):
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        switch knownType {
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          return TranslatedParameter(
+            javaParameters: [
+              JavaParameter(type: .javaForeignMemorySegment, name: parameterName)
+            ],
+            conversion: .method(
+              .explodedName(component: "pointer"),
+              methodName: "reinterpret",
+              arguments: [
+                .explodedName(component: "count")
+              ],
+              withArena: false
+            )
+          )
+        default:
+          break
+        }
+      }
+    default:
+      break
+    }
+    throw JavaTranslationError.unhandledType(type)
+  }
+
 
   /// Translate a Swift API signature to the user-facing Java API signature.
   ///
@@ -424,10 +467,10 @@ struct JavaTranslation {
               JavaParameter(type: .long, name: "count"),
             ],
             conversion: .method(
-              .readOutParameter(.javaForeignMemorySegment, component: "pointer"),
+              .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
               methodName: "reinterpret",
               arguments: [
-                .readOutParameter(.long, component: "count")
+                .readMemorySegment(.explodedName(component: "count"), as: .long),
               ],
               withArena: false
             )
@@ -483,8 +526,11 @@ struct JavaTranslation {
 
 /// Describes how to convert values between Java types and FFM types.
 enum JavaConversionStep {
-  // Pass through.
+  // The input
   case placeholder
+
+  // The input exploded into components.
+  case explodedName(component: String)
 
   // A fixed value
   case constant(String)
@@ -513,7 +559,7 @@ enum JavaConversionStep {
   indirect case commaSeparated([JavaConversionStep])
 
   // Refer an exploded argument suffixed with `_\(name)`.
-  indirect case readOutParameter(JavaType, component: String)
+  indirect case readMemorySegment(JavaConversionStep, as: JavaType)
 
   var isPlaceholder: Bool {
     return if case .placeholder = self { true } else { false }

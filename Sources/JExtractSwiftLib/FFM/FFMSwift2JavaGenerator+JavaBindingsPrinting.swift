@@ -251,7 +251,6 @@ extension FFMSwift2JavaGenerator {
       )
     } else {
       // Otherwise, the lambda must be wrapped with the lowered function instance.
-      assertionFailure("should be unreachable at this point")
       let apiParams = functionType.parameters.flatMap {
         $0.javaParameters.map { param in "\(param.type) \(param.name)" }
       }
@@ -262,13 +261,38 @@ extension FFMSwift2JavaGenerator {
         public interface \(functionType.name) {
           \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: ", ")));
         }
-        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
-          return \(cdeclDescriptor).toUpcallStub((<cdecl-params>) -> {
-            <maybe-return> fi(<converted-args>)
-          }, arena);
-        }
         """
       )
+
+      let cdeclParams = functionType.cdeclType.parameters.map( { "\($0.parameterName!)" })
+
+      printer.printBraceBlock(
+        """
+        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena)
+        """
+      ) { printer in
+        printer.print(
+          """
+          return \(cdeclDescriptor).toUpcallStub((\(cdeclParams.joined(separator: ", "))) -> {
+          """
+        )
+        printer.indent()
+        var convertedArgs: [String] = []
+        for param in functionType.parameters {
+          let arg = param.conversion.render(&printer, param.javaParameters[0].name)
+          convertedArgs.append(arg)
+        }
+
+        let call = "fi.apply(\(convertedArgs.joined(separator: ", ")))"
+        let result = functionType.result.conversion.render(&printer, call)
+        if functionType.result.javaResultType == .void {
+          printer.print("\(result);")
+        } else {
+          printer.print("return \(result);")
+        }
+        printer.outdent()
+        printer.print("}, arena);")
+      }
     }
   }
 
@@ -419,7 +443,7 @@ extension JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {
-    case .placeholder, .constant, .readOutParameter:
+    case .placeholder, .explodedName, .constant, .readMemorySegment:
       return false
     case .constructSwiftValue:
       return true
@@ -436,9 +460,9 @@ extension JavaConversionStep {
   /// Whether the conversion uses temporary Arena.
   var requiresTemporaryArena: Bool {
     switch self {
-    case .placeholder, .constant:
+    case .placeholder, .explodedName, .constant:
       return false
-    case .readOutParameter:
+    case .readMemorySegment:
       return true
     case .cast(let inner, _), .construct(let inner, _), .constructSwiftValue(let inner, _), .swiftValueSelfSegment(let inner):
       return inner.requiresSwiftArena
@@ -458,6 +482,9 @@ extension JavaConversionStep {
     switch self {
     case .placeholder:
       return placeholder
+
+    case .explodedName(let component):
+      return "\(placeholder)_\(component)"
 
     case .swiftValueSelfSegment:
       return "\(placeholder).$memorySegment()"
@@ -491,8 +518,9 @@ extension JavaConversionStep {
     case .constant(let value):
       return value
 
-    case .readOutParameter(let javaType, let name):
-      return "\(placeholder)_\(name).get(\(ForeignValueLayout(javaType: javaType)!), 0)"
+    case .readMemorySegment(let inner, let javaType):
+      let inner = inner.render(&printer, placeholder)
+      return "\(inner).get(\(ForeignValueLayout(javaType: javaType)!), 0)"
     }
   }
 }

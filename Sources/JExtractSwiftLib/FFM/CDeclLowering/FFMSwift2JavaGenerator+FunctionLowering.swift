@@ -332,14 +332,15 @@ struct CdeclLowering {
     var parameters: [SwiftParameter] = []
     var parameterConversions: [ConversionStep] = []
 
-    for parameter in fn.parameters {
-      if let _ = try? CType(cdeclType: parameter.type) {
-        parameters.append(SwiftParameter(convention: .byValue, type: parameter.type))
-        parameterConversions.append(.placeholder)
-      } else {
-        // Non-trivial types are not yet supported.
-        throw LoweringError.unhandledType(.function(fn))
-      }
+    for (i, parameter) in fn.parameters.enumerated() {
+      let parameterName = parameter.parameterName ?? "_\(i)"
+      let loweredParam = try lowerClosureParameter(
+        parameter.type,
+        convention: parameter.convention,
+        parameterName: parameterName
+      )
+      parameters.append(contentsOf: loweredParam.cdeclParameters)
+      parameterConversions.append(loweredParam.conversion)
     }
 
     let resultType: SwiftType
@@ -352,13 +353,72 @@ struct CdeclLowering {
       throw LoweringError.unhandledType(.function(fn))
     }
 
-    // Ignore the conversions for now, since we don't support non-trivial types yet.
-    _ = (parameterConversions, resultConversion)
+    let isCompatibleWithC = parameterConversions.allSatisfy(\.isPlaceholder) && resultConversion.isPlaceholder
 
     return (
       type: .function(SwiftFunctionType(convention: .c, parameters: parameters, resultType: resultType)),
-      conversion: .placeholder
+      conversion: isCompatibleWithC ? .placeholder : .closureLowering(parameters: parameterConversions, result: resultConversion)
     )
+  }
+
+  func lowerClosureParameter(
+    _ type: SwiftType,
+    convention: SwiftParameterConvention,
+    parameterName: String
+  ) throws -> LoweredParameter {
+    // If there is a 1:1 mapping between this Swift type and a C type, we just
+    // return it.
+    if let _ = try? CType(cdeclType: type) {
+      return LoweredParameter(
+        cdeclParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: parameterName,
+            type: type
+          ),
+        ],
+        conversion: .placeholder
+      )
+    }
+    
+    switch type {
+    case .nominal(let nominal):
+      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        switch knownType {
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          // pointer buffers are lowered to (raw-pointer, count) pair.
+          let isMutable = knownType == .unsafeMutableRawBufferPointer
+          return LoweredParameter(
+            cdeclParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(parameterName)_pointer",
+                type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+              ),
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(parameterName)_count",
+                type: knownTypes.int
+              ),
+            ],
+            conversion: .tuplify([
+              .member(.placeholder, member: "baseAddress"),
+              .member(.placeholder, member: "count")
+            ])
+          )
+
+        default:
+          throw LoweringError.unhandledType(type)
+        }
+      }
+
+      // Custom types are not supported yet.
+      throw LoweringError.unhandledType(type)
+
+    case .function, .metatype, .optional, .tuple:
+      // TODO: Implement
+      throw LoweringError.unhandledType(type)
+    }
   }
 
   /// Lower a Swift result type to cdecl out parameters and return type.

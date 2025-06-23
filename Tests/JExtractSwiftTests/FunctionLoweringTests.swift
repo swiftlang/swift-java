@@ -333,6 +333,24 @@ final class FunctionLoweringTests {
     )
   }
 
+  @Test("Lowering non-C-compatible closures")
+  func lowerComplexClosureParameter() throws {
+    try assertLoweredFunction(
+      """
+      func withBuffer(body: (UnsafeRawBufferPointer) -> Int) {}
+      """,
+      expectedCDecl: """
+      @_cdecl("c_withBuffer")
+      public func c_withBuffer(_ body: @convention(c) (UnsafeRawPointer?, Int) -> Int) {
+        withBuffer(body: { (_0) in
+          return body(_0.baseAddress, _0.count)
+        })
+      }
+      """,
+      expectedCFunction: "void c_withBuffer(ptrdiff_t (*body)(const void *, ptrdiff_t))"
+    )
+  }
+
   @Test("Lowering () -> Void type")
   func lowerSimpleClosureTypes() throws {
     try assertLoweredFunction("""

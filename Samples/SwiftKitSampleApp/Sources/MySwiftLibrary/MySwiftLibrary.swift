@@ -53,6 +53,10 @@ public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
 
 public var globalBuffer: UnsafeRawBufferPointer = UnsafeRawBufferPointer(UnsafeMutableRawBufferPointer.allocate(byteCount: 124, alignment: 1))
 
+public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
+  body(globalBuffer)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
