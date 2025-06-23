@@ -39,6 +39,20 @@ struct SwiftJava: AsyncParsableCommand {
       JExtractCommand.self
     ])
 
+  public static func main() async {
+    do {
+      var command = try parseAsRoot(nil)
+      if var asyncCommand = command as? AsyncParsableCommand {
+        try await asyncCommand.run()
+      } else {
+        try command.run()
+      }
+    } catch {
+      print("Invocation: \(CommandLine.arguments.joined(separator: " "))")
+      exit(withError: error)
+    }
+  }
+
   mutating func run() async throws {
     guard CommandLine.arguments.count >= 2 else {
       // there's no "default" command, print USAGE when no arguments/parameters are passed.
