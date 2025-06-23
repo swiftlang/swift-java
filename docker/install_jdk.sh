@@ -22,7 +22,7 @@ if [ "$JDK_VENDOR" = "" ]; then
 declare -r JDK_VENDOR="Corretto"
 fi
 
-apt-get update && apt-get install -y wget
+apt-get update && apt-get install -y wget tree
 
 echo "Download JDK for: $(uname -m)"
 
@@ -53,7 +53,7 @@ download_and_install_jdk() {
             case "$jdk_version" in
                 "21")
                     jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.tar.gz"
-                    expected_md5="84368821f590bd58708d9e350534c7f8"
+                    expected_md5="a123e7f50807c27de521bef7378d3377"
                     ;;
                 "24")
                     jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
@@ -94,20 +94,21 @@ download_and_install_jdk() {
 
     # Move extracted directory to a standard name
     local extracted_dir
-    extracted_dir="$(find . -maxdepth 1 -type d -name "*jdk*" | head -n1)"
-    if [ -n "$extracted_dir" ]; then
-        mv "$extracted_dir"/* .
-        rm -rf "$extracted_dir"
-    fi
+    extracted_dir="$(find . -maxdepth 1 -type d -name '*linux*' | head -n1)"
+    echo "move $extracted_dir to $(pwd)..."
+    mv "${extracted_dir}"/* .
 
     echo "JDK $jdk_version installed successfully in /usr/lib/jvm/jdk-${jdk_version}/"
-    cd
+    cd "$HOME"
 }
 
 # Usage: Install both JDK versions
 download_and_install_jdk "21"
 download_and_install_jdk "24"
 
-ln -sf /usr/lib/jvm/jdk-21 /usr/lib/jvm/default-jdk
+ls -la /usr/lib/jvm/
+cd /usr/lib/jvm/
+ln -s jdk-21 default-jdk
+find . | grep java | grep bin
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
 /usr/lib/jvm/default-jdk/bin/java -version

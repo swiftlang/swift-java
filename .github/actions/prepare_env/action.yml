@@ -15,7 +15,7 @@ runs:
         path: /usr/lib/jvm/default-jdk/
         key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
         restore-keys: |
-          ${{ runner.os }}-jdk-
+          ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}
     - name: Install JDK
       if: steps.cache-jdk.outputs.cache-hit != 'true'
       run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
