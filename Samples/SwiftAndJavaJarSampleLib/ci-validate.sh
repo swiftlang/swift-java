@@ -5,7 +5,7 @@ set -x
 
 ./gradlew jar
 
-export SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
+SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
 
 # we make sure to build and run with JDK 24 because the runtime needs latest JDK, unlike Gradle which needed 21.
 if [ "$(uname -s)" = 'Darwin' ]
