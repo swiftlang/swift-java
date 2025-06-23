@@ -14,7 +14,7 @@
 ##===----------------------------------------------------------------------===##
 set -euo pipefail
 
-# Supported JDKs: Corretto or OpenJDK
+# Supported JDKs: Corretto
 if [ "$JDK_VENDOR" = "" ]; then
 declare -r JDK_VENDOR="Corretto"
 fi
@@ -24,34 +24,13 @@ apt-get update && apt-get install -y wget
 
 echo "Download JDK for: $(uname -m)"
 
-if [ "$JDK_VENDOR" = 'OpenJDK' ]; then
+if [ "$JDK_VENDOR" = 'Corretto' ]; then
   if [ "$(uname -m)" = 'aarch64' ]; then
-    declare -r JDK_URL="https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-aarch64_bin.tar.gz"
-    declare -r EXPECT_JDK_SHA="076dcf7078cdf941951587bf92733abacf489a6570f1df97ee35945ffebec5b7"
+    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-24-aarch64-linux-jdk.tar.gz"
+    declare -r EXPECT_JDK_MD5="3b543f4e971350b73d0ab6d8174cc030"
   else
-    declare -r JDK_URL="https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/$JDK_NAME"
-    declare -r EXPECT_JDK_SHA="08fea92724127c6fa0f2e5ea0b07ff4951ccb1e2f22db3c21eebbd7347152a67"
-  fi
-
-  wget -q -O jdk.tar.gz "$JDK_URL"
-
-  declare JDK_SHA # on separate lines due to: SC2155 (warning): Declare and assign separately to avoid masking return values.
-  JDK_SHA="$(sha256sum jdk.tar.gz | cut -d ' ' -f 1)"
-  if [ "$JDK_SHA" != "$EXPECT_JDK_SHA" ]; then
-    echo "Downloaded JDK SHA does not match expected!"
-    echo "Expected: $EXPECT_JDK_SHA"
-    echo "     Was: $JDK_SHA"
-    exit 1;
-  else
-    echo "JDK SHA is correct.";
-  fi
-elif [ "$JDK_VENDOR" = 'Corretto' ]; then
-  if [ "$(uname -m)" = 'aarch64' ]; then
-    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-22-aarch64-linux-jdk.tar.gz"
-    declare -r EXPECT_JDK_MD5="1ebe5f5229bb18bc784a1e0f54d3fe39"
-  else
-    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-22-x64-linux-jdk.tar.gz"
-    declare -r EXPECT_JDK_MD5="5bd7fe30eb063699a3b4db7a00455841"
+    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
+    declare -r EXPECT_JDK_MD5="130885ded3cbfc712fbe9f7dace45a52"
   fi
 
   wget -q -O jdk.tar.gz "$JDK_URL"
