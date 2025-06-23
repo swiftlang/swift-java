@@ -14,49 +14,100 @@
 ##===----------------------------------------------------------------------===##
 set -euo pipefail
 
+# We need JDK 24 because that's the supported version with latest FFM
+# However, we also need JDK 23 at most because Gradle does not support 24.
+
 # Supported JDKs: Corretto
 if [ "$JDK_VENDOR" = "" ]; then
 declare -r JDK_VENDOR="Corretto"
 fi
-echo "Installing $JDK_VENDOR JDK..."
 
 apt-get update && apt-get install -y wget
 
 echo "Download JDK for: $(uname -m)"
 
-if [ "$JDK_VENDOR" = 'Corretto' ]; then
-  if [ "$(uname -m)" = 'aarch64' ]; then
-    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-24-aarch64-linux-jdk.tar.gz"
-    declare -r EXPECT_JDK_MD5="3b543f4e971350b73d0ab6d8174cc030"
-  else
-    declare -r JDK_URL="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
-    declare -r EXPECT_JDK_MD5="130885ded3cbfc712fbe9f7dace45a52"
-  fi
+download_and_install_jdk() {
+    local jdk_version="$1"
+    local jdk_url=""
+    local expected_md5=""
 
-  wget -q -O jdk.tar.gz "$JDK_URL"
+    echo "Installing $JDK_VENDOR JDK (${jdk_version})..."
 
-  declare JDK_MD5 # on separate lines due to: SC2155 (warning): Declare and assign separately to avoid masking return values.
-  JDK_MD5="$(md5sum jdk.tar.gz | cut -d ' ' -f 1)"
-  if [ "$JDK_MD5" != "$EXPECT_JDK_MD5" ]; then
-    echo "Downloaded JDK MD5 does not match expected!"
-    echo "Expected: $EXPECT_JDK_MD5"
-    echo "     Was: $JDK_MD5"
-    exit 1;
-  else
-    echo "JDK MD5 is correct.";
-  fi
-else
-  echo "Unsupported JDK vendor: '$JDK_VENDOR'"
-  exit 1
-fi
+    if [ "$JDK_VENDOR" = 'Corretto' ]; then
+        if [ "$(uname -m)" = 'aarch64' ]; then
+            case "$jdk_version" in
+                "21")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-21-aarch64-linux-jdk.tar.gz"
+                    expected_md5="87e458029cf9976945dfa3a22af3f850"
+                    ;;
+                "24")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-aarch64-linux-jdk.tar.gz"
+                    expected_md5="3b543f4e971350b73d0ab6d8174cc030"
+                    ;;
+                *)
+                    echo "Unsupported JDK version: '$jdk_version'"
+                    exit 1
+                    ;;
+            esac
+        else
+            case "$jdk_version" in
+                "21")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.tar.gz"
+                    expected_md5="84368821f590bd58708d9e350534c7f8"
+                    ;;
+                "24")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
+                    expected_md5="130885ded3cbfc712fbe9f7dace45a52"
+                    ;;
+                *)
+                    echo "Unsupported JDK version: '$jdk_version'"
+                    exit 1
+                    ;;
+            esac
+        fi
+    else
+        echo "Unsupported JDK vendor: '$JDK_VENDOR'"
+        exit 1
+    fi
 
-# Extract and verify the JDK installation
+    # Download JDK
+    local jdk_filename="jdk_${jdk_version}.tar.gz"
+    wget -q -O "$jdk_filename" "$jdk_url"
 
-mkdir -p /usr/lib/jvm/
-mv jdk.tar.gz /usr/lib/jvm/
-cd /usr/lib/jvm/
-tar xzvf jdk.tar.gz && rm jdk.tar.gz
-mv "$(find . -depth -maxdepth 1 -type d | head -n1)" default-jdk
+    # Verify MD5
+    local jdk_md5
+    jdk_md5="$(md5sum "$jdk_filename" | cut -d ' ' -f 1)"
+    if [ "$jdk_md5" != "$expected_md5" ]; then
+        echo "Downloaded JDK $jdk_version MD5 does not match expected!"
+        echo "Expected: $expected_md5"
+        echo "     Was: $jdk_md5"
+        exit 1
+    else
+        echo "JDK $jdk_version MD5 is correct."
+    fi
 
+    # Extract and install JDK
+    mkdir -p "/usr/lib/jvm/jdk-${jdk_version}"
+    mv "$jdk_filename" "/usr/lib/jvm/jdk-${jdk_version}/"
+    cd "/usr/lib/jvm/jdk-${jdk_version}/" || exit 1
+    tar xzf "$jdk_filename" && rm "$jdk_filename"
+
+    # Move extracted directory to a standard name
+    local extracted_dir
+    extracted_dir="$(find . -maxdepth 1 -type d -name "*jdk*" | head -n1)"
+    if [ -n "$extracted_dir" ]; then
+        mv "$extracted_dir"/* .
+        rm -rf "$extracted_dir"
+    fi
+
+    echo "JDK $jdk_version installed successfully in /usr/lib/jvm/jdk-${jdk_version}/"
+    cd
+}
+
+# Usage: Install both JDK versions
+download_and_install_jdk "21"
+download_and_install_jdk "24"
+
+ln -sf /usr/lib/jvm/jdk-21 /usr/lib/jvm/default-jdk
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
 /usr/lib/jvm/default-jdk/bin/java -version
