@@ -43,11 +43,7 @@ let javaIncludePath = "\(javaHome)/include"
 let package = Package(
   name: "JavaDependencySampleApp",
   platforms: [
-    .macOS(.v13),
-    .iOS(.v13),
-    .tvOS(.v13),
-    .watchOS(.v6),
-    .macCatalyst(.v13),
+    .macOS(.v15),
   ],
 
   products: [
