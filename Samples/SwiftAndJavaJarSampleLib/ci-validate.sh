@@ -3,6 +3,8 @@
 set -e
 set -x
 
+export PATH="${PATH}:${JAVA_HOME}/bin"
+
 ./gradlew jar
 
 # check if we can compile a plain Example file that uses the generated Java bindings that should be in the generated jar
