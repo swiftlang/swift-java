@@ -78,8 +78,14 @@ def swiftProductsWithJExtractPlugin() {
     }
 }
 
+def swiftCheckValid = tasks.register("swift-check-valid", Exec) {
+    commandLine "swift"
+    args("-version")
+}
+
 def jextract = tasks.register("jextract", Exec) {
     description = "Generate Java wrappers for swift target"
+    dependsOn swiftCheckValid
     // dependsOn compileSwiftJExtractPlugin
 
     // only because we depend on "live developing" the plugin while using this project to test it
@@ -90,7 +96,8 @@ def jextract = tasks.register("jextract", Exec) {
     inputs.file(new File(projectDir, "Package.swift"))
 
     // monitor all targets/products which depend on the JExtract plugin
-    swiftProductsWithJExtractPlugin().each {
+    // swiftProductsWithJExtractPlugin().each {
+    ["MySwiftLibrary"].each {
         logger.info("[swift-java:jextract (Gradle)] Swift input target: ${it}")
         inputs.dir(new File(layout.projectDirectory.asFile, "Sources/${it}".toString()))
     }

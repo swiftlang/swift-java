@@ -30,13 +30,19 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(22))
+        languageVersion.set(JavaLanguageVersion.of(23))
     }
+}
+
+def swiftCheckValid = tasks.register("swift-check-valid", Exec) {
+    commandLine "swift"
+    args("-version")
 }
 
 def jextract = tasks.register("jextract", Exec) {
     description = "Builds swift sources, including swift-java source generation"
-    dependsOn compileSwiftJExtractPlugin
+    dependsOn swiftCheckValid
+    // dependsOn compileSwiftJExtractPlugin
 
     // only because we depend on "live developing" the plugin while using this project to test it
     inputs.file(new File(rootDir, "Package.swift"))
