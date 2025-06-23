@@ -7,15 +7,15 @@ runs:
     - name: Install System Dependencies
       run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       shell: bash
-    - name: Cache JDK
+    - name: Cache JDKs
       id: cache-jdk
       uses: actions/cache@v4
       continue-on-error: true
       with:
-        path: /usr/lib/jvm/default-jdk/
-        key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/default-jdk/*') }}
+        path: /usr/lib/jvm/
+        key: ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}-${{ hashFiles('/usr/lib/jvm/*') }}
         restore-keys: |
-          ${{ runner.os }}-jdk-${{ matrix.jdk_vendor }}
+          ${{ runner.os }}-jdk-
     - name: Install JDK
       if: steps.cache-jdk.outputs.cache-hit != 'true'
       run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
