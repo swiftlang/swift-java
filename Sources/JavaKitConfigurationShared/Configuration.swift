@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -38,19 +38,17 @@ public struct Configuration: Codable {
 
   public var outputJavaDirectory: String?
 
-  public var mode: GenerationMode?
+  public var mode: JExtractGenerationMode?
+
+  public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
 
   // ==== java 2 swift ---------------------------------------------------------
 
-  /// The Java class path that should be passed along to the Java2Swift tool.
+  /// The Java class path that should be passed along to the swift-java tool.
   public var classpath: String? = nil
 
   public var classpathEntries: [String] {
-    guard let classpath else {
-      return []
-    }
-
-    return classpath.split(separator: ":").map(String.init)
+    return classpath?.split(separator: ":").map(String.init) ?? []
   }
 
   /// The Java classes that should be translated to Swift. The keys are
@@ -79,6 +77,12 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
   public var groupID: String
   public var artifactID: String
   public var version: String
+
+  public init(groupID: String, artifactID: String, version: String) {
+    self.groupID = groupID
+    self.artifactID = artifactID
+    self.version = version
+  }
 
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
@@ -154,7 +158,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   let baseURL = URL(fileURLWithPath: basePath)
   var classpathEntries: [String] = []
 
-  print("[debug][swift-java] Searching for *.swift-java.classpath files in: \(baseURL)")
+  print("[debug][swift-java] Searching for *.swift-java.classpath files in: \(baseURL.absoluteString)")
   guard let enumerator = fileManager.enumerator(at: baseURL, includingPropertiesForKeys: []) else {
     print("[warning][swift-java] Failed to get enumerator for \(baseURL)")
     return []
@@ -162,7 +166,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   
   for case let fileURL as URL in enumerator {
     if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
-      print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.relativePath)")
+      print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.path)")
       if let contents = try? String(contentsOf: fileURL) {
         let entries = contents.split(separator: ":").map(String.init)
         for entry in entries {

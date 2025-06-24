@@ -20,8 +20,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -36,7 +35,7 @@ jobs:
       - name: Gradle :SwiftKit:build
         run: ./gradlew build -x test
       - name: Gradle :SwiftKit:check
-        run: ./gradlew :SwiftKit:check --info
+        run: ./gradlew :SwiftKit:check --debug
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 
@@ -46,8 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -70,8 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -90,8 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -110,8 +106,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -130,8 +125,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -150,8 +144,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:
@@ -170,8 +163,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # swift_version: ['nightly-main']
-        swift_version: ['6.0.2']
+        swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
     container:

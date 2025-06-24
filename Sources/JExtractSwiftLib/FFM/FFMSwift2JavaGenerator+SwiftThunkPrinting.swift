@@ -21,6 +21,19 @@ extension FFMSwift2JavaGenerator {
     try writeSwiftThunkSources(printer: &printer)
   }
 
+  package func writeSwiftExpectedEmptySources() throws {
+    for expectedFileName in self.expectedOutputSwiftFiles {
+      log.trace("Write empty file: \(expectedFileName) ...")
+
+      var printer = CodePrinter()
+      printer.print("// Empty file generated on purpose")
+      try printer.writeContents(
+        outputDirectory: self.swiftOutputDirectory,
+        javaPackagePath: nil,
+        filename: expectedFileName)
+    }
+  }
+
   package func writeSwiftThunkSources(printer: inout CodePrinter) throws {
     let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
     let moduleFilename = "\(moduleFilenameBase).swift"
@@ -32,15 +45,16 @@ extension FFMSwift2JavaGenerator {
       if let outputFile = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
-        filename: moduleFilename)
-      {
-        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+        filename: moduleFilename) {
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
+        self.expectedOutputSwiftFiles.remove(moduleFilename)
       }
     } catch {
       log.warning("Failed to write to Swift thunks: \(moduleFilename)")
     }
 
     // === All types
+    // FIXME: write them all into the same file they were declared from +SwiftJava
     for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
@@ -52,9 +66,9 @@ extension FFMSwift2JavaGenerator {
         if let outputFile = try printer.writeContents(
           outputDirectory: self.swiftOutputDirectory,
           javaPackagePath: nil,
-          filename: filename)
-        {
-          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile)")
+          filename: filename) {
+          print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile))")
+          self.expectedOutputSwiftFiles.remove(filename)
         }
       } catch {
         log.warning("Failed to write to Swift thunks: \(filename)")

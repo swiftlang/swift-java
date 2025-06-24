@@ -15,6 +15,7 @@
 import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let log: Logger
@@ -35,6 +36,9 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
 
+  /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
+  /// and write an empty file for those.
+  var expectedOutputSwiftFiles: Set<String>
 
   package init(
     translator: Swift2JavaTranslator,
@@ -50,6 +54,20 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     self.javaOutputDirectory = javaOutputDirectory
     self.symbolTable = translator.symbolTable
     self.swiftStdlibTypes = translator.swiftStdlibTypeDecls
+
+    // If we are forced to write empty files, construct the expected outputs
+    if translator.config.writeEmptyFiles ?? false {
+      self.expectedOutputSwiftFiles = Set(translator.inputs.compactMap { (input) -> String? in
+        guard let filePathPart = input.filePath.split(separator: "/\(translator.swiftModuleName)/").last else {
+          return nil
+        }
+
+        return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
+      })
+      self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
+    } else {
+      self.expectedOutputSwiftFiles = []
+    }
   }
 
   func generate() throws {
@@ -58,6 +76,12 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
     try writeExportedJavaSources()
     print("[swift-java] Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
+
+    let pendingFileCount = self.expectedOutputSwiftFiles.count
+    if pendingFileCount > 0 {
+      print("[swift-java] Write empty [\(pendingFileCount)] 'expected' files in: \(swiftOutputDirectory)/")
+      try writeSwiftExpectedEmptySources()
+    }
   }
 }
 

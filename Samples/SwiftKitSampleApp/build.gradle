@@ -12,9 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+import groovy.json.JsonSlurper
 import org.swift.swiftkit.gradle.BuildUtils
 
 import java.nio.file.*
+import kotlinx.serialization.json.*
 
 plugins {
     id("build-logic.java-application-conventions")
@@ -30,42 +32,61 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(22))
+        languageVersion.set(JavaLanguageVersion.of(24))
+    }
+}
+
+def swiftProductsWithJExtractPlugin() {
+    def stdout = new ByteArrayOutputStream()
+    def stderr = new ByteArrayOutputStream()
+
+    def result = exec {
+        commandLine 'swift', 'package', 'describe', '--type', 'json'
+        standardOutput = stdout
+        errorOutput = stderr
+        ignoreExitValue = true
+    }
+
+    def jsonOutput = stdout.toString()
+
+    if (result.exitValue == 0) {
+        def json = new JsonSlurper().parseText(jsonOutput)
+        def products = json.targets
+                .findAll { target ->
+                    target.product_dependencies?.contains("JExtractSwiftPlugin")
+                }
+                .collectMany { target ->
+                    target.product_memberships ?: []
+                }
+        return products
+    } else {
+        logger.warn("Command failed: ${stderr.toString()}")
+        return []
     }
 }
 
 
-// This is for development, when we edit the Swift swift-java project, the outputs of the generated sources may change.
-// Thus, we also need to watch and re-build the top level project.
-def compileSwiftJExtractPlugin = tasks.register("compileSwiftJExtractPlugin", Exec) {
-    description = "Rebuild the swift-java root project"
-
-    inputs.file(new File(rootDir, "Package.swift"))
-    inputs.dir(new File(rootDir, "Sources"))
-    outputs.dir(new File(rootDir, ".build"))
-
-    workingDir = rootDir
+def swiftCheckValid = tasks.register("swift-check-valid", Exec) {
     commandLine "swift"
-    args("build",
-            "--product", "SwiftKitSwift",
-            "--product", "JExtractSwiftPlugin",
-            "--product", "JExtractSwiftCommandPlugin")
+    args("-version")
 }
 
 def jextract = tasks.register("jextract", Exec) {
-    description = "Builds swift sources, including swift-java source generation"
-    dependsOn compileSwiftJExtractPlugin
+    description = "Generate Java wrappers for swift target"
+    dependsOn swiftCheckValid
 
     // only because we depend on "live developing" the plugin while using this project to test it
     inputs.file(new File(rootDir, "Package.swift"))
     inputs.dir(new File(rootDir, "Sources"))
 
+    // If the package description changes, we should execute jextract again, maybe we added jextract to new targets
     inputs.file(new File(projectDir, "Package.swift"))
-    inputs.dir(new File(projectDir, "Sources"))
 
-    // TODO: we can use package describe --type json to figure out which targets depend on JExtractSwiftPlugin and will produce outputs
-    //       Avoid adding this directory, but create the expected one specifically for all targets
-    //       which WILL produce sources because they have the plugin
+    // monitor all targets/products which depend on the JExtract plugin
+    swiftProductsWithJExtractPlugin().each {
+        logger.info("[swift-java:jextract (Gradle)] Swift input target: ${it}")
+        inputs.dir(new File(layout.projectDirectory.asFile, "Sources/${it}".toString()))
+    }
     outputs.dir(layout.buildDirectory.dir("../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}"))
 
     File baseSwiftPluginOutputsDir = layout.buildDirectory.dir("../.build/plugins/outputs/").get().asFile
@@ -81,7 +102,16 @@ def jextract = tasks.register("jextract", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args("package", "jextract", "-v", "--log-level", "debug") // TODO: pass log level from Gradle build
+    args("build") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
+    // If we wanted to execute a specific subcommand, we can like this:
+    //     args("run",/*
+    //             "swift-java", "jextract",
+    //             "--swift-module", "MySwiftLibrary",
+    //             // java.package is obtained from the swift-java.config in the swift module
+    //             "--output-java", "${layout.buildDirectory.dir(".build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractSwiftPlugin/src/generated/java").get()}",
+    //             "--output-swift", "${layout.buildDirectory.dir(".build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractSwiftPlugin/Sources").get()}",
+    //             "--log-level", (logging.level <= LogLevel.INFO ? "debug" :  */"info")
+    //     )
 }
 
 // Add the java-swift generated Java sources

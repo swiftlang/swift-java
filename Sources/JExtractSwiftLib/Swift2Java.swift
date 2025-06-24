@@ -30,21 +30,18 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-module' name.")
     }
 
-    let translator = Swift2JavaTranslator(
-      swiftModuleName: swiftModule
-    )
+    let translator = Swift2JavaTranslator(config: config)
     translator.log.logLevel = config.logLevel ?? .info
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
       translator.log.warning("Configured java package is '', consider specifying concrete package for generated sources.")
     }
 
-    print("===== CONFIG ==== \(config)")
-
     guard let inputSwift = config.inputSwiftDirectory else {
       fatalError("Missing '--swift-input' directory!")
     }
 
+    translator.log.info("Input swift = \(inputSwift)")
     let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
     translator.log.info("Input paths = \(inputPaths)")
 

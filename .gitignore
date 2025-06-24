@@ -1,3 +1,6 @@
+.swift-version
+.sdkmanrc
+
 .DS_Store
 .build
 .idea

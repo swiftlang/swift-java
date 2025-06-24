@@ -71,7 +71,6 @@ public abstract class SwiftValueWitnessTable {
     public static MemorySegment valueWitnessTable(MemorySegment typeMetadata) {
         return fullTypeMetadata(typeMetadata)
                  .get(SwiftValueLayout.SWIFT_POINTER, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
-//                .get(ValueLayout.ADDRESS, SwiftValueWitnessTable.fullTypeMetadata$vwt$offset);
     }
 
 

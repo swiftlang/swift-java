@@ -40,6 +40,10 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     let sourceDir = target.directory.string
+
+    // The name of the configuration file JavaKit.config from the target for
+    // which we are generating Swift wrappers for Java classes.
+    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
     
     guard let javaPackage = configuration?.javaPackage else {
@@ -54,28 +58,55 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let outputSwiftDirectory = context.outputSwiftDirectory
 
     var arguments: [String] = [
-      "--input-swift", sourceDir,
+      /*subcommand=*/"jextract",
       "--swift-module", sourceModule.name,
+      "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
+      // since SwiftPM requires all "expected" files do end up being written
+      // and we don't know which files will have actual thunks generated... we force jextract to write even empty files.
+      "--write-empty-files",
       // TODO: "--build-cache-directory", ...
       //       Since plugins cannot depend on libraries we cannot detect what the output files will be,
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
-    // arguments.append(sourceDir)
     if !javaPackage.isEmpty {
-      arguments.append(contentsOf: ["--java-package", javaPackage])
+      arguments += ["--java-package", javaPackage]
     }
 
+    let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
+      $0.pathExtension == "swift"
+    }
+
+    var outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
+      guard sourceFileURL.isFileURL else {
+        return nil as URL?
+      }
+
+      let sourceFilePath = sourceFileURL.path
+      guard sourceFilePath.starts(with: sourceDir) else {
+        fatalError("Could not get relative path for source file \(sourceFilePath)")
+      }
+      var outputURL = outputSwiftDirectory
+        .appending(path: String(sourceFilePath.dropFirst(sourceDir.count).dropLast(sourceFileURL.lastPathComponent.count + 1)))
+
+      let inputFileName = sourceFileURL.deletingPathExtension().lastPathComponent
+      return outputURL.appending(path: "\(inputFileName)+SwiftJava.swift")
+    }
+
+    // Append the "module file" that contains any thunks for global func definitions
+    outputSwiftFiles += [
+      outputSwiftDirectory.appending(path: "\(sourceModule.name)Module+SwiftJava.swift")
+    ]
+
     return [
-      .prebuildCommand(
+      .buildCommand(
         displayName: "Generate Java wrappers for Swift types",
         executable: toolURL,
         arguments: arguments,
-        // inputFiles: [ configFile ] + swiftFiles,
-        // outputFiles: outputJavaFiles
-        outputFilesDirectory: outputSwiftDirectory
+        inputFiles: [ configFile ] + swiftFiles,
+        outputFiles: outputSwiftFiles
       )
     ]
   }

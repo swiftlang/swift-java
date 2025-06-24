@@ -66,42 +66,11 @@ extension SwiftJava {
 
 extension SwiftJava.ConfigureCommand {
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    // Form a class path from all of our input sources:
-    //   * Command-line option --classpath
-    let classpathOptionEntries: [String] = self.commonJVMOptions.classpath.flatMap { $0.split(separator: ":").map(String.init) }
-    let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
-    let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
-    print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
+    let classpathEntries = self.configureCommandJVMClasspath(
+        searchDirs: [self.effectiveSwiftModuleURL], config: config)
 
-    var classpathEntries: [String] = classpathFromConfig
-
-    let swiftJavaCachedModuleClasspath = findSwiftJavaClasspaths(in:
-    // self.effectiveCacheDirectory ??
-    FileManager.default.currentDirectoryPath)
-    print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(swiftJavaCachedModuleClasspath)")
-    classpathEntries += swiftJavaCachedModuleClasspath
-
-    if !classpathOptionEntries.isEmpty {
-      print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
-      classpathEntries += classpathOptionEntries
-    } else {
-      // * Base classpath from CLASSPATH env variable
-      print("[debug][swift-java] Classpath from environment: \(classpathFromEnv)")
-      classpathEntries += classpathFromEnv
-    }
-
-    let extraClasspath = input ?? "" // FIXME: just use the -cp as usual
-    let extraClasspathEntries = extraClasspath.split(separator: ":").map(String.init)
-    print("[debug][swift-java] Extra classpath: \(extraClasspathEntries)")
-    classpathEntries += extraClasspathEntries
-
-    // Bring up the Java VM when necessary
-
-    if logLevel >= .debug {
-      let classpathString = classpathEntries.joined(separator: ":")
-      print("[debug][swift-java] Initialize JVM with classpath: \(classpathString)")
-    }
-    let jvm = try JavaVirtualMachine.shared(classpath: classpathEntries)
+    let jvm =
+      try self.makeJVM(classpathEntries: classpathEntries)
 
     try emitConfiguration(classpath: self.commonJVMOptions.classpath, environment: jvm.environment())
   }
@@ -178,6 +147,7 @@ extension SwiftJava.ConfigureCommand {
     // Write the file.
     try writeContents(
       contents,
+      outputDirectory: self.actualOutputDirectory,
       to: "swift-java.config",
       description: "swift-java configuration file"
     )

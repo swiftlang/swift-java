@@ -87,7 +87,7 @@ extension JNISwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: moduleFilename
       ) {
-        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile)")
+        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
       }
     } catch {
       logger.warning("Failed to write to Swift thunks: \(moduleFilename)")
