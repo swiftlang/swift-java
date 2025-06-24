@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import JavaKitConfigurationShared
 import Testing
 
 final class FuncCallbackImportTests {
@@ -36,9 +37,9 @@ final class FuncCallbackImportTests {
 
   @Test("Import: public func callMe(callback: () -> Void)")
   func func_callMeFunc_callback() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
@@ -125,9 +126,9 @@ final class FuncCallbackImportTests {
 
   @Test("Import: public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())")
   func func_callMeMoreFunc_callback() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)

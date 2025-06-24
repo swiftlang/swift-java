@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import JavaKitConfigurationShared
 import Testing
 
 final class MethodImportTests {
@@ -64,9 +65,9 @@ final class MethodImportTests {
 
   @Test("Import: public func helloWorld()")
   func method_helloWorld() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -103,9 +104,9 @@ final class MethodImportTests {
 
   @Test("Import: public func globalTakeInt(i: Int)")
   func func_globalTakeInt() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -144,9 +145,9 @@ final class MethodImportTests {
 
   @Test("Import: public func globalTakeIntLongString(i32: Int32, l: Int64, s: String)")
   func func_globalTakeIntLongString() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -188,9 +189,9 @@ final class MethodImportTests {
 
   @Test("Import: public func globalReturnClass() -> MySwiftClass")
   func func_globalReturnClass() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -232,9 +233,9 @@ final class MethodImportTests {
 
   @Test("Import: func swapRawBufferPointer(buffer: _)")
   func func_globalSwapRawBufferPointer() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -279,9 +280,9 @@ final class MethodImportTests {
 
   @Test
   func method_class_helloMemberFunction() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -321,9 +322,9 @@ final class MethodImportTests {
 
   @Test
   func method_class_makeInt() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .info
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -363,9 +364,9 @@ final class MethodImportTests {
 
   @Test
   func class_constructor() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .info
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
@@ -406,9 +407,10 @@ final class MethodImportTests {
 
   @Test
   func struct_constructor() throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: "__FakeModule"
-    )
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
+
     st.log.logLevel = .info
 
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)

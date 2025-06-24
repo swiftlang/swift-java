@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import JavaKitConfigurationShared
 import Testing
 
 @Suite
@@ -233,9 +234,9 @@ extension FunctionDescriptorTests {
     logLevel: Logger.Level = .trace,
     body: (String) throws -> Void
   ) throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: swiftModuleName
-    )
+    var config = Configuration()
+    config.swiftModule = swiftModuleName
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
@@ -266,9 +267,9 @@ extension FunctionDescriptorTests {
     logLevel: Logger.Level = .trace,
     body: (String) throws -> Void
   ) throws {
-    let st = Swift2JavaTranslator(
-      swiftModuleName: swiftModuleName
-    )
+    var config = Configuration()
+    config.swiftModule = swiftModuleName
+    let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)

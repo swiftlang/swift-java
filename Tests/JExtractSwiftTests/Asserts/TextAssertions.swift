@@ -35,7 +35,9 @@ func assertOutput(
   line: Int = #line,
   column: Int = #column
 ) throws {
-  let translator = Swift2JavaTranslator(swiftModuleName: swiftModuleName)
+  var config = Configuration()
+  config.swiftModule = swiftModuleName
+  let translator = Swift2JavaTranslator(config: config)
 
   try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
 
