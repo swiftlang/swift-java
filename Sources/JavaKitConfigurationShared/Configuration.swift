@@ -40,6 +40,8 @@ public struct Configuration: Codable {
 
   public var mode: JExtractGenerationMode?
 
+  public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
+
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.

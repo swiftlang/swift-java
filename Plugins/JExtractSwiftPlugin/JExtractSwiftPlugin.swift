@@ -63,6 +63,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
+      // since SwiftPM requires all "expected" files do end up being written
+      // and we don't know which files will have actual thunks generated... we force jextract to write even empty files.
+      "--write-empty-files",
       // TODO: "--build-cache-directory", ...
       //       Since plugins cannot depend on libraries we cannot detect what the output files will be,
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
@@ -76,7 +79,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       $0.pathExtension == "swift"
     }
 
-    let outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
+    var outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
       guard sourceFileURL.isFileURL else {
         return nil as URL?
       }
@@ -89,16 +92,13 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .appending(path: String(sourceFilePath.dropFirst(sourceDir.count).dropLast(sourceFileURL.lastPathComponent.count + 1)))
 
       let inputFileName = sourceFileURL.deletingPathExtension().lastPathComponent
-      print(" inputFileName = \(inputFileName)")
-      let isModuleFile = inputFileName.contains("Library") // FIXME: this is a hack
-      print(" isModuleFile = \(isModuleFile)")
-
-      return if isModuleFile {
-        outputURL.appending(path: "\(inputFileName)Module+SwiftJava.swift")
-      } else {
-        outputURL.appending(path: "\(inputFileName)+SwiftJava.swift")
-      }
+      return outputURL.appending(path: "\(inputFileName)+SwiftJava.swift")
     }
+
+    // Append the "module file" that contains any thunks for global func definitions
+    outputSwiftFiles += [
+      outputSwiftDirectory.appending(path: "\(sourceModule.name)Module+SwiftJava.swift")
+    ]
 
     return [
       .buildCommand(

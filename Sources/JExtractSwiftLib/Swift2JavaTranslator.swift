@@ -16,6 +16,7 @@ import Foundation
 import JavaTypes
 import SwiftBasicFormat
 import SwiftParser
+import JavaKitConfigurationShared
 import SwiftSyntax
 
 /// Takes swift interfaces and translates them into Java used to access those.
@@ -23,6 +24,8 @@ public final class Swift2JavaTranslator {
   static let SWIFT_INTERFACE_SUFFIX = ".swiftinterface"
 
   package var log = Logger(label: "translator", logLevel: .info)
+
+  let config: Configuration
 
   // ==== Input
 
@@ -53,9 +56,13 @@ public final class Swift2JavaTranslator {
   }
 
   public init(
-    swiftModuleName: String
+    config: Configuration
   ) {
-    self.symbolTable = SwiftSymbolTable(parsedModuleName: swiftModuleName)
+    guard let swiftModule = config.swiftModule else {
+      fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
+    }
+    self.config = config
+    self.symbolTable = SwiftSymbolTable(parsedModuleName: swiftModule)
 
     // Create a mock of the Swift standard library.
     var parsedSwiftModule = SwiftParsedModuleSymbolTable(moduleName: "Swift")

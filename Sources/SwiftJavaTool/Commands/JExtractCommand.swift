@@ -57,6 +57,9 @@ extension SwiftJava {
 
     @Option(help: "The directory where generated Java files should be written. Generally used with jextract mode.")
     var outputJava: String
+
+    @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
+    var writeEmptyFiles: Bool = false
   }
 }
 
@@ -68,6 +71,7 @@ extension SwiftJava.JExtractCommand {
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
+    config.writeEmptyFiles = writeEmptyFiles
 
     if let inputSwift = commonOptions.inputSwift {
       config.inputSwiftDirectory = inputSwift
@@ -76,7 +80,7 @@ extension SwiftJava.JExtractCommand {
       config.inputSwiftDirectory = "\(FileManager.default.currentDirectoryPath)/Sources/\(swiftModule)"
     }
 
-    print("[debug][swift-java] Running swift-java in mode: " + "\(self.mode)".bold)
+    print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(self.mode)".bold)
 
     try jextractSwift(config: config)
   }

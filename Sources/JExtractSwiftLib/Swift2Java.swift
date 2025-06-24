@@ -30,9 +30,7 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-module' name.")
     }
 
-    let translator = Swift2JavaTranslator(
-      swiftModuleName: swiftModule
-    )
+    let translator = Swift2JavaTranslator(config: config)
     translator.log.logLevel = config.logLevel ?? .info
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
