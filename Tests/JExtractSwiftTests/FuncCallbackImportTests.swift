@@ -31,6 +31,7 @@ final class FuncCallbackImportTests {
 
     public func callMe(callback: () -> Void)
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
+    public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
     """
 
   @Test("Import: public func callMe(callback: () -> Void)")
@@ -237,4 +238,100 @@ final class FuncCallbackImportTests {
     )
   }
 
+  @Test("Import: public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)")
+  func func_withBuffer_body() throws {
+    let st = Swift2JavaTranslator(
+      swiftModuleName: "__FakeModule"
+    )
+    st.log.logLevel = .error
+
+    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.importedGlobalFuncs.first { $0.name == "withBuffer" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = CodePrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        // ==== --------------------------------------------------
+        // withBuffer
+        /**
+         * {@snippet lang=c :
+         * void swiftjava___FakeModule_withBuffer_body(ptrdiff_t (*body)(const void *, ptrdiff_t))
+         * }
+         */
+        private static class swiftjava___FakeModule_withBuffer_body {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* body: */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            __FakeModule.findOrThrow("swiftjava___FakeModule_withBuffer_body");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static void call(java.lang.foreign.MemorySegment body) {
+            try {
+              if (SwiftKit.TRACE_DOWNCALLS) {
+                SwiftKit.traceDowncall(body);
+              }
+              HANDLE.invokeExact(body);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+          /**
+           * {snippet lang=c :
+           * ptrdiff_t (*)(const void *, ptrdiff_t)
+           * }
+           */
+          private static class $body {
+            @FunctionalInterface
+            public interface Function {
+              long apply(java.lang.foreign.MemorySegment _0, long _1);
+            }
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+              /* -> */SwiftValueLayout.SWIFT_INT,
+              /* _0: */SwiftValueLayout.SWIFT_POINTER,
+              /* _1: */SwiftValueLayout.SWIFT_INT
+            );
+            private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+            private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+              return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+            }
+          }
+        }
+        public static class withBuffer {
+          @FunctionalInterface
+          public interface body {
+            long apply(java.lang.foreign.MemorySegment _0);
+          }
+          private static MemorySegment $toUpcallStub(body fi, Arena arena) {
+            return swiftjava___FakeModule_withBuffer_body.$body.toUpcallStub((_0_pointer, _0_count) -> {
+              return fi.apply(_0_pointer.reinterpret(_0_count));
+            }, arena);
+          }
+        }
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
+         * }
+         */
+        public static void withBuffer(withBuffer.body body) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_withBuffer_body.call(withBuffer.$toUpcallStub(body, arena$));
+          }
+        }
+        """
+    )
+  }
 }

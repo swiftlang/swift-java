@@ -58,6 +58,8 @@ enum ConversionStep: Equatable {
   /// Perform multiple conversions using the same input.
   case aggregate([ConversionStep], name: String?)
 
+  indirect case closureLowering(parameters: [ConversionStep], result: ConversionStep)
+
   indirect case member(ConversionStep, member: String)
 
   /// Count the number of times that the placeholder occurs within this
@@ -73,11 +75,18 @@ enum ConversionStep: Equatable {
       inner.placeholderCount
     case .initialize(_, arguments: let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
-    case .placeholder, .tupleExplode:
+    case .placeholder, .tupleExplode, .closureLowering:
       1
     case .tuplify(let elements), .aggregate(let elements, _):
       elements.reduce(0) { $0 + $1.placeholderCount }
     }
+  }
+
+  var isPlaceholder: Bool {
+    if case .placeholder = self {
+      return true
+    }
+    return false
   }
 
   /// Convert the conversion step into an expression with the given
@@ -165,6 +174,48 @@ enum ConversionStep: Equatable {
         }
       }
       return nil
+
+    case .closureLowering(let parameterSteps, let resultStep):
+      var body: [CodeBlockItemSyntax] = []
+
+      // Lower parameters.
+      var params: [String] = []
+      var args: [ExprSyntax] = []
+      for (i, parameterStep) in parameterSteps.enumerated() {
+        let paramName = "_\(i)"
+        params.append(paramName)
+        if case .tuplify(let elemSteps) = parameterStep {
+          for elemStep in elemSteps {
+            if let elemExpr = elemStep.asExprSyntax(placeholder: paramName, bodyItems: &body) {
+              args.append(elemExpr)
+            }
+          }
+        } else if let paramExpr = parameterStep.asExprSyntax(placeholder: paramName, bodyItems: &body) {
+          args.append(paramExpr)
+        }
+      }
+
+      // Call the lowered closure with lowered parameters.
+      let loweredResult = "\(placeholder)(\(args.map(\.description).joined(separator: ", ")))"
+
+      // Raise the lowered result.
+      let result = resultStep.asExprSyntax(placeholder: loweredResult.description, bodyItems: &body)
+      body.append("return \(result)")
+
+      // Construct the closure expression.
+      var closure = ExprSyntax(
+        """
+        { (\(raw: params.joined(separator: ", "))) in
+          }
+        """
+      ).cast(ClosureExprSyntax.self)
+
+      closure.statements = CodeBlockItemListSyntax {
+        body.map {
+          $0.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
+        }
+      }
+      return ExprSyntax(closure)
     }
   }
 }
