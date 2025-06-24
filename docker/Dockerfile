@@ -19,12 +19,8 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 COPY install_jdk.sh .
-COPY install_swiftly.sh .
 
 # JDK dependency
 RUN bash -xc 'JDK_VENDOR=Corretto ./install_jdk.sh'
 ENV JAVA_HOME="/usr/lib/jvm/default-jdk"
 ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"
-
-# Install Swift with Swiftly
-# RUN bash -xc './install_swiftly.sh'
