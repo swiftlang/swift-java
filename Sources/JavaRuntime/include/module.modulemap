@@ -1,0 +1,4 @@
+module JavaRuntime {
+    umbrella header "JavaRuntime.h"
+    export *
+}
