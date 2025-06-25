@@ -41,8 +41,10 @@ public class SwiftValueLayout {
     public static final ValueLayout.OfLong SWIFT_INT64 = ValueLayout.JAVA_LONG;
     public static final ValueLayout.OfFloat SWIFT_FLOAT = ValueLayout.JAVA_FLOAT;
     public static final ValueLayout.OfDouble SWIFT_DOUBLE = ValueLayout.JAVA_DOUBLE;
-    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS;
-            // .withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
+
+    // FIXME: this sequence layout is a workaround, we must properly size pointers when we get them.
+    public static final AddressLayout SWIFT_POINTER = ValueLayout.ADDRESS
+           .withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
     public static final SequenceLayout SWIFT_BYTE_ARRAY = MemoryLayout.sequenceLayout(8, ValueLayout.JAVA_BYTE);
 
     /**
