@@ -106,7 +106,7 @@ extension Swift2JavaTranslator {
 
     for input in self.inputs {
       log.trace("Analyzing \(input.filePath)")
-      visitor.walk(input.syntax)
+      visitor.visit(sourceFile: input.syntax)
     }
   }
 
