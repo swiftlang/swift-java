@@ -16,98 +16,85 @@ import Foundation
 import SwiftParser
 import SwiftSyntax
 
-final class Swift2JavaVisitor: SyntaxVisitor {
+final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator
-
-  /// Type context stack associated with the syntax.
-  var typeContext: [(syntaxID: Syntax.ID, type: ImportedNominalType)] = []
-
-  /// Innermost type context.
-  var currentType: ImportedNominalType? { typeContext.last?.type }
-
-  var currentSwiftType: SwiftType? {
-    guard let currentType else { return nil }
-    return .nominal(SwiftNominalType(nominalTypeDecl: currentType.swiftNominal))
-  }
-
-  /// The current type name as a nested name like A.B.C.
-  var currentTypeName: String? { self.currentType?.swiftNominal.qualifiedName }
-
-  var log: Logger { translator.log }
 
   init(translator: Swift2JavaTranslator) {
     self.translator = translator
-
-    super.init(viewMode: .all)
   }
 
-  /// Push specified type to the type context associated with the syntax.
-  func pushTypeContext(syntax: some SyntaxProtocol, importedNominal: ImportedNominalType) {
-    typeContext.append((syntax.id, importedNominal))
-  }
+  var log: Logger { translator.log }
 
-  /// Pop type context if the current context is associated with the syntax.
-  func popTypeContext(syntax: some SyntaxProtocol) -> Bool {
-    if typeContext.last?.syntaxID == syntax.id {
-      typeContext.removeLast()
-      return true
-    } else {
-      return false
+  func visit(sourceFile node: SourceFileSyntax) {
+    for codeItem in node.statements {
+      if let declNode = codeItem.item.as(DeclSyntax.self) {
+        self.visit(decl: declNode, in: nil)
+      }
     }
   }
 
-  override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-    log.debug("Visit \(node.kind): '\(node.qualifiedNameForDebug)'")
-    guard let importedNominalType = translator.importedNominalType(node, parent: self.currentType) else {
-      return .skipChildren
-    }
+  func visit(decl node: DeclSyntax, in parent: ImportedNominalType?) {
+    switch node.as(DeclSyntaxEnum.self) {
+    case .actorDecl(let node):
+      self.visit(nominalDecl: node, in: parent)
+    case .classDecl(let node):
+      self.visit(nominalDecl: node, in: parent)
+    case .structDecl(let node):
+      self.visit(nominalDecl: node, in: parent)
+    case .enumDecl(let node):
+      self.visit(nominalDecl: node, in: parent)
+    case .protocolDecl(let node):
+      self.visit(nominalDecl: node, in: parent)
+    case .extensionDecl(let node):
+      self.visit(extensionDecl: node, in: parent)
+    case .typeAliasDecl:
+      break // TODO: Implement
+    case .associatedTypeDecl:
+      break // TODO: Implement
 
-    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
-    return .visitChildren
+    case .initializerDecl(let node):
+      self.visit(initializerDecl: node, in: parent)
+    case .functionDecl(let node):
+      self.visit(functionDecl: node, in: parent)
+    case .variableDecl(let node):
+      self.visit(variableDecl: node, in: parent)
+    case .subscriptDecl:
+      // TODO: Implement
+      break
+
+    default:
+      break
+    }
   }
 
-  override func visitPost(_ node: ClassDeclSyntax) {
-    if self.popTypeContext(syntax: node) {
-      log.debug("Completed import: \(node.kind) \(node.name)")
+  func visit(
+    nominalDecl node: some DeclSyntaxProtocol & DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax,
+    in parent: ImportedNominalType?
+  ) {
+    guard let importedNominalType = translator.importedNominalType(node, parent: parent) else {
+      return
+    }
+    for memberItem in node.memberBlock.members {
+      self.visit(decl: memberItem.decl, in: importedNominalType)
     }
   }
 
-  override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-    log.debug("Visit \(node.kind): \(node.qualifiedNameForDebug)")
-    guard let importedNominalType = translator.importedNominalType(node, parent: self.currentType) else {
-      return .skipChildren
+  func visit(extensionDecl node: ExtensionDeclSyntax, in parent: ImportedNominalType?) {
+    guard parent != nil else {
+      // 'extension' in a nominal type is invalid. Ignore
+      return
     }
-
-    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
-    return .visitChildren
-  }
-
-  override func visitPost(_ node: StructDeclSyntax) {
-    if self.popTypeContext(syntax: node) {
-      log.debug("Completed import: \(node.kind) \(node.qualifiedNameForDebug)")
-    }
-  }
-
-  override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
-    // Resolve the extended type of the extension as an imported nominal, and
-    // recurse if we found it.
     guard let importedNominalType = translator.importedNominalType(node.extendedType) else {
-      return .skipChildren
+      return
     }
-
-    self.pushTypeContext(syntax: node, importedNominal: importedNominalType)
-    return .visitChildren
-  }
-
-  override func visitPost(_ node: ExtensionDeclSyntax) {
-    if self.popTypeContext(syntax: node) {
-      log.debug("Completed import: \(node.kind) \(node.qualifiedNameForDebug)")
+    for memberItem in node.memberBlock.members {
+      self.visit(decl: memberItem.decl, in: importedNominalType)
     }
   }
 
-  override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
+  func visit(functionDecl node: FunctionDeclSyntax, in typeContext: ImportedNominalType?) {
     guard node.shouldImport(log: log) else {
-      return .skipChildren
+      return
     }
 
     self.log.debug("Import function: '\(node.qualifiedNameForDebug)'")
@@ -116,12 +103,12 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     do {
       signature = try SwiftFunctionSignature(
         node,
-        enclosingType: self.currentSwiftType,
+        enclosingType: typeContext?.swiftType,
         symbolTable: self.translator.symbolTable
       )
     } catch {
       self.log.debug("Failed to import: '\(node.qualifiedNameForDebug)'; \(error)")
-      return .skipChildren
+      return
     }
 
     let imported = ImportedFunc(
@@ -133,22 +120,20 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     )
 
     log.debug("Record imported method \(node.qualifiedNameForDebug)")
-    if let currentType {
-      currentType.methods.append(imported)
+    if let typeContext {
+      typeContext.methods.append(imported)
     } else {
       translator.importedGlobalFuncs.append(imported)
     }
-
-    return .skipChildren
   }
 
-  override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+  func visit(variableDecl node: VariableDeclSyntax, in typeContext: ImportedNominalType?) {
     guard node.shouldImport(log: log) else {
-      return .skipChildren
+      return
     }
 
     guard let binding = node.bindings.first else {
-      return .skipChildren
+      return
     }
 
     let varName = "\(binding.pattern.trimmed)"
@@ -159,7 +144,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       let signature = try SwiftFunctionSignature(
         node,
         isSet: kind == .setter,
-        enclosingType: self.currentSwiftType,
+        enclosingType: typeContext?.swiftType,
         symbolTable: self.translator.symbolTable
       )
 
@@ -170,10 +155,10 @@ final class Swift2JavaVisitor: SyntaxVisitor {
         apiKind: kind,
         functionSignature: signature
       )
-      
+
       log.debug("Record imported variable accessor \(kind == .getter ? "getter" : "setter"):\(node.qualifiedNameForDebug)")
-      if let currentType {
-        currentType.variables.append(imported)
+      if let typeContext {
+        typeContext.variables.append(imported)
       } else {
         translator.importedGlobalVariables.append(imported)
       }
@@ -189,18 +174,16 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
-      return .skipChildren
     }
-
-    return .skipChildren
   }
 
-  override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
-    guard let currentType else {
-      fatalError("Initializer must be within a current type, was: \(node)")
+  func visit(initializerDecl node: InitializerDeclSyntax, in typeContext: ImportedNominalType?) {
+    guard let typeContext else {
+      self.log.info("Initializer must be within a current type; \(node)")
+      return
     }
     guard node.shouldImport(log: log) else {
-      return .skipChildren
+      return
     }
 
     self.log.debug("Import initializer: \(node.kind) '\(node.qualifiedNameForDebug)'")
@@ -209,12 +192,12 @@ final class Swift2JavaVisitor: SyntaxVisitor {
     do {
       signature = try SwiftFunctionSignature(
         node,
-        enclosingType: self.currentSwiftType,
+        enclosingType: typeContext.swiftType,
         symbolTable: self.translator.symbolTable
       )
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
-      return .skipChildren
+      return
     }
     let imported = ImportedFunc(
       module: translator.swiftModuleName,
@@ -224,13 +207,7 @@ final class Swift2JavaVisitor: SyntaxVisitor {
       functionSignature: signature
     )
 
-    currentType.initializers.append(imported)
-
-    return .skipChildren
-  }
-
-  override func visit(_ node: DeinitializerDeclSyntax) -> SyntaxVisitorContinueKind {
-    return .skipChildren
+    typeContext.initializers.append(imported)
   }
 }
 
