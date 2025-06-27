@@ -53,14 +53,14 @@ public struct CodePrinter {
     self.mode = mode
   }
 
-  internal mutating func append(_ text: String) {
+  mutating func append(_ text: String) {
     contents.append(text)
     if self.verbose {
       Swift.print(text, terminator: "")
     }
   }
 
-  internal mutating func append<S>(contentsOf text: S)
+  mutating func append<S>(contentsOf text: S)
   where S: Sequence, S.Element == Character {
     contents.append(contentsOf: text)
     if self.verbose {

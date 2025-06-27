@@ -111,7 +111,7 @@ extension Logger.Level: ExpressibleByArgument {
 }
 
 extension Logger.Level {
-  internal var naturalIntegralValue: Int {
+  var naturalIntegralValue: Int {
     switch self {
     case .trace:
       return 0
