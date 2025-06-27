@@ -39,6 +39,14 @@ jobs:
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 
+  macos-tests:
+    name: macOS tests
+    # Workaround https://github.com/nektos/act/issues/1875
+    uses: swiftlang/swift-java/.github/workflows/macos_tests.yml@main
+    with:
+      runner_pool: general
+      build_scheme: SwiftJava-Package
+
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
