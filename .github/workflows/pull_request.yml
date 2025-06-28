@@ -39,12 +39,24 @@ jobs:
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 
-  macos-tests:
-    name: macOS tests
-    # Workaround https://github.com/nektos/act/issues/1875
-    uses: swiftlang/swift-java/.github/workflows/macos_tests.yml@wip-macos-ci
-    with:
-      build_scheme: SwiftJava-Package
+#  macos-tests:
+#    name: macOS tests
+#    # Workaround https://github.com/nektos/act/issues/1875
+#    uses: swiftlang/swift-java/.github/workflows/macos_tests.yml@wip-macos-ci
+#    with:
+#      build_scheme: SwiftJava-Package
+
+  macos-tests-selfhosted:
+    name: Swift tests (macOS Sequoia ARM64)
+    runs-on: [self-hosted, macos, sequoia, ARM64]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build and Test
+        run: swift test
+        timeout-minutes: 20
 
   test-swift:
     name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
