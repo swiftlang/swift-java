@@ -6,7 +6,17 @@ set -x
 ./gradlew jar
 
 SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
-ARCH=$(uname -m | awk '{ print toupper($0) }')
+
+# This is how env variables are set by setup-java
+if [ "$(uname -m)" = 'arm64' ]; then
+  ARCH=ARM64
+  JAVAC="${JAVA_HOME_24_ARM64}/bin/javac"
+  JAVA="${JAVA_HOME_24_ARM64}/bin/java"
+else
+  ARCH=X64
+  JAVAC="${JAVA_HOME_24_X64}/bin/javac"
+  JAVA="${JAVA_HOME_24_X64}/bin/java"
+fi
 
 if [ -n "$JAVA_HOME_24_$ARCH" ]; then
    export JAVA_HOME="$JAVA_HOME_24_$ARCH"
@@ -21,9 +31,6 @@ SWIFTKIT_CLASSPATH="$(pwd)/../../SwiftKit/build/libs/*"
 MYLIB_CLASSPATH="$(pwd)/build/libs/*"
 CLASSPATH="$(pwd)/:${SWIFTKIT_CLASSPATH}:${MYLIB_CLASSPATH}"
 echo "CLASSPATH       = ${CLASSPATH}"
-
-JAVAC="${JAVA_HOME}/bin/javac"
-JAVA="${JAVA_HOME}/bin/java"
 
 $JAVAC -cp "${CLASSPATH}" Example.java
 
