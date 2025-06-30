@@ -37,8 +37,8 @@ package class ImportedNominalType: ImportedDecl {
     self.swiftNominal = swiftNominal
   }
 
-  var javaClassName: String {
-    swiftNominal.name
+  var swiftType: SwiftType {
+    return .nominal(.init(nominalTypeDecl: swiftNominal))
   }
 }
 
