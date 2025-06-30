@@ -61,9 +61,9 @@ jobs:
         run: "swift build --build-tests --disable-sandbox"
       - name: Swift Test
         run: "swift test"
-
-  verify-sample-01:
-    name: Verify Sample JavaDependencySampleApp (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+  
+  verify-samples:
+    name: Verify Sample ${{ matrix.sample_app }} (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -71,6 +71,14 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['Corretto']
+        sample_app: [
+          'JavaDependencySampleApp',
+          'JavaKitSampleApp',
+          'JavaProbablyPrime',
+          'JavaSieve',
+          'SwiftAndJavaJarSampleLib',
+          'SwiftKitSampleApp',
+        ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -79,103 +87,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
-      - name: "Verify Sample: JavaDependencySampleApp"
-        run: .github/scripts/validate_sample.sh Samples/JavaDependencySampleApp
-  verify-sample-02:
-    name: Verify Sample JavaKitSampleApp (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify Sample"
-        run: .github/scripts/validate_sample.sh Samples/JavaKitSampleApp
-  verify-sample-03:
-    name: Verify Sample JavaProbablyPrime (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify Sample"
-        run: .github/scripts/validate_sample.sh Samples/JavaProbablyPrime
-  verify-sample-04:
-    name: Verify Sample JavaSieve (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify Sample"
-        run: .github/scripts/validate_sample.sh Samples/JavaSieve
-  verify-sample-05:
-    name: Verify Sample SwiftAndJavaJarSampleLib (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify Sample"
-        run: .github/scripts/validate_sample.sh Samples/SwiftAndJavaJarSampleLib
-  verify-sample-06:
-    name: Verify Sample SwiftKitSampleApp (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify Sample"
-        run: .github/scripts/validate_sample.sh Samples/SwiftKitSampleApp
-        # TODO: Benchmark compile crashes in CI, enable when nightly toolchains in better shape.
-        # - name: Build (Swift) Benchmarks
-        #  run: "swift package --package-path Benchmarks/ benchmark list"
+      - name: "Verify sample"
+        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
