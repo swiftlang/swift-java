@@ -61,7 +61,7 @@ jobs:
         run: "swift build --build-tests --disable-sandbox"
       - name: Swift Test
         run: "swift test"
-  
+
   verify-samples:
     name: Verify Sample ${{ matrix.sample_app }} (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
     runs-on: ubuntu-latest
