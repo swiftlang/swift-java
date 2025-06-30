@@ -23,7 +23,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -49,7 +48,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
     env:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
       SWIFT_JAVA_VERBOSE: true
@@ -73,7 +71,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -97,7 +94,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
     env:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
       SWIFT_JAVA_VERBOSE: true
@@ -119,7 +115,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
         sample_app: [
           'JavaDependencySampleApp',
           'JavaKitSampleApp',
@@ -149,7 +144,6 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['21']
         sample_app: [
           'JavaDependencySampleApp',
           'JavaKitSampleApp',
