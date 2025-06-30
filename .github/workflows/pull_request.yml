@@ -15,7 +15,7 @@ jobs:
       license_header_check_project_name: Swift.org
 
   test-java:
-    name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Test (Java) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -23,7 +23,7 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew compileJmh --info
 
   test-java-macos:
-    name: Java tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Test (Java) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: [self-hosted, macos, sequoia, ARM64]
     strategy:
       fail-fast: true
@@ -49,7 +49,7 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
     env:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
       SWIFT_JAVA_VERBOSE: true
@@ -65,7 +65,7 @@ jobs:
         run: ./gradlew compileJmh --info
 
   test-swift:
-    name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -73,7 +73,7 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     env:
@@ -89,7 +89,7 @@ jobs:
         run: "swift test"
 
   test-swift-macos:
-    name: Swift tests (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: [self-hosted, macos, sequoia, ARM64]
     strategy:
       fail-fast: false
@@ -97,7 +97,7 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
     env:
       JAVA_HOME: "/usr/lib/jvm/default-jdk"
       SWIFT_JAVA_VERBOSE: true
@@ -111,7 +111,7 @@ jobs:
         run: "swift test"
 
   verify-samples:
-    name: Verify Sample ${{ matrix.sample_app }} (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -119,7 +119,7 @@ jobs:
         swift_version: ['6.1.2']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
         sample_app: [
           'JavaDependencySampleApp',
           'JavaKitSampleApp',
@@ -141,15 +141,15 @@ jobs:
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
   verify-samples-macos:
-    name: Verify Sample ${{ matrix.sample_app }} (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
+    name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: [self-hosted, macos, sequoia, ARM64]
     strategy:
       fail-fast: false
       matrix:
         swift_version: ['6.1.2']
-        os_version: ['sequoia']
+        os_version: ['macos']
         jdk_vendor: ['corretto']
-        jdk_version: ['24']
+        jdk_version: ['21']
         sample_app: [
           'JavaDependencySampleApp',
           'JavaKitSampleApp',
