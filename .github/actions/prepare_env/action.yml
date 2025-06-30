@@ -5,10 +5,18 @@ runs:
   using: composite
   steps:
     - name: Install System Dependencies
+      if: matrix.os_version == 'jammy'
       run: apt-get -qq update && apt-get -qq install -y make curl wget libjemalloc2 libjemalloc-dev
       shell: bash
+    - name: Set up JDK ${{ matrix.jdk_version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.jdk_version }}
+        distribution: ${{ matrix.jdk_vendor }}
+        cache: 'gradle'
     - name: Cache JDKs
       id: cache-jdk
+      if: matrix.os_version == 'jammy'
       uses: actions/cache@v4
       continue-on-error: true
       with:
@@ -17,12 +25,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-jdk-
     - name: Install JDK
-      if: steps.cache-jdk.outputs.cache-hit != 'true'
+      if: steps.cache-jdk.outputs.cache-hit != 'true' && matrix.os_version == 'jammy'
       run: "bash -xc 'JDK_VENDOR=${{ matrix.jdk_vendor }} ./docker/install_jdk.sh'"
       shell: bash
-      # TODO: not using setup-java since incompatible with the swiftlang/swift base image
-      #      - name: Install Untested Nightly Swift
-      #        run: "bash -xc './docker/install_untested_nightly_swift.sh'"
     - name: Cache local Gradle repository
       uses: actions/cache@v4
       continue-on-error: true
@@ -34,6 +39,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Cache local SwiftPM repository
+      if: matrix.os_version == 'jammy'
       uses: actions/cache@v4
       continue-on-error: true
       with:
