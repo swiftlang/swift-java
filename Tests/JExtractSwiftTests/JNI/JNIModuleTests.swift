@@ -44,6 +44,11 @@ struct JNIModuleTests {
       package com.example.swift;
 
       public final class SwiftModule {
+        static final String LIB_NAME = "SwiftModule";
+      
+        static {
+          System.loadLibrary(LIB_NAME);
+        }
       """
     ])
   }
@@ -104,7 +109,7 @@ struct JNIModuleTests {
         @_cdecl("Java_com_example_swift_SwiftModule_takeIntegers")
         func swiftjava_SwiftModule_takeIntegers_i1_i2_i3_i4(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
           let result = SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment!), i2: Int16(fromJNI: i2, in: environment!), i3: Int32(fromJNI: i3, in: environment!), i4: Int(fromJNI: i4, in: environment!))
-          return result.getJNIValue(in: environment)")
+          return result.getJNIValue(in: environment)
         }
         """,
         """
