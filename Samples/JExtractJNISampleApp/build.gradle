@@ -159,7 +159,7 @@ tasks.named('test', Test) {
 }
 
 application {
-    mainClass = "com.example.swift.HelloJava2Swift"
+    mainClass = "com.example.swift.HelloJava2SwiftJNI"
 
     applicationDefaultJvmArgs = [
         "--enable-native-access=ALL-UNNAMED",
