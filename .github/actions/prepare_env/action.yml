@@ -12,8 +12,18 @@ runs:
           24
           21
         cache: 'gradle'
+    - name: Re-export JAVA_HOME
+      run: >
+        if [[ -n "$JAVA_HOME_24_ARM64" ]]; then echo "JAVA_HOME_24=${{ env.JAVA_HOME_24_ARM64 }}" >> $GITHUB_ENV; fi;
+        if [[ -n "$JAVA_HOME_24_X64" ]]; then echo "JAVA_HOME_24=${{ env.JAVA_HOME_24_X64 }}" >> $GITHUB_ENV; fi;
+        if [[ -n "$JAVA_HOME_21_ARM64" ]]; then echo "JAVA_HOME_21=${{ env.JAVA_HOME_21_ARM64 }}" >> $GITHUB_ENV; fi;
+        if [[ -n "$JAVA_HOME_21_X64" ]]; then echo "JAVA_HOME_21=${{ env.JAVA_HOME_21_X64 }}" >> $GITHUB_ENV; fi;
+      shell: bash
     - name: List JAVA_HOME
       run: env | grep JAVA_HOME
+      shell: bash
+    - name: Check Gradle detected toolchains
+      run: ./gradlew -q javaToolchains
       shell: bash
     - name: Cache local SwiftPM repository
       if: matrix.os_version == 'jammy'
