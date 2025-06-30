@@ -1,0 +1,99 @@
+name: verify_samples
+
+on:
+  workflow_call:
+    inputs:
+      swift_version:
+        type: string
+        description: "Swift version to use"
+      os_version:
+        type: string
+        description: "OS to use"
+        default: "jammy"
+      jdk_vendor:
+        type: string
+        description: "JDK vendor to use"
+        default: "Corretto"
+      jdk_version:
+        type: string
+        description: "JDK version to use"
+        default: "24"
+
+jobs:
+  construct-samples-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.samples-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: samples-matrix
+        run: |
+          cat >> "$GITHUB_OUTPUT" << EOM
+          samples-matrix="$(
+            swift_version="${MATRIX_SWIFT_VERSION:="6.1.2"}"
+            os_version="${MATRIX_OS_VERSION:=""}"
+            jdk_vendor="${MATRIX_JDK_VENDOR:=""}"
+            jdk_version="${MATRIX_JDK_VERSION:=""}"
+          
+            matrix='{"config": []}'
+          
+          
+            for sample_app in $(find Samples -maxdepth 1 -type d)
+            do
+              matrix=$(echo "${matrix}" | jq -c \
+                --arg sample_app "$(basename ${sample_app})" \
+                --arg swift_version "${swift_version}" \
+                --arg os_version "${os_version}" \
+                --arg jdk_vendor "${jdk_vendor}" \
+                --arg jdk_version "${jdk_version}" \
+                '.config[.config| length] |= . + { "name": "Verify sample: $sample_app (swift:$swift_version, jdk:$jdk_vendor@$jdk_version)", "sample_app": "$sample_app", "swift_version": "$swift_version", "os_version": "$os_version", "jdk_vendor": "$jdk_vendor", "jdk_version": "$jdk_version" }'
+                )
+            done 
+          
+            echo "$matrix" | jq -c
+          )"
+          EOM
+    env:
+      MATRIX_SWIFT_VERSION: ${{ inputs.swift_version }}
+      MATRIX_OS_VERSION: ${{ inputs.os_version }}
+      MATRIX_JDK_VENDOR: ${{ inputs.jdk_vendor }}
+      MATRIX_JDK_VERSION: ${{ inputs.jdk_version }}
+
+  verify-samples-linux:
+    name: "Linux: ${{ matrix.config.name }}"
+    needs: construct-samples-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.construct-samples-matrix.outputs.samples-matrix) }}
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: "Verify sample ${{ matrix.sample_app }}"
+        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+
+  verify-samples-macos:
+    name: "macOS: ${{ matrix.config.name }}"
+    needs: construct-samples-matrix
+    runs-on: [self-hosted, macos, sequoia, ARM64]
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.construct-samples-matrix.outputs.samples-matrix) }}
+    env:
+      JAVA_HOME: "/usr/lib/jvm/default-jdk"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: "Verify sample ${{ matrix.sample_app }}"
+        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}

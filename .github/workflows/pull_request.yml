@@ -32,10 +32,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
-      - name: Gradle :SwiftKit:build
+      - name: Gradle build
         run: ./gradlew build -x test
-      - name: Gradle :SwiftKit:check
-        run: ./gradlew :SwiftKit:check --debug
+      - name: Gradle check
+        run: ./gradlew check --debug
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 
@@ -63,29 +63,8 @@ jobs:
         run: "swift test"
 
   verify-samples:
-    name: Verify Sample ${{ matrix.sample_app }} (swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} os:${{ matrix.os_version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['Corretto']
-        sample_app: [
-          'JavaDependencySampleApp',
-          'JavaKitSampleApp',
-          'JavaProbablyPrime',
-          'JavaSieve',
-          'SwiftAndJavaJarSampleLib',
-          'SwiftKitSampleApp',
-        ]
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      JAVA_HOME: "/usr/lib/jvm/default-jdk"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: "Verify sample"
-        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+    uses: ./.github/workflows/verify_samples.yml
+    with:
+      swift_version: '6.1.2'
+#      os_version: 'jammy'
+      jdk_vendor: 'Corretto'
