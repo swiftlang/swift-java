@@ -6,14 +6,12 @@ set -x
 ./gradlew jar
 
 SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
+ARCH=$(uname -m)
 
-# we make sure to build and run with JDK 24 because the runtime needs latest JDK, unlike Gradle which needed 21.
-if [ "$(uname -s)" = 'Darwin' ]
-then
-  export OS='osx'
+if [ -n "$JAVA_HOME_24_$ARCH" ]; then
+   export JAVA_HOME="$JAVA_HOME_24_$ARCH"
 elif [ "$(uname -s)" = 'Linux' ]
 then
-  export OS='linux'
   export PATH="${PATH}:/usr/lib/jvm/jdk-24/bin" # we need to make sure to use the latest JDK to actually compile/run the executable
 fi
 
@@ -24,8 +22,12 @@ MYLIB_CLASSPATH="$(pwd)/build/libs/*"
 CLASSPATH="$(pwd)/:${SWIFTKIT_CLASSPATH}:${MYLIB_CLASSPATH}"
 echo "CLASSPATH       = ${CLASSPATH}"
 
-javac -cp "${CLASSPATH}" Example.java
+JAVAC="${JAVA_HOME}/bin/javac"
+JAVA="${JAVA_HOME}/bin/java"
 
+$JAVAC -cp "${CLASSPATH}" Example.java
+
+# TODO: move all this into Gradle or SwiftPM and make it easier to get the right classpath for running
 if [ "$(uname -s)" = 'Linux' ]
 then
   SWIFT_LIB_PATHS=/usr/lib/swift/linux
@@ -50,7 +52,7 @@ fi
 echo "SWIFT_LIB_PATHS = ${SWIFT_LIB_PATHS}"
 
 # Can we run the example?
-java --enable-native-access=ALL-UNNAMED \
+${JAVA} --enable-native-access=ALL-UNNAMED \
      -Djava.library.path="${SWIFT_LIB_PATHS}" \
      -cp "${CLASSPATH}" \
      Example
