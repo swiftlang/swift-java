@@ -43,7 +43,10 @@ let javaIncludePath = "\(javaHome)/include"
 let package = Package(
   name: "SwiftAndJavaJarSampleLib",
   platforms: [
-    .macOS(.v15)
+    .macOS(.v15),
+    .iOS(.v18),
+    .watchOS(.v11),
+    .tvOS(.v18),
   ],
   products: [
     .library(
