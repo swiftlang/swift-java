@@ -6,7 +6,7 @@ set -x
 ./gradlew jar
 
 SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
-ARCH=$(uname -m)
+ARCH=$(uname -m | awk '{ print toupper($0) }')
 
 if [ -n "$JAVA_HOME_24_$ARCH" ]; then
    export JAVA_HOME="$JAVA_HOME_24_$ARCH"
