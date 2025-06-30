@@ -11,8 +11,10 @@ runs:
     - name: Set up JDK ${{ matrix.jdk_version }}
       uses: actions/setup-java@v4
       with:
-        java-version: ${{ matrix.jdk_version }}
         distribution: ${{ matrix.jdk_vendor }}
+        java-version: |
+          24
+          21
         cache: 'gradle'
 #    - name: Cache JDKs
 #      id: cache-jdk
