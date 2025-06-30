@@ -12,24 +12,27 @@ runs:
           24
           21
         cache: 'gradle'
-    - name: Re-export JAVA_HOME
-      run: >
-        # Gradle specifically looks for JDK_N environment variables to detect installed JDK versions,
-        # so we need to ensure it can find it, so it picks up JDK_24 since we are using 21 for Gradle itself,
-        # because it does not (yet) support JDK 24+. If it did, we wouldn't need multiple JDKs installed.
-        if [[ -n "$JAVA_HOME_24_ARM64" ]]; then echo "JDK_24=${{ env.JAVA_HOME_24_ARM64 }}" >> "$GITHUB_ENV"; fi;
-        if [[ -n "$JAVA_HOME_24_X64" ]]; then echo "JDK_24=${{ env.JAVA_HOME_24_X64 }}" >> "$GITHUB_ENV"; fi;
-        if [[ -n "$JAVA_HOME_21_ARM64" ]]; then echo "JDK_21=${{ env.JAVA_HOME_21_ARM64 }}" >> "$GITHUB_ENV"; fi;
-        if [[ -n "$JAVA_HOME_21_X64" ]]; then echo "JDK_21=${{ env.JAVA_HOME_21_X64 }}" >> "$GITHUB_ENV"; fi;
-        echo $JDK_21; 
-        echo $JDK_24;
+    - name: Set JDK21
       shell: bash
-    - name: Check Java environment
       run: |
-        env | grep JAVA_HOME;  
-        env | grep JDK; 
-        ./gradlew -q javaToolchains
+        if [[ -n "$JAVA_HOME_21_X64" ]]; then
+          echo "JDK21=$JAVA_HOME_21_X64" >> $GITHUB_ENV
+        elif [[ -n "$JAVA_HOME_21_ARM64" ]]; then
+          echo "JDK21=$JAVA_HOME_21_ARM64" >> $GITHUB_ENV
+        fi
+    - name: Set JDK24
       shell: bash
+      run: |
+        if [[ -n "$JAVA_HOME_24_X64" ]]; then
+          echo "JDK24=$JAVA_HOME_24_X64" >> $GITHUB_ENV
+        elif [[ -n "$JAVA_HOME_24_ARM64" ]]; then
+          echo "JDK24=$JAVA_HOME_24_ARM64" >> $GITHUB_ENV
+        fi
+    - name: Check Java environment
+      shell: bash
+      run: ./gradlew -q javaToolchains
+      env:
+        JDK21: ${{ env.JAVA_HOME_21_X64 || env.JAVA_HOME_21_ARM64 }}
     - name: Cache local SwiftPM repository
       if: matrix.os_version == 'jammy'
       uses: actions/cache@v4
