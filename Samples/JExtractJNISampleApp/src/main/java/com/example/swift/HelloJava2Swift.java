@@ -40,6 +40,8 @@ public class HelloJava2Swift {
         long i = MySwiftLibrary.globalMakeInt();
         SwiftKit.trace("globalMakeInt() = " + i);
 
+        MySwiftClass.method();
+
         System.out.println("DONE.");
     }
 }
