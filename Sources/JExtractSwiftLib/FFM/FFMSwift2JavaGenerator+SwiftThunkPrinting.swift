@@ -27,7 +27,7 @@ extension FFMSwift2JavaGenerator {
 
       var printer = CodePrinter()
       printer.print("// Empty file generated on purpose")
-      try printer.writeContents(
+      _ = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
         filename: expectedFileName)

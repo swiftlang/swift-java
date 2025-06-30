@@ -78,6 +78,7 @@ jobs:
           'JavaSieve',
           'SwiftAndJavaJarSampleLib',
           'SwiftKitSampleApp',
+          'JExtractJNISampleApp'
         ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}

@@ -28,6 +28,10 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry = ThunkNameRegistry()
 
+  /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
+  /// and write an empty file for those.
+  var expectedOutputSwiftFiles: Set<String>
+
   package init(
     translator: Swift2JavaTranslator,
     javaPackage: String,
@@ -40,11 +44,31 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
+
+     // If we are forced to write empty files, construct the expected outputs
+    if translator.config.writeEmptyFiles ?? false {
+      self.expectedOutputSwiftFiles = Set(translator.inputs.compactMap { (input) -> String? in
+        guard let filePathPart = input.filePath.split(separator: "/\(translator.swiftModuleName)/").last else {
+          return nil
+        }
+
+        return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
+      })
+      self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
+    } else {
+      self.expectedOutputSwiftFiles = []
+    }
   }
 
   func generate() throws {
     try writeSwiftThunkSources()
     try writeExportedJavaSources()
+
+    let pendingFileCount = self.expectedOutputSwiftFiles.count
+    if pendingFileCount > 0 {
+      print("[swift-java] Write empty [\(pendingFileCount)] 'expected' files in: \(swiftOutputDirectory)/")
+      try writeSwiftExpectedEmptySources()
+    }
   }
 }
 
@@ -73,6 +97,19 @@ extension JNISwift2JavaGenerator {
     try writeSwiftThunkSources(&printer)
   }
 
+  package func writeSwiftExpectedEmptySources() throws {
+    for expectedFileName in self.expectedOutputSwiftFiles {
+      logger.trace("Write empty file: \(expectedFileName) ...")
+
+      var printer = CodePrinter()
+      printer.print("// Empty file generated on purpose")
+      _ = try printer.writeContents(
+        outputDirectory: self.swiftOutputDirectory,
+        javaPackagePath: nil,
+        filename: expectedFileName)
+    }
+  }
+
   package func writeSwiftThunkSources(_ printer: inout CodePrinter) throws {
     let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
     let moduleFilename = "\(moduleFilenameBase).swift"
@@ -84,10 +121,11 @@ extension JNISwift2JavaGenerator {
 
       if let outputFile = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
-        javaPackagePath: javaPackagePath,
+        javaPackagePath: nil,
         filename: moduleFilename
       ) {
         print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
+        self.expectedOutputSwiftFiles.remove(moduleFilename)
       }
     } catch {
       logger.warning("Failed to write to Swift thunks: \(moduleFilename)")
@@ -113,18 +151,22 @@ extension JNISwift2JavaGenerator {
 
   private func printSwiftFunctionThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     // TODO: Replace swiftModuleName with class name if non-global
-    let cName = "Java_" + self.javaPackage.replacingOccurrences(of: ".", with: "_") + "_\(swiftModuleName)_" + decl.name
+    let cName =
+      "Java_" + self.javaPackage.replacingOccurrences(of: ".", with: "_") + "_\(swiftModuleName)_"
+      + decl.name
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let translatedParameters = decl.functionSignature.parameters.enumerated().map { idx, param in
       (param.parameterName ?? "arg\(idx)", param.type.javaType)
     }
 
-    let thunkParameters = [
-      "environment: UnsafeMutablePointer<JNIEnv?>!",
-      "thisClass: jclass"
-    ] + translatedParameters.map { "\($0.0): \($0.1.jniTypeName)"}
+    let thunkParameters =
+      [
+        "environment: UnsafeMutablePointer<JNIEnv?>!",
+        "thisClass: jclass",
+      ] + translatedParameters.map { "\($0.0): \($0.1.jniTypeName)" }
     let swiftReturnType = decl.functionSignature.result.type
-    let thunkReturnType = !swiftReturnType.isVoid ? " -> \(swiftReturnType.javaType.jniTypeName)" : ""
+    let thunkReturnType =
+      !swiftReturnType.isVoid ? " -> \(swiftReturnType.javaType.jniTypeName)" : ""
 
     printer.printBraceBlock(
       """
@@ -132,24 +174,28 @@ extension JNISwift2JavaGenerator {
       func \(thunkName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """
     ) { printer in
-      let downcallParameters = zip(decl.functionSignature.parameters, translatedParameters).map { originalParam, translatedParam in
-        let label = originalParam.argumentLabel.map { "\($0): "} ?? ""
+      let downcallParameters = zip(decl.functionSignature.parameters, translatedParameters).map {
+        originalParam, translatedParam in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
       }
       let tryClause: String = decl.isThrowing ? "try " : ""
-      let functionDowncall = "\(tryClause)\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
+      let functionDowncall =
+        "\(tryClause)\(swiftModuleName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
 
-      let innerBody = if swiftReturnType.isVoid {
-        functionDowncall
-      } else {
-        """
-        let result = \(functionDowncall)
-        return result.getJNIValue(in: environment)")
-        """
-      }
+      let innerBody =
+        if swiftReturnType.isVoid {
+          functionDowncall
+        } else {
+          """
+          let result = \(functionDowncall)
+          return result.getJNIValue(in: environment)
+          """
+        }
 
       if decl.isThrowing {
-        let dummyReturn = !swiftReturnType.isVoid ? "return \(swiftReturnType).jniPlaceholderValue" : ""
+        let dummyReturn =
+          !swiftReturnType.isVoid ? "return \(swiftReturnType).jniPlaceholderValue" : ""
         printer.print(
           """
           do {
@@ -173,6 +219,16 @@ extension JNISwift2JavaGenerator {
     printPackage(&printer)
 
     printModuleClass(&printer) { printer in
+      printer.print(
+        """
+        static final String LIB_NAME = "\(swiftModuleName)";
+        
+        static {
+          System.loadLibrary(LIB_NAME);
+        }
+        """
+      )
+
       for decl in analysis.importedGlobalFuncs {
         self.logger.trace("Print global function: \(decl)")
         printFunctionBinding(&printer, decl)
@@ -223,7 +279,9 @@ extension JNISwift2JavaGenerator {
       */
       """
     )
-    printer.print("public static native \(returnType) \(decl.name)(\(params.joined(separator: ", ")))\(throwsClause);")
+    printer.print(
+      "public static native \(returnType) \(decl.name)(\(params.joined(separator: ", ")))\(throwsClause);"
+    )
   }
 }
 
@@ -253,7 +311,7 @@ extension SwiftStandardLibraryTypeKind {
   var javaType: JavaType? {
     switch self {
     case .bool: .boolean
-    case .int: .long // TODO: Handle 32-bit or 64-bit
+    case .int: .long  // TODO: Handle 32-bit or 64-bit
     case .int8: .byte
     case .uint16: .char
     case .int16: .short
@@ -264,10 +322,10 @@ extension SwiftStandardLibraryTypeKind {
     case .void: .void
     case .string: .javaLangString
     case .uint, .uint8, .uint32, .uint64,
-        .unsafeRawPointer, .unsafeMutableRawPointer,
-        .unsafePointer, .unsafeMutablePointer,
-        .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-        .unsafeBufferPointer, .unsafeMutableBufferPointer:
+      .unsafeRawPointer, .unsafeMutableRawPointer,
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer:
       nil
     }
   }
