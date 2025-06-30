@@ -12,6 +12,9 @@ runs:
           24
           21
         cache: 'gradle'
+    - name: List JAVA_HOME
+      run: env | grep JAVA_HOME
+      shell: bash
     - name: Cache local SwiftPM repository
       if: matrix.os_version == 'jammy'
       uses: actions/cache@v4
