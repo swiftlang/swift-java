@@ -12,27 +12,22 @@ runs:
           24
           21
         cache: 'gradle'
-    - name: Set JDK21
+    - name: Set JAVA_HOME_{N}
       shell: bash
       run: |
         if [[ -n "$JAVA_HOME_21_X64" ]]; then
-          echo "JDK21=$JAVA_HOME_21_X64" >> $GITHUB_ENV
+          echo "JAVA_HOME_21=$JAVA_HOME_21_X64" >> $GITHUB_ENV
         elif [[ -n "$JAVA_HOME_21_ARM64" ]]; then
-          echo "JDK21=$JAVA_HOME_21_ARM64" >> $GITHUB_ENV
+          echo "JAVA_HOME_21=$JAVA_HOME_21_ARM64" >> $GITHUB_ENV
         fi
-    - name: Set JDK24
-      shell: bash
-      run: |
         if [[ -n "$JAVA_HOME_24_X64" ]]; then
-          echo "JDK24=$JAVA_HOME_24_X64" >> $GITHUB_ENV
+          echo "JAVA_HOME_24=$JAVA_HOME_24_X64" >> $GITHUB_ENV
         elif [[ -n "$JAVA_HOME_24_ARM64" ]]; then
-          echo "JDK24=$JAVA_HOME_24_ARM64" >> $GITHUB_ENV
+          echo "JAVA_HOME_24=$JAVA_HOME_24_ARM64" >> $GITHUB_ENV
         fi
     - name: Check Java environment
       shell: bash
       run: ./gradlew -q javaToolchains
-      env:
-        JDK21: ${{ env.JAVA_HOME_21_X64 || env.JAVA_HOME_21_ARM64 }}
     - name: Cache local SwiftPM repository
       if: matrix.os_version == 'jammy'
       uses: actions/cache@v4

@@ -35,6 +35,8 @@ Makefile
 **/CMakeLists.txt
 **/*.jar
 **/generated/*.java
+gradle.properties
+**/gradle.properties
 **/generated/*.swift
 gradle/wrapper/gradle-wrapper.properties
 gradlew
