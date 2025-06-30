@@ -20,7 +20,7 @@ package com.example.swift;
 
 import org.swift.swiftkit.SwiftKit;
 
-public class HelloJava2Swift {
+public class HelloJava2SwiftJNI {
 
     public static void main(String[] args) {
         System.out.print("Property: java.library.path = " + SwiftKit.getJavaLibraryPath());
