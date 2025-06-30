@@ -7,7 +7,7 @@ import PackageDescription
 let package = Package(
   name: "JavaProbablyPrime",
   platforms: [
-    .macOS(.v10_15),
+    .macOS(.v15),
   ],
 
   products: [
