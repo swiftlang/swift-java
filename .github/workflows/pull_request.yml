@@ -34,27 +34,7 @@ jobs:
       - name: Gradle :SwiftKit:build
         run: ./gradlew build -x test
       - name: Gradle :SwiftKit:check
-        run: ./gradlew :SwiftKit:check --debug
-
-  benchmark-java:
-    name: Benchmark (JMH) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        swift_version: ['6.1.2']
-        os_version: ['jammy']
-        jdk_vendor: ['corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      SWIFT_JAVA_VERBOSE: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
-      - name: Gradle compile JMH benchmarks
-        run: ./gradlew compileJmh --info
+        run: ./gradlew :SwiftKit:check --info
 
   test-java-macos:
     name: Test (Java) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
@@ -75,6 +55,24 @@ jobs:
         run: ./gradlew build -x test
       - name: Gradle :SwiftKit:check
         run: ./gradlew :SwiftKit:check --debug
+
+  benchmark-java:
+    name: Benchmark (JMH) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        swift_version: ['6.1.2']
+        os_version: ['jammy']
+        jdk_vendor: ['corretto']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      SWIFT_JAVA_VERBOSE: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
 
@@ -136,7 +134,7 @@ jobs:
           'JavaSieve',
           'SwiftAndJavaJarSampleLib',
           'SwiftKitSampleApp',
-          'JExtractJNISampleApp'
+          'JExtractJNISampleApp',
         ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -163,6 +161,7 @@ jobs:
           'JavaSieve',
           'SwiftAndJavaJarSampleLib',
           'SwiftKitSampleApp',
+          'JExtractJNISampleApp',
         ]
     steps:
       - uses: actions/checkout@v4
