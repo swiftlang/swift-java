@@ -34,7 +34,7 @@ echo "CLASSPATH       = ${CLASSPATH}"
 
 $JAVAC -cp "${CLASSPATH}" Example.java
 
-# TODO: move all this into Gradle or SwiftPM and make it easier to get the right classpath for running
+# FIXME: move all this into Gradle or SwiftPM and make it easier to get the right classpath for running
 if [ "$(uname -s)" = 'Linux' ]
 then
   SWIFT_LIB_PATHS=/usr/lib/swift/linux
@@ -44,6 +44,7 @@ then
   SWIFT_CORE_LIB=$(find "$HOME"/.local -name "libswiftCore.so" 2>/dev/null | grep "$SWIFT_VERSION" | head -n1)
   if [ -n "$SWIFT_CORE_LIB" ]; then
     SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:$(dirname "$SWIFT_CORE_LIB")"
+    ls "$SWIFT_LIB_PATHS"
   else
     # maybe there is one installed system-wide in /usr/lib?
     SWIFT_CORE_LIB2=$(find /usr/lib -name "libswiftCore.so" 2>/dev/null | grep "$SWIFT_VERSION" | head -n1)
@@ -53,8 +54,15 @@ then
   fi
 elif [ "$(uname -s)" = 'Darwin' ]
 then
-  SWIFT_LIB_PATHS=$(find "$(swiftly use --print-location)" | grep dylib$ | grep libswiftCore | grep macos | xargs dirname)
+  SWIFT_LIB_PATHS=$(find "$(swiftly use --print-location)" | grep dylib$ | grep libswiftCore | grep macos | head -n1 | xargs dirname)
+  if [ -z "${SWIFT_LIB_PATHS}" ]
+  then
+    # if we failed to locate paths using swiftly...
+    # try to use the the path that we know about for github actions macOS
+    SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:/Library/Developer/CommandLineTools/usr/lib/swift-5.0/macosx/"
+  fi
   SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:$(pwd)/$(find . | grep libMySwiftLibrary.dylib$ | sort | head -n1 | xargs dirname)"
+
 fi
 echo "SWIFT_LIB_PATHS = ${SWIFT_LIB_PATHS}"
 
