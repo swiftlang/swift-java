@@ -43,11 +43,10 @@ let javaIncludePath = "\(javaHome)/include"
 let package = Package(
   name: "JavaKitSampleApp",
   platforms: [
-    .macOS(.v13),
-    .iOS(.v13),
-    .tvOS(.v13),
-    .watchOS(.v6),
-    .macCatalyst(.v13),
+    .macOS(.v15),
+    .iOS(.v18),
+    .watchOS(.v11),
+    .tvOS(.v18),
   ],
 
   products: [

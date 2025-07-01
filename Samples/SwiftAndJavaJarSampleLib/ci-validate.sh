@@ -7,13 +7,21 @@ set -x
 
 SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
 
-# we make sure to build and run with JDK 24 because the runtime needs latest JDK, unlike Gradle which needed 21.
-if [ "$(uname -s)" = 'Darwin' ]
-then
-  export OS='osx'
+# This is how env variables are set by setup-java
+if [ "$(uname -m)" = 'arm64' ]; then
+  ARCH=ARM64
+  JAVAC="${JAVA_HOME_24_ARM64}/bin/javac"
+  JAVA="${JAVA_HOME_24_ARM64}/bin/java"
+else
+  ARCH=X64
+  JAVAC="${JAVA_HOME_24_X64}/bin/javac"
+  JAVA="${JAVA_HOME_24_X64}/bin/java"
+fi
+
+if [ -n "$JAVA_HOME_24_$ARCH" ]; then
+   export JAVA_HOME="$JAVA_HOME_24_$ARCH"
 elif [ "$(uname -s)" = 'Linux' ]
 then
-  export OS='linux'
   export PATH="${PATH}:/usr/lib/jvm/jdk-24/bin" # we need to make sure to use the latest JDK to actually compile/run the executable
 fi
 
@@ -24,8 +32,9 @@ MYLIB_CLASSPATH="$(pwd)/build/libs/*"
 CLASSPATH="$(pwd)/:${SWIFTKIT_CLASSPATH}:${MYLIB_CLASSPATH}"
 echo "CLASSPATH       = ${CLASSPATH}"
 
-javac -cp "${CLASSPATH}" Example.java
+$JAVAC -cp "${CLASSPATH}" Example.java
 
+# FIXME: move all this into Gradle or SwiftPM and make it easier to get the right classpath for running
 if [ "$(uname -s)" = 'Linux' ]
 then
   SWIFT_LIB_PATHS=/usr/lib/swift/linux
@@ -35,6 +44,7 @@ then
   SWIFT_CORE_LIB=$(find "$HOME"/.local -name "libswiftCore.so" 2>/dev/null | grep "$SWIFT_VERSION" | head -n1)
   if [ -n "$SWIFT_CORE_LIB" ]; then
     SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:$(dirname "$SWIFT_CORE_LIB")"
+    ls "$SWIFT_LIB_PATHS"
   else
     # maybe there is one installed system-wide in /usr/lib?
     SWIFT_CORE_LIB2=$(find /usr/lib -name "libswiftCore.so" 2>/dev/null | grep "$SWIFT_VERSION" | head -n1)
@@ -44,13 +54,14 @@ then
   fi
 elif [ "$(uname -s)" = 'Darwin' ]
 then
-  SWIFT_LIB_PATHS=$(find "$(swiftly use --print-location)" | grep dylib$ | grep libswiftCore | grep macos | xargs dirname)
+  SWIFT_LIB_PATHS=$(find "$(swiftly use --print-location)" | grep dylib$ | grep libswiftCore | grep macos | head -n1 | xargs dirname)
   SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:$(pwd)/$(find . | grep libMySwiftLibrary.dylib$ | sort | head -n1 | xargs dirname)"
+
 fi
 echo "SWIFT_LIB_PATHS = ${SWIFT_LIB_PATHS}"
 
 # Can we run the example?
-java --enable-native-access=ALL-UNNAMED \
+${JAVA} --enable-native-access=ALL-UNNAMED \
      -Djava.library.path="${SWIFT_LIB_PATHS}" \
      -cp "${CLASSPATH}" \
      Example

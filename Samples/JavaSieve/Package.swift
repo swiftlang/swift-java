@@ -42,7 +42,10 @@ let javaIncludePath = "\(javaHome)/include"
 let package = Package(
     name: "JavaSieve",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v15),
+        .iOS(.v18),
+        .watchOS(.v11),
+        .tvOS(.v18),
     ],
     dependencies: [
         .package(name: "swift-java", path: "../../"),

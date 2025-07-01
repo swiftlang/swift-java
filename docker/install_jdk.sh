@@ -17,9 +17,9 @@ set -euo pipefail
 # We need JDK 24 because that's the supported version with latest FFM
 # However, we also need JDK 23 at most because Gradle does not support 24.
 
-# Supported JDKs: Corretto
+# Supported JDKs: corretto
 if [ "$JDK_VENDOR" = "" ]; then
-declare -r JDK_VENDOR="Corretto"
+declare -r JDK_VENDOR="corretto"
 fi
 
 apt-get update && apt-get install -y wget tree
@@ -33,7 +33,7 @@ download_and_install_jdk() {
 
     echo "Installing $JDK_VENDOR JDK (${jdk_version})..."
 
-    if [ "$JDK_VENDOR" = 'Corretto' ]; then
+    if [ "$JDK_VENDOR" = 'corretto' ]; then
         if [ "$(uname -m)" = 'aarch64' ]; then
             case "$jdk_version" in
                 "21")

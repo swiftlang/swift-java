@@ -44,6 +44,9 @@ let package = Package(
   name: "JavaDependencySampleApp",
   platforms: [
     .macOS(.v15),
+    .iOS(.v18),
+    .watchOS(.v11),
+    .tvOS(.v18),
   ],
 
   products: [

@@ -11,6 +11,8 @@ declare -r RESET='\033[0m'
 declare -r sampleDir="$1"
 declare -r CI_VALIDATE_SCRIPT='ci-validate.sh'
 
+echo "Using Swift: $(which swift)"
+
 echo ""
 echo ""
 echo "========================================================================"
