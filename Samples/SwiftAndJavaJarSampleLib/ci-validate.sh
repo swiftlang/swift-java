@@ -55,12 +55,6 @@ then
 elif [ "$(uname -s)" = 'Darwin' ]
 then
   SWIFT_LIB_PATHS=$(find "$(swiftly use --print-location)" | grep dylib$ | grep libswiftCore | grep macos | head -n1 | xargs dirname)
-  if [ -z "${SWIFT_LIB_PATHS}" ]
-  then
-    # if we failed to locate paths using swiftly...
-    # try to use the the path that we know about for github actions macOS
-    SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:/Library/Developer/CommandLineTools/usr/lib/swift-5.0/macosx/"
-  fi
   SWIFT_LIB_PATHS="${SWIFT_LIB_PATHS}:$(pwd)/$(find . | grep libMySwiftLibrary.dylib$ | sort | head -n1 | xargs dirname)"
 
 fi

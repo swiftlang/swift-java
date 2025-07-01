@@ -169,7 +169,7 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swiftly  # we specifically install Swiftly in macOS jobs because we want a simpler way to find the right dylib paths for libraries
-        run: ./.github/scripts/prep-gh-action.sh --install-swiftly
+        run: ./.github/scripts/install_swiftly.sh
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: "Verify sample ${{ matrix.sample_app }}"
