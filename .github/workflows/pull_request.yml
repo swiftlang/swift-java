@@ -142,8 +142,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Prepare the action
+        run: ./.github/scripts/prep-gh-action.sh --install-swiftly
+        env:
+          SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: "Verify sample: ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+
 
   verify-samples-macos:
     name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})

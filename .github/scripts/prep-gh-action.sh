@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script is reused from Swiftly itself, see:
+# https://github.com/swiftlang/swiftly/blob/main/scripts/prep-gh-action.sh
+#
 # This script does a bit of extra preparation of the docker containers used to run the GitHub workflows
 # that are specific to this project's needs when building/testing. Note that this script runs on
 # every supported Linux distribution and macOS so it must adapt to the distribution that it is running.
@@ -57,6 +60,10 @@ if [ "$installSwiftly" == true ]; then
         echo "Installing latest main-snapshot toolchain"
         selector=("main-snapshot")
         runSelector=("+main-snapshot")
+    elif [ -n "${SWIFT_VERSION}" ]; then
+        echo "Installing selected swift toolchain from SWIFT_VERSION environment variable"
+        selector=("${SWIFT_VERSION}")
+        runSelector=()
     elif [ -f .swift-version ]; then
         echo "Installing selected swift toolchain from .swift-version file"
         selector=()
