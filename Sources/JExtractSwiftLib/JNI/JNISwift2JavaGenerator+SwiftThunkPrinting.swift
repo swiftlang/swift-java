@@ -96,14 +96,16 @@ extension JNISwift2JavaGenerator {
     _ decl: ImportedFunc,
     sorroundingType: ImportedNominalType? = nil
   ) {
+    let translatedDecl = translatedDecl(for: decl)
     let parentName = sorroundingType?.swiftNominal.qualifiedName ?? swiftModuleName
 
     let cName =
       "Java_" + self.javaPackage.replacingOccurrences(of: ".", with: "_") + "_\(parentName)_"
       + decl.name
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
-    let translatedParameters = decl.functionSignature.parameters.enumerated().map { idx, param in
-      (param.parameterName ?? "arg\(idx)", param.type.javaType)
+    // TODO: Add a similair construct as `LoweredFunctionSignature` to `TranslatedFunctionSignature`
+    let translatedParameters = translatedDecl.translatedFunctionSignature.parameters.map { param in
+      (param.name, param.type)
     }
 
     let thunkParameters =
@@ -113,7 +115,7 @@ extension JNISwift2JavaGenerator {
       ] + translatedParameters.map { "\($0.0): \($0.1.jniTypeName)" }
     let swiftReturnType = decl.functionSignature.result.type
     let thunkReturnType =
-      !swiftReturnType.isVoid ? " -> \(swiftReturnType.javaType.jniTypeName)" : ""
+    !swiftReturnType.isVoid ? " -> \(translatedDecl.translatedFunctionSignature.resultType.jniTypeName)" : ""
 
     printer.printBraceBlock(
       """

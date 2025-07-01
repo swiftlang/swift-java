@@ -28,6 +28,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry = ThunkNameRegistry()
 
+  /// Cached Java translation result. 'nil' indicates failed translation.
+  var translatedDecls: [ImportedFunc: TranslatedFunctionDecl] = [:]
+
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
   var expectedOutputSwiftFiles: Set<String>
@@ -68,52 +71,6 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     if pendingFileCount > 0 {
       print("[swift-java] Write empty [\(pendingFileCount)] 'expected' files in: \(swiftOutputDirectory)/")
       try writeSwiftExpectedEmptySources()
-    }
-  }
-}
-
-extension SwiftType {
-  var javaType: JavaType {
-    switch self {
-    case .nominal(let nominalType):
-      if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
-        guard let javaType = knownType.javaType else {
-          fatalError("unsupported known type: \(knownType)")
-        }
-        return javaType
-      }
-
-      fatalError("unsupported nominal type: \(nominalType)")
-
-    case .tuple([]):
-      return .void
-
-    case .metatype, .optional, .tuple, .function:
-      fatalError("unsupported type: \(self)")
-    }
-  }
-}
-
-extension SwiftStandardLibraryTypeKind {
-  var javaType: JavaType? {
-    switch self {
-    case .bool: .boolean
-    case .int: .long  // TODO: Handle 32-bit or 64-bit
-    case .int8: .byte
-    case .uint16: .char
-    case .int16: .short
-    case .int32: .int
-    case .int64: .long
-    case .float: .float
-    case .double: .double
-    case .void: .void
-    case .string: .javaLangString
-    case .uint, .uint8, .uint32, .uint64,
-      .unsafeRawPointer, .unsafeMutableRawPointer,
-      .unsafePointer, .unsafeMutablePointer,
-      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-      .unsafeBufferPointer, .unsafeMutableBufferPointer:
-      nil
     }
   }
 }

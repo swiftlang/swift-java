@@ -19,8 +19,19 @@ import Testing
 struct JNIClassTests {
   let source = """
     public class MyClass {
-      public static func method() {
+      let x: Int64
+      let y: Int64
   
+      public static func method() {}
+  
+      public init(x: Int64, y: Int64) {
+        self.x = y
+        self.y = y
+      }
+  
+      public init() {
+        self.x = 0
+        self.y = 0
       }
     }
   """
@@ -34,8 +45,13 @@ struct JNIClassTests {
 
       package com.example.swift;
 
-      public final class MyClass {
-      """
+      public final class MyClass { 
+        private long selfPointer;
+      
+        private MyClass(long selfPointer) {
+          this.selfPointer = selfPointer;
+        }
+      """,
     ])
   }
 
@@ -72,6 +88,47 @@ struct JNIClassTests {
         func swiftjava_SwiftModule_MyClass_method(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           MyClass.method()
         }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func initializer_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public init(x: Int64, y: Int64)
+          * }
+          */
+        public static MyClass init(long x, long y) {
+          long selfPointer = MyClass.allocatingInit(x, y);
+          return new MyClass(selfPointer);
+        }
+        """,
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public init()
+          * }
+          */
+        public static MyClass init() {
+          long selfPointer = MyClass.allocatingInit();
+          return new MyClass(selfPointer);
+        }
+        """,
+        """
+        private static native long allocatingInit(long x, long y);
+        """,
+        """
+        private static native long allocatingInit();
         """
       ]
     )

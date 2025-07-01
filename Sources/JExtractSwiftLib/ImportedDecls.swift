@@ -40,6 +40,10 @@ package class ImportedNominalType: ImportedDecl {
   var swiftType: SwiftType {
     return .nominal(.init(nominalTypeDecl: swiftNominal))
   }
+
+  var qualifiedName: String {
+    self.swiftNominal.qualifiedName
+  }
 }
 
 public final class ImportedFunc: ImportedDecl, CustomStringConvertible {

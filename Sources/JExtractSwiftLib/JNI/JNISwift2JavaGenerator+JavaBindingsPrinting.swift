@@ -74,6 +74,20 @@ extension JNISwift2JavaGenerator {
     printPackage(&printer)
 
     printNominal(&printer, decl) { printer in
+      printer.print(
+        """
+        private long selfPointer;
+        
+        private MyClass(long selfPointer) {
+          this.selfPointer = selfPointer;
+        }
+        """
+      )
+
+      for initializer in decl.initializers {
+        printInitializerBindings(&printer, initializer, type: decl)
+      }
+
       for method in decl.methods {
         printFunctionBinding(&printer, method)
       }
@@ -114,12 +128,31 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let returnType = decl.functionSignature.result.type.javaType
-    let params = decl.functionSignature.parameters.enumerated().map { idx, param in
-      "\(param.type.javaType) \(param.parameterName ?? "arg\(idx))")"
-    }
-    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+    printDeclDocumentation(&printer, decl)
+    printer.print(
+      "public static native \(renderFunctionSignature(decl));"
+    )
+  }
 
+  private func printInitializerBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc, type: ImportedNominalType) {
+    let translatedDecl = translatedDecl(for: decl)
+
+    printDeclDocumentation(&printer, decl)
+    printer.printBraceBlock("public static \(renderFunctionSignature(decl))") { printer in
+      let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.asArgument)
+      printer.print(
+        """
+        long selfPointer = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
+        return new \(type.qualifiedName)(selfPointer);
+        """
+      )
+    }
+
+    let parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
+    printer.print("private static native long allocatingInit(\(parameters.joined(separator: ", ")));")
+  }
+
+  private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     printer.print(
       """
       /**
@@ -130,8 +163,18 @@ extension JNISwift2JavaGenerator {
       */
       """
     )
-    printer.print(
-      "public static native \(returnType) \(decl.name)(\(params.joined(separator: ", ")))\(throwsClause);"
-    )
+  }
+
+  /// Renders a function signature such
+  ///
+  /// `func method(x: Int, y: Int) -> Int` becomes
+  /// `long method(long x, long y)`
+  private func renderFunctionSignature(_ decl: ImportedFunc) -> String {
+    let translatedDecl = translatedDecl(for: decl)
+    let resultType = translatedDecl.translatedFunctionSignature.resultType
+    let parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
+    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+
+    return "\(resultType) \(decl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
   }
 }
