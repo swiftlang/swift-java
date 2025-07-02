@@ -42,6 +42,9 @@ public class HelloJava2Swift {
 
         MySwiftClass.method();
 
+        MySwiftClass myClass = MySwiftClass.init(10, 5);
+        MySwiftClass myClass2 = MySwiftClass.init();
+
         System.out.println("DONE.");
     }
 }

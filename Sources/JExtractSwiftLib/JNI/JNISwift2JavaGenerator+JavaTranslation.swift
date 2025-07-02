@@ -32,14 +32,16 @@ extension JNISwift2JavaGenerator {
   struct JavaTranslation {
     func translate(_ decl: ImportedFunc) -> TranslatedFunctionDecl {
       let translatedFunctionSignature = translate(functionSignature: decl.functionSignature)
+      let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName
 
       return TranslatedFunctionDecl(
         name: decl.name,
+        parentName: parentName,
         translatedFunctionSignature: translatedFunctionSignature
       )
     }
 
-    func translate(functionSignature: SwiftFunctionSignature) -> TranslatedFunctionSignature {
+    func translate(functionSignature: SwiftFunctionSignature, isInitializer: Bool = false) -> TranslatedFunctionSignature {
       let parameters = functionSignature.parameters.enumerated().map { idx, param in
         let parameterName = param.parameterName ?? "arg\(idx))"
         return translate(swiftParam: param, parameterName: parameterName)
@@ -103,6 +105,9 @@ extension JNISwift2JavaGenerator {
   struct TranslatedFunctionDecl {
     /// Java function name
     let name: String
+
+    /// The name of the parent scope this function is declared in (or nil if global)
+    let parentName: String?
 
     /// Function signature
     let translatedFunctionSignature: TranslatedFunctionSignature

@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaTypes
+
 extension JNISwift2JavaGenerator {
   func writeSwiftThunkSources() throws {
     var printer = CodePrinter()
@@ -85,52 +87,61 @@ extension JNISwift2JavaGenerator {
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
     printHeader(&printer)
 
-    for decl in type.methods {
-      printSwiftFunctionThunk(&printer, decl, sorroundingType: type)
+    for initializer in type.initializers {
+      printInitializerThunk(&printer, initializer)
       printer.println()
+    }
+
+    for method in type.methods {
+      printSwiftFunctionThunk(&printer, method)
+      printer.println()
+    }
+  }
+
+  private func printInitializerThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    let translatedDecl = translatedDecl(for: decl)
+    // Initializers must have a parent
+    let typeName = translatedDecl.parentName!
+
+    printCDecl(
+      &printer,
+      javaMethodName: "allocatingInit",
+      parentName: translatedDecl.parentName,
+      parameters: translatedDecl.translatedFunctionSignature.parameters,
+      isStatic: true,
+      resultType: .long
+    ) { printer in
+      let downcallArguments = renderDowncallArguments(
+        swiftFunctionSignature: decl.functionSignature,
+        translatedFunctionSignature: translatedDecl.translatedFunctionSignature
+      )
+      // TODO: Throwing initializers
+      printer.print(
+        """
+        let selfPointer = UnsafeMutablePointer<\(typeName)>.allocate(capacity: 1)
+        selfPointer.initialize(to: \(typeName)(\(downcallArguments)))
+        return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+        """
+      )
     }
   }
 
   private func printSwiftFunctionThunk(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
-    sorroundingType: ImportedNominalType? = nil
+    _ decl: ImportedFunc
   ) {
-    let translatedDecl = translatedDecl(for: decl)
-    let parentName = sorroundingType?.swiftNominal.qualifiedName ?? swiftModuleName
-
-    let cName =
-      "Java_" + self.javaPackage.replacingOccurrences(of: ".", with: "_") + "_\(parentName)_"
-      + decl.name
-    let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
-    // TODO: Add a similair construct as `LoweredFunctionSignature` to `TranslatedFunctionSignature`
-    let translatedParameters = translatedDecl.translatedFunctionSignature.parameters.map { param in
-      (param.name, param.type)
-    }
-
-    let thunkParameters =
-      [
-        "environment: UnsafeMutablePointer<JNIEnv?>!",
-        "thisClass: jclass",
-      ] + translatedParameters.map { "\($0.0): \($0.1.jniTypeName)" }
+    let translatedDecl = self.translatedDecl(for: decl)
+    let parentName = translatedDecl.parentName ?? swiftModuleName
     let swiftReturnType = decl.functionSignature.result.type
-    let thunkReturnType =
-    !swiftReturnType.isVoid ? " -> \(translatedDecl.translatedFunctionSignature.resultType.jniTypeName)" : ""
 
-    printer.printBraceBlock(
-      """
-      @_cdecl("\(cName)")
-      func \(thunkName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
-      """
-    ) { printer in
-      let downcallParameters = zip(decl.functionSignature.parameters, translatedParameters).map {
-        originalParam, translatedParam in
-        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
-        return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.0), in: environment!)"
-      }
+    printCDecl(&printer, decl) { printer in
+      let downcallParameters = renderDowncallArguments(
+        swiftFunctionSignature: decl.functionSignature,
+        translatedFunctionSignature: translatedDecl.translatedFunctionSignature
+      )
       let tryClause: String = decl.isThrowing ? "try " : ""
       let functionDowncall =
-        "\(tryClause)\(parentName).\(decl.name)(\(downcallParameters.joined(separator: ", ")))"
+        "\(tryClause)\(parentName).\(decl.name)(\(downcallParameters))"
 
       let innerBody =
         if swiftReturnType.isVoid {
@@ -161,6 +172,76 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  private func printCDecl(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc,
+    _ body: (inout CodePrinter) -> Void
+  ) {
+    let translatedDecl = translatedDecl(for: decl)
+    let parentName = translatedDecl.parentName
+
+    printCDecl(
+      &printer,
+      javaMethodName: translatedDecl.name,
+      parentName: parentName,
+      parameters: translatedDecl.translatedFunctionSignature.parameters,
+      isStatic: decl.isStatic || decl.isInitializer,
+      resultType: translatedDecl.translatedFunctionSignature.resultType,
+      body
+    )
+  }
+
+  private func printCDecl(
+    _ printer: inout CodePrinter,
+    javaMethodName: String,
+    parentName: String?,
+    parameters: [JavaParameter],
+    isStatic: Bool,
+    resultType: JavaType,
+    _ body: (inout CodePrinter) -> Void
+  ) {
+    let parentName = parentName ?? swiftModuleName
+    var jniSignature = parameters.reduce(into: "") { signature, parameter in
+      signature += parameter.type.jniTypeSignature
+    }
+
+    // Escape signature characters
+    jniSignature = jniSignature
+      .replacingOccurrences(of: "_", with: "_1")
+      .replacingOccurrences(of: "/", with: "_")
+      .replacingOccurrences(of: ";", with: "_2")
+      .replacingOccurrences(of: "[", with: "_3")
+
+    let cName =
+      "Java_"
+      + self.javaPackage.replacingOccurrences(of: ".", with: "_")
+      + "_\(parentName)_"
+      + javaMethodName
+      + "__"
+      + jniSignature
+    let translatedParameters = parameters.map {
+      "\($0.name): \($0.type.jniTypeName)"
+    }
+    let thisParameter = isStatic ? "thisClass: jclass" : "thisObject: jobject"
+
+    let thunkParameters =
+      [
+        "environment: UnsafeMutablePointer<JNIEnv?>!",
+        thisParameter
+      ] + translatedParameters
+    let thunkReturnType = !resultType.isVoid ? " -> \(resultType.jniTypeName)" : ""
+
+    // TODO: Think about function overloads
+    printer.printBraceBlock(
+      """
+      @_cdecl("\(cName)")
+      func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
+      """
+    ) { printer in
+      body(&printer)
+    }
+  }
+
   private func printHeader(_ printer: inout CodePrinter) {
     printer.print(
       """
@@ -170,5 +251,20 @@ extension JNISwift2JavaGenerator {
 
       """
     )
+  }
+
+  /// Renders the arguments for making a downcall
+  private func renderDowncallArguments(
+    swiftFunctionSignature: SwiftFunctionSignature,
+    translatedFunctionSignature: TranslatedFunctionSignature
+  ) -> String {
+    zip(
+      swiftFunctionSignature.parameters,
+      translatedFunctionSignature.parameters
+    ).map { originalParam, translatedParam in
+      let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+      return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.name), in: environment!)"
+    }
+    .joined(separator: ", ")
   }
 }

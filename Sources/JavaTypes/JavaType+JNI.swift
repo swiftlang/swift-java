@@ -12,6 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 extension JavaType {
   /// Map this Java type to the appropriate JNI type name.
   package var jniTypeName: String {
@@ -55,6 +61,27 @@ extension JavaType {
     case .double: "d"
     case .class, .array: "l"
     case .void: fatalError("There is no field name for 'void'")
+    }
+  }
+
+  package var jniTypeSignature: String {
+    switch self {
+    case .boolean: "Z"
+    case .byte: "B"
+    case .char: "C"
+    case .short: "S"
+    case .int: "I"
+    case .long: "J"
+    case .float: "F"
+    case .double: "D"
+    case .class(let package, let name):
+      if let package {
+        "L\(package.replacingOccurrences(of: ".", with: "/"))/\(name);"
+      } else {
+        "L\(name);"
+      }
+    case .array(let javaType): "[\(javaType.jniTypeSignature)"
+    case .void: fatalError("There is no type signature for 'void'")
     }
   }
 }

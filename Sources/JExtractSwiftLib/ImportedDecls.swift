@@ -78,6 +78,20 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     }
   }
 
+  var isStatic: Bool {
+    if case .staticMethod = functionSignature.selfParameter {
+      return true
+    }
+    return false
+  }
+
+  var isInitializer: Bool {
+    if case .initializer = functionSignature.selfParameter {
+      return true
+    }
+    return false
+  }
+
   /// If this function/method is member of a class/struct/protocol,
   /// this will contain that declaration's imported name.
   ///

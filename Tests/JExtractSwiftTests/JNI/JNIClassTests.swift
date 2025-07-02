@@ -133,4 +133,32 @@ struct JNIClassTests {
       ]
     )
   }
+
+  @Test
+  func initializer_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass_allocatingInit__")
+        func Java_com_example_swift_MyClass_allocatingInit__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+          let selfPointer = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          selfPointer.initialize(to: MyClass())
+          return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_MyClass_allocatingInit__JJ")
+        func Java_com_example_swift_MyClass_allocatingInit__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
+          let selfPointer = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          selfPointer.initialize(to: MyClass(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
 }

@@ -13,7 +13,25 @@
 //===----------------------------------------------------------------------===//
 
 public class MySwiftClass {
+  let x: Int64
+  let y: Int64
+
   public static func method() {
     p("Hello from static method in a class!")
+  }
+
+  public init(x: Int64, y: Int64) {
+    self.x = x
+    self.y = y
+    p("\(self)")
+  }
+
+  public init() {
+    self.x = 10
+    self.y = 5
+  }
+
+  deinit {
+    p("deinit called!")
   }
 }

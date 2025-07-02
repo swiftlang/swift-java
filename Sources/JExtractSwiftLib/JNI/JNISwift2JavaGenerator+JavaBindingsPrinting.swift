@@ -78,7 +78,7 @@ extension JNISwift2JavaGenerator {
         """
         private long selfPointer;
         
-        private MyClass(long selfPointer) {
+        private \(decl.swiftNominal.name)(long selfPointer) {
           this.selfPointer = selfPointer;
         }
         """
@@ -165,7 +165,7 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-  /// Renders a function signature such
+  /// Renders a Java function signature
   ///
   /// `func method(x: Int, y: Int) -> Int` becomes
   /// `long method(long x, long y)`
@@ -175,6 +175,6 @@ extension JNISwift2JavaGenerator {
     let parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
     let throwsClause = decl.isThrowing ? " throws Exception" : ""
 
-    return "\(resultType) \(decl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
+    return "\(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
   }
 }
