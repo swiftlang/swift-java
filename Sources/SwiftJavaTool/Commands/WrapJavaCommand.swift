@@ -52,6 +52,9 @@ extension SwiftJava {
     @Option(help: "Cache directory for intermediate results and other outputs between runs")
     var cacheDirectory: String?
 
+    @Option(help: "Match java package directory structure with generated Swift files")
+    var swiftMatchPackageDirectoryStructure: Bool = false
+
     @Argument(help: "Path to .jar file whose Java classes should be wrapped using Swift bindings")
     var input: String
   }
@@ -229,11 +232,16 @@ extension SwiftJava.WrapJavaCommand {
 
                           """
 
+      var generatedFileOutputDir = self.actualOutputDirectory
+      if self.swiftMatchPackageDirectoryStructure {
+        generatedFileOutputDir?.append(path: javaClass.getPackageName().replacing(".", with: "/"))
+      }
+
       let swiftFileName = try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
         .swiftName.replacing(".", with: "+") + ".swift"
       try writeContents(
         swiftFileText,
-        outputDirectory: self.actualOutputDirectory,
+        outputDirectory: generatedFileOutputDir,
         to: swiftFileName,
         description: "Java class '\(javaClass.getName())' translation"
       )
