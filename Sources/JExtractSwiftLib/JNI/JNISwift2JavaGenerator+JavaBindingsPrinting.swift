@@ -76,6 +76,21 @@ extension JNISwift2JavaGenerator {
     printNominal(&printer, decl) { printer in
       printer.print(
         """
+        static final String LIB_NAME = "\(swiftModuleName)";
+        
+        @SuppressWarnings("unused")
+        private static final boolean INITIALIZED_LIBS = initializeLibs();
+        static boolean initializeLibs() {
+            System.loadLibrary(LIB_NAME);
+            return true;
+        }
+        """
+      )
+
+      printer.println()
+
+      printer.print(
+        """
         private long selfPointer;
         
         private \(decl.swiftNominal.name)(long selfPointer) {
@@ -83,6 +98,8 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
+
+      printer.println()
 
       for initializer in decl.initializers {
         printInitializerBindings(&printer, initializer, type: decl)
