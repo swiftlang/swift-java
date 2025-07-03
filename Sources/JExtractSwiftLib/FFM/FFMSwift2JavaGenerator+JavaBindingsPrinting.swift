@@ -439,7 +439,7 @@ extension FFMSwift2JavaGenerator {
   }
 }
 
-extension JavaConversionStep {
+extension FFMSwift2JavaGenerator.JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {

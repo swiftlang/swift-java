@@ -40,6 +40,10 @@ package class ImportedNominalType: ImportedDecl {
   var swiftType: SwiftType {
     return .nominal(.init(nominalTypeDecl: swiftNominal))
   }
+
+  var qualifiedName: String {
+    self.swiftNominal.qualifiedName
+  }
 }
 
 public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
@@ -72,6 +76,20 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     case .initializer(let type):
       return type
     }
+  }
+
+  var isStatic: Bool {
+    if case .staticMethod = functionSignature.selfParameter {
+      return true
+    }
+    return false
+  }
+
+  var isInitializer: Bool {
+    if case .initializer = functionSignature.selfParameter {
+      return true
+    }
+    return false
   }
 
   /// If this function/method is member of a class/struct/protocol,

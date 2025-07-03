@@ -45,6 +45,13 @@ extension JavaType {
     }
   }
 
+  public var isVoid: Bool {
+    if case .void = self {
+      return true
+    }
+    return false
+  }
+
   public var isString: Bool {
     switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
