@@ -12,18 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitffm;
 
-rootProject.name = "swift-java"
-
-include "SwiftKitCore"
-include "SwiftKitFFM"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
+/**
+ * Represent a wrapper around a Swift value object. e.g. {@code struct} or {@code enum}.
+ */
+public interface SwiftValue {
 }

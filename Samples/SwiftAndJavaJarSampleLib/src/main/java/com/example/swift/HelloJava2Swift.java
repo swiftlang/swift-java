@@ -16,15 +16,9 @@ package com.example.swift;
 
 // Import swift-extract generated sources
 
-import com.example.swift.MySwiftLibrary;
-import com.example.swift.MySwiftClass;
-
 // Import javakit/swiftkit support libraries
-import org.swift.swiftkit.SwiftArena;
-import org.swift.swiftkit.SwiftKit;
-import org.swift.swiftkit.SwiftValueWitnessTable;
-
-import java.util.Arrays;
+import org.swift.swiftkitffm.SwiftArena;
+import org.swift.swiftkitffm.SwiftKit;
 
 public class HelloJava2Swift {
 

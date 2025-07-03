@@ -12,18 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitffm;
 
-rootProject.name = "swift-java"
+import java.lang.foreign.MemorySegment;
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
+// delete?
 
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
+public interface ManagedSwiftType {
+    /**
+     * The memory segment of `self` of the managed Swift object/value.
+     */
+    public MemorySegment $memorySegment();
+
 }

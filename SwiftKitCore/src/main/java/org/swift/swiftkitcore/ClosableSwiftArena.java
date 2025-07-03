@@ -12,18 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitffm;
 
-rootProject.name = "swift-java"
+// Can be moved
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
+/**
+ * Auto-closable version of {@link SwiftArena}.
+ */
+public interface ClosableSwiftArena extends SwiftArena, AutoCloseable {
 
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
+    /**
+     * Close the arena and make sure all objects it managed are released.
+     * Throws if unable to verify all resources have been release (e.g. over retained Swift classes)
+     */
+    void close();
+
 }

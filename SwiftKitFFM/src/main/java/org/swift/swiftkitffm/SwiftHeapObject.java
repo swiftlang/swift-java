@@ -12,18 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitffm;
 
-rootProject.name = "swift-java"
+import java.lang.foreign.MemorySegment;
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
+// keep in core as a marker protocol
 
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
+/**
+ * Represents a wrapper around a Swift heap object, e.g. a {@code class} or an {@code actor}.
+ */
+public interface SwiftHeapObject {
+    MemorySegment $memorySegment();
+
+    /**
+     * Pointer to the instance.
+     */
+    public default MemorySegment $instance() {
+        return this.$memorySegment().get(SwiftValueLayout.SWIFT_POINTER, 0);
     }
 }

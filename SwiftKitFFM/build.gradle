@@ -1,0 +1,73 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+plugins {
+    id("build-logic.java-application-conventions")
+}
+
+group = "org.swift.swiftkitffm"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    }
+}
+
+dependencies {
+    implementation(project(':SwiftKitCore'))
+
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+// SwiftKit depends on SwiftKitSwift (Swift library that this Java library calls into)
+
+def compileSwift = tasks.register("compileSwift", Exec) {
+    description "Compile the swift-java SwiftKitSwift dynamic library that SwiftKit (Java) calls into"
+
+    inputs.file(new File(rootDir, "Package.swift"))
+    inputs.dir(new File(rootDir, "Sources/")) // a bit generous, but better safe than sorry, and include all Swift source changes
+    outputs.dir(new File(rootDir, ".build"))
+
+    workingDir = rootDir
+    commandLine "swift"
+    args("build", "--target", "SwiftKitSwift")
+}
+tasks.build {
+    dependsOn("compileSwift")
+}
+
+
+
+def cleanSwift = tasks.register("cleanSwift", Exec) {
+    workingDir = rootDir
+    commandLine "swift"
+    args("package", "clean")
+}
+tasks.clean {
+    dependsOn("cleanSwift")
+}
+

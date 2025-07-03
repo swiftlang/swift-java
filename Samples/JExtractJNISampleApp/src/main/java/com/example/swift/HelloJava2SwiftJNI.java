@@ -18,7 +18,7 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 
-import org.swift.swiftkit.SwiftKit;
+import org.swift.swiftkitffm.SwiftKit;
 
 public class HelloJava2SwiftJNI {
 

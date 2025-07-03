@@ -16,8 +16,8 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.SwiftArena;
-import org.swift.swiftkit.SwiftKit;
+import org.swift.swiftkitffm.SwiftArena;
+import org.swift.swiftkitffm.SwiftKit;
 
 import java.io.File;
 import java.util.stream.Stream;
