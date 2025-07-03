@@ -100,8 +100,7 @@ extension JNISwift2JavaGenerator {
 
   private func printInitializerThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     let translatedDecl = translatedDecl(for: decl)
-    // Initializers must have a parent
-    let typeName = translatedDecl.parentName!
+    let typeName = translatedDecl.parentName
 
     printCDecl(
       &printer,
@@ -185,7 +184,7 @@ extension JNISwift2JavaGenerator {
       javaMethodName: translatedDecl.name,
       parentName: parentName,
       parameters: translatedDecl.translatedFunctionSignature.parameters,
-      isStatic: decl.isStatic || decl.isInitializer,
+      isStatic: decl.isStatic || decl.isInitializer || !decl.hasParent,
       resultType: translatedDecl.translatedFunctionSignature.resultType,
       body
     )
@@ -194,13 +193,12 @@ extension JNISwift2JavaGenerator {
   private func printCDecl(
     _ printer: inout CodePrinter,
     javaMethodName: String,
-    parentName: String?,
+    parentName: String,
     parameters: [JavaParameter],
     isStatic: Bool,
     resultType: JavaType,
     _ body: (inout CodePrinter) -> Void
   ) {
-    let parentName = parentName ?? swiftModuleName
     var jniSignature = parameters.reduce(into: "") { signature, parameter in
       signature += parameter.type.jniTypeSignature
     }

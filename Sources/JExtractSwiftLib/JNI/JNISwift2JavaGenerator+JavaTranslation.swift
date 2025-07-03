@@ -22,7 +22,7 @@ extension JNISwift2JavaGenerator {
       return cached
     }
 
-    let translation = JavaTranslation()
+    let translation = JavaTranslation(swiftModuleName: self.swiftModuleName)
     let translated = translation.translate(decl)
 
     translatedDecls[decl] = translated
@@ -30,9 +30,12 @@ extension JNISwift2JavaGenerator {
   }
 
   struct JavaTranslation {
+    let swiftModuleName: String
+
     func translate(_ decl: ImportedFunc) -> TranslatedFunctionDecl {
       let translatedFunctionSignature = translate(functionSignature: decl.functionSignature)
-      let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName
+      // Types with no parent will be outputted inside a "module" class.
+      let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
       return TranslatedFunctionDecl(
         name: decl.name,
@@ -106,8 +109,8 @@ extension JNISwift2JavaGenerator {
     /// Java function name
     let name: String
 
-    /// The name of the parent scope this function is declared in (or nil if global)
-    let parentName: String?
+    /// The name of the Java parent scope this function is declared in
+    let parentName: String
 
     /// Function signature
     let translatedFunctionSignature: TranslatedFunctionSignature

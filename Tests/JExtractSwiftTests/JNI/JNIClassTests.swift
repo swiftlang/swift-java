@@ -45,7 +45,16 @@ struct JNIClassTests {
 
       package com.example.swift;
 
-      public final class MyClass { 
+      public final class MyClass {
+        static final String LIB_NAME = "SwiftModule";
+      
+        @SuppressWarnings("unused")
+        private static final boolean INITIALIZED_LIBS = initializeLibs();
+        static boolean initializeLibs() {
+          System.loadLibrary(LIB_NAME);
+          return true;
+        }
+      
         private long selfPointer;
       
         private MyClass(long selfPointer) {
@@ -84,8 +93,8 @@ struct JNIClassTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyClass_method")
-        func swiftjava_SwiftModule_MyClass_method(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        @_cdecl("Java_com_example_swift_MyClass_method__")
+        func Java_com_example_swift_MyClass_method__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           MyClass.method()
         }
         """
