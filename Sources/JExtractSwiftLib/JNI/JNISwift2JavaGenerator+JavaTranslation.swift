@@ -113,19 +113,6 @@ extension JNISwift2JavaGenerator {
     let translatedFunctionSignature: TranslatedFunctionSignature
   }
 
-  struct JavaParameter {
-    let name: String
-    let type: JavaType
-
-    var asParameter: String {
-      "\(type) \(name)"
-    }
-
-    var asArgument: String {
-      name
-    }
-  }
-
   struct TranslatedFunctionSignature {
     let parameters: [JavaParameter]
     let resultType: JavaType

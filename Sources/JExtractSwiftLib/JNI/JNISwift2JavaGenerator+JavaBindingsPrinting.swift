@@ -29,7 +29,7 @@ extension JNISwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
-        print("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
+        logger.info("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
       }
     }
 
@@ -139,7 +139,7 @@ extension JNISwift2JavaGenerator {
 
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock("public static \(renderFunctionSignature(decl))") { printer in
-      let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.asArgument)
+      let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
       printer.print(
         """
         long selfPointer = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));

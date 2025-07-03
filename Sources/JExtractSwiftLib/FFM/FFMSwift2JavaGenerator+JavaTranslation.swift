@@ -35,15 +35,6 @@ extension FFMSwift2JavaGenerator {
     return translated
   }
 
-  /// Represent a parameter in Java code.
-  struct JavaParameter {
-    /// The type.
-    var type: JavaType
-
-    /// The name.
-    var name: String
-  }
-
   /// Represent a Swift API parameter translated to Java.
   struct TranslatedParameter {
     /// Java parameter(s) mapped to the Swift parameter.
@@ -209,7 +200,7 @@ extension FFMSwift2JavaGenerator {
       if let cType = try? CType(cdeclType: type) {
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(type: cType.javaType, name: parameterName)
+            JavaParameter(name: parameterName, type: cType.javaType)
           ],
           conversion: .placeholder
         )
@@ -222,7 +213,7 @@ extension FFMSwift2JavaGenerator {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
               javaParameters: [
-                JavaParameter(type: .javaForeignMemorySegment, name: parameterName)
+                JavaParameter(name: parameterName, type: .javaForeignMemorySegment)
               ],
               conversion: .method(
                 .explodedName(component: "pointer"),
@@ -309,8 +300,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              type: javaType,
-              name: parameterName
+              name: parameterName, type: javaType
             )
           ],
           conversion: .placeholder
@@ -323,8 +313,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              type: JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType"),
-              name: parameterName)
+              name: parameterName, type: JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType"))
           ],
           conversion: .swiftValueSelfSegment(.placeholder)
         )
@@ -346,7 +335,7 @@ extension FFMSwift2JavaGenerator {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
               javaParameters: [
-                JavaParameter(type: .javaForeignMemorySegment, name: parameterName),
+                JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
               ],
               conversion: .commaSeparated([
                 .placeholder,
@@ -358,8 +347,7 @@ extension FFMSwift2JavaGenerator {
             return TranslatedParameter(
               javaParameters: [
                 JavaParameter(
-                  type: .javaLangString,
-                  name: parameterName
+                  name: parameterName, type: .javaLangString
                 )
               ],
               conversion: .call(.placeholder, function: "SwiftKit.toCString", withArena: true)
@@ -378,8 +366,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              type: try translate(swiftType: swiftType),
-              name: parameterName
+              name: parameterName, type: try translate(swiftType: swiftType)
             )
           ],
           conversion: .swiftValueSelfSegment(.placeholder)
@@ -393,8 +380,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"),
-              name: parameterName)
+              name: parameterName, type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"))
           ],
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
@@ -439,8 +425,8 @@ extension FFMSwift2JavaGenerator {
             return TranslatedResult(
               javaResultType: .javaForeignMemorySegment,
               outParameters: [
-                JavaParameter(type: .javaForeignMemorySegment, name: "pointer"),
-                JavaParameter(type: .long, name: "count"),
+                JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+                JavaParameter(name: "count", type: .long),
               ],
               conversion: .method(
                 .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
@@ -475,7 +461,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedResult(
           javaResultType: javaType,
           outParameters: [
-            JavaParameter(type: javaType, name: "")
+            JavaParameter(name: "", type: javaType)
           ],
           conversion: .constructSwiftValue(.placeholder, javaType)
         )
