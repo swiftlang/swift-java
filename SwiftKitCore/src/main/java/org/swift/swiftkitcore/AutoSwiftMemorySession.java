@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -37,34 +37,33 @@ import java.util.concurrent.ThreadFactory;
  *
  * <p> Whenever possible, prefer using an explicitly managed {@link SwiftArena}, such as {@link SwiftArena#ofConfined()}.
  */
-final class AutoSwiftMemorySession implements SwiftArena {
-
-    private final Arena arena;
-    private final Cleaner cleaner;
-
-    public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
-        this.cleaner = Cleaner.create(cleanerThreadFactory);
-        this.arena = Arena.ofAuto();
-    }
-
-    @Override
-    public void register(SwiftInstance instance) {
-        Objects.requireNonNull(instance, "value");
-
-        // We're doing this dance to avoid keeping a strong reference to the value itself
-        var statusDestroyedFlag = instance.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        MemorySegment resource = instance.$memorySegment();
-        var cleanupAction = new SwiftInstanceCleanup(resource, instance.$swiftType(), markAsDestroyed);
-        cleaner.register(instance, cleanupAction);
-    }
-
-    @Override
-    public MemorySegment allocate(long byteSize, long byteAlignment) {
-        return arena.allocate(byteSize, byteAlignment);
-    }
-}
+//final class AutoSwiftMemorySession implements SwiftArena {
+//
+//    private final Cleaner cleaner;
+//
+//    public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
+//        this.cleaner = Cleaner.create(cleanerThreadFactory);
+//        this.arena = Arena.ofAuto();
+//    }
+//
+//    @Override
+//    public void register(SwiftInstance instance) {
+//        Objects.requireNonNull(instance, "value");
+//
+//        // We're doing this dance to avoid keeping a strong reference to the value itself
+//        var statusDestroyedFlag = instance.$statusDestroyedFlag();
+//        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
+//
+//        MemorySegment resource = instance.$memorySegment();
+//        var cleanupAction = new SwiftInstanceCleanup(resource, instance.$swiftType(), markAsDestroyed);
+//        cleaner.register(instance, cleanupAction);
+//    }
+//
+//    @Override
+//    public MemorySegment allocate(long byteSize, long byteAlignment) {
+//        return arena.allocate(byteSize, byteAlignment);
+//    }
+//}
 
 /**
  * interface AllocatingSwiftArena implements SwiftArena extends SegmentAllocator {}

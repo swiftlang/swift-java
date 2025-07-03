@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm.util;
+package org.swift.swiftkitcore.util;
 
 public class PlatformUtils {
     public static boolean isLinux() {

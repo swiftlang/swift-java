@@ -12,28 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
-import java.lang.foreign.GroupLayout;
-import java.lang.foreign.MemorySegment;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
-/**
- * Maybe have the SwiftInstance require a `destroy` method that the cleanup calls.
- * Interface instead of superclass
- */
 
 public abstract class SwiftInstance {
     /// Pointer to the "self".
-    private final MemorySegment selfMemorySegment;
+    private final long selfPointer;
 
     /**
      * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
      */
-    public final MemorySegment $memorySegment() {
-        return this.selfMemorySegment;
+    public final long pointer() {
+        return this.selfPointer;
     }
+
+    /**
+     * Called when the arena has decided the value should be destroyed.
+     */
+    public abstract void destroy();
 
     // TODO: make this a flagset integer and/or use a field updater
     /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
@@ -51,23 +48,13 @@ public abstract class SwiftInstance {
     }
 
     /**
-     * The in memory layout of an instance of this Swift type.
-     */
-    public abstract GroupLayout $layout();
-
-    /**
-     * The Swift type metadata of this type.
-     */
-    public abstract SwiftAnyType $swiftType();
-
-    /**
      * The designated constructor of any imported Swift types.
      *
-     * @param segment the memory segment.
+     * @param pointer a pointer to the memory containing the value
      * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
-    protected SwiftInstance(MemorySegment segment, SwiftArena arena) {
-        this.selfMemorySegment = segment;
+    protected SwiftInstance(long pointer, SwiftArena arena) {
+        this.selfPointer = pointer;
         arena.register(this);
     }
 

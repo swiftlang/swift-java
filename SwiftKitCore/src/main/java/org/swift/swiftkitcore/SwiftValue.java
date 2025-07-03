@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
 /**
  * Represent a wrapper around a Swift value object. e.g. {@code struct} or {@code enum}.

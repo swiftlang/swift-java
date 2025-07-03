@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -20,9 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// FFMConfinedSwiftMemorySession implements Allocating extends Confined??
-
-final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
+public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
 
     final static int CLOSED = 0;
     final static int ACTIVE = 1;
@@ -30,21 +28,17 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     final Thread owner;
     final AtomicInteger state;
 
-    final Arena arena;
     final ConfinedResourceList resources;
 
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
         this.state = new AtomicInteger(ACTIVE);
         this.resources = new ConfinedResourceList();
-
-        this.arena = Arena.ofConfined();
     }
 
     public void checkValid() throws RuntimeException {
         if (this.owner != null && this.owner != Thread.currentThread()) {
-            throw new WrongThreadException("ConfinedSwift arena is confined to %s but was closed from %s!"
-                    .formatted(this.owner, Thread.currentThread()));
+            throw new WrongThreadException(String.format("ConfinedSwift arena is confined to %s but was closed from %s!", this.owner, Thread.currentThread()));
         } else if (this.state.get() < ACTIVE) {
             throw new RuntimeException("SwiftArena is already closed!");
         }
@@ -55,30 +49,17 @@ final class ConfinedSwiftMemorySession implements ClosableSwiftArena {
         checkValid();
 
         // Cleanup all resources
-        if (this.state.compareAndExchange(ACTIVE, CLOSED) == ACTIVE) {
+        if (this.state.compareAndSet(ACTIVE, CLOSED)) {
             this.resources.runCleanup();
         } // else, was already closed; do nothing
-
-        this.arena.close();
     }
 
     @Override
     public void register(SwiftInstance instance) {
         checkValid();
 
-        var statusDestroyedFlag = instance.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        var cleanup = new SwiftInstanceCleanup(
-                instance.$memorySegment(),
-                instance.$swiftType(),
-                markAsDestroyed);
+        SwiftInstanceCleanup cleanup = new SwiftInstanceCleanup(instance);
         this.resources.add(cleanup);
-    }
-
-    @Override
-    public MemorySegment allocate(long byteSize, long byteAlignment) {
-        return arena.allocate(byteSize, byteAlignment);
     }
 
     static final class ConfinedResourceList implements SwiftResourceList {

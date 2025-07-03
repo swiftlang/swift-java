@@ -18,8 +18,6 @@ import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 
-// move to FFM, if we don't abstract the type away.
-
 public final class SwiftAnyType {
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
@@ -48,7 +46,7 @@ public final class SwiftAnyType {
      * Get the human-readable Swift type name of this type.
      */
     public String getSwiftName() {
-        return SwiftKit.nameOfSwiftType(memorySegment, true);
+        return SwiftFFM.nameOfSwiftType(memorySegment, true);
     }
 
     @Override

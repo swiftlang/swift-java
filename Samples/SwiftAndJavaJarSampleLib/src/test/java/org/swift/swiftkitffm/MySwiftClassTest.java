@@ -27,13 +27,13 @@ public class MySwiftClassTest {
         var arena = SwiftArena.ofConfined();
         var obj = MySwiftClass.init(1, 2, arena);
 
-        assertEquals(1, SwiftKit.retainCount(obj));
+        assertEquals(1, SwiftFFM.retainCount(obj));
         // TODO: test directly on SwiftHeapObject inheriting obj
 
-        SwiftKit.retain(obj);
-        assertEquals(2, SwiftKit.retainCount(obj));
+        SwiftFFM.retain(obj);
+        assertEquals(2, SwiftFFM.retainCount(obj));
 
-        SwiftKit.release(obj);
-        assertEquals(1, SwiftKit.retainCount(obj));
+        SwiftFFM.release(obj);
+        assertEquals(1, SwiftFFM.retainCount(obj));
     }
 }

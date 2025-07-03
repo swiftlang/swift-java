@@ -14,16 +14,14 @@
 
 package org.swift.swiftkitffm;
 
+import org.swift.swiftkitcore.SwiftHeapObject;
+import org.swift.swiftkitcore.util.PlatformUtils;
 import org.swift.swiftkitffm.util.PlatformUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,10 +29,7 @@ import java.util.stream.Collectors;
 import static org.swift.swiftkitffm.util.StringUtils.stripPrefix;
 import static org.swift.swiftkitffm.util.StringUtils.stripSuffix;
 
-// rename to SwiftLibraries that has all the library loading
-// move all the other stuff to FFM, SwiftFFM class
-
-public class SwiftKit {
+public class SwiftFFM {
 
     public static final String STDLIB_DYLIB_NAME = "swiftCore";
     public static final String SWIFTKITSWIFT_DYLIB_NAME = "SwiftKitSwift";
@@ -69,7 +64,7 @@ public class SwiftKit {
         }
     }
 
-    public SwiftKit() {
+    public SwiftFFM() {
     }
 
     public static void traceDowncall(Object... args) {
@@ -110,42 +105,6 @@ public class SwiftKit {
 
     public static boolean getJextractTraceDowncalls() {
         return Boolean.getBoolean("jextract.trace.downcalls");
-    }
-
-    // ==== ------------------------------------------------------------------------------------------------------------
-    // Loading libraries
-
-    public static void loadLibrary(String libname) {
-        // TODO: avoid concurrent loadResource calls; one load is enough esp since we cause File IO when we do that
-        try {
-            // try to load a dylib from our classpath, e.g. when we included it in our jar
-            loadResourceLibrary(libname);
-        } catch (UnsatisfiedLinkError | RuntimeException e) {
-            // fallback to plain system path loading
-            System.loadLibrary(libname);
-        }
-    }
-
-    public static void loadResourceLibrary(String libname) {
-        var resourceName = PlatformUtils.dynamicLibraryName(libname);
-        if (SwiftKit.TRACE_DOWNCALLS) {
-            System.out.println("[swift-java] Loading resource library: " + resourceName);
-        }
-
-        try (var libInputStream = SwiftKit.class.getResourceAsStream("/" + resourceName)) {
-            if (libInputStream == null) {
-                throw new RuntimeException("Expected library '" + libname + "' ('" + resourceName + "') was not found as resource!");
-            }
-
-            // TODO: we could do an in memory file system here
-            var tempFile = File.createTempFile(libname, "");
-            tempFile.deleteOnExit();
-            Files.copy(libInputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            System.load(tempFile.getAbsolutePath());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load dynamic library '" + libname + "' ('" + resourceName + "') as resource!", e);
-        }
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------

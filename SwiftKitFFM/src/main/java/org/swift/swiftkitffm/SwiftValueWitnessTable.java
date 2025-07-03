@@ -18,7 +18,7 @@ import java.lang.foreign.*;
 import java.lang.invoke.*;
 
 import static java.lang.foreign.ValueLayout.JAVA_BYTE;
-import static org.swift.swiftkitffm.SwiftKit.getSwiftInt;
+import static org.swift.swiftkitffm.SwiftFFM.getSwiftInt;
 
 public abstract class SwiftValueWitnessTable {
 
@@ -156,7 +156,7 @@ public abstract class SwiftValueWitnessTable {
 
         return MemoryLayout.structLayout(
                 layouts
-        ).withName(SwiftKit.nameOfSwiftType(typeMetadata, true));
+        ).withName(SwiftFFM.nameOfSwiftType(typeMetadata, true));
     }
 
 

@@ -17,8 +17,6 @@ package org.swift.swiftkitffm;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-// move to FFM
-
 public class MemorySegmentUtils {
     /**
      * Set the value of `target` to the {@link MemorySegment#address()} of the `memorySegment`,

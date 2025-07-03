@@ -17,7 +17,7 @@ package com.example.swift;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkitffm.SwiftArena;
-import org.swift.swiftkitffm.SwiftKit;
+import org.swift.swiftkitffm.SwiftFFM;
 
 import java.io.File;
 import java.util.stream.Stream;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MySwiftClassTest {
 
     void checkPaths(Throwable throwable) {
-        var paths = SwiftKit.getJavaLibraryPath().split(":");
+        var paths = SwiftFFM.getJavaLibraryPath().split(":");
         for (var path : paths) {
             System.out.println("CHECKING PATH: " + path);
             Stream.of(new File(path).listFiles())

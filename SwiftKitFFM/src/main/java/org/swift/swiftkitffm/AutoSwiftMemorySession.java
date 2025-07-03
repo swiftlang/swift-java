@@ -14,6 +14,9 @@
 
 package org.swift.swiftkitffm;
 
+import org.swift.swiftkitcore.SwiftInstance;
+import org.swift.swiftkitcore.SwiftInstanceCleanup;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.ref.Cleaner;
@@ -26,7 +29,7 @@ import java.util.concurrent.ThreadFactory;
  * <p> When registered Java wrapper classes around native Swift instances {@link SwiftInstance},
  * are eligible for collection, this will trigger the cleanup of the native resources as well.
  *
- * <p> This memory session is LESS reliable than using a {@link ConfinedSwiftMemorySession} because
+ * <p> This memory session is LESS reliable than using a {@link FFMConfinedSwiftMemorySession} because
  * the timing of when the native resources are cleaned up is somewhat undefined, and rely on the
  * system GC. Meaning, that if an object nas been promoted to an old generation, there may be a
  * long time between the resource no longer being referenced "in Java" and its native memory being released,
@@ -37,7 +40,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * <p> Whenever possible, prefer using an explicitly managed {@link SwiftArena}, such as {@link SwiftArena#ofConfined()}.
  */
-final class AutoSwiftMemorySession implements SwiftArena {
+final class AutoSwiftMemorySession implements AllocatingSwiftArena {
 
     private final Arena arena;
     private final Cleaner cleaner;
@@ -51,12 +54,8 @@ final class AutoSwiftMemorySession implements SwiftArena {
     public void register(SwiftInstance instance) {
         Objects.requireNonNull(instance, "value");
 
-        // We're doing this dance to avoid keeping a strong reference to the value itself
-        var statusDestroyedFlag = instance.$statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        MemorySegment resource = instance.$memorySegment();
-        var cleanupAction = new SwiftInstanceCleanup(resource, instance.$swiftType(), markAsDestroyed);
+        // TODO: Captures warning???
+        var cleanupAction = new SwiftInstanceCleanup(instance);
         cleaner.register(instance, cleanupAction);
     }
 
@@ -65,21 +64,3 @@ final class AutoSwiftMemorySession implements SwiftArena {
         return arena.allocate(byteSize, byteAlignment);
     }
 }
-
-/**
- * interface AllocatingSwiftArena implements SwiftArena extends SegmentAllocator {}
- */
-
-/**
- * .init(long x, AllocatingSwiftArena arena) // FFM
- */
-
-/**
- * Remain as a lifetime container. Remove `allocate`, so remove `SegmentAllocator` from `SwiftArena`
- */
-
-/**
- * SwiftArena.ofConfined() {
- *
- * }
- */

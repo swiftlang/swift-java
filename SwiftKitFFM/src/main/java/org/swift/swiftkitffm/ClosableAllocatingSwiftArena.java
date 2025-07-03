@@ -14,8 +14,9 @@
 
 package org.swift.swiftkitffm;
 
+import org.swift.swiftkitcore.ClosableSwiftArena;
+
 /**
- * Represent a wrapper around a Swift value object. e.g. {@code struct} or {@code enum}.
+ * Auto-closable version of {@link AllocatingSwiftArena}.
  */
-public interface SwiftValue {
-}
+public interface ClosableAllocatingSwiftArena extends ClosableSwiftArena, AllocatingSwiftArena {}

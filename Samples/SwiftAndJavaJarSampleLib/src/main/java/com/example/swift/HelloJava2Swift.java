@@ -18,7 +18,7 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 import org.swift.swiftkitffm.SwiftArena;
-import org.swift.swiftkitffm.SwiftKit;
+import org.swift.swiftkitffm.SwiftFFM;
 
 public class HelloJava2Swift {
 
@@ -26,7 +26,7 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.print("Property: java.library.path = " +SwiftKit.getJavaLibraryPath());
+        System.out.print("Property: java.library.path = " + SwiftFFM.getJavaLibraryPath());
 
         examples();
     }
@@ -41,8 +41,8 @@ public class HelloJava2Swift {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
 
             // just checking retains/releases work
-            SwiftKit.retain(obj);
-            SwiftKit.release(obj);
+            SwiftFFM.retain(obj);
+            SwiftFFM.release(obj);
 
             obj.voidMethod();
             obj.takeIntMethod(42);

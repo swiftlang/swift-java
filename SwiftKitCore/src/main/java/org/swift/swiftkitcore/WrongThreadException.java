@@ -12,16 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
-import java.lang.foreign.MemorySegment;
-
-// delete?
-
-public interface ManagedSwiftType {
-    /**
-     * The memory segment of `self` of the managed Swift object/value.
-     */
-    public MemorySegment $memorySegment();
-
+public class WrongThreadException extends RuntimeException {
+    public WrongThreadException(String message) {
+        super(message);
+    }
 }

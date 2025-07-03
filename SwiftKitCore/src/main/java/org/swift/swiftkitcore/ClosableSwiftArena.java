@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
-
-// Can be moved
+package org.swift.swiftkitcore;
 
 /**
  * Auto-closable version of {@link SwiftArena}.
@@ -26,5 +24,4 @@ public interface ClosableSwiftArena extends SwiftArena, AutoCloseable {
      * Throws if unable to verify all resources have been release (e.g. over retained Swift classes)
      */
     void close();
-
 }

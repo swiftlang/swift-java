@@ -12,9 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkitcore;
 
-import java.lang.foreign.SegmentAllocator;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -24,7 +23,7 @@ import java.util.concurrent.ThreadFactory;
  * <p> A confined arena has an associated owner thread that confines some operations to
  * associated owner thread such as {@link ClosableSwiftArena#close()}.
  */
-public interface SwiftArena extends SegmentAllocator {
+public interface SwiftArena  {
 
     static ClosableSwiftArena ofConfined() {
         return new ConfinedSwiftMemorySession(Thread.currentThread());
@@ -50,13 +49,4 @@ interface SwiftResourceList {
 
     void runCleanup();
 
-}
-
-
-final class UnexpectedRetainCountException extends RuntimeException {
-    public UnexpectedRetainCountException(Object resource, long retainCount, int expectedRetainCount) {
-        super(("Attempting to cleanup managed memory segment %s, but it's retain count was different than [%d] (was %d)! " +
-                "This would result in destroying a swift object that is still retained by other code somewhere."
-        ).formatted(resource, expectedRetainCount, retainCount));
-    }
 }

@@ -19,7 +19,7 @@ package com.example.swift;
 // Import javakit/swiftkit support libraries
 
 import org.swift.swiftkitffm.SwiftArena;
-import org.swift.swiftkitffm.SwiftKit;
+import org.swift.swiftkitffm.SwiftFFM;
 
 public class HelloJava2Swift {
 
@@ -27,7 +27,7 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.print("Property: java.library.path = " + SwiftKit.getJavaLibraryPath());
+        System.out.print("Property: java.library.path = " + SwiftFFM.getJavaLibraryPath());
 
         examples();
     }
@@ -39,30 +39,30 @@ public class HelloJava2Swift {
 
         long cnt = MySwiftLibrary.globalWriteString("String from Java");
 
-        SwiftKit.trace("count = " + cnt);
+        SwiftFFM.trace("count = " + cnt);
 
         MySwiftLibrary.globalCallMeRunnable(() -> {
-            SwiftKit.trace("running runnable");
+            SwiftFFM.trace("running runnable");
         });
 
-        SwiftKit.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
+        SwiftFFM.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
 
         MySwiftLibrary.withBuffer((buf) -> {
-            SwiftKit.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
+            SwiftFFM.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
         });
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
 
             // just checking retains/releases work
-            SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
-            SwiftKit.retain(obj);
-            SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
-            SwiftKit.release(obj);
-            SwiftKit.trace("retainCount = " + SwiftKit.retainCount(obj));
+            SwiftFFM.trace("retainCount = " + SwiftFFM.retainCount(obj));
+            SwiftFFM.retain(obj);
+            SwiftFFM.trace("retainCount = " + SwiftFFM.retainCount(obj));
+            SwiftFFM.release(obj);
+            SwiftFFM.trace("retainCount = " + SwiftFFM.retainCount(obj));
 
             obj.setCounter(12);
-            SwiftKit.trace("obj.counter = " + obj.getCounter());
+            SwiftFFM.trace("obj.counter = " + obj.getCounter());
 
             obj.voidMethod();
             obj.takeIntMethod(42);
@@ -71,9 +71,9 @@ public class HelloJava2Swift {
             otherObj.voidMethod();
 
             MySwiftStruct swiftValue = MySwiftStruct.init(2222, 1111, arena);
-            SwiftKit.trace("swiftValue.capacity = " + swiftValue.getCapacity());
+            SwiftFFM.trace("swiftValue.capacity = " + swiftValue.getCapacity());
             swiftValue.withCapLen((cap, len) -> {
-                SwiftKit.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
+                SwiftFFM.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
             });
         }
 
