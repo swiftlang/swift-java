@@ -16,7 +16,6 @@ package org.swift.swiftkitffm;
 
 import org.swift.swiftkitcore.SwiftHeapObject;
 import org.swift.swiftkitcore.util.PlatformUtils;
-import org.swift.swiftkitffm.util.PlatformUtils;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;

@@ -17,19 +17,4 @@ package org.swift.swiftkitcore;
 /**
  * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
  */
-public final class SwiftInstanceCleanup implements Runnable {
-    // TODO: Should this be a weak reference?
-    private final SwiftInstance swiftInstance;
-
-    public SwiftInstanceCleanup(SwiftInstance swiftInstance) {
-        this.swiftInstance = swiftInstance;
-    }
-
-    @Override
-    public void run() {
-        swiftInstance.$statusDestroyedFlag().set(true);
-
-        // System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
-        swiftInstance.destroy();
-    }
-}
+public interface SwiftInstanceCleanup extends Runnable {}

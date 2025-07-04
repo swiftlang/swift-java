@@ -16,6 +16,7 @@ package org.swift.swiftkitffm;
 
 import org.swift.swiftkitcore.SwiftArena;
 import org.swift.swiftkitcore.SwiftInstance;
+import org.swift.swiftkitcore.SwiftInstanceCleanup;
 
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
@@ -45,10 +46,14 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
     }
 
     @Override
-    public void destroy() {
-        System.out.println("[debug] Destroy swift value [" + $swiftType().getSwiftName() + "]: " + $memorySegment());
+    public SwiftInstanceCleanup makeCleanupAction() {
+        var statusDestroyedFlag = $statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 
-        // In FFM we allocate on the Java-side, so we can just call destroy.
-        SwiftValueWitnessTable.destroy(this.$swiftType(), this.$memorySegment());
+        return new FFMSwiftInstanceCleanup(
+                $memorySegment(),
+                $swiftType(),
+                markAsDestroyed
+        );
     }
 }

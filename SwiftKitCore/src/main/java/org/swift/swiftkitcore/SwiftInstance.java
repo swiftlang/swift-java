@@ -29,8 +29,10 @@ public abstract class SwiftInstance {
 
     /**
      * Called when the arena has decided the value should be destroyed.
+     * <p/>
+     * <b>Warning:</b> The cleanup action must not capture {@code this}.
      */
-    public abstract void destroy();
+    public abstract SwiftInstanceCleanup makeCleanupAction();
 
     // TODO: make this a flagset integer and/or use a field updater
     /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */

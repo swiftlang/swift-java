@@ -14,8 +14,8 @@ public interface AllocatingSwiftArena extends SwiftArena {
         return new FFMConfinedSwiftMemorySession(Thread.currentThread());
     }
 
-//    static SwiftArena ofAuto() {
-//        ThreadFactory cleanerThreadFactory = r -> new Thread(r, "AutoSwiftArenaCleanerThread");
-//        return new AutoSwiftMemorySession(cleanerThreadFactory);
-//    }
+    static AllocatingSwiftArena ofAuto() {
+        ThreadFactory cleanerThreadFactory = r -> new Thread(r, "AutoSwiftArenaCleanerThread");
+        return new AllocatingAutoSwiftMemorySession(cleanerThreadFactory);
+    }
 }

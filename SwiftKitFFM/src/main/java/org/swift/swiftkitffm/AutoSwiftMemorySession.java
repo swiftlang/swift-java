@@ -40,12 +40,12 @@ import java.util.concurrent.ThreadFactory;
  *
  * <p> Whenever possible, prefer using an explicitly managed {@link SwiftArena}, such as {@link SwiftArena#ofConfined()}.
  */
-final class AutoSwiftMemorySession implements AllocatingSwiftArena {
+final class AllocatingAutoSwiftMemorySession implements AllocatingSwiftArena {
 
     private final Arena arena;
     private final Cleaner cleaner;
 
-    public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
+    public AllocatingAutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
         this.cleaner = Cleaner.create(cleanerThreadFactory);
         this.arena = Arena.ofAuto();
     }
@@ -54,8 +54,9 @@ final class AutoSwiftMemorySession implements AllocatingSwiftArena {
     public void register(SwiftInstance instance) {
         Objects.requireNonNull(instance, "value");
 
-        // TODO: Captures warning???
-        var cleanupAction = new SwiftInstanceCleanup(instance);
+        // We make sure we don't capture `instance` in the
+        // cleanup action, so we can ignore the warning below.
+        var cleanupAction = instance.makeCleanupAction();
         cleaner.register(instance, cleanupAction);
     }
 
