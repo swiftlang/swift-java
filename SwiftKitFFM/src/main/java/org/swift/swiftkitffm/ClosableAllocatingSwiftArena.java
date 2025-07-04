@@ -12,18 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitffm;
 
-rootProject.name = "swift-java"
+import org.swift.swiftkitcore.ClosableSwiftArena;
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
-    }
-}
+/**
+ * Auto-closable version of {@link AllocatingSwiftArena}.
+ */
+public interface ClosableAllocatingSwiftArena extends ClosableSwiftArena, AllocatingSwiftArena {}

@@ -14,21 +14,19 @@
 
 package org.swift.swiftkitffm;
 
-import java.util.concurrent.TimeUnit;
-
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.Blackhole;
+import com.example.swift.HelloJava2Swift;
+import com.example.swift.MySwiftLibrary;
+import org.openjdk.jmh.annotations.*;
 
 import com.example.swift.MySwiftClass;
 
-@SuppressWarnings("unused")
+import java.util.concurrent.TimeUnit;
+
+@BenchmarkMode(Mode.AverageTime)
+@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Fork(value = 3, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
 public class JavaToSwiftBenchmark {
 
     @State(Scope.Benchmark)
@@ -37,13 +35,7 @@ public class JavaToSwiftBenchmark {
         MySwiftClass obj;
 
         @Setup(Level.Trial)
-        public void beforeALl() {
-            System.loadLibrary("swiftCore");
-            System.loadLibrary("ExampleSwiftLibrary");
-
-            // Tune down debug statements so they don't fill up stdout
-            System.setProperty("jextract.trace.downcalls", "false");
-
+        public void beforeAll() {
             arena = SwiftArena.ofConfined();
             obj = MySwiftClass.init(1, 2, arena);
         }
@@ -54,8 +46,19 @@ public class JavaToSwiftBenchmark {
         }
     }
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void simpleSwiftApiCall(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.obj.makeRandomIntMethod());
+    @Benchmark
+    public long jextract_getInt_ffm(BenchmarkState state) {
+        return MySwiftLibrary.globalMakeInt();
     }
+
+    @Benchmark
+    public long getInt_global_jni(BenchmarkState state) {
+        return HelloJava2Swift.jniGetInt();
+    }
+
+    @Benchmark
+    public long getInt_member_ffi(BenchmarkState state) {
+        return state.obj.makeIntMethod();
+    }
+
 }

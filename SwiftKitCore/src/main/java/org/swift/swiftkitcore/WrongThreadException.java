@@ -12,18 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+package org.swift.swiftkitcore;
 
-rootProject.name = "swift-java"
-
-include "SwiftKitCore"
-include "SwiftKitFFM"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
-        include ":Samples:${it.name}"
+public class WrongThreadException extends RuntimeException {
+    public WrongThreadException(String message) {
+        super(message);
     }
 }
