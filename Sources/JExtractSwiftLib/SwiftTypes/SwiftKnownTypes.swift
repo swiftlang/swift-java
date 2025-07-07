@@ -13,32 +13,32 @@
 //===----------------------------------------------------------------------===//
 
 struct SwiftKnownTypes {
-  private let decls: SwiftStandardLibraryTypeDecls
+  private let symbolTable: SwiftSymbolTable
 
-  init(decls: SwiftStandardLibraryTypeDecls) {
-    self.decls = decls
+  init(symbolTable: SwiftSymbolTable) {
+    self.symbolTable = symbolTable
   }
 
-  var bool: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.bool])) }
-  var int: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.int])) }
-  var uint: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.uint])) }
-  var int8: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.int8])) }
-  var uint8: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.uint8])) }
-  var int16: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.int16])) }
-  var uint16: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.uint16])) }
-  var int32: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.int32])) }
-  var uint32: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.uint32])) }
-  var int64: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.int64])) }
-  var uint64: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.uint64])) }
-  var float: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.float])) }
-  var double: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.double])) }
-  var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.unsafeRawPointer])) }
-  var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: decls[.unsafeMutableRawPointer])) }
-  
+  var bool: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.bool])) }
+  var int: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.int])) }
+  var uint: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.uint])) }
+  var int8: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.int8])) }
+  var uint8: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.uint8])) }
+  var int16: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.int16])) }
+  var uint16: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.uint16])) }
+  var int32: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.int32])) }
+  var uint32: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.uint32])) }
+  var int64: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.int64])) }
+  var uint64: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.uint64])) }
+  var float: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.float])) }
+  var double: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.double])) }
+  var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawPointer])) }
+  var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeMutableRawPointer])) }
+
   func unsafePointer(_ pointeeType: SwiftType) -> SwiftType {
     .nominal(
       SwiftNominalType(
-        nominalTypeDecl: decls.unsafePointerDecl,
+        nominalTypeDecl: symbolTable[.unsafePointer],
         genericArguments: [pointeeType]
       )
     )
@@ -47,7 +47,7 @@ struct SwiftKnownTypes {
   func unsafeMutablePointer(_ pointeeType: SwiftType) -> SwiftType {
     .nominal(
       SwiftNominalType(
-        nominalTypeDecl: decls.unsafeMutablePointerDecl,
+        nominalTypeDecl: symbolTable[.unsafeMutablePointer],
         genericArguments: [pointeeType]
       )
     )
@@ -56,7 +56,7 @@ struct SwiftKnownTypes {
   func unsafeBufferPointer(_ elementType: SwiftType) -> SwiftType {
     .nominal(
       SwiftNominalType(
-        nominalTypeDecl: decls.unsafeBufferPointerDecl,
+        nominalTypeDecl: symbolTable[.unsafeBufferPointer],
         genericArguments: [elementType]
       )
     )
@@ -65,7 +65,7 @@ struct SwiftKnownTypes {
   func unsafeMutableBufferPointer(_ elementType: SwiftType) -> SwiftType {
     .nominal(
       SwiftNominalType(
-        nominalTypeDecl: decls.unsafeMutableBufferPointerDecl,
+        nominalTypeDecl: symbolTable[.unsafeMutableBufferPointer],
         genericArguments: [elementType]
       )
     )

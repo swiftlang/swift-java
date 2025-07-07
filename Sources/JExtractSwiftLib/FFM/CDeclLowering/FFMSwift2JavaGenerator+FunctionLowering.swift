@@ -29,7 +29,7 @@ extension FFMSwift2JavaGenerator {
       enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
       symbolTable: symbolTable
     )
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
   }
 
   /// Lower the given initializer to a C-compatible entrypoint,
@@ -46,7 +46,7 @@ extension FFMSwift2JavaGenerator {
       symbolTable: symbolTable
     )
 
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
   }
 
   /// Lower the given variable decl to a C-compatible entrypoint,
@@ -69,7 +69,7 @@ extension FFMSwift2JavaGenerator {
       enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
       symbolTable: symbolTable
     )
-    return try CdeclLowering(swiftStdlibTypes: swiftStdlibTypes).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
   }
 }
 
@@ -77,8 +77,8 @@ extension FFMSwift2JavaGenerator {
 struct CdeclLowering {
   var knownTypes: SwiftKnownTypes
 
-  init(swiftStdlibTypes: SwiftStandardLibraryTypeDecls) {
-    self.knownTypes = SwiftKnownTypes(decls: swiftStdlibTypes)
+  init(symbolTable: SwiftSymbolTable) {
+    self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)
   }
 
   /// Lower the given Swift function signature to a Swift @_cdecl function signature,
@@ -266,6 +266,9 @@ struct CdeclLowering {
             )
           }
 
+        case .data:
+          break
+
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
           throw LoweringError.unhandledType(type)
@@ -407,6 +410,9 @@ struct CdeclLowering {
             ])
           )
 
+        case .data:
+          break
+
         default:
           throw LoweringError.unhandledType(type)
         }
@@ -508,6 +514,9 @@ struct CdeclLowering {
         case .string:
           // Returning string is not supported at this point.
           throw LoweringError.unhandledType(type)
+
+        case .data:
+          break
 
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
@@ -663,8 +672,7 @@ extension LoweredFunctionSignature {
   package func cdeclThunk(
     cName: String,
     swiftAPIName: String,
-    as apiKind: SwiftAPIKind,
-    stdlibTypes: SwiftStandardLibraryTypeDecls
+    as apiKind: SwiftAPIKind
   ) -> FunctionDeclSyntax {
 
     let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
@@ -765,7 +773,7 @@ extension LoweredFunctionSignature {
 }
 
 enum LoweringError: Error {
-  case inoutNotSupported(SwiftType)
-  case unhandledType(SwiftType)
-  case effectNotSupported(SwiftEffectSpecifier)
+  case inoutNotSupported(SwiftType, file: String = #file, line: Int = #line)
+  case unhandledType(SwiftType, file: String = #file, line: Int = #line)
+  case effectNotSupported(SwiftEffectSpecifier, file: String = #file, line: Int = #line)
 }

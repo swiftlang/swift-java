@@ -67,7 +67,7 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
-          guard let javaType = translate(standardLibraryType: knownType) else {
+          guard let javaType = translate(knownType: knownType) else {
             fatalError("unsupported known type: \(knownType)")
           }
           return javaType
@@ -83,8 +83,8 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(standardLibraryType: SwiftStandardLibraryTypeKind) -> JavaType? {
-      switch standardLibraryType {
+    func translate(knownType: SwiftKnownTypeDeclKind) -> JavaType? {
+      switch knownType {
       case .bool: .boolean
       case .int8: .byte
       case .uint16: .char
@@ -101,6 +101,8 @@ extension JNISwift2JavaGenerator {
           .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
           .unsafeBufferPointer, .unsafeMutableBufferPointer:
         nil
+      case .data:
+        fatalError("unimplemented")
       }
     }
   }

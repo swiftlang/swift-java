@@ -87,6 +87,8 @@ extension FFMSwift2JavaGenerator {
 
       """)
 
+    printSwiftThunkImports(&printer)
+
     for thunk in stt.renderGlobalThunks() {
       printer.print(thunk)
       printer.println()
@@ -114,9 +116,20 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
+    printSwiftThunkImports(&printer)
+
     for thunk in stt.renderThunks(forType: ty) {
       printer.print("\(thunk)")
       printer.print("")
+    }
+  }
+
+  func printSwiftThunkImports(_ printer: inout CodePrinter) {
+    for module in self.symbolTable.importedModules.keys.sorted() {
+      guard module != "Swift" else {
+        continue
+      }
+      printer.print("import \(module)")
     }
   }
 }
@@ -196,8 +209,7 @@ struct SwiftThunkTranslator {
     let thunkFunc = translated.loweredSignature.cdeclThunk(
       cName: thunkName,
       swiftAPIName: decl.name,
-      as: decl.apiKind,
-      stdlibTypes: st.swiftStdlibTypes
+      as: decl.apiKind
     )
     return [DeclSyntax(thunkFunc)]
   }

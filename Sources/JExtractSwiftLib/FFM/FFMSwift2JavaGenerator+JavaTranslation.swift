@@ -24,7 +24,7 @@ extension FFMSwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(swiftStdlibTypes: self.swiftStdlibTypes)
+      let translation = JavaTranslation(symbolTable: self.symbolTable)
       translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -113,12 +113,12 @@ extension FFMSwift2JavaGenerator {
   }
 
   struct JavaTranslation {
-    var swiftStdlibTypes: SwiftStandardLibraryTypeDecls
+    var symbolTable: SwiftSymbolTable
 
     func translate(
       _ decl: ImportedFunc
     ) throws -> TranslatedFunctionDecl {
-      let lowering = CdeclLowering(swiftStdlibTypes: self.swiftStdlibTypes)
+      let lowering = CdeclLowering(symbolTable: symbolTable)
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
@@ -353,6 +353,9 @@ extension FFMSwift2JavaGenerator {
               conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
+          case .data:
+            break
+
           default:
             throw JavaTranslationError.unhandledType(swiftType)
           }
@@ -437,6 +440,9 @@ extension FFMSwift2JavaGenerator {
                 withArena: false
               )
             )
+
+          case .data:
+            break
 
           case .unsafePointer, .unsafeMutablePointer:
             // FIXME: Implement
@@ -629,6 +635,6 @@ extension CType {
 }
 
 enum JavaTranslationError: Error {
-  case inoutNotSupported(SwiftType)
+  case inoutNotSupported(SwiftType, file: String = #file, line: Int = #line)
   case unhandledType(SwiftType, file: String = #file, line: Int = #line)
 }

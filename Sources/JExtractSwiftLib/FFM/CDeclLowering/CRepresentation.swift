@@ -102,7 +102,7 @@ enum CDeclToCLoweringError: Error {
   case invalidFunctionConvention(SwiftFunctionType)
 }
 
-extension SwiftStandardLibraryTypeKind {
+extension SwiftKnownTypeDeclKind {
   /// Determine the primitive C type that corresponds to this C standard
   /// library type, if there is one.
   var primitiveCType: CType? {
@@ -125,7 +125,7 @@ extension SwiftStandardLibraryTypeKind {
       .qualified(const: true, volatile: false, type: .void)
     )
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string:
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data:
        nil
     }
   }

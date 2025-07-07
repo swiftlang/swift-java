@@ -73,8 +73,7 @@ func assertLoweredFunction(
   let loweredCDecl = loweredFunction.cdeclThunk(
     cName: "c_\(swiftFunctionName)",
     swiftAPIName: swiftFunctionName,
-    as: apiKind,
-    stdlibTypes: translator.swiftStdlibTypeDecls
+    as: apiKind
   )
 
   #expect(
@@ -141,8 +140,7 @@ func assertLoweredVariableAccessor(
   let loweredCDecl = loweredFunction?.cdeclThunk(
     cName: "c_\(swiftVariableName)",
     swiftAPIName: swiftVariableName,
-    as: isSet ? .setter : .getter,
-    stdlibTypes: translator.swiftStdlibTypeDecls
+    as: isSet ? .setter : .getter
   )
 
   #expect(

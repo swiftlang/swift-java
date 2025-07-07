@@ -23,6 +23,8 @@ import Glibc
 import Darwin.C
 #endif
 
+import Foundation
+
 public func helloWorld() {
   p("\(#function)")
 }
@@ -52,6 +54,10 @@ public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
 }
 
 public var globalBuffer: UnsafeRawBufferPointer = UnsafeRawBufferPointer(UnsafeMutableRawBufferPointer.allocate(byteCount: 124, alignment: 1))
+
+public func globalReceiveReturnData(data: Data) -> Data {
+  return Data(data)
+}
 
 public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
