@@ -16,7 +16,6 @@ import groovy.json.JsonSlurper
 import org.swift.swiftkit.gradle.BuildUtils
 
 import java.nio.file.*
-import kotlinx.serialization.json.*
 
 plugins {
     id("build-logic.java-application-conventions")
@@ -148,7 +147,8 @@ tasks.clean {
 }
 
 dependencies {
-    implementation(project(':SwiftKit'))
+    implementation(project(':SwiftKitCore'))
+    implementation(project(':SwiftKitFFM'))
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

@@ -27,9 +27,10 @@ fi
 
 # check if we can compile a plain Example file that uses the generated Java bindings that should be in the generated jar
 # The classpath MUST end with a * if it contains jar files, and must not if it directly contains class files.
-SWIFTKIT_CLASSPATH="$(pwd)/../../SwiftKit/build/libs/*"
+SWIFTKIT_CORE_CLASSPATH="$(pwd)/../../SwiftKitCore/build/libs/*"
+SWIFTKIT_FFM_CLASSPATH="$(pwd)/../../SwiftKitFFM/build/libs/*"
 MYLIB_CLASSPATH="$(pwd)/build/libs/*"
-CLASSPATH="$(pwd)/:${SWIFTKIT_CLASSPATH}:${MYLIB_CLASSPATH}"
+CLASSPATH="$(pwd)/:${SWIFTKIT_FFM_CLASSPATH}:${SWIFTKIT_CORE_CLASSPATH}:${MYLIB_CLASSPATH}"
 echo "CLASSPATH       = ${CLASSPATH}"
 
 $JAVAC -cp "${CLASSPATH}" Example.java

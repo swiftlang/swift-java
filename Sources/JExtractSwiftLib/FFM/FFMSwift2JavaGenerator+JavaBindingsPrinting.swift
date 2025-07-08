@@ -116,8 +116,8 @@ extension FFMSwift2JavaGenerator {
       """
       public static \(returnTy) call(\(paramsStr)) {
         try {
-          if (SwiftKit.TRACE_DOWNCALLS) {
-            SwiftKit.traceDowncall(\(argsStr));
+          if (SwiftRuntime.TRACE_DOWNCALLS) {
+            SwiftRuntime.traceDowncall(\(argsStr));
           }
           \(maybeReturn)HANDLE.invokeExact(\(argsStr));
         } catch (Throwable ex$) {
@@ -156,7 +156,7 @@ extension FFMSwift2JavaGenerator {
   ///       <return-type> apply(<parameters>);
   ///     }
   ///     static final MethodDescriptor DESC = FunctionDescriptor.of(...);
-  ///     static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+  ///     static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
   ///     static MemorySegment toUpcallStub(Function fi, Arena arena) {
   ///       return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
   ///     }
@@ -197,7 +197,7 @@ extension FFMSwift2JavaGenerator {
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
       printer.print(
         """
-        private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+        private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
         private static MemorySegment toUpcallStub(Function fi, Arena arena) {
           return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
         }
@@ -320,7 +320,7 @@ extension FFMSwift2JavaGenerator {
       .flatMap(\.javaParameters)
       .map { "\($0.type) \($0.name)" }
     if translatedSignature.requiresSwiftArena {
-      paramDecls.append("SwiftArena swiftArena$")
+      paramDecls.append("AllocatingSwiftArena swiftArena$")
     }
 
     // TODO: we could copy the Swift method's documentation over here, that'd be great UX

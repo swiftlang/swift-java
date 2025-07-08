@@ -77,8 +77,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment callback) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(callback);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(callback);
               }
               HANDLE.invokeExact(callback);
             } catch (Throwable ex$) {
@@ -96,7 +96,7 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
             private static MemorySegment toUpcallStub(Function fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
@@ -167,8 +167,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment callback, java.lang.foreign.MemorySegment fn) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(callback, fn);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(callback, fn);
               }
               HANDLE.invokeExact(callback, fn);
             } catch (Throwable ex$) {
@@ -190,7 +190,7 @@ final class FuncCallbackImportTests {
               /* _0: */SwiftValueLayout.SWIFT_POINTER,
               /* _1: */SwiftValueLayout.SWIFT_FLOAT
             );
-            private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
             private static MemorySegment toUpcallStub(Function fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
@@ -206,7 +206,7 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
             private static MemorySegment toUpcallStub(Function fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
@@ -281,8 +281,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment body) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(body);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(body);
               }
               HANDLE.invokeExact(body);
             } catch (Throwable ex$) {
@@ -304,7 +304,7 @@ final class FuncCallbackImportTests {
               /* _0: */SwiftValueLayout.SWIFT_POINTER,
               /* _1: */SwiftValueLayout.SWIFT_INT
             );
-            private static final MethodHandle HANDLE = SwiftKit.upcallHandle(Function.class, "apply", DESC);
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
             private static MemorySegment toUpcallStub(Function fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }

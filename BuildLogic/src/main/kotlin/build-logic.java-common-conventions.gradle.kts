@@ -31,21 +31,6 @@ repositories {
     mavenCentral()
 }
 
-testing {
-    suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter("5.10.3")
-        }
-    }
-}
-
-/// Enable access to preview APIs, e.g. java.lang.foreign.* (Panama)
-tasks.withType(JavaCompile::class).forEach {
-    it.options.compilerArgs.add("--enable-preview")
-    it.options.compilerArgs.add("-Xlint:preview")
-}
-
-
 fun getSwiftRuntimeLibraryPaths(): List<String> {
     val process = ProcessBuilder("swiftc", "-print-target-info")
         .redirectError(ProcessBuilder.Redirect.INHERIT)

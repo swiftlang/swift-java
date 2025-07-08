@@ -43,7 +43,8 @@ java {
 }
 
 dependencies {
-    implementation(project(':SwiftKit'))
+    implementation(project(':SwiftKitCore'))
+    implementation(project(':SwiftKitFFM'))
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

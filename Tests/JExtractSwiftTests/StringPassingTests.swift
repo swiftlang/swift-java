@@ -45,8 +45,8 @@ final class StringPassingTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment string) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(string);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(string);
               }
               return (long) HANDLE.invokeExact(string);
             } catch (Throwable ex$) {
@@ -64,7 +64,7 @@ final class StringPassingTests {
          */
         public static long writeString(java.lang.String string) {
             try(var arena$ = Arena.ofConfined()) {
-                return swiftjava___FakeModule_writeString_string.call(SwiftKit.toCString(string, arena$));
+                return swiftjava___FakeModule_writeString_string.call(SwiftRuntime.toCString(string, arena$));
             }
         }
         """

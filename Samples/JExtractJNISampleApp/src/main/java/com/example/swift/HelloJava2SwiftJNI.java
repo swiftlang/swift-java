@@ -18,12 +18,12 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 
-import org.swift.swiftkit.SwiftKit;
+import org.swift.swiftkit.core.SwiftLibraries;
 
 public class HelloJava2SwiftJNI {
 
     public static void main(String[] args) {
-        System.out.print("Property: java.library.path = " + SwiftKit.getJavaLibraryPath());
+        System.out.print("Property: java.library.path = " + SwiftLibraries.getJavaLibraryPath());
 
         examples();
     }
@@ -35,10 +35,8 @@ public class HelloJava2SwiftJNI {
         MySwiftLibrary.globalTakeIntInt(1337, 42);
 
         long cnt = MySwiftLibrary.globalWriteString("String from Java");
-        SwiftKit.trace("count = " + cnt);
 
         long i = MySwiftLibrary.globalMakeInt();
-        SwiftKit.trace("globalMakeInt() = " + i);
 
         MySwiftClass.method();
 

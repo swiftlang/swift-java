@@ -51,8 +51,8 @@ final class VariableImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment self) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(self);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(self);
               }
               return (long) HANDLE.invokeExact(self);
             } catch (Throwable ex$) {
@@ -84,8 +84,8 @@ final class VariableImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(long newValue, java.lang.foreign.MemorySegment self) {
             try {
-              if (SwiftKit.TRACE_DOWNCALLS) {
-                SwiftKit.traceDowncall(newValue, self);
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(newValue, self);
               }
               HANDLE.invokeExact(newValue, self);
             } catch (Throwable ex$) {
