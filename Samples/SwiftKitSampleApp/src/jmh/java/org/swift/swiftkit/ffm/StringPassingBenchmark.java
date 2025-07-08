@@ -12,12 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkit.ffm;
 
 import com.example.swift.HelloJava2Swift;
 import com.example.swift.MySwiftClass;
 import com.example.swift.MySwiftLibrary;
 import org.openjdk.jmh.annotations.*;
+import org.swift.swiftkit.core.ClosableSwiftArena;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,12 +39,12 @@ public class StringPassingBenchmark {
     public int stringLen;
     public String string;
 
-    ClosableSwiftArena arena;
+    ClosableAllocatingSwiftArena arena;
     MySwiftClass obj;
 
     @Setup(Level.Trial)
     public void beforeAll() {
-        arena = SwiftArena.ofConfined();
+        arena = AllocatingSwiftArena.ofConfined();
         obj = MySwiftClass.init(1, 2, arena);
         string = makeString(stringLen);
     }

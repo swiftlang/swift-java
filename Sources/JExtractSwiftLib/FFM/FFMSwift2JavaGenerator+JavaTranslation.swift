@@ -313,7 +313,7 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              name: parameterName, type: JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType"))
+              name: parameterName, type: JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType"))
           ],
           conversion: .swiftValueSelfSegment(.placeholder)
         )
@@ -350,7 +350,7 @@ extension FFMSwift2JavaGenerator {
                   name: parameterName, type: .javaLangString
                 )
               ],
-              conversion: .call(.placeholder, function: "SwiftKit.toCString", withArena: true)
+              conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
           default:
@@ -411,7 +411,7 @@ extension FFMSwift2JavaGenerator {
       switch swiftType {
       case .metatype(_):
         // Metatype are expressed as 'org.swift.swiftkit.SwiftAnyType'
-        let javaType = JavaType.class(package: "org.swift.swiftkit", name: "SwiftAnyType")
+        let javaType = JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType")
         return TranslatedResult(
           javaResultType: javaType,
           outParameters: [],

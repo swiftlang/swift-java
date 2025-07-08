@@ -20,11 +20,13 @@ import org.swift.swiftkit.core.SwiftInstanceCleanup;
 import java.lang.foreign.MemorySegment;
 
 public abstract class FFMSwiftInstance extends SwiftInstance {
+    private final MemorySegment memorySegment;
+
     /**
      * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
      */
     public final MemorySegment $memorySegment() {
-        return MemorySegment.ofAddress(this.pointer());
+        return this.memorySegment;
     }
 
     /**
@@ -40,6 +42,7 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
      */
     protected FFMSwiftInstance(MemorySegment segment, AllocatingSwiftArena arena) {
         super(segment.address(), arena);
+        this.memorySegment = segment;
     }
 
     @Override

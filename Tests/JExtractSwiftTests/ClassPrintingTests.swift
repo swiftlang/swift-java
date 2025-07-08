@@ -44,7 +44,7 @@ struct ClassPrintingTests {
     try assertOutput(input: class_interfaceFile, .ffm, .java, swiftModuleName: "__FakeModule", expectedChunks: [
       """
       public static final SwiftAnyType TYPE_METADATA =
-          new SwiftAnyType(SwiftKit.swiftjava.getType("__FakeModule", "MySwiftClass"));
+          new SwiftAnyType(SwiftRuntime.swiftjava.getType("__FakeModule", "MySwiftClass"));
       public final SwiftAnyType $swiftType() {
           return TYPE_METADATA;
       }

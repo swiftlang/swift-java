@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkit.ffm;
 
 import com.example.swift.HelloJava2Swift;
 import com.example.swift.MySwiftLibrary;
@@ -31,12 +31,12 @@ public class JavaToSwiftBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-        ClosableSwiftArena arena;
+        ClosableAllocatingSwiftArena arena;
         MySwiftClass obj;
 
         @Setup(Level.Trial)
         public void beforeAll() {
-            arena = SwiftArena.ofConfined();
+            arena = AllocatingSwiftArena.ofConfined();
             obj = MySwiftClass.init(1, 2, arena);
         }
 

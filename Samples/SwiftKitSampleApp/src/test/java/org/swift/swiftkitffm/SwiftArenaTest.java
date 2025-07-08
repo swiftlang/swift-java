@@ -18,10 +18,12 @@ import com.example.swift.MySwiftClass;
 import com.example.swift.MySwiftStruct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
-import org.swift.swiftkitffm.util.PlatformUtils;
+import org.swift.swiftkit.core.util.PlatformUtils;
+import org.swift.swiftkit.ffm.AllocatingSwiftArena;
+import org.swift.swiftkit.ffm.SwiftRuntime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.swift.swiftkitffm.SwiftFFM.retainCount;
+import static org.swift.swiftkit.ffm.SwiftRuntime.retainCount;
 
 public class SwiftArenaTest {
 
@@ -34,13 +36,13 @@ public class SwiftArenaTest {
     @Test
     @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             var obj = MySwiftClass.init(1, 2, arena);
 
-            retain(obj);
+            SwiftRuntime.retain(obj);
             assertEquals(2, retainCount(obj));
 
-            release(obj);
+            SwiftRuntime.release(obj);
             assertEquals(1, retainCount(obj));
         }
     }
@@ -51,7 +53,7 @@ public class SwiftArenaTest {
     public void arena_markAsDestroyed_preventUseAfterFree_class() {
         MySwiftClass unsafelyEscapedOutsideArenaScope = null;
 
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             var obj = MySwiftClass.init(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = obj;
         }
@@ -70,7 +72,7 @@ public class SwiftArenaTest {
     public void arena_markAsDestroyed_preventUseAfterFree_struct() {
         MySwiftStruct unsafelyEscapedOutsideArenaScope = null;
 
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             var s = MySwiftStruct.init(1, 2, arena);
             unsafelyEscapedOutsideArenaScope = s;
         }

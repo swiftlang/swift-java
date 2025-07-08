@@ -12,14 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkit.ffm;
 
 import com.example.swift.MySwiftClass;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
-import org.swift.swiftkitffm.util.PlatformUtils;
+import org.swift.swiftkit.core.util.PlatformUtils;
 
-import static org.swift.swiftkitffm.SwiftFFM.retainCount;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.swift.swiftkit.ffm.SwiftRuntime.*;
 
 public class SwiftArenaTest {
 
@@ -32,7 +33,7 @@ public class SwiftArenaTest {
     @Test
     @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             var obj = MySwiftClass.init(1, 2, arena);
 
             retain(obj);

@@ -19,21 +19,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.example.swift.MySwiftClass;
+import org.swift.swiftkit.ffm.AllocatingSwiftArena;
+import org.swift.swiftkit.ffm.SwiftRuntime;
 
 public class MySwiftClassTest {
 
     @Test
     void call_retain_retainCount_release() {
-        var arena = SwiftArena.ofConfined();
+        var arena = AllocatingSwiftArena.ofConfined();
         var obj = MySwiftClass.init(1, 2, arena);
 
-        assertEquals(1, SwiftFFM.retainCount(obj));
+        assertEquals(1, SwiftRuntime.retainCount(obj));
         // TODO: test directly on SwiftHeapObject inheriting obj
 
-        SwiftFFM.retain(obj);
-        assertEquals(2, SwiftFFM.retainCount(obj));
+        SwiftRuntime.retain(obj);
+        assertEquals(2, SwiftRuntime.retainCount(obj));
 
-        SwiftFFM.release(obj);
-        assertEquals(1, SwiftFFM.retainCount(obj));
+        SwiftRuntime.release(obj);
+        assertEquals(1, SwiftRuntime.retainCount(obj));
     }
 }

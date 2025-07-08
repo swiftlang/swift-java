@@ -16,6 +16,7 @@ package org.swift.swiftkitffm;
 
 import com.example.swift.MySwiftStruct;
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +24,7 @@ public class MySwiftStructTest {
 
     @Test
     void create_struct() {
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             long cap = 12;
             long len = 34;
             var struct = MySwiftStruct.init(cap, len, arena);

@@ -92,9 +92,10 @@ extension FFMSwift2JavaGenerator {
 
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
-    "org.swift.swiftkit.*",
-    "org.swift.swiftkit.SwiftKit",
-    "org.swift.swiftkit.util.*",
+    "org.swift.swiftkit.core.*",
+    "org.swift.swiftkit.core.util.*",
+    "org.swift.swiftkit.ffm.*",
+    "org.swift.swiftkit.ffm.SwiftRuntime",
 
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",
@@ -188,7 +189,7 @@ extension FFMSwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            System.loadLibrary(SwiftKit.STDLIB_DYLIB_NAME);
+            System.loadLibrary(SwiftLibraries.STDLIB_DYLIB_NAME);
             System.loadLibrary("SwiftKitSwift");
             System.loadLibrary(LIB_NAME);
             return true;
@@ -210,7 +211,7 @@ extension FFMSwift2JavaGenerator {
 
       printer.print(
         """
-        public \(decl.swiftNominal.name)(MemorySegment segment, SwiftArena arena) {
+        public \(decl.swiftNominal.name)(MemorySegment segment, AllocatingSwiftArena arena) {
           super(segment, arena);
         }
         """
@@ -272,7 +273,7 @@ extension FFMSwift2JavaGenerator {
       parentProtocol = "SwiftValue"
     }
 
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends SwiftInstance implements \(parentProtocol)") {
+    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)") {
       printer in
       // Constants
       printClassConstants(printer: &printer)
@@ -322,9 +323,9 @@ extension FFMSwift2JavaGenerator {
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             // Ensure Swift and our Lib are loaded during static initialization of the class.
-            SwiftKit.loadLibrary("swiftCore");
-            SwiftKit.loadLibrary("SwiftKitSwift");
-            SwiftKit.loadLibrary(LIB_NAME);
+            SwiftLibraries.loadLibrary("swiftCore");
+            SwiftLibraries.loadLibrary("SwiftKitSwift");
+            SwiftLibraries.loadLibrary(LIB_NAME);
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)
@@ -386,7 +387,7 @@ extension FFMSwift2JavaGenerator {
       public String toString() {
           return getClass().getSimpleName()
               + "("
-              + SwiftKit.nameOfSwiftType($swiftType().$memorySegment(), true)
+              + SwiftRuntime.nameOfSwiftType($swiftType().$memorySegment(), true)
               + ")@"
               + $memorySegment();
       }

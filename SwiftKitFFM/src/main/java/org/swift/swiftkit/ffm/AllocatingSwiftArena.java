@@ -17,9 +17,10 @@ package org.swift.swiftkit.ffm;
 import org.swift.swiftkit.core.SwiftArena;
 
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
 import java.util.concurrent.ThreadFactory;
 
-public interface AllocatingSwiftArena extends SwiftArena {
+public interface AllocatingSwiftArena extends SwiftArena, SegmentAllocator {
     MemorySegment allocate(long byteSize, long byteAlignment);
 
     static ClosableAllocatingSwiftArena ofConfined() {

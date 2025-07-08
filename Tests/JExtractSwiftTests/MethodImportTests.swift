@@ -180,7 +180,7 @@ final class MethodImportTests {
          */
         public static void globalTakeIntLongString(int i32, long l, java.lang.String s) {
             try(var arena$ = Arena.ofConfined()) {
-                swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.call(i32, l, SwiftKit.toCString(s, arena$));
+                swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.call(i32, l, SwiftRuntime.toCString(s, arena$));
             }
         }
         """
@@ -222,7 +222,7 @@ final class MethodImportTests {
          * public func globalReturnClass() -> MySwiftClass
          * }
          */
-        public static MySwiftClass globalReturnClass(SwiftArena swiftArena$) {
+        public static MySwiftClass globalReturnClass(AllocatingSwiftArena swiftArena$) {
           MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
           swiftjava___FakeModule_globalReturnClass.call(_result);
           return new MySwiftClass(_result, swiftArena$);
@@ -396,7 +396,7 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public static MySwiftClass init(long len, long cap, SwiftArena swiftArena$) {
+        public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena$) {
             MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
             swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
             return new MySwiftClass(_result, swiftArena$);
@@ -440,7 +440,7 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public static MySwiftStruct init(long len, long cap, SwiftArena swiftArena$) {
+        public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena$) {
             MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
             swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
             return new MySwiftStruct(_result, swiftArena$);

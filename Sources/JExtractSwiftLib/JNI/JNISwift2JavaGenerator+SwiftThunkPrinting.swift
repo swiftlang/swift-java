@@ -130,7 +130,7 @@ extension JNISwift2JavaGenerator {
     _ decl: ImportedFunc
   ) {
     let translatedDecl = self.translatedDecl(for: decl)
-    let parentName = translatedDecl.parentName ?? swiftModuleName
+    let parentName = translatedDecl.parentName
     let swiftReturnType = decl.functionSignature.result.type
 
     printCDecl(&printer, decl) { printer in
