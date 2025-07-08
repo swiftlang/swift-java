@@ -22,24 +22,16 @@ package org.swift.swiftkit.core;
  * associated owner thread such as {@link ClosableSwiftArena#close()}.
  */
 public interface SwiftArena  {
-
-//    static ClosableSwiftArena ofConfined() {
-//        return new ConfinedSwiftMemorySession(Thread.currentThread());
-//    }
-
     /**
      * Register a Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
      */
     void register(SwiftInstance instance);
-
 }
 
 /**
  * Represents a list of resources that need a cleanup, e.g. allocated classes/structs.
  */
 interface SwiftResourceList {
-
     void runCleanup();
-
 }

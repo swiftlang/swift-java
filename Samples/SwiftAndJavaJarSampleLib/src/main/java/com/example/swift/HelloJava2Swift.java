@@ -17,9 +17,9 @@ package com.example.swift;
 // Import swift-extract generated sources
 
 // Import javakit/swiftkit support libraries
+import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
-import org.swift.swiftkit.core.SwiftLibraries;
 
 public class HelloJava2Swift {
 

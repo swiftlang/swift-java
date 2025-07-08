@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkitffm;
+package org.swift.swiftkit.ffm;
 
 import java.util.concurrent.TimeUnit;
 
