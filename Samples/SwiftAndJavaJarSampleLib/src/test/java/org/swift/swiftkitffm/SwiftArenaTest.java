@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 import org.swift.swiftkitffm.util.PlatformUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.swift.swiftkitffm.SwiftFFM.retainCount;
 
 public class SwiftArenaTest {

@@ -17,8 +17,9 @@ package com.example.swift;
 // Import swift-extract generated sources
 
 // Import javakit/swiftkit support libraries
-import org.swift.swiftkitffm.SwiftArena;
-import org.swift.swiftkitffm.SwiftFFM;
+import org.swift.swiftkit.ffm.AllocatingSwiftArena;
+import org.swift.swiftkit.ffm.SwiftRuntime;
+import org.swift.swiftkit.core.SwiftLibraries;
 
 public class HelloJava2Swift {
 
@@ -26,7 +27,7 @@ public class HelloJava2Swift {
         boolean traceDowncalls = Boolean.getBoolean("jextract.trace.downcalls");
         System.out.println("Property: jextract.trace.downcalls = " + traceDowncalls);
 
-        System.out.print("Property: java.library.path = " + SwiftFFM.getJavaLibraryPath());
+        System.out.print("Property: java.library.path = " + SwiftLibraries.getJavaLibraryPath());
 
         examples();
     }
@@ -37,12 +38,12 @@ public class HelloJava2Swift {
         MySwiftLibrary.globalTakeInt(1337);
 
         // Example of using an arena; MyClass.deinit is run at end of scope
-        try (var arena = SwiftArena.ofConfined()) {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
 
             // just checking retains/releases work
-            SwiftFFM.retain(obj);
-            SwiftFFM.release(obj);
+            SwiftRuntime.retain(obj);
+            SwiftRuntime.release(obj);
 
             obj.voidMethod();
             obj.takeIntMethod(42);

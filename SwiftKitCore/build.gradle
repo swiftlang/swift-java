@@ -16,7 +16,7 @@ plugins {
     id("build-logic.java-application-conventions")
 }
 
-group = "org.swift.swiftkitcore"
+group = "org.swift.swiftkit"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -25,15 +25,15 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        // JDK 19 is the last JDK to support Java 7
+        languageVersion.set(JavaLanguageVersion.of(19))
     }
     // Support Android 6+ (Java 7)
     sourceCompatibility = JavaVersion.VERSION_1_7
 }
 
 dependencies {
-//    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-//    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation 'junit:junit:4.13.2'
 }
 
 tasks.test {

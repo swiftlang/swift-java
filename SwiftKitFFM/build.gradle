@@ -16,7 +16,7 @@ plugins {
     id("build-logic.java-application-conventions")
 }
 
-group = "org.swift.swiftkitffm"
+group = "org.swift.swiftkit"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -36,11 +36,25 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
+testing {
+    suites {
+        test {
+            useJUnitJupiter('5.10.3')
+        }
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
     }
+}
+
+/// Enable access to preview APIs, e.g. java.lang.foreign.* (Panama)
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("--enable-preview")
+    options.compilerArgs.add("-Xlint:preview")
 }
 
 // SwiftKit depends on SwiftKitSwift (Swift library that this Java library calls into)
