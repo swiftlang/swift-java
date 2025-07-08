@@ -185,8 +185,8 @@ public abstract class SwiftValueWitnessTable {
                 $LAYOUT.byteOffset(MemoryLayout.PathElement.groupElement("destroy"));
 
         static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-                ValueLayout.ADDRESS, // witness table functions expect a pointer to self pointer
-                ValueLayout.ADDRESS // pointer to the witness table
+                ValueLayout.ADDRESS, // pointer to self
+                ValueLayout.ADDRESS // pointer to the type metadata
         );
 
         /**
@@ -213,13 +213,9 @@ public abstract class SwiftValueWitnessTable {
      * This includes deallocating the Swift managed memory for the object.
      */
     public static void destroy(SwiftAnyType type, MemorySegment object) {
-        var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
-        var wtable = valueWitnessTable(fullTypeMetadata);
-
         var mh = destroy.handle(type);
-
         try {
-            mh.invokeExact(object, wtable);
+            mh.invokeExact(object, type.$memorySegment());
         } catch (Throwable th) {
             throw new AssertionError("Failed to destroy '" + type + "' at " + object, th);
         }
@@ -246,7 +242,7 @@ public abstract class SwiftValueWitnessTable {
                 /* -> */ ValueLayout.ADDRESS, // returns the destination object
                 ValueLayout.ADDRESS, // destination
                 ValueLayout.ADDRESS, // source
-                ValueLayout.ADDRESS // pointer to the witness table
+                ValueLayout.ADDRESS // pointer to the type metadata
         );
 
         /**
@@ -274,13 +270,10 @@ public abstract class SwiftValueWitnessTable {
      * Returns the dest object.
      */
     public static MemorySegment initializeWithCopy(SwiftAnyType type, MemorySegment dest, MemorySegment src) {
-        var fullTypeMetadata = fullTypeMetadata(type.$memorySegment());
-        var wtable = valueWitnessTable(fullTypeMetadata);
-
         var mh = initializeWithCopy.handle(type);
 
         try {
-            return (MemorySegment) mh.invokeExact(dest, src, wtable);
+            return (MemorySegment) mh.invokeExact(dest, src, type.$memorySegment());
         } catch (Throwable th) {
             throw new AssertionError("Failed to initializeWithCopy '" + type + "' (" + dest + ", " + src + ")", th);
         }
