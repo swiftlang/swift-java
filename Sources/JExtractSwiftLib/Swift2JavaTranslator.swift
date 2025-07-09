@@ -27,6 +27,9 @@ public final class Swift2JavaTranslator {
 
   let config: Configuration
 
+  /// The name of the Swift module being translated.
+  let swiftModuleName: String
+
   // ==== Input
 
   struct Input {
@@ -46,14 +49,7 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
-  package var swiftStdlibTypeDecls: SwiftStandardLibraryTypeDecls
-
-  package let symbolTable: SwiftSymbolTable
-
-  /// The name of the Swift module being translated.
-  var swiftModuleName: String {
-    symbolTable.moduleName
-  }
+  package var symbolTable: SwiftSymbolTable! = nil
 
   public init(
     config: Configuration
@@ -62,12 +58,7 @@ public final class Swift2JavaTranslator {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
     self.config = config
-    self.symbolTable = SwiftSymbolTable(parsedModuleName: swiftModule)
-
-    // Create a mock of the Swift standard library.
-    var parsedSwiftModule = SwiftParsedModuleSymbolTable(moduleName: "Swift")
-    self.swiftStdlibTypeDecls = SwiftStandardLibraryTypeDecls(into: &parsedSwiftModule)
-    self.symbolTable.importedModules.append(parsedSwiftModule.symbolTable)
+    self.swiftModuleName = swiftModule
   }
 }
 
@@ -108,11 +99,69 @@ extension Swift2JavaTranslator {
       log.trace("Analyzing \(input.filePath)")
       visitor.visit(sourceFile: input.syntax)
     }
+
+    // If any API uses 'Foundation.Data', import 'Data' as if it's declared in
+    // this module.
+    if let dataDecl = self.symbolTable[.data] {
+      if self.isUsing(dataDecl) {
+        visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil)
+      }
+    }
   }
 
   package func prepareForTranslation() {
-    /// Setup the symbol table.
-    symbolTable.setup(inputs.map({ $0.syntax }))
+    self.symbolTable = SwiftSymbolTable.setup(
+      moduleName: self.swiftModuleName,
+      inputs.map({ $0.syntax }),
+      log: self.log
+    )
+  }
+
+  /// Check if any of the imported decls uses the specified nominal declaration.
+  func isUsing(_ decl: SwiftNominalTypeDeclaration) -> Bool {
+    func check(_ type: SwiftType) -> Bool {
+      switch type {
+      case .nominal(let nominal):
+        return nominal.nominalTypeDecl == decl
+      case .optional(let ty):
+        return check(ty)
+      case .tuple(let tuple):
+        return tuple.contains(where: check)
+      case .function(let fn):
+        return check(fn.resultType) || fn.parameters.contains(where: { check($0.type) })
+      case .metatype(let ty):
+        return check(ty)
+      }
+    }
+
+    func check(_ fn: ImportedFunc) -> Bool {
+      if check(fn.functionSignature.result.type) {
+        return true
+      }
+      if fn.functionSignature.parameters.contains(where: { check($0.type) }) {
+        return true
+      }
+      return false
+    }
+
+    if self.importedGlobalFuncs.contains(where: check) {
+      return true
+    }
+    if self.importedGlobalVariables.contains(where: check) {
+      return true
+    }
+    for importedType in self.importedTypes.values {
+      if importedType.initializers.contains(where: check) {
+        return true
+      }
+      if importedType.methods.contains(where: check) {
+        return true
+      }
+      if importedType.variables.contains(where: check) {
+        return true
+      }
+    }
+    return false
   }
 }
 
@@ -146,10 +195,10 @@ extension Swift2JavaTranslator {
     }
 
     // Whether to import this extension?
-    guard let nominalNode = symbolTable.parsedModule.nominalTypeSyntaxNodes[swiftNominalDecl] else {
+    guard swiftNominalDecl.moduleName == self.swiftModuleName else {
       return nil
     }
-    guard nominalNode.shouldImport(log: log) else {
+    guard swiftNominalDecl.syntax!.shouldImport(log: log) else {
       return nil
     }
 

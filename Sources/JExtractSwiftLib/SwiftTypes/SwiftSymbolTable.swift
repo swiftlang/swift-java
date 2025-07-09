@@ -38,89 +38,50 @@ extension SwiftSymbolTableProtocol {
 }
 
 package class SwiftSymbolTable {
-  var importedModules: [SwiftModuleSymbolTable] = []
-  var parsedModule: SwiftParsedModuleSymbolTable
+  let importedModules: [String: SwiftModuleSymbolTable]
+  let parsedModule:SwiftModuleSymbolTable
 
-  package init(parsedModuleName: String) {
-    self.parsedModule = SwiftParsedModuleSymbolTable(moduleName: parsedModuleName)
-  }
+  private var knownTypeToNominal: [SwiftKnownTypeDeclKind: SwiftNominalTypeDeclaration] = [:]
 
-  func addImportedModule(symbolTable: SwiftModuleSymbolTable) {
-    importedModules.append(symbolTable)
+  init(parsedModule: SwiftModuleSymbolTable, importedModules: [String: SwiftModuleSymbolTable]) {
+    self.parsedModule = parsedModule
+    self.importedModules = importedModules
   }
 }
 
 extension SwiftSymbolTable {
-  package func setup(_ sourceFiles: some Collection<SourceFileSyntax>) {
+  package static func setup(
+    moduleName: String,
+    _ sourceFiles: some Collection<SourceFileSyntax>,
+    log: Logger
+  ) -> SwiftSymbolTable {
+
+    // Prepare imported modules.
+    // FIXME: Support arbitrary dependencies.
+    var moduleNames: Set<String> = []
+    for sourceFile in sourceFiles {
+      moduleNames.formUnion(importingModuleNames(sourceFile: sourceFile))
+    }
+    var importedModules: [String: SwiftModuleSymbolTable] = [:]
+    importedModules[SwiftKnownModule.swift.name] = SwiftKnownModule.swift.symbolTable
+    for moduleName in moduleNames.sorted() {
+      if
+        importedModules[moduleName] == nil,
+        let knownModule = SwiftKnownModule(rawValue: moduleName)
+      {
+        importedModules[moduleName] = knownModule.symbolTable
+      }
+    }
+
+    // FIXME: Support granular lookup context (file, type context).
+
+    var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: moduleName, importedModules: importedModules, log: log)
     // First, register top-level and nested nominal types to the symbol table.
     for sourceFile in sourceFiles {
-      self.addNominalTypeDeclarations(sourceFile)
+      builder.handle(sourceFile: sourceFile)
     }
-
-    // Next bind the extensions.
-
-    // The work queue is required because, the extending type might be declared
-    // in another extension that hasn't been processed. E.g.:
-    //
-    //   extension Outer.Inner { struct Deeper {} }
-    //   extension Outer { struct Inner {} }
-    //   struct Outer {}
-    //
-    var unresolvedExtensions: [ExtensionDeclSyntax] = []
-    for sourceFile in sourceFiles {
-      // Find extensions.
-      for statement in sourceFile.statements {
-        // We only care about extensions at top-level.
-        if case .decl(let decl) = statement.item, let extNode = decl.as(ExtensionDeclSyntax.self) {
-          let resolved = handleExtension(extNode)
-          if !resolved {
-            unresolvedExtensions.append(extNode)
-          }
-        }
-      }
-    }
-
-    while !unresolvedExtensions.isEmpty {
-      let numExtensionsBefore = unresolvedExtensions.count
-      unresolvedExtensions.removeAll(where: handleExtension(_:))
-
-      // If we didn't resolve anything, we're done.
-      if numExtensionsBefore == unresolvedExtensions.count {
-        break
-      }
-      assert(numExtensionsBefore > unresolvedExtensions.count)
-    }
-  }
-
-  private func addNominalTypeDeclarations(_ sourceFile: SourceFileSyntax) {
-    // Find top-level nominal type declarations.
-    for statement in sourceFile.statements {
-      // We only care about declarations.
-      guard case .decl(let decl) = statement.item,
-          let nominalTypeNode = decl.asNominal else {
-        continue
-      }
-
-      parsedModule.addNominalTypeDeclaration(nominalTypeNode, parent: nil)
-    }
-  }
-
-  private func handleExtension(_ extensionDecl: ExtensionDeclSyntax) -> Bool {
-    // Try to resolve the type referenced by this extension declaration.
-    // If it fails, we'll try again later.
-    guard let extendedType = try? SwiftType(extensionDecl.extendedType, symbolTable: self) else {
-      return false
-    }
-    guard let extendedNominal = extendedType.asNominalTypeDeclaration else {
-      // Extending type was not a nominal type. Ignore it.
-      return true
-    }
-
-    // Register nested nominals in extensions to the symbol table.
-    parsedModule.addExtension(extensionDecl, extending: extendedNominal)
-
-    // We have successfully resolved the extended type. Record it.
-    return true
+    let parsedModule = builder.finalize()
+    return SwiftSymbolTable(parsedModule: parsedModule, importedModules: importedModules)
   }
 }
 
@@ -134,12 +95,14 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
       return parsedResult
     }
 
-    for importedModule in importedModules {
+    for importedModule in importedModules.values {
       if let result = importedModule.lookupTopLevelNominalType(name) {
         return result
       }
     }
     
+    // FIXME: Implement module qualified name lookups. E.g. 'Swift.String'
+
     return nil
   }
 
@@ -149,12 +112,30 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
       return parsedResult
     }
 
-    for importedModule in importedModules {
+    for importedModule in importedModules.values {
       if let result = importedModule.lookupNestedType(name, parent: parent) {
         return result
       }
     }
 
     return nil
+  }
+}
+
+extension SwiftSymbolTable {
+  /// Map 'SwiftKnownTypeDeclKind' to the declaration.
+  subscript(knownType: SwiftKnownTypeDeclKind) -> SwiftNominalTypeDeclaration! {
+    if let known = knownTypeToNominal[knownType] {
+      return known
+    }
+
+    let (module, name) = knownType.moduleAndName
+    guard let moduleTable = importedModules[module] else {
+      return nil
+    }
+
+    let found = moduleTable.lookupTopLevelNominalType(name)
+    knownTypeToNominal[knownType] = found
+    return found
   }
 }

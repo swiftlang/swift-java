@@ -100,6 +100,13 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       outputSwiftDirectory.appending(path: "\(sourceModule.name)Module+SwiftJava.swift")
     ]
 
+    // If the module uses 'Data' type, the thunk file is emitted as if 'Data' is declared
+    // in that module. Declare the thunk file as the output.
+    // FIXME: Make this conditional.
+    outputSwiftFiles += [
+      outputSwiftDirectory.appending(path: "Data+SwiftJava.swift")
+    ]
+
     return [
       .buildCommand(
         displayName: "Generate Java wrappers for Swift types",

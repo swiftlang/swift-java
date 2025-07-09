@@ -58,6 +58,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
         return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
       })
       self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
+
+      // FIXME: Can we avoid this?
+      self.expectedOutputSwiftFiles.insert("Data+SwiftJava.swift")
     } else {
       self.expectedOutputSwiftFiles = []
     }

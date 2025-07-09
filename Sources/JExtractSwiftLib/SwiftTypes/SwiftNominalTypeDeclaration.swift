@@ -31,28 +31,28 @@ package class SwiftNominalTypeDeclaration {
 
   /// The syntax node this declaration is derived from.
   /// Can be `nil` if this is loaded from a .swiftmodule.
-  var syntax: NominalTypeDeclSyntaxNode?
+  let syntax: NominalTypeDeclSyntaxNode?
 
   /// The kind of nominal type.
-  var kind: Kind
+  let kind: Kind
 
   /// The parent nominal type when this nominal type is nested inside another type, e.g.,
   /// MyCollection.Iterator.
-  var parent: SwiftNominalTypeDeclaration?
+  let parent: SwiftNominalTypeDeclaration?
 
   /// The module in which this nominal type is defined. If this is a nested type, the
   /// module might be different from that of the parent type, if this nominal type
   /// is defined in an extension within another module.
-  var moduleName: String
+  let moduleName: String
 
   /// The name of this nominal type, e.g., 'MyCollection'.
-  var name: String
+  let name: String
 
   // TODO: Generic parameters.
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
-  lazy var knownStandardLibraryType: SwiftStandardLibraryTypeKind? = {
+  lazy var knownStandardLibraryType: SwiftKnownTypeDeclKind? = {
     self.computeKnownStandardLibraryType()
   }()
 
@@ -66,6 +66,7 @@ package class SwiftNominalTypeDeclaration {
     self.moduleName = moduleName
     self.parent = parent
     self.name = node.name.text
+    self.syntax = node
 
     // Determine the kind from the syntax node.
     switch Syntax(node).as(SyntaxEnum.self) {
@@ -80,12 +81,12 @@ package class SwiftNominalTypeDeclaration {
 
   /// Determine the known standard library type for this nominal type
   /// declaration.
-  private func computeKnownStandardLibraryType() -> SwiftStandardLibraryTypeKind? {
-    if parent != nil || moduleName != "Swift" {
+  private func computeKnownStandardLibraryType() -> SwiftKnownTypeDeclKind? {
+    if parent != nil {
       return nil
     }
 
-    return SwiftStandardLibraryTypeKind(typeNameInSwiftModule: name)
+    return SwiftKnownTypeDeclKind(rawValue: "\(moduleName).\(name)")
   }
 
   package var qualifiedName: String {

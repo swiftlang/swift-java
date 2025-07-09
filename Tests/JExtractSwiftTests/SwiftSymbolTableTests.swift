@@ -21,7 +21,6 @@ import Testing
 struct SwiftSymbolTableSuite {
 
   @Test func lookupBindingTests() throws {
-    let symbolTable = SwiftSymbolTable(parsedModuleName: "MyModule")
     let sourceFile1: SourceFileSyntax = """
       extension X.Y {
         struct Z { }
@@ -33,8 +32,11 @@ struct SwiftSymbolTableSuite {
     let sourceFile2: SourceFileSyntax = """
       struct X {}
       """
-
-    symbolTable.setup([sourceFile1, sourceFile2])
+    let symbolTable = SwiftSymbolTable.setup(
+      moduleName: "MyModule",
+      [sourceFile1, sourceFile2],
+      log: Logger(label: "swift-java", logLevel: .critical)
+    )
 
     let x = try #require(symbolTable.lookupType("X", parent: nil))
     let xy = try #require(symbolTable.lookupType("Y", parent: x))
