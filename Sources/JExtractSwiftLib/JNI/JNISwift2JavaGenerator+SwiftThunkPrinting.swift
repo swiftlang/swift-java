@@ -13,6 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 extension JNISwift2JavaGenerator {
   func writeSwiftThunkSources() throws {
@@ -96,6 +101,8 @@ extension JNISwift2JavaGenerator {
       printSwiftFunctionThunk(&printer, method)
       printer.println()
     }
+
+    printDestroyFunctionThunk(&printer, type)
   }
 
   private func printInitializerThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
@@ -199,24 +206,18 @@ extension JNISwift2JavaGenerator {
     resultType: JavaType,
     _ body: (inout CodePrinter) -> Void
   ) {
-    var jniSignature = parameters.reduce(into: "") { signature, parameter in
+    let jniSignature = parameters.reduce(into: "") { signature, parameter in
       signature += parameter.type.jniTypeSignature
     }
-
-    // Escape signature characters
-    jniSignature = jniSignature
-      .replacingOccurrences(of: "_", with: "_1")
-      .replacingOccurrences(of: "/", with: "_")
-      .replacingOccurrences(of: ";", with: "_2")
-      .replacingOccurrences(of: "[", with: "_3")
 
     let cName =
       "Java_"
       + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName)_"
-      + javaMethodName
+      + "_\(parentName.nativeJNIEscaped)_"
+      + javaMethodName.nativeJNIEscaped
       + "__"
-      + jniSignature
+      + jniSignature.nativeJNIEscaped
+
     let translatedParameters = parameters.map {
       "\($0.name): \($0.type.jniTypeName)"
     }
@@ -251,6 +252,30 @@ extension JNISwift2JavaGenerator {
     )
   }
 
+  /// Prints the implementation of the destroy function.
+  private func printDestroyFunctionThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    printCDecl(
+      &printer,
+      javaMethodName: "$destroy",
+      parentName: type.swiftNominal.name,
+      parameters: [
+        JavaParameter(name: "selfPointer", type: .long)
+      ],
+      isStatic: true,
+      resultType: .void
+    ) { printer in
+      // Deinitialize the pointer allocated (which will call the VWT destroy method)
+      // then deallocate the memory.
+      printer.print(
+        """
+        let pointer = UnsafeMutablePointer<\(type.qualifiedName)>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+        pointer.deinitialize(count: 1)
+        pointer.deallocate()
+        """
+      )
+    }
+  }
+
   /// Renders the arguments for making a downcall
   private func renderDowncallArguments(
     swiftFunctionSignature: SwiftFunctionSignature,
@@ -264,5 +289,31 @@ extension JNISwift2JavaGenerator {
       return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.name), in: environment!)"
     }
     .joined(separator: ", ")
+  }
+}
+
+extension String {
+  /// Returns a version of the string correctly escaped for a JNI
+  var nativeJNIEscaped: String {
+    self.map {
+      if $0 == "_" {
+        return "_1"
+      } else if $0 == "/" {
+        return "_"
+      } else if $0 == ";" {
+        return "_2"
+      } else if $0 == "[" {
+        return "_3"
+      } else if $0.isASCII && ($0.isLetter || $0.isNumber)  {
+        return String($0)
+      } else if let utf16 = $0.utf16.first {
+        // Escape any non-alphanumeric to their UTF16 hex encoding
+        let utf16Hex = String(format: "%04x", utf16)
+        return "_0\(utf16Hex)"
+      } else {
+        fatalError("Invalid JNI character: \($0)")
+      }
+    }
+    .joined()
   }
 }
