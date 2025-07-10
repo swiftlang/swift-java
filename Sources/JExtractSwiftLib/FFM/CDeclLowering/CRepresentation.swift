@@ -24,7 +24,7 @@ extension CType {
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
-      if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
+      if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
         if let primitiveCType = knownType.primitiveCType {
           self = primitiveCType
           return
@@ -68,7 +68,7 @@ extension CType {
     case .optional(let wrapped) where wrapped.isPointer:
       try self.init(cdeclType: wrapped)
 
-    case .metatype, .optional, .tuple:
+    case .metatype, .optional, .tuple, .opaque, .existential:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
@@ -125,7 +125,7 @@ extension SwiftKnownTypeDeclKind {
       .qualified(const: true, volatile: false, type: .void)
     )
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data:
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data, .dataProtocol:
        nil
     }
   }

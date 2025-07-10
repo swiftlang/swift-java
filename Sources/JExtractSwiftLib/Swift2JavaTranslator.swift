@@ -103,7 +103,8 @@ extension Swift2JavaTranslator {
     // If any API uses 'Foundation.Data', import 'Data' as if it's declared in
     // this module.
     if let dataDecl = self.symbolTable[.data] {
-      if self.isUsing(dataDecl) {
+      let dataProtocolDecl = self.symbolTable[.dataProtocol]!
+      if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
         visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil)
       }
     }
@@ -117,12 +118,13 @@ extension Swift2JavaTranslator {
     )
   }
 
-  /// Check if any of the imported decls uses the specified nominal declaration.
-  func isUsing(_ decl: SwiftNominalTypeDeclaration) -> Bool {
+  /// Check if any of the imported decls uses a nominal declaration that satisfies
+  /// the given predicate.
+  func isUsing(where predicate: (SwiftNominalTypeDeclaration) -> Bool) -> Bool {
     func check(_ type: SwiftType) -> Bool {
       switch type {
       case .nominal(let nominal):
-        return nominal.nominalTypeDecl == decl
+        return predicate(nominal.nominalTypeDecl)
       case .optional(let ty):
         return check(ty)
       case .tuple(let tuple):
@@ -130,6 +132,8 @@ extension Swift2JavaTranslator {
       case .function(let fn):
         return check(fn.resultType) || fn.parameters.contains(where: { check($0.type) })
       case .metatype(let ty):
+        return check(ty)
+      case .existential(let ty), .opaque(let ty):
         return check(ty)
       }
     }

@@ -113,12 +113,16 @@ extension FFMSwift2JavaGenerator {
   }
 
   struct JavaTranslation {
-    var symbolTable: SwiftSymbolTable
+    var knownTypes: SwiftKnownTypes
+
+    init(symbolTable: SwiftSymbolTable) {
+      self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)
+    }
 
     func translate(
       _ decl: ImportedFunc
     ) throws -> TranslatedFunctionDecl {
-      let lowering = CdeclLowering(symbolTable: symbolTable)
+      let lowering = CdeclLowering(knownTypes: knownTypes)
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
@@ -208,7 +212,7 @@ extension FFMSwift2JavaGenerator {
 
       switch type {
       case .nominal(let nominal):
-        if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+        if let knownType = nominal.nominalTypeDecl.knownTypeKind {
           switch knownType {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
@@ -248,11 +252,12 @@ extension FFMSwift2JavaGenerator {
       // 'self'
       let selfParameter: TranslatedParameter?
       if case .instance(let swiftSelf) = swiftSignature.selfParameter {
-        selfParameter = try self.translate(
-          swiftParam: swiftSelf,
+        selfParameter = try self.translateParameter(
+          type: swiftSelf.type,
+          convention: swiftSelf.convention,
+          parameterName: swiftSelf.parameterName ?? "self",
           loweredParam: loweredFunctionSignature.selfParameter!,
-          methodName: methodName,
-          parameterName: swiftSelf.parameterName ?? "self"
+          methodName: methodName
         )
       } else {
         selfParameter = nil
@@ -263,11 +268,12 @@ extension FFMSwift2JavaGenerator {
         .map { (idx, swiftParam) in
           let loweredParam = loweredFunctionSignature.parameters[idx]
           let parameterName = swiftParam.parameterName ?? "_\(idx)"
-          return try self.translate(
-            swiftParam: swiftParam,
+          return try self.translateParameter(
+            type: swiftParam.type,
+            convention: swiftParam.convention,
+            parameterName: parameterName,
             loweredParam: loweredParam,
-            methodName: methodName,
-            parameterName: parameterName
+            methodName: methodName
           )
         }
 
@@ -285,13 +291,13 @@ extension FFMSwift2JavaGenerator {
     }
 
     /// Translate a Swift API parameter to the user-facing Java API parameter.
-    func translate(
-      swiftParam: SwiftParameter,
+    func translateParameter(
+      type swiftType: SwiftType,
+      convention: SwiftParameterConvention,
+      parameterName: String,
       loweredParam: LoweredParameter,
-      methodName: String,
-      parameterName: String
+      methodName: String
     ) throws -> TranslatedParameter {
-      let swiftType = swiftParam.type
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
@@ -319,8 +325,8 @@ extension FFMSwift2JavaGenerator {
         )
 
       case .nominal(let swiftNominalType):
-        if let knownType = swiftNominalType.nominalTypeDecl.knownStandardLibraryType {
-          if swiftParam.convention == .inout {
+        if let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind {
+          if convention == .inout {
             // FIXME: Support non-trivial 'inout' for builtin types.
             throw JavaTranslationError.inoutNotSupported(swiftType)
           }
@@ -388,6 +394,26 @@ extension FFMSwift2JavaGenerator {
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
 
+      case .existential(let proto), .opaque(let proto):
+        // If the protocol has a known representative implementation, e.g. `String` for `StringProtocol`
+        // Translate it as the concrete type.
+        // NOTE: This is a temporary workaround until we add support for generics.
+        if
+          let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
+          let concreteTy = knownTypes.representativeType(of: knownProtocol)
+        {
+          return try translateParameter(
+            type: concreteTy,
+            convention: convention,
+            parameterName: parameterName,
+            loweredParam: loweredParam,
+            methodName: methodName
+          )
+        }
+
+        // Otherwise, not supported yet.
+        throw JavaTranslationError.unhandledType(swiftType)
+
       case .optional:
         throw JavaTranslationError.unhandledType(swiftType)
       }
@@ -422,7 +448,7 @@ extension FFMSwift2JavaGenerator {
         )
 
       case .nominal(let swiftNominalType):
-        if let knownType = swiftNominalType.nominalTypeDecl.knownStandardLibraryType {
+        if let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind {
           switch knownType {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedResult(
@@ -476,7 +502,7 @@ extension FFMSwift2JavaGenerator {
         // TODO: Implement.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .optional, .function:
+      case .optional, .function, .existential, .opaque:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 

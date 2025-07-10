@@ -35,6 +35,9 @@ struct SwiftKnownTypes {
   var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawPointer])) }
   var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeMutableRawPointer])) }
 
+  var dataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.dataProtocol])) }
+  var data: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.data])) }
+
   func unsafePointer(_ pointeeType: SwiftType) -> SwiftType {
     .nominal(
       SwiftNominalType(
@@ -69,5 +72,14 @@ struct SwiftKnownTypes {
         genericArguments: [elementType]
       )
     )
+  }
+
+  /// Returns the known representative concrete type if there is one for the
+  /// given protocol kind. E.g. `String` for `StringProtocol`
+  func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftType? {
+    switch knownProtocol {
+    case .dataProtocol: return self.data
+    default: return nil
+    }
   }
 }

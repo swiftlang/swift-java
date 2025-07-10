@@ -63,6 +63,10 @@ public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
 }
 
+public func globalReceiveSomeDataProtocol(data: some DataProtocol) {
+  p(Array(data).description)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
