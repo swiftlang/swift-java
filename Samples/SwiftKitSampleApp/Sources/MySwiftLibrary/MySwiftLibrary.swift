@@ -63,8 +63,9 @@ public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
 }
 
-public func globalReceiveSomeDataProtocol(data: some DataProtocol) {
+public func globalReceiveSomeDataProtocol(data: some DataProtocol) -> Int {
   p(Array(data).description)
+  return data.count
 }
 
 // ==== Internal helpers
