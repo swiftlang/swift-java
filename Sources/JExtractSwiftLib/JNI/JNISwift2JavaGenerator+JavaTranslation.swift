@@ -66,7 +66,7 @@ extension JNISwift2JavaGenerator {
     func translate(swiftType: SwiftType) -> JavaType {
       switch swiftType {
       case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownStandardLibraryType {
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = translate(knownType: knownType) else {
             fatalError("unsupported known type: \(knownType)")
           }
@@ -78,7 +78,7 @@ extension JNISwift2JavaGenerator {
       case .tuple([]):
         return .void
 
-      case .metatype, .optional, .tuple, .function:
+      case .metatype, .optional, .tuple, .function, .existential, .opaque:
         fatalError("unsupported type: \(self)")
       }
     }
@@ -99,10 +99,8 @@ extension JNISwift2JavaGenerator {
           .unsafeRawPointer, .unsafeMutableRawPointer,
           .unsafePointer, .unsafeMutablePointer,
           .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-          .unsafeBufferPointer, .unsafeMutableBufferPointer:
+          .unsafeBufferPointer, .unsafeMutableBufferPointer, .data, .dataProtocol:
         nil
-      case .data:
-        fatalError("unimplemented")
       }
     }
   }

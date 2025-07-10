@@ -52,7 +52,7 @@ package class SwiftNominalTypeDeclaration {
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
-  lazy var knownStandardLibraryType: SwiftKnownTypeDeclKind? = {
+  lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
     self.computeKnownStandardLibraryType()
   }()
 

@@ -86,7 +86,9 @@ private let swiftSourceFile: SourceFileSyntax = """
   """
 
 private let foundationSourceFile: SourceFileSyntax = """
-  public struct Data {
+  public protocol DataProtocol {}
+  
+  public struct Data: DataProtocol {
     public init(bytes: UnsafeRawPointer, count: Int)
     public var count: Int { get }
     public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)

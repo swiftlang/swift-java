@@ -39,6 +39,7 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case void = "Swift.Void"
   case string = "Swift.String"
 
+  case dataProtocol = "Foundation.DataProtocol"
   case data = "Foundation.Data"
 
   var moduleAndName: (module: String, name: String) {

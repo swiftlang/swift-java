@@ -77,6 +77,10 @@ extension FFMSwift2JavaGenerator {
 struct CdeclLowering {
   var knownTypes: SwiftKnownTypes
 
+  init(knownTypes: SwiftKnownTypes) {
+    self.knownTypes = knownTypes
+  }
+
   init(symbolTable: SwiftSymbolTable) {
     self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)
   }
@@ -165,7 +169,7 @@ struct CdeclLowering {
       )
 
     case .nominal(let nominal):
-      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
         if convention == .inout {
           // FIXME: Support non-trivial 'inout' for builtin types.
           throw LoweringError.inoutNotSupported(type)
@@ -320,6 +324,18 @@ struct CdeclLowering {
         conversion: conversion
       )
 
+    case .opaque(let proto), .existential(let proto):
+      // If the protocol has a known representative implementation, e.g. `String` for `StringProtocol`
+      // Translate it as the concrete type.
+      // NOTE: This is a temporary workaround until we add support for generics.
+      if
+        let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
+        let concreteTy = knownTypes.representativeType(of: knownProtocol)
+      {
+        return try lowerParameter(concreteTy, convention: convention, parameterName: parameterName)
+      }
+      throw LoweringError.unhandledType(type)
+
     case .optional:
       throw LoweringError.unhandledType(type)
     }
@@ -386,7 +402,7 @@ struct CdeclLowering {
     
     switch type {
     case .nominal(let nominal):
-      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
         switch knownType {
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
           // pointer buffers are lowered to (raw-pointer, count) pair.
@@ -421,7 +437,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .function, .metatype, .optional, .tuple:
+    case .function, .metatype, .optional, .tuple, .existential, .opaque:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -454,7 +470,7 @@ struct CdeclLowering {
 
     case .nominal(let nominal):
       // Types from the Swift standard library that we know about.
-      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
         switch knownType {
         case .unsafePointer, .unsafeMutablePointer:
           // Typed pointers are lowered to corresponding raw forms.
@@ -575,7 +591,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName)
       )
 
-    case .function(_), .optional(_):
+    case .function, .optional, .existential, .opaque:
       throw LoweringError.unhandledType(type)
     }
   }

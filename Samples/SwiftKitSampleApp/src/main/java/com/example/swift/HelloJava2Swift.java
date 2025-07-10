@@ -22,10 +22,6 @@ import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
 
-import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-
 public class HelloJava2Swift {
 
     public static void main(String[] args) {
@@ -93,6 +89,12 @@ public class HelloJava2Swift {
                 var str = retBytes.getString(0);
                 SwiftRuntime.trace("retStr=" + str);
             });
+        }
+
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            var bytes = arena.allocateFrom("hello");
+            var dat = Data.init(bytes, bytes.byteSize(), arena);
+            MySwiftLibrary.globalReceiveSomeDataProtocol(dat);
         }
 
 

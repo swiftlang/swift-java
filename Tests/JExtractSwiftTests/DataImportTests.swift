@@ -16,7 +16,7 @@ import JExtractSwiftLib
 import Testing
 
 final class DataImportTests {
-  let class_interfaceFile =
+  let data_interfaceFile =
     """
     import Foundation
     
@@ -24,11 +24,19 @@ final class DataImportTests {
     public func returnData() -> Data
     """
 
+  let dataProtocol_interfaceFile =
+    """
+    import Foundation
+    
+    public func receiveDataProtocol(dat: some DataProtocol)
+    """
+
+
   @Test("Import Data: Swift thunks")
-  func swiftThunk() throws {
+  func data_swiftThunk() throws {
 
     try assertOutput(
-      input: class_interfaceFile, .ffm, .swift,
+      input: data_interfaceFile, .ffm, .swift,
       expectedChunks: [
         """
         import Foundation
@@ -80,10 +88,10 @@ final class DataImportTests {
   }
 
   @Test("Import Data: JavaBindings")
-  func javaBindings() throws {
+  func data_javaBindings() throws {
 
     try assertOutput(
-      input: class_interfaceFile, .ffm, .java,
+      input: data_interfaceFile, .ffm, .java,
       expectedChunks: [
         """
         /**
@@ -325,4 +333,78 @@ final class DataImportTests {
     )
   }
 
+  @Test("Import DataProtocol: Swift thunks")
+  func dataProtocol_swiftThunk() throws {
+    try assertOutput(
+      input: dataProtocol_interfaceFile, .ffm, .swift,
+      expectedChunks: [
+        """
+        import Foundation
+        """,
+        """
+        @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat")
+        public func swiftjava_SwiftModule_receiveDataProtocol_dat(_ dat: UnsafeRawPointer) {
+          receiveDataProtocol(dat: dat.assumingMemoryBound(to: Data.self).pointee)
+        }
+        """,
+
+        // Just to make sure 'Data' is imported.
+        """
+        @_cdecl("swiftjava_getType_SwiftModule_Data")
+        """
+      ]
+    )
+  }
+
+  @Test("Import DataProtocol: JavaBindings")
+  func dataProtocol_javaBindings() throws {
+
+    try assertOutput(
+      input: dataProtocol_interfaceFile, .ffm, .java,
+      expectedChunks: [
+        """
+        /**
+         * {@snippet lang=c :
+         * void swiftjava_SwiftModule_receiveDataProtocol_dat(const void *dat)
+         * }
+         */
+        private static class swiftjava_SwiftModule_receiveDataProtocol_dat {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* dat: */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            SwiftModule.findOrThrow("swiftjava_SwiftModule_receiveDataProtocol_dat");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static void call(java.lang.foreign.MemorySegment dat) {
+            try {
+              if (SwiftRuntime.TRACE_DOWNCALLS) {
+                SwiftRuntime.traceDowncall(dat);
+              }
+              HANDLE.invokeExact(dat);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+        }
+        """,
+
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func receiveDataProtocol(dat: some DataProtocol)
+         * }
+         */
+        public static void receiveDataProtocol(Data dat) {
+          swiftjava_SwiftModule_receiveDataProtocol_dat.call(dat.$memorySegment());
+        }
+        """,
+
+        // Just to make sure 'Data' is imported.
+        """
+        public final class Data
+        """
+      ]
+    )
+  }
 }

@@ -16,11 +16,24 @@ import SwiftSyntax
 
 /// Describes a type in the Swift type system.
 enum SwiftType: Equatable {
-  indirect case function(SwiftFunctionType)
-  indirect case metatype(SwiftType)
   case nominal(SwiftNominalType)
+
+  indirect case function(SwiftFunctionType)
+
+  /// `<type>.Type`
+  indirect case metatype(SwiftType)
+
+  /// `<type>?`
   indirect case optional(SwiftType)
+
+  /// `(<type>, <type>)`
   case tuple([SwiftType])
+
+  /// `any <type>`
+  indirect case existential(SwiftType)
+
+  /// `some <type>`
+  indirect case opaque(SwiftType)
 
   static var void: Self {
     return .tuple([])
@@ -30,7 +43,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
-    case .function, .metatype, .optional: nil
+    case .function, .metatype, .optional, .existential, .opaque: nil
     }
   }
 
@@ -54,7 +67,7 @@ enum SwiftType: Equatable {
   var isPointer: Bool {
     switch self {
     case .nominal(let nominal):
-      if let knownType = nominal.nominalTypeDecl.knownStandardLibraryType {
+      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
         return knownType.isPointer
       }
     default:
@@ -73,7 +86,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .optional, .tuple:
+    case .optional, .tuple, .existential, .opaque:
       return false
     }
   }
@@ -84,7 +97,7 @@ extension SwiftType: CustomStringConvertible {
   /// requires parentheses.
   private var postfixRequiresParentheses: Bool {
     switch self {
-    case .function: true
+    case .function, .existential, .opaque: true
     case .metatype, .nominal, .optional, .tuple: false
     }
   }
@@ -103,6 +116,10 @@ extension SwiftType: CustomStringConvertible {
       return "\(wrappedType.description)?"
     case .tuple(let elements):
       return "(\(elements.map(\.description).joined(separator: ", ")))"
+    case .existential(let constraintType):
+      return "any \(constraintType)"
+    case .opaque(let constraintType):
+      return "some \(constraintType)"
     }
   }
 }
@@ -159,8 +176,7 @@ extension SwiftType {
     switch type.as(TypeSyntaxEnum.self) {
     case .arrayType, .classRestrictionType, .compositionType,
         .dictionaryType, .missingType, .namedOpaqueReturnType,
-        .packElementType, .packExpansionType, .someOrAnyType,
-        .suppressedType:
+        .packElementType, .packExpansionType, .suppressedType:
       throw TypeTranslationError.unimplementedType(type)
 
     case .attributedType(let attributedType):
@@ -254,6 +270,13 @@ extension SwiftType {
       self = try .tuple(tupleType.elements.map { element in
          try SwiftType(element.type, symbolTable: symbolTable)
       })
+
+    case .someOrAnyType(let someOrAntType):
+      if someOrAntType.someOrAnySpecifier.tokenKind == .keyword(.some) {
+        self = .opaque(try SwiftType(someOrAntType.constraint, symbolTable: symbolTable))
+      } else {
+        self = .opaque(try SwiftType(someOrAntType.constraint, symbolTable: symbolTable))
+      }
     }
   }
 
