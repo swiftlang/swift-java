@@ -11,7 +11,7 @@ runs:
         java-version: |
           24
           21
-          19
+          17
         cache: 'gradle'
     - name: Set JAVA_HOME_{N}
       shell: bash
