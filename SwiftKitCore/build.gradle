@@ -25,11 +25,11 @@ repositories {
 
 java {
     toolchain {
-        // JDK 19 is the last JDK to support Java 7
-        languageVersion.set(JavaLanguageVersion.of(19))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
     // Support Android 6+ (Java 7)
     sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
 }
 
 dependencies {
