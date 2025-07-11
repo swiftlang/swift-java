@@ -2,9 +2,8 @@
 
 This repository contains two approaches to Swift/Java interoperability.
 
-- A Swift library (`JavaKit`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
-- The `jextract-swift` tool which is similar to the JDK's `jextract` which allows to extract Java sources which are used
-  to efficiently call into Swift _from Java_.
+- Swift library (`JavaKit`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
+- The `swift-java` tool which which offers automated ways to import or "extract" bindings to sources or libraries in either language. The results are bindings for Swift or Java.
 
 ## :construction: :construction: :construction: Early Development :construction: :construction: :construction: 
 
@@ -16,34 +15,48 @@ The primary purpose of this repository is to create an environment for collabora
 
 ## Dependencies
 
-### Required Swift Development Toolchains
-
-To build and use this project, currently, you will need to download a custom toolchain which includes some improvements in Swift that this project relies on:
-
-**Required toolchain download:**
-
-Currently this project supports Swift `6.0.x` and we are working on supporting later releases.
-
-You can use Swiftly ([macOS](https://www.swift.org/install/macos/swiftly/) / [linux](https://www.swift.org/install/linux/swiftly/)) the Swift toolchain installer to install the necessary Swift versions.
-
 ### Required JDK versions
 
 This project consists of different modules which have different Swift and Java runtime requirements.
 
-**JavaKit** – the Swift macros allowing the invocation of Java libraries from Swift
+## JavaKit macros
 
+JavaKit is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
+
+It is possible to generate Swift bindings to Java libraries using JavaKit by using the `swift-java wrap-java` command.
+
+Required language/runtime versions:
 - **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integration
 - **Swift 6.0.x**, because the library uses modern Swift macros
 
-**jextract-swift** – the source generator that ingests .swiftinterface files and makes them available to be called from generated Java sources
+**swift-java jextract** 
 
-- **Swift 6.0.x development snapshots**, because of dependence on rich swift interface files  
-- **JDK 22+** because of dependence on [JEP-454: Foreign Function & Memory API](https://openjdk.org/jeps/454)
-  - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-23.  
+Is a source generator which will **generate Java bindings to existing Swift libraries**. 
+Its inputs are Swift sources or packages, and outputs are generated Swift and Java code necessary to call these functions efficiently from Java.
 
-The extract tool may become able to generate legacy compatible sources, which would not require JEP-454 and would instead rely on existing JNI facilities. Currently though, efforts are focused on the forward-looking implementation using modern foreign function and memory APIs. 
+## swift-java jextract --mode=ffm (default)
 
-Support for more recent Swift versions will be provided, for now please stick to 6.0 while evaluating this early version of swift-java.
+This mode provides the most flexibility and performance, and allows to decrease the amount of data being copied between Swift and Java.
+This does require the use of the relatively recent [JEP-454: Foreign Function & Memory API](https://openjdk.org/jeps/454), which is only available since JDK22, and will become part of JDK LTS releases with JDK 25 (depending on your JDK vendor).
+
+This is the primary way we envision calling Swift code from server-side Java libraries and applications.
+
+Required language/runtime versions:
+- **Swift 6.1**, because of dependence on rich swift interface files  
+- **JDK 24+** 
+  - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-24.
+
+## swift-java jextract --mode=jni
+
+In this mode, the generated sources will use the legacy JNI approach to calling native code.
+
+This mode is more limited in some performance and flexibility that it can offer, however it is the most compatible, since even very old JVM's as well as even Android systems can be supported by this mode.
+We recommend this mode when FFM is not available, or wide ranging deployment compatibility is your priority. When performance is paramaunt, we recommend the FFM mode instead.
+
+Required language/runtime versions:
+- **Swift 6.1**, because of dependence on rich swift interface files  
+- **Java 7+**, including 
+
 
 ## Development and Testing
 
