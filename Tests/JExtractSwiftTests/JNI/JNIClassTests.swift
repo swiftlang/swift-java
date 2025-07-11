@@ -44,8 +44,11 @@ struct JNIClassTests {
       // Swift module: SwiftModule
 
       package com.example.swift;
+      
+      import org.swift.swiftkit.core.*;
+      import org.swift.swiftkit.core.util.*;
 
-      public final class MyClass {
+      public final class MyClass extends JNISwiftInstance {
         static final String LIB_NAME = "SwiftModule";
       
         @SuppressWarnings("unused")
@@ -55,12 +58,25 @@ struct JNIClassTests {
           return true;
         }
       
-        private long selfPointer;
-      
-        private MyClass(long selfPointer) {
-          this.selfPointer = selfPointer;
+        public MyClass(long selfPointer, SwiftArena swiftArena) {
+          super(selfPointer, swiftArena);
         }
       """,
+      """
+      private static native void $destroy(long selfPointer);
+      """,
+      """
+      @Override
+      protected Runnable $createDestroyFunction() {
+        long $selfPointer = this.pointer(); 
+        return new Runnable() {
+          @Override
+          public void run() {
+            MyClass.$destroy($selfPointer);
+          }
+        };
+      }
+      """
     ])
   }
 
@@ -116,9 +132,9 @@ struct JNIClassTests {
           * public init(x: Int64, y: Int64)
           * }
           */
-        public static MyClass init(long x, long y) {
+        public static MyClass init(long x, long y, SwiftArena swiftArena$) {
           long selfPointer = MyClass.allocatingInit(x, y);
-          return new MyClass(selfPointer);
+          return new MyClass(selfPointer, swiftArena$);
         }
         """,
         """
@@ -128,9 +144,9 @@ struct JNIClassTests {
           * public init()
           * }
           */
-        public static MyClass init() {
+        public static MyClass init(SwiftArena swiftArena$) {
           long selfPointer = MyClass.allocatingInit();
-          return new MyClass(selfPointer);
+          return new MyClass(selfPointer, swiftArena$);
         }
         """,
         """
@@ -165,6 +181,26 @@ struct JNIClassTests {
           let selfPointer = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           selfPointer.initialize(to: MyClass(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
           return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func destroyFunction_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024destroy__J")
+        func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+          let pointer = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          pointer.deinitialize(count: 1)
+          pointer.deallocate()
         }
         """
       ]

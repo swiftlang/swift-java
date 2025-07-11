@@ -213,10 +213,10 @@ extension JNISwift2JavaGenerator {
     let cName =
       "Java_"
       + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName.nativeJNIEscaped)_"
-      + javaMethodName.nativeJNIEscaped
+      + "_\(parentName.escapedJNIIdentifier)_"
+      + javaMethodName.escapedJNIIdentifier
       + "__"
-      + jniSignature.nativeJNIEscaped
+      + jniSignature.escapedJNIIdentifier
 
     let translatedParameters = parameters.map {
       "\($0.name): \($0.type.jniTypeName)"
@@ -294,7 +294,7 @@ extension JNISwift2JavaGenerator {
 
 extension String {
   /// Returns a version of the string correctly escaped for a JNI
-  var nativeJNIEscaped: String {
+  var escapedJNIIdentifier: String {
     self.map {
       if $0 == "_" {
         return "_1"

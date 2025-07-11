@@ -14,24 +14,25 @@
 
 package com.example.swift;
 
-import com.example.swift.MySwiftLibrary;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftClassTest {
     @Test
     void init_noParameters() {
-        MySwiftClass c = MySwiftClass.init();
-        assertNotNull(c);
+        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+            MySwiftClass c = MySwiftClass.init(arena);
+            assertNotNull(c);
+        }
     }
 
     @Test
     void init_withParameters() {
-        MySwiftClass c = MySwiftClass.init(1337, 42);
-        assertNotNull(c);
+        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+            MySwiftClass c = MySwiftClass.init(1337, 42, arena);
+            assertNotNull(c);
+        }
     }
-
 }
