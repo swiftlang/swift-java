@@ -39,7 +39,7 @@ public abstract class JNISwiftInstance extends SwiftInstance {
      *
      * @return a function that is called when the value should be destroyed.
      */
-    abstract Runnable $createDestroyFunction();
+    protected abstract Runnable $createDestroyFunction();
 
     @Override
     public SwiftInstanceCleanup createCleanupAction() {
