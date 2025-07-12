@@ -35,4 +35,30 @@ public class MySwiftClassTest {
             assertNotNull(c);
         }
     }
+
+    @Test
+    void sum() {
+        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            assertEquals(30, c.sum());
+        }
+    }
+
+    @Test
+    void xMultiplied() {
+        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            assertEquals(200, c.xMultiplied(10));
+        }
+    }
+
+    @Test
+    void throwingFunction() {
+        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            Exception exception = assertThrows(Exception.class, () -> c.throwingFunction());
+
+            assertEquals("swiftError", exception.getMessage());
+        }
+    }
 }

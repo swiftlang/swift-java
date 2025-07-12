@@ -33,6 +33,8 @@ struct JNIClassTests {
         self.x = 0
         self.y = 0
       }
+  
+      public func doSomething(x: Int64) {}
     }
   """
 
@@ -203,6 +205,51 @@ struct JNIClassTests {
           pointer.deallocate()
         }
         """
+      ]
+    )
+  }
+
+  @Test
+  func memberMethod_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public func doSomething(x: Int64)
+          * }
+          */
+        public void doSomething(long x) {
+          long selfPointer = this.pointer();
+          MyClass.$doSomething(x, selfPointer);
+        }
+        """,
+        """
+        private static native void $doSomething(long x, long selfPointer);
+        """
+      ]
+    )
+  }
+
+  @Test
+  func memberMethod_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
+        func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
+          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment!))
+        }
+        """,
       ]
     )
   }

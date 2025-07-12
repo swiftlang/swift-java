@@ -136,65 +136,95 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
+    // Free functions does not have a parent
+    if decl.isStatic || !decl.hasParent {
+      self.printSwiftStaticFunctionThunk(&printer, decl)
+    } else {
+      self.printSwiftMemberFunctionThunk(&printer, decl)
+    }
+  }
+
+  private func printSwiftStaticFunctionThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     let translatedDecl = self.translatedDecl(for: decl)
-    let parentName = translatedDecl.parentName
+
+    printCDecl(
+      &printer,
+      javaMethodName: translatedDecl.name,
+      parentName: translatedDecl.parentName,
+      parameters: translatedDecl.translatedFunctionSignature.parameters,
+      isStatic: true,
+      resultType: translatedDecl.translatedFunctionSignature.resultType
+    ) { printer in
+      // For free functions the parent is the Swift module
+      let parentName = decl.parentType?.asNominalTypeDeclaration?.qualifiedName ?? swiftModuleName
+      self.printFunctionDowncall(&printer, decl, calleeName: parentName)
+    }
+  }
+
+  private func printSwiftMemberFunctionThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    let translatedDecl = self.translatedDecl(for: decl)
+    let swiftParentName = decl.parentType!.asNominalTypeDeclaration!.qualifiedName
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$\(translatedDecl.name)",
+      parentName: translatedDecl.parentName,
+      parameters: translatedDecl.translatedFunctionSignature.parameters + [
+        JavaParameter(name: "selfPointer", type: .long)
+      ],
+      isStatic: true,
+      resultType: translatedDecl.translatedFunctionSignature.resultType
+    ) { printer in
+      printer.print(
+        """
+        let self$ = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+        """
+      )
+      self.printFunctionDowncall(&printer, decl, calleeName: "self$.pointee")
+    }
+  }
+
+  private func printFunctionDowncall(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc,
+    calleeName: String
+  ) {
+    let translatedDecl = self.translatedDecl(for: decl)
     let swiftReturnType = decl.functionSignature.result.type
 
-    printCDecl(&printer, decl) { printer in
-      let downcallParameters = renderDowncallArguments(
-        swiftFunctionSignature: decl.functionSignature,
-        translatedFunctionSignature: translatedDecl.translatedFunctionSignature
-      )
-      let tryClause: String = decl.isThrowing ? "try " : ""
-      let functionDowncall =
-        "\(tryClause)\(parentName).\(decl.name)(\(downcallParameters))"
+    let downcallParameters = renderDowncallArguments(
+      swiftFunctionSignature: decl.functionSignature,
+      translatedFunctionSignature: translatedDecl.translatedFunctionSignature
+    )
+    let tryClause: String = decl.isThrowing ? "try " : ""
+    let functionDowncall = "\(tryClause)\(calleeName).\(decl.name)(\(downcallParameters))"
 
-      let innerBody =
-        if swiftReturnType.isVoid {
-          functionDowncall
-        } else {
-          """
-          let result = \(functionDowncall)
-          return result.getJNIValue(in: environment)
-          """
-        }
+    let returnStatement =
+    if swiftReturnType.isVoid {
+      functionDowncall
+    } else {
+      """
+      let result = \(functionDowncall)
+      return result.getJNIValue(in: environment)
+      """
+    }
 
-      if decl.isThrowing {
-        let dummyReturn =
-          !swiftReturnType.isVoid ? "return \(swiftReturnType).jniPlaceholderValue" : ""
-        printer.print(
+    if decl.isThrowing {
+      let dummyReturn =
+      !swiftReturnType.isVoid ? "return \(swiftReturnType).jniPlaceholderValue" : ""
+      printer.print(
           """
           do {
-            \(innerBody)
+            \(returnStatement)
           } catch {
             environment.throwAsException(error)
             \(dummyReturn)
           }
           """
-        )
-      } else {
-        printer.print(innerBody)
-      }
+      )
+    } else {
+      printer.print(returnStatement)
     }
-  }
-
-  private func printCDecl(
-    _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
-    _ body: (inout CodePrinter) -> Void
-  ) {
-    let translatedDecl = translatedDecl(for: decl)
-    let parentName = translatedDecl.parentName
-
-    printCDecl(
-      &printer,
-      javaMethodName: translatedDecl.name,
-      parentName: parentName,
-      parameters: translatedDecl.translatedFunctionSignature.parameters,
-      isStatic: decl.isStatic || decl.isInitializer || !decl.hasParent,
-      resultType: translatedDecl.translatedFunctionSignature.resultType,
-      body
-    )
   }
 
   private func printCDecl(

@@ -44,6 +44,12 @@ public class HelloJava2SwiftJNI {
         try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
             MySwiftClass myClass = MySwiftClass.init(10, 5, arena);
             MySwiftClass myClass2 = MySwiftClass.init(arena);
+
+            try {
+                myClass.throwingFunction();
+            } catch (Exception e) {
+                System.out.println("Caught exception: " + e.getMessage());
+            }
         }
 
         System.out.println("DONE.");

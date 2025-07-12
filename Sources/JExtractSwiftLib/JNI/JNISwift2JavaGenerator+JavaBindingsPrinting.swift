@@ -164,10 +164,47 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    if decl.isStatic || decl.isInitializer || !decl.hasParent {
+      printStaticFunctionBinding(&printer, decl)
+    } else {
+      printMemberMethodBindings(&printer, decl)
+    }
+  }
+
+  private func printStaticFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
     printDeclDocumentation(&printer, decl)
     printer.print(
       "public static native \(renderFunctionSignature(decl));"
     )
+  }
+
+  /// Renders Java bindings for member methods
+  ///
+  /// Member methods are generated as a function that extracts the `selfPointer`
+  /// and passes it down to another native function along with the arguments
+  /// to call the Swift implementation.
+  private func printMemberMethodBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    let translatedDecl = translatedDecl(for: decl)
+
+    printDeclDocumentation(&printer, decl)
+    printer.printBraceBlock("public \(renderFunctionSignature(decl))") { printer in
+      var arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
+      arguments.append("selfPointer")
+
+      let returnKeyword = translatedDecl.translatedFunctionSignature.resultType.isVoid ? "" : "return "
+
+      printer.print(
+        """
+        long selfPointer = this.pointer();
+        \(returnKeyword)\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")));
+        """
+      )
+    }
+
+    let returnType = translatedDecl.translatedFunctionSignature.resultType
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
+    parameters.append("long selfPointer")
+    printer.print("private static native \(returnType) $\(translatedDecl.name)(\(parameters.joined(separator: ", ")));")
   }
 
   private func printInitializerBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc, type: ImportedNominalType) {
