@@ -34,4 +34,20 @@ public class MySwiftClass {
   deinit {
     p("deinit called!")
   }
+
+  public func sum() -> Int64 {
+    return x + y
+  }
+
+  public func xMultiplied(by z: Int64) -> Int64 {
+    return x * z;
+  }
+
+  enum MySwiftClassError: Error {
+    case swiftError
+  }
+
+  public func throwingFunction() throws {
+    throw MySwiftClassError.swiftError
+  }
 }
