@@ -34,6 +34,7 @@ public class MySwiftClass {
       mutable = newValue * 2
     }
   }
+  public let warm: Bool = false
 
   public static func method() {
     p("Hello from static method in a class!")
