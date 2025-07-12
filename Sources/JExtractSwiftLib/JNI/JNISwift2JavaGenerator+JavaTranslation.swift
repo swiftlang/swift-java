@@ -37,8 +37,15 @@ extension JNISwift2JavaGenerator {
       // Types with no parent will be outputted inside a "module" class.
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
+      // Name.
+      let javaName = switch decl.apiKind {
+      case .getter: "get\(decl.name.toCamelCase)"
+      case .setter: "set\(decl.name.toCamelCase)"
+      case .function, .initializer: decl.name
+      }
+
       return TranslatedFunctionDecl(
-        name: decl.name,
+        name: javaName,
         parentName: parentName,
         translatedFunctionSignature: translatedFunctionSignature
       )
