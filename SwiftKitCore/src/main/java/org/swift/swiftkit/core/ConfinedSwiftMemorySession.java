@@ -28,6 +28,10 @@ public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
 
     final ConfinedResourceList resources;
 
+    public ConfinedSwiftMemorySession() {
+        this(Thread.currentThread());
+    }
+
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
         this.state = new AtomicInteger(ACTIVE);
