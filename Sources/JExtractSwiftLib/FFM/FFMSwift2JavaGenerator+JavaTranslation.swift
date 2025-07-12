@@ -126,7 +126,6 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let returnsBoolean = decl.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
       let javaName = switch decl.apiKind {
       case .getter: decl.javaGetterName
       case .setter: decl.javaSetterName
