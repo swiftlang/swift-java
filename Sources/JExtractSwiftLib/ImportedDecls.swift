@@ -154,3 +154,27 @@ extension ImportedFunc: Hashable {
     return lhs === rhs
   }
 }
+
+extension ImportedFunc {
+  var javaGetterName: String {
+    let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    if !returnsBoolean {
+      return "get\(self.name.toCamelCase)"
+    } else if !self.name.hasJavaBooleanNamingConvention {
+      return "is\(self.name.toCamelCase)"
+    } else {
+      return self.name.toCamelCase
+    }
+  }
+
+  var javaSetterName: String {
+    let firstParameterIsBoolean = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    if !firstParameterIsBoolean || self.name.hasJavaBooleanNamingConvention {
+      return "set\(self.name.toCamelCase)"
+    } else {
+      return "setIs\(self.name.toCamelCase)"
+    }
+  }
+}

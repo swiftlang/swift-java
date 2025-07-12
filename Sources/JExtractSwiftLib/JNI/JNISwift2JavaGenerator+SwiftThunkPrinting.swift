@@ -87,6 +87,11 @@ extension JNISwift2JavaGenerator {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
+
+    for decl in analysis.importedGlobalVariables {
+      printSwiftFunctionThunk(&printer, decl)
+      printer.println()
+    }
   }
 
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
@@ -99,6 +104,11 @@ extension JNISwift2JavaGenerator {
 
     for method in type.methods {
       printSwiftFunctionThunk(&printer, method)
+      printer.println()
+    }
+
+    for variable in type.variables {
+      printSwiftFunctionThunk(&printer, variable)
       printer.println()
     }
 
@@ -192,19 +202,32 @@ extension JNISwift2JavaGenerator {
     let translatedDecl = self.translatedDecl(for: decl)
     let swiftReturnType = decl.functionSignature.result.type
 
-    let downcallParameters = renderDowncallArguments(
-      swiftFunctionSignature: decl.functionSignature,
-      translatedFunctionSignature: translatedDecl.translatedFunctionSignature
-    )
     let tryClause: String = decl.isThrowing ? "try " : ""
-    let functionDowncall = "\(tryClause)\(calleeName).\(decl.name)(\(downcallParameters))"
+
+    let result: String
+    switch decl.apiKind {
+    case .function, .initializer:
+      let downcallParameters = renderDowncallArguments(
+        swiftFunctionSignature: decl.functionSignature,
+        translatedFunctionSignature: translatedDecl.translatedFunctionSignature
+      )
+      result = "\(tryClause)\(calleeName).\(decl.name)(\(downcallParameters))"
+
+    case .getter:
+      result = "\(tryClause)\(calleeName).\(decl.name)"
+
+    case .setter:
+      assert(decl.functionSignature.parameters.count == 1)
+      let newValueParameter = decl.functionSignature.parameters[0]
+      result = "\(calleeName).\(decl.name) = \(renderJNIToSwiftConversion("newValue", type: newValueParameter.type))"
+    }
 
     let returnStatement =
     if swiftReturnType.isVoid {
-      functionDowncall
+      result
     } else {
       """
-      let result = \(functionDowncall)
+      let result = \(result)
       return result.getJNIValue(in: environment)
       """
     }
@@ -319,6 +342,10 @@ extension JNISwift2JavaGenerator {
       return "\(label)\(originalParam.type)(fromJNI: \(translatedParam.name), in: environment!)"
     }
     .joined(separator: ", ")
+  }
+
+  private func renderJNIToSwiftConversion(_ variableName: String, type: SwiftType) -> String {
+    "\(type)(fromJNI: \(variableName), in: environment!)"
   }
 }
 

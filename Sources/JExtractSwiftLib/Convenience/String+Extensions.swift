@@ -22,4 +22,14 @@ extension String {
 
     return "\(f.uppercased())\(String(dropFirst()))"
   }
+
+  /// Returns whether the string is of the format `isX`
+  var hasJavaBooleanNamingConvention: Bool {
+    guard self.hasPrefix("is"), self.count > 2 else {
+      return false
+    }
+
+    let thirdCharacterIndex = self.index(self.startIndex, offsetBy: 2)
+    return self[thirdCharacterIndex].isUppercase
+  }
 }

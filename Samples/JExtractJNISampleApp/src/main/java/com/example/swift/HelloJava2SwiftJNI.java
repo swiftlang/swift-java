@@ -41,9 +41,11 @@ public class HelloJava2SwiftJNI {
 
         MySwiftClass.method();
 
-        try (var arena = new ConfinedSwiftMemorySession(Thread.currentThread())) {
+        try (var arena = new ConfinedSwiftMemorySession()) {
             MySwiftClass myClass = MySwiftClass.init(10, 5, arena);
             MySwiftClass myClass2 = MySwiftClass.init(arena);
+
+            System.out.println("myClass.isWarm: " + myClass.isWarm());
 
             try {
                 myClass.throwingFunction();

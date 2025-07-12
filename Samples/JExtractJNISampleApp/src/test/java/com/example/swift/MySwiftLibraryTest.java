@@ -54,4 +54,11 @@ public class MySwiftLibraryTest {
 
         assertEquals(string.length(), reply);
     }
+
+    @Test
+    void globalVariable() {
+        assertEquals(0, MySwiftLibrary.getGlobalVariable());
+        MySwiftLibrary.setGlobalVariable(100);
+        assertEquals(100, MySwiftLibrary.getGlobalVariable());
+    }
 }

@@ -254,7 +254,7 @@ extension VariableDeclSyntax {
   /// - Parameters:
   ///   - binding the pattern binding in this declaration.
   func supportedAccessorKinds(binding: PatternBindingSyntax) -> SupportedAccessorKinds {
-    if self.bindingSpecifier == .keyword(.let) {
+    if self.bindingSpecifier.tokenKind == .keyword(.let) {
       return [.get]
     }
 

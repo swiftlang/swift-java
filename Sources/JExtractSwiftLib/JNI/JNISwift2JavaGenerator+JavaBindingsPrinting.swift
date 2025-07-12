@@ -79,6 +79,11 @@ extension JNISwift2JavaGenerator {
         printFunctionBinding(&printer, decl)
         printer.println()
       }
+
+      for decl in analysis.importedGlobalVariables {
+        printFunctionBinding(&printer, decl)
+        printer.println()
+      }
     }
   }
 
@@ -113,10 +118,17 @@ extension JNISwift2JavaGenerator {
 
       for initializer in decl.initializers {
         printInitializerBindings(&printer, initializer, type: decl)
+        printer.println()
       }
 
       for method in decl.methods {
         printFunctionBinding(&printer, method)
+        printer.println()
+      }
+
+      for variable in decl.variables {
+        printFunctionBinding(&printer, variable)
+        printer.println()
       }
 
       printDestroyFunction(&printer, decl)

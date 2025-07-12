@@ -23,6 +23,8 @@
   import Darwin.C
 #endif
 
+public var globalVariable: Int64 = 0
+
 public func helloWorld() {
   p("\(#function)")
 }
