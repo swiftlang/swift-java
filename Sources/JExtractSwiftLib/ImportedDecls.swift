@@ -91,7 +91,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     }
     return false
   }
-  
+
   /// If this function/method is member of a class/struct/protocol,
   /// this will contain that declaration's imported name.
   ///

@@ -22,4 +22,32 @@ extension String {
 
     return "\(f.uppercased())\(String(dropFirst()))"
   }
+
+  /// Returns whether the string is of the format `isX`
+  private var hasJavaBooleanNamingConvention: Bool {
+    guard self.hasPrefix("is"), self.count > 2 else {
+      return false
+    }
+
+    let thirdCharacterIndex = self.index(self.startIndex, offsetBy: 2)
+    return self[thirdCharacterIndex].isUppercase
+  }
+
+  func javaGetterName(isBoolean: Bool) -> String {
+    if !isBoolean {
+      return "get\(self.toCamelCase)"
+    } else if !hasJavaBooleanNamingConvention {
+      return "is\(self.toCamelCase)"
+    } else {
+      return self.toCamelCase
+    }
+  }
+
+  func javaSetterName(isBoolean: Bool) -> String {
+    if !isBoolean || !hasJavaBooleanNamingConvention {
+      return "set\(self.toCamelCase)"
+    } else {
+      return "setIs\(self.toCamelCase)"
+    }
+  }
 }
