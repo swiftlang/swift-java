@@ -38,6 +38,7 @@ extension JNISwift2JavaGenerator {
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
       // Name.
+      let returnsBoolean = translatedFunctionSignature.resultType == .boolean
       let javaName = switch decl.apiKind {
       case .getter: decl.javaGetterName
       case .setter: decl.javaSetterName
