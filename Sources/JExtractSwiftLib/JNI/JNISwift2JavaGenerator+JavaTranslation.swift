@@ -17,13 +17,19 @@ import JavaTypes
 extension JNISwift2JavaGenerator {
   func translatedDecl(
     for decl: ImportedFunc
-  ) -> TranslatedFunctionDecl {
+  ) -> TranslatedFunctionDecl? {
     if let cached = translatedDecls[decl] {
       return cached
     }
 
-    let translation = JavaTranslation(swiftModuleName: self.swiftModuleName)
-    let translated = translation.translate(decl)
+    let translated: TranslatedFunctionDecl?
+    do {
+      let translation = JavaTranslation(swiftModuleName: swiftModuleName)
+      translated = try translation.translate(decl)
+    } catch {
+      self.logger.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
+      translated = nil
+    }
 
     translatedDecls[decl] = translated
     return translated
@@ -32,8 +38,8 @@ extension JNISwift2JavaGenerator {
   struct JavaTranslation {
     let swiftModuleName: String
 
-    func translate(_ decl: ImportedFunc) -> TranslatedFunctionDecl {
-      let translatedFunctionSignature = translate(functionSignature: decl.functionSignature)
+    func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
+      let translatedFunctionSignature = try translate(functionSignature: decl.functionSignature)
       // Types with no parent will be outputted inside a "module" class.
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
@@ -51,31 +57,31 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    func translate(functionSignature: SwiftFunctionSignature, isInitializer: Bool = false) -> TranslatedFunctionSignature {
-      let parameters = functionSignature.parameters.enumerated().map { idx, param in
+    func translate(functionSignature: SwiftFunctionSignature, isInitializer: Bool = false) throws -> TranslatedFunctionSignature {
+      let parameters = try functionSignature.parameters.enumerated().map { idx, param in
         let parameterName = param.parameterName ?? "arg\(idx))"
-        return translate(swiftParam: param, parameterName: parameterName)
+        return try translate(swiftParam: param, parameterName: parameterName)
       }
 
-      return TranslatedFunctionSignature(
+      return try TranslatedFunctionSignature(
         parameters: parameters,
         resultType: translate(swiftType: functionSignature.result.type)
       )
     }
 
-    func translate(swiftParam: SwiftParameter, parameterName: String) -> JavaParameter {
-      return JavaParameter(
+    func translate(swiftParam: SwiftParameter, parameterName: String) throws -> JavaParameter {
+      return try JavaParameter(
         name: parameterName,
         type: translate(swiftType: swiftParam.type)
       )
     }
 
-    func translate(swiftType: SwiftType) -> JavaType {
+    func translate(swiftType: SwiftType) throws -> JavaType {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = translate(knownType: knownType) else {
-            fatalError("unsupported known type: \(knownType)")
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
           return javaType
         }
@@ -86,7 +92,7 @@ extension JNISwift2JavaGenerator {
         return .void
 
       case .metatype, .optional, .tuple, .function, .existential, .opaque:
-        fatalError("unsupported type: \(self)")
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
 
@@ -126,5 +132,9 @@ extension JNISwift2JavaGenerator {
   struct TranslatedFunctionSignature {
     let parameters: [JavaParameter]
     let resultType: JavaType
+  }
+
+  enum JavaTranslationError: Error {
+    case unsupportedSwiftType(SwiftType)
   }
 }
