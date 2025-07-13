@@ -56,10 +56,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+
       - name: Gradle :SwiftKitCore:build
         run: ./gradlew :SwiftKitCore:build -x test
       - name: Gradle :SwiftKitCore:check
         run: ./gradlew :SwiftKitCore:check --info
+        
       - name: Gradle :SwiftKitFFM:build
         run: ./gradlew :SwiftKitFFM:build -x test
       - name: Gradle :SwiftKitFFM:check
