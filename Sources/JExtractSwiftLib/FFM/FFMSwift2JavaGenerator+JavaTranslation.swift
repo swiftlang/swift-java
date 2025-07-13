@@ -127,8 +127,8 @@ extension FFMSwift2JavaGenerator {
 
       // Name.
       let javaName = switch decl.apiKind {
-      case .getter: "get\(decl.name.toCamelCase)"
-      case .setter: "set\(decl.name.toCamelCase)"
+      case .getter: decl.javaGetterName
+      case .setter: decl.javaSetterName
       case .function, .initializer: decl.name
       }
 

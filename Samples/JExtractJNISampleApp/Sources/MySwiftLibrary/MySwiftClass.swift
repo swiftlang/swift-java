@@ -16,6 +16,31 @@ public class MySwiftClass {
   let x: Int64
   let y: Int64
 
+  public let constant: Int64 = 100
+  public var mutable: Int64 = 0
+  public var product: Int64 {
+    return x * y
+  }
+  public var throwingVariable: Int64 {
+    get throws {
+      throw MySwiftClassError.swiftError
+    }
+  }
+  public var mutableDividedByTwo: Int64 {
+    get {
+      return mutable / 2
+    }
+    set {
+      mutable = newValue * 2
+    }
+  }
+  public let warm: Bool = false
+  public var getAsync: Int64 {
+    get async {
+      return 42
+    }
+  }
+
   public static func method() {
     p("Hello from static method in a class!")
   }
