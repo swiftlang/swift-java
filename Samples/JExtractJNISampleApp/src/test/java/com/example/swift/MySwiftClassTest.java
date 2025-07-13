@@ -111,5 +111,11 @@ public class MySwiftClassTest {
         }
     }
 
-
+    @Test
+    void isWarm() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            assertFalse(c.isWarm());
+        }
+    }
 }
