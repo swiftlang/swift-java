@@ -217,8 +217,10 @@ extension JNISwift2JavaGenerator {
       result = "\(tryClause)\(calleeName).\(decl.name)"
 
     case .setter:
-      assert(decl.functionSignature.parameters.count == 1)
-      let newValueParameter = decl.functionSignature.parameters[0]
+      guard let newValueParameter = decl.functionSignature.parameters.first else {
+        fatalError("Setter did not contain newValue parameter: \(decl)")
+      }
+
       result = "\(calleeName).\(decl.name) = \(renderJNIToSwiftConversion("newValue", type: newValueParameter.type))"
     }
 

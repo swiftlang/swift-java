@@ -35,6 +35,11 @@ public class MySwiftClass {
     }
   }
   public let warm: Bool = false
+  public var getAsync: Int64 {
+    get async {
+      return 42
+    }
+  }
 
   public static func method() {
     p("Hello from static method in a class!")

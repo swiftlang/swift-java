@@ -211,11 +211,11 @@ extension SwiftFunctionSignature {
     switch binding.accessorBlock?.accessors {
     case .getter(let getter):
       if let getter = getter.as(AccessorDeclSyntax.self) {
-        effectSpecifiers = Self.effectSpecifiers(from: getter)
+        effectSpecifiers = try Self.effectSpecifiers(from: getter)
       }
     case .accessors(let accessors):
       if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
-        effectSpecifiers = Self.effectSpecifiers(from: getter)
+        effectSpecifiers = try Self.effectSpecifiers(from: getter)
       }
     default:
       break
@@ -232,10 +232,13 @@ extension SwiftFunctionSignature {
     }
   }
 
-  private static func effectSpecifiers(from decl: AccessorDeclSyntax) -> [SwiftEffectSpecifier] {
+  private static func effectSpecifiers(from decl: AccessorDeclSyntax) throws -> [SwiftEffectSpecifier] {
     var effectSpecifiers = [SwiftEffectSpecifier]()
     if decl.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
+    }
+    if let asyncSpecifier = decl.effectSpecifiers?.asyncSpecifier {
+      throw SwiftFunctionTranslationError.async(asyncSpecifier)
     }
     return effectSpecifiers
   }

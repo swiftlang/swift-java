@@ -169,12 +169,6 @@ extension ImportedFunc {
   }
 
   var javaSetterName: String {
-    let firstParameterIsBoolean = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
-
-    if !firstParameterIsBoolean || self.name.hasJavaBooleanNamingConvention {
-      return "set\(self.name.toCamelCase)"
-    } else {
-      return "setIs\(self.name.toCamelCase)"
-    }
+    "set\(self.name.toCamelCase)"
   }
 }

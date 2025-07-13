@@ -17,24 +17,25 @@ import Testing
 
 @Suite
 struct JNIVariablesTests {
-  let membersSource = """
+  let membersSource =
+    """
     public class MyClass {
-    public let constant: Int64
-    public var mutable: Int64
-    public var computed: Int64 {
-      return 0
-    }
-    public var computedThrowing: Int64 {
-      get throws { return 0 }
-    }
-    public var getterAndSetter: Int64 {
-      get { return 0 }
-      set { }
-    }
+      public let constant: Int64
+      public var mutable: Int64
+      public var computed: Int64 {
+        return 0
+      }
+      public var computedThrowing: Int64 {
+        get throws { return 0 }
+      }
+      public var getterAndSetter: Int64 {
+        get { return 0 }
+        set { }
+      }
       public var someBoolean: Bool
       public let isBoolean: Bool
     }
-  """
+    """
 
   @Test
   func constant_javaBindings() throws {
@@ -341,16 +342,16 @@ struct JNIVariablesTests {
         * public var someBoolean: Bool
         * }
         */
-        public void setIsSomeBoolean(boolean newValue) {
+        public void setSomeBoolean(boolean newValue) {
           long selfPointer = this.pointer();
-          MyClass.$setIsSomeBoolean(newValue, selfPointer);
+          MyClass.$setSomeBoolean(newValue, selfPointer);
         }
       """,
       """
       private static native boolean $isSomeBoolean(long selfPointer);
       """,
       """
-      private static native void $setIsSomeBoolean(boolean newValue, long selfPointer);
+      private static native void $setSomeBoolean(boolean newValue, long selfPointer);
       """
       ]
     )
@@ -373,8 +374,8 @@ struct JNIVariablesTests {
         }
         """,
         """
-        @_cdecl("Java_com_example_swift_MyClass__00024setIsSomeBoolean__ZJ")
-        func Java_com_example_swift_MyClass__00024setIsSomeBoolean__ZJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jboolean, selfPointer: jlong) {
+        @_cdecl("Java_com_example_swift_MyClass__00024setSomeBoolean__ZJ")
+        func Java_com_example_swift_MyClass__00024setSomeBoolean__ZJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jboolean, selfPointer: jlong) {
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
           self$.pointee.someBoolean = Bool(fromJNI: newValue, in: environment!)
         }
@@ -382,5 +383,4 @@ struct JNIVariablesTests {
       ]
     )
   }
-
 }
