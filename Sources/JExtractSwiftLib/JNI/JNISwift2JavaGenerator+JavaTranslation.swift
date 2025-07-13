@@ -27,7 +27,7 @@ extension JNISwift2JavaGenerator {
       let translation = JavaTranslation(swiftModuleName: swiftModuleName)
       translated = try translation.translate(decl)
     } catch {
-      self.logger.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
+      self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
       translated = nil
     }
 

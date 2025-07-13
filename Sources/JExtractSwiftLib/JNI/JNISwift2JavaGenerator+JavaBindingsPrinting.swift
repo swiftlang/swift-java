@@ -176,7 +176,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    guard let translatedDecl = translatedDecl(for: decl) else {
+    guard let _ = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
       return
     }
@@ -201,7 +201,7 @@ extension JNISwift2JavaGenerator {
   /// and passes it down to another native function along with the arguments
   /// to call the Swift implementation.
   private func printMemberMethodBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = translatedDecl(for: decl)!
+    let translatedDecl = translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
 
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock("public \(renderFunctionSignature(decl))") { printer in
@@ -283,7 +283,9 @@ extension JNISwift2JavaGenerator {
   /// `func method(x: Int, y: Int) -> Int` becomes
   /// `long method(long x, long y)`
   private func renderFunctionSignature(_ decl: ImportedFunc) -> String {
-    let translatedDecl = translatedDecl(for: decl)!
+    guard let translatedDecl = translatedDecl(for: decl) else {
+      fatalError("Unable to render function signature for a function that cannot be translated: \(decl)")
+    }
     let resultType = translatedDecl.translatedFunctionSignature.resultType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
 
