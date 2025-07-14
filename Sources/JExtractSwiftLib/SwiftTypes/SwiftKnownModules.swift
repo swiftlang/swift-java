@@ -76,6 +76,8 @@ private let swiftSourceFile: SourceFileSyntax = """
   public struct UnsafeBufferPointer<Element> {}
   public struct UnsafeMutableBufferPointer<Element> {}
   
+  public struct Optional<Wrapped> {}
+  
   // FIXME: Support 'typealias Void = ()'
   public struct Void {}
   

@@ -62,6 +62,8 @@ enum ConversionStep: Equatable {
 
   indirect case member(ConversionStep, member: String)
 
+  indirect case optionalChain(ConversionStep)
+
   /// Count the number of times that the placeholder occurs within this
   /// conversion step.
   var placeholderCount: Int {
@@ -71,7 +73,7 @@ enum ConversionStep: Equatable {
         .typedPointer(let inner, swiftType: _),
         .unsafeCastPointer(let inner, swiftType: _),
         .populatePointer(name: _, assumingType: _, to: let inner),
-        .member(let inner, member: _):
+        .member(let inner, member: _), .optionalChain(let inner):
       inner.placeholderCount
     case .initialize(_, arguments: let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
@@ -174,6 +176,10 @@ enum ConversionStep: Equatable {
         }
       }
       return nil
+
+    case .optionalChain(let step):
+      let inner = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
+      return ExprSyntax(OptionalChainingExprSyntax(expression: inner!))
 
     case .closureLowering(let parameterSteps, let resultStep):
       var body: [CodeBlockItemSyntax] = []
