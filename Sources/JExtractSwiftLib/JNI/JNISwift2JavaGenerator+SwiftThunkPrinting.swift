@@ -116,7 +116,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printInitializerThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = translatedDecl(for: decl)
+    guard let translatedDecl = translatedDecl(for: decl) else {
+      // Failed to translate. Skip.
+      return
+    }
+
     let typeName = translatedDecl.parentName
 
     printCDecl(
@@ -146,6 +150,11 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
+    guard let _ = translatedDecl(for: decl) else {
+      // Failed to translate. Skip.
+      return
+    }
+
     // Free functions does not have a parent
     if decl.isStatic || !decl.hasParent {
       self.printSwiftStaticFunctionThunk(&printer, decl)
@@ -155,7 +164,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printSwiftStaticFunctionThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = self.translatedDecl(for: decl)
+    let translatedDecl = self.translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
 
     printCDecl(
       &printer,
@@ -172,7 +181,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printSwiftMemberFunctionThunk(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = self.translatedDecl(for: decl)
+    let translatedDecl = self.translatedDecl(for: decl)! // We will only call this method if can translate the decl.
     let swiftParentName = decl.parentType!.asNominalTypeDeclaration!.qualifiedName
 
     printCDecl(
@@ -199,7 +208,9 @@ extension JNISwift2JavaGenerator {
     _ decl: ImportedFunc,
     calleeName: String
   ) {
-    let translatedDecl = self.translatedDecl(for: decl)
+    guard let translatedDecl = self.translatedDecl(for: decl) else {
+      fatalError("Cannot print function downcall for a function that can't be translated: \(decl)")
+    }
     let swiftReturnType = decl.functionSignature.result.type
 
     let tryClause: String = decl.isThrowing ? "try " : ""

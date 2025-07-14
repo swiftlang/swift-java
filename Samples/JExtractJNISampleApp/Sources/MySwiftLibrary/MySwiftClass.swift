@@ -16,6 +16,7 @@ public class MySwiftClass {
   let x: Int64
   let y: Int64
 
+  public let byte: UInt8 = 0
   public let constant: Int64 = 100
   public var mutable: Int64 = 0
   public var product: Int64 {

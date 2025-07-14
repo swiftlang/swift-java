@@ -14,6 +14,7 @@
 
 public class MySwiftClass {
 
+  public let byte: UInt8 = 0
   public var len: Int
   public var cap: Int
 
