@@ -210,10 +210,12 @@ let package = Package(
   ],
   targets: [
     .target(
+      name: "Documentation",
       name: "SwiftJavaDocumentation",
       dependencies: [
         "JavaKit",
         "SwiftKitSwift",
+        "SwiftJavaTool",
       ]
     ),
     
