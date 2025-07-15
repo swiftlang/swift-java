@@ -285,3 +285,122 @@ extension Int64: JavaValue {
     0
   }
 }
+
+#if _pointerBitWidth(_32)
+extension Int: JavaValue {
+
+  public typealias JNIType = jint
+
+  public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.i }
+
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+
+  public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
+    self = Int(value)
+  }
+
+  public static var javaType: JavaType { .int }
+
+  public static func jniMethodCall(
+    in environment: JNIEnvironment
+  ) -> ((JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> JNIType) {
+    environment.interface.CallIntMethodA
+  }
+
+  public static func jniFieldGet(in environment: JNIEnvironment) -> JNIFieldGet<JNIType> {
+    environment.interface.GetIntField
+  }
+
+  public static func jniFieldSet(in environment: JNIEnvironment) -> JNIFieldSet<JNIType> {
+    environment.interface.SetIntField
+  }
+
+  public static func jniStaticMethodCall(
+    in environment: JNIEnvironment
+  ) -> ((JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> JNIType) {
+    environment.interface.CallStaticIntMethodA
+  }
+
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+    environment.interface.GetStaticIntField
+  }
+
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+    environment.interface.SetStaticIntField
+  }
+
+  public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
+    environment.interface.NewIntArray
+  }
+
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+    environment.interface.GetIntArrayRegion
+  }
+
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+    environment.interface.SetIntArrayRegion
+  }
+
+  public static var jniPlaceholderValue: jint {
+    0
+  }
+}
+#elseif _pointerBitWidth(_64)
+extension Int: JavaValue {
+  public typealias JNIType = jlong
+
+  public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.j }
+
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+
+  public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
+    self = Int(value)
+  }
+
+  public static var javaType: JavaType { .long }
+
+  public static func jniMethodCall(
+    in environment: JNIEnvironment
+  ) -> ((JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> JNIType) {
+    environment.interface.CallLongMethodA
+  }
+
+  public static func jniFieldGet(in environment: JNIEnvironment) -> JNIFieldGet<JNIType> {
+    environment.interface.GetLongField
+  }
+
+  public static func jniFieldSet(in environment: JNIEnvironment) -> JNIFieldSet<JNIType> {
+    environment.interface.SetLongField
+  }
+
+  public static func jniStaticMethodCall(
+    in environment: JNIEnvironment
+  ) -> ((JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> JNIType) {
+    environment.interface.CallStaticLongMethodA
+  }
+
+  public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType> {
+    environment.interface.GetStaticLongField
+  }
+
+  public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType> {
+    environment.interface.SetStaticLongField
+  }
+
+  public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
+    environment.interface.NewLongArray
+  }
+
+  public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
+    environment.interface.GetLongArrayRegion
+  }
+
+  public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
+    environment.interface.SetLongArrayRegion
+  }
+
+  public static var jniPlaceholderValue: jlong {
+    0
+  }
+}
+#endif
