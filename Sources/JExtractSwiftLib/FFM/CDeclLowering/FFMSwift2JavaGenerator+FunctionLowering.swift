@@ -194,7 +194,7 @@ struct CdeclLowering {
           )
 
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
+          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
             throw LoweringError.unhandledType(type)
           }
           // Typed pointers are lowered to (raw-pointer, count) pair.
@@ -254,7 +254,7 @@ struct CdeclLowering {
             ))
 
         case .optional:
-          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
+          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
             throw LoweringError.unhandledType(type)
           }
           return try lowerOptionalParameter(genericArgs[0], convention: convention, parameterName: parameterName)

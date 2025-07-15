@@ -101,9 +101,7 @@ extension FFMSwift2JavaGenerator {
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",
     "java.lang.invoke.*",
-    "java.util.Arrays",
-    "java.util.stream.Collectors",
-    "java.util.concurrent.atomic.*",
+    "java.util.*",
     "java.nio.charset.StandardCharsets",
   ]
 }
