@@ -13,6 +13,31 @@ jobs:
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
       format_check_enabled: false
       license_header_check_project_name: Swift.org
+      # Since we need JAVA_HOME to be set up for building the project and depending on a different workflow won't
+      # give us that, we disable the checking and make a separate job that performs docs validation
+      docs_check_enabled: false
+
+  # This replicates 'docs-check' from https://github.com/swiftlang/github-workflows/blob/main/.github/workflows/soundness.yml
+  # because we need to set up environment so we can build the SwiftJava project (including Java runtime/dependencies).
+  soundness-docs:
+    name: Documentation check
+    runs-on: ubuntu-latest
+    container:
+      image: 'swift:6.1-noble'
+    strategy:
+      fail-fast: true
+      matrix:
+        swift_version: ['6.1.2']
+        os_version: ['jammy']
+        jdk_vendor: ['corretto']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Swift Build
+        run: swift build
+      - name: Run documentation check
+        run: ./.github/scripts/validate_docs.sh
 
   test-java:
     name: Test (Java) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})

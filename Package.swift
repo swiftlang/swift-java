@@ -139,6 +139,12 @@ let package = Package(
       name: "swift-java",
       targets: ["SwiftJavaTool"]
     ),
+    
+    
+    .library(
+      name: "SwiftJavaDocumentation",
+      targets: ["SwiftJavaDocumentation"]
+    ),
 
     // ==== Plugin for building Java code
     .plugin(
@@ -198,6 +204,14 @@ let package = Package(
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
   targets: [
+    .target(
+      name: "SwiftJavaDocumentation",
+      dependencies: [
+        "JavaKit",
+        "SwiftKitSwift",
+      ]
+    ),
+    
     .macro(
       name: "JavaKitMacros",
       dependencies: [
