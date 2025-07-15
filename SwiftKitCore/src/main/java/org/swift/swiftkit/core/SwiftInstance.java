@@ -17,15 +17,6 @@ package org.swift.swiftkit.core;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SwiftInstance {
-    /// Pointer to the "self".
-    private final long selfPointer;
-
-    /**
-     * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
-     */
-    public final long pointer() {
-        return this.selfPointer;
-    }
 
     /**
      * Called when the arena has decided the value should be destroyed.
@@ -55,8 +46,7 @@ public abstract class SwiftInstance {
      * @param pointer a pointer to the memory containing the value
      * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
-    protected SwiftInstance(long pointer, SwiftArena arena) {
-        this.selfPointer = pointer;
+    protected SwiftInstance(SwiftArena arena) {
         arena.register(this);
     }
 

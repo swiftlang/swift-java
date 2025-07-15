@@ -41,7 +41,7 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
      * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
     protected FFMSwiftInstance(MemorySegment segment, AllocatingSwiftArena arena) {
-        super(segment.address(), arena);
+        super(arena);
         this.memorySegment = segment;
     }
 
