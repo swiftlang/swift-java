@@ -52,6 +52,12 @@ public class HelloJava2SwiftJNI {
             } catch (Exception e) {
                 System.out.println("Caught exception: " + e.getMessage());
             }
+
+            MySwiftStruct myStruct = MySwiftStruct.init(12, 34, arena);
+            System.out.println("myStruct.cap: " + myStruct.getCapacity());
+            System.out.println("myStruct.len: " + myStruct.getLen());
+            myStruct.increaseCap(10);
+            System.out.println("myStruct.cap after increase: " + myStruct.getCapacity());
         }
 
         System.out.println("DONE.");
