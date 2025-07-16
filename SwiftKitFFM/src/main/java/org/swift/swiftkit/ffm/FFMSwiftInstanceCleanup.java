@@ -19,13 +19,13 @@ import org.swift.swiftkit.core.SwiftInstanceCleanup;
 import java.lang.foreign.MemorySegment;
 
 public class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
-    private final MemorySegment selfPointer;
-    private final SwiftAnyType selfType;
+    private final MemorySegment memoryAddress;
+    private final SwiftAnyType type;
     private final Runnable markAsDestroyed;
 
-    public FFMSwiftInstanceCleanup(MemorySegment selfPointer, SwiftAnyType selfType, Runnable markAsDestroyed) {
-        this.selfPointer = selfPointer;
-        this.selfType = selfType;
+    public FFMSwiftInstanceCleanup(MemorySegment memoryAddress, SwiftAnyType type, Runnable markAsDestroyed) {
+        this.memoryAddress = memoryAddress;
+        this.type = type;
         this.markAsDestroyed = markAsDestroyed;
     }
 
@@ -34,9 +34,9 @@ public class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
         markAsDestroyed.run();
 
         // Allow null pointers just for AutoArena tests.
-        if (selfType != null && selfPointer != null) {
-            System.out.println("[debug] Destroy swift value [" + selfType.getSwiftName() + "]: " + selfPointer);
-            SwiftValueWitnessTable.destroy(selfType, self$);
+        if (type != null && memoryAddress != null) {
+            System.out.println("[debug] Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
+            SwiftValueWitnessTable.destroy(type, memoryAddress);
         }
     }
 }

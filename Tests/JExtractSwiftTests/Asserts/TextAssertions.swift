@@ -112,6 +112,7 @@ func assertOutput(
       print("==== ---------------------------------------------------------------")
       
       #expect(output.contains(expected), sourceLocation: sourceLocation)
+      fatalError("Failed: \(filePath):\(line)")
       continue
     }
 

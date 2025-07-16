@@ -213,7 +213,7 @@ struct JNIClassTests {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
           assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
-          guard let self$ = UnsafeMutablePointer<MySwiftClass>(bitPattern: selfBits$) else {
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
             fatalError("Missing self pointer in call to \\(#function)!")
           }
           self$.deinitialize(count: 1)
@@ -233,11 +233,11 @@ struct JNIClassTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func doSomething(x: Int64)
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func doSomething(x: Int64)
+         * }
+         */
         public void doSomething(long x) {
           long self$ = this.$memoryAddress();
           MyClass.$doSomething(x, self$);

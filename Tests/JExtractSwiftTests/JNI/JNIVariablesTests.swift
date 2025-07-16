@@ -69,7 +69,15 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024getConstant__J")
         func Java_com_example_swift_MyClass__00024getConstant__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           let result = self$.pointee.constant
           return result.getJNIValue(in: environment)
         }
@@ -131,7 +139,15 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024getMutable__J")
         func Java_com_example_swift_MyClass__00024getMutable__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           let result = self$.pointee.mutable
           return result.getJNIValue(in: environment)
         }
@@ -139,7 +155,15 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024setMutable__JJ")
         func Java_com_example_swift_MyClass__00024setMutable__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           self$.pointee.mutable = Int64(fromJNI: newValue, in: environment!)
         }
         """
@@ -185,7 +209,16 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024getComputed__J")
         func Java_com_example_swift_MyClass__00024getComputed__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
+
           let result = self$.pointee.computed
           return result.getJNIValue(in: environment)
         }
@@ -232,7 +265,16 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024getComputedThrowing__J")
         func Java_com_example_swift_MyClass__00024getComputedThrowing__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
+
           do {
             let result = try self$.pointee.computedThrowing
             return result.getJNIValue(in: environment)
@@ -299,7 +341,16 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024getGetterAndSetter__J")
         func Java_com_example_swift_MyClass__00024getGetterAndSetter__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
+
           let result = self$.pointee.getterAndSetter
           return result.getJNIValue(in: environment)
         }
@@ -307,7 +358,16 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024setGetterAndSetter__JJ")
         func Java_com_example_swift_MyClass__00024setGetterAndSetter__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
+
           self$.pointee.getterAndSetter = Int64(fromJNI: newValue, in: environment!)
         }
         """
@@ -368,7 +428,15 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024isSomeBoolean__J")
         func Java_com_example_swift_MyClass__00024isSomeBoolean__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jboolean {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           let result = self$.pointee.someBoolean
           return result.getJNIValue(in: environment)
         }
@@ -376,7 +444,15 @@ struct JNIVariablesTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024setSomeBoolean__ZJ")
         func Java_com_example_swift_MyClass__00024setSomeBoolean__ZJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jboolean, selfPointer: jlong) {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           self$.pointee.someBoolean = Bool(fromJNI: newValue, in: environment!)
         }
         """
