@@ -70,11 +70,11 @@ struct JNIClassTests {
       """
       @Override
       protected Runnable $createDestroyFunction() {
-        long $selfPointer = this.pointer(); 
+        long $self = this.$memoryAddress();
         return new Runnable() {
           @Override
           public void run() {
-            MyClass.$destroy($selfPointer);
+            MyClass.$destroy($self);
           }
         };
       }
@@ -224,8 +224,8 @@ struct JNIClassTests {
           * }
           */
         public void doSomething(long x) {
-          long selfPointer = this.pointer();
-          MyClass.$doSomething(x, selfPointer);
+          long self$ = this.$memoryAddress();
+          MyClass.$doSomething(x, self$);
         }
         """,
         """

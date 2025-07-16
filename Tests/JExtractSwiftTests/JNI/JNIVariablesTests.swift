@@ -48,8 +48,8 @@ struct JNIVariablesTests {
        * }
        */
        public long getConstant() {
-         long selfPointer = this.pointer();
-         return MyClass.$getConstant(selfPointer);
+         long self$ = this.$memoryAddress();
+         return MyClass.$getConstant(self$);
        }
       """,
       """
@@ -94,8 +94,8 @@ struct JNIVariablesTests {
        * }
        */
        public long getMutable() {
-         long selfPointer = this.pointer();
-         return MyClass.$getMutable(selfPointer);
+         long self$ = this.$memoryAddress();
+         return MyClass.$getMutable(self$);
        }
       """,
       """
@@ -106,8 +106,8 @@ struct JNIVariablesTests {
        * }
        */
        public void setMutable(long newValue) {
-         long selfPointer = this.pointer();
-         MyClass.$setMutable(newValue, selfPointer);
+         long self$ = this.$memoryAddress();
+         MyClass.$setMutable(newValue, self$);
        }
       """,
       """
@@ -163,8 +163,8 @@ struct JNIVariablesTests {
        * }
        */
        public long getComputed() {
-         long selfPointer = this.pointer();
-         return MyClass.$getComputed(selfPointer);
+         long self$ = this.$memoryAddress();
+         return MyClass.$getComputed(self$);
        }
       """,
       """
@@ -210,8 +210,8 @@ struct JNIVariablesTests {
        * }
        */
        public long getComputedThrowing() throws Exception {
-         long selfPointer = this.pointer();
-         return MyClass.$getComputedThrowing(selfPointer);
+         long self$ = this.$memoryAddress();
+         return MyClass.$getComputedThrowing(self$);
        }
       """,
       """
@@ -262,8 +262,8 @@ struct JNIVariablesTests {
        * }
        */
        public long getGetterAndSetter() {
-         long selfPointer = this.pointer();
-         return MyClass.$getGetterAndSetter(selfPointer);
+         long self$ = this.$memoryAddress();
+         return MyClass.$getGetterAndSetter(self$);
        }
       """,
       """
@@ -274,8 +274,8 @@ struct JNIVariablesTests {
        * }
        */
        public void setGetterAndSetter(long newValue) {
-         long selfPointer = this.pointer();
-         MyClass.$setGetterAndSetter(newValue, selfPointer);
+         long self$ = this.$memoryAddress();
+         MyClass.$setGetterAndSetter(newValue, self$);
        }
       """,
       """
@@ -331,8 +331,8 @@ struct JNIVariablesTests {
        * }
        */
        public boolean isSomeBoolean() {
-        long selfPointer = this.pointer();
-        return MyClass.$isSomeBoolean(selfPointer);
+        long self$ = this.$memoryAddress();
+        return MyClass.$isSomeBoolean(self$);
        }
       """,
       """
@@ -343,8 +343,8 @@ struct JNIVariablesTests {
         * }
         */
         public void setSomeBoolean(boolean newValue) {
-          long selfPointer = this.pointer();
-          MyClass.$setSomeBoolean(newValue, selfPointer);
+          long self$ = this.$memoryAddress();
+          MyClass.$setSomeBoolean(newValue, self$);
         }
       """,
       """

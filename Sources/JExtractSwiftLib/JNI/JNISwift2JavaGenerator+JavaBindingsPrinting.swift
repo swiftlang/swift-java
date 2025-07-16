@@ -212,7 +212,7 @@ extension JNISwift2JavaGenerator {
 
       printer.print(
         """
-        long selfPointer = this.pointer();
+        long self$ = this.$memoryAddress();
         \(returnKeyword)\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")));
         """
       )
