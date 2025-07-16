@@ -402,7 +402,7 @@ final class DataImportTests {
 
         // Just to make sure 'Data' is imported.
         """
-        public final class Data
+        public final class Data extends FFMSwiftInstance implements SwiftValue {
         """
       ]
     )
