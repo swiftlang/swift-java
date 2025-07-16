@@ -29,8 +29,10 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
      * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
     protected FFMSwiftInstance(MemorySegment segment, AllocatingSwiftArena arena) {
-        super(arena);
         this.memorySegment = segment;
+
+        // Only register once we have fully initialized the object since this will need the object pointer.
+        arena.register(this);
     }
 
     /**
