@@ -36,6 +36,7 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case unsafeMutablePointer = "Swift.UnsafeMutablePointer"
   case unsafeBufferPointer = "Swift.UnsafeBufferPointer"
   case unsafeMutableBufferPointer = "Swift.UnsafeMutableBufferPointer"
+  case optional = "Swift.Optional"
   case void = "Swift.Void"
   case string = "Swift.String"
 

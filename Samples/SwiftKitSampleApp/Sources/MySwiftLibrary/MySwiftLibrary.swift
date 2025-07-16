@@ -68,6 +68,23 @@ public func globalReceiveSomeDataProtocol(data: some DataProtocol) -> Int {
   return data.count
 }
 
+public func globalReceiveOptional(o1: Int?, o2: (some DataProtocol)?) -> Int {
+  switch (o1, o2) {
+  case (nil, nil):
+    p("<nil>, <nil>")
+    return 0
+  case (let v1?, nil):
+    p("\(v1), <nil>")
+    return 1
+  case (nil, let v2?):
+    p("<nil>, \(v2)")
+    return 2
+  case (let v1?, let v2?):
+    p("\(v1), \(v2)")
+    return 3
+  }
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

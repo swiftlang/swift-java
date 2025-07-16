@@ -238,7 +238,6 @@ extension FFMSwift2JavaGenerator {
       throw JavaTranslationError.unhandledType(type)
     }
 
-
     /// Translate a Swift API signature to the user-facing Java API signature.
     ///
     /// Note that the result signature is for the high-level Java API, not the
@@ -349,6 +348,12 @@ extension FFMSwift2JavaGenerator {
               ])
             )
 
+          case .optional:
+            guard let genericArgs = swiftNominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unhandledType(swiftType)
+            }
+            return try translateOptionalParameter(wrappedType: genericArgs[0], convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+
           case .string:
             return TranslatedParameter(
               javaParameters: [
@@ -414,8 +419,81 @@ extension FFMSwift2JavaGenerator {
         // Otherwise, not supported yet.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .optional:
-        throw JavaTranslationError.unhandledType(swiftType)
+      case .optional(let wrapped):
+        return try translateOptionalParameter(wrappedType: wrapped, convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+      }
+    }
+
+    /// Translate an Optional Swift API parameter to the user-facing Java API parameter.
+    func translateOptionalParameter(
+      wrappedType swiftType: SwiftType,
+      convention: SwiftParameterConvention,
+      parameterName: String,
+      loweredParam: LoweredParameter,
+      methodName: String
+    ) throws -> TranslatedParameter {
+      // If there is a 1:1 mapping between this Swift type and a C type, that can
+      // be expressed as a Java primitive type.
+      if let cType = try? CType(cdeclType: swiftType) {
+        var (translatedClass, lowerFunc) = switch cType.javaType {
+        case .int: ("OptionalInt", "toOptionalSegmentInt")
+        case .long: ("OptionalLong", "toOptionalSegmentLong")
+        case .double: ("OptionalDouble", "toOptionalSegmentDouble")
+        case .boolean: ("Optional<Boolean>", "toOptionalSegmentBoolean")
+        case .byte: ("Optional<Byte>", "toOptionalSegmentByte")
+        case .char: ("Optional<Character>", "toOptionalSegmentCharacter")
+        case .short: ("Optional<Short>", "toOptionalSegmentShort")
+        case .float: ("Optional<Float>", "toOptionalSegmentFloat")
+        default:
+          throw JavaTranslationError.unhandledType(.optional(swiftType))
+        }
+        return TranslatedParameter(
+          javaParameters: [
+            JavaParameter(name: parameterName, type: JavaType(className: translatedClass))
+          ],
+          conversion: .call(.placeholder, function: "SwiftRuntime.\(lowerFunc)", withArena: true)
+        )
+      }
+
+      switch swiftType {
+      case .nominal(let nominal):
+        if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+          switch knownType {
+          case .data, .dataProtocol:
+            break
+          default:
+            throw JavaTranslationError.unhandledType(.optional(swiftType))
+          }
+        }
+
+        let translatedTy = try self.translate(swiftType: swiftType)
+        return TranslatedParameter(
+          javaParameters: [
+            JavaParameter(name: parameterName, type: JavaType(className: "Optional<\(translatedTy.description)>"))
+          ],
+          conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
+        )
+      case .existential(let proto), .opaque(let proto):
+        if
+          let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
+          let concreteTy = knownTypes.representativeType(of: knownProtocol)
+        {
+          return try translateOptionalParameter(
+            wrappedType: concreteTy,
+            convention: convention,
+            parameterName: parameterName,
+            loweredParam: loweredParam,
+            methodName: methodName
+          )
+        }
+        throw JavaTranslationError.unhandledType(.optional(swiftType))
+      case .tuple(let tuple):
+        if tuple.count == 1 {
+          return try translateOptionalParameter(wrappedType: tuple[0], convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+        }
+        throw JavaTranslationError.unhandledType(.optional(swiftType))
+      default:
+        throw JavaTranslationError.unhandledType(.optional(swiftType))
       }
     }
 
@@ -584,7 +662,6 @@ extension FFMSwift2JavaGenerator.TranslatedFunctionSignature {
     return self.result.conversion.requiresSwiftArena
   }
 }
-
 
 extension CType {
   /// Map lowered C type to Java type for FFM binding.

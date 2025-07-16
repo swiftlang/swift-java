@@ -125,7 +125,7 @@ extension SwiftKnownTypeDeclKind {
       .qualified(const: true, volatile: false, type: .void)
     )
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data, .dataProtocol:
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data, .dataProtocol, .optional:
        nil
     }
   }

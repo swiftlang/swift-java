@@ -194,7 +194,7 @@ struct CdeclLowering {
           )
 
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
+          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
             throw LoweringError.unhandledType(type)
           }
           // Typed pointers are lowered to (raw-pointer, count) pair.
@@ -252,6 +252,12 @@ struct CdeclLowering {
                 )
               ]
             ))
+
+        case .optional:
+          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
+            throw LoweringError.unhandledType(type)
+          }
+          return try lowerOptionalParameter(genericArgs[0], convention: convention, parameterName: parameterName)
 
         case .string:
           // 'String' is passed in by C string. i.e. 'UnsafePointer<Int8>' ('const uint8_t *')
@@ -336,8 +342,79 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(type)
 
-    case .optional:
-      throw LoweringError.unhandledType(type)
+    case .optional(let wrapped):
+      return try lowerOptionalParameter(wrapped, convention: convention, parameterName: parameterName)
+    }
+  }
+
+  /// Lower a Swift Optional to cdecl function type.
+  ///
+  /// - Parameters:
+  ///   - fn: the Swift function type to lower.
+  func lowerOptionalParameter(
+    _ wrappedType: SwiftType,
+    convention: SwiftParameterConvention,
+    parameterName: String
+  ) throws -> LoweredParameter {
+    // If there is a 1:1 mapping between this Swift type and a C type, lower it to 'UnsafePointer<T>?'
+    if let _ = try? CType(cdeclType: wrappedType) {
+      return LoweredParameter(
+        cdeclParameters: [
+          SwiftParameter(convention: .byValue, parameterName: parameterName, type: .optional(knownTypes.unsafePointer(wrappedType)))
+        ],
+        conversion: .pointee(.optionalChain(.placeholder))
+      )
+    }
+
+    switch wrappedType {
+    case .nominal(let nominal):
+      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+        switch knownType {
+        case .data:
+          break
+        case .unsafeRawPointer, .unsafeMutableRawPointer:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        case .unsafePointer, .unsafeMutablePointer:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        case .void, .string:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        case .dataProtocol:
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        default:
+          // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
+          throw LoweringError.unhandledType(.optional(wrappedType))
+        }
+      }
+
+      // Lower arbitrary nominal to `UnsafeRawPointer?`
+      return LoweredParameter(
+        cdeclParameters: [
+          SwiftParameter(convention: .byValue, parameterName: parameterName, type: .optional(knownTypes.unsafeRawPointer))
+        ],
+        conversion: .pointee(.typedPointer(.optionalChain(.placeholder), swiftType: wrappedType))
+      )
+
+    case .existential(let proto), .opaque(let proto):
+      if
+        let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
+        let concreteTy = knownTypes.representativeType(of: knownProtocol)
+      {
+        return try lowerOptionalParameter(concreteTy, convention: convention, parameterName: parameterName)
+      }
+      throw LoweringError.unhandledType(.optional(wrappedType))
+      
+    case .tuple(let tuple):
+      if tuple.count == 1 {
+        return try lowerOptionalParameter(tuple[0], convention: convention, parameterName: parameterName)
+      }
+      throw LoweringError.unhandledType(.optional(wrappedType))
+
+    case .function, .metatype, .optional:
+      throw LoweringError.unhandledType(.optional(wrappedType))
     }
   }
 
@@ -527,12 +604,12 @@ struct CdeclLowering {
         case .void:
           return LoweredResult(cdeclResultType: .void, cdeclOutParameters: [], conversion: .placeholder)
 
-        case .string:
-          // Returning string is not supported at this point.
-          throw LoweringError.unhandledType(type)
-
         case .data:
           break
+
+        case .string, .optional:
+          // Not supported at this point.
+          throw LoweringError.unhandledType(type)
 
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.

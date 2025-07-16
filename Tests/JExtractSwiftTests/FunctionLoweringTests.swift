@@ -383,6 +383,27 @@ final class FunctionLoweringTests {
     )
   }
 
+  @Test("Lowering optional primitives")
+  func lowerOptionalParameters() throws {
+    try assertLoweredFunction(
+      """
+      func fn(a1: Optional<Int>, a2: Int?, a3: Point?, a4: (some DataProtocol)?)  
+      """,
+      sourceFile: """
+      import Foundation
+      struct Point {}
+      """,
+      expectedCDecl:"""
+      @_cdecl("c_fn")
+      public func c_fn(_ a1: UnsafePointer<Int>?, _ a2: UnsafePointer<Int>?, _ a3: UnsafeRawPointer?, _ a4: UnsafeRawPointer?) {
+        fn(a1: a1?.pointee, a2: a2?.pointee, a3: a3?.assumingMemoryBound(to: Point.self).pointee, a4: a4?.assumingMemoryBound(to: Data.self).pointee)
+      }
+      """,
+      expectedCFunction: """
+      void c_fn(const ptrdiff_t *a1, const ptrdiff_t *a2, const void *a3, const void *a4)
+      """)
+  }
+
   @Test("Lowering read accessor")
   func lowerGlobalReadAccessor() throws {
     try assertLoweredVariableAccessor(

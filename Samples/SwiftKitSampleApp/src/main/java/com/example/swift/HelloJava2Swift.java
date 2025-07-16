@@ -22,6 +22,9 @@ import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
 
+import java.util.Optional;
+import java.util.OptionalLong;
+
 public class HelloJava2Swift {
 
     public static void main(String[] args) {
@@ -95,6 +98,7 @@ public class HelloJava2Swift {
             var bytes = arena.allocateFrom("hello");
             var dat = Data.init(bytes, bytes.byteSize(), arena);
             MySwiftLibrary.globalReceiveSomeDataProtocol(dat);
+            MySwiftLibrary.globalReceiveOptional(OptionalLong.of(12), Optional.of(dat));
         }
 
 

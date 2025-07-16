@@ -14,14 +14,14 @@
 
 package org.swift.swiftkit.ffm;
 
+import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.util.PlatformUtils;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.swift.swiftkit.core.util.StringUtils.stripPrefix;
@@ -423,6 +423,42 @@ public class SwiftRuntime {
      */
     public static MemorySegment toCString(String str, Arena arena) {
         return arena.allocateFrom(str);
+    }
+
+    public static MemorySegment toOptionalSegmentInt(OptionalInt opt, Arena arena) {
+        return opt.isPresent() ? arena.allocateFrom(ValueLayout.JAVA_INT, opt.getAsInt()) : MemorySegment.NULL;
+    }
+
+    public static MemorySegment toOptionalSegmentLong(OptionalLong opt, Arena arena) {
+        return opt.isPresent() ? arena.allocateFrom(ValueLayout.JAVA_LONG, opt.getAsLong()) : MemorySegment.NULL;
+    }
+
+    public static MemorySegment toOptionalSegmentDouble(OptionalDouble opt, Arena arena) {
+        return opt.isPresent() ? arena.allocateFrom(ValueLayout.JAVA_DOUBLE, opt.getAsDouble()) : MemorySegment.NULL;
+    }
+
+    public static MemorySegment toOptionalSegmentBoolean(Optional<Boolean> opt, Arena arena) {
+        return opt.map(val -> arena.allocateFrom(ValueLayout.JAVA_BYTE, (byte) (val ? 1 : 0))).orElse(MemorySegment.NULL);
+    }
+
+    public static MemorySegment toOptionalSegmentByte(Optional<Byte> opt, Arena arena) {
+        return opt.map(val -> arena.allocateFrom(ValueLayout.JAVA_BYTE, val)).orElse(MemorySegment.NULL);
+    }
+
+    public static MemorySegment toOptionalSegmentCharacter(Optional<Character> opt, Arena arena) {
+        return opt.map(val -> arena.allocateFrom(ValueLayout.JAVA_CHAR, val)).orElse(MemorySegment.NULL);
+    }
+
+    public static MemorySegment toOptionalSegmentShort(Optional<Short> opt, Arena arena) {
+        return opt.map(val -> arena.allocateFrom(ValueLayout.JAVA_SHORT, val)).orElse(MemorySegment.NULL);
+    }
+
+    public static MemorySegment toOptionalSegmentFloat(Optional<Float> opt, Arena arena) {
+        return opt.map(val -> arena.allocateFrom(ValueLayout.JAVA_FLOAT, val)).orElse(MemorySegment.NULL);
+    }
+
+    public static <Instance extends FFMSwiftInstance> MemorySegment toOptionalSegmentInstance(Optional<Instance> opt) {
+        return opt.map(instance -> instance.$memorySegment()).orElse(MemorySegment.NULL);
     }
 
     private static class swift_getTypeName {

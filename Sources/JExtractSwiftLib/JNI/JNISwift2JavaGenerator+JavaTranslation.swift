@@ -112,7 +112,7 @@ extension JNISwift2JavaGenerator {
           .unsafeRawPointer, .unsafeMutableRawPointer,
           .unsafePointer, .unsafeMutablePointer,
           .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-          .unsafeBufferPointer, .unsafeMutableBufferPointer, .data, .dataProtocol:
+          .unsafeBufferPointer, .unsafeMutableBufferPointer, .optional, .data, .dataProtocol:
         nil
       }
     }
