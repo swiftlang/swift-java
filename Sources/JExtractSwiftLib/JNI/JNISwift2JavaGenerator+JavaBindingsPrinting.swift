@@ -262,15 +262,25 @@ extension JNISwift2JavaGenerator {
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     printer.print("private static native void $destroy(long selfPointer);")
 
+    let funcName = "$createDestroyFunction"
     printer.print("@Override")
-    printer.printBraceBlock("protected Runnable $createDestroyFunction()") { printer in
+    printer.printBraceBlock("protected Runnable \(funcName)()") { printer in
       printer.print(
         """
-        long $selfPointer = this.pointer(); 
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+              "this", this,
+              "this.$memoryAddress()", this.$memoryAddress());
+        }
+        long self$ = this.$memoryAddress();
+        assert(self$ > 0);
         return new Runnable() {
           @Override
           public void run() {
-            \(type.swiftNominal.name).$destroy($selfPointer);
+            if (CallTraces.TRACE_DOWNCALLS) {
+              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy(" + self$ + ")");
+            }
+            \(type.swiftNominal.name).$destroy(self$);
           }
         };
         """

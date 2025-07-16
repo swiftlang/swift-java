@@ -108,8 +108,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment dat) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(dat);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(dat);
               }
               HANDLE.invokeExact(dat);
             } catch (Throwable ex$) {
@@ -146,8 +146,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment _result) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(_result);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(_result);
               }
               HANDLE.invokeExact(_result);
             } catch (Throwable ex$) {
@@ -189,8 +189,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment bytes, long count, java.lang.foreign.MemorySegment _result) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(bytes, count, _result);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(bytes, count, _result);
               }
               HANDLE.invokeExact(bytes, count, _result);
             } catch (Throwable ex$) {
@@ -230,8 +230,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment self) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(self);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(self);
               }
               return (long) HANDLE.invokeExact(self);
             } catch (Throwable ex$) {
@@ -270,8 +270,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment body, java.lang.foreign.MemorySegment self) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(body, self);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(body, self);
               }
               HANDLE.invokeExact(body, self);
             } catch (Throwable ex$) {
@@ -377,8 +377,8 @@ final class DataImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment dat) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(dat);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(dat);
               }
               HANDLE.invokeExact(dat);
             } catch (Throwable ex$) {

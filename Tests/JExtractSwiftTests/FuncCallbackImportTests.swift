@@ -77,8 +77,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment callback) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(callback);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(callback);
               }
               HANDLE.invokeExact(callback);
             } catch (Throwable ex$) {
@@ -167,8 +167,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment callback, java.lang.foreign.MemorySegment fn) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(callback, fn);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(callback, fn);
               }
               HANDLE.invokeExact(callback, fn);
             } catch (Throwable ex$) {
@@ -281,8 +281,8 @@ final class FuncCallbackImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment body) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(body);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(body);
               }
               HANDLE.invokeExact(body);
             } catch (Throwable ex$) {

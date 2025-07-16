@@ -116,8 +116,8 @@ extension FFMSwift2JavaGenerator {
       """
       public static \(returnTy) call(\(paramsStr)) {
         try {
-          if (SwiftRuntime.TRACE_DOWNCALLS) {
-            SwiftRuntime.traceDowncall(\(argsStr));
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall(\(argsStr));
           }
           \(maybeReturn)HANDLE.invokeExact(\(argsStr));
         } catch (Throwable ex$) {
