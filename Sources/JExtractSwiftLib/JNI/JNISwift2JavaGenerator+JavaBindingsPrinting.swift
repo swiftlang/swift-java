@@ -235,8 +235,8 @@ extension JNISwift2JavaGenerator {
       let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
       printer.print(
         """
-        long selfPointer = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
-        return new \(type.qualifiedName)(selfPointer, swiftArena$);
+        long self$ = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
+        return new \(type.qualifiedName)(self$, swiftArena$);
         """
       )
     }

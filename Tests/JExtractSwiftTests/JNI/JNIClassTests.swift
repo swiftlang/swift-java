@@ -135,8 +135,8 @@ struct JNIClassTests {
           * }
           */
         public static MyClass init(long x, long y, SwiftArena swiftArena$) {
-          long selfPointer = MyClass.allocatingInit(x, y);
-          return new MyClass(selfPointer, swiftArena$);
+          long self$ = MyClass.allocatingInit(x, y);
+          return new MyClass(self$, swiftArena$);
         }
         """,
         """
@@ -147,8 +147,8 @@ struct JNIClassTests {
           * }
           */
         public static MyClass init(SwiftArena swiftArena$) {
-          long selfPointer = MyClass.allocatingInit();
-          return new MyClass(selfPointer, swiftArena$);
+          long self$ = MyClass.allocatingInit();
+          return new MyClass(self$, swiftArena$);
         }
         """,
         """
@@ -172,17 +172,17 @@ struct JNIClassTests {
         """
         @_cdecl("Java_com_example_swift_MyClass_allocatingInit__")
         func Java_com_example_swift_MyClass_allocatingInit__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          let selfPointer = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          selfPointer.initialize(to: MyClass())
-          return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+          let self$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          self$.initialize(to: MyClass())
+          return Int64(Int(bitPattern: self$)).getJNIValue(in: environment)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_MyClass_allocatingInit__JJ")
         func Java_com_example_swift_MyClass_allocatingInit__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
-          let selfPointer = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          selfPointer.initialize(to: MyClass(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
-          return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+          let self$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          self$.initialize(to: MyClass(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          return Int64(Int(bitPattern: self$)).getJNIValue(in: environment)
         }
         """
       ]
@@ -200,9 +200,9 @@ struct JNIClassTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024destroy__J")
         func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
-          let pointer = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
-          pointer.deinitialize(count: 1)
-          pointer.deallocate()
+          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          self$.deinitialize(count: 1)
+          self$.deallocate()
         }
         """
       ]
