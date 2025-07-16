@@ -70,14 +70,21 @@ struct JNIClassTests {
       """
       @Override
       protected Runnable $createDestroyFunction() {
-        long $self = this.$memoryAddress();
+        long self$ = this.$memoryAddress();
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall("MyClass.$createDestroyFunction",
+              "this", this,
+              "self", self$);
+        }
         return new Runnable() {
           @Override
           public void run() {
-            MyClass.$destroy($self);
+            if (CallTraces.TRACE_DOWNCALLS) {
+              CallTraces.traceDowncall("MyClass.$destroy", "self", self$);
+            }
+            MyClass.$destroy(self$);
           }
         };
-      }
       """
     ])
   }
@@ -200,7 +207,15 @@ struct JNIClassTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024destroy__J")
         func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MySwiftClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           self$.deinitialize(count: 1)
           self$.deallocate()
         }
@@ -246,7 +261,15 @@ struct JNIClassTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
         func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("Missing self pointer in call to \\(#function)!")
+          }
           self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment!))
         }
         """,

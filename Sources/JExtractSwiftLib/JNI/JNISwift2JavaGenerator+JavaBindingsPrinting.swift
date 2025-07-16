@@ -206,13 +206,15 @@ extension JNISwift2JavaGenerator {
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock("public \(renderFunctionSignature(decl))") { printer in
       var arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
-      arguments.append("selfPointer")
+
+      let selfVarName = "self$"
+      arguments.append(selfVarName)
 
       let returnKeyword = translatedDecl.translatedFunctionSignature.resultType.isVoid ? "" : "return "
 
       printer.print(
         """
-        long self$ = this.$memoryAddress();
+        long \(selfVarName) = this.$memoryAddress();
         \(returnKeyword)\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")));
         """
       )
@@ -267,18 +269,17 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock("protected Runnable \(funcName)()") { printer in
       printer.print(
         """
+        long self$ = this.$memoryAddress();
         if (CallTraces.TRACE_DOWNCALLS) {
           CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
               "this", this,
-              "this.$memoryAddress()", this.$memoryAddress());
+              "self", self$);
         }
-        long self$ = this.$memoryAddress();
-        assert(self$ > 0);
         return new Runnable() {
           @Override
           public void run() {
             if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy(" + self$ + ")");
+              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
             }
             \(type.swiftNominal.name).$destroy(self$);
           }
