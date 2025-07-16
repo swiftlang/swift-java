@@ -52,7 +52,7 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
 
 
     @Override
-    public SwiftInstanceCleanup createCleanupAction() {
+    public SwiftInstanceCleanup $createCleanup() {
         var statusDestroyedFlag = $statusDestroyedFlag();
         Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 

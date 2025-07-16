@@ -41,11 +41,7 @@ public abstract class SwiftInstance {
      * <p/>
      * <b>Warning:</b> The cleanup action must not capture {@code this}.
      */
-    public abstract SwiftInstanceCleanup createCleanupAction();
-
-    // TODO: make this a flagset integer and/or use a field updater
-    /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
-    private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+    public abstract SwiftInstanceCleanup $createCleanup();
 
     /**
      * Exposes a boolean value which can be used to indicate if the object was destroyed.
