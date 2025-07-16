@@ -18,14 +18,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SwiftInstance {
 
-    /**
-     * The designated constructor of any imported Swift types.
-     *
-     * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
-     */
-    protected SwiftInstance(SwiftArena arena) {
-        arena.register(this);
-    }
+    // TODO: make this a flagset integer and/or use a field updater
+    /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
+    private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
 
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
