@@ -38,6 +38,11 @@ public abstract class JNISwiftInstance extends SwiftInstance {
         this.selfPointer = pointer;
     }
 
+    @Override
+    public long $memoryAddress() {
+        return selfPointer;
+    }
+
     /**
      * Creates a function that will be called when the value should be destroyed.
      * This will be code-generated to call a native method to do deinitialization and deallocation.

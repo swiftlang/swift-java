@@ -19,6 +19,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class SwiftInstance {
 
     /**
+     * The designated constructor of any imported Swift types.
+     *
+     * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
+     */
+    protected SwiftInstance(SwiftArena arena) {
+        arena.register(this);
+    }
+
+    /**
+     * Pointer to the {@code self} of the underlying Swift object or value.
+     *
+     * @apiNote When using this pointer one must ensure that the underlying object
+     *          is kept alive using some means (e.g. a class remains retained), as
+     *          this function does not ensure safety of the address in any way.
+     */
+    public abstract long $memoryAddress();
+
+    /**
      * Called when the arena has decided the value should be destroyed.
      * <p/>
      * <b>Warning:</b> The cleanup action must not capture {@code this}.
@@ -34,20 +52,10 @@ public abstract class SwiftInstance {
      * <p/>
      * This is exposing the object, rather than performing the action because we don't want to accidentally
      * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
-     * if using an GC managed instance (e.g. using an {@link AutoSwiftMemorySession}.
+     * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
      */
     public final AtomicBoolean $statusDestroyedFlag() {
         return this.$state$destroyed;
-    }
-
-    /**
-     * The designated constructor of any imported Swift types.
-     *
-     * @param pointer a pointer to the memory containing the value
-     * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
-     */
-    protected SwiftInstance(SwiftArena arena) {
-        arena.register(this);
     }
 
     /**

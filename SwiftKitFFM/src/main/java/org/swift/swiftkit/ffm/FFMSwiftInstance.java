@@ -23,18 +23,6 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
     private final MemorySegment memorySegment;
 
     /**
-     * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
-     */
-    public final MemorySegment $memorySegment() {
-        return this.memorySegment;
-    }
-
-    /**
-     * The Swift type metadata of this type.
-     */
-    public abstract SwiftAnyType $swiftType();
-
-    /**
      * The designated constructor of any imported Swift types.
      *
      * @param segment the memory segment.
@@ -44,6 +32,24 @@ public abstract class FFMSwiftInstance extends SwiftInstance {
         super(arena);
         this.memorySegment = segment;
     }
+
+    /**
+     * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
+     */
+    public final MemorySegment $memorySegment() {
+        return this.memorySegment;
+    }
+
+    @Override
+    public long $memoryAddress() {
+        return $memorySegment().address();
+    }
+
+    /**
+     * The Swift type metadata of this type.
+     */
+    public abstract SwiftAnyType $swiftType();
+
 
     @Override
     public SwiftInstanceCleanup createCleanupAction() {
