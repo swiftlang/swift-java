@@ -66,8 +66,8 @@ final class FunctionDescriptorTests {
             private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(long i) {
               try {
-                if (SwiftRuntime.TRACE_DOWNCALLS) {
-                  SwiftRuntime.traceDowncall(i);
+                if (CallTraces.TRACE_DOWNCALLS) {
+                  CallTraces.traceDowncall(i);
                 }
                 HANDLE.invokeExact(i);
               } catch (Throwable ex$) {
@@ -102,8 +102,8 @@ final class FunctionDescriptorTests {
             private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(long l, int i32) {
               try {
-                if (SwiftRuntime.TRACE_DOWNCALLS) {
-                  SwiftRuntime.traceDowncall(l, i32);
+                if (CallTraces.TRACE_DOWNCALLS) {
+                  CallTraces.traceDowncall(l, i32);
                 }
                 HANDLE.invokeExact(l, i32);
               } catch (Throwable ex$) {
@@ -138,8 +138,8 @@ final class FunctionDescriptorTests {
             private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static long call(long i) {
               try {
-                if (SwiftRuntime.TRACE_DOWNCALLS) {
-                  SwiftRuntime.traceDowncall(i);
+                if (CallTraces.TRACE_DOWNCALLS) {
+                  CallTraces.traceDowncall(i);
                 }
                 return (long) HANDLE.invokeExact(i);
               } catch (Throwable ex$) {
@@ -174,8 +174,8 @@ final class FunctionDescriptorTests {
             private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static int call(java.lang.foreign.MemorySegment self) {
               try {
-                if (SwiftRuntime.TRACE_DOWNCALLS) {
-                  SwiftRuntime.traceDowncall(self);
+                if (CallTraces.TRACE_DOWNCALLS) {
+                  CallTraces.traceDowncall(self);
                 }
                 return (int) HANDLE.invokeExact(self);
               } catch (Throwable ex$) {
@@ -209,8 +209,8 @@ final class FunctionDescriptorTests {
             private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
             public static void call(int newValue, java.lang.foreign.MemorySegment self) {
               try {
-                if (SwiftRuntime.TRACE_DOWNCALLS) {
-                  SwiftRuntime.traceDowncall(newValue, self);
+                if (CallTraces.TRACE_DOWNCALLS) {
+                  CallTraces.traceDowncall(newValue, self);
                 }
                 HANDLE.invokeExact(newValue, self);
               } catch (Throwable ex$) {

@@ -18,6 +18,7 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 
+import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
@@ -43,30 +44,30 @@ public class HelloJava2Swift {
 
         long cnt = MySwiftLibrary.globalWriteString("String from Java");
 
-        SwiftRuntime.trace("count = " + cnt);
+        CallTraces.trace("count = " + cnt);
 
         MySwiftLibrary.globalCallMeRunnable(() -> {
-            SwiftRuntime.trace("running runnable");
+            CallTraces.trace("running runnable");
         });
 
-        SwiftRuntime.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
+        CallTraces.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
 
         MySwiftLibrary.withBuffer((buf) -> {
-            SwiftRuntime.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
+            CallTraces.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
         });
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
 
             // just checking retains/releases work
-            SwiftRuntime.trace("retainCount = " + SwiftRuntime.retainCount(obj));
+            CallTraces.trace("retainCount = " + SwiftRuntime.retainCount(obj));
             SwiftRuntime.retain(obj);
-            SwiftRuntime.trace("retainCount = " + SwiftRuntime.retainCount(obj));
+            CallTraces.trace("retainCount = " + SwiftRuntime.retainCount(obj));
             SwiftRuntime.release(obj);
-            SwiftRuntime.trace("retainCount = " + SwiftRuntime.retainCount(obj));
+            CallTraces.trace("retainCount = " + SwiftRuntime.retainCount(obj));
 
             obj.setCounter(12);
-            SwiftRuntime.trace("obj.counter = " + obj.getCounter());
+            CallTraces.trace("obj.counter = " + obj.getCounter());
 
             obj.voidMethod();
             obj.takeIntMethod(42);
@@ -75,9 +76,9 @@ public class HelloJava2Swift {
             otherObj.voidMethod();
 
             MySwiftStruct swiftValue = MySwiftStruct.init(2222, 1111, arena);
-            SwiftRuntime.trace("swiftValue.capacity = " + swiftValue.getCapacity());
+            CallTraces.trace("swiftValue.capacity = " + swiftValue.getCapacity());
             swiftValue.withCapLen((cap, len) -> {
-                SwiftRuntime.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
+                CallTraces.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
             });
         }
 
@@ -85,12 +86,12 @@ public class HelloJava2Swift {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var origBytes = arena.allocateFrom("foobar");
             var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
-            SwiftRuntime.trace("origDat.count = " + origDat.getCount());
+            CallTraces.trace("origDat.count = " + origDat.getCount());
             
             var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
             retDat.withUnsafeBytes((retBytes) -> {
                 var str = retBytes.getString(0);
-                SwiftRuntime.trace("retStr=" + str);
+                CallTraces.trace("retStr=" + str);
             });
         }
 

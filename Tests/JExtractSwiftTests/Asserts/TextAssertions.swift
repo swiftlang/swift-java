@@ -28,7 +28,7 @@ func assertOutput(
   _ mode: JExtractGenerationMode,
   _ renderKind: RenderKind,
   swiftModuleName: String = "SwiftModule",
-  detectChunkByInitialLines: Int = 4,
+  detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   expectedChunks: [String],
   fileID: String = #fileID,
   filePath: String = #filePath,
@@ -79,19 +79,22 @@ func assertOutput(
   let gotLines = output.split(separator: "\n").filter { l in
     l.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count > 0
   }
-  for expected in expectedChunks {
-    let expectedLines = expected.split(separator: "\n")
+  for expectedChunk in expectedChunks {
+    let expectedLines = expectedChunk.split(separator: "\n")
+    let detectChunkByInitialLines = min(expectedLines.count, _detectChunkByInitialLines)
+    precondition(detectChunkByInitialLines > 0, "Chunk size to detect cannot be zero lines!")
 
     var matchingOutputOffset: Int? = nil
     let expectedInitialMatchingLines = expectedLines[0..<min(expectedLines.count, detectChunkByInitialLines)]
       .map({$0.trimmingCharacters(in: .whitespacesAndNewlines)})
       .joined(separator: "\n")
-    for offset in 0..<gotLines.count where gotLines.count > (offset+detectChunkByInitialLines) {
-      let textLinesAtOffset = gotLines[offset..<offset+detectChunkByInitialLines]
+
+    for lineOffset in 0..<gotLines.count where gotLines.count > (lineOffset+detectChunkByInitialLines) {
+      let textLinesAtOffset = gotLines[lineOffset..<lineOffset+detectChunkByInitialLines]
         .map({$0.trimmingCharacters(in: .whitespacesAndNewlines)})
         .joined(separator: "\n")
       if textLinesAtOffset == expectedInitialMatchingLines {
-        matchingOutputOffset = offset
+        matchingOutputOffset = lineOffset
         break
       }
     }
@@ -105,13 +108,14 @@ func assertOutput(
       
       print("==== ---------------------------------------------------------------")
       print("Expected output:")
-      print(expected.yellow)
+      print("'\(expectedChunk.yellow)'")
       print("==== ---------------------------------------------------------------")
       print("Got output:")
       print(output)
       print("==== ---------------------------------------------------------------")
       
-      #expect(output.contains(expected), sourceLocation: sourceLocation)
+      #expect(output.contains(expectedChunk), sourceLocation: sourceLocation)
+      fatalError("Failed: \(filePath):\(line)")
       continue
     }
 

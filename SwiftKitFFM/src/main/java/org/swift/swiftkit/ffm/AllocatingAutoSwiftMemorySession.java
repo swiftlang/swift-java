@@ -56,7 +56,7 @@ final class AllocatingAutoSwiftMemorySession implements AllocatingSwiftArena {
 
         // We make sure we don't capture `instance` in the
         // cleanup action, so we can ignore the warning below.
-        var cleanupAction = instance.createCleanupAction();
+        var cleanupAction = instance.$createCleanup();
         cleaner.register(instance, cleanupAction);
     }
 

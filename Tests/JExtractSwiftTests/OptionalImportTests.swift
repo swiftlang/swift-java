@@ -47,8 +47,8 @@ final class OptionalImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment arg) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(arg);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(arg);
               }
               HANDLE.invokeExact(arg);
             } catch (Throwable ex$) {
@@ -87,8 +87,8 @@ final class OptionalImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment arg) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(arg);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(arg);
               }
               HANDLE.invokeExact(arg);
             } catch (Throwable ex$) {
@@ -128,8 +128,8 @@ final class OptionalImportTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static void call(java.lang.foreign.MemorySegment arg) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(arg);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(arg);
               }
               HANDLE.invokeExact(arg);
             } catch (Throwable ex$) {

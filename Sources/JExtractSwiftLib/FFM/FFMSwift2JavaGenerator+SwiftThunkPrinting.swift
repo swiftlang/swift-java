@@ -131,6 +131,7 @@ extension FFMSwift2JavaGenerator {
       }
       printer.print("import \(module)")
     }
+    printer.println()
   }
 }
 

@@ -45,8 +45,8 @@ final class StringPassingTests {
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
           public static long call(java.lang.foreign.MemorySegment string) {
             try {
-              if (SwiftRuntime.TRACE_DOWNCALLS) {
-                SwiftRuntime.traceDowncall(string);
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(string);
               }
               return (long) HANDLE.invokeExact(string);
             } catch (Throwable ex$) {

@@ -15,6 +15,7 @@
 package org.swift.swiftkit.ffm;
 
 import org.swift.swiftkit.core.SwiftInstance;
+import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.util.PlatformUtils;
 
 import java.lang.foreign.*;
@@ -24,6 +25,7 @@ import java.lang.invoke.VarHandle;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.swift.swiftkit.core.CallTraces.traceDowncall;
 import static org.swift.swiftkit.core.util.StringUtils.stripPrefix;
 import static org.swift.swiftkit.core.util.StringUtils.stripSuffix;
 
@@ -31,7 +33,6 @@ public class SwiftRuntime {
 
     public static final String STDLIB_DYLIB_NAME = "swiftCore";
     public static final String SWIFTKITSWIFT_DYLIB_NAME = "SwiftKitSwift";
-    public static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
     private static final String STDLIB_MACOS_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
 
@@ -63,33 +64,6 @@ public class SwiftRuntime {
     }
 
     public SwiftRuntime() {
-    }
-
-    public static void traceDowncall(Object... args) {
-        var ex = new RuntimeException();
-
-        String traceArgs = Arrays.stream(args)
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        System.out.printf("[java][%s:%d] Downcall: %s.%s(%s)\n",
-                ex.getStackTrace()[1].getFileName(),
-                ex.getStackTrace()[1].getLineNumber(),
-                ex.getStackTrace()[1].getClassName(),
-                ex.getStackTrace()[1].getMethodName(),
-                traceArgs);
-    }
-
-    public static void trace(Object... args) {
-        var ex = new RuntimeException();
-
-        String traceArgs = Arrays.stream(args)
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        System.out.printf("[java][%s:%d] %s: %s\n",
-                ex.getStackTrace()[1].getFileName(),
-                ex.getStackTrace()[1].getLineNumber(),
-                ex.getStackTrace()[1].getMethodName(),
-                traceArgs);
     }
 
     static MemorySegment findOrThrow(String symbol) {
@@ -152,7 +126,7 @@ public class SwiftRuntime {
     public static long retainCount(MemorySegment object) {
         var mh$ = swift_retainCount.HANDLE;
         try {
-            if (TRACE_DOWNCALLS) {
+            if (CallTraces.TRACE_DOWNCALLS) {
                 traceDowncall("swift_retainCount", object);
             }
             return (long) mh$.invokeExact(object);
@@ -182,7 +156,7 @@ public class SwiftRuntime {
     public static void retain(MemorySegment object) {
         var mh$ = swift_retain.HANDLE;
         try {
-            if (TRACE_DOWNCALLS) {
+            if (CallTraces.TRACE_DOWNCALLS) {
                 traceDowncall("swift_retain", object);
             }
             mh$.invokeExact(object);
@@ -212,7 +186,7 @@ public class SwiftRuntime {
     public static void release(MemorySegment object) {
         var mh$ = swift_release.HANDLE;
         try {
-            if (TRACE_DOWNCALLS) {
+            if (CallTraces.TRACE_DOWNCALLS) {
                 traceDowncall("swift_release", object);
             }
             mh$.invokeExact(object);
@@ -248,7 +222,7 @@ public class SwiftRuntime {
     public static MemorySegment getTypeByName(String string) {
         var mh$ = swift_getTypeByName.HANDLE;
         try {
-            if (TRACE_DOWNCALLS) {
+            if (CallTraces.TRACE_DOWNCALLS) {
                 traceDowncall("_typeByName");
             }
             // TODO: A bit annoying to generate, we need an arena for the conversion...
@@ -303,7 +277,7 @@ public class SwiftRuntime {
             // contain this, but we don't need it for type lookup
             mangledName = stripSuffix(mangledName, "Ma");
             mangledName = stripSuffix(mangledName, "CN");
-            if (TRACE_DOWNCALLS) {
+            if (CallTraces.TRACE_DOWNCALLS) {
                 traceDowncall("swift_getTypeByMangledNameInEnvironment", mangledName);
             }
             try (Arena arena = Arena.ofConfined()) {

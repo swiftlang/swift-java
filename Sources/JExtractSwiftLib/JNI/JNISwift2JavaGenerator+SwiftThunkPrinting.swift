@@ -138,9 +138,9 @@ extension JNISwift2JavaGenerator {
       // TODO: Throwing initializers
       printer.print(
         """
-        let selfPointer = UnsafeMutablePointer<\(typeName)>.allocate(capacity: 1)
-        selfPointer.initialize(to: \(typeName)(\(downcallArguments)))
-        return Int64(Int(bitPattern: selfPointer)).getJNIValue(in: environment)
+        let self$ = UnsafeMutablePointer<\(typeName)>.allocate(capacity: 1)
+        self$.initialize(to: \(typeName)(\(downcallArguments)))
+        return Int64(Int(bitPattern: self$)).getJNIValue(in: environment)
         """
       )
     }
@@ -184,22 +184,20 @@ extension JNISwift2JavaGenerator {
     let translatedDecl = self.translatedDecl(for: decl)! // We will only call this method if can translate the decl.
     let swiftParentName = decl.parentType!.asNominalTypeDeclaration!.qualifiedName
 
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     printCDecl(
       &printer,
       javaMethodName: "$\(translatedDecl.name)",
       parentName: translatedDecl.parentName,
       parameters: translatedDecl.translatedFunctionSignature.parameters + [
-        JavaParameter(name: "selfPointer", type: .long)
+        selfPointerParam
       ],
       isStatic: true,
       resultType: translatedDecl.translatedFunctionSignature.resultType
     ) { printer in
-      printer.print(
-        """
-        let self$ = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
-        """
-      )
-      self.printFunctionDowncall(&printer, decl, calleeName: "self$.pointee")
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer,
+          swiftParentName: swiftParentName, selfPointerParam)
+      self.printFunctionDowncall(&printer, decl, calleeName: "\(selfVar).pointee")
     }
   }
 
@@ -320,27 +318,52 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the implementation of the destroy function.
   private func printDestroyFunctionThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     printCDecl(
       &printer,
       javaMethodName: "$destroy",
       parentName: type.swiftNominal.name,
       parameters: [
-        JavaParameter(name: "selfPointer", type: .long)
+        selfPointerParam
       ],
       isStatic: true,
       resultType: .void
     ) { printer in
+      let parentName = type.qualifiedName
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
       // Deinitialize the pointer allocated (which will call the VWT destroy method)
       // then deallocate the memory.
       printer.print(
         """
-        let pointer = UnsafeMutablePointer<\(type.qualifiedName)>(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment!)))!
-        pointer.deinitialize(count: 1)
-        pointer.deallocate()
+        \(selfVar).deinitialize(count: 1)
+        \(selfVar).deallocate()
         """
       )
     }
   }
+
+  /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`
+  ///
+  /// - Returns: name of the created "self" variable
+  private func printSelfJLongToUnsafeMutablePointer(
+      _ printer: inout CodePrinter,
+      swiftParentName: String, _ selfPointerParam: JavaParameter) -> String {
+    let newSelfParamName = "self$"
+    printer.print(
+      """
+      guard let env$ = environment else {
+        fatalError("Missing JNIEnv in downcall to \\(#function)")
+      }
+      assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
+      let selfBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfBits$) else {
+        fatalError("self memory address was null in call to \\(#function)!")
+      }
+      """
+    )
+    return newSelfParamName
+  }
+
 
   /// Renders the arguments for making a downcall
   private func renderDowncallArguments(

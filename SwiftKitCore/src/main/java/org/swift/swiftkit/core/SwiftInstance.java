@@ -17,47 +17,36 @@ package org.swift.swiftkit.core;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SwiftInstance {
-    /// Pointer to the "self".
-    private final long selfPointer;
-
-    /**
-     * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
-     */
-    public final long pointer() {
-        return this.selfPointer;
-    }
-
-    /**
-     * Called when the arena has decided the value should be destroyed.
-     * <p/>
-     * <b>Warning:</b> The cleanup action must not capture {@code this}.
-     */
-    public abstract SwiftInstanceCleanup createCleanupAction();
 
     // TODO: make this a flagset integer and/or use a field updater
     /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
     private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
 
     /**
+     * Pointer to the {@code self} of the underlying Swift object or value.
+     *
+     * @apiNote When using this pointer one must ensure that the underlying object
+     *          is kept alive using some means (e.g. a class remains retained), as
+     *          this function does not ensure safety of the address in any way.
+     */
+    public abstract long $memoryAddress();
+
+    /**
+     * Called when the arena has decided the value should be destroyed.
+     * <p/>
+     * <b>Warning:</b> The cleanup action must not capture {@code this}.
+     */
+    public abstract SwiftInstanceCleanup $createCleanup();
+
+    /**
      * Exposes a boolean value which can be used to indicate if the object was destroyed.
      * <p/>
      * This is exposing the object, rather than performing the action because we don't want to accidentally
      * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
-     * if using an GC managed instance (e.g. using an {@link AutoSwiftMemorySession}.
+     * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
      */
     public final AtomicBoolean $statusDestroyedFlag() {
         return this.$state$destroyed;
-    }
-
-    /**
-     * The designated constructor of any imported Swift types.
-     *
-     * @param pointer a pointer to the memory containing the value
-     * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
-     */
-    protected SwiftInstance(long pointer, SwiftArena arena) {
-        this.selfPointer = pointer;
-        arena.register(this);
     }
 
     /**

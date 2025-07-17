@@ -206,13 +206,15 @@ extension JNISwift2JavaGenerator {
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock("public \(renderFunctionSignature(decl))") { printer in
       var arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
-      arguments.append("selfPointer")
+
+      let selfVarName = "self$"
+      arguments.append(selfVarName)
 
       let returnKeyword = translatedDecl.translatedFunctionSignature.resultType.isVoid ? "" : "return "
 
       printer.print(
         """
-        long selfPointer = this.pointer();
+        long \(selfVarName) = this.$memoryAddress();
         \(returnKeyword)\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")));
         """
       )
@@ -235,8 +237,8 @@ extension JNISwift2JavaGenerator {
       let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
       printer.print(
         """
-        long selfPointer = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
-        return new \(type.qualifiedName)(selfPointer, swiftArena$);
+        long self$ = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
+        return new \(type.qualifiedName)(self$, swiftArena$);
         """
       )
     }
@@ -262,15 +264,24 @@ extension JNISwift2JavaGenerator {
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     printer.print("private static native void $destroy(long selfPointer);")
 
+    let funcName = "$createDestroyFunction"
     printer.print("@Override")
-    printer.printBraceBlock("protected Runnable $createDestroyFunction()") { printer in
+    printer.printBraceBlock("protected Runnable \(funcName)()") { printer in
       printer.print(
         """
-        long $selfPointer = this.pointer(); 
+        long self$ = this.$memoryAddress();
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+              "this", this,
+              "self", self$);
+        }
         return new Runnable() {
           @Override
           public void run() {
-            \(type.swiftNominal.name).$destroy($selfPointer);
+            if (CallTraces.TRACE_DOWNCALLS) {
+              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
+            }
+            \(type.swiftNominal.name).$destroy(self$);
           }
         };
         """
