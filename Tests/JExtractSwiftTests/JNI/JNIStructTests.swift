@@ -144,9 +144,8 @@ struct JNIStructTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           self$.deinitialize(count: 1)
           self$.deallocate()
@@ -198,9 +197,8 @@ struct JNIStructTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment!))
         }

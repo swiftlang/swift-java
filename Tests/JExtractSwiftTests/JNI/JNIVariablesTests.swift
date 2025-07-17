@@ -74,9 +74,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           let result = self$.pointee.constant
           return result.getJNIValue(in: environment)
@@ -144,9 +143,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           let result = self$.pointee.mutable
           return result.getJNIValue(in: environment)
@@ -160,9 +158,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           self$.pointee.mutable = Int64(fromJNI: newValue, in: environment!)
         }
@@ -214,9 +211,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
 
           let result = self$.pointee.computed
@@ -270,9 +266,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
 
           do {
@@ -346,9 +341,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
 
           let result = self$.pointee.getterAndSetter
@@ -363,9 +357,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
 
           self$.pointee.getterAndSetter = Int64(fromJNI: newValue, in: environment!)
@@ -433,9 +426,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           let result = self$.pointee.someBoolean
           return result.getJNIValue(in: environment)
@@ -449,9 +441,8 @@ struct JNIVariablesTests {
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          assert(selfBits$ != 0, "$self memory address was null: selfPointer = \\(selfPointer)" )
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("Missing self pointer in call to \\(#function)!")
+            fatalError("self memory address was null in call to \\(#function)!")
           }
           self$.pointee.someBoolean = Bool(fromJNI: newValue, in: environment!)
         }

@@ -356,9 +356,8 @@ extension JNISwift2JavaGenerator {
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
       let selfBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
-      assert(selfBits$ != 0, "$self memory address was null: \(selfPointerParam.name) = \\(\(selfPointerParam.name))" )
       guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfBits$) else {
-        fatalError("Missing self pointer in call to \\(#function)!")
+        fatalError("self memory address was null in call to \\(#function)!")
       }
       """
     )
