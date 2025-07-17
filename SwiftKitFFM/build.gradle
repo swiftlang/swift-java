@@ -14,13 +14,30 @@
 
 plugins {
     id("build-logic.java-application-conventions")
+    id("maven-publish")
 }
 
 group = "org.swift.swiftkit"
 version = "1.0-SNAPSHOT"
+base {
+    archivesName = "swiftkit-ffm"
+}
 
 repositories {
+    mavenLocal()
     mavenCentral()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = group
+            artifactId = 'swiftkit-ffm'
+            version = '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
 }
 
 java {
