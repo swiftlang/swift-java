@@ -168,7 +168,6 @@ final class MethodImportTests {
     }
 
     assertOutput(
-      dump: true,
       output,
       expected:
         """
@@ -212,7 +211,6 @@ final class MethodImportTests {
     }
 
     assertOutput(
-      dump: true,
       output,
       expected:
         """
@@ -256,7 +254,6 @@ final class MethodImportTests {
     }
 
     assertOutput(
-      dump: true,
       output,
       expected:
         """
