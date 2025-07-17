@@ -198,6 +198,15 @@ let package = Package(
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
   targets: [
+    .target(
+      name: "Documentation",
+      dependencies: [
+        "JavaKit",
+        "SwiftKitSwift",
+        "SwiftJavaTool",
+      ]
+    ),
+    
     .macro(
       name: "JavaKitMacros",
       dependencies: [
