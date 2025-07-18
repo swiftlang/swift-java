@@ -160,15 +160,15 @@ extension ImportedFunc {
     let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
 
     if !returnsBoolean {
-      return "get\(self.name.toCamelCase)"
+      return "get\(self.name.firstCharacterUppercased)"
     } else if !self.name.hasJavaBooleanNamingConvention {
-      return "is\(self.name.toCamelCase)"
+      return "is\(self.name.firstCharacterUppercased)"
     } else {
-      return self.name.toCamelCase
+      return self.name
     }
   }
 
   var javaSetterName: String {
-    "set\(self.name.toCamelCase)"
+    "set\(self.name.firstCharacterUppercased)"
   }
 }

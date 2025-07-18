@@ -411,7 +411,7 @@ struct JNIVariablesTests {
   }
 
   @Test
-  func boolean_swiftThunks() throws {
+  func someBoolean_swiftThunks() throws {
     try assertOutput(
       input: membersSource,
       .jni,
@@ -447,6 +447,60 @@ struct JNIVariablesTests {
           self$.pointee.someBoolean = Bool(fromJNI: newValue, in: environment!)
         }
         """
+      ]
+    )
+  }
+
+  @Test
+  func isBoolean_javaBindings() throws {
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 8,
+      expectedChunks: [
+      """
+      /**
+      * Downcall to Swift:
+      * {@snippet lang=swift :
+      * public let isBoolean: Bool
+      * }
+      */
+      public boolean isBoolean() {
+        long self$ = this.$memoryAddress();
+        return MyClass.$isBoolean(self$);
+      }
+      """,
+      """
+      private static native boolean $isBoolean(long selfPointer);
+      """,
+      ]
+    )
+  }
+
+  @Test
+  func isBoolean_swiftThunks() throws {
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024isBoolean__J")
+        func Java_com_example_swift_MyClass__00024isBoolean__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jboolean {
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("self memory address was null in call to \\(#function)!")
+          }
+          let result = self$.pointee.isBoolean
+          return result.getJNIValue(in: environment)
+        }
+        """,
       ]
     )
   }

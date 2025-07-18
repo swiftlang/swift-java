@@ -14,8 +14,7 @@
 
 extension String {
 
-  // TODO: naive implementation good enough for our simple case `methodMethodSomething` -> `MethodSomething`
-  var toCamelCase: String {
+  var firstCharacterUppercased: String {
     guard let f = first else {
       return self
     }
