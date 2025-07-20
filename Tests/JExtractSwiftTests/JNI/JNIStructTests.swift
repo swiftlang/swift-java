@@ -98,12 +98,11 @@ struct JNIStructTests {
           * }
           */
         public static MyStruct init(long x, long y, SwiftArena swiftArena$) {
-          long self$ = MyStruct.allocatingInit(x, y);
-          return new MyStruct(self$, swiftArena$);
+          return new MyStruct(MyStruct.$init(x, y), swiftArena$);
         }
         """,
         """
-        private static native long allocatingInit(long x, long y);
+        private static native long $init(long x, long y);
         """,
       ]
     )
@@ -118,11 +117,12 @@ struct JNIStructTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyStruct_allocatingInit__JJ")
-        func Java_com_example_swift_MyStruct_allocatingInit__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
-          let self$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
-          self$.initialize(to: MyStruct(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
-          return Int64(Int(bitPattern: self$)).getJNIValue(in: environment)
+        @_cdecl("Java_com_example_swift_MyStruct__00024init__JJ")
+        func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
+          let _result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
+          _result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          let _resultBits$ = Int64(Int(bitPattern: _result$))
+          return _resultBits$.getJNIValue(in: environment!)
         }
         """
       ]
@@ -170,12 +170,11 @@ struct JNIStructTests {
           * }
           */
         public void doSomething(long x) {
-          long self$ = this.$memoryAddress();
-          MyStruct.$doSomething(x, self$);
+          MyStruct.$doSomething(x, this.$memoryAddress());
         }
         """,
         """
-        private static native void $doSomething(long x, long selfPointer);
+        private static native void $doSomething(long x, long self);
         """
       ]
     )
@@ -191,12 +190,9 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024doSomething__JJ")
-        func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
-          guard let env$ = environment else {
-            fatalError("Missing JNIEnv in downcall to \\(#function)")
-          }
-          assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+        func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
+          assert(self != 0, "self memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: self, in: environment!))
           guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
             fatalError("self memory address was null in call to \\(#function)!")
           }

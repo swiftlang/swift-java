@@ -29,4 +29,14 @@ extension JavaType {
   static var javaLangRunnable: JavaType {
     .class(package: "java.lang", name: "Runnable")
   }
+
+  /// The description of the type java.lang.Class.
+  static var javaLangClass: JavaType {
+    .class(package: "java.lang", name: "Class")
+  }
+
+  /// The description of the type java.lang.Throwable.
+  static var javaLangThrowable: JavaType {
+    .class(package: "java.lang", name: "Throwable")
+  }
 }

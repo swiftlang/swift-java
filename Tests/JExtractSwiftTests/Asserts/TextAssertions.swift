@@ -115,7 +115,7 @@ func assertOutput(
       print("==== ---------------------------------------------------------------")
       
       #expect(output.contains(expectedChunk), sourceLocation: sourceLocation)
-      fatalError("Failed: \(filePath):\(line)")
+//      fatalError("Failed: \(filePath):\(line)")
       continue
     }
 
