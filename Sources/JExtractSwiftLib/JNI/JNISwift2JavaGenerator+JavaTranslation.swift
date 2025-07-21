@@ -24,7 +24,7 @@ extension JNISwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(swiftModuleName: swiftModuleName)
+      let translation = JavaTranslation(swiftModuleName: swiftModuleName, javaPackage: self.javaPackage)
       translated = try translation.translate(decl)
     } catch {
       self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -37,17 +37,10 @@ extension JNISwift2JavaGenerator {
 
   struct JavaTranslation {
     let swiftModuleName: String
+    let javaPackage: String
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
-      let nativeTranslation = NativeJavaTranslation()
-
-      // Swift -> Java
-      let translatedFunctionSignature = try translate(functionSignature: decl.functionSignature)
-      // Java -> Java (native)
-      let nativeFunctionSignature = try nativeTranslation.translate(
-        functionSignature: decl.functionSignature,
-        translatedFunctionSignature: translatedFunctionSignature
-      )
+      let nativeTranslation = NativeJavaTranslation(javaPackage: self.javaPackage)
 
       // Types with no parent will be outputted inside a "module" class.
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
@@ -59,19 +52,81 @@ extension JNISwift2JavaGenerator {
       case .function, .initializer: decl.name
       }
 
+      // Swift -> Java
+      let translatedFunctionSignature = try translate(
+        functionSignature: decl.functionSignature,
+        methodName: javaName,
+        parentName: parentName
+      )
+      // Java -> Java (native)
+      let nativeFunctionSignature = try nativeTranslation.translate(
+        functionSignature: decl.functionSignature,
+        translatedFunctionSignature: translatedFunctionSignature,
+        methodName: javaName,
+        parentName: parentName
+      )
+
+      // Closures.
+      var funcTypes: [TranslatedFunctionType] = []
+      for (idx, param) in decl.functionSignature.parameters.enumerated() {
+        let parameterName = param.parameterName ?? "_\(idx)"
+
+        switch param.type {
+        case .function(let funcTy):
+          let translatedClosure = try translateFunctionType(
+            name: parameterName,
+            swiftType: funcTy,
+            parentName: parentName
+          )
+          funcTypes.append(translatedClosure)
+        default:
+          break
+        }
+      }
+
       return TranslatedFunctionDecl(
         name: javaName,
         nativeFunctionName: "$\(javaName)",
         parentName: parentName,
+        functionTypes: funcTypes,
         translatedFunctionSignature: translatedFunctionSignature,
         nativeFunctionSignature: nativeFunctionSignature
       )
     }
 
-    func translate(functionSignature: SwiftFunctionSignature) throws -> TranslatedFunctionSignature {
+    /// Translate Swift closure type to Java functional interface.
+    func translateFunctionType(
+      name: String,
+      swiftType: SwiftFunctionType,
+      parentName: String
+    ) throws -> TranslatedFunctionType {
+      var translatedParams: [TranslatedParameter] = []
+
+      for (i, param) in swiftType.parameters.enumerated() {
+        let paramName = param.parameterName ?? "_\(i)"
+        translatedParams.append(
+          try translateParameter(swiftType: param.type, parameterName: paramName, methodName: name, parentName: parentName)
+        )
+      }
+
+      let transltedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType))
+
+      return TranslatedFunctionType(
+        name: name,
+        parameters: translatedParams,
+        result: transltedResult,
+        swiftType: swiftType
+      )
+    }
+
+    func translate(
+      functionSignature: SwiftFunctionSignature,
+      methodName: String,
+      parentName: String
+    ) throws -> TranslatedFunctionSignature {
       let parameters = try functionSignature.parameters.enumerated().map { idx, param in
         let parameterName = param.parameterName ?? "arg\(idx))"
-        return try translateParameter(swiftType: param.type, parameterName: parameterName)
+        return try translateParameter(swiftType: param.type, parameterName: parameterName, methodName: methodName, parentName: parentName)
       }
 
       // 'self'
@@ -79,7 +134,9 @@ extension JNISwift2JavaGenerator {
       if case .instance(let swiftSelf) = functionSignature.selfParameter {
         selfParameter = try self.translateParameter(
           swiftType: swiftSelf.type,
-          parameterName: swiftSelf.parameterName ?? "self"
+          parameterName: swiftSelf.parameterName ?? "self",
+          methodName: methodName,
+          parentName: parentName
         )
       } else {
         selfParameter = nil
@@ -92,7 +149,12 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    func translateParameter(swiftType: SwiftType, parameterName: String) throws -> TranslatedParameter {
+    func translateParameter(
+      swiftType: SwiftType,
+      parameterName: String,
+      methodName: String,
+      parentName: String
+    ) throws -> TranslatedParameter {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -121,7 +183,16 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque:
+      case .function:
+        return TranslatedParameter(
+          parameter: JavaParameter(
+            name: parameterName,
+            type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)")
+          ),
+          conversion: .placeholder
+        )
+
+      case .metatype, .optional, .tuple, .existential, .opaque:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -167,6 +238,9 @@ extension JNISwift2JavaGenerator {
 
     /// The name of the Java parent scope this function is declared in
     let parentName: String
+
+    /// Functional interfaces required for the Java method.
+    let functionTypes: [TranslatedFunctionType]
 
     /// Function signature of the Java function the user will call
     let translatedFunctionSignature: TranslatedFunctionSignature
@@ -218,6 +292,16 @@ extension JNISwift2JavaGenerator {
 
     /// Represents how to convert the Java native result into a user-facing result.
     let conversion: JavaNativeConversionStep
+  }
+
+  /// Represent a Swift closure type in the user facing Java API.
+  ///
+  /// Closures are translated to named functional interfaces in Java.
+  struct TranslatedFunctionType {
+    var name: String
+    var parameters: [TranslatedParameter]
+    var result: TranslatedResult
+    var swiftType: SwiftFunctionType
   }
 
   /// Describes how to convert values between Java types and the native Java function

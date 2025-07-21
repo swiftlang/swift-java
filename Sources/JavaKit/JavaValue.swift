@@ -137,7 +137,7 @@ extension JavaValue where Self: ~Copyable {
   }
 
   /// Convert to a jvalue within the given JNI environment.
-  consuming func getJValue(in environment: JNIEnvironment) -> jvalue {
+  public consuming func getJValue(in environment: JNIEnvironment) -> jvalue {
     var result = jvalue()
     Self.assignJNIType(&result[keyPath: Self.jvalueKeyPath], to: getJNIValue(in: environment))
     return result

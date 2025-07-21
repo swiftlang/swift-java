@@ -17,14 +17,25 @@ import JavaTypes
 extension JNISwift2JavaGenerator {
   
   struct NativeJavaTranslation {
+    let javaPackage: String
+
     /// Translates a Swift function into the native JNI method signature.
     func translate(
       functionSignature: SwiftFunctionSignature,
-      translatedFunctionSignature: TranslatedFunctionSignature
+      translatedFunctionSignature: TranslatedFunctionSignature,
+      methodName: String,
+      parentName: String
     ) throws -> NativeFunctionSignature {
-      let parameters = try zip(translatedFunctionSignature.parameters, functionSignature.parameters).map { translatedParameter, swiftParameter in
+      let parameters = try zip(translatedFunctionSignature.parameters, functionSignature.parameters).map {
+        translatedParameter,
+        swiftParameter in
         let parameterName = translatedParameter.parameter.name
-        return try translate(swiftParameter: swiftParameter, parameterName: parameterName)
+        return try translate(
+          swiftParameter: swiftParameter,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName
+        )
       }
 
       // Lower the self parameter.
@@ -32,7 +43,9 @@ extension JNISwift2JavaGenerator {
       case .instance(let selfParameter):
         try translate(
           swiftParameter: selfParameter,
-          parameterName: selfParameter.parameterName ?? "self"
+          parameterName: selfParameter.parameterName ?? "self",
+          methodName: methodName,
+          parentName: parentName
         )
       case nil, .initializer(_), .staticMethod(_):
         nil
@@ -47,7 +60,9 @@ extension JNISwift2JavaGenerator {
 
     func translate(
       swiftParameter: SwiftParameter,
-      parameterName: String
+      parameterName: String,
+      methodName: String,
+      parentName: String,
     ) throws -> NativeParameter {
       switch swiftParameter.type {
       case .nominal(let nominalType):
@@ -57,26 +72,109 @@ extension JNISwift2JavaGenerator {
           }
 
           return NativeParameter(
-            javaParameter: JavaParameter(name: parameterName, type: javaType),
+            name: parameterName,
+            javaType: javaType,
             conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
           )
         }
 
       case .tuple([]):
         return NativeParameter(
-          javaParameter: JavaParameter(name: parameterName, type: .void),
+          name: parameterName,
+          javaType: .void,
           conversion: .placeholder
         )
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque:
+      case .function(let fn):
+        var parameters = [NativeParameter]()
+        for (i, parameter) in fn.parameters.enumerated() {
+          let parameterName = parameter.parameterName ?? "_\(i)"
+          let closureParameter = try translateClosureParameter(
+            parameter.type,
+            parameterName: parameterName
+          )
+          parameters.append(closureParameter)
+        }
+
+        let result = try translateClosureResult(fn.resultType)
+
+        return NativeParameter(
+          name: parameterName,
+          javaType: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
+          conversion: .closureLowering(
+            parameters: parameters,
+            result: result
+          )
+        )
+
+      case .metatype, .optional, .tuple, .existential, .opaque:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
       }
 
       // Classes are passed as the pointer.
       return NativeParameter(
-        javaParameter: JavaParameter(name: parameterName, type: .long),
+        name: parameterName,
+        javaType: .long,
         conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
       )
+    }
+
+    func translateClosureResult(
+      _ type: SwiftType
+    ) throws -> NativeResult {
+      switch type {
+      case .nominal(let nominal):
+        if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(type)
+          }
+
+          // Only support primitives for now.
+          return NativeResult(
+            javaType: javaType,
+            conversion: .initFromJNI(.placeholder, swiftType: type)
+          )
+        }
+
+        // Custom types are not supported yet.
+        throw JavaTranslationError.unsupportedSwiftType(type)
+
+      case .tuple([]):
+        return NativeResult(
+          javaType: .void,
+          conversion: .placeholder
+        )
+
+      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+      }
+    }
+
+    func translateClosureParameter(
+      _ type: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      switch type {
+      case .nominal(let nominal):
+        if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(type)
+          }
+
+          // Only support primitives for now.
+          return NativeParameter(
+            name: parameterName,
+            javaType: javaType,
+            conversion: .getJValue(.placeholder)
+          )
+        }
+
+        // Custom types are not supported yet.
+        throw JavaTranslationError.unsupportedSwiftType(type)
+
+      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+      }
     }
 
     func translate(
@@ -122,10 +220,11 @@ extension JNISwift2JavaGenerator {
   }
 
   struct NativeParameter {
-    let javaParameter: JavaParameter
+    let name: String
+    let javaType: JavaType
 
     var jniType: JNIType {
-      javaParameter.type.jniType
+      javaType.jniType
     }
 
     /// Represents how to convert the JNI parameter to a Swift parameter
@@ -145,6 +244,9 @@ extension JNISwift2JavaGenerator {
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
 
+    /// `value.getJValue(in:)`
+    indirect case getJValue(NativeSwiftConversionStep)
+
     /// `SwiftType(from: value, in: environment!)`
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
@@ -152,12 +254,13 @@ extension JNISwift2JavaGenerator {
     indirect case extractSwiftValue(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Allocate memory for a Swift value and outputs the pointer
-    indirect case allocateSwiftValue(name: String, swiftType: SwiftType)
+    case allocateSwiftValue(name: String, swiftType: SwiftType)
 
     /// The thing to which the pointer typed, which is the `pointee` property
     /// of the `Unsafe(Mutable)Pointer` types in Swift.
     indirect case pointee(NativeSwiftConversionStep)
 
+    indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -170,6 +273,10 @@ extension JNISwift2JavaGenerator {
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).getJNIValue(in: environment!)"
+
+      case .getJValue(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).getJValue(in: environment!)"
 
       case .initFromJNI(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
@@ -203,7 +310,63 @@ extension JNISwift2JavaGenerator {
       case .pointee(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).pointee"
+
+      case .closureLowering(let parameters, let nativeResult):
+        var printer = CodePrinter()
+
+        let methodSignature = MethodSignature(
+          resultType: nativeResult.javaType,
+          parameterTypes: parameters.map(\.javaType)
+        )
+
+        let closureParameters = !parameters.isEmpty ? "\(parameters.map(\.name).joined(separator: ", ")) in" : ""
+        printer.print("{ \(closureParameters)")
+        printer.indent()
+
+        let arguments = parameters.map {
+          $0.conversion.render(&printer, $0.name)
+        }
+
+        printer.print(
+            """
+            let class$ = environment!.interface.GetObjectClass(environment, \(placeholder))
+            let methodID$ = environment!.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+            let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
+            """
+        )
+
+        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let result = nativeResult.conversion.render(&printer, upcall)
+
+        if nativeResult.javaType.isVoid {
+          printer.print(result)
+        } else {
+          printer.print("return \(result)")
+        }
+
+        printer.outdent()
+        printer.print("}")
+
+        return printer.finalize()
       }
+    }
+  }
+}
+
+extension JavaType {
+  var jniCallMethodAName: String {
+    switch self {
+    case .boolean: "CallBooleanMethodA"
+    case .byte: "CallByteMethodA"
+    case .char: "CallCharMethodA"
+    case .short: "CallShortMethodA"
+    case .int: "CallIntMethodA"
+    case .long: "CallLongMethodA"
+    case .float: "CallFloatMethodA"
+    case .double: "CallDoubleMethodA"
+    case .void: "CallVoidMethodA"
+    case .class: "CallObjectMethodA"
+    case .array: "CallObjectMethodA"
     }
   }
 }

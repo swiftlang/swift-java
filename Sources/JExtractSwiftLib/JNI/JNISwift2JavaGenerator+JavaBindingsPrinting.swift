@@ -76,12 +76,12 @@ extension JNISwift2JavaGenerator {
 
       for decl in analysis.importedGlobalFuncs {
         self.logger.trace("Print global function: \(decl)")
-        printFunctionBinding(&printer, decl)
+        printFunctionDowncallMethods(&printer, decl)
         printer.println()
       }
 
       for decl in analysis.importedGlobalVariables {
-        printFunctionBinding(&printer, decl)
+        printFunctionDowncallMethods(&printer, decl)
         printer.println()
       }
     }
@@ -117,17 +117,17 @@ extension JNISwift2JavaGenerator {
       printer.println()
 
       for initializer in decl.initializers {
-        printFunctionBinding(&printer, initializer)
+        printFunctionDowncallMethods(&printer, initializer)
         printer.println()
       }
 
       for method in decl.methods {
-        printFunctionBinding(&printer, method)
+        printFunctionDowncallMethods(&printer, method)
         printer.println()
       }
 
       for variable in decl.variables {
-        printFunctionBinding(&printer, variable)
+        printFunctionDowncallMethods(&printer, variable)
         printer.println()
       }
 
@@ -175,13 +175,68 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+  private func printFunctionDowncallMethods(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc
+  ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
       return
     }
 
-    var modifiers = ["public"]
+    printer.printSeparator(decl.displayName)
+
+    printJavaBindingWrapperHelperClass(&printer, decl)
+
+    printJavaBindingWrapperMethod(&printer, decl)
+  }
+
+  /// Print the helper type container for a user-facing Java API.
+  ///
+  /// * User-facing functional interfaces.
+  private func printJavaBindingWrapperHelperClass(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc
+  ) {
+    let translated = self.translatedDecl(for: decl)!
+    if translated.functionTypes.isEmpty {
+      return
+    }
+
+    printer.printBraceBlock(
+      """
+      public static class \(translated.name)
+      """
+    ) { printer in
+      for functionType in translated.functionTypes {
+        printJavaBindingWrapperFunctionTypeHelper(&printer, functionType)
+      }
+    }
+  }
+
+  /// Print "wrapper" functional interface representing a Swift closure type.
+  func printJavaBindingWrapperFunctionTypeHelper(
+    _ printer: inout CodePrinter,
+    _ functionType: TranslatedFunctionType
+  ) {
+    let apiParams = functionType.parameters.map(\.parameter.asParameter)
+
+    printer.print(
+        """
+        @FunctionalInterface
+        public interface \(functionType.name) {
+          \(functionType.result.javaType) apply(\(apiParams.joined(separator: ", ")));
+        }
+        """
+    )
+  }
+
+  private func printJavaBindingWrapperMethod(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    guard let translatedDecl = translatedDecl(for: decl) else {
+      fatalError("Decl was not translated, \(decl)")
+    }
+
+    var modifiers = "public"
     if decl.isStatic || decl.isInitializer || !decl.hasParent {
       modifiers.append("static")
     }
@@ -215,7 +270,7 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = nativeSignature.selfParameter {
       parameters.append(selfParameter)
     }
-    let renderedParameters = parameters.map { "\($0.javaParameter.type) \($0.javaParameter.name)"}.joined(separator: ", ")
+    let renderedParameters = parameters.map { "\($0.javaType) \($0.name)"}.joined(separator: ", ")
 
     printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
   }
