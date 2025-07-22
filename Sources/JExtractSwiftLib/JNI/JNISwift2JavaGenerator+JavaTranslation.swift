@@ -127,7 +127,7 @@ extension JNISwift2JavaGenerator {
     }
 
     func translate(
-      swiftResult: SwiftResult,
+      swiftResult: SwiftResult
     ) throws -> TranslatedResult {
       switch swiftResult.type {
       case .nominal(let nominalType):

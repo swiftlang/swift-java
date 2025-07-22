@@ -165,7 +165,7 @@ extension JNISwift2JavaGenerator {
     case .instance(let swiftSelf):
       nativeSignature.selfParameter!.conversion.render(
         &printer,
-        swiftSelf.parameterName ?? "self",
+        swiftSelf.parameterName ?? "self"
       )
     case .staticMethod(let selfType), .initializer(let selfType):
       "\(selfType)"
