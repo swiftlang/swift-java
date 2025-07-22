@@ -40,6 +40,22 @@ enum JNIType {
   case jfloatArray
   case jdoubleArray
   case jobjectArray
+
+  var callMethodAName: String {
+    switch self {
+    case .jboolean: "CallBooleanMethodA"
+    case .jbyte: "CallByteMethodA"
+    case .jchar: "CallCharMethodA"
+    case .jshort: "CallShortMethodA"
+    case .jint: "CallIntMethodA"
+    case .jlong: "CallLongMethodA"
+    case .jfloat: "CallFloatMethodA"
+    case .jdouble: "CallDoubleMethodA"
+    case .void: "CallVoidMethodA"
+    case .jobject, .jstring, .jclass, .jthrowable: "CallObjectMethodA"
+    case .jbooleanArray, .jbyteArray, .jcharArray, .jshortArray, .jintArray, .jlongArray, .jfloatArray, .jdoubleArray, .jobjectArray: "CallObjectMethodA"
+    }
+  }
 }
 
 extension JavaType {

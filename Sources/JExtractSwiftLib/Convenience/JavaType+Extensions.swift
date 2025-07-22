@@ -17,21 +17,22 @@ import JavaTypes
 extension JavaType {
   var jniTypeSignature: String {
     switch self {
-    case .boolean: "Z"
-    case .byte: "B"
-    case .char: "C"
-    case .short: "S"
-    case .int: "I"
-    case .long: "J"
-    case .float: "F"
-    case .double: "D"
+    case .boolean: return "Z"
+    case .byte: return "B"
+    case .char: return "C"
+    case .short: return "S"
+    case .int: return "I"
+    case .long: return "J"
+    case .float: return "F"
+    case .double: return "D"
     case .class(let package, let name):
+      let nameWithInnerClasses = name.replacingOccurrences(of: ".", with: "$")
       if let package {
-        "L\(package.replacingOccurrences(of: ".", with: "/"))/\(name);"
+        return "L\(package.replacingOccurrences(of: ".", with: "/"))/\(nameWithInnerClasses);"
       } else {
-        "L\(name);"
+        return "L\(nameWithInnerClasses);"
       }
-    case .array(let javaType): "[\(javaType.jniTypeSignature)"
+    case .array(let javaType): return  "[\(javaType.jniTypeSignature)"
     case .void: fatalError("There is no type signature for 'void'")
     }
   }
