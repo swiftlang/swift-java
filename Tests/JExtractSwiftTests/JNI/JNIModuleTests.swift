@@ -67,7 +67,12 @@ struct JNIModuleTests {
           * public func helloWorld()
           * }
           */
-        public static native void helloWorld();
+        public static void helloWorld() {
+          SwiftModule.$helloWorld();
+        }
+        """,
+        """
+        private static native void $helloWorld();
         """,
         """
         /**
@@ -76,7 +81,12 @@ struct JNIModuleTests {
           * public func takeIntegers(i1: Int8, i2: Int16, i3: Int32, i4: Int64) -> UInt16
           * }
           */
-        public static native char takeIntegers(byte i1, short i2, int i3, long i4);
+        public static char takeIntegers(byte i1, short i2, int i3, long i4) {
+          return SwiftModule.$takeIntegers(i1, i2, i3, i4);
+        }
+        """,
+        """
+        private static native char $takeIntegers(byte i1, short i2, int i3, long i4);
         """,
         """
         /**
@@ -85,7 +95,12 @@ struct JNIModuleTests {
           * public func otherPrimitives(b: Bool, f: Float, d: Double)
           * }
           */
-        public static native void otherPrimitives(boolean b, float f, double d);
+        public static void otherPrimitives(boolean b, float f, double d) {
+          SwiftModule.$otherPrimitives(b, f, d);
+        }
+        """,
+        """
+        private static native void $otherPrimitives(boolean b, float f, double d);
         """
       ]
     )
@@ -100,21 +115,20 @@ struct JNIModuleTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule_helloWorld__")
-        func Java_com_example_swift_SwiftModule_helloWorld__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024helloWorld__")
+        func Java_com_example_swift_SwiftModule__00024helloWorld__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           SwiftModule.helloWorld()
         }
         """,
         """
-        @_cdecl("Java_com_example_swift_SwiftModule_takeIntegers__BSIJ")
-        func Java_com_example_swift_SwiftModule_takeIntegers__BSIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
-          let result = SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment!), i2: Int16(fromJNI: i2, in: environment!), i3: Int32(fromJNI: i3, in: environment!), i4: Int64(fromJNI: i4, in: environment!))
-          return result.getJNIValue(in: environment)
-        }
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ")
+        func Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
+          return SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment!), i2: Int16(fromJNI: i2, in: environment!), i3: Int32(fromJNI: i3, in: environment!), i4: Int64(fromJNI: i4, in: environment!)).getJNIValue(in: environment!)
+        }        
         """,
         """
-        @_cdecl("Java_com_example_swift_SwiftModule_otherPrimitives__ZFD")
-        func Java_com_example_swift_SwiftModule_otherPrimitives__ZFD(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jboolean, f: jfloat, d: jdouble) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD")
+        func Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jboolean, f: jfloat, d: jdouble) {
           SwiftModule.otherPrimitives(b: Bool(fromJNI: b, in: environment!), f: Float(fromJNI: f, in: environment!), d: Double(fromJNI: d, in: environment!))
         }
         """
@@ -136,8 +150,13 @@ struct JNIModuleTests {
           * public func copy(_ string: String) -> String
           * }
           */
-        public static native java.lang.String copy(java.lang.String string);
+        public static java.lang.String copy(java.lang.String string) {
+          return SwiftModule.$copy(string);
+        }
         """,
+        """
+        private static native java.lang.String $copy(java.lang.String string);
+        """
       ]
     )
   }
@@ -151,10 +170,9 @@ struct JNIModuleTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
           """
-          @_cdecl("Java_com_example_swift_SwiftModule_copy__Ljava_lang_String_2")
-          func Java_com_example_swift_SwiftModule_copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
-            let result = SwiftModule.copy(String(fromJNI: string, in: environment!))
-            return result.getJNIValue(in: environment)
+          @_cdecl("Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2")
+          func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring) -> jstring {
+            return SwiftModule.copy(String(fromJNI: string, in: environment!)).getJNIValue(in: environment!)
           }
           """,
       ]
@@ -175,7 +193,12 @@ struct JNIModuleTests {
           * public func methodA() throws
           * }
           */
-        public static native void methodA() throws Exception;
+        public static void methodA() throws Exception {
+          SwiftModule.$methodA();
+        }
+        """,
+        """
+        private static native void $methodA();
         """,
         """
         /**
@@ -184,8 +207,13 @@ struct JNIModuleTests {
           * public func methodB() throws -> Int64
           * }
           */
-        public static native long methodB() throws Exception;
+        public static long methodB() throws Exception {
+          return SwiftModule.$methodB();
+        }
         """,
+        """
+        private static native long $methodB();
+        """
       ]
     )
   }
@@ -199,9 +227,9 @@ struct JNIModuleTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
           """
-          @_cdecl("Java_com_example_swift_SwiftModule_methodA__")
-          func Java_com_example_swift_SwiftModule_methodA__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
-            do { 
+          @_cdecl("Java_com_example_swift_SwiftModule__00024methodA__")
+          func Java_com_example_swift_SwiftModule__00024methodA__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+            do {
               try SwiftModule.methodA()
             } catch {
               environment.throwAsException(error)
@@ -209,11 +237,10 @@ struct JNIModuleTests {
           }
           """,
           """
-          @_cdecl("Java_com_example_swift_SwiftModule_methodB__")
-          func Java_com_example_swift_SwiftModule_methodB__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-            do { 
-              let result = try SwiftModule.methodB()
-              return result.getJNIValue(in: environment)
+          @_cdecl("Java_com_example_swift_SwiftModule__00024methodB__")
+          func Java_com_example_swift_SwiftModule__00024methodB__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+            do {
+              return try SwiftModule.methodB().getJNIValue(in: environment!)
             } catch {
               environment.throwAsException(error)
               return Int64.jniPlaceholderValue

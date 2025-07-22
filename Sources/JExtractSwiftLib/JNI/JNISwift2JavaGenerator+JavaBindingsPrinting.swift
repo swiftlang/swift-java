@@ -117,7 +117,7 @@ extension JNISwift2JavaGenerator {
       printer.println()
 
       for initializer in decl.initializers {
-        printInitializerBindings(&printer, initializer, type: decl)
+        printFunctionBinding(&printer, initializer)
         printer.println()
       }
 
@@ -176,75 +176,82 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    guard let _ = translatedDecl(for: decl) else {
-      // Failed to translate. Skip.
-      return
-    }
-
-    if decl.isStatic || decl.isInitializer || !decl.hasParent {
-      printStaticFunctionBinding(&printer, decl)
-    } else {
-      printMemberMethodBindings(&printer, decl)
-    }
-  }
-
-  private func printStaticFunctionBinding(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    printDeclDocumentation(&printer, decl)
-    printer.print(
-      "public static native \(renderFunctionSignature(decl));"
-    )
-  }
-
-  /// Renders Java bindings for member methods
-  ///
-  /// Member methods are generated as a function that extracts the `selfPointer`
-  /// and passes it down to another native function along with the arguments
-  /// to call the Swift implementation.
-  private func printMemberMethodBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
-
-    printDeclDocumentation(&printer, decl)
-    printer.printBraceBlock("public \(renderFunctionSignature(decl))") { printer in
-      var arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
-
-      let selfVarName = "self$"
-      arguments.append(selfVarName)
-
-      let returnKeyword = translatedDecl.translatedFunctionSignature.resultType.isVoid ? "" : "return "
-
-      printer.print(
-        """
-        long \(selfVarName) = this.$memoryAddress();
-        \(returnKeyword)\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")));
-        """
-      )
-    }
-
-    let returnType = translatedDecl.translatedFunctionSignature.resultType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
-    parameters.append("long selfPointer")
-    printer.print("private static native \(returnType) $\(translatedDecl.name)(\(parameters.joined(separator: ", ")));")
-  }
-
-  private func printInitializerBindings(_ printer: inout CodePrinter, _ decl: ImportedFunc, type: ImportedNominalType) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
       return
     }
 
-    printDeclDocumentation(&printer, decl)
-    printer.printBraceBlock("public static \(renderFunctionSignature(decl))") { printer in
-      let initArguments = translatedDecl.translatedFunctionSignature.parameters.map(\.name)
-      printer.print(
-        """
-        long self$ = \(type.qualifiedName).allocatingInit(\(initArguments.joined(separator: ", ")));
-        return new \(type.qualifiedName)(self$, swiftArena$);
-        """
-      )
+    var modifiers = ["public"]
+    if decl.isStatic || decl.isInitializer || !decl.hasParent {
+      modifiers.append("static")
     }
 
-    let parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
-    printer.print("private static native long allocatingInit(\(parameters.joined(separator: ", ")));")
+    let translatedSignature = translatedDecl.translatedFunctionSignature
+    let resultType = translatedSignature.resultType.javaType
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.asParameter)
+    if translatedSignature.requiresSwiftArena {
+      parameters.append("SwiftArena swiftArena$")
+    }
+    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+
+    let modifiersStr = modifiers.joined(separator: " ")
+    let parametersStr = parameters.joined(separator: ", ")
+
+    printDeclDocumentation(&printer, decl)
+    printer.printBraceBlock(
+      "\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+    ) { printer in
+      printDowncall(&printer, decl)
+    }
+
+    printNativeFunction(&printer, decl)
+  }
+
+  private func printNativeFunction(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    let translatedDecl = translatedDecl(for: decl)! // Will always call with valid decl
+    let nativeSignature = translatedDecl.nativeFunctionSignature
+    let resultType = nativeSignature.result.javaType
+    var parameters = nativeSignature.parameters
+    if let selfParameter = nativeSignature.selfParameter {
+      parameters.append(selfParameter)
+    }
+    let renderedParameters = parameters.map { "\($0.javaParameter.type) \($0.javaParameter.name)"}.joined(separator: ", ")
+
+    printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
+  }
+
+  private func printDowncall(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc
+  ) {
+    let translatedDecl = translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
+    let translatedFunctionSignature = translatedDecl.translatedFunctionSignature
+
+    // Regular parameters.
+    var arguments = [String]()
+    for parameter in translatedFunctionSignature.parameters {
+      let lowered = parameter.conversion.render(&printer, parameter.parameter.name)
+      arguments.append(lowered)
+    }
+
+    // 'self' parameter.
+    if let selfParameter = translatedFunctionSignature.selfParameter {
+      let lowered = selfParameter.conversion.render(&printer, "this")
+      arguments.append(lowered)
+    }
+
+    //=== Part 3: Downcall.
+    // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
+    // using the registry?
+    let downcall = "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+
+    //=== Part 4: Convert the return value.
+    if translatedFunctionSignature.resultType.javaType.isVoid {
+      printer.print("\(downcall);")
+    } else {
+      let result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
+      printer.print("return \(result);")
+    }
   }
 
   private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
@@ -287,25 +294,5 @@ extension JNISwift2JavaGenerator {
         """
       )
     }
-  }
-
-  /// Renders a Java function signature
-  ///
-  /// `func method(x: Int, y: Int) -> Int` becomes
-  /// `long method(long x, long y)`
-  private func renderFunctionSignature(_ decl: ImportedFunc) -> String {
-    guard let translatedDecl = translatedDecl(for: decl) else {
-      fatalError("Unable to render function signature for a function that cannot be translated: \(decl)")
-    }
-    let resultType = translatedDecl.translatedFunctionSignature.resultType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.asParameter)
-
-    if decl.isInitializer {
-      parameters.append("SwiftArena swiftArena$")
-    }
-
-    let throwsClause = decl.isThrowing ? " throws Exception" : ""
-
-    return "\(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
   }
 }

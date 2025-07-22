@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 public class MySwiftClass {
-  let x: Int64
-  let y: Int64
+  public let x: Int64
+  public let y: Int64
 
   public let byte: UInt8 = 0
   public let constant: Int64 = 100
@@ -75,5 +75,13 @@ public class MySwiftClass {
 
   public func throwingFunction() throws {
     throw MySwiftClassError.swiftError
+  }
+
+  public func sumX(with other: MySwiftClass) -> Int64 {
+    return self.x + other.x
+  }
+
+  public func copy() -> MySwiftClass {
+    return MySwiftClass(x: self.x, y: self.y)
   }
 }

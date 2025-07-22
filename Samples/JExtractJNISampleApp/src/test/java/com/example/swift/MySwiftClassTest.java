@@ -118,4 +118,25 @@ public class MySwiftClassTest {
             assertFalse(c.isWarm());
         }
     }
+
+    @Test
+    void sumWithX() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            MySwiftClass c2 = MySwiftClass.init(50, 10, arena);
+            assertEquals(70, c1.sumX(c2));
+        }
+    }
+
+    @Test
+    void copy() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            MySwiftClass c2 = c1.copy(arena);
+
+            assertEquals(20, c2.getX());
+            assertEquals(10, c2.getY());
+            assertNotEquals(c1.$memoryAddress(), c2.$memoryAddress());
+        }
+    }
 }
