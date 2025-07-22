@@ -133,7 +133,7 @@ extension JNISwift2JavaGenerator {
 
     printCDecl(
       &printer,
-      javaMethodName: "$\(translatedDecl.name)",
+      javaMethodName: translatedDecl.nativeFunctionName,
       parentName: translatedDecl.parentName,
       parameters: parameters.map(\.javaParameter),
       resultType: nativeSignature.result.javaType.jniType

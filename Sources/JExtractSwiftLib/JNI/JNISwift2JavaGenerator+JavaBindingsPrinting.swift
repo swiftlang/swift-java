@@ -181,9 +181,9 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    var modifiers = "public"
+    var modifiers = ["public"]
     if decl.isStatic || decl.isInitializer || !decl.hasParent {
-      modifiers.append(" static")
+      modifiers.append("static")
     }
 
     let translatedSignature = translatedDecl.translatedFunctionSignature
@@ -194,9 +194,12 @@ extension JNISwift2JavaGenerator {
     }
     let throwsClause = decl.isThrowing ? " throws Exception" : ""
 
+    let modifiersStr = modifiers.joined(separator: " ")
+    let parametersStr = parameters.joined(separator: ", ")
+
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
-      "\(modifiers) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
+      "\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
     ) { printer in
       printDowncall(&printer, decl)
     }
@@ -208,14 +211,13 @@ extension JNISwift2JavaGenerator {
     let translatedDecl = translatedDecl(for: decl)! // Will always call with valid decl
     let nativeSignature = translatedDecl.nativeFunctionSignature
     let resultType = nativeSignature.result.javaType
-    let nativeName = "$\(translatedDecl.name)"
     var parameters = nativeSignature.parameters
     if let selfParameter = nativeSignature.selfParameter {
       parameters.append(selfParameter)
     }
     let renderedParameters = parameters.map { "\($0.javaParameter.type) \($0.javaParameter.name)"}.joined(separator: ", ")
 
-    printer.print("private static native \(resultType) \(nativeName)(\(renderedParameters));")
+    printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
   }
 
   private func printDowncall(
@@ -241,7 +243,7 @@ extension JNISwift2JavaGenerator {
     //=== Part 3: Downcall.
     // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
     // using the registry?
-    let downcall = "\(translatedDecl.parentName).$\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
+    let downcall = "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.resultType.javaType.isVoid {

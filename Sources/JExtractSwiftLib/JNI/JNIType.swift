@@ -14,6 +14,9 @@
 
 import JavaTypes
 
+/// Represents types that are able to be passed over a JNI boundary.
+///
+/// - SeeAlso: https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/types.html
 enum JNIType {
   case jboolean
   case jfloat

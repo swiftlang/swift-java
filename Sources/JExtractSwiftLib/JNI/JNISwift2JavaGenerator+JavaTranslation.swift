@@ -61,6 +61,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
+        nativeFunctionName: "$\(javaName)",
         parentName: parentName,
         translatedFunctionSignature: translatedFunctionSignature,
         nativeFunctionSignature: nativeFunctionSignature
@@ -160,6 +161,9 @@ extension JNISwift2JavaGenerator {
   struct TranslatedFunctionDecl {
     /// Java function name
     let name: String
+
+    /// The name of the native function
+    let nativeFunctionName: String
 
     /// The name of the Java parent scope this function is declared in
     let parentName: String

@@ -119,10 +119,10 @@ struct JNIStructTests {
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024init__JJ")
         func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
-          let _result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
-          _result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
-          let _resultBits$ = Int64(Int(bitPattern: _result$))
-          return _resultBits$.getJNIValue(in: environment!)
+          let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
+          result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          let resultBits$ = Int64(Int(bitPattern: result$))
+          return resultBits$.getJNIValue(in: environment!)
         }
         """
       ]

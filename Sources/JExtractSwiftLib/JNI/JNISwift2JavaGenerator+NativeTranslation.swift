@@ -110,7 +110,7 @@ extension JNISwift2JavaGenerator {
       // so we pass the pointer.
       return NativeResult(
         javaType: .long,
-        conversion: .getJNIValue(.allocateSwiftValue(name: "_result", swiftType: swiftResult.type))
+        conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type))
       )
     }
   }
@@ -189,14 +189,16 @@ extension JNISwift2JavaGenerator {
         return "\(inner)$"
 
       case .allocateSwiftValue(let name, let swiftType):
+        let pointerName = "\(name)$"
+        let bitsName = "\(name)Bits$"
         printer.print(
           """
-          let \(name)$ = UnsafeMutablePointer<\(swiftType)>.allocate(capacity: 1)
-          \(name)$.initialize(to: \(placeholder))
-          let \(name)Bits$ = Int64(Int(bitPattern: \(name)$))
+          let \(pointerName) = UnsafeMutablePointer<\(swiftType)>.allocate(capacity: 1)
+          \(pointerName).initialize(to: \(placeholder))
+          let \(bitsName) = Int64(Int(bitPattern: \(pointerName)))
           """
         )
-        return "\(name)Bits$"
+        return bitsName
 
       case .pointee(let inner):
         let inner = inner.render(&printer, placeholder)

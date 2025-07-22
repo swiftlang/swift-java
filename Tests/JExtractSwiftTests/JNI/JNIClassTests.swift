@@ -185,19 +185,19 @@ struct JNIClassTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024init__JJ")
         func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
-          let _result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          _result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
-          let _resultBits$ = Int64(Int(bitPattern: _result$))
-          return _resultBits$.getJNIValue(in: environment!)
+          let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          let resultBits$ = Int64(Int(bitPattern: result$))
+          return resultBits$.getJNIValue(in: environment!)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_MyClass__00024init__")
         func Java_com_example_swift_MyClass__00024init__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          let _result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          _result$.initialize(to: MyClass.init())
-          let _resultBits$ = Int64(Int(bitPattern: _result$))
-          return _resultBits$.getJNIValue(in: environment!)
+          let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          result$.initialize(to: MyClass.init())
+          let resultBits$ = Int64(Int(bitPattern: result$))
+          return resultBits$.getJNIValue(in: environment!)
         }
         """
       ]
@@ -320,10 +320,10 @@ struct JNIClassTests {
           guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
             fatalError("self memory address was null in call to \\(#function)!")
           }
-          let _result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          _result$.initialize(to: self$.pointee.copy())
-          let _resultBits$ = Int64(Int(bitPattern: _result$))
-          return _resultBits$.getJNIValue(in: environment!)
+          let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+          result$.initialize(to: self$.pointee.copy())
+          let resultBits$ = Int64(Int(bitPattern: result$))
+          return resultBits$.getJNIValue(in: environment!)
         }
         """,
       ]
