@@ -35,4 +35,10 @@ public class ClosuresTest {
         long result = MySwiftLibrary.closureWithInt(10, (value) -> value * 2);
         assertEquals(20, result);
     }
+
+    @Test
+    void closureMultipleArguments() {
+        long result = MySwiftLibrary.closureMultipleArguments(5, 10, (a, b) -> a + b);
+        assertEquals(15, result);
+    }
 }
