@@ -160,15 +160,25 @@ extension ImportedFunc {
     let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
 
     if !returnsBoolean {
-      return "get\(self.name.toCamelCase)"
+      return "get\(self.name.firstCharacterUppercased)"
     } else if !self.name.hasJavaBooleanNamingConvention {
-      return "is\(self.name.toCamelCase)"
+      return "is\(self.name.firstCharacterUppercased)"
     } else {
-      return self.name.toCamelCase
+      return self.name
     }
   }
 
   var javaSetterName: String {
-    "set\(self.name.toCamelCase)"
+    let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    // If the variable is already named "isX", then we make
+    // the setter "setX" to match beans spec.
+    if isBooleanSetter && self.name.hasJavaBooleanNamingConvention {
+      // Safe to force unwrap due to `hasJavaBooleanNamingConvention` check.
+      let propertyName = self.name.split(separator: "is", maxSplits: 1).last!
+      return "set\(propertyName)"
+    } else {
+      return "set\(self.name.firstCharacterUppercased)"
+    }
   }
 }
