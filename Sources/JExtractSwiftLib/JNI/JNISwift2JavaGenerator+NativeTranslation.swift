@@ -335,7 +335,7 @@ extension JNISwift2JavaGenerator {
             """
         )
 
-        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let upcall = "environment!.interface.\(nativeResult.javaType.jniType.callMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -349,24 +349,6 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
       }
-    }
-  }
-}
-
-extension JavaType {
-  var jniCallMethodAName: String {
-    switch self {
-    case .boolean: "CallBooleanMethodA"
-    case .byte: "CallByteMethodA"
-    case .char: "CallCharMethodA"
-    case .short: "CallShortMethodA"
-    case .int: "CallIntMethodA"
-    case .long: "CallLongMethodA"
-    case .float: "CallFloatMethodA"
-    case .double: "CallDoubleMethodA"
-    case .void: "CallVoidMethodA"
-    case .class: "CallObjectMethodA"
-    case .array: "CallObjectMethodA"
     }
   }
 }
