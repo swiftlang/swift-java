@@ -179,7 +179,7 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
   ) {
-    guard let translatedDecl = translatedDecl(for: decl) else {
+    guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
       return
     }
@@ -236,7 +236,7 @@ extension JNISwift2JavaGenerator {
       fatalError("Decl was not translated, \(decl)")
     }
 
-    var modifiers = "public"
+    var modifiers = ["public"]
     if decl.isStatic || decl.isInitializer || !decl.hasParent {
       modifiers.append("static")
     }
