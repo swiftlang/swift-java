@@ -169,6 +169,16 @@ extension ImportedFunc {
   }
 
   var javaSetterName: String {
-    "set\(self.name.firstCharacterUppercased)"
+    let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    // If the variable is already named "isX", then we make
+    // the setter "setX" to match beans spec.
+    if isBooleanSetter && self.name.hasJavaBooleanNamingConvention {
+      // Safe to force unwrap due to `hasJavaBooleanNamingConvention` check.
+      let propertyName = self.name.split(separator: "is", maxSplits: 1).last!
+      return "set\(propertyName)"
+    } else {
+      return "set\(self.name.firstCharacterUppercased)"
+    }
   }
 }

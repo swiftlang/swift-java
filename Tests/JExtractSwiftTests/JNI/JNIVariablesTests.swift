@@ -33,7 +33,7 @@ struct JNIVariablesTests {
         set { }
       }
       public var someBoolean: Bool
-      public let isBoolean: Bool
+      public var isBoolean: Bool
     }
     """
 
@@ -463,7 +463,7 @@ struct JNIVariablesTests {
       /**
       * Downcall to Swift:
       * {@snippet lang=swift :
-      * public let isBoolean: Bool
+      * public var isBoolean: Bool
       * }
       */
       public boolean isBoolean() {
@@ -472,8 +472,23 @@ struct JNIVariablesTests {
       }
       """,
       """
+      /**
+      * Downcall to Swift:
+      * {@snippet lang=swift :
+      * public var isBoolean: Bool
+      * }
+      */
+      public void setBoolean(boolean newValue) {
+        long self$ = this.$memoryAddress();
+        MyClass.$setBoolean(newValue, self$);
+      }
+      """,
+      """
       private static native boolean $isBoolean(long selfPointer);
       """,
+      """
+      private static native void $setBoolean(boolean newValue, long selfPointer);
+      """
       ]
     )
   }
@@ -501,6 +516,20 @@ struct JNIVariablesTests {
           return result.getJNIValue(in: environment)
         }
         """,
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024setBoolean__ZJ")
+        func Java_com_example_swift_MyClass__00024setBoolean__ZJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jboolean, selfPointer: jlong) {
+          guard let env$ = environment else {
+            fatalError("Missing JNIEnv in downcall to \\(#function)")
+          }
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
+            fatalError("self memory address was null in call to \\(#function)!")
+          }
+          self$.pointee.isBoolean = Bool(fromJNI: newValue, in: environment!)
+        }
+        """
       ]
     )
   }
