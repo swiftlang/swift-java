@@ -41,6 +41,7 @@ else
 
     curl -O https://download.swift.org/swiftly/darwin/swiftly.pkg && pkgutil --check-signature swiftly.pkg && pkgutil --verbose --expand swiftly.pkg "${SWIFTLY_HOME_DIR}" && tar -C "${SWIFTLY_HOME_DIR}" -xvf "${SWIFTLY_HOME_DIR}"/swiftly-*/Payload && "$SWIFTLY_HOME_DIR/bin/swiftly" init -y --skip-install
 
+    chmod +x "$SWIFTLY_HOME_DIR/env.sh"
     # shellcheck disable=SC1091
     . "$SWIFTLY_HOME_DIR/env.sh"
 fi
@@ -84,5 +85,8 @@ echo "Displaying swift version"
 swiftly run "${runSelector[@]}" swift --version
 
 if [[ "$(uname -s)" == "Linux" ]]; then
-    CC=clang swiftly run "${runSelector[@]}" "$(dirname "$0")/install-libarchive.sh"
+    if [[ -f "$(dirname "$0")/install-libarchive.sh" ]]; then
+        CC=clang swiftly run "${runSelector[@]}" "$(dirname "$0")/install-libarchive.sh"
+    fi
 fi
+

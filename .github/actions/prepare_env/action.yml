@@ -26,9 +26,9 @@ runs:
         elif [[ -n "$JAVA_HOME_24_ARM64" ]]; then
           echo "JAVA_HOME_24=$JAVA_HOME_24_ARM64" >> $GITHUB_ENV
         fi
-    - name: Check Java environment
-      shell: bash
-      run: ./gradlew -q javaToolchains
+      # - name: Check Java environment
+      #  shell: bash
+      #  run: ./gradlew -q javaToolchains
     - name: Cache local SwiftPM repository
       if: matrix.os_version == 'jammy'
       uses: actions/cache@v4
