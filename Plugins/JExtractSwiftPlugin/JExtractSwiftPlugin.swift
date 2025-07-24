@@ -59,48 +59,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let outputJavaDirectory = context.outputJavaDirectory
     let outputSwiftDirectory = context.outputSwiftDirectory
 
-    /// Find the manifest files from other swift-java executions in any targets
-    /// this target depends on.
-    var dependentConfigFiles: [(String, URL)] = []
-    func searchForConfigFiles(in target: any Target) {
-      // log("Search for config files in target: \(target.name)")
-      let dependencyURL = URL(filePath: target.directory.string)
-
-      // Look for a config file within this target.
-      let dependencyConfigURL = dependencyURL
-        .appending(path: SwiftJavaConfigFileName)
-      let dependencyConfigString = dependencyConfigURL
-        .path(percentEncoded: false)
-
-      if FileManager.default.fileExists(atPath: dependencyConfigString) {
-        dependentConfigFiles.append((target.name, dependencyConfigURL))
-      }
-    }
-
-    // Process direct dependencies of this target.
-    for dependency in target.dependencies {
-      switch dependency {
-      case .target(let target):
-        // log("Dependency target: \(target.name)")
-        searchForConfigFiles(in: target)
-
-      case .product(let product):
-        // log("Dependency product: \(product.name)")
-        for target in product.targets {
-          // log("Dependency product: \(product.name), target: \(target.name)")
-          searchForConfigFiles(in: target)
-        }
-
-      @unknown default:
-        break
-      }
-    }
-
-    // Process indirect target dependencies.
-    for dependency in target.recursiveTargetDependencies {
-      // log("Recursive dependency target: \(dependency.name)")
-      searchForConfigFiles(in: dependency)
-    }
+    let dependentConfigFiles = searchForDependentConfigFiles(in: target)
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
@@ -171,6 +130,54 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         outputFiles: outputSwiftFiles
       )
     ]
+  }
+
+  /// Find the manifest files from other swift-java executions in any targets
+  /// this target depends on.
+  func searchForDependentConfigFiles(in target: any Target) -> [(String, URL)] {
+    var dependentConfigFiles = [(String, URL)]()
+
+    func _searchForConfigFiles(in target: any Target) {
+      // log("Search for config files in target: \(target.name)")
+      let dependencyURL = URL(filePath: target.directory.string)
+
+      // Look for a config file within this target.
+      let dependencyConfigURL = dependencyURL
+        .appending(path: SwiftJavaConfigFileName)
+      let dependencyConfigString = dependencyConfigURL
+        .path(percentEncoded: false)
+
+      if FileManager.default.fileExists(atPath: dependencyConfigString) {
+        dependentConfigFiles.append((target.name, dependencyConfigURL))
+      }
+    }
+
+    // Process direct dependencies of this target.
+    for dependency in target.dependencies {
+      switch dependency {
+      case .target(let target):
+        // log("Dependency target: \(target.name)")
+        _searchForConfigFiles(in: target)
+
+      case .product(let product):
+        // log("Dependency product: \(product.name)")
+        for target in product.targets {
+          // log("Dependency product: \(product.name), target: \(target.name)")
+          _searchForConfigFiles(in: target)
+        }
+
+      @unknown default:
+        break
+      }
+    }
+
+    // Process indirect target dependencies.
+    for dependency in target.recursiveTargetDependencies {
+      // log("Recursive dependency target: \(dependency.name)")
+      _searchForConfigFiles(in: dependency)
+    }
+
+    return dependentConfigFiles
   }
 }
 

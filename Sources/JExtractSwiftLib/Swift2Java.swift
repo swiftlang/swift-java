@@ -85,7 +85,7 @@ public struct SwiftToJava {
       fatalError("Missing --output-java directory!")
     }
 
-    let wrappedJavaClassesLookupTable: [String: String] = dependentConfigs.compactMap(\.classes).reduce(into: [:]) {
+    let wrappedJavaClassesLookupTable: JavaClassLookupTable = dependentConfigs.compactMap(\.classes).reduce(into: [:]) {
       for (canonicalName, javaClass) in $1 {
         $0[javaClass] = canonicalName
       }

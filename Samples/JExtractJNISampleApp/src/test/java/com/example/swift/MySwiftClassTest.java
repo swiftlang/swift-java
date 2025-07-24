@@ -144,7 +144,7 @@ public class MySwiftClassTest {
     void addXWithJavaLong() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            Long javaLong = new Long(50);
+            Long javaLong = 50L;
             assertEquals(70, c1.addXWithJavaLong(javaLong));
         }
     }

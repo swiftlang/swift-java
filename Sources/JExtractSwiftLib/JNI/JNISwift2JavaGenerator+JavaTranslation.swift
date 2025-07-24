@@ -42,7 +42,7 @@ extension JNISwift2JavaGenerator {
   struct JavaTranslation {
     let swiftModuleName: String
     let javaPackage: String
-    let javaClassLookupTable: [String: String]
+    let javaClassLookupTable: JavaClassLookupTable
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
       let nativeTranslation = NativeJavaTranslation(

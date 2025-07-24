@@ -18,7 +18,7 @@ extension JNISwift2JavaGenerator {
   
   struct NativeJavaTranslation {
     let javaPackage: String
-    let javaClassLookupTable: [String: String]
+    let javaClassLookupTable: JavaClassLookupTable
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(

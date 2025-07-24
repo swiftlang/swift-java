@@ -39,7 +39,7 @@ public final class Swift2JavaTranslator {
 
   var inputs: [Input] = []
 
-  /// A list of used Swift class names that live in dependencies
+  /// A list of used Swift class names that live in dependencies, e.g. `JavaInteger`
   package var dependenciesClasses: [String] = []
 
   // ==== Output state
