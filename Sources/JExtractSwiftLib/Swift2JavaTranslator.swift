@@ -40,7 +40,7 @@ public final class Swift2JavaTranslator {
   var inputs: [Input] = []
 
   /// A list of used Swift class names that live in dependencies
-  var dependenciesClasses: [String] = []
+  package var dependenciesClasses: [String] = []
 
   // ==== Output state
 

@@ -29,6 +29,7 @@ func assertOutput(
   _ renderKind: RenderKind,
   swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
+  javaClassLookupTable: [String: String] = [:],
   expectedChunks: [String],
   fileID: String = #fileID,
   filePath: String = #filePath,
@@ -38,6 +39,7 @@ func assertOutput(
   var config = Configuration()
   config.swiftModule = swiftModuleName
   let translator = Swift2JavaTranslator(config: config)
+  translator.dependenciesClasses = Array(javaClassLookupTable.keys)
 
   try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
 
@@ -64,7 +66,8 @@ func assertOutput(
       translator: translator,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
-      javaOutputDirectory: "/fake"
+      javaOutputDirectory: "/fake",
+      javaClassLookupTable: javaClassLookupTable
     )
 
     switch renderKind {
