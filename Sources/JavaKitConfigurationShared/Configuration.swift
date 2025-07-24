@@ -152,7 +152,7 @@ public func loadDependentConfigs(dependsOn: [String]) throws -> [(String?, Confi
       swiftModuleName = String(dependentConfig[..<equalLoc])
     }
 
-    let afterEqual = equalLoc ?? dependentConfig.startIndex
+    let afterEqual = equalLoc.map { dependentConfig.index(after: $0) } ?? dependentConfig.startIndex
     let configFileName = String(dependentConfig[afterEqual...])
 
     let config = try readConfiguration(configPath: URL(fileURLWithPath: configFileName)) ?? Configuration()
