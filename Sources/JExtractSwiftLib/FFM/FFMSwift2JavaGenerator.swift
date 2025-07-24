@@ -98,6 +98,9 @@ extension FFMSwift2JavaGenerator {
     "org.swift.swiftkit.ffm.*",
     "org.swift.swiftkit.ffm.SwiftRuntime",
 
+    // Unsigned numerics support
+    "org.swift.swiftkit.core.primitives.*",
+
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",
     "java.lang.invoke.*",

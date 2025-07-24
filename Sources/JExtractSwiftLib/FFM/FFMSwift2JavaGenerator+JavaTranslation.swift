@@ -304,6 +304,14 @@ extension FFMSwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
 
+      // If we need to handle unsigned integers "safely" do so here
+      if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
+        return TranslatedParameter(
+          javaParameters: [
+            JavaParameter(name: parameterName, type: unsignedWrapperType)
+          ], conversion: .call(.placeholder, function: "UnsignedNumbers.toPrimitive", withArena: false))
+      }
+
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {

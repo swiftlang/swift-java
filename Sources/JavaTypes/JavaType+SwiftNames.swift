@@ -85,20 +85,9 @@ extension JavaType {
     }
   }
 
-  /// Try to map a Swift type name (e.g., from the module Swift) over to a
-  /// primitive Java type, or fail otherwise.
-  public init?(swiftTypeName: String) {
-    switch swiftTypeName {
-    case "Bool": self = .boolean
-    case "Int8": self = .byte
-    case "UInt16": self = .char
-    case "Int16": self = .short
-    case "Int32": self = .int
-    case "Int64": self = .long
-    case "Float": self = .float
-    case "Double": self = .double
-    case "Void": self = .void
-    default: return nil
-    }
-  }
+}
+
+public enum UnsignedNumericsMode {
+  case ignoreSign
+  case wrapAsUnsignedNumbers
 }
