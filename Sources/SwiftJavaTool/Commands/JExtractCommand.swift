@@ -60,6 +60,15 @@ extension SwiftJava {
 
     @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
     var writeEmptyFiles: Bool = false
+
+    @Option(
+      help: """
+            A swift-java configuration file for a given Swift module name on which this module depends,
+            e.g., Sources/JavaKitJar/Java2Swift.config. There should be one of these options
+            for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
+            """
+    )
+    var dependsOn: [String] = []
   }
 }
 
@@ -82,15 +91,20 @@ extension SwiftJava.JExtractCommand {
 
     print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(self.mode)".bold)
 
-    try jextractSwift(config: config)
+    // Load all of the dependent configurations and associate them with Swift modules.
+    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn)
+    print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
+
+    try jextractSwift(config: config, dependentConfigs: dependentConfigs.map(\.1))
   }
 }
 
 extension SwiftJava.JExtractCommand {
   func jextractSwift(
-    config: Configuration
+    config: Configuration,
+    dependentConfigs: [Configuration]
   ) throws {
-    try SwiftToJava(config: config).run()
+    try SwiftToJava(config: config, dependentConfigs: dependentConfigs).run()
   }
 
 }

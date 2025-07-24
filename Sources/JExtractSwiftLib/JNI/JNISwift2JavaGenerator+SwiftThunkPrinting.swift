@@ -328,29 +328,3 @@ extension JNISwift2JavaGenerator {
     return newSelfParamName
   }
 }
-
-extension String {
-  /// Returns a version of the string correctly escaped for a JNI
-  var escapedJNIIdentifier: String {
-    self.map {
-      if $0 == "_" {
-        return "_1"
-      } else if $0 == "/" {
-        return "_"
-      } else if $0 == ";" {
-        return "_2"
-      } else if $0 == "[" {
-        return "_3"
-      } else if $0.isASCII && ($0.isLetter || $0.isNumber)  {
-        return String($0)
-      } else if let utf16 = $0.utf16.first {
-        // Escape any non-alphanumeric to their UTF16 hex encoding
-        let utf16Hex = String(format: "%04x", utf16)
-        return "_0\(utf16Hex)"
-      } else {
-        fatalError("Invalid JNI character: \($0)")
-      }
-    }
-    .joined()
-  }
-}

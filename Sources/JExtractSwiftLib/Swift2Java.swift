@@ -20,9 +20,11 @@ import JavaKitConfigurationShared // TODO: this should become SwiftJavaConfigura
 
 public struct SwiftToJava {
   let config: Configuration
+  let dependentConfigs: [Configuration]
 
-  public init(config: Configuration) {
+  public init(config: Configuration, dependentConfigs: [Configuration]) {
     self.config = config
+    self.dependentConfigs = dependentConfigs
   }
 
   public func run() throws {
@@ -83,6 +85,14 @@ public struct SwiftToJava {
       fatalError("Missing --output-java directory!")
     }
 
+    let wrappedJavaClassesLookupTable: JavaClassLookupTable = dependentConfigs.compactMap(\.classes).reduce(into: [:]) {
+      for (canonicalName, javaClass) in $1 {
+        $0[javaClass] = canonicalName
+      }
+    }
+
+    translator.dependenciesClasses = Array(wrappedJavaClassesLookupTable.keys)
+
     try translator.analyze()
 
     switch config.mode {
@@ -101,7 +111,8 @@ public struct SwiftToJava {
         translator: translator,
         javaPackage: config.javaPackage ?? "",
         swiftOutputDirectory: outputSwiftDirectory,
-        javaOutputDirectory: outputJavaDirectory
+        javaOutputDirectory: outputJavaDirectory,
+        javaClassLookupTable: wrappedJavaClassesLookupTable
       )
 
       try generator.generate()

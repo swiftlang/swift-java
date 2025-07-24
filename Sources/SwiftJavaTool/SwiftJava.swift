@@ -88,13 +88,13 @@ struct SwiftJava: AsyncParsableCommand {
 }
 
 enum JavaToSwiftError: Error {
-  case badConfigOption(String)
+  case badConfigOption
 }
 
 extension JavaToSwiftError: CustomStringConvertible {
   var description: String {
     switch self {
-    case .badConfigOption(_):
+    case .badConfigOption:
       "configuration option must be of the form '<swift module name>=<path to config file>"
     }
   }

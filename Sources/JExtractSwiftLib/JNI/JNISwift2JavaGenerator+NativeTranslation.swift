@@ -18,6 +18,7 @@ extension JNISwift2JavaGenerator {
   
   struct NativeJavaTranslation {
     let javaPackage: String
+    let javaClassLookupTable: JavaClassLookupTable
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -62,10 +63,12 @@ extension JNISwift2JavaGenerator {
       swiftParameter: SwiftParameter,
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: String
     ) throws -> NativeParameter {
       switch swiftParameter.type {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
@@ -77,6 +80,25 @@ extension JNISwift2JavaGenerator {
             conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
           )
         }
+
+        if nominalType.isJavaKitWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftParameter.type)
+          }
+
+          return NativeParameter(
+            name: parameterName,
+            javaType: javaType,
+            conversion: .initializeJavaKitWrapper(wrapperName: nominalTypeName)
+          )
+        }
+
+        // JExtract classes are passed as the pointer.
+        return NativeParameter(
+          name: parameterName,
+          javaType: .long,
+          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
+        )
 
       case .tuple([]):
         return NativeParameter(
@@ -110,13 +132,6 @@ extension JNISwift2JavaGenerator {
       case .metatype, .optional, .tuple, .existential, .opaque:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
       }
-
-      // Classes are passed as the pointer.
-      return NativeParameter(
-        name: parameterName,
-        javaType: .long,
-        conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
-      )
     }
 
     func translateClosureResult(
@@ -193,6 +208,15 @@ extension JNISwift2JavaGenerator {
           )
         }
 
+        if nominalType.isJavaKitWrapper {
+          throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+        }
+
+        return NativeResult(
+          javaType: .long,
+          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type))
+        )
+
       case .tuple([]):
         return NativeResult(
           javaType: .void,
@@ -203,13 +227,7 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
 
-      // TODO: Handle other classes, for example from JavaKit macros.
-      // for now we assume all passed in classes are JExtract generated
-      // so we pass the pointer.
-      return NativeResult(
-        javaType: .long,
-        conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type))
-      )
+
     }
   }
 
@@ -261,6 +279,8 @@ extension JNISwift2JavaGenerator {
     indirect case pointee(NativeSwiftConversionStep)
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
+
+    case initializeJavaKitWrapper(wrapperName: String)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -348,6 +368,9 @@ extension JNISwift2JavaGenerator {
         printer.print("}")
 
         return printer.finalize()
+
+      case .initializeJavaKitWrapper(let wrapperName):
+        return "\(wrapperName)(javaThis: \(placeholder), environment: environment!)"
       }
     }
   }

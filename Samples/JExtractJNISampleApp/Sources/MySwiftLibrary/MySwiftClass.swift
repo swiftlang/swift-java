@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaKit
+
 public class MySwiftClass {
   public let x: Int64
   public let y: Int64
@@ -83,5 +85,9 @@ public class MySwiftClass {
 
   public func copy() -> MySwiftClass {
     return MySwiftClass(x: self.x, y: self.y)
+  }
+
+  public func addXWithJavaLong(_ other: JavaLong) -> Int64 {
+    return self.x + other.longValue()
   }
 }

@@ -77,7 +77,12 @@ extension SwiftJava.WrapJavaCommand {
         searchDirs: classpathSearchDirs, config: config)
 
     // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try self.loadDependentConfigs()
+    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in
+      guard let moduleName else {
+        throw JavaToSwiftError.badConfigOption
+      }
+      return (moduleName, config)
+    }
     print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
 
     // Include classpath entries which libs we depend on require...
@@ -99,27 +104,6 @@ extension SwiftJava.WrapJavaCommand {
       dependentConfigs: dependentConfigs,
       environment: jvm.environment()
     )
-  }
-}
-
-extension SwiftJava.WrapJavaCommand {
-
-  /// Load all dependent configs configured with `--depends-on` and return a list of
-  /// `(SwiftModuleName, Configuration)` tuples.
-  func loadDependentConfigs() throws -> [(String, Configuration)] {
-    try dependsOn.map { dependentConfig in
-      guard let equalLoc = dependentConfig.firstIndex(of: "=") else {
-        throw JavaToSwiftError.badConfigOption(dependentConfig)
-      }
-
-      let afterEqual = dependentConfig.index(after: equalLoc)
-      let swiftModuleName = String(dependentConfig[..<equalLoc])
-      let configFileName = String(dependentConfig[afterEqual...])
-
-      let config = try readConfiguration(configPath: URL(fileURLWithPath: configFileName)) ?? Configuration()
-
-      return (swiftModuleName, config)
-    }
   }
 }
 

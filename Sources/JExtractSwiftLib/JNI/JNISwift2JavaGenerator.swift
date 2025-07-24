@@ -14,6 +14,10 @@
 
 import JavaTypes
 
+/// A table that where keys are Swift class names and the values are
+/// the fully qualified canoical names.
+package typealias JavaClassLookupTable = [String: String]
+
 package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let analysis: AnalysisResult
   let swiftModuleName: String
@@ -21,6 +25,8 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let logger: Logger
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
+
+  let javaClassLookupTable: JavaClassLookupTable
 
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
@@ -39,7 +45,8 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
-    javaOutputDirectory: String
+    javaOutputDirectory: String,
+    javaClassLookupTable: JavaClassLookupTable
   ) {
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
     self.analysis = translator.result
@@ -47,6 +54,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
+    self.javaClassLookupTable = javaClassLookupTable
 
      // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {

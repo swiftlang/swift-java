@@ -24,7 +24,11 @@ extension JNISwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(swiftModuleName: swiftModuleName, javaPackage: self.javaPackage)
+      let translation = JavaTranslation(
+        swiftModuleName: swiftModuleName,
+        javaPackage: self.javaPackage,
+        javaClassLookupTable: self.javaClassLookupTable
+      )
       translated = try translation.translate(decl)
     } catch {
       self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -38,9 +42,13 @@ extension JNISwift2JavaGenerator {
   struct JavaTranslation {
     let swiftModuleName: String
     let javaPackage: String
+    let javaClassLookupTable: JavaClassLookupTable
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
-      let nativeTranslation = NativeJavaTranslation(javaPackage: self.javaPackage)
+      let nativeTranslation = NativeJavaTranslation(
+        javaPackage: self.javaPackage,
+        javaClassLookupTable: self.javaClassLookupTable
+      )
 
       // Types with no parent will be outputted inside a "module" class.
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
@@ -157,6 +165,8 @@ extension JNISwift2JavaGenerator {
     ) throws -> TranslatedParameter {
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -168,11 +178,25 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        // For now, we assume this is a JExtract class.
+        if nominalType.isJavaKitWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+
+          return TranslatedParameter(
+            parameter: JavaParameter(
+              name: parameterName,
+              type: javaType
+            ),
+            conversion: .placeholder
+          )
+        }
+
+        // We assume this is a JExtract class.
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: nil, name: nominalType.nominalTypeDecl.name)
+            type: .class(package: nil, name: nominalTypeName)
           ),
           conversion: .valueMemoryAddress(.placeholder)
         )
@@ -213,7 +237,11 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        // For now, we assume this is a JExtract class.
+        if nominalType.isJavaKitWrapper {
+          throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+        }
+
+        // We assume this is a JExtract class.
         let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.name)
         return TranslatedResult(
           javaType: javaType,
@@ -350,5 +378,9 @@ extension JNISwift2JavaGenerator {
 
   enum JavaTranslationError: Error {
     case unsupportedSwiftType(SwiftType)
+
+    /// The user has not supplied a mapping from `SwiftType` to
+    /// a java class.
+    case wrappedJavaClassTranslationNotProvided(SwiftType)
   }
 }

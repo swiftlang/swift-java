@@ -171,6 +171,13 @@ extension SwiftNominalType: CustomStringConvertible {
   }
 }
 
+extension SwiftNominalType {
+  // TODO: Better way to detect Java wrapped classes.
+  var isJavaKitWrapper: Bool {
+    nominalTypeDecl.name.hasPrefix("Java")
+  }
+}
+
 extension SwiftType {
   init(_ type: TypeSyntax, symbolTable: SwiftSymbolTable) throws {
     switch type.as(TypeSyntaxEnum.self) {

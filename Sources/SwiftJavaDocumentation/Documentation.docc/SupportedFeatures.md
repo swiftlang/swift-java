@@ -65,6 +65,8 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Protocols: `protocol`, existential parameters `any Collection`                       | ❌        | ❌   |
 | Optional types: `Int?`, `AnyObject?`                                                 | ❌        | ❌   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
+| Parameters: JavaKit wrapped types `JavaLong`, `JavaInteger`                          | ❌        | ✅   |
+| Return values: JavaKit wrapped types `JavaLong`, `JavaInteger`                       | ❌        | ❌   |
 | Unsigned primitive types: `UInt`, `UInt8`, `UInt16`, `UInt32`, `UInt64`              | ❌        | ❌   |
 | String (with copying data)                                                           | ✅        | ✅   |
 | Variadic parameters: `T...`                                                          | ❌        | ❌   |
