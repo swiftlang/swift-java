@@ -39,6 +39,9 @@ public final class Swift2JavaTranslator {
 
   var inputs: [Input] = []
 
+  /// A list of used Swift class names that live in dependencies
+  var dependenciesClasses: [String] = []
+
   // ==== Output state
 
   package var importedGlobalVariables: [ImportedFunc] = []
@@ -111,9 +114,11 @@ extension Swift2JavaTranslator {
   }
 
   package func prepareForTranslation() {
+    let dependenciesSource = self.buildDependencyClassesSourceFile()
+
     self.symbolTable = SwiftSymbolTable.setup(
       moduleName: self.swiftModuleName,
-      inputs.map({ $0.syntax }),
+      inputs.map({ $0.syntax }) + [dependenciesSource],
       log: self.log
     )
   }
@@ -166,6 +171,16 @@ extension Swift2JavaTranslator {
       }
     }
     return false
+  }
+
+  /// Returns a source file that contains all the available dependency classes.
+  private func buildDependencyClassesSourceFile() -> SourceFileSyntax {
+    let contents = self.dependenciesClasses.map {
+      "public class \($0) {}"
+    }
+    .joined(separator: "\n")
+
+    return SourceFileSyntax(stringLiteral: contents)
   }
 }
 

@@ -139,4 +139,13 @@ public class MySwiftClassTest {
             assertNotEquals(c1.$memoryAddress(), c2.$memoryAddress());
         }
     }
+
+    @Test
+    void addXWithJavaLong() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            Long javaLong = new Long(50);
+            assertEquals(70, c1.addXWithJavaLong(javaLong));
+        }
+    }
 }

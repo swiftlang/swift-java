@@ -22,6 +22,10 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
 
+  /// A lookup table for any JavaKit generated Swift types
+  /// that wrap Java classes.
+  let javaClassLookupTable: [String: String]
+
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
   }
@@ -39,7 +43,8 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
-    javaOutputDirectory: String
+    javaOutputDirectory: String,
+    javaClassLookupTable: [String: String]
   ) {
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
     self.analysis = translator.result
@@ -47,6 +52,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
+    self.javaClassLookupTable = javaClassLookupTable
 
      // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {
