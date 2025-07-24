@@ -63,7 +63,7 @@ extension JNISwift2JavaGenerator {
       swiftParameter: SwiftParameter,
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: String
     ) throws -> NativeParameter {
       switch swiftParameter.type {
       case .nominal(let nominalType):
