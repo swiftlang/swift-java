@@ -62,22 +62,59 @@ Required language/runtime versions:
 
 This project contains multiple builds, living side by side together.
 
-Depending on which part you are developing, you may want to run just the swift tests:
+You will need to have:
+- Swift (6.1.x+)
+- Java (24+ for FFM, even though we support lower JDK targets)
+- Gradle (installed by "Gradle wrapper" automatically when you run gradle through `./gradlew`)
+
+### Preparing your environment
+
+Install **Swift**, the easiest way to do this is to use **Swiftly**: [swift.org/install/](https://www.swift.org/install/).
+This should automatically install a recent Swift, but you can always make sure by running:
+
+```
+> swiftly install 6.1.2 --use
+```
+
+Install a recent enough Java distribution. We validate this project using Corretto so you can choose to use that as well,
+however any recent enough Java distribution should work correctly. You can use sdkman to install Java:
+
+```
+# Install sdkman from: https://sdkman.io
+curl -s "https://get.sdkman.io" | bash
+sdk install java 17.0.15-amzn
+sdk install java 21.0.7-amzn
+sdk install java 24.0.1-amzn
+
+sdk use java 21.0.7-amzn
+```
+
+Make sure to use Java 21 because Gradle 8.10 isn't quite ready for JDK 24 as time of writing this readme (if this changes, please update the readme).
+
+### Testing your changes 
+
+Many tests, including source generation tests, are written in Swift and you can execute them all by running the 
+swift package manager test command:
 
 ```bash
 > swift test
 ```
 
-or the Java tests through the Gradle build. The Gradle build may also trigger some Swift compilation because of 
-interlinked dependencies of the two parts of Swift-Java. To run the Java build and tests use the Gradle wrapper script:
+When adding tests in `Tests/...` targets, you can run these tests (or filter a specific test using `swift test --filter type-or-method-name`).
+
+Some tests are implemented in Java and therefore need to be executed using Gradle.
+Please always use the gradle wrapper (`./gradlew`) to make sure to use the appropriate Gradle version
 
 ```bash
 > ./gradlew test
 ```
 
-Currently it is suggested to use Swift 6.0 and a Java 24+.
+> Tip: A lot of the **runtime tests** for code relying on `jextract` are **located in sample apps**, 
+> so if you need to runtime test any code relying on source generation steps of jextract, consider adding the tests
+> to an appropriate Sample. These tests are also executed in CI (which you can check in the `ci-validate.sh` script 
+> contained in every sample repository).
 
-### Sample Apps
+### Sample apps & tests
 
 Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
 
@@ -101,11 +138,17 @@ To run a simple example app showcasing the jextract (Java calling Swift) approac
 This will also generate the necessary sources (by invoking jextract, extracting the `Sources/ExampleSwiftLibrary`) 
 and generating Java sources in `src/generated/java`.
 
+#### Other sample apps
+
+Please refer to the [Samples](Samples) directory for more sample apps which showcase the various usage modes of swift-java.
+
 ## Benchmarks
 
 You can run Swift [ordo-one/package-benchmark](https://github.com/ordo-one/package-benchmark) and OpenJDK [JMH](https://github.com/openjdk/jmh) benchmarks in this project.
 
 Swift benchmarks are located under `Benchmarks/` and JMH benchmarks are currently part of the SwiftKit sample project: `Samples/SwiftKitSampleApp/src/jmh` because they depend on generated sources from the sample.
+
+### Swift benchmarks
 
 To run **Swift benchmarks** you can:
 
@@ -113,6 +156,8 @@ To run **Swift benchmarks** you can:
 cd Benchmarks
 swift package benchmark
 ```
+
+### Java benchmarks
 
 In order to run JMH benchmarks you can:
 
@@ -125,4 +170,20 @@ Please read documentation of both performance testing tools and understand that 
 
 ## User Guide
 
-More details about the project and how it can be used are available in [USER_GUIDE.md](USER_GUIDE.md)
+More details about the project can be found in [docc](https://www.swift.org/documentation/docc/) documentation.
+
+To view the rendered docc documentation you can use the docc preview command:
+
+```bash
+xcrun docc preview Sources/SwiftJavaDocumentation/Documentation.docc
+
+# OR JavaKit to view JavaKit documentation:
+# xcrun docc preview Sources/JavaKit/Documentation.docc
+
+# ========================================
+# Starting Local Preview Server
+#	 Address: http://localhost:8080/documentation/documentation
+# ========================================
+# Monitoring /Users/ktoso/code/swift-java/Sources/SwiftJavaDocumentation/Documentation.docc for changes...
+
+```
