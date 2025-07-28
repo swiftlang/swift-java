@@ -72,14 +72,14 @@ You will need to have:
 Install **Swift**, the easiest way to do this is to use **Swiftly**: [swift.org/install/](https://www.swift.org/install/).
 This should automatically install a recent Swift, but you can always make sure by running:
 
-```
-> swiftly install 6.1.2 --use
+```bash
+swiftly install 6.1.2 --use
 ```
 
 Install a recent enough Java distribution. We validate this project using Corretto so you can choose to use that as well,
 however any recent enough Java distribution should work correctly. You can use sdkman to install Java:
 
-```
+```bash
 # Install sdkman from: https://sdkman.io
 curl -s "https://get.sdkman.io" | bash
 sdk install java 17.0.15-amzn
@@ -90,6 +90,13 @@ sdk use java 21.0.7-amzn
 ```
 
 Make sure to use Java 21 because Gradle 8.10 isn't quite ready for JDK 24 as time of writing this readme (if this changes, please update the readme).
+
+❗️ Please make sure to `export JAVA_HOME` such that swift-java can find the necessary java libraries!
+When using sdkman the easiest way to export JAVA_HOME is to export the "current" used JDK's home, like this:
+
+```bash
+export JAVA_HOME="$(sdk home java current)
+```
 
 ### Testing your changes 
 
