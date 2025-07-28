@@ -36,10 +36,6 @@ download_and_install_jdk() {
     if [ "$JDK_VENDOR" = 'corretto' ]; then
         if [ "$(uname -m)" = 'aarch64' ]; then
             case "$jdk_version" in
-                "21")
-                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-21-aarch64-linux-jdk.tar.gz"
-                    expected_md5="87e458029cf9976945dfa3a22af3f850"
-                    ;;
                 "24")
                     jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-aarch64-linux-jdk.tar.gz"
                     expected_md5="3b543f4e971350b73d0ab6d8174cc030"
@@ -51,10 +47,6 @@ download_and_install_jdk() {
             esac
         else
             case "$jdk_version" in
-                "21")
-                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.tar.gz"
-                    expected_md5="a123e7f50807c27de521bef7378d3377"
-                    ;;
                 "24")
                     jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
                     expected_md5="130885ded3cbfc712fbe9f7dace45a52"
@@ -102,13 +94,12 @@ download_and_install_jdk() {
     cd "$HOME"
 }
 
-# Usage: Install both JDK versions
-download_and_install_jdk "21"
+# Usage: Install JDK 24
 download_and_install_jdk "24"
 
 ls -la /usr/lib/jvm/
 cd /usr/lib/jvm/
-ln -s jdk-21 default-jdk
+ln -s jdk-24 default-jdk
 find . | grep java | grep bin
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
 /usr/lib/jvm/default-jdk/bin/java -version
