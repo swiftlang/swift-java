@@ -20,6 +20,7 @@ extension JNISwift2JavaGenerator {
   static let defaultJavaImports: Array<String> = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
+    "java.util.*"
   ]
 }
 
@@ -270,7 +271,11 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = nativeSignature.selfParameter {
       parameters.append(selfParameter)
     }
-    let renderedParameters = parameters.map { "\($0.javaType) \($0.name)"}.joined(separator: ", ")
+    let renderedParameters = parameters.flatMap {
+      $0.parameters.map { javaParameter in
+        "\(javaParameter.type) \(javaParameter.name)"
+      }
+    }.joined(separator: ", ")
 
     printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
   }

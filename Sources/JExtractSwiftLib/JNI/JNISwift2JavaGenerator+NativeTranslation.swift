@@ -70,15 +70,28 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+            }
+            return try translateOptionalParameter(
+              wrappedType: genericArgs[0],
+              parameterName: parameterName
+            )
 
-          return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
-            conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
-          )
+          default:
+            guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+            }
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: javaType)
+              ],
+              conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
+            )
+          }
         }
 
         if nominalType.isJavaKitWrapper {
@@ -87,23 +100,26 @@ extension JNISwift2JavaGenerator {
           }
 
           return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
             conversion: .initializeJavaKitWrapper(wrapperName: nominalTypeName)
           )
         }
 
         // JExtract classes are passed as the pointer.
         return NativeParameter(
-          name: parameterName,
-          javaType: .long,
+          parameters: [
+            JavaParameter(name: parameterName, type: .long)
+          ],
           conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
         )
 
       case .tuple([]):
         return NativeParameter(
-          name: parameterName,
-          javaType: .void,
+          parameters: [
+            JavaParameter(name: parameterName, type: .void)
+          ],
           conversion: .placeholder
         )
 
@@ -121,16 +137,69 @@ extension JNISwift2JavaGenerator {
         let result = try translateClosureResult(fn.resultType)
 
         return NativeParameter(
-          name: parameterName,
-          javaType: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
+          parameters: [
+            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),)
+          ],
           conversion: .closureLowering(
             parameters: parameters,
             result: result
           )
         )
 
-      case .metatype, .optional, .tuple, .existential, .opaque:
+      case .optional(let wrapped):
+        return try translateOptionalParameter(
+          wrappedType: wrapped,
+          parameterName: parameterName
+        )
+
+      case .metatype, .tuple, .existential, .opaque:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+      }
+    }
+
+    func translateOptionalParameter(
+      wrappedType swiftType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      let descriptorParameter = JavaParameter(name: "\(parameterName)_descriptor", type: .byte)
+      let valueName = "\(parameterName)_value"
+
+      switch swiftType {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          return NativeParameter(
+            parameters: [
+              descriptorParameter,
+              JavaParameter(name: valueName, type: javaType)
+            ],
+            conversion: .optionalLowering(.getJNIValue(.placeholder))
+          )
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+        // Assume JExtract wrapped class
+        return NativeParameter(
+          parameters: [JavaParameter(name: parameterName, type: .long)],
+          conversion: .pointee(
+            .optionalChain(
+              .extractSwiftValue(
+                .placeholder,
+                swiftType: swiftType,
+                allowNil: true
+              )
+            )
+          )
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
 
@@ -178,8 +247,9 @@ extension JNISwift2JavaGenerator {
 
           // Only support primitives for now.
           return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
             conversion: .getJValue(.placeholder)
           )
         }
@@ -238,12 +308,9 @@ extension JNISwift2JavaGenerator {
   }
 
   struct NativeParameter {
-    let name: String
-    let javaType: JavaType
-
-    var jniType: JNIType {
-      javaType.jniType
-    }
+    /// One Swift parameter can be lowered to multiple parameters.
+    /// E.g. 'Optional<Int>' as (descriptor, value) pair.
+    var parameters: [JavaParameter]
 
     /// Represents how to convert the JNI parameter to a Swift parameter
     let conversion: NativeSwiftConversionStep
@@ -269,7 +336,11 @@ extension JNISwift2JavaGenerator {
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Extracts a swift type at a pointer given by a long.
-    indirect case extractSwiftValue(NativeSwiftConversionStep, swiftType: SwiftType)
+    indirect case extractSwiftValue(
+      NativeSwiftConversionStep,
+      swiftType: SwiftType,
+      allowNil: Bool = false
+    )
 
     /// Allocate memory for a Swift value and outputs the pointer
     case allocateSwiftValue(name: String, swiftType: SwiftType)
@@ -281,6 +352,10 @@ extension JNISwift2JavaGenerator {
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
     case initializeJavaKitWrapper(wrapperName: String)
+
+    indirect case optionalLowering(NativeSwiftConversionStep)
+
+    indirect case optionalChain(NativeSwiftConversionStep)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -302,18 +377,28 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment!)"
 
-      case .extractSwiftValue(let inner, let swiftType):
+      case .extractSwiftValue(let inner, let swiftType, let allowNil):
         let inner = inner.render(&printer, placeholder)
+        let pointerName = "\(inner)$"
+        if !allowNil {
+          printer.print(#"assert(\#(inner) != 0, "\#(inner) memory address was null")"#)
+        }
         printer.print(
           """
-          assert(\(inner) != 0, "\(inner) memory address was null")
           let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment!))
-          guard let \(inner)$ = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$) else {
-            fatalError("\(inner) memory address was null in call to \\(#function)!")
-          }
+          let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)
           """
         )
-        return "\(inner)$"
+        if !allowNil {
+          printer.print(
+            """
+            guard let \(pointerName) else {
+              fatalError("\(inner) memory address was null in call to \\(#function)!")
+            }
+            """
+          )
+        }
+        return pointerName
 
       case .allocateSwiftValue(let name, let swiftType):
         let pointerName = "\(name)$"
@@ -336,15 +421,17 @@ extension JNISwift2JavaGenerator {
 
         let methodSignature = MethodSignature(
           resultType: nativeResult.javaType,
-          parameterTypes: parameters.map(\.javaType)
+          parameterTypes: parameters.flatMap { $0.parameters.map(\.type) }
         )
 
-        let closureParameters = !parameters.isEmpty ? "\(parameters.map(\.name).joined(separator: ", ")) in" : ""
+        let names = parameters.flatMap { $0.parameters.map(\.name) }
+        let closureParameters = !parameters.isEmpty ? "\(names.joined(separator: ", ")) in" : ""
         printer.print("{ \(closureParameters)")
         printer.indent()
 
+        // TODO: Add support for types that are lowered to multiple parameters in closures
         let arguments = parameters.map {
-          $0.conversion.render(&printer, $0.name)
+          $0.conversion.render(&printer, $0.parameters.first!.name)
         }
 
         printer.print(
@@ -371,6 +458,14 @@ extension JNISwift2JavaGenerator {
 
       case .initializeJavaKitWrapper(let wrapperName):
         return "\(wrapperName)(javaThis: \(placeholder), environment: environment!)"
+
+      case .optionalLowering(let valueConversion):
+        let value = valueConversion.render(&printer, "\(placeholder)_value")
+        return "\(placeholder)_descriptor == 1 ? \(value) : nil"
+
+      case .optionalChain(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner)?"
       }
     }
   }

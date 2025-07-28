@@ -135,7 +135,7 @@ extension JNISwift2JavaGenerator {
       &printer,
       javaMethodName: translatedDecl.nativeFunctionName,
       parentName: translatedDecl.parentName,
-      parameters: parameters.map { JavaParameter(name: $0.name, type: $0.javaType) },
+      parameters: parameters.flatMap { $0.parameters },
       resultType: nativeSignature.result.javaType.jniType
     ) { printer in
       self.printFunctionDowncall(&printer, decl)
@@ -155,8 +155,9 @@ extension JNISwift2JavaGenerator {
 
     // Regular parameters.
     var arguments = [String]()
-    for parameter in nativeSignature.parameters {
-      let lowered = parameter.conversion.render(&printer, parameter.name)
+    for (idx, parameter) in nativeSignature.parameters.enumerated() {
+      let javaParameterName = translatedDecl.translatedFunctionSignature.parameters[idx].parameter.name
+      let lowered = parameter.conversion.render(&printer, javaParameterName)
       arguments.append(lowered)
     }
 

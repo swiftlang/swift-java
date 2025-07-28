@@ -17,6 +17,9 @@ package com.example.swift;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftClassTest {
@@ -146,6 +149,25 @@ public class MySwiftClassTest {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
             Long javaLong = 50L;
             assertEquals(70, c1.addXWithJavaLong(javaLong));
+        }
+    }
+
+    @Test
+    void optionalMethod() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            assertEquals(0, c1.optionalMethod(OptionalInt.empty()));
+            assertEquals(50, c1.optionalMethod(OptionalInt.of(50)));
+        }
+    }
+
+    @Test
+    void optionalMethodClass() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            MySwiftClass c2 = MySwiftClass.init(50, 10, arena);
+            assertFalse(c1.optionalMethodClass(Optional.empty()));
+            assertTrue(c1.optionalMethodClass(Optional.of(c2)));
         }
     }
 }

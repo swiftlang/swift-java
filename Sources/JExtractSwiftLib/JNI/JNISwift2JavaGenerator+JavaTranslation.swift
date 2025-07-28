@@ -168,14 +168,26 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            return try translateOptionalParameter(
+              wrappedType: genericArgs[0],
+              parameterName: parameterName
+            )
 
-          return TranslatedParameter(
-            parameter: JavaParameter(name: parameterName, type: javaType),
-            conversion: .placeholder
-          )
+          default:
+            guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: javaType),
+              conversion: .placeholder
+            )
+          }
         }
 
         if nominalType.isJavaKitWrapper {
@@ -216,7 +228,73 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .metatype, .optional, .tuple, .existential, .opaque:
+      case .optional(let wrapped):
+        return try translateOptionalParameter(
+          wrappedType: wrapped,
+          parameterName: parameterName
+        )
+
+      case .metatype, .tuple, .existential, .opaque:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
+    func translateOptionalParameter(
+      wrappedType swiftType: SwiftType,
+      parameterName: String
+    ) throws -> TranslatedParameter {
+      switch swiftType {
+      case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          let (translatedClass, orElseValue) = switch javaType {
+          case .boolean: ("Optional<Boolean>", "false")
+          case .byte: ("Optional<Byte>", "0")
+          case .char: ("Optional<Character>", "0")
+          case .short: ("Optional<Short>", "0")
+          case .int: ("OptionalInt", "0")
+          case .long: ("OptionalLong", "0")
+          case .float: ("Optional<Float>", "0")
+          case .double: ("OptionalDouble", "0")
+          case .javaLangString: ("Optional<String>", #""""#)
+          default:
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          return TranslatedParameter(
+            parameter: JavaParameter(
+              name: parameterName,
+              type: JavaType(className: translatedClass)
+            ),
+            conversion: .commaSeparated([
+              .isOptionalPresent,
+              .method(.placeholder, function: "orElse", arguments: [.constant(orElseValue)])
+            ])
+          )
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+        // Assume JExtract imported class
+        return TranslatedParameter(
+          parameter: JavaParameter(
+            name: parameterName,
+            type: .class(package: nil, name: "Optional<\(nominalTypeName)>")
+          ),
+          conversion: .method(
+            .method(.placeholder, function: "map", arguments: [.constant("\(nominalType)::$memoryAddress")]),
+            function: "orElse",
+            arguments: [.constant("0L")]
+          )
+        )
+      default:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -337,11 +415,23 @@ extension JNISwift2JavaGenerator {
     /// The value being converted
     case placeholder
 
+    case constant(String)
+
+    // The input exploded into components.
+    case explodedName(component: String)
+
+    // Convert the results of the inner steps to a comma separated list.
+    indirect case commaSeparated([JavaNativeConversionStep])
+
     /// `value.$memoryAddress()`
     indirect case valueMemoryAddress(JavaNativeConversionStep)
 
     /// Call `new \(Type)(\(placeholder), swiftArena$)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
+
+    indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep])
+
+    case isOptionalPresent
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -350,27 +440,51 @@ extension JNISwift2JavaGenerator {
       switch self {
       case .placeholder:
         return placeholder
-        
+
+      case .constant(let value):
+        return value
+
+      case .explodedName(let component):
+        return "\(placeholder)_\(component)"
+
+      case .commaSeparated(let list):
+        return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
+
       case .valueMemoryAddress:
         return "\(placeholder).$memoryAddress()"
-        
+
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "new \(javaType.className!)(\(inner), swiftArena$)"
-        
+
+      case .isOptionalPresent:
+        return "(byte) (\(placeholder).isPresent() ? 1 : 0)"
+
+      case .method(let inner, let methodName, let arguments):
+        let inner = inner.render(&printer, placeholder)
+        let args = arguments.map { $0.render(&printer, placeholder) }
+        let argsStr = args.joined(separator: ", ")
+        return "\(inner).\(methodName)(\(argsStr))"
+
       }
     }
 
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder:
+      case .placeholder, .constant, .explodedName, .isOptionalPresent:
         return false
 
       case .constructSwiftValue:
         return true
 
       case .valueMemoryAddress(let inner):
+        return inner.requiresSwiftArena
+
+      case .commaSeparated(let list):
+        return list.contains(where: { $0.requiresSwiftArena })
+
+      case .method(let inner, _, _):
         return inner.requiresSwiftArena
       }
     }
