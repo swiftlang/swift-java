@@ -83,13 +83,12 @@ however any recent enough Java distribution should work correctly. You can use s
 # Install sdkman from: https://sdkman.io
 curl -s "https://get.sdkman.io" | bash
 sdk install java 17.0.15-amzn
-sdk install java 21.0.7-amzn
 sdk install java 24.0.1-amzn
 
-sdk use java 21.0.7-amzn
+sdk use java 24.0.1-amzn
 ```
 
-Make sure to use Java 21 because Gradle 8.10 isn't quite ready for JDK 24 as time of writing this readme (if this changes, please update the readme).
+The use of JDK 24 is required to build the project, even though the libraries being published may target lower Java versions.
 
 ❗️ Please make sure to `export JAVA_HOME` such that swift-java can find the necessary java libraries!
 When using sdkman the easiest way to export JAVA_HOME is to export the "current" used JDK's home, like this:
