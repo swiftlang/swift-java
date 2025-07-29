@@ -26,11 +26,13 @@ components that this product depends on.
 
 -------------------------------------------------------------------------------
 
-This product contains a unsigned numerics support which is derived from Google Guava's 'UnsignedLong' and related types.
+This product contains a unsigned numerics support which is derived from Google Guava library (Version 33.4.8).
+Specifically, types from the 'com.google.common.primitives.*' package.
 
   * LICENSE (Apache License 2.0):
     * https://www.apache.org/licenses/LICENSE-2.0
   * HOMEPAGE:
     * https://github.com/google/guava/
+    * https://github.com/google/guava/blob/master/guava/src/com/google/common/primitives/
     * https://github.com/google/guava/blob/master/guava/src/com/google/common/primitives/UnsignedLong.java
     * https://github.com/google/guava/blob/master/guava/src/com/google/common/primitives/UnsignedInts.java

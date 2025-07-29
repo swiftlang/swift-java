@@ -61,12 +61,11 @@ public class MySwiftClass {
     return Int.random(in: 1..<256)
   }
 
-  public func takeUnsignedByte(arg: UInt8) -> UInt8 {
-    p("\(UInt32.self) = \(arg)")
-    return arg
-  }
-
   public func takeUnsignedInt(arg: UInt32) {
     p("\(UInt32.self) = \(arg)")
+  }
+
+  public func takeUnsignedLong(arg: UInt64) {
+    p("\(UInt64.self) = \(arg)")
   }
 }

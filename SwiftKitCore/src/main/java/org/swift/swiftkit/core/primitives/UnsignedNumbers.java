@@ -14,29 +14,28 @@
 
 package org.swift.swiftkit.core.primitives;
 
-import java.math.BigInteger;
-import java.util.Objects;
+import org.swift.swiftkit.core.annotations.NonNull;
 
 /**
- * Represents an 32-bit unsigned integer, with a value between 0 and (@{@code 2^32 - 1}).
+ * Utility class used to convert from {@code Unsigned...} wrapper classes to their underlying representation,
+ * without performing checks.
  *
- * <p> Equivalent to the {@code UInt32} Swift type.
+ * <p>Primarily used by the jextract source generator. In non-generated code, prefer using {@code intValue()},
+ * and the other value methods, which can return the specific type of primitive you might be interested in.
  */
 public final class UnsignedNumbers {
 
-    public static byte toPrimitive(UnsignedByte value) {
-        return value.value;
+    /**
+     * Returns the primitive {@code int}, value of the passed in {@link UnsignedInteger}.
+     */
+    public static int toPrimitive(@NonNull UnsignedInteger value) {
+        return value.intValue();
     }
 
-    public static short toPrimitive(UnsignedShort value) {
-        return value.value;
-    }
-
-    public static int toPrimitive(UnsignedInteger value) {
-        return value.value;
-    }
-
-    public static long toPrimitive(UnsignedLong value) {
-        return value.value;
+    /**
+     * Returns the primitive {@code long}, value of the passed in {@link UnsignedLong}.
+     */
+    public static long toPrimitive(@NonNull UnsignedLong value) {
+        return value.longValue();
     }
 }

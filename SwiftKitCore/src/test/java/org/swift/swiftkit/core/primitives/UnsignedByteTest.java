@@ -21,17 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UnsignedByteTest {
     @Test
     public void simpleValues() {
-        assertEquals(UnsignedByte.representedByBitsOf((byte) 12).longValue(), 12);
+        assertEquals(UnsignedBytes.toInt((byte) 12), 12);
     }
 
     @Test
     public void maxUnsignedValue() {
-        assertEquals(UnsignedByte.representedByBitsOf(Byte.MAX_VALUE).longValue(), Byte.MAX_VALUE);
-    }
-
-    @Test
-    public void maxUnsignedValueRoundTrip() {
-        long input = 2 ^ UnsignedByte.BIT_COUNT;
-        assertEquals(UnsignedByte.valueOf(input).longValue(), input);
+        assertEquals(UnsignedBytes.toInt(Byte.MAX_VALUE), Byte.MAX_VALUE);
     }
 }

@@ -18,11 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.primitives.*;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class UnsignedTest {
+public class UnsignedNumbersTest {
     @Test
-    void take_unsigned_int32() {
+    void take_uint32() {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var c = MySwiftClass.init(1, 2, arena);
             c.takeUnsignedInt(UnsignedInteger.valueOf(128));
@@ -30,11 +28,10 @@ public class UnsignedTest {
     }
 
     @Test
-    void take_uint8() {
+    void take_uint64() {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var c = MySwiftClass.init(1, 2, arena);
-            byte got = c.takeUnsignedByte(UnsignedByte.valueOf(200)); // FIXME: should return UnsignedByte
-            assertEquals(UnsignedByte.representedByBitsOf(got).intValue(), got);
+            c.takeUnsignedLong(UnsignedLong.MAX_VALUE);
         }
     }
 }
