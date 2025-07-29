@@ -30,11 +30,7 @@ extension JavaType {
       }
 
     case "Int16": self = .short
-    case "UInt16":
-    self = switch unsigned {
-      case .ignoreSign: .short
-      case .wrapAsUnsignedNumbers: JavaType.swiftkit.primitives.UnsignedShort
-      }
+    case "UInt16": self = .char
 
     case "Int32": self = .int
     case "UInt32":
@@ -77,13 +73,12 @@ extension JavaType {
   enum swiftkit {
     enum primitives {
       static let package = "org.swift.swiftkit.core.primitives"
-      static var UnsignedShort: JavaType {
-        .class(package: primitives.package, name: "UnsignedShort")
-      }
 
       static var UnsignedByte: JavaType {
         .class(package: primitives.package, name: "UnsignedByte")
       }
+
+      // UnsignedShort is not necessary because UInt16 is directly expressible as Java's unsigned 'char'.
 
       static var UnsignedInteger: JavaType {
         .class(package: primitives.package, name: "UnsignedInteger")
