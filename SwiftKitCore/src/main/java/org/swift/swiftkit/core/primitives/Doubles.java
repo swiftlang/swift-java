@@ -54,7 +54,7 @@ import org.swift.swiftkit.core.annotations.Nullable;
  * @author Kevin Bourrillion
  * @since 1.0
  */
-public final class Doubles extends DoublesMethodsForWeb {
+public final class Doubles {
   private Doubles() {}
 
   /**

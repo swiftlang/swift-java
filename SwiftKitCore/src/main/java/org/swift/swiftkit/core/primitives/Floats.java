@@ -30,8 +30,6 @@ package org.swift.swiftkit.core.primitives;
 
 import static org.swift.swiftkit.core.Preconditions.*;
 
-
-
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Arrays;
@@ -52,7 +50,7 @@ import org.swift.swiftkit.core.annotations.Nullable;
  * @author Kevin Bourrillion
  * @since 1.0
  */
-public final class Floats extends FloatsMethodsForWeb {
+public final class Floats {
   private Floats() {}
 
   /**
