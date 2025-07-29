@@ -254,11 +254,11 @@ extension JNISwift2JavaGenerator {
 
           let (translatedClass, orElseValue) = switch javaType {
           case .boolean: ("Optional<Boolean>", "false")
-          case .byte: ("Optional<Byte>", "0")
-          case .char: ("Optional<Character>", "0")
-          case .short: ("Optional<Short>", "0")
+          case .byte: ("Optional<Byte>", "(byte) 0")
+          case .char: ("Optional<Character>", "(char) 0")
+          case .short: ("Optional<Short>", "(short) 0")
           case .int: ("OptionalInt", "0")
-          case .long: ("OptionalLong", "0")
+          case .long: ("OptionalLong", "0L")
           case .float: ("Optional<Float>", "0")
           case .double: ("OptionalDouble", "0")
           case .javaLangString: ("Optional<String>", #""""#)
@@ -302,17 +302,28 @@ extension JNISwift2JavaGenerator {
     func translate(
       swiftResult: SwiftResult
     ) throws -> TranslatedResult {
-      switch swiftResult.type {
+      let swiftType = swiftResult.type
+
+      switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            return try translateOptionalResult(wrappedType: genericArgs[0])
 
-          return TranslatedResult(
-            javaType: javaType,
-            conversion: .placeholder
-          )
+          default:
+            guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+            }
+
+            return TranslatedResult(
+              javaType: javaType,
+              conversion: .placeholder
+            )
+          }
         }
 
         if nominalType.isJavaKitWrapper {
@@ -329,8 +340,68 @@ extension JNISwift2JavaGenerator {
       case .tuple([]):
         return TranslatedResult(javaType: .void, conversion: .placeholder)
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque:
+      case .optional(let wrapped):
+        return try translateOptionalResult(wrappedType: wrapped)
+
+      case .metatype, .tuple, .function, .existential, .opaque:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+      }
+    }
+
+    func translateOptionalResult(
+      wrappedType swiftType: SwiftType
+    ) throws -> TranslatedResult {
+      switch swiftType {
+      case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          let (returnType, staticCallee) = switch javaType {
+          case .boolean: ("Optional<Boolean>", "Optional")
+          case .byte: ("Optional<Byte>", "Optional")
+          case .char: ("Optional<Character>", "Optional")
+          case .short: ("Optional<Short>", "Optional")
+          case .int: ("OptionalInt", "OptionalInt")
+          case .long: ("OptionalLong", "OptionalLong")
+          case .float: ("Optional<Float>", "Optional")
+          case .double: ("OptionalDouble", "OptionalDouble")
+          case .javaLangString: ("Optional<String>", "Optional")
+          default:
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          // Check if we can fit the value and a discriminator byte in a primitive.
+          // so the return JNI value will be (value || discriminator)
+          if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
+            return TranslatedResult(
+              javaType: .class(package: nil, name: returnType),
+              conversion: .combinedValueToOptional(
+                .placeholder,
+                nextIntergralTypeWithSpaceForByte.java,
+                valueType: javaType,
+                valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
+                optionalType: staticCallee
+              )
+            )
+          } else {
+            // Otherwise, we are forced to use an array.
+            fatalError()
+          }
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+        // Assume JExtract imported class
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
   }
@@ -433,6 +504,8 @@ extension JNISwift2JavaGenerator {
 
     case isOptionalPresent
 
+    indirect case combinedValueToOptional(JavaNativeConversionStep, JavaType, valueType: JavaType, valueSizeInBytes: Int, optionalType: String)
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -466,6 +539,22 @@ extension JNISwift2JavaGenerator {
         let argsStr = args.joined(separator: ", ")
         return "\(inner).\(methodName)(\(argsStr))"
 
+      case .combinedValueToOptional(let combined, let combinedType, let valueType, let valueSizeInBytes, let optionalType):
+        let combined = combined.render(&printer, placeholder)
+        printer.print(
+          """
+          \(combinedType) combined$ = \(combined);
+          byte discriminator$ = (byte) (combined$ & 0xFF);
+          """
+        )
+
+        if valueType == .boolean {
+          printer.print("boolean value$ = ((byte) (combined$ >> 8)) != 0;")
+        } else {
+          printer.print("\(valueType) value$ = (\(valueType)) (combined$ >> \(valueSizeInBytes * 8));")
+        }
+
+        return "discriminator$ == 1 ? \(optionalType).of(value$) : \(optionalType).empty()"
       }
     }
 
@@ -485,6 +574,9 @@ extension JNISwift2JavaGenerator {
         return list.contains(where: { $0.requiresSwiftArena })
 
       case .method(let inner, _, _):
+        return inner.requiresSwiftArena
+
+      case .combinedValueToOptional(let inner, _, _, _, _):
         return inner.requiresSwiftArena
       }
     }

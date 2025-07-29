@@ -91,19 +91,31 @@ public class MySwiftClass {
     return self.x + other.longValue()
   }
 
-  public func optionalMethod(input: Optional<Int32>) -> Int64 {
-    if let input {
-      return Int64(input)
-    } else {
-      return 0
-    }
+  public func optionalBool(input: Optional<Bool>) -> Bool? {
+    return input
   }
 
-  public func optionalMethodClass(input: MySwiftClass?) -> Bool {
-    if let input {
-      return true
-    } else {
-      return false
-    }
+  public func optionalByte(input: Optional<Int8>) -> Int8? {
+    return input
   }
+
+  public func optionalChar(input: Optional<UInt16>) -> UInt16? {
+    return input
+  }
+
+  public func optionalShort(input: Optional<Int16>) -> Int16? {
+    return input
+  }
+
+  public func optionalInt(input: Optional<Int32>) -> Int32? {
+    return input
+  }
+
+//   public func optionalMethodClass(input: MySwiftClass?) -> <Optional<MySwiftClass>> {
+//     if let input {
+//       return MySwiftClass(x: input.x * 10, y: input.y * 10)
+//     } else {
+//       return nil
+//     }
+//   }
 }

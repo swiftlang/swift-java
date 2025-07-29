@@ -36,4 +36,14 @@ extension JavaType {
     case .void: fatalError("There is no type signature for 'void'")
     }
   }
+
+  /// Returns the next integral type with space for self and an additional byte.
+  var nextIntergralTypeWithSpaceForByte: (java: JavaType, swift: String, valueBytes: Int)? {
+    switch self {
+    case .boolean, .byte: (.short, "Int16", 1)
+    case .char, .short: (.int, "Int32", 2)
+    case .int: (.long, "Int64", 4)
+    default: nil
+    }
+  }
 }
