@@ -61,7 +61,7 @@ public class MySwiftClass {
     return Int.random(in: 1..<256)
   }
 
-  public func takeUnsignedShort(arg: UInt16) {
+  public func takeUnsignedChar(arg: UInt16) {
     p("\(UInt32.self) = \(arg)")
   }
 

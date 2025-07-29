@@ -214,7 +214,6 @@ let package = Package(
       dependencies: [
         "JavaKit",
         "SwiftKitSwift",
-        "SwiftJavaTool",
       ]
     ),
     
