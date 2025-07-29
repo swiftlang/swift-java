@@ -33,6 +33,7 @@ import static org.swift.swiftkit.core.Preconditions.*;
 
 import java.math.BigInteger;
 
+import com.sun.source.doctree.AttributeTree;
 import org.swift.swiftkit.core.annotations.Nullable;
 
 /**
@@ -277,3 +278,58 @@ public final class UnsignedLong extends Number implements Comparable<UnsignedLon
         return UnsignedLongs.toString(value, radix);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// enum V {
+//   case car(name: String)
+//   case bicycle(int: Int)
+// }
+
+
+class Vehicle {
+    enum VK {
+        CAR,
+        BIKE;
+    }
+
+    Vehicle() {
+    }
+
+    public VK getKind() {
+        return null;
+    }
+}
+
+void test(Vehicle v) {
+    v.getKind()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

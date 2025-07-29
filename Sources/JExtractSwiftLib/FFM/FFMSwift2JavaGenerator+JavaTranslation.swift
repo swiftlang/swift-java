@@ -532,12 +532,45 @@ extension FFMSwift2JavaGenerator {
       }
     }
 
+    func unsignedResultConversion(_ from: SwiftType, to javaType: JavaType) -> JavaConversionStep {
+    guard let className = javaType.className else {
+      fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
+    }
+
+    switch from {
+    case .nominal(let nominal):
+     switch nominal.nominalTypeDecl.knownTypeKind {
+     case .uint8:
+       return .call(.placeholder, function: "\(className).fromIntBits", withArena: false)
+     case .uint16:
+       return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
+     case .uint32:
+       return .call(.placeholder, function: "\(className).fromIntBits", withArena: false)
+     case .uint64:
+       return .call(.placeholder, function: "\(className).fromLongBits", withArena: false)
+     default:
+       fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+     }
+     default:
+       fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+    }
+  }
+
     /// Translate a Swift API result to the user-facing Java API result.
     func translate(
       swiftResult: SwiftResult,
       loweredResult: LoweredResult
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
+
+      // If we need to handle unsigned integers "safely" do so here
+      if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
+        return TranslatedResult(
+          javaResultType: unsignedWrapperType,
+          outParameters: [],
+          conversion: unsignedResultConversion(swiftType, to: unsignedWrapperType)
+        )
+      }
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
@@ -747,10 +780,10 @@ extension CType {
     case .integral(.signed(bits: 32)): return .SwiftInt32
     case .integral(.signed(bits: 64)): return .SwiftInt64
 
-    case .integral(.unsigned(bits: 8)): return .SwiftInt8
-    case .integral(.unsigned(bits: 16)): return .SwiftInt16
-    case .integral(.unsigned(bits: 32)): return .SwiftInt32
-    case .integral(.unsigned(bits: 64)): return .SwiftInt64
+    case .integral(.unsigned(bits: 8)): return .SwiftUInt8
+    case .integral(.unsigned(bits: 16)): return .SwiftUInt16
+    case .integral(.unsigned(bits: 32)): return .SwiftUInt32
+    case .integral(.unsigned(bits: 64)): return .SwiftUInt64
 
     case .floating(.double): return .SwiftDouble
     case .floating(.float): return .SwiftFloat

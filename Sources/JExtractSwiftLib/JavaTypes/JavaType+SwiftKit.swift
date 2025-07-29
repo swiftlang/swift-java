@@ -61,7 +61,7 @@ extension JavaType {
     case .nominal(let nominal):
       switch nominal.nominalTypeDecl.knownTypeKind {
       case .uint8: return swiftkit.primitives.UnsignedByte
-      case .uint16: return swiftkit.primitives.UnsignedShort
+      case .uint16: return .char // no wrapper necessary, we can express it as 'char' natively in Java
       case .uint32: return swiftkit.primitives.UnsignedInteger
       case .uint64: return swiftkit.primitives.UnsignedLong
       default: return nil
