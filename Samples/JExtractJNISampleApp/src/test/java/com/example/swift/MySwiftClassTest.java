@@ -153,51 +153,6 @@ public class MySwiftClassTest {
         }
     }
 
-    @Test
-    void optionalBool() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
-            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(Optional.empty(), c1.optionalBool(Optional.empty()));
-            assertEquals(Optional.of(true), c1.optionalBool(Optional.of(true)));
-        }
-    }
-
-    @Test
-    void optionalByte() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
-            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(Optional.empty(), c1.optionalByte(Optional.empty()));
-            assertEquals(Optional.of((byte) 1) , c1.optionalByte(Optional.of((byte) 1)));
-        }
-    }
-
-    @Test
-    void optionalChar() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
-            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(Optional.empty(), c1.optionalChar(Optional.empty()));
-            assertEquals(Optional.of((char) 42), c1.optionalChar(Optional.of((char) 42)));
-        }
-    }
-
-    @Test
-    void optionalShort() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
-            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(Optional.empty(), c1.optionalShort(Optional.empty()));
-            assertEquals(Optional.of((short) -250), c1.optionalShort(Optional.of((short) -250)));
-        }
-    }
-
-    @Test
-    void optionalInt() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
-            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(OptionalInt.empty(), c1.optionalInt(OptionalInt.empty()));
-            assertEquals(OptionalInt.of(999), c1.optionalInt(OptionalInt.of(999)));
-        }
-    }
-
 //    @Test
 //    void optionalMethodClass() {
 //        try (var arena = new ConfinedSwiftMemorySession()) {

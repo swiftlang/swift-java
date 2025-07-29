@@ -63,6 +63,7 @@ extension JNISwift2JavaGenerator {
   private func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)
     printPackage(&printer)
+    printImports(&printer)
 
     printModuleClass(&printer) { printer in
       printer.print(
