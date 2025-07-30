@@ -15,6 +15,11 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
+enum SwiftGenericRequirement: Equatable {
+  case inherits(SwiftType, SwiftType)
+  case equals(SwiftType, SwiftType)
+}
+
 /// Provides a complete signature for a Swift function, which includes its
 /// parameters and return type.
 public struct SwiftFunctionSignature: Equatable {
@@ -22,17 +27,23 @@ public struct SwiftFunctionSignature: Equatable {
   var parameters: [SwiftParameter]
   var result: SwiftResult
   var effectSpecifiers: [SwiftEffectSpecifier]
+  var genericParameters: [SwiftGenericParameterDeclaration]
+  var genericRequirements: [SwiftGenericRequirement]
 
   init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],
     result: SwiftResult,
-    effectSpecifiers: [SwiftEffectSpecifier]
+    effectSpecifiers: [SwiftEffectSpecifier],
+    genericParameters: [SwiftGenericParameterDeclaration],
+    genericRequirements: [SwiftGenericRequirement]
   ) {
     self.selfParameter = selfParameter
     self.parameters = parameters
     self.result = result
     self.effectSpecifiers = effectSpecifiers
+    self.genericParameters = genericParameters
+    self.genericRequirements = genericRequirements
   }
 }
 
@@ -54,13 +65,8 @@ extension SwiftFunctionSignature {
   init(
     _ node: InitializerDeclSyntax,
     enclosingType: SwiftType?,
-    symbolTable: SwiftSymbolTable
+    lookupContext: SwiftTypeLookupContext
   ) throws {
-    // Prohibit generics for now.
-    if let generics = node.genericParameterClause {
-      throw SwiftFunctionTranslationError.generic(generics)
-    }
-
     guard let enclosingType else {
       throw SwiftFunctionTranslationError.missingEnclosingType(node)
     }
@@ -70,33 +76,36 @@ extension SwiftFunctionSignature {
       throw SwiftFunctionTranslationError.failableInitializer(node)
     }
 
-    // Prohibit generics for now.
-    if let generics = node.genericParameterClause {
-      throw SwiftFunctionTranslationError.generic(generics)
-    }
-
+    let (genericParams, genericRequirements) = try Self.translateGenericParameters(
+      parameterClause: node.genericParameterClause,
+      whereClause: node.genericWhereClause,
+      lookupContext: lookupContext
+    )
     let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
       node.signature,
-      symbolTable: symbolTable
+      lookupContext: lookupContext
     )
 
     self.init(
       selfParameter: .initializer(enclosingType),
       parameters: parameters,
       result: SwiftResult(convention: .direct, type: enclosingType),
-      effectSpecifiers: effectSpecifiers
+      effectSpecifiers: effectSpecifiers,
+      genericParameters: genericParams,
+      genericRequirements: genericRequirements
     )
   }
 
   init(
     _ node: FunctionDeclSyntax,
     enclosingType: SwiftType?,
-    symbolTable: SwiftSymbolTable
+    lookupContext: SwiftTypeLookupContext
   ) throws {
-    // Prohibit generics for now.
-    if let generics = node.genericParameterClause {
-      throw SwiftFunctionTranslationError.generic(generics)
-    }
+    let (genericParams, genericRequirements) = try Self.translateGenericParameters(
+      parameterClause: node.genericParameterClause,
+      whereClause: node.genericWhereClause,
+      lookupContext: lookupContext
+    )
 
     // If this is a member of a type, so we will have a self parameter. Figure out the
     // type and convention for the self parameter.
@@ -132,7 +141,7 @@ extension SwiftFunctionSignature {
     // Translate the parameters.
     let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
       node.signature,
-      symbolTable: symbolTable
+      lookupContext: lookupContext
     )
 
     // Translate the result type.
@@ -140,20 +149,81 @@ extension SwiftFunctionSignature {
     if let resultType = node.signature.returnClause?.type {
       result = try SwiftResult(
         convention: .direct,
-        type: SwiftType(resultType, symbolTable: symbolTable)
+        type: SwiftType(resultType, lookupContext: lookupContext)
       )
     } else {
       result = .void
     }
 
-    self.init(selfParameter: selfParameter, parameters: parameters, result: result, effectSpecifiers: effectSpecifiers)
+    self.init(
+      selfParameter: selfParameter,
+      parameters: parameters,
+      result: result,
+      effectSpecifiers: effectSpecifiers,
+      genericParameters: genericParams,
+      genericRequirements: genericRequirements
+    )
+  }
+
+  static func translateGenericParameters(
+    parameterClause: GenericParameterClauseSyntax?,
+    whereClause: GenericWhereClauseSyntax?,
+    lookupContext: SwiftTypeLookupContext
+  ) throws -> (parameters: [SwiftGenericParameterDeclaration], requirements: [SwiftGenericRequirement]) {
+    var params: [SwiftGenericParameterDeclaration] = []
+    var requirements: [SwiftGenericRequirement] = []
+
+    // Parameter clause
+    if let parameterClause {
+      for parameterNode in parameterClause.parameters {
+        guard parameterNode.specifier == nil else {
+          throw SwiftFunctionTranslationError.genericParameterSpecifier(parameterNode)
+        }
+        let param = try lookupContext.typeDeclaration(for: parameterNode) as! SwiftGenericParameterDeclaration
+        params.append(param)
+        if let inheritedNode = parameterNode.inheritedType {
+          let inherited = try SwiftType(inheritedNode, lookupContext: lookupContext)
+          requirements.append(.inherits(.genericParameter(param), inherited))
+        }
+      }
+    }
+
+    // Where clause
+    if let whereClause {
+      for requirementNode in whereClause.requirements {
+        let requirement: SwiftGenericRequirement
+        switch requirementNode.requirement {
+        case .conformanceRequirement(let conformance):
+          requirement = .inherits(
+            try SwiftType(conformance.leftType, lookupContext: lookupContext),
+            try SwiftType(conformance.rightType, lookupContext: lookupContext)
+          )
+        case .sameTypeRequirement(let sameType):
+          guard let leftType = sameType.leftType.as(TypeSyntax.self) else {
+            throw SwiftFunctionTranslationError.expressionInGenericRequirement(requirementNode)
+          }
+          guard let rightType = sameType.rightType.as(TypeSyntax.self) else {
+            throw SwiftFunctionTranslationError.expressionInGenericRequirement(requirementNode)
+          }
+          requirement = .equals(
+            try SwiftType(leftType, lookupContext: lookupContext),
+            try SwiftType(rightType, lookupContext: lookupContext)
+            )
+        case .layoutRequirement:
+          throw SwiftFunctionTranslationError.layoutRequirement(requirementNode)
+        }
+        requirements.append(requirement)
+      }
+    }
+
+    return (params, requirements)
   }
 
   /// Translate the function signature, returning the list of translated
   /// parameters and effect specifiers.
   static func translateFunctionSignature(
     _ signature: FunctionSignatureSyntax,
-    symbolTable: SwiftSymbolTable
+    lookupContext: SwiftTypeLookupContext
   ) throws -> ([SwiftParameter], [SwiftEffectSpecifier]) {
     var effectSpecifiers = [SwiftEffectSpecifier]()
     if signature.effectSpecifiers?.throwsClause != nil {
@@ -164,13 +234,18 @@ extension SwiftFunctionSignature {
     }
 
     let parameters = try signature.parameterClause.parameters.map { param in
-      try SwiftParameter(param, symbolTable: symbolTable)
+      try SwiftParameter(param, lookupContext: lookupContext)
     }
 
     return (parameters, effectSpecifiers)
   }
 
-  init(_ varNode: VariableDeclSyntax, isSet: Bool, enclosingType: SwiftType?, symbolTable: SwiftSymbolTable) throws {
+  init(
+    _ varNode: VariableDeclSyntax,
+    isSet: Bool,
+    enclosingType: SwiftType?,
+    lookupContext: SwiftTypeLookupContext
+  ) throws {
 
     // If this is a member of a type, so we will have a self parameter. Figure out the
     // type and convention for the self parameter.
@@ -205,7 +280,7 @@ extension SwiftFunctionSignature {
     guard let varTypeNode = binding.typeAnnotation?.type else {
       throw SwiftFunctionTranslationError.missingTypeAnnotation(varNode)
     }
-    let valueType = try SwiftType(varTypeNode, symbolTable: symbolTable)
+    let valueType = try SwiftType(varTypeNode, lookupContext: lookupContext)
 
     var effectSpecifiers: [SwiftEffectSpecifier]? = nil
     switch binding.accessorBlock?.accessors {
@@ -230,6 +305,8 @@ extension SwiftFunctionSignature {
       self.parameters = []
       self.result = .init(convention: .direct, type: valueType)
     }
+    self.genericParameters = []
+    self.genericRequirements = []
   }
 
   private static func effectSpecifiers(from decl: AccessorDeclSyntax) throws -> [SwiftEffectSpecifier] {
@@ -287,11 +364,13 @@ extension VariableDeclSyntax {
 enum SwiftFunctionTranslationError: Error {
   case `throws`(ThrowsClauseSyntax)
   case async(TokenSyntax)
-  case generic(GenericParameterClauseSyntax)
   case classMethod(TokenSyntax)
   case missingEnclosingType(InitializerDeclSyntax)
   case failableInitializer(InitializerDeclSyntax)
   case multipleBindings(VariableDeclSyntax)
   case missingTypeAnnotation(VariableDeclSyntax)
   case unsupportedAccessor(AccessorDeclSyntax)
+  case genericParameterSpecifier(GenericParameterSyntax)
+  case expressionInGenericRequirement(GenericRequirementSyntax)
+  case layoutRequirement(GenericRequirementSyntax)
 }

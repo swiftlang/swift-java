@@ -18,6 +18,8 @@ import SwiftSyntax
 enum SwiftType: Equatable {
   case nominal(SwiftNominalType)
 
+  case genericParameter(SwiftGenericParameterDeclaration)
+
   indirect case function(SwiftFunctionType)
 
   /// `<type>.Type`
@@ -43,7 +45,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
-    case .function, .metatype, .optional, .existential, .opaque: nil
+    case .genericParameter, .function, .metatype, .optional, .existential, .opaque: nil
     }
   }
 
@@ -86,7 +88,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .optional, .tuple, .existential, .opaque:
+    case .genericParameter, .optional, .tuple, .existential, .opaque:
       return false
     }
   }
@@ -98,13 +100,14 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque: true
-    case .metatype, .nominal, .optional, .tuple: false
+    case .genericParameter, .metatype, .nominal, .optional, .tuple: false
     }
   }
 
   var description: String {
     switch self {
     case .nominal(let nominal): return nominal.description
+    case .genericParameter(let genericParam): return genericParam.name
     case .function(let functionType): return functionType.description
     case .metatype(let instanceType):
       var instanceTypeStr = instanceType.description
@@ -179,7 +182,7 @@ extension SwiftNominalType {
 }
 
 extension SwiftType {
-  init(_ type: TypeSyntax, symbolTable: SwiftSymbolTable) throws {
+  init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     switch type.as(TypeSyntaxEnum.self) {
     case .arrayType, .classRestrictionType, .compositionType,
         .dictionaryType, .missingType, .namedOpaqueReturnType,
@@ -192,7 +195,7 @@ extension SwiftType {
       // FIXME: This string matching is a horrible hack.
       switch attributedType.attributes.trimmedDescription {
       case "@convention(c)", "@convention(swift)":
-        let innerType = try SwiftType(attributedType.baseType, symbolTable: symbolTable)
+        let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
         switch innerType {
         case .function(var functionType):
           let isConventionC = attributedType.attributes.trimmedDescription == "@convention(c)"
@@ -208,7 +211,7 @@ extension SwiftType {
 
     case .functionType(let functionType):
       self = .function(
-        try SwiftFunctionType(functionType, convention: .swift, symbolTable: symbolTable)
+        try SwiftFunctionType(functionType, convention: .swift, lookupContext: lookupContext)
       )
 
     case .identifierType(let identifierType):
@@ -217,7 +220,7 @@ extension SwiftType {
         try genericArgumentClause.arguments.map { argument in
           switch argument.argument {
           case .type(let argumentTy):
-            try SwiftType(argumentTy, symbolTable: symbolTable)
+            try SwiftType(argumentTy, lookupContext: lookupContext)
           default:
             throw TypeTranslationError.unimplementedType(type)
           }
@@ -228,13 +231,13 @@ extension SwiftType {
       self = try SwiftType(
         originalType: type,
         parent: nil,
-        name: identifierType.name.text,
+        name: identifierType.name,
         genericArguments: genericArgs,
-        symbolTable: symbolTable
+        lookupContext: lookupContext
       )
 
     case .implicitlyUnwrappedOptionalType(let optionalType):
-      self = .optional(try SwiftType(optionalType.wrappedType, symbolTable: symbolTable))
+      self = .optional(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .memberType(let memberType):
       // If the parent type isn't a known module, translate it.
@@ -244,7 +247,7 @@ extension SwiftType {
       if memberType.baseType.trimmedDescription == "Swift" {
         parentType = nil
       } else {
-        parentType = try SwiftType(memberType.baseType, symbolTable: symbolTable)
+        parentType = try SwiftType(memberType.baseType, lookupContext: lookupContext)
       }
 
       // Translate the generic arguments.
@@ -252,7 +255,7 @@ extension SwiftType {
         try genericArgumentClause.arguments.map { argument in
           switch argument.argument {
           case .type(let argumentTy):
-            try SwiftType(argumentTy, symbolTable: symbolTable)
+            try SwiftType(argumentTy, lookupContext: lookupContext)
           default:
             throw TypeTranslationError.unimplementedType(type)
           }
@@ -262,27 +265,27 @@ extension SwiftType {
       self = try SwiftType(
         originalType: type,
         parent: parentType,
-        name: memberType.name.text,
+        name: memberType.name,
         genericArguments: genericArgs,
-        symbolTable: symbolTable
+        lookupContext: lookupContext
       )
 
     case .metatypeType(let metatypeType):
-      self = .metatype(try SwiftType(metatypeType.baseType, symbolTable: symbolTable))
+      self = .metatype(try SwiftType(metatypeType.baseType, lookupContext: lookupContext))
 
     case .optionalType(let optionalType):
-      self = .optional(try SwiftType(optionalType.wrappedType, symbolTable: symbolTable))
+      self = .optional(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .tupleType(let tupleType):
       self = try .tuple(tupleType.elements.map { element in
-         try SwiftType(element.type, symbolTable: symbolTable)
+         try SwiftType(element.type, lookupContext: lookupContext)
       })
 
     case .someOrAnyType(let someOrAntType):
       if someOrAntType.someOrAnySpecifier.tokenKind == .keyword(.some) {
-        self = .opaque(try SwiftType(someOrAntType.constraint, symbolTable: symbolTable))
+        self = .opaque(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
       } else {
-        self = .opaque(try SwiftType(someOrAntType.constraint, symbolTable: symbolTable))
+        self = .opaque(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
       }
     }
   }
@@ -290,25 +293,37 @@ extension SwiftType {
   init(
     originalType: TypeSyntax,
     parent: SwiftType?,
-    name: String,
+    name: TokenSyntax,
     genericArguments: [SwiftType]?,
-    symbolTable: SwiftSymbolTable
+    lookupContext: SwiftTypeLookupContext
   ) throws {
     // Look up the imported types by name to resolve it to a nominal type.
-    guard let nominalTypeDecl = symbolTable.lookupType(
-      name,
-      parent: parent?.asNominalTypeDeclaration
-    ) else {
-      throw TypeTranslationError.unknown(originalType)
+    let typeDecl: SwiftTypeDeclaration?
+    if let parent {
+      guard let parentDecl = parent.asNominalTypeDeclaration else {
+        throw TypeTranslationError.unknown(originalType)
+      }
+      typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
+    } else {
+      typeDecl = try lookupContext.unqualifiedLookup(name: Identifier(name)!, from: name)
+    }
+    guard let typeDecl else {
+     throw TypeTranslationError.unknown(originalType)
     }
 
-    self = .nominal(
-      SwiftNominalType(
-        parent: parent?.asNominalType,
-        nominalTypeDecl: nominalTypeDecl,
-        genericArguments: genericArguments
+    if let nominalDecl = typeDecl as? SwiftNominalTypeDeclaration {
+      self = .nominal(
+        SwiftNominalType(
+          parent: parent?.asNominalType,
+          nominalTypeDecl: nominalDecl,
+          genericArguments: genericArguments
+        )
       )
-    )
+    } else if let genericParamDecl = typeDecl as? SwiftGenericParameterDeclaration {
+      self = .genericParameter(genericParamDecl)
+    } else {
+      fatalError("unknown SwiftTypeDeclaration: \(type(of: typeDecl))")
+    }
   }
 
   init?(
@@ -345,11 +360,11 @@ extension SwiftType {
 
 enum TypeTranslationError: Error {
   /// We haven't yet implemented support for this type.
-  case unimplementedType(TypeSyntax)
+  case unimplementedType(TypeSyntax, file: StaticString = #file, line: Int = #line)
 
   /// Missing generic arguments.
-  case missingGenericArguments(TypeSyntax)
+  case missingGenericArguments(TypeSyntax, file: StaticString = #file, line: Int = #line)
 
   /// Unknown nominal type.
-  case unknown(TypeSyntax)
+  case unknown(TypeSyntax, file: StaticString = #file, line: Int = #line)
 }

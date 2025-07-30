@@ -104,7 +104,7 @@ final class Swift2JavaVisitor {
       signature = try SwiftFunctionSignature(
         node,
         enclosingType: typeContext?.swiftType,
-        symbolTable: self.translator.symbolTable
+        lookupContext: translator.lookupContext
       )
     } catch {
       self.log.debug("Failed to import: '\(node.qualifiedNameForDebug)'; \(error)")
@@ -145,7 +145,7 @@ final class Swift2JavaVisitor {
         node,
         isSet: kind == .setter,
         enclosingType: typeContext?.swiftType,
-        symbolTable: self.translator.symbolTable
+        lookupContext: translator.lookupContext
       )
 
       let imported = ImportedFunc(
@@ -193,7 +193,7 @@ final class Swift2JavaVisitor {
       signature = try SwiftFunctionSignature(
         node,
         enclosingType: typeContext.swiftType,
-        symbolTable: self.translator.symbolTable
+        lookupContext: translator.lookupContext
       )
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")

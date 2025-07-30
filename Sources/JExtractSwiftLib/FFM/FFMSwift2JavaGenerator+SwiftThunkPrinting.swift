@@ -125,7 +125,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printSwiftThunkImports(_ printer: inout CodePrinter) {
-    for module in self.symbolTable.importedModules.keys.sorted() {
+    for module in self.lookupContext.symbolTable.importedModules.keys.sorted() {
       guard module != "Swift" else {
         continue
       }

@@ -404,6 +404,27 @@ final class FunctionLoweringTests {
       """)
   }
 
+  @Test("Lowering generic parameters")
+  func genericParam() throws {
+    try assertLoweredFunction(
+      """
+      func fn<T, U: DataProtocol>(x: T, y: U?) where T: DataProtocol
+      """,
+      sourceFile: """
+      import Foundation
+      """,
+      expectedCDecl: """
+      @_cdecl("c_fn")
+      public func c_fn(_ x: UnsafeRawPointer, _ y: UnsafeRawPointer?) {
+        fn(x: x.assumingMemoryBound(to: Data.self).pointee, y: y?.assumingMemoryBound(to: Data.self).pointee)
+      }
+      """,
+      expectedCFunction: """
+      void c_fn(const void *x, const void *y)
+      """
+    )
+  }
+
   @Test("Lowering read accessor")
   func lowerGlobalReadAccessor() throws {
     try assertLoweredVariableAccessor(

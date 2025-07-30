@@ -24,7 +24,7 @@ extension FFMSwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(symbolTable: self.symbolTable)
+      let translation = JavaTranslation(knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable))
       translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -115,8 +115,8 @@ extension FFMSwift2JavaGenerator {
   struct JavaTranslation {
     var knownTypes: SwiftKnownTypes
 
-    init(symbolTable: SwiftSymbolTable) {
-      self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)
+    init(knownTypes: SwiftKnownTypes) {
+      self.knownTypes = knownTypes
     }
 
     func translate(
@@ -256,7 +256,9 @@ extension FFMSwift2JavaGenerator {
           convention: swiftSelf.convention,
           parameterName: swiftSelf.parameterName ?? "self",
           loweredParam: loweredFunctionSignature.selfParameter!,
-          methodName: methodName
+          methodName: methodName,
+          genericParameters: swiftSignature.genericParameters,
+          genericRequirements: swiftSignature.genericRequirements
         )
       } else {
         selfParameter = nil
@@ -272,7 +274,9 @@ extension FFMSwift2JavaGenerator {
             convention: swiftParam.convention,
             parameterName: parameterName,
             loweredParam: loweredParam,
-            methodName: methodName
+            methodName: methodName,
+            genericParameters: swiftSignature.genericParameters,
+            genericRequirements: swiftSignature.genericRequirements
           )
         }
 
@@ -295,7 +299,9 @@ extension FFMSwift2JavaGenerator {
       convention: SwiftParameterConvention,
       parameterName: String,
       loweredParam: LoweredParameter,
-      methodName: String
+      methodName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
@@ -352,7 +358,15 @@ extension FFMSwift2JavaGenerator {
             guard let genericArgs = swiftNominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unhandledType(swiftType)
             }
-            return try translateOptionalParameter(wrappedType: genericArgs[0], convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+            return try translateOptionalParameter(
+              wrappedType: genericArgs[0],
+              convention: convention,
+              parameterName: parameterName,
+              loweredParam: loweredParam,
+              methodName: methodName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
 
           case .string:
             return TranslatedParameter(
@@ -399,20 +413,16 @@ extension FFMSwift2JavaGenerator {
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
 
-      case .existential(let proto), .opaque(let proto):
-        // If the protocol has a known representative implementation, e.g. `String` for `StringProtocol`
-        // Translate it as the concrete type.
-        // NOTE: This is a temporary workaround until we add support for generics.
-        if
-          let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
-          let concreteTy = knownTypes.representativeType(of: knownProtocol)
-        {
+      case .existential, .opaque, .genericParameter:
+        if let concreteTy = swiftType.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
           return try translateParameter(
             type: concreteTy,
             convention: convention,
             parameterName: parameterName,
             loweredParam: loweredParam,
-            methodName: methodName
+            methodName: methodName,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
           )
         }
 
@@ -420,7 +430,15 @@ extension FFMSwift2JavaGenerator {
         throw JavaTranslationError.unhandledType(swiftType)
 
       case .optional(let wrapped):
-        return try translateOptionalParameter(wrappedType: wrapped, convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+        return try translateOptionalParameter(
+          wrappedType: wrapped,
+          convention: convention,
+          parameterName: parameterName,
+          loweredParam: loweredParam,
+          methodName: methodName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
       }
     }
 
@@ -430,12 +448,14 @@ extension FFMSwift2JavaGenerator {
       convention: SwiftParameterConvention,
       parameterName: String,
       loweredParam: LoweredParameter,
-      methodName: String
+      methodName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
-        var (translatedClass, lowerFunc) = switch cType.javaType {
+        let (translatedClass, lowerFunc) = switch cType.javaType {
         case .int: ("OptionalInt", "toOptionalSegmentInt")
         case .long: ("OptionalLong", "toOptionalSegmentLong")
         case .double: ("OptionalDouble", "toOptionalSegmentDouble")
@@ -473,23 +493,30 @@ extension FFMSwift2JavaGenerator {
           ],
           conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
         )
-      case .existential(let proto), .opaque(let proto):
-        if
-          let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
-          let concreteTy = knownTypes.representativeType(of: knownProtocol)
-        {
+      case .existential, .opaque, .genericParameter:
+        if let concreteTy = swiftType.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
           return try translateOptionalParameter(
             wrappedType: concreteTy,
             convention: convention,
             parameterName: parameterName,
             loweredParam: loweredParam,
-            methodName: methodName
+            methodName: methodName,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
           )
         }
         throw JavaTranslationError.unhandledType(.optional(swiftType))
       case .tuple(let tuple):
         if tuple.count == 1 {
-          return try translateOptionalParameter(wrappedType: tuple[0], convention: convention, parameterName: parameterName, loweredParam: loweredParam, methodName: methodName)
+          return try translateOptionalParameter(
+            wrappedType: tuple[0],
+            convention: convention,
+            parameterName: parameterName,
+            loweredParam: loweredParam,
+            methodName: methodName,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
+          )
         }
         throw JavaTranslationError.unhandledType(.optional(swiftType))
       default:
@@ -580,7 +607,7 @@ extension FFMSwift2JavaGenerator {
         // TODO: Implement.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .optional, .function, .existential, .opaque:
+      case .genericParameter, .optional, .function, .existential, .opaque:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 
