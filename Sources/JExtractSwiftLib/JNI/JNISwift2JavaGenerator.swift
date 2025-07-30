@@ -13,16 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import JavaKitConfigurationShared
 
 /// A table that where keys are Swift class names and the values are
 /// the fully qualified canoical names.
 package typealias JavaClassLookupTable = [String: String]
 
 package class JNISwift2JavaGenerator: Swift2JavaGenerator {
+
+  let logger: Logger
+  let config: Configuration
   let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
-  let logger: Logger
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
 
@@ -42,12 +45,14 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   var expectedOutputSwiftFiles: Set<String>
 
   package init(
+    config: Configuration,
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String,
     javaClassLookupTable: JavaClassLookupTable
   ) {
+    self.config = config
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
     self.analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName

@@ -15,10 +15,12 @@
 import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import JavaKitConfigurationShared
 import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let log: Logger
+  let config: Configuration
   let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
@@ -40,12 +42,14 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   var expectedOutputSwiftFiles: Set<String>
 
   package init(
+    config: Configuration,
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String
   ) {
     self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
+    self.config = config
     self.analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage

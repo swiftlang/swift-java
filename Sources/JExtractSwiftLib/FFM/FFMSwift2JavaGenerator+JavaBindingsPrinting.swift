@@ -105,9 +105,16 @@ extension FFMSwift2JavaGenerator {
     var params: [String] = []
     var args: [String] = []
     for param in cFunc.parameters {
-      // ! unwrapping because cdecl lowering guarantees the parameter named.
-      params.append("\(param.type.javaType) \(param.name!)")
-      args.append(param.name!)
+      let name = param.name! // !-safe, because cdecl lowering guarantees the parameter named.
+
+      let annotationsStr =
+        if param.type.javaType.parameterAnnotations.isEmpty {
+          ""
+        } else {
+          param.type.javaType.parameterAnnotations.map({$0.render()}).joined(separator: " ") + " "
+        }
+      params.append("\(annotationsStr)\(param.type.javaType) \(name)")
+      args.append(name)
     }
     let paramsStr = params.joined(separator: ", ")
     let argsStr = args.joined(separator: ", ")
@@ -316,9 +323,12 @@ extension FFMSwift2JavaGenerator {
     let translatedSignature = translated.translatedSignature
     let returnTy = translatedSignature.result.javaResultType
 
+    var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
+    if !annotationsStr.isEmpty { annotationsStr += "\n" }
+
     var paramDecls = translatedSignature.parameters
       .flatMap(\.javaParameters)
-      .map { "\($0.type) \($0.name)" }
+      .map { $0.renderParameter() }
     if translatedSignature.requiresSwiftArena {
       paramDecls.append("AllocatingSwiftArena swiftArena$")
     }
@@ -332,7 +342,7 @@ extension FFMSwift2JavaGenerator {
        * \(decl.signatureString)
        * }
        */
-      \(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
+      \(annotationsStr) \(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
       """
     ) { printer in
       if case .instance(_) =  decl.functionSignature.selfParameter {

@@ -26,7 +26,7 @@ import org.swift.swiftkit.core.annotations.NonNull;
 public final class UnsignedNumbers {
 
     @Deprecated(forRemoval = true)
-    public static int toPrimitive(char value) {
+    public static char toPrimitive(char value) {
         return value; // TODO: remove this, we should not be generating a conversion for 'char'
     }
 

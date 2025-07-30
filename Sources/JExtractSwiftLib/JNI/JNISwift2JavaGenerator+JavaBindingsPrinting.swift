@@ -219,7 +219,7 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ functionType: TranslatedFunctionType
   ) {
-    let apiParams = functionType.parameters.map(\.parameter.asParameter)
+    let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
 
     printer.print(
         """
@@ -243,7 +243,7 @@ extension JNISwift2JavaGenerator {
 
     let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.asParameter)
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map({ $0.parameter.renderParameter() })
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }

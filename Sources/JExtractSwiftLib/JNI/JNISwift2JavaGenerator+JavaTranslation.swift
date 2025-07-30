@@ -300,12 +300,24 @@ extension JNISwift2JavaGenerator {
 
   struct TranslatedFunctionSignature {
     let selfParameter: TranslatedParameter?
+    var annotations: [JavaAnnotation] = []
     let parameters: [TranslatedParameter]
     let resultType: TranslatedResult
 
     var requiresSwiftArena: Bool {
       return self.resultType.conversion.requiresSwiftArena
     }
+
+    init(selfParameter: TranslatedParameter?,
+         parameters: [TranslatedParameter],
+         resultType: TranslatedResult) {
+      self.selfParameter = selfParameter
+      // if the result type implied any annotations,
+      // propagate them onto the function the result is returned from
+      self.annotations = resultType.annotations
+      self.parameters = parameters
+      self.resultType = resultType
+   }
   }
 
   /// Represent a Swift API parameter translated to Java.
@@ -317,6 +329,9 @@ extension JNISwift2JavaGenerator {
   /// Represent a Swift API result translated to Java.
   struct TranslatedResult {
     let javaType: JavaType
+
+    /// Java annotations that should be propagated from the result type onto the method
+    var annotations: [JavaAnnotation] = []
 
     /// Represents how to convert the Java native result into a user-facing result.
     let conversion: JavaNativeConversionStep

@@ -25,6 +25,7 @@ enum RenderKind {
 func assertOutput(
   dump: Bool = false,
   input: String,
+  config: Configuration? = nil,
   _ mode: JExtractGenerationMode,
   _ renderKind: RenderKind,
   swiftModuleName: String = "SwiftModule",
@@ -36,7 +37,7 @@ func assertOutput(
   line: Int = #line,
   column: Int = #column
 ) throws {
-  var config = Configuration()
+  var config = config ?? Configuration()
   config.logLevel = .trace
   config.swiftModule = swiftModuleName
   let translator = Swift2JavaTranslator(config: config)
@@ -49,6 +50,7 @@ func assertOutput(
   switch mode {
   case .ffm:
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: translator,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -64,6 +66,7 @@ func assertOutput(
 
   case .jni:
     let generator = JNISwift2JavaGenerator(
+      config: config,
       translator: translator,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",

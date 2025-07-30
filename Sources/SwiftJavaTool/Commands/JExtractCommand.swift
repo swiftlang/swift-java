@@ -61,6 +61,9 @@ extension SwiftJava {
     @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
     var writeEmptyFiles: Bool = false
 
+    @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
+    var unsignedNumbers: JExtractUnsignedIntegerMode = .default
+
     @Option(
       help: """
             A swift-java configuration file for a given Swift module name on which this module depends,
@@ -81,6 +84,7 @@ extension SwiftJava.JExtractCommand {
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
     config.writeEmptyFiles = writeEmptyFiles
+    config.unsignedNumbersMode = unsignedNumbers
 
     if let inputSwift = commonOptions.inputSwift {
       config.inputSwiftDirectory = inputSwift
@@ -110,3 +114,4 @@ extension SwiftJava.JExtractCommand {
 }
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
+extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}

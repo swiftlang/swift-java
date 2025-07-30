@@ -517,7 +517,7 @@ extension JavaClassTranslator {
   package func renderConstructor(
     _ javaConstructor: Constructor<some AnyJavaObject>
   ) throws -> DeclSyntax {
-    let parameters = try translateParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
+    let parameters = try translateJavaParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
@@ -537,7 +537,7 @@ extension JavaClassTranslator {
     whereClause: String = ""
   ) throws -> DeclSyntax {
     // Map the parameters.
-    let parameters = try translateParameters(javaMethod.getParameters())
+    let parameters = try translateJavaParameters(javaMethod.getParameters())
 
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
 
@@ -700,7 +700,7 @@ extension JavaClassTranslator {
   }
 
   // Translate a Java parameter list into Swift parameters.
-  private func translateParameters(_ parameters: [Parameter?]) throws -> [FunctionParameterSyntax] {
+  private func translateJavaParameters(_ parameters: [Parameter?]) throws -> [FunctionParameterSyntax] {
     return try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 

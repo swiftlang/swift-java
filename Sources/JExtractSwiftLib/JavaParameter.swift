@@ -18,8 +18,20 @@ import JavaTypes
 struct JavaParameter {
   let name: String
   let type: JavaType
+  let annotations: [JavaAnnotation]
 
-  var asParameter: String {
-    "\(type) \(name)"
+  init(name: String, type: JavaType, annotations: [JavaAnnotation] = []) {
+    self.name = name
+    self.type = type
+    self.annotations = annotations
+  }
+
+  func renderParameter() -> String {
+    if annotations.isEmpty {
+      return "\(type) \(name)"
+    }
+
+    let annotationsStr = annotations.map({$0.render()}).joined(separator: "")
+    return "\(annotationsStr) \(type) \(name)"
   }
 }

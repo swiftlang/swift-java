@@ -98,6 +98,7 @@ public struct SwiftToJava {
     switch config.mode {
     case .some(.ffm), .none:
       let generator = FFMSwift2JavaGenerator(
+        config: self.config,
         translator: translator,
         javaPackage: config.javaPackage ?? "",
         swiftOutputDirectory: outputSwiftDirectory,
@@ -108,6 +109,7 @@ public struct SwiftToJava {
 
     case .jni:
       let generator = JNISwift2JavaGenerator(
+        config: self.config,
         translator: translator,
         javaPackage: config.javaPackage ?? "",
         swiftOutputDirectory: outputSwiftDirectory,

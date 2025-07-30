@@ -47,6 +47,7 @@ final class FuncCallbackImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -136,6 +137,7 @@ final class FuncCallbackImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMeMore" }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -251,6 +253,7 @@ final class FuncCallbackImportTests {
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "withBuffer" }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
