@@ -342,7 +342,7 @@ extension FFMSwift2JavaGenerator {
        * \(decl.signatureString)
        * }
        */
-      \(annotationsStr) \(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
+      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
       """
     ) { printer in
       if case .instance(_) =  decl.functionSignature.selfParameter {

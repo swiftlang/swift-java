@@ -37,7 +37,7 @@ final class UnsignedNumberTests {
         );
         """,
         """
-        public static void unsignedChar(char arg) {
+        public static void unsignedChar(@Unsigned char arg) {
           swiftjava_SwiftModule_unsignedChar__.call(arg);
         }
         """,
@@ -109,7 +109,7 @@ final class UnsignedNumberTests {
 
   @Test("Import: return UInt32 (default)")
   func returnUnsignedIntDefault() throws {
-    var config = Configuration()
+    let config = Configuration()
 
     try assertOutput(
       input: "public func returnUnsignedInt() -> UInt32",
