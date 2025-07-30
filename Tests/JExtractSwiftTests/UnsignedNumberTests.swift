@@ -37,7 +37,7 @@ final class UnsignedNumberTests {
         );
         """,
         """
-        public static void unsignedChar(@Unsigned char arg) {
+        public static void unsignedChar(char arg) {
           swiftjava_SwiftModule_unsignedChar__.call(arg);
         }
         """,
@@ -109,9 +109,11 @@ final class UnsignedNumberTests {
 
   @Test("Import: return UInt32 (default)")
   func returnUnsignedIntDefault() throws {
+    var config = Configuration()
+
     try assertOutput(
       input: "public func returnUnsignedInt() -> UInt32",
-      config: Configuration(),
+      config: config,
       .ffm, .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [

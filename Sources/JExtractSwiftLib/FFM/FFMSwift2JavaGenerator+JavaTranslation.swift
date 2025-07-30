@@ -327,8 +327,8 @@ extension FFMSwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
 
-      // If we need to handle unsigned integers "safely" do so here
-      if config.unsignedNumbersMode.needsConversion {
+      // If we need to handle unsigned integers do so here
+      if config.effectiveUnsignedNumbersMode.needsConversion {
         if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
           return TranslatedParameter(
             javaParameters: [
@@ -567,7 +567,7 @@ extension FFMSwift2JavaGenerator {
   /// Determine if the given type needs any extra annotations that should be included
   /// in Java sources when the corresponding Java type is rendered.
   func getTypeAnnotations(swiftType: SwiftType) -> [JavaAnnotation] {
-    if swiftType.isUnsignedInteger, config.unsignedNumbersMode == .annotate {
+    if swiftType.isUnsignedInteger, config.effectiveUnsignedNumbersMode == .annotate {
       return [JavaAnnotation.unsigned]
     }
 
@@ -610,15 +610,15 @@ extension FFMSwift2JavaGenerator {
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
 
-      // If we need to handle unsigned integers "safely" do so here
-      if config.unsignedNumbersMode.needsConversion {
+      // If we need to handle unsigned integers do so here
+      if config.effectiveUnsignedNumbersMode.needsConversion {
         if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
           return TranslatedResult(
             javaResultType: unsignedWrapperType,
             outParameters: [],
             conversion: unsignedResultConversion(
                 swiftType, to: unsignedWrapperType,
-                mode: self.config.unsignedNumbersMode)
+                mode: self.config.effectiveUnsignedNumbersMode)
           )
         }
       }

@@ -23,7 +23,7 @@ public class UnsignedNumbersTest {
     void take_uint32() {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var c = MySwiftClass.init(1, 2, arena);
-            c.takeUnsignedInt(UnsignedInteger.valueOf(128));
+            c.takeUnsignedInt(128);
         }
     }
 
@@ -31,7 +31,7 @@ public class UnsignedNumbersTest {
     void take_uint64() {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var c = MySwiftClass.init(1, 2, arena);
-            c.takeUnsignedLong(UnsignedLong.MAX_VALUE);
+            c.takeUnsignedLong(Long.MAX_VALUE);
         }
     }
 }
