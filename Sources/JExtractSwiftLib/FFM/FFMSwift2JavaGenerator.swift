@@ -102,6 +102,8 @@ extension FFMSwift2JavaGenerator {
     "org.swift.swiftkit.ffm.*",
     "org.swift.swiftkit.ffm.SwiftRuntime",
 
+    // NonNull, Unsigned and friends
+    "org.swift.swiftkit.core.annotations.*",
     // Unsigned numerics support
     "org.swift.swiftkit.core.primitives.*",
 
