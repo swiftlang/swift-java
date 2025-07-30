@@ -26,7 +26,7 @@ extension JavaType {
     case "UInt8":
       self = switch unsigned {
         case .ignoreSign: .char
-        case .wrapAsUnsignedNumbers: JavaType.swiftkit.primitives.UnsignedByte
+        case .wrapUnsignedGuava: JavaType.guava.primitives.UnsignedInteger
       }
 
     case "Int16": self = .short
@@ -36,14 +36,14 @@ extension JavaType {
     case "UInt32":
       self = switch unsigned {
       case .ignoreSign: .int
-      case .wrapAsUnsignedNumbers: JavaType.swiftkit.primitives.UnsignedInteger
+      case .wrapUnsignedGuava: JavaType.guava.primitives.UnsignedInteger
       }
 
     case "Int64": self = .long
     case "UInt64":
       self = switch unsigned {
       case .ignoreSign: .long
-      case .wrapAsUnsignedNumbers: JavaType.swiftkit.primitives.UnsignedLong
+      case .wrapUnsignedGuava: JavaType.guava.primitives.UnsignedLong
       }
 
     case "Float": self = .float
@@ -60,25 +60,20 @@ extension JavaType {
     switch swiftType {
     case .nominal(let nominal):
       switch nominal.nominalTypeDecl.knownTypeKind {
-      case .uint8: return swiftkit.primitives.UnsignedByte
+      case .uint8: return guava.primitives.UnsignedInteger
       case .uint16: return .char // no wrapper necessary, we can express it as 'char' natively in Java
-      case .uint32: return swiftkit.primitives.UnsignedInteger
-      case .uint64: return swiftkit.primitives.UnsignedLong
+      case .uint32: return guava.primitives.UnsignedInteger
+      case .uint64: return guava.primitives.UnsignedLong
       default: return nil
       }
     default: return nil
     }
   }
 
-  enum swiftkit {
+  /// Known types from the Google Guava library
+  enum guava {
     enum primitives {
-      static let package = "org.swift.swiftkit.core.primitives"
-
-      static var UnsignedByte: JavaType {
-        .class(package: primitives.package, name: "UnsignedByte")
-      }
-
-      // UnsignedShort is not necessary because UInt16 is directly expressible as Java's unsigned 'char'.
+      static let package = "com.google.common.primitives"
 
       static var UnsignedInteger: JavaType {
         .class(package: primitives.package, name: "UnsignedInteger")

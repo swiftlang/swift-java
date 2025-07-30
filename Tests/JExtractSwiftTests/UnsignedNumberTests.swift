@@ -48,7 +48,7 @@ final class UnsignedNumberTests {
   @Test("Import: UInt32 (wrap)")
   func unsignedInt() throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .wrap
+    config.unsignedNumbersMode = .wrapGuava
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
@@ -68,7 +68,7 @@ final class UnsignedNumberTests {
         );
         """,
         """
-        public static void unsignedInt(org.swift.swiftkit.core.primitives.UnsignedInteger arg) {
+        public static void unsignedInt(com.google.common.primitives.UnsignedInteger arg) {
           swiftjava_SwiftModule_unsignedInt__.call(UnsignedNumbers.toPrimitive(arg));
         }
         """,
@@ -141,7 +141,7 @@ final class UnsignedNumberTests {
   @Test("Import: return UInt64 (wrap)")
   func return_unsignedLongWrap() throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .wrap
+    config.unsignedNumbersMode = .wrapGuava
 
     try assertOutput(
       input: "public func returnUnsignedLong() -> UInt64",
@@ -161,8 +161,8 @@ final class UnsignedNumberTests {
         );
         """,
         """
-        public static org.swift.swiftkit.core.primitives.UnsignedLong returnUnsignedLong() {
-          return UnsignedLong.fromLongBits(swiftjava_SwiftModule_returnUnsignedLong.call());
+        public static com.google.common.primitives.UnsignedLong returnUnsignedLong() {
+          return com.google.common.primitives.UnsignedLong.fromLongBits(swiftjava_SwiftModule_returnUnsignedLong.call());
         }
         """,
       ]

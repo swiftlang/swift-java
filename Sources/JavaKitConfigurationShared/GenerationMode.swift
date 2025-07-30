@@ -38,7 +38,7 @@ public enum JExtractUnsignedIntegerMode: String, Codable {
   /// This mode trades off performance, due to needing to allocate the type-safe wrapper objects around
   /// primitive values, however allows to retain static type information about the unsignedness of
   /// unsigned number types in the Java side of generated bindings.
-  case wrap
+  case wrapGuava
 
 //  /// If possible, use a wider Java signed integer type to represent an Unsigned Swift integer type.
 //  /// For example, represent a Swift `UInt32` (width equivalent to Java `int`) as a Java signed `long`,
@@ -56,7 +56,7 @@ extension JExtractUnsignedIntegerMode {
   public var needsConversion: Bool {
     switch self {
     case .annotate: false
-    case .wrap: true
+    case .wrapGuava: true
     }
   }
 

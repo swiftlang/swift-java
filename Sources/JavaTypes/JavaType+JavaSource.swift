@@ -60,11 +60,24 @@ extension JavaType: CustomStringConvertible {
     }
   }
 
-  /// Returns the a class name if this java type was a class,
+  /// Returns the class name if this java type was a class,
   /// and nil otherwise.
   public var className: String? {
     switch self {
     case .class(_, let name):
+      return name
+    default:
+      return nil
+    }
+  }
+
+  /// Returns the fully qualified class name if this java type was a class,
+  /// and nil otherwise.
+  public var fullyQualifiedClassName: String? {
+    switch self {
+    case .class(.some(let package), let name):
+      return "\(package).\(name)"
+    case .class(nil, let name):
       return name
     default:
       return nil

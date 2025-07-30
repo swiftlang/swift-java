@@ -576,30 +576,32 @@ extension FFMSwift2JavaGenerator {
 
   func unsignedResultConversion(_ from: SwiftType, to javaType: JavaType,
                                 mode: JExtractUnsignedIntegerMode) -> JavaConversionStep {
-    guard mode == .wrap else {
-      return .placeholder
-    }
+    switch mode {
+    case .annotate:
+      return .placeholder // no conversions
 
-    guard let className = javaType.className else {
-      fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
-    }
+    case .wrapGuava:
+      guard let typeName = javaType.fullyQualifiedClassName else {
+        fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
+      }
 
-    switch from {
-    case .nominal(let nominal):
-     switch nominal.nominalTypeDecl.knownTypeKind {
-     case .uint8:
-       return .call(.placeholder, function: "\(className).fromIntBits", withArena: false)
-     case .uint16:
-       return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
-     case .uint32:
-       return .call(.placeholder, function: "\(className).fromIntBits", withArena: false)
-     case .uint64:
-       return .call(.placeholder, function: "\(className).fromLongBits", withArena: false)
-     default:
-       fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
-     }
-     default:
-       fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+      switch from {
+      case .nominal(let nominal):
+       switch nominal.nominalTypeDecl.knownTypeKind {
+       case .uint8:
+         return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
+       case .uint16:
+         return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
+       case .uint32:
+         return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
+       case .uint64:
+         return .call(.placeholder, function: "\(typeName).fromLongBits", withArena: false)
+       default:
+         fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+       }
+       default:
+         fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+      }
     }
   }
 
