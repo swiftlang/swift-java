@@ -148,7 +148,7 @@ extension SwiftJava.ResolveCommand {
       } else {
         let suggestDisablingSandbox = "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
         fatalError("Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n" +
-          "Output was:<<<\(outString ?? "<empty>")>>>; Err was:<<<\(errString ?? "<empty>")>>>")
+          "Output was:<<<\(outString)>>>; Err was:<<<\(errString ?? "<empty>")>>>")
       }
 
       return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))
