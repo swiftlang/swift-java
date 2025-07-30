@@ -1,17 +1,3 @@
-/*
- * Copyright (C) 2008 The Guava Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -25,6 +11,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+/*
+ * Copyright (C) 2008 The Guava Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.swift.swiftkit.core.primitives;
 
@@ -288,42 +288,6 @@ public final class Floats {
         "the total number of elements (%s) in the arrays must fit in an int",
         result);
     return (int) result;
-  }
-
-  private static final class FloatConverter extends Converter<String, Float>
-      implements Serializable {
-    static final Converter<String, Float> INSTANCE = new FloatConverter();
-
-    @Override
-    protected Float doForward(String value) {
-      return Float.valueOf(value);
-    }
-
-    @Override
-    protected String doBackward(Float value) {
-      return value.toString();
-    }
-
-    @Override
-    public String toString() {
-      return "Floats.stringConverter()";
-    }
-
-    private Object readResolve() {
-      return INSTANCE;
-    }
-
-    private static final long serialVersionUID = 1;
-  }
-
-  /**
-   * Returns a serializable converter object that converts between strings and floats using {@link
-   * Float#valueOf} and {@link Float#toString()}.
-   *
-   * @since 16.0
-   */
-  public static Converter<String, Float> stringConverter() {
-    return FloatConverter.INSTANCE;
   }
 
   /**

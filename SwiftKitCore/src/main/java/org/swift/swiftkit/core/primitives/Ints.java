@@ -1,17 +1,3 @@
-/*
- * Copyright (C) 2008 The Guava Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -26,6 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
+/*
+ * Copyright (C) 2008 The Guava Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.swift.swiftkit.core.primitives;
 
 import static org.swift.swiftkit.core.Preconditions.*;
@@ -353,47 +352,6 @@ public final class Ints {
    */
   public static int fromBytes(byte b1, byte b2, byte b3, byte b4) {
     return b1 << 24 | (b2 & 0xFF) << 16 | (b3 & 0xFF) << 8 | (b4 & 0xFF);
-  }
-
-  private static final class IntConverter extends Converter<String, Integer>
-      implements Serializable {
-    static final Converter<String, Integer> INSTANCE = new IntConverter();
-
-    @Override
-    protected Integer doForward(String value) {
-      return Integer.decode(value);
-    }
-
-    @Override
-    protected String doBackward(Integer value) {
-      return value.toString();
-    }
-
-    @Override
-    public String toString() {
-      return "Ints.stringConverter()";
-    }
-
-    private Object readResolve() {
-      return INSTANCE;
-    }
-
-    private static final long serialVersionUID = 1;
-  }
-
-  /**
-   * Returns a serializable converter object that converts between strings and integers using {@link
-   * Integer#decode} and {@link Integer#toString()}. The returned converter throws {@link
-   * NumberFormatException} if the input string is invalid.
-   *
-   * <p><b>Warning:</b> please see {@link Integer#decode} to understand exactly how strings are
-   * parsed. For example, the string {@code "0123"} is treated as <i>octal</i> and converted to the
-   * value {@code 83}.
-   *
-   * @since 16.0
-   */
-  public static Converter<String, Integer> stringConverter() {
-    return IntConverter.INSTANCE;
   }
 
   /**

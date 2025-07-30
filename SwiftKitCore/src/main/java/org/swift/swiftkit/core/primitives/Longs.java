@@ -1,17 +1,3 @@
-/*
- * Copyright (C) 2008 The Guava Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -25,6 +11,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+/*
+ * Copyright (C) 2008 The Guava Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.swift.swiftkit.core.primitives;
 
@@ -440,46 +440,6 @@ public final class Longs {
     } else {
       return -accum;
     }
-  }
-
-  private static final class LongConverter extends Converter<String, Long> implements Serializable {
-    static final Converter<String, Long> INSTANCE = new LongConverter();
-
-    @Override
-    protected Long doForward(String value) {
-      return Long.decode(value);
-    }
-
-    @Override
-    protected String doBackward(Long value) {
-      return value.toString();
-    }
-
-    @Override
-    public String toString() {
-      return "Longs.stringConverter()";
-    }
-
-    private Object readResolve() {
-      return INSTANCE;
-    }
-
-    private static final long serialVersionUID = 1;
-  }
-
-  /**
-   * Returns a serializable converter object that converts between strings and longs using {@link
-   * Long#decode} and {@link Long#toString()}. The returned converter throws {@link
-   * NumberFormatException} if the input string is invalid.
-   *
-   * <p><b>Warning:</b> please see {@link Long#decode} to understand exactly how strings are parsed.
-   * For example, the string {@code "0123"} is treated as <i>octal</i> and converted to the value
-   * {@code 83L}.
-   *
-   * @since 16.0
-   */
-  public static Converter<String, Long> stringConverter() {
-    return LongConverter.INSTANCE;
   }
 
   /**
