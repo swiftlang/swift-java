@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.core.primitives;
+package org.swift.swiftkit.core.annotations;
 
 import jdk.jfr.Description;
 import jdk.jfr.Label;

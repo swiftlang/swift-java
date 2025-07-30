@@ -371,35 +371,6 @@ public final class UnsignedLongs {
         return value;
     }
 
-    /**
-     * Returns the unsigned {@code long} value represented by the given string.
-     *
-     * <p>Accepts a decimal, hexadecimal, or octal number given by specifying the following prefix:
-     *
-     * <ul>
-     *   <li>{@code 0x}<i>HexDigits</i>
-     *   <li>{@code 0X}<i>HexDigits</i>
-     *   <li>{@code #}<i>HexDigits</i>
-     *   <li>{@code 0}<i>OctalDigits</i>
-     * </ul>
-     *
-     * @throws NumberFormatException if the string does not contain a valid unsigned {@code long}
-     *                               value
-     * @since 13.0
-     */
-    public static long decode(String stringValue) {
-        ParseRequest request = ParseRequest.fromString(stringValue);
-
-        try {
-            return parseUnsignedLong(request.rawValue, request.radix);
-        } catch (NumberFormatException e) {
-            NumberFormatException decodeException =
-                    new NumberFormatException("Error parsing value: " + stringValue);
-            decodeException.initCause(e);
-            throw decodeException;
-        }
-    }
-
     /*
      * We move the static constants into this class so ProGuard can inline UnsignedLongs entirely
      * unless the user is actually calling a parse method.
