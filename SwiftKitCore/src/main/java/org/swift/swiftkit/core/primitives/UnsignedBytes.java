@@ -333,7 +333,7 @@ public final class UnsignedBytes {
         // a 64-bit JVM with an 8-byte aligned field offset.
         if (!(Objects.equals(System.getProperty("sun.arch.data.model"), "64")
             && (BYTE_ARRAY_BASE_OFFSET % 8) == 0
-            // sanity check - this should never fail
+            // this should never fail
             && theUnsafe.arrayIndexScale(byte[].class) == 1)) {
           throw new Error(); // force fallback to PureJavaComparator
         }
