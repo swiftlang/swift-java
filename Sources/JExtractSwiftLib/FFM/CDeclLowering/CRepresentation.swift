@@ -68,7 +68,7 @@ extension CType {
     case .optional(let wrapped) where wrapped.isPointer:
       try self.init(cdeclType: wrapped)
 
-    case .metatype, .optional, .tuple, .opaque, .existential:
+    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
@@ -98,7 +98,7 @@ extension CFunction {
 
 enum CDeclToCLoweringError: Error {
   case invalidCDeclType(SwiftType)
-  case invalidNominalType(SwiftNominalTypeDeclaration)
+  case invalidNominalType(SwiftTypeDeclaration)
   case invalidFunctionConvention(SwiftFunctionType)
 }
 

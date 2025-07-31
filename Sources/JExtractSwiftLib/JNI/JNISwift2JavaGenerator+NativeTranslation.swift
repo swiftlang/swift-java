@@ -129,7 +129,7 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .metatype, .optional, .tuple, .existential, .opaque:
+      case .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
       }
     }
@@ -160,7 +160,7 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -187,7 +187,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -223,7 +223,7 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque:
+      case .metatype, .optional, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
 

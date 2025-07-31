@@ -24,7 +24,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let javaPackage: String
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
-  let symbolTable: SwiftSymbolTable
+  let lookupContext: SwiftTypeLookupContext
 
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
@@ -51,7 +51,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
-    self.symbolTable = translator.symbolTable
+    self.lookupContext = translator.lookupContext
 
     // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {

@@ -216,7 +216,7 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .metatype, .optional, .tuple, .existential, .opaque:
+      case .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -251,7 +251,7 @@ extension JNISwift2JavaGenerator {
       case .tuple([]):
         return TranslatedResult(javaType: .void, conversion: .placeholder)
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque:
+      case .metatype, .optional, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
     }

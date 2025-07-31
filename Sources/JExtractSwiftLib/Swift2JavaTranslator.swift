@@ -23,7 +23,7 @@ import SwiftSyntax
 public final class Swift2JavaTranslator {
   static let SWIFT_INTERFACE_SUFFIX = ".swiftinterface"
 
-  package var log = Logger(label: "translator", logLevel: .info)
+  package var log: Logger
 
   let config: Configuration
 
@@ -52,7 +52,11 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
-  package var symbolTable: SwiftSymbolTable! = nil
+  var lookupContext: SwiftTypeLookupContext! = nil
+
+  var symbolTable: SwiftSymbolTable! {
+    return lookupContext?.symbolTable
+  }
 
   public init(
     config: Configuration
@@ -60,6 +64,7 @@ public final class Swift2JavaTranslator {
     guard let swiftModule = config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
+    self.log = Logger(label: "translator", logLevel: config.logLevel ?? .info)
     self.config = config
     self.swiftModuleName = swiftModule
   }
@@ -116,11 +121,12 @@ extension Swift2JavaTranslator {
   package func prepareForTranslation() {
     let dependenciesSource = self.buildDependencyClassesSourceFile()
 
-    self.symbolTable = SwiftSymbolTable.setup(
+    let symbolTable = SwiftSymbolTable.setup(
       moduleName: self.swiftModuleName,
       inputs.map({ $0.syntax }) + [dependenciesSource],
       log: self.log
     )
+    self.lookupContext = SwiftTypeLookupContext(symbolTable: symbolTable)
   }
 
   /// Check if any of the imported decls uses a nominal declaration that satisfies
@@ -140,6 +146,8 @@ extension Swift2JavaTranslator {
         return check(ty)
       case .existential(let ty), .opaque(let ty):
         return check(ty)
+      case .genericParameter:
+        return false
       }
     }
 
@@ -206,7 +214,7 @@ extension Swift2JavaTranslator {
   func importedNominalType(
     _ typeNode: TypeSyntax
   ) -> ImportedNominalType? {
-    guard let swiftType = try? SwiftType(typeNode, symbolTable: self.symbolTable) else {
+    guard let swiftType = try? SwiftType(typeNode, lookupContext: lookupContext) else {
       return nil
     }
     guard let swiftNominalDecl = swiftType.asNominalTypeDeclaration else {

@@ -40,18 +40,18 @@ extension SwiftFunctionType {
   init(
     _ node: FunctionTypeSyntax,
     convention: Convention,
-    symbolTable: SwiftSymbolTable
+    lookupContext: SwiftTypeLookupContext
   ) throws {
     self.convention = convention
     self.parameters = try node.parameters.map { param in
       let isInout = param.inoutKeyword != nil
       return SwiftParameter(
         convention: isInout ? .inout : .byValue,
-        type: try SwiftType(param.type, symbolTable: symbolTable)
+        type: try SwiftType(param.type, lookupContext: lookupContext)
       )
     }
 
-    self.resultType = try SwiftType(node.returnClause.type, symbolTable: symbolTable)
+    self.resultType = try SwiftType(node.returnClause.type, lookupContext: lookupContext)
 
     // check for effect specifiers
     if let throwsClause = node.effectSpecifiers?.throwsClause {
