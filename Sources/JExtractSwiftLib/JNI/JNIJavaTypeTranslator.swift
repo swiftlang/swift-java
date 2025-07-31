@@ -29,7 +29,8 @@ enum JNIJavaTypeTranslator {
     case .bool: return .boolean
 
     case .int8: return .byte
-    case .uint8: return .char
+    case .uint8: return .byte
+
     case .int16: return .short
     case .uint16: return .char
 

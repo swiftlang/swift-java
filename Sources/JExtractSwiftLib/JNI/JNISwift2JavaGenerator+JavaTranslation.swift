@@ -249,27 +249,7 @@ extension JNISwift2JavaGenerator {
         return .placeholder // no conversions
 
       case .wrapGuava:
-        guard let typeName = javaType.fullyQualifiedClassName else {
-          fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
-        }
-
-        switch from {
-        case .nominal(let nominal):
-         switch nominal.nominalTypeDecl.knownTypeKind {
-         case .uint8:
-           return .call(.placeholder, function: "\(typeName).fromIntBits")
-         case .uint16:
-           return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
-         case .uint32:
-           return .call(.placeholder, function: "\(typeName).fromIntBits")
-         case .uint64:
-           return .call(.placeholder, function: "\(typeName).fromLongBits")
-         default:
-           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
-         }
-         default:
-           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
-        }
+        fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
       }
     }
 
