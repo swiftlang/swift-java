@@ -15,9 +15,12 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,5 +54,38 @@ public class OptionalsTest {
     void optionalInt() {
         assertEquals(OptionalInt.empty(), MySwiftLibrary.optionalInt(OptionalInt.empty()));
         assertEquals(OptionalInt.of(999), MySwiftLibrary.optionalInt(OptionalInt.of(999)));
+    }
+
+    @Test
+    void optionalLong() {
+        assertEquals(OptionalLong.empty(), MySwiftLibrary.optionalLong(OptionalLong.empty()));
+        assertEquals(OptionalLong.of(999), MySwiftLibrary.optionalLong(OptionalLong.of(999)));
+    }
+
+    @Test
+    void optionalFloat() {
+        assertEquals(Optional.empty(), MySwiftLibrary.optionalFloat(Optional.empty()));
+        assertEquals(Optional.of(3.14f), MySwiftLibrary.optionalFloat(Optional.of(3.14f)));
+    }
+
+    @Test
+    void optionalDouble() {
+        assertEquals(OptionalDouble.empty(), MySwiftLibrary.optionalDouble(OptionalDouble.empty()));
+        assertEquals(OptionalDouble.of(2.718), MySwiftLibrary.optionalDouble(OptionalDouble.of(2.718)));
+    }
+
+    @Test
+    void optionalString() {
+        assertEquals(Optional.empty(), MySwiftLibrary.optionalString(Optional.empty()));
+        assertEquals(Optional.of("Hello Swift!"), MySwiftLibrary.optionalString(Optional.of("Hello Swift!")));
+    }
+
+    @Test
+    void optionalClass() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c = MySwiftClass.init(arena);
+            assertEquals(Optional.empty(), MySwiftLibrary.optionalClass(Optional.empty()));
+            assertEquals(Optional.of(c), MySwiftLibrary.optionalClass(Optional.of(c)));
+        }
     }
 }

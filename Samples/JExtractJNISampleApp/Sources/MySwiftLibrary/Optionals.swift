@@ -31,3 +31,23 @@ public func optionalShort(input: Optional<Int16>) -> Int16? {
 public func optionalInt(input: Optional<Int32>) -> Int32? {
   return input
 }
+
+public func optionalLong(input: Optional<Int64>) -> Int64? {
+  return input
+}
+
+public func optionalFloat(input: Optional<Float>) -> Float? {
+  return input
+}
+
+public func optionalDouble(input: Optional<Double>) -> Double? {
+  return input
+}
+
+public func optionalString(input: Optional<String>) -> String? {
+  return input
+}
+
+public func optionalClass(input: Optional<MySwiftClass>) -> MySwiftClass? {
+  return input
+}

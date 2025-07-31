@@ -259,8 +259,8 @@ extension JNISwift2JavaGenerator {
           case .short: ("Optional<Short>", "(short) 0")
           case .int: ("OptionalInt", "0")
           case .long: ("OptionalLong", "0L")
-          case .float: ("Optional<Float>", "0")
-          case .double: ("OptionalDouble", "0")
+          case .float: ("Optional<Float>", "0f")
+          case .double: ("OptionalDouble", "0.0")
           case .javaLangString: ("Optional<String>", #""""#)
           default:
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -321,6 +321,7 @@ extension JNISwift2JavaGenerator {
 
             return TranslatedResult(
               javaType: javaType,
+              outParameters: [],
               conversion: .placeholder
             )
           }
@@ -334,11 +335,12 @@ extension JNISwift2JavaGenerator {
         let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.name)
         return TranslatedResult(
           javaType: javaType,
+          outParameters: [],
           conversion: .constructSwiftValue(.placeholder, javaType)
         )
 
       case .tuple([]):
-        return TranslatedResult(javaType: .void, conversion: .placeholder)
+        return TranslatedResult(javaType: .void, outParameters: [], conversion: .placeholder)
 
       case .optional(let wrapped):
         return try translateOptionalResult(wrappedType: wrapped)
@@ -379,6 +381,7 @@ extension JNISwift2JavaGenerator {
           if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
             return TranslatedResult(
               javaType: .class(package: nil, name: returnType),
+              outParameters: [],
               conversion: .combinedValueToOptional(
                 .placeholder,
                 nextIntergralTypeWithSpaceForByte.java,
@@ -388,8 +391,28 @@ extension JNISwift2JavaGenerator {
               )
             )
           } else {
-            // Otherwise, we are forced to use an array.
-            fatalError()
+            // Otherwise, we return the result as normal, but
+            // use an indirect return for the discriminator.
+            return TranslatedResult(
+              javaType: .class(package: nil, name: returnType),
+              outParameters: [
+                OutParameter(name: "result_discriminator$", type: .array(.byte), allocation: .newArray(.byte, size: 1))
+              ],
+              conversion: .aggregate(
+                name: "result$",
+                type: javaType,
+                [
+                  .ternary(
+                    .equals(
+                      .subscriptOf(.constant("result_discriminator$"), arguments: [.constant("0")]),
+                      .constant("1")
+                    ),
+                    thenExp: .method(.constant(staticCallee), function: "of", arguments: [.constant("result$")]),
+                    elseExp: .method(.constant(staticCallee), function: "empty")
+                  )
+                ]
+              )
+            )
           }
         }
 
@@ -467,8 +490,31 @@ extension JNISwift2JavaGenerator {
   struct TranslatedResult {
     let javaType: JavaType
 
+    let outParameters: [OutParameter]
+
     /// Represents how to convert the Java native result into a user-facing result.
     let conversion: JavaNativeConversionStep
+  }
+
+  struct OutParameter {
+    enum Allocation {
+      case newArray(JavaType, size: Int)
+
+      func render() -> String {
+        switch self {
+        case .newArray(let javaType, let size):
+          "new \(javaType)[\(size)]"
+        }
+      }
+    }
+
+    let name: String
+    let type: JavaType
+    let allocation: Allocation
+
+    var javaParameter: JavaParameter {
+      JavaParameter(name: self.name, type: self.type)
+    }
   }
 
   /// Represent a Swift closure type in the user facing Java API.
@@ -500,11 +546,20 @@ extension JNISwift2JavaGenerator {
     /// Call `new \(Type)(\(placeholder), swiftArena$)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
 
-    indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep])
+    indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep] = [])
 
     case isOptionalPresent
 
     indirect case combinedValueToOptional(JavaNativeConversionStep, JavaType, valueType: JavaType, valueSizeInBytes: Int, optionalType: String)
+
+    indirect case ternary(JavaNativeConversionStep, thenExp: JavaNativeConversionStep, elseExp: JavaNativeConversionStep)
+
+    indirect case equals(JavaNativeConversionStep, JavaNativeConversionStep)
+
+    indirect case subscriptOf(JavaNativeConversionStep, arguments: [JavaNativeConversionStep])
+
+    /// Perform multiple conversions using the same input.
+    case aggregate(name: String, type: JavaType, [JavaNativeConversionStep])
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -555,6 +610,30 @@ extension JNISwift2JavaGenerator {
         }
 
         return "discriminator$ == 1 ? \(optionalType).of(value$) : \(optionalType).empty()"
+
+      case .ternary(let cond, let thenExp, let elseExp):
+        let cond = cond.render(&printer, placeholder)
+        let thenExp = thenExp.render(&printer, placeholder)
+        let elseExp = elseExp.render(&printer, placeholder)
+        return "(\(cond)) ? \(thenExp) : \(elseExp)"
+
+      case .equals(let lhs, let rhs):
+        let lhs = lhs.render(&printer, placeholder)
+        let rhs = rhs.render(&printer, placeholder)
+        return "\(lhs) == \(rhs)"
+
+      case .subscriptOf(let inner, let arguments):
+        let inner = inner.render(&printer, placeholder)
+        let arguments = arguments.map { $0.render(&printer, placeholder) }
+        return "\(inner)[\(arguments.joined(separator: ", "))]"
+
+      case .aggregate(let name, let type, let steps):
+        precondition(!steps.isEmpty, "Aggregate must contain steps")
+        printer.print("\(type) \(name) = \(placeholder);")
+        let steps = steps.map {
+          $0.render(&printer, name)
+        }
+        return steps.last!
       }
     }
 
@@ -578,6 +657,18 @@ extension JNISwift2JavaGenerator {
 
       case .combinedValueToOptional(let inner, _, _, _, _):
         return inner.requiresSwiftArena
+
+      case .ternary(let cond, let thenExp, let elseExp):
+        return cond.requiresSwiftArena || thenExp.requiresSwiftArena || elseExp.requiresSwiftArena
+
+      case .equals(let lhs, let rhs):
+        return lhs.requiresSwiftArena || rhs.requiresSwiftArena
+
+      case .subscriptOf(let inner, _):
+        return inner.requiresSwiftArena
+
+      case .aggregate(_, _, let steps):
+        return steps.contains(where: \.requiresSwiftArena)
       }
     }
   }

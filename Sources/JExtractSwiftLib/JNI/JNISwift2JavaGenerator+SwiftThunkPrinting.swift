@@ -125,18 +125,20 @@ extension JNISwift2JavaGenerator {
     }
 
     let nativeSignature = translatedDecl.nativeFunctionSignature
-    var parameters = nativeSignature.parameters
+    var parameters = nativeSignature.parameters.flatMap(\.parameters)
 
     if let selfParameter = nativeSignature.selfParameter {
-      parameters.append(selfParameter)
+      parameters += selfParameter.parameters
     }
+
+    parameters += nativeSignature.result.outParameters
 
     printCDecl(
       &printer,
       javaMethodName: translatedDecl.nativeFunctionName,
       parentName: translatedDecl.parentName,
-      parameters: parameters.flatMap { $0.parameters },
-      resultType: nativeSignature.result.javaType.jniType
+      parameters: parameters,
+      resultType: nativeSignature.result.javaType
     ) { printer in
       self.printFunctionDowncall(&printer, decl)
     }
@@ -231,7 +233,7 @@ extension JNISwift2JavaGenerator {
     javaMethodName: String,
     parentName: String,
     parameters: [JavaParameter],
-    resultType: JNIType,
+    resultType: JavaType,
     _ body: (inout CodePrinter) -> Void
   ) {
     let jniSignature = parameters.reduce(into: "") { signature, parameter in
@@ -255,7 +257,7 @@ extension JNISwift2JavaGenerator {
         "environment: UnsafeMutablePointer<JNIEnv?>!",
         "thisClass: jclass"
       ] + translatedParameters
-    let thunkReturnType = resultType != .void ? " -> \(resultType)" : ""
+    let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
 
     // TODO: Think about function overloads
     printer.printBraceBlock(
