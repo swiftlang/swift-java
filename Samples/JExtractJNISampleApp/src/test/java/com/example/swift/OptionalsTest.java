@@ -84,8 +84,10 @@ public class OptionalsTest {
     void optionalClass() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             MySwiftClass c = MySwiftClass.init(arena);
-            assertEquals(Optional.empty(), MySwiftLibrary.optionalClass(Optional.empty()));
-            assertEquals(Optional.of(c), MySwiftLibrary.optionalClass(Optional.of(c)));
+            assertEquals(Optional.empty(), MySwiftLibrary.optionalClass(Optional.empty(), arena));
+            Optional<MySwiftClass> optionalClass = MySwiftLibrary.optionalClass(Optional.of(c), arena);
+            assertTrue(optionalClass.isPresent());
+            assertEquals(c.getX(), optionalClass.get().getX());
         }
     }
 }

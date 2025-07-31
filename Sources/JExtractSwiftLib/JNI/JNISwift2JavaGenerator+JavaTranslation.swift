@@ -362,7 +362,7 @@ extension JNISwift2JavaGenerator {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
-          let (returnType, staticCallee) = switch javaType {
+          let (returnType, optionalClass) = switch javaType {
           case .boolean: ("Optional<Boolean>", "Optional")
           case .byte: ("Optional<Byte>", "Optional")
           case .char: ("Optional<Character>", "Optional")
@@ -387,7 +387,7 @@ extension JNISwift2JavaGenerator {
                 nextIntergralTypeWithSpaceForByte.java,
                 valueType: javaType,
                 valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
-                optionalType: staticCallee
+                optionalType: optionalClass
               )
             )
           } else {
@@ -398,19 +398,11 @@ extension JNISwift2JavaGenerator {
               outParameters: [
                 OutParameter(name: "result_discriminator$", type: .array(.byte), allocation: .newArray(.byte, size: 1))
               ],
-              conversion: .aggregate(
-                name: "result$",
-                type: javaType,
-                [
-                  .ternary(
-                    .equals(
-                      .subscriptOf(.constant("result_discriminator$"), arguments: [.constant("0")]),
-                      .constant("1")
-                    ),
-                    thenExp: .method(.constant(staticCallee), function: "of", arguments: [.constant("result$")]),
-                    elseExp: .method(.constant(staticCallee), function: "empty")
-                  )
-                ]
+              conversion: .toOptionalFromIndirectReturn(
+                discriminatorName: "result_discriminator$",
+                optionalClass: optionalClass,
+                javaType: javaType,
+                toValue: .placeholder
               )
             )
           }
@@ -420,8 +412,20 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
-        // Assume JExtract imported class
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        // We assume this is a JExtract class.
+        let returnType = JavaType.class(package: nil, name: "Optional<\(nominalTypeName)>")
+        return TranslatedResult(
+          javaType: returnType,
+          outParameters: [
+            OutParameter(name: "result_discriminator$", type: .array(.byte), allocation: .newArray(.byte, size: 1))
+          ],
+          conversion: .toOptionalFromIndirectReturn(
+            discriminatorName: "result_discriminator$",
+            optionalClass: "Optional",
+            javaType: .long,
+            toValue: .constructSwiftValue(.placeholder, .class(package: nil, name: nominalTypeName))
+          )
+        )
 
       default:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -558,6 +562,28 @@ extension JNISwift2JavaGenerator {
 
     indirect case subscriptOf(JavaNativeConversionStep, arguments: [JavaNativeConversionStep])
 
+    static func toOptionalFromIndirectReturn(
+      discriminatorName: String,
+      optionalClass: String,
+      javaType: JavaType,
+      toValue valueConversion: JavaNativeConversionStep
+    ) -> JavaNativeConversionStep {
+      .aggregate(
+        name: "result$",
+        type: javaType,
+        [
+          .ternary(
+            .equals(
+              .subscriptOf(.constant(discriminatorName), arguments: [.constant("0")]),
+              .constant("1")
+            ),
+            thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
+            elseExp: .method(.constant(optionalClass), function: "empty")
+          )
+        ]
+      )
+    }
+
     /// Perform multiple conversions using the same input.
     case aggregate(name: String, type: JavaType, [JavaNativeConversionStep])
 
@@ -652,8 +678,8 @@ extension JNISwift2JavaGenerator {
       case .commaSeparated(let list):
         return list.contains(where: { $0.requiresSwiftArena })
 
-      case .method(let inner, _, _):
-        return inner.requiresSwiftArena
+      case .method(let inner, _, let args):
+        return inner.requiresSwiftArena || args.contains(where: \.requiresSwiftArena)
 
       case .combinedValueToOptional(let inner, _, _, _, _):
         return inner.requiresSwiftArena
