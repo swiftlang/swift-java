@@ -100,7 +100,6 @@ extension FFMSwift2JavaGenerator {
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.ffm.*",
-    "org.swift.swiftkit.ffm.SwiftRuntime",
 
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
@@ -127,7 +126,7 @@ extension FFMSwift2JavaGenerator {
   package func writeExportedJavaSources(printer: inout CodePrinter) throws {
     for (_, ty) in analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.swiftNominal.name).java"
-      log.info("Printing contents: \(filename)")
+      log.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
 
       if let outputFile = try printer.writeContents(
@@ -141,7 +140,7 @@ extension FFMSwift2JavaGenerator {
 
     do {
       let filename = "\(self.swiftModuleName).java"
-      log.info("Printing contents: \(filename)")
+      log.debug("Printing contents: \(filename)")
       printModule(&printer)
 
       if let outputFile = try printer.writeContents(

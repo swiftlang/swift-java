@@ -59,7 +59,7 @@ extension JNISwift2JavaGenerator {
       for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
         let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
         let filename = "\(fileNameBase).swift"
-        logger.info("Printing contents: \(filename)")
+        logger.debug("Printing contents: \(filename)")
 
         do {
           try printNominalTypeThunks(&printer, ty)

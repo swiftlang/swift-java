@@ -334,14 +334,9 @@ extension FFMSwift2JavaGenerator {
     }
 
     // TODO: we could copy the Swift method's documentation over here, that'd be great UX
+    printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
       """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * \(decl.signatureString)
-       * }
-       */
       \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
       """
     ) { printer in
@@ -352,6 +347,19 @@ extension FFMSwift2JavaGenerator {
 
       printDowncall(&printer, decl)
     }
+  }
+
+  private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    printer.print(
+      """
+      /**
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * \(decl.signatureString)
+       * }
+       */
+      """
+    )
   }
 
   /// Print the actual downcall to the Swift API.

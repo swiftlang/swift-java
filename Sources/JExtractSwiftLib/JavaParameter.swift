@@ -18,6 +18,7 @@ import JavaTypes
 struct JavaParameter {
   let name: String
   let type: JavaType
+  /// Parameter annotations are used in parameter declarations like this: `@Annotation int example`
   let annotations: [JavaAnnotation]
 
   init(name: String, type: JavaType, annotations: [JavaAnnotation] = []) {

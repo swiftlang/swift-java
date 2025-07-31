@@ -130,7 +130,6 @@ final class FuncCallbackImportTests {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
     let st = Swift2JavaTranslator(config: config)
-    st.log.logLevel = .error
 
     try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
 

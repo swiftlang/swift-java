@@ -18,14 +18,14 @@ extension JavaType {
 
   /// Try to map a Swift type name (e.g., from the module Swift) over to a
   /// primitive Java type, or fail otherwise.
-  public init?(swiftTypeName: String, unsigned: UnsignedNumericsMode) {
+  public init?(swiftTypeName: String, WHT_unsigned unsigned: UnsignedNumericsMode) {
     switch swiftTypeName {
     case "Bool": self = .boolean
 
     case "Int8": self = .byte
     case "UInt8":
       self = switch unsigned {
-        case .ignoreSign: .char
+        case .ignoreSign: .byte
         case .wrapUnsignedGuava: JavaType.guava.primitives.UnsignedInteger
       }
 
