@@ -165,7 +165,7 @@ extension JNISwift2JavaGenerator {
       wrappedType swiftType: SwiftType,
       parameterName: String
     ) throws -> NativeParameter {
-      let descriptorParameter = JavaParameter(name: "\(parameterName)_descriptor", type: .byte)
+      let discriminatorName = "\(parameterName)_discriminator"
       let valueName = "\(parameterName)_value"
 
       switch swiftType {
@@ -178,10 +178,14 @@ extension JNISwift2JavaGenerator {
 
           return NativeParameter(
             parameters: [
-              descriptorParameter,
+              JavaParameter(name: discriminatorName, type: .byte),
               JavaParameter(name: valueName, type: javaType)
             ],
-            conversion: .optionalLowering(.initFromJNI(.placeholder, swiftType: swiftType))
+            conversion: .optionalLowering(
+              .initFromJNI(.placeholder, swiftType: swiftType),
+              discriminatorName: discriminatorName,
+              valueName: valueName
+            )
           )
         }
 
@@ -220,15 +224,15 @@ extension JNISwift2JavaGenerator {
           }
 
           // Check if we can fit the value and a discriminator byte in a primitive.
-          // so the return JNI value will be (value || discriminator)
+          // so the return JNI value will be (value, discriminator)
           if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
             return NativeResult(
-              javaType: nextIntergralTypeWithSpaceForByte.java,
+              javaType: nextIntergralTypeWithSpaceForByte.javaType,
               conversion: .getJNIValue(
                 .optionalRaisingWidenIntegerType(
                   .placeholder,
                   valueType: javaType,
-                  combinedSwiftType: nextIntergralTypeWithSpaceForByte.swift,
+                  combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
                   valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
                 )
               ),
@@ -454,11 +458,11 @@ extension JNISwift2JavaGenerator {
 
     case initializeJavaKitWrapper(wrapperName: String)
 
-    indirect case optionalLowering(NativeSwiftConversionStep)
+    indirect case optionalLowering(NativeSwiftConversionStep, discriminatorName: String, valueName: String)
 
     indirect case optionalChain(NativeSwiftConversionStep)
 
-    indirect case optionalRaisingWidenIntegerType(NativeSwiftConversionStep, valueType: JavaType, combinedSwiftType: String, valueSizeInBytes: Int)
+    indirect case optionalRaisingWidenIntegerType(NativeSwiftConversionStep, valueType: JavaType, combinedSwiftType: SwiftKnownTypeDeclKind, valueSizeInBytes: Int)
 
     indirect case optionalRaisingIndirectReturn(NativeSwiftConversionStep, returnType: JavaType, discriminatorParameterName: String, placeholderValue: NativeSwiftConversionStep)
 
@@ -571,9 +575,9 @@ extension JNISwift2JavaGenerator {
       case .initializeJavaKitWrapper(let wrapperName):
         return "\(wrapperName)(javaThis: \(placeholder), environment: environment!)"
 
-      case .optionalLowering(let valueConversion):
-        let value = valueConversion.render(&printer, "\(placeholder)_value")
-        return "\(placeholder)_descriptor == 1 ? \(value) : nil"
+      case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
+        let value = valueConversion.render(&printer, valueName)
+        return "\(discriminatorName) == 1 ? \(value) : nil"
 
       case .optionalChain(let inner):
         let inner = inner.render(&printer, placeholder)
@@ -582,10 +586,11 @@ extension JNISwift2JavaGenerator {
       case .optionalRaisingWidenIntegerType(let inner, let valueType, let combinedSwiftType, let valueSizeInBytes):
         let inner = inner.render(&printer, placeholder)
         let value = valueType == .boolean ? "$0 ? 1 : 0" : "$0"
+        let combinedSwiftTypeName = combinedSwiftType.moduleAndName.name
         printer.print(
           """
-          let value$: \(combinedSwiftType) = \(inner).map {
-            \(combinedSwiftType)(\(value)) << \(valueSizeInBytes * 8) | \(combinedSwiftType)(1)
+          let value$ = \(inner).map {
+            \(combinedSwiftTypeName)(\(value)) << \(valueSizeInBytes * 8) | \(combinedSwiftTypeName)(1)
           } ?? 0
           """
         )

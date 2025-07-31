@@ -289,17 +289,7 @@ extension JNISwift2JavaGenerator {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
-          let (translatedClass, orElseValue) = switch javaType {
-          case .boolean: ("Optional<Boolean>", "false")
-          case .byte: ("Optional<Byte>", "(byte) 0")
-          case .char: ("Optional<Character>", "(char) 0")
-          case .short: ("Optional<Short>", "(short) 0")
-          case .int: ("OptionalInt", "0")
-          case .long: ("OptionalLong", "0L")
-          case .float: ("Optional<Float>", "0f")
-          case .double: ("OptionalDouble", "0.0")
-          case .javaLangString: ("Optional<String>", #""""#)
-          default:
+          guard let translatedClass = javaType.optionalType, let placeholderValue = javaType.optionalPlaceholderValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
@@ -311,7 +301,7 @@ extension JNISwift2JavaGenerator {
             ),
             conversion: .commaSeparated([
               .isOptionalPresent,
-              .method(.placeholder, function: "orElse", arguments: [.constant(orElseValue)])
+              .method(.placeholder, function: "orElse", arguments: [.constant(placeholderValue)])
             ])
           )
         }
@@ -406,22 +396,12 @@ extension JNISwift2JavaGenerator {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
-          let (returnType, optionalClass) = switch javaType {
-          case .boolean: ("Optional<Boolean>", "Optional")
-          case .byte: ("Optional<Byte>", "Optional")
-          case .char: ("Optional<Character>", "Optional")
-          case .short: ("Optional<Short>", "Optional")
-          case .int: ("OptionalInt", "OptionalInt")
-          case .long: ("OptionalLong", "OptionalLong")
-          case .float: ("Optional<Float>", "Optional")
-          case .double: ("OptionalDouble", "OptionalDouble")
-          case .javaLangString: ("Optional<String>", "Optional")
-          default:
+          guard let returnType = javaType.optionalType, let optionalClass = javaType.optionalWrapperType else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
           // Check if we can fit the value and a discriminator byte in a primitive.
-          // so the return JNI value will be (value || discriminator)
+          // so the return JNI value will be (value, discriminator)
           if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
             return TranslatedResult(
               javaType: .class(package: nil, name: returnType),
@@ -429,7 +409,7 @@ extension JNISwift2JavaGenerator {
               outParameters: [],
               conversion: .combinedValueToOptional(
                 .placeholder,
-                nextIntergralTypeWithSpaceForByte.java,
+                nextIntergralTypeWithSpaceForByte.javaType,
                 valueType: javaType,
                 valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
                 optionalType: optionalClass
@@ -578,9 +558,6 @@ extension JNISwift2JavaGenerator {
 
     case constant(String)
 
-    // The input exploded into components.
-    case explodedName(component: String)
-
     // Convert the results of the inner steps to a comma separated list.
     indirect case commaSeparated([JavaNativeConversionStep])
 
@@ -639,9 +616,6 @@ extension JNISwift2JavaGenerator {
 
       case .constant(let value):
         return value
-
-      case .explodedName(let component):
-        return "\(placeholder)_\(component)"
 
       case .commaSeparated(let list):
         return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
@@ -713,7 +687,7 @@ extension JNISwift2JavaGenerator {
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .explodedName, .isOptionalPresent:
+      case .placeholder, .constant, .isOptionalPresent:
         return false
 
       case .constructSwiftValue:

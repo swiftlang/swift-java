@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -88,6 +88,23 @@ public class OptionalsTest {
             Optional<MySwiftClass> optionalClass = MySwiftLibrary.optionalClass(Optional.of(c), arena);
             assertTrue(optionalClass.isPresent());
             assertEquals(c.getX(), optionalClass.get().getX());
+        }
+    }
+
+    @Test
+    void multipleOptionals() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            MySwiftClass c = MySwiftClass.init(arena);
+            OptionalLong result = MySwiftLibrary.multipleOptionals(
+                    Optional.of((byte) 1),
+                    Optional.of((short) 42),
+                    OptionalInt.of(50),
+                    OptionalLong.of(1000L),
+                    Optional.of("42"),
+                    Optional.of(c),
+                    Optional.of(true)
+            );
+            assertEquals(result, OptionalLong.of(1L));
         }
     }
 }

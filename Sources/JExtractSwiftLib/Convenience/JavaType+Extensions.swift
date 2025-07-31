@@ -38,12 +38,52 @@ extension JavaType {
   }
 
   /// Returns the next integral type with space for self and an additional byte.
-  var nextIntergralTypeWithSpaceForByte: (java: JavaType, swift: String, valueBytes: Int)? {
+  var nextIntergralTypeWithSpaceForByte: (javaType: JavaType, swiftType: SwiftKnownTypeDeclKind, valueBytes: Int)? {
     switch self {
-    case .boolean, .byte: (.short, "Int16", 1)
-    case .char, .short: (.int, "Int32", 2)
-    case .int: (.long, "Int64", 4)
+    case .boolean, .byte: (.short, .int16, 1)
+    case .char, .short: (.int, .int32, 2)
+    case .int: (.long, .int64, 4)
     default: nil
+    }
+  }
+
+  var optionalType: String? {
+    switch self {
+    case .boolean: "Optional<Boolean>"
+    case .byte: "Optional<Byte>"
+    case .char: "Optional<Character>"
+    case .short: "Optional<Short>"
+    case .int: "OptionalInt"
+    case .long: "OptionalLong"
+    case .float: "Optional<Float>"
+    case .double: "OptionalDouble"
+    case .javaLangString: "Optional<String>"
+    default: nil
+    }
+  }
+
+  var optionalWrapperType: String? {
+    switch self {
+    case .boolean, .byte, .char, .short, .float, .javaLangString: "Optional"
+    case .int: "OptionalInt"
+    case .long: "OptionalLong"
+    case .double: "OptionalDouble"
+    default: nil
+    }
+  }
+
+  var optionalPlaceholderValue: String? {
+    switch self {
+    case .boolean: "false"
+    case .byte: "(byte) 0"
+    case .char: "(char) 0"
+    case .short: "(short) 0"
+    case .int: "0"
+    case .long: "0L"
+    case .float: "0f"
+    case .double: "0.0"
+    case .array, .class: "null"
+    case .void: nil
     }
   }
 }

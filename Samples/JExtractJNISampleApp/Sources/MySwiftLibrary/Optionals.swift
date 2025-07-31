@@ -51,3 +51,15 @@ public func optionalString(input: Optional<String>) -> String? {
 public func optionalClass(input: Optional<MySwiftClass>) -> MySwiftClass? {
   return input
 }
+
+public func multipleOptionals(
+  input1: Optional<Int8>,
+  input2: Optional<Int16>,
+  input3: Optional<Int32>,
+  input4: Optional<Int64>,
+  input5: Optional<String>,
+  input6: Optional<MySwiftClass>,
+  input7: Optional<Bool>
+) -> Int64? {
+  return 1
+}
