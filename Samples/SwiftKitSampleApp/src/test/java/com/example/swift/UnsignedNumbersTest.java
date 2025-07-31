@@ -15,7 +15,6 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.primitives.*;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
 public class UnsignedNumbersTest {

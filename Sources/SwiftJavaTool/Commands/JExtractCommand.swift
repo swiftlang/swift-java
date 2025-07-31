@@ -61,7 +61,7 @@ extension SwiftJava {
     @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
     var writeEmptyFiles: Bool = false
 
-    @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
+    @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrap-guava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
     var unsignedNumbers: JExtractUnsignedIntegerMode = .default
 
     @Option(
