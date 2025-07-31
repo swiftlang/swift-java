@@ -111,8 +111,6 @@ final class JNIUnsignedNumberTests {
       expectedChunks: [
         // we do not import in wrap mode
         """
-        package com.example.swift;
-
         public final class SwiftModule {
           static final String LIB_NAME = "SwiftModule";
 
@@ -147,7 +145,7 @@ final class JNIUnsignedNumberTests {
           @Unsigned
           public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
             return SwiftModule.$unsignedLong(first, second);
-          } // printJavaBindingWrapperMethod(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+JavaBindingsPrinting.swift:265
+          }
           private static native int $unsignedLong(long first, int second);
         """,
       ]

@@ -43,6 +43,10 @@ struct JNIModuleTests {
 
       package com.example.swift;
 
+      import org.swift.swiftkit.core.*;
+      import org.swift.swiftkit.core.util.*;
+      import org.swift.swiftkit.core.annotations.*;
+
       public final class SwiftModule {
         static final String LIB_NAME = "SwiftModule";
       

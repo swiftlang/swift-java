@@ -29,8 +29,7 @@ public enum JExtractUnsignedIntegerMode: String, Codable {
   /// is actually unsigned, and must be treated carefully.
   ///
   /// Specifically negative values of a `@Unchecked long` must be interpreted carefully as
-  /// a value larger than the Long.MAX_VALUE can represent in Java. You can use `org.swift.swiftkit.core.primitives`
-  /// utility classes to work with such unsigned values in Java.
+  /// a value larger than the Long.MAX_VALUE can represent in Java.
   case annotate
 
   /// Wrap any unsigned Swift integer values in an explicit `Unsigned...` wrapper types.

@@ -38,7 +38,6 @@ func assertOutput(
   column: Int = #column
 ) throws {
   var config = config ?? Configuration()
-  config.logLevel = .trace
   config.swiftModule = swiftModuleName
   let translator = Swift2JavaTranslator(config: config)
   translator.dependenciesClasses = Array(javaClassLookupTable.keys)
