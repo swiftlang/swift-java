@@ -306,8 +306,23 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        if nominalType.isJavaKitWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+
+          return TranslatedParameter(
+            parameter: JavaParameter(
+              name: parameterName,
+              type: .class(package: nil, name: "Optional<\(javaType)>"),
+              annotations: parameterAnnotations
+            ),
+            conversion: .method(
+              .placeholder,
+              function: "orElse",
+              arguments: [.constant("null")]
+            )
+          )
         }
 
         // Assume JExtract imported class

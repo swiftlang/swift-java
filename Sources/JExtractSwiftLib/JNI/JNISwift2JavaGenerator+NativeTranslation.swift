@@ -107,7 +107,14 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: javaType)
             ],
-            conversion: .initializeJavaKitWrapper(wrapperName: nominalTypeName)
+            conversion: .initializeJavaKitWrapper(
+              .unwrapOptional(
+                .placeholder,
+                name: parameterName,
+                fatalErrorMessage: "\(parameterName) was null in call to \\(#function), but Swift requires non-optional!"
+              ),
+              wrapperName: nominalTypeName
+            )
           )
         }
 
@@ -170,6 +177,8 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
                 javaType.implementsJavaValue else {
@@ -189,8 +198,17 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        if nominalType.isJavaKitWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
+            conversion: .optionalMap(.initializeJavaKitWrapper(.placeholder, wrapperName: nominalTypeName))
+          )
         }
 
         // Assume JExtract wrapped class
@@ -456,7 +474,7 @@ extension JNISwift2JavaGenerator {
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
-    case initializeJavaKitWrapper(wrapperName: String)
+    indirect case initializeJavaKitWrapper(NativeSwiftConversionStep, wrapperName: String)
 
     indirect case optionalLowering(NativeSwiftConversionStep, discriminatorName: String, valueName: String)
 
@@ -469,6 +487,10 @@ extension JNISwift2JavaGenerator {
     indirect case method(NativeSwiftConversionStep, function: String, arguments: [(String?, NativeSwiftConversionStep)] = [])
 
     indirect case member(NativeSwiftConversionStep, member: String)
+
+    indirect case optionalMap(NativeSwiftConversionStep)
+
+    indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -558,7 +580,7 @@ extension JNISwift2JavaGenerator {
             """
         )
 
-        let upcall = "environment!.interface.\(nativeResult.javaType.jniType.callMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -572,8 +594,9 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
 
-      case .initializeJavaKitWrapper(let wrapperName):
-        return "\(wrapperName)(javaThis: \(placeholder), environment: environment!)"
+      case .initializeJavaKitWrapper(let inner, let wrapperName):
+        let inner = inner.render(&printer, placeholder)
+        return "\(wrapperName)(javaThis: \(inner), environment: environment!)"
 
       case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
         let value = valueConversion.render(&printer, valueName)
@@ -637,6 +660,26 @@ extension JNISwift2JavaGenerator {
       case .member(let inner, let member):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).\(member)"
+
+      case .optionalMap(let inner):
+        var printer = CodePrinter()
+        printer.printBraceBlock("\(placeholder).map") { printer in
+          let inner = inner.render(&printer, "$0")
+          printer.print("return \(inner)")
+        }
+        return printer.finalize()
+
+      case .unwrapOptional(let inner, let name, let fatalErrorMessage):
+        let unwrappedName = "\(name)_unwrapped$"
+        let inner = inner.render(&printer, placeholder)
+        printer.print(
+          """
+          guard let \(unwrappedName) = \(inner) else {
+            fatalError("\(fatalErrorMessage)")
+          }
+          """
+        )
+        return unwrappedName
       }
     }
   }

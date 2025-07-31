@@ -92,6 +92,12 @@ public class OptionalsTest {
     }
 
     @Test
+    void optionalJavaKitLong() {
+        assertEquals(OptionalLong.empty(), MySwiftLibrary.optionalJavaKitLong(Optional.empty()));
+        assertEquals(OptionalLong.of(99L), MySwiftLibrary.optionalJavaKitLong(Optional.of(99L)));
+    }
+
+    @Test
     void multipleOptionals() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             MySwiftClass c = MySwiftClass.init(arena);

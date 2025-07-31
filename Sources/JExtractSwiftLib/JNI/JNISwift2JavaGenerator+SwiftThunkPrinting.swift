@@ -249,7 +249,7 @@ extension JNISwift2JavaGenerator {
       + jniSignature.escapedJNIIdentifier
 
     let translatedParameters = parameters.map {
-      "\($0.name): \($0.type.jniType)"
+      "\($0.name): \($0.type.jniTypeName)"
     }
 
     let thunkParameters =

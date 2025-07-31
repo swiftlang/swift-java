@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaKit
+
 public func optionalBool(input: Optional<Bool>) -> Bool? {
   return input
 }
@@ -50,6 +52,14 @@ public func optionalString(input: Optional<String>) -> String? {
 
 public func optionalClass(input: Optional<MySwiftClass>) -> MySwiftClass? {
   return input
+}
+
+public func optionalJavaKitLong(input: Optional<JavaLong>) -> Int64? {
+  if let input {
+    return input.longValue()
+  } else {
+    return nil
+  }
 }
 
 public func multipleOptionals(

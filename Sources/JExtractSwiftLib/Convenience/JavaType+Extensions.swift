@@ -86,4 +86,29 @@ extension JavaType {
     case .void: nil
     }
   }
+
+  var jniCallMethodAName: String {
+    switch self {
+    case .boolean: "CallBooleanMethodA"
+    case .byte: "CallByteMethodA"
+    case .char: "CallCharMethodA"
+    case .short: "CallShortMethodA"
+    case .int: "CallIntMethodA"
+    case .long: "CallLongMethodA"
+    case .float: "CallFloatMethodA"
+    case .double: "CallDoubleMethodA"
+    case .void: "CallVoidMethodA"
+    default: "CallObjectMethodA"
+    }
+  }
+
+  /// Returns whether this type returns `JavaValue` from JavaKit
+  var implementsJavaValue: Bool {
+    return switch self {
+    case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString:
+      true
+    default:
+      false
+    }
+  }
 }
