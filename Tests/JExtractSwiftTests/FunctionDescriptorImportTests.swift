@@ -246,6 +246,7 @@ extension FunctionDescriptorTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: javaPackage,
       swiftOutputDirectory: "/fake",
@@ -275,6 +276,7 @@ extension FunctionDescriptorTests {
     try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: javaPackage,
       swiftOutputDirectory: "/fake",

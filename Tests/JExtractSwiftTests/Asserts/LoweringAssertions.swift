@@ -43,6 +43,7 @@ func assertLoweredFunction(
   translator.prepareForTranslation()
 
   let generator = FFMSwift2JavaGenerator(
+    config: config,
     translator: translator,
     javaPackage: "com.example.swift",
     swiftOutputDirectory: "/fake",
@@ -128,6 +129,7 @@ func assertLoweredVariableAccessor(
   translator.prepareForTranslation()
 
   let generator = FFMSwift2JavaGenerator(
+    config: config,
     translator: translator,
     javaPackage: javaPackage,
     swiftOutputDirectory: "/fake",

@@ -28,7 +28,7 @@ final class DataImportTests {
     """
     import Foundation
     
-    public func receiveDataProtocol(dat: some DataProtocol)
+    public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
 
 
@@ -342,9 +342,9 @@ final class DataImportTests {
         import Foundation
         """,
         """
-        @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat")
-        public func swiftjava_SwiftModule_receiveDataProtocol_dat(_ dat: UnsafeRawPointer) {
-          receiveDataProtocol(dat: dat.assumingMemoryBound(to: Data.self).pointee)
+        @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat_dat2")
+        public func swiftjava_SwiftModule_receiveDataProtocol_dat_dat2(_ dat: UnsafeRawPointer, _ dat2: UnsafeRawPointer?) {
+          receiveDataProtocol(dat: dat.assumingMemoryBound(to: Data.self).pointee, dat2: dat2?.assumingMemoryBound(to: Data.self).pointee)
         }
         """,
 
@@ -365,22 +365,23 @@ final class DataImportTests {
         """
         /**
          * {@snippet lang=c :
-         * void swiftjava_SwiftModule_receiveDataProtocol_dat(const void *dat)
+         * void swiftjava_SwiftModule_receiveDataProtocol_dat_dat2(const void *dat, const void *dat2)
          * }
          */
-        private static class swiftjava_SwiftModule_receiveDataProtocol_dat {
+        private static class swiftjava_SwiftModule_receiveDataProtocol_dat_dat2 {
           private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* dat: */SwiftValueLayout.SWIFT_POINTER
+            /* dat: */SwiftValueLayout.SWIFT_POINTER,
+            /* dat2: */SwiftValueLayout.SWIFT_POINTER
           );
           private static final MemorySegment ADDR =
-            SwiftModule.findOrThrow("swiftjava_SwiftModule_receiveDataProtocol_dat");
+            SwiftModule.findOrThrow("swiftjava_SwiftModule_receiveDataProtocol_dat_dat2");
           private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          public static void call(java.lang.foreign.MemorySegment dat) {
+          public static void call(java.lang.foreign.MemorySegment dat, java.lang.foreign.MemorySegment dat2) {
             try {
               if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall(dat);
+                CallTraces.traceDowncall(dat, dat2);
               }
-              HANDLE.invokeExact(dat);
+              HANDLE.invokeExact(dat, dat2);
             } catch (Throwable ex$) {
               throw new AssertionError("should not reach here", ex$);
             }
@@ -392,11 +393,11 @@ final class DataImportTests {
         /**
          * Downcall to Swift:
          * {@snippet lang=swift :
-         * public func receiveDataProtocol(dat: some DataProtocol)
+         * public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
          * }
          */
-        public static void receiveDataProtocol(Data dat) {
-          swiftjava_SwiftModule_receiveDataProtocol_dat.call(dat.$memorySegment());
+        public static void receiveDataProtocol(Data dat, Optional<Data> dat2) {
+          swiftjava_SwiftModule_receiveDataProtocol_dat_dat2.call(dat.$memorySegment(), SwiftRuntime.toOptionalSegmentInstance(dat2));
         }
         """,
 

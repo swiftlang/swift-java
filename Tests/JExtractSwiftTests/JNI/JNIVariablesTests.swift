@@ -20,6 +20,7 @@ struct JNIVariablesTests {
   let membersSource =
     """
     public class MyClass {
+      public let someByte: UInt8
       public let constant: Int64
       public var mutable: Int64
       public var computed: Int64 {

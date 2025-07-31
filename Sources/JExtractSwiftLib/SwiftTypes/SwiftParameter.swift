@@ -58,7 +58,7 @@ enum SwiftParameterConvention: Equatable {
 }
 
 extension SwiftParameter {
-  init(_ node: FunctionParameterSyntax, symbolTable: SwiftSymbolTable) throws {
+  init(_ node: FunctionParameterSyntax, lookupContext: SwiftTypeLookupContext) throws {
     // Determine the convention. The default is by-value, but there are
     // specifiers on the type for other conventions (like `inout`).
     var type = node.type
@@ -90,7 +90,7 @@ extension SwiftParameter {
     self.convention = convention
 
     // Determine the type.
-    self.type = try SwiftType(type, symbolTable: symbolTable)
+    self.type = try SwiftType(type, lookupContext: lookupContext)
 
     // FIXME: swift-syntax itself should have these utilities based on identifiers.
     if let secondName = node.secondName {

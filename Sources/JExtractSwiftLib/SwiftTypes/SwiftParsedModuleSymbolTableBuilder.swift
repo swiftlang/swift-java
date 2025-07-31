@@ -122,7 +122,8 @@ extension SwiftParsedModuleSymbolTableBuilder {
       parsedModule: symbolTable,
       importedModules: importedModules
     )
-    guard let extendedType = try? SwiftType(node.extendedType, symbolTable: table) else {
+    let lookupContext = SwiftTypeLookupContext(symbolTable: table)
+    guard let extendedType = try? SwiftType(node.extendedType, lookupContext: lookupContext) else {
       return false
     }
     guard let extendedNominal = extendedType.asNominalTypeDeclaration else {

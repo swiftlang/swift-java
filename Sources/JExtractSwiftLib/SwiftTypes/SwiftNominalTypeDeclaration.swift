@@ -18,9 +18,24 @@ import SwiftSyntax
 @_spi(Testing)
 public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax
 
+package class SwiftTypeDeclaration {
+  /// The module in which this nominal type is defined. If this is a nested type, the
+  /// module might be different from that of the parent type, if this nominal type
+  /// is defined in an extension within another module.
+  let moduleName: String
+
+  /// The name of this nominal type, e.g., 'MyCollection'.
+  let name: String
+
+  init(moduleName: String, name: String) {
+    self.moduleName = moduleName
+    self.name = name
+  }
+}
+
 /// Describes a nominal type declaration, which can be of any kind (class, struct, etc.)
 /// and has a name, parent type (if nested), and owning module.
-package class SwiftNominalTypeDeclaration {
+package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   enum Kind {
     case actor
     case `class`
@@ -40,14 +55,6 @@ package class SwiftNominalTypeDeclaration {
   /// MyCollection.Iterator.
   let parent: SwiftNominalTypeDeclaration?
 
-  /// The module in which this nominal type is defined. If this is a nested type, the
-  /// module might be different from that of the parent type, if this nominal type
-  /// is defined in an extension within another module.
-  let moduleName: String
-
-  /// The name of this nominal type, e.g., 'MyCollection'.
-  let name: String
-
   // TODO: Generic parameters.
 
   /// Identify this nominal declaration as one of the known standard library
@@ -63,9 +70,7 @@ package class SwiftNominalTypeDeclaration {
     parent: SwiftNominalTypeDeclaration?,
     node: NominalTypeDeclSyntaxNode
   ) {
-    self.moduleName = moduleName
     self.parent = parent
-    self.name = node.name.text
     self.syntax = node
 
     // Determine the kind from the syntax node.
@@ -77,6 +82,7 @@ package class SwiftNominalTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
+    super.init(moduleName: moduleName, name: node.name.text)
   }
 
   /// Determine the known standard library type for this nominal type
@@ -107,13 +113,25 @@ package class SwiftNominalTypeDeclaration {
   }
 }
 
-extension SwiftNominalTypeDeclaration: Equatable {
-  package static func ==(lhs: SwiftNominalTypeDeclaration, rhs: SwiftNominalTypeDeclaration) -> Bool {
+package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
+  let syntax: GenericParameterSyntax
+
+  init(
+    moduleName: String,
+    node: GenericParameterSyntax
+  ) {
+    self.syntax = node
+    super.init(moduleName: moduleName, name: node.name.text)
+  }
+}
+
+extension SwiftTypeDeclaration: Equatable {
+  package static func ==(lhs: SwiftTypeDeclaration, rhs: SwiftTypeDeclaration) -> Bool {
     lhs === rhs
   }
 }
 
-extension SwiftNominalTypeDeclaration: Hashable {
+extension SwiftTypeDeclaration: Hashable {
   package func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }

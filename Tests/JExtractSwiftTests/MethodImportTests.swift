@@ -73,6 +73,7 @@ final class MethodImportTests {
     try st.analyze(file: "Fake.swift", text: class_interfaceFile)
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -116,6 +117,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -157,6 +159,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -200,6 +203,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -243,6 +247,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -289,6 +294,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -331,6 +337,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -373,6 +380,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
@@ -417,6 +425,7 @@ final class MethodImportTests {
     }!
 
     let generator = FFMSwift2JavaGenerator(
+      config: config,
       translator: st,
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",

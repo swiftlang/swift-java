@@ -13,10 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import JavaKitConfigurationShared
 
 extension JNISwift2JavaGenerator {
   
   struct NativeJavaTranslation {
+    let config: Configuration
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
 
@@ -81,7 +83,8 @@ extension JNISwift2JavaGenerator {
             )
 
           default:
-            guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                  javaType.implementsJavaValue else {
               throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
             }
 
@@ -91,6 +94,7 @@ extension JNISwift2JavaGenerator {
               ],
               conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
             )
+
           }
         }
 
@@ -138,7 +142,7 @@ extension JNISwift2JavaGenerator {
 
         return NativeParameter(
           parameters: [
-            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),)
+            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
           ],
           conversion: .closureLowering(
             parameters: parameters,
@@ -152,7 +156,7 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .existential, .opaque:
+      case .metatype, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
       }
     }
@@ -167,7 +171,8 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
@@ -208,10 +213,9 @@ extension JNISwift2JavaGenerator {
     ) throws -> NativeResult {
       switch swiftType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.name
-
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
@@ -284,7 +288,8 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
           }
 
@@ -306,7 +311,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -318,7 +323,8 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
           }
 
@@ -334,7 +340,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -353,7 +359,7 @@ extension JNISwift2JavaGenerator {
             return try translateOptionalResult(wrappedType: swiftResult.type)
 
           default:
-            guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
 
@@ -385,11 +391,9 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrapped):
         return try translateOptionalResult(wrappedType: wrapped)
 
-      case .metatype, .tuple, .function, .existential, .opaque:
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
-
-
     }
   }
 

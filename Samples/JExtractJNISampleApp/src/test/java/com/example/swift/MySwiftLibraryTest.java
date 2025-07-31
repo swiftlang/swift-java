@@ -61,4 +61,11 @@ public class MySwiftLibraryTest {
         MySwiftLibrary.setGlobalVariable(100);
         assertEquals(100, MySwiftLibrary.getGlobalVariable());
     }
+
+    @Test
+    void globalUnsignedIntEcho() {
+        int i = 12;
+        long l = 1200;
+        assertEquals(1212, MySwiftLibrary.echoUnsignedInt(12, 1200));
+    }
 }

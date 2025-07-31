@@ -34,11 +34,19 @@ public class SwiftValueLayout {
     }
 
     public static final ValueLayout.OfBoolean SWIFT_BOOL = ValueLayout.JAVA_BOOLEAN;
+
     public static final ValueLayout.OfByte SWIFT_INT8 = ValueLayout.JAVA_BYTE;
-    public static final ValueLayout.OfChar SWIFT_UINT16 = ValueLayout.JAVA_CHAR;
+    public static final ValueLayout.OfByte SWIFT_UINT8 = SWIFT_INT8;
+
     public static final ValueLayout.OfShort SWIFT_INT16 = ValueLayout.JAVA_SHORT;
+    public static final ValueLayout.OfChar SWIFT_UINT16 = ValueLayout.JAVA_CHAR;
+
     public static final ValueLayout.OfInt SWIFT_INT32 = ValueLayout.JAVA_INT;
+    public static final ValueLayout.OfInt SWIFT_UINT32 = SWIFT_INT32;
+
     public static final ValueLayout.OfLong SWIFT_INT64 = ValueLayout.JAVA_LONG;
+    public static final ValueLayout.OfLong SWIFT_UINT64 = SWIFT_INT64;
+
     public static final ValueLayout.OfFloat SWIFT_FLOAT = ValueLayout.JAVA_FLOAT;
     public static final ValueLayout.OfDouble SWIFT_DOUBLE = ValueLayout.JAVA_DOUBLE;
 

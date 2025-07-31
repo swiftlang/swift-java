@@ -4,3 +4,4 @@ Sources/_Subprocess/Platforms/Subprocess+Linux.swift
 Sources/_Subprocess/Platforms/Subprocess+Unix.swift
 Sources/_Subprocess/Teardown.swift
 Sources/_Subprocess/Subprocess.swift
+NOTICE.txt

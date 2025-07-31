@@ -45,6 +45,11 @@ public func globalTakeIntInt(i: Int64, j: Int64) {
   p("i:\(i), j:\(j)")
 }
 
+public func echoUnsignedInt(i: UInt32, j: UInt64) -> UInt64 {
+  p("i:\(i), j:\(j)")
+  return UInt64(i) + j
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

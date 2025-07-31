@@ -26,10 +26,10 @@ extension FFMSwift2JavaGenerator {
   ) throws -> LoweredFunctionSignature {
     let signature = try SwiftFunctionSignature(
       decl,
-      enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
-      symbolTable: symbolTable
+      enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
+      lookupContext: lookupContext
     )
-    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
   }
 
   /// Lower the given initializer to a C-compatible entrypoint,
@@ -42,11 +42,11 @@ extension FFMSwift2JavaGenerator {
   ) throws -> LoweredFunctionSignature {
     let signature = try SwiftFunctionSignature(
       decl,
-      enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
-      symbolTable: symbolTable
+      enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
+      lookupContext: lookupContext
     )
 
-    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
   }
 
   /// Lower the given variable decl to a C-compatible entrypoint,
@@ -66,10 +66,10 @@ extension FFMSwift2JavaGenerator {
     let signature = try SwiftFunctionSignature(
       decl,
       isSet: isSet,
-      enclosingType: try enclosingType.map { try SwiftType($0, symbolTable: symbolTable) },
-      symbolTable: symbolTable
+      enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
+      lookupContext: lookupContext
     )
-    return try CdeclLowering(symbolTable: symbolTable).lowerFunctionSignature(signature)
+    return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
   }
 }
 
@@ -98,7 +98,9 @@ struct CdeclLowering {
       try lowerParameter(
         selfParameter.type,
         convention: selfParameter.convention,
-        parameterName: selfParameter.parameterName ?? "self"
+        parameterName: selfParameter.parameterName ?? "self",
+        genericParameters: signature.genericParameters,
+        genericRequirements: signature.genericRequirements
       )
     case nil, .initializer(_), .staticMethod(_):
       nil
@@ -106,10 +108,12 @@ struct CdeclLowering {
 
     // Lower all of the parameters.
     let loweredParameters = try signature.parameters.enumerated().map { (index, param) in
-      try lowerParameter(
+      return try lowerParameter(
         param.type,
         convention: param.convention,
-        parameterName: param.parameterName ?? "_\(index)"
+        parameterName: param.parameterName ?? "_\(index)",
+        genericParameters: signature.genericParameters,
+        genericRequirements: signature.genericRequirements
       )
     }
 
@@ -142,7 +146,9 @@ struct CdeclLowering {
   func lowerParameter(
     _ type: SwiftType,
     convention: SwiftParameterConvention,
-    parameterName: String
+    parameterName: String,
+    genericParameters: [SwiftGenericParameterDeclaration],
+    genericRequirements: [SwiftGenericRequirement]
   ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, we just
     // return it.
@@ -257,7 +263,7 @@ struct CdeclLowering {
           guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
             throw LoweringError.unhandledType(type)
           }
-          return try lowerOptionalParameter(genericArgs[0], convention: convention, parameterName: parameterName)
+          return try lowerOptionalParameter(genericArgs[0], convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
 
         case .string:
           // 'String' is passed in by C string. i.e. 'UnsafePointer<Int8>' ('const uint8_t *')
@@ -300,7 +306,7 @@ struct CdeclLowering {
 
     case .tuple(let tuple):
       if tuple.count == 1 {
-        return try lowerParameter(tuple[0], convention: convention, parameterName: parameterName)
+        return try lowerParameter(tuple[0], convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
       }
       if convention == .inout {
         throw LoweringError.inoutNotSupported(type)
@@ -310,7 +316,7 @@ struct CdeclLowering {
       for (idx, element) in tuple.enumerated() {
         // FIXME: Use tuple element label.
         let cdeclName = "\(parameterName)_\(idx)"
-        let lowered = try lowerParameter(element, convention: convention, parameterName: cdeclName)
+        let lowered = try lowerParameter(element, convention: convention, parameterName: cdeclName, genericParameters: genericParameters, genericRequirements: genericRequirements)
 
         parameters.append(contentsOf: lowered.cdeclParameters)
         conversions.append(lowered.conversion)
@@ -330,20 +336,14 @@ struct CdeclLowering {
         conversion: conversion
       )
 
-    case .opaque(let proto), .existential(let proto):
-      // If the protocol has a known representative implementation, e.g. `String` for `StringProtocol`
-      // Translate it as the concrete type.
-      // NOTE: This is a temporary workaround until we add support for generics.
-      if
-        let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
-        let concreteTy = knownTypes.representativeType(of: knownProtocol)
-      {
-        return try lowerParameter(concreteTy, convention: convention, parameterName: parameterName)
+    case .opaque, .existential, .genericParameter:
+      if let concreteTy = type.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
+        return try lowerParameter(concreteTy, convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
       }
       throw LoweringError.unhandledType(type)
 
     case .optional(let wrapped):
-      return try lowerOptionalParameter(wrapped, convention: convention, parameterName: parameterName)
+      return try lowerOptionalParameter(wrapped, convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
     }
   }
 
@@ -354,7 +354,9 @@ struct CdeclLowering {
   func lowerOptionalParameter(
     _ wrappedType: SwiftType,
     convention: SwiftParameterConvention,
-    parameterName: String
+    parameterName: String,
+    genericParameters: [SwiftGenericParameterDeclaration],
+    genericRequirements: [SwiftGenericRequirement]
   ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, lower it to 'UnsafePointer<T>?'
     if let _ = try? CType(cdeclType: wrappedType) {
@@ -398,18 +400,15 @@ struct CdeclLowering {
         conversion: .pointee(.typedPointer(.optionalChain(.placeholder), swiftType: wrappedType))
       )
 
-    case .existential(let proto), .opaque(let proto):
-      if
-        let knownProtocol = proto.asNominalTypeDeclaration?.knownTypeKind,
-        let concreteTy = knownTypes.representativeType(of: knownProtocol)
-      {
-        return try lowerOptionalParameter(concreteTy, convention: convention, parameterName: parameterName)
+    case .existential, .opaque, .genericParameter:
+      if let concreteTy = wrappedType.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
+        return try lowerOptionalParameter(concreteTy, convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
       
     case .tuple(let tuple):
       if tuple.count == 1 {
-        return try lowerOptionalParameter(tuple[0], convention: convention, parameterName: parameterName)
+        return try lowerOptionalParameter(tuple[0], convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
 
@@ -514,7 +513,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .function, .metatype, .optional, .tuple, .existential, .opaque:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -668,7 +667,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName)
       )
 
-    case .function, .optional, .existential, .opaque:
+    case .genericParameter, .function, .optional, .existential, .opaque:
       throw LoweringError.unhandledType(type)
     }
   }
@@ -754,7 +753,9 @@ public struct LoweredFunctionSignature: Equatable {
       selfParameter: nil,
       parameters: allLoweredParameters,
       result: SwiftResult(convention: .direct, type: result.cdeclResultType),
-      effectSpecifiers: []
+      effectSpecifiers: [],
+      genericParameters: [],
+      genericRequirements: []
     )
   }
 }

@@ -38,7 +38,7 @@ extension FFMSwift2JavaGenerator {
     let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
     let moduleFilename = "\(moduleFilenameBase).swift"
     do {
-      log.info("Printing contents: \(moduleFilename)")
+      log.debug("Printing contents: \(moduleFilename)")
 
       try printGlobalSwiftThunkSources(&printer)
 
@@ -58,7 +58,7 @@ extension FFMSwift2JavaGenerator {
     for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
       let filename = "\(fileNameBase).swift"
-      log.info("Printing contents: \(filename)")
+      log.debug("Printing contents: \(filename)")
 
       do {
         try printSwiftThunkSources(&printer, ty: ty)
@@ -125,7 +125,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printSwiftThunkImports(_ printer: inout CodePrinter) {
-    for module in self.symbolTable.importedModules.keys.sorted() {
+    for module in self.lookupContext.symbolTable.importedModules.keys.sorted() {
       guard module != "Swift" else {
         continue
       }

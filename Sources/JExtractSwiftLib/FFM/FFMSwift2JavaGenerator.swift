@@ -15,16 +15,18 @@
 import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import JavaKitConfigurationShared
 import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let log: Logger
+  let config: Configuration
   let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
-  let symbolTable: SwiftSymbolTable
+  let lookupContext: SwiftTypeLookupContext
 
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
@@ -40,18 +42,20 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   var expectedOutputSwiftFiles: Set<String>
 
   package init(
+    config: Configuration,
     translator: Swift2JavaTranslator,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String
   ) {
     self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
+    self.config = config
     self.analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
-    self.symbolTable = translator.symbolTable
+    self.lookupContext = translator.lookupContext
 
     // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {
@@ -96,7 +100,9 @@ extension FFMSwift2JavaGenerator {
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.ffm.*",
-    "org.swift.swiftkit.ffm.SwiftRuntime",
+
+    // NonNull, Unsigned and friends
+    "org.swift.swiftkit.core.annotations.*",
 
     // Necessary for native calls and type mapping
     "java.lang.foreign.*",
@@ -120,7 +126,7 @@ extension FFMSwift2JavaGenerator {
   package func writeExportedJavaSources(printer: inout CodePrinter) throws {
     for (_, ty) in analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
       let filename = "\(ty.swiftNominal.name).java"
-      log.info("Printing contents: \(filename)")
+      log.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
 
       if let outputFile = try printer.writeContents(
@@ -134,7 +140,7 @@ extension FFMSwift2JavaGenerator {
 
     do {
       let filename = "\(self.swiftModuleName).java"
-      log.info("Printing contents: \(filename)")
+      log.debug("Printing contents: \(filename)")
       printModule(&printer)
 
       if let outputFile = try printer.writeContents(
@@ -178,7 +184,7 @@ extension FFMSwift2JavaGenerator {
   func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
-    printImports(&printer)
+    printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
 
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,
