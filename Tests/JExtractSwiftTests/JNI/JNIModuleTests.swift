@@ -43,6 +43,10 @@ struct JNIModuleTests {
 
       package com.example.swift;
 
+      import org.swift.swiftkit.core.*;
+      import org.swift.swiftkit.core.util.*;
+      import org.swift.swiftkit.core.annotations.*;
+
       public final class SwiftModule {
         static final String LIB_NAME = "SwiftModule";
       
@@ -81,6 +85,7 @@ struct JNIModuleTests {
           * public func takeIntegers(i1: Int8, i2: Int16, i3: Int32, i4: Int64) -> UInt16
           * }
           */
+        @Unsigned
         public static char takeIntegers(byte i1, short i2, int i3, long i4) {
           return SwiftModule.$takeIntegers(i1, i2, i3, i4);
         }

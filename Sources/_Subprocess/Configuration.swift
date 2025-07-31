@@ -40,7 +40,7 @@ public struct Configuration: Sendable {
     public var environment: Environment
     /// The working directory to use when running the executable.
     public var workingDirectory: FilePath
-    /// The platform specifc options to use when
+    /// The platform specific options to use when
     /// running the subprocess.
     public var platformOptions: PlatformOptions
 

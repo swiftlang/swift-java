@@ -13,10 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import JavaKitConfigurationShared
 
 extension JNISwift2JavaGenerator {
   
   struct NativeJavaTranslation {
+    let config: Configuration
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
 
@@ -70,7 +72,8 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
           }
 
@@ -140,7 +143,8 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
           }
 
@@ -172,7 +176,8 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
           }
 
@@ -198,7 +203,10 @@ extension JNISwift2JavaGenerator {
       switch swiftResult.type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType), javaType.implementsJavaValue else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+          }
+          guard javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
           }
 

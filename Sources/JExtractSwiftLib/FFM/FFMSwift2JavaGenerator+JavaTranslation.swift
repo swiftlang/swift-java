@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import JavaKitConfigurationShared
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(
@@ -24,7 +25,9 @@ extension FFMSwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable))
+      let translation = JavaTranslation(
+        config: self.config,
+        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable))
       translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -51,6 +54,9 @@ extension FFMSwift2JavaGenerator {
   struct TranslatedResult {
     /// Java type that represents the Swift result type.
     var javaResultType: JavaType
+
+    /// Java annotations that should be propagated from the result type onto the method
+    var annotations: [JavaAnnotation] = []
 
     /// Required indirect return receivers for receiving the result.
     ///
@@ -85,8 +91,13 @@ extension FFMSwift2JavaGenerator {
     /// Function signature.
     let translatedSignature: TranslatedFunctionSignature
 
-    /// Cdecl lowerd signature.
+    /// Cdecl lowered signature.
     let loweredSignature: LoweredFunctionSignature
+
+    /// Annotations to include on the Java function declaration
+    var annotations: [JavaAnnotation] {
+      self.translatedSignature.annotations
+    }
   }
 
   /// Function signature for a Java API.
@@ -94,6 +105,12 @@ extension FFMSwift2JavaGenerator {
     var selfParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
+
+    // if the result type implied any annotations,
+    // propagate them onto the function the result is returned from
+    var annotations: [JavaAnnotation] {
+      self.result.annotations
+    }
   }
 
   /// Represent a Swift closure type in the user facing Java API.
@@ -113,15 +130,15 @@ extension FFMSwift2JavaGenerator {
   }
 
   struct JavaTranslation {
+    let config: Configuration
     var knownTypes: SwiftKnownTypes
 
-    init(knownTypes: SwiftKnownTypes) {
+    init(config: Configuration, knownTypes: SwiftKnownTypes) {
+      self.config = config
       self.knownTypes = knownTypes
     }
 
-    func translate(
-      _ decl: ImportedFunc
-    ) throws -> TranslatedFunctionDecl {
+    func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
       let lowering = CdeclLowering(knownTypes: knownTypes)
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
@@ -303,6 +320,18 @@ extension FFMSwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
+      // If the result type should cause any annotations on the method, include them here.
+      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+
+      // If we need to handle unsigned integers do so here
+      if config.effectiveUnsignedNumbersMode.needsConversion {
+        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) {
+          return TranslatedParameter(
+            javaParameters: [
+              JavaParameter(name: parameterName, type: unsignedWrapperType, annotations: parameterAnnotations)
+            ], conversion: .call(.placeholder, function: "UnsignedNumbers.toPrimitive", withArena: false))
+        }
+      }
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
@@ -311,8 +340,9 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              name: parameterName, type: javaType
-            )
+              name: parameterName,
+              type: javaType,
+              annotations: parameterAnnotations)
           ],
           conversion: .placeholder
         )
@@ -324,7 +354,10 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              name: parameterName, type: JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType"))
+              name: parameterName,
+              type: JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType"),
+              annotations: parameterAnnotations
+            )
           ],
           conversion: .swiftValueSelfSegment(.placeholder)
         )
@@ -524,6 +557,37 @@ extension FFMSwift2JavaGenerator {
       }
     }
 
+    func unsignedResultConversion(_ from: SwiftType, to javaType: JavaType,
+                                  mode: JExtractUnsignedIntegerMode) -> JavaConversionStep {
+      switch mode {
+      case .annotate:
+        return .placeholder // no conversions
+
+      case .wrapGuava:
+        guard let typeName = javaType.fullyQualifiedClassName else {
+          fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
+        }
+
+        switch from {
+        case .nominal(let nominal):
+         switch nominal.nominalTypeDecl.knownTypeKind {
+         case .uint8:
+           return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
+         case .uint16:
+           return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
+         case .uint32:
+           return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
+         case .uint64:
+           return .call(.placeholder, function: "\(typeName).fromLongBits", withArena: false)
+         default:
+           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+         }
+         default:
+           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
+        }
+      }
+    }
+
     /// Translate a Swift API result to the user-facing Java API result.
     func translate(
       swiftResult: SwiftResult,
@@ -531,12 +595,29 @@ extension FFMSwift2JavaGenerator {
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
 
+      // If we need to handle unsigned integers do so here
+      if config.effectiveUnsignedNumbersMode.needsConversion {
+        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
+          return TranslatedResult(
+            javaResultType: unsignedWrapperType,
+            outParameters: [],
+            conversion: unsignedResultConversion(
+                swiftType, to: unsignedWrapperType,
+                mode: self.config.effectiveUnsignedNumbersMode)
+          )
+        }
+      }
+
+      // If the result type should cause any annotations on the method, include them here.
+      let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
         let javaType = cType.javaType
         return TranslatedResult(
           javaResultType: javaType,
+          annotations: resultAnnotations,
           outParameters: [],
           conversion: .placeholder
         )
@@ -548,6 +629,7 @@ extension FFMSwift2JavaGenerator {
         let javaType = JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType")
         return TranslatedResult(
           javaResultType: javaType,
+          annotations: resultAnnotations,
           outParameters: [],
           conversion: .construct(.placeholder, javaType)
         )
@@ -558,6 +640,7 @@ extension FFMSwift2JavaGenerator {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedResult(
               javaResultType: .javaForeignMemorySegment,
+              annotations: resultAnnotations,
               outParameters: [
                 JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
                 JavaParameter(name: "count", type: .long),
@@ -597,6 +680,7 @@ extension FFMSwift2JavaGenerator {
         let javaType: JavaType = .class(package: nil, name: swiftNominalType.nominalTypeDecl.name)
         return TranslatedResult(
           javaResultType: javaType,
+          annotations: resultAnnotations,
           outParameters: [
             JavaParameter(name: "", type: javaType)
           ],
@@ -702,7 +786,7 @@ extension CType {
     case .integral(.signed(bits: 32)): return .int
     case .integral(.signed(bits: 64)): return .long
     case .integral(.unsigned(bits: 8)): return .byte
-    case .integral(.unsigned(bits: 16)): return .short
+    case .integral(.unsigned(bits: 16)): return .char // char is Java's only unsigned primitive, we can use it!
     case .integral(.unsigned(bits: 32)): return .int
     case .integral(.unsigned(bits: 64)): return .long
 
@@ -739,10 +823,10 @@ extension CType {
     case .integral(.signed(bits: 32)): return .SwiftInt32
     case .integral(.signed(bits: 64)): return .SwiftInt64
 
-    case .integral(.unsigned(bits: 8)): return .SwiftInt8
-    case .integral(.unsigned(bits: 16)): return .SwiftInt16
-    case .integral(.unsigned(bits: 32)): return .SwiftInt32
-    case .integral(.unsigned(bits: 64)): return .SwiftInt64
+    case .integral(.unsigned(bits: 8)): return .SwiftUInt8
+    case .integral(.unsigned(bits: 16)): return .SwiftUInt16
+    case .integral(.unsigned(bits: 32)): return .SwiftUInt32
+    case .integral(.unsigned(bits: 64)): return .SwiftUInt64
 
     case .floating(.double): return .SwiftDouble
     case .floating(.float): return .SwiftFloat

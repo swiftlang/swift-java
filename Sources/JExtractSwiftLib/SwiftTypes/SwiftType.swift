@@ -92,6 +92,17 @@ enum SwiftType: Equatable {
       return false
     }
   }
+
+  var isUnsignedInteger: Bool {
+    switch self {
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .uint8, .uint16, .uint32, .uint64: true
+      default: false
+      }
+    default: false
+    }
+  }
 }
 
 extension SwiftType: CustomStringConvertible {

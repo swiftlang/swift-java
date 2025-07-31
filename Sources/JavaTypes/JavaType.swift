@@ -13,13 +13,15 @@
 //===----------------------------------------------------------------------===//
 
 /// Describes the Java type system.
+///
+/// Some types may need to be annotated when in parameter position,
 public enum JavaType: Equatable, Hashable {
   case boolean
-  case byte
-  case char
-  case short
-  case int
-  case long
+  case byte(parameterAnnotations: [JavaAnnotation])
+  case char(parameterAnnotations: [JavaAnnotation])
+  case short(parameterAnnotations: [JavaAnnotation])
+  case int(parameterAnnotations: [JavaAnnotation])
+  case long(parameterAnnotations: [JavaAnnotation])
   case float
   case double
   case void
@@ -30,6 +32,12 @@ public enum JavaType: Equatable, Hashable {
 
   /// A Java array.
   indirect case array(JavaType)
+
+  public static var byte: JavaType { .byte(parameterAnnotations: []) }
+  public static var char: JavaType { .char(parameterAnnotations: []) }
+  public static var short: JavaType { .short(parameterAnnotations: []) }
+  public static var int: JavaType { .int(parameterAnnotations: []) }
+  public static var long: JavaType { .long(parameterAnnotations: []) }
 
   /// Given a class name such as "java.lang.Object", split it into
   /// its package and class name to form a class instance.
@@ -46,6 +54,21 @@ public enum JavaType: Equatable, Hashable {
 }
 
 extension JavaType {
+  /// List of Java annotations this type should have include in parameter position,
+  /// e.g. `void example(@Unsigned long num)`
+  public var parameterAnnotations: [JavaAnnotation] {
+    switch self {
+    case .byte(let parameterAnnotations): return parameterAnnotations
+    case .char(let parameterAnnotations): return parameterAnnotations
+    case .short(let parameterAnnotations): return parameterAnnotations
+    case .int(let parameterAnnotations): return parameterAnnotations
+    case .long(let parameterAnnotations): return parameterAnnotations
+    default: return []
+    }
+  }
+}
+
+extension JavaType {
   /// Whether this is a primitive Java type.
   public var isPrimitive: Bool {
     switch self {
@@ -57,3 +80,4 @@ extension JavaType {
     }
   }
 }
+

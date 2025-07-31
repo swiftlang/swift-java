@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import JavaKitConfigurationShared
 
 extension JNISwift2JavaGenerator {
   func translatedDecl(
@@ -25,6 +26,7 @@ extension JNISwift2JavaGenerator {
     let translated: TranslatedFunctionDecl?
     do {
       let translation = JavaTranslation(
+        config: config,
         swiftModuleName: swiftModuleName,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable
@@ -40,12 +42,14 @@ extension JNISwift2JavaGenerator {
   }
 
   struct JavaTranslation {
+    let config: Configuration
     let swiftModuleName: String
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
       let nativeTranslation = NativeJavaTranslation(
+        config: self.config,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable
       )
@@ -117,12 +121,12 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let transltedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType))
+      let translatedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType))
 
       return TranslatedFunctionType(
         name: name,
         parameters: translatedParams,
-        result: transltedResult,
+        result: translatedResult,
         swiftType: swiftType
       )
     }
@@ -150,10 +154,12 @@ extension JNISwift2JavaGenerator {
         selfParameter = nil
       }
 
-      return try TranslatedFunctionSignature(
+      let resultType = try translate(swiftResult: functionSignature.result)
+
+      return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
-        resultType: translate(swiftResult: functionSignature.result)
+        resultType: resultType
       )
     }
 
@@ -163,17 +169,33 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: String
     ) throws -> TranslatedParameter {
+
+      // If the result type should cause any annotations on the method, include them here.
+      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+
+      // If we need to handle unsigned integers do so here
+      if config.effectiveUnsignedNumbersMode.needsConversion {
+        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) {
+          return TranslatedParameter(
+            parameter: JavaParameter(name: parameterName, type: unsignedWrapperType, annotations: parameterAnnotations),
+            conversion: unsignedResultConversion(
+                swiftType, to: unsignedWrapperType,
+                mode: self.config.effectiveUnsignedNumbersMode)
+          )
+        }
+      }
+
       switch swiftType {
       case .nominal(let nominalType):
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
             throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
           return TranslatedParameter(
-            parameter: JavaParameter(name: parameterName, type: javaType),
+            parameter: JavaParameter(name: parameterName, type: javaType, annotations: parameterAnnotations),
             conversion: .placeholder
           )
         }
@@ -184,10 +206,7 @@ extension JNISwift2JavaGenerator {
           }
 
           return TranslatedParameter(
-            parameter: JavaParameter(
-              name: parameterName,
-              type: javaType
-            ),
+            parameter: JavaParameter(name: parameterName, type: javaType, annotations: parameterAnnotations),
             conversion: .placeholder
           )
         }
@@ -196,14 +215,15 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: nil, name: nominalTypeName)
+            type: .class(package: nil, name: nominalTypeName),
+            annotations: parameterAnnotations
           ),
           conversion: .valueMemoryAddress(.placeholder)
         )
 
       case .tuple([]):
         return TranslatedParameter(
-          parameter: JavaParameter(name: parameterName, type: .void),
+          parameter: JavaParameter(name: parameterName, type: .void, annotations: parameterAnnotations),
           conversion: .placeholder
         )
 
@@ -211,7 +231,8 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)")
+            type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
+            annotations: parameterAnnotations
           ),
           conversion: .placeholder
         )
@@ -221,30 +242,46 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(
-      swiftResult: SwiftResult
-    ) throws -> TranslatedResult {
-      switch swiftResult.type {
+    func unsignedResultConversion(_ from: SwiftType, to javaType: JavaType,
+                                  mode: JExtractUnsignedIntegerMode) -> JavaNativeConversionStep {
+      switch mode {
+      case .annotate:
+        return .placeholder // no conversions
+
+      case .wrapGuava:
+        fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
+      }
+    }
+
+    func translate(swiftResult: SwiftResult) throws -> TranslatedResult {
+      let swiftType = swiftResult.type
+
+      // If the result type should cause any annotations on the method, include them here.
+      let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+
+      switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNISwift2JavaGenerator.translate(knownType: knownType) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
 
           return TranslatedResult(
             javaType: javaType,
+            annotations: resultAnnotations,
             conversion: .placeholder
           )
         }
 
         if nominalType.isJavaKitWrapper {
-          throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
         // We assume this is a JExtract class.
         let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.name)
         return TranslatedResult(
           javaType: javaType,
+          annotations: resultAnnotations,
           conversion: .constructSwiftValue(.placeholder, javaType)
         )
 
@@ -252,7 +289,7 @@ extension JNISwift2JavaGenerator {
         return TranslatedResult(javaType: .void, conversion: .placeholder)
 
       case .metatype, .optional, .tuple, .function, .existential, .opaque, .genericParameter:
-        throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
   }
@@ -275,33 +312,23 @@ extension JNISwift2JavaGenerator {
 
     /// Function signature of the native function that will be implemented by Swift
     let nativeFunctionSignature: NativeFunctionSignature
-  }
 
-  static func translate(knownType: SwiftKnownTypeDeclKind) -> JavaType? {
-    switch knownType {
-    case .bool: .boolean
-    case .int8: .byte
-    case .uint16: .char
-    case .int16: .short
-    case .int32: .int
-    case .int64: .long
-    case .float: .float
-    case .double: .double
-    case .void: .void
-    case .string: .javaLangString
-    case .int, .uint, .uint8, .uint32, .uint64,
-        .unsafeRawPointer, .unsafeMutableRawPointer,
-        .unsafePointer, .unsafeMutablePointer,
-        .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-        .unsafeBufferPointer, .unsafeMutableBufferPointer, .optional, .data, .dataProtocol:
-      nil
+    /// Annotations to include on the Java function declaration
+    var annotations: [JavaAnnotation] {
+      self.translatedFunctionSignature.annotations
     }
   }
 
   struct TranslatedFunctionSignature {
-    let selfParameter: TranslatedParameter?
-    let parameters: [TranslatedParameter]
-    let resultType: TranslatedResult
+    var selfParameter: TranslatedParameter?
+    var parameters: [TranslatedParameter]
+    var resultType: TranslatedResult
+
+    // if the result type implied any annotations,
+    // propagate them onto the function the result is returned from
+    var annotations: [JavaAnnotation] {
+      self.resultType.annotations
+    }
 
     var requiresSwiftArena: Bool {
       return self.resultType.conversion.requiresSwiftArena
@@ -317,6 +344,9 @@ extension JNISwift2JavaGenerator {
   /// Represent a Swift API result translated to Java.
   struct TranslatedResult {
     let javaType: JavaType
+
+    /// Java annotations that should be propagated from the result type onto the method
+    var annotations: [JavaAnnotation] = []
 
     /// Represents how to convert the Java native result into a user-facing result.
     let conversion: JavaNativeConversionStep
@@ -343,6 +373,8 @@ extension JNISwift2JavaGenerator {
     /// Call `new \(Type)(\(placeholder), swiftArena$)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
 
+    indirect case call(JavaNativeConversionStep, function: String)
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -350,14 +382,18 @@ extension JNISwift2JavaGenerator {
       switch self {
       case .placeholder:
         return placeholder
-        
+
       case .valueMemoryAddress:
         return "\(placeholder).$memoryAddress()"
-        
+
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "new \(javaType.className!)(\(inner), swiftArena$)"
-        
+
+      case .call(let inner, let function):
+        let inner = inner.render(&printer, placeholder)
+        return "\(function)(\(inner))"
+
       }
     }
 
@@ -372,12 +408,18 @@ extension JNISwift2JavaGenerator {
 
       case .valueMemoryAddress(let inner):
         return inner.requiresSwiftArena
+
+      case .call(let inner, _):
+      return inner.requiresSwiftArena
       }
     }
   }
 
   enum JavaTranslationError: Error {
-    case unsupportedSwiftType(SwiftType)
+    case unsupportedSwiftType(SwiftType, fileID: String, line: Int)
+    static func unsupportedSwiftType(_ type: SwiftType, _fileID: String = #fileID, _line: Int = #line) -> JavaTranslationError {
+      .unsupportedSwiftType(type, fileID: _fileID, line: _line)
+    }
 
     /// The user has not supplied a mapping from `SwiftType` to
     /// a java class.

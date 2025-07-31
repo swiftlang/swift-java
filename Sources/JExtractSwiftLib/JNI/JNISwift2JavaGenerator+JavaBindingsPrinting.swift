@@ -20,6 +20,9 @@ extension JNISwift2JavaGenerator {
   static let defaultJavaImports: Array<String> = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
+
+    // NonNull, Unsigned and friends
+    "org.swift.swiftkit.core.annotations.*",
   ]
 }
 
@@ -32,9 +35,11 @@ extension JNISwift2JavaGenerator {
   }
 
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
-    for (_, ty) in analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
+    let importedTypes = analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key })
+
+    for (_, ty) in importedTypes {
       let filename = "\(ty.swiftNominal.name).java"
-      logger.info("Printing contents: \(filename)")
+      logger.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
 
       if let outputFile = try printer.writeContents(
@@ -62,6 +67,7 @@ extension JNISwift2JavaGenerator {
   private func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)
     printPackage(&printer)
+    printImports(&printer)
 
     printModuleClass(&printer) { printer in
       printer.print(
@@ -81,6 +87,7 @@ extension JNISwift2JavaGenerator {
       }
 
       for decl in analysis.importedGlobalVariables {
+        self.logger.trace("Print global variable: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
         printer.println()
       }
@@ -219,7 +226,7 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ functionType: TranslatedFunctionType
   ) {
-    let apiParams = functionType.parameters.map(\.parameter.asParameter)
+    let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
 
     printer.print(
         """
@@ -243,18 +250,21 @@ extension JNISwift2JavaGenerator {
 
     let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.asParameter)
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map({ $0.parameter.renderParameter() })
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }
     let throwsClause = decl.isThrowing ? " throws Exception" : ""
+
+    var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
+    if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
     let modifiersStr = modifiers.joined(separator: " ")
     let parametersStr = parameters.joined(separator: ", ")
 
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
-      "\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      "\(annotationsStr)\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
     ) { printer in
       printDowncall(&printer, decl)
     }
