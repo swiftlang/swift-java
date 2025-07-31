@@ -152,14 +152,4 @@ public class MySwiftClassTest {
             assertEquals(70, c1.addXWithJavaLong(javaLong));
         }
     }
-
-//    @Test
-//    void optionalMethodClass() {
-//        try (var arena = new ConfinedSwiftMemorySession()) {
-//            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-//            MySwiftClass c2 = MySwiftClass.init(50, 10, arena);
-//            assertFalse(c1.optionalMethodClass(Optional.empty()));
-//            assertTrue(c1.optionalMethodClass(Optional.of(c2)));
-//        }
-//    }
 }

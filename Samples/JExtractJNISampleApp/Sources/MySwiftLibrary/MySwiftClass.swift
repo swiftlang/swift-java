@@ -90,12 +90,4 @@ public class MySwiftClass {
   public func addXWithJavaLong(_ other: JavaLong) -> Int64 {
     return self.x + other.longValue()
   }
-
-//   public func optionalMethodClass(input: MySwiftClass?) -> <Optional<MySwiftClass>> {
-//     if let input {
-//       return MySwiftClass(x: input.x * 10, y: input.y * 10)
-//     } else {
-//       return nil
-//     }
-//   }
 }

@@ -372,13 +372,4 @@ extension JNISwift2JavaGenerator {
       )
     }
   }
-
-  private func renderIndirectReturnAllocation(for javaType: JavaType) -> String {
-    switch javaType {
-    case .array(let nested):
-      "new byte[]"
-    default:
-      fatalError("renderIndirectReturnAllocation not supported for \(javaType)")
-    }
-  }
 }
