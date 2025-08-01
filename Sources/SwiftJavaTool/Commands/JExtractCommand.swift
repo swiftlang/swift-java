@@ -86,10 +86,7 @@ extension SwiftJava.JExtractCommand {
     config.writeEmptyFiles = writeEmptyFiles
     config.unsignedNumbersMode = unsignedNumbers
 
-    guard checkModeCompatibility() else {
-      // check would have logged the reason for early exit.
-      return
-    }
+    try checkModeCompatibility()
 
     if let inputSwift = commonOptions.inputSwift {
       config.inputSwiftDirectory = inputSwift
@@ -108,18 +105,15 @@ extension SwiftJava.JExtractCommand {
   }
 
   /// Check if the configured modes are compatible, and fail if not
-  func checkModeCompatibility() -> Bool {
+  func checkModeCompatibility() throws {
     if self.mode == .jni {
       switch self.unsignedNumbers {
       case .annotate:
-        print("Error: JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
-        return false
+        throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
       case .wrapGuava:
         () // OK
       }
     }
-
-    return true
   }
 }
 
@@ -138,6 +132,13 @@ extension SwiftJava.JExtractCommand {
     try SwiftToJava(config: config, dependentConfigs: dependentConfigs).run()
   }
 
+}
+
+struct IllegalModeCombinationError: Error {
+  let message: String
+  init(_ message: String) {
+    self.message = message
+  }
 }
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
