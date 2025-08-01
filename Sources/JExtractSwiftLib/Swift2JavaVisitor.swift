@@ -15,9 +15,13 @@
 import Foundation
 import SwiftParser
 import SwiftSyntax
+import JavaKitConfigurationShared
 
 final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator
+  var config: Configuration {
+    self.translator.config
+  }
 
   init(translator: Swift2JavaTranslator) {
     self.translator = translator
@@ -48,7 +52,7 @@ final class Swift2JavaVisitor {
     case .extensionDecl(let node):
       self.visit(extensionDecl: node, in: parent)
     case .typeAliasDecl:
-      break // TODO: Implement
+      break // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
     case .associatedTypeDecl:
       break // TODO: Implement
 
@@ -93,7 +97,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(functionDecl node: FunctionDeclSyntax, in typeContext: ImportedNominalType?) {
-    guard node.shouldImport(log: log) else {
+    guard node.shouldExtract(config: config, log: log) else {
       return
     }
 
@@ -128,7 +132,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(variableDecl node: VariableDeclSyntax, in typeContext: ImportedNominalType?) {
-    guard node.shouldImport(log: log) else {
+    guard node.shouldExtract(config: config, log: log) else {
       return
     }
 
@@ -182,7 +186,7 @@ final class Swift2JavaVisitor {
       self.log.info("Initializer must be within a current type; \(node)")
       return
     }
-    guard node.shouldImport(log: log) else {
+    guard node.shouldExtract(config: config, log: log) else {
       return
     }
 
@@ -212,13 +216,20 @@ final class Swift2JavaVisitor {
 }
 
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
-  func shouldImport(log: Logger) -> Bool {
-    guard accessControlModifiers.contains(where: { $0.isPublic }) else {
-      log.trace("Skip import '\(self.qualifiedNameForDebug)': not public")
+  func shouldExtract(config: Configuration, log: Logger) -> Bool {
+    let meetsRequiredAccessLevel: Bool =
+      switch config.effectiveMinimumInputAccessLevelMode {
+      case .public: self.isPublic
+      case .package: self.isAtLeastPackage
+      case .internal: self.isAtLeastInternal
+      }
+
+    guard meetsRequiredAccessLevel else {
+      log.debug("Skip import '\(self.qualifiedNameForDebug)': not at least \(config.effectiveMinimumInputAccessLevelMode)")
       return false
     }
     guard !attributes.contains(where: { $0.isJava }) else {
-      log.trace("Skip import '\(self.qualifiedNameForDebug)': is Java")
+      log.debug("Skip import '\(self.qualifiedNameForDebug)': is Java")
       return false
     }
 

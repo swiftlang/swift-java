@@ -27,6 +27,23 @@ public struct Logger {
     self.logLevel = logLevel
   }
 
+  public func error(
+    _ message: @autoclosure () -> String,
+    metadata: [String: Any] = [:],
+    file: String = #fileID,
+    line: UInt = #line,
+    function: String = #function
+  ) {
+    guard logLevel <= .error else {
+      return
+    }
+
+    let metadataString: String =
+      if metadata.isEmpty { "" } else { "\(metadata)" }
+
+    print("[error][\(file):\(line)](\(function)) \(message()) \(metadataString)")
+  }
+
   public func warning(
     _ message: @autoclosure () -> String,
     metadata: [String: Any] = [:],

@@ -64,6 +64,9 @@ extension SwiftJava {
     @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrap-guava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
     var unsignedNumbers: JExtractUnsignedIntegerMode = .default
 
+    @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
+    var minimumInputAccessLevel: JExtractMinimumAccessLevelMode = .default
+
     @Option(
       help: """
             A swift-java configuration file for a given Swift module name on which this module depends,
@@ -85,6 +88,7 @@ extension SwiftJava.JExtractCommand {
     config.outputSwiftDirectory = outputSwift
     config.writeEmptyFiles = writeEmptyFiles
     config.unsignedNumbersMode = unsignedNumbers
+    config.minimumInputAccessLevelMode = minimumInputAccessLevel
 
     try checkModeCompatibility()
 
@@ -143,3 +147,4 @@ struct IllegalModeCombinationError: Error {
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
 extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
+extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
