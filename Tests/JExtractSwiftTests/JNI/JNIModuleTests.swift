@@ -45,6 +45,7 @@ struct JNIModuleTests {
 
       import org.swift.swiftkit.core.*;
       import org.swift.swiftkit.core.util.*;
+      import java.util.*;
       import org.swift.swiftkit.core.annotations.*;
 
       public final class SwiftModule {
@@ -176,7 +177,7 @@ struct JNIModuleTests {
       expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2")
-          func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring) -> jstring {
+          func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
             return SwiftModule.copy(String(fromJNI: string, in: environment!)).getJNIValue(in: environment!)
           }
           """,
