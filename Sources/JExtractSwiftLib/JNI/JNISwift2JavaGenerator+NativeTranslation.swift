@@ -378,7 +378,7 @@ extension JNISwift2JavaGenerator {
             guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
-            return try translateOptionalResult(wrappedType: swiftResult.type)
+            return try translateOptionalResult(wrappedType: genericArgs[0])
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
