@@ -72,16 +72,30 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-              javaType.implementsJavaValue else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+            }
+            return try translateOptionalParameter(
+              wrappedType: genericArgs[0],
+              parameterName: parameterName
+            )
 
-          return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
-            conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
-          )
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                  javaType.implementsJavaValue else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+            }
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: javaType)
+              ],
+              conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
+            )
+
+          }
         }
 
         if nominalType.isJavaKitWrapper {
@@ -90,23 +104,33 @@ extension JNISwift2JavaGenerator {
           }
 
           return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
-            conversion: .initializeJavaKitWrapper(wrapperName: nominalTypeName)
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
+            conversion: .initializeJavaKitWrapper(
+              .unwrapOptional(
+                .placeholder,
+                name: parameterName,
+                fatalErrorMessage: "\(parameterName) was null in call to \\(#function), but Swift requires non-optional!"
+              ),
+              wrapperName: nominalTypeName
+            )
           )
         }
 
         // JExtract classes are passed as the pointer.
         return NativeParameter(
-          name: parameterName,
-          javaType: .long,
+          parameters: [
+            JavaParameter(name: parameterName, type: .long)
+          ],
           conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
         )
 
       case .tuple([]):
         return NativeParameter(
-          name: parameterName,
-          javaType: .void,
+          parameters: [
+            JavaParameter(name: parameterName, type: .void)
+          ],
           conversion: .placeholder
         )
 
@@ -124,16 +148,159 @@ extension JNISwift2JavaGenerator {
         let result = try translateClosureResult(fn.resultType)
 
         return NativeParameter(
-          name: parameterName,
-          javaType: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
+          parameters: [
+            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+          ],
           conversion: .closureLowering(
             parameters: parameters,
             result: result
           )
         )
 
-      case .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
+      case .optional(let wrapped):
+        return try translateOptionalParameter(
+          wrappedType: wrapped,
+          parameterName: parameterName
+        )
+
+      case .metatype, .tuple, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+      }
+    }
+
+    func translateOptionalParameter(
+      wrappedType swiftType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      let discriminatorName = "\(parameterName)_discriminator"
+      let valueName = "\(parameterName)_value"
+
+      switch swiftType {
+      case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: discriminatorName, type: .byte),
+              JavaParameter(name: valueName, type: javaType)
+            ],
+            conversion: .optionalLowering(
+              .initFromJNI(.placeholder, swiftType: swiftType),
+              discriminatorName: discriminatorName,
+              valueName: valueName
+            )
+          )
+        }
+
+        if nominalType.isJavaKitWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
+            conversion: .optionalMap(.initializeJavaKitWrapper(.placeholder, wrapperName: nominalTypeName))
+          )
+        }
+
+        // Assume JExtract wrapped class
+        return NativeParameter(
+          parameters: [JavaParameter(name: parameterName, type: .long)],
+          conversion: .pointee(
+            .optionalChain(
+              .extractSwiftValue(
+                .placeholder,
+                swiftType: swiftType,
+                allowNil: true
+              )
+            )
+          )
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
+    func translateOptionalResult(
+      wrappedType swiftType: SwiftType
+    ) throws -> NativeResult {
+      switch swiftType {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+
+          // Check if we can fit the value and a discriminator byte in a primitive.
+          // so the return JNI value will be (value, discriminator)
+          if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
+            return NativeResult(
+              javaType: nextIntergralTypeWithSpaceForByte.javaType,
+              conversion: .getJNIValue(
+                .optionalRaisingWidenIntegerType(
+                  .placeholder,
+                  valueType: javaType,
+                  combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
+                  valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
+                )
+              ),
+              outParameters: []
+            )
+          } else {
+            // Use indirect byte array to store discriminator
+            let discriminatorName = "result_discriminator$"
+
+            return NativeResult(
+              javaType: javaType,
+              conversion: .optionalRaisingIndirectReturn(
+                .getJNIValue(.placeholder),
+                returnType: javaType,
+                discriminatorParameterName: discriminatorName,
+                placeholderValue: .member(
+                  .constant("\(swiftType)"),
+                  member: "jniPlaceholderValue"
+                )
+              ),
+              outParameters: [
+                JavaParameter(name: discriminatorName, type: .array(.byte))
+              ]
+            )
+          }
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          // TODO: Should be the same as above
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+        // Assume JExtract imported class
+        let discriminatorName = "result_discriminator$"
+
+        return NativeResult(
+          javaType: .long,
+          conversion: .optionalRaisingIndirectReturn(
+            .getJNIValue(.allocateSwiftValue(name: "_result", swiftType: swiftType)),
+            returnType: .long,
+            discriminatorParameterName: discriminatorName,
+            placeholderValue: .constant("0")
+          ),
+          outParameters: [
+            JavaParameter(name: discriminatorName, type: .array(.byte))
+          ]
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
 
@@ -151,7 +318,8 @@ extension JNISwift2JavaGenerator {
           // Only support primitives for now.
           return NativeResult(
             javaType: javaType,
-            conversion: .initFromJNI(.placeholder, swiftType: type)
+            conversion: .initFromJNI(.placeholder, swiftType: type),
+            outParameters: []
           )
         }
 
@@ -161,7 +329,8 @@ extension JNISwift2JavaGenerator {
       case .tuple([]):
         return NativeResult(
           javaType: .void,
-          conversion: .placeholder
+          conversion: .placeholder,
+          outParameters: []
         )
 
       case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
@@ -183,8 +352,9 @@ extension JNISwift2JavaGenerator {
 
           // Only support primitives for now.
           return NativeParameter(
-            name: parameterName,
-            javaType: javaType,
+            parameters: [
+              JavaParameter(name: parameterName, type: javaType)
+            ],
             conversion: .getJValue(.placeholder)
           )
         }
@@ -203,17 +373,24 @@ extension JNISwift2JavaGenerator {
       switch swiftResult.type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
-          }
-          guard javaType.implementsJavaValue else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+            }
+            return try translateOptionalResult(wrappedType: genericArgs[0])
 
-          return NativeResult(
-            javaType: javaType,
-            conversion: .getJNIValue(.placeholder)
-          )
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+            }
+
+            return NativeResult(
+              javaType: javaType,
+              conversion: .getJNIValue(.placeholder),
+              outParameters: []
+            )
+          }
         }
 
         if nominalType.isJavaKitWrapper {
@@ -222,20 +399,23 @@ extension JNISwift2JavaGenerator {
 
         return NativeResult(
           javaType: .long,
-          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type))
+          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type)),
+          outParameters: []
         )
 
       case .tuple([]):
         return NativeResult(
           javaType: .void,
-          conversion: .placeholder
+          conversion: .placeholder,
+          outParameters: []
         )
 
-      case .metatype, .optional, .tuple, .function, .existential, .opaque, .genericParameter:
+      case .optional(let wrapped):
+        return try translateOptionalResult(wrappedType: wrapped)
+
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
-
-
     }
   }
 
@@ -246,12 +426,9 @@ extension JNISwift2JavaGenerator {
   }
 
   struct NativeParameter {
-    let name: String
-    let javaType: JavaType
-
-    var jniType: JNIType {
-      javaType.jniType
-    }
+    /// One Swift parameter can be lowered to multiple parameters.
+    /// E.g. 'Optional<Int>' as (descriptor, value) pair.
+    var parameters: [JavaParameter]
 
     /// Represents how to convert the JNI parameter to a Swift parameter
     let conversion: NativeSwiftConversionStep
@@ -260,12 +437,17 @@ extension JNISwift2JavaGenerator {
   struct NativeResult {
     let javaType: JavaType
     let conversion: NativeSwiftConversionStep
+
+    /// Out parameters for populating the indirect return values.
+    var outParameters: [JavaParameter]
   }
 
   /// Describes how to convert values between Java types and Swift through JNI
   enum NativeSwiftConversionStep {
     /// The value being converted
     case placeholder
+
+    case constant(String)
 
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
@@ -277,7 +459,11 @@ extension JNISwift2JavaGenerator {
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Extracts a swift type at a pointer given by a long.
-    indirect case extractSwiftValue(NativeSwiftConversionStep, swiftType: SwiftType)
+    indirect case extractSwiftValue(
+      NativeSwiftConversionStep,
+      swiftType: SwiftType,
+      allowNil: Bool = false
+    )
 
     /// Allocate memory for a Swift value and outputs the pointer
     case allocateSwiftValue(name: String, swiftType: SwiftType)
@@ -288,7 +474,23 @@ extension JNISwift2JavaGenerator {
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
-    case initializeJavaKitWrapper(wrapperName: String)
+    indirect case initializeJavaKitWrapper(NativeSwiftConversionStep, wrapperName: String)
+
+    indirect case optionalLowering(NativeSwiftConversionStep, discriminatorName: String, valueName: String)
+
+    indirect case optionalChain(NativeSwiftConversionStep)
+
+    indirect case optionalRaisingWidenIntegerType(NativeSwiftConversionStep, valueType: JavaType, combinedSwiftType: SwiftKnownTypeDeclKind, valueSizeInBytes: Int)
+
+    indirect case optionalRaisingIndirectReturn(NativeSwiftConversionStep, returnType: JavaType, discriminatorParameterName: String, placeholderValue: NativeSwiftConversionStep)
+
+    indirect case method(NativeSwiftConversionStep, function: String, arguments: [(String?, NativeSwiftConversionStep)] = [])
+
+    indirect case member(NativeSwiftConversionStep, member: String)
+
+    indirect case optionalMap(NativeSwiftConversionStep)
+
+    indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -297,6 +499,9 @@ extension JNISwift2JavaGenerator {
       switch self {
       case .placeholder:
         return placeholder
+
+      case .constant(let value):
+        return value
 
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
@@ -310,18 +515,28 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment!)"
 
-      case .extractSwiftValue(let inner, let swiftType):
+      case .extractSwiftValue(let inner, let swiftType, let allowNil):
         let inner = inner.render(&printer, placeholder)
+        let pointerName = "\(inner)$"
+        if !allowNil {
+          printer.print(#"assert(\#(inner) != 0, "\#(inner) memory address was null")"#)
+        }
         printer.print(
           """
-          assert(\(inner) != 0, "\(inner) memory address was null")
           let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment!))
-          guard let \(inner)$ = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$) else {
-            fatalError("\(inner) memory address was null in call to \\(#function)!")
-          }
+          let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)
           """
         )
-        return "\(inner)$"
+        if !allowNil {
+          printer.print(
+            """
+            guard let \(pointerName) else {
+              fatalError("\(inner) memory address was null in call to \\(#function)!")
+            }
+            """
+          )
+        }
+        return pointerName
 
       case .allocateSwiftValue(let name, let swiftType):
         let pointerName = "\(name)$"
@@ -344,15 +559,17 @@ extension JNISwift2JavaGenerator {
 
         let methodSignature = MethodSignature(
           resultType: nativeResult.javaType,
-          parameterTypes: parameters.map(\.javaType)
+          parameterTypes: parameters.flatMap { $0.parameters.map(\.type) }
         )
 
-        let closureParameters = !parameters.isEmpty ? "\(parameters.map(\.name).joined(separator: ", ")) in" : ""
+        let names = parameters.flatMap { $0.parameters.map(\.name) }
+        let closureParameters = !parameters.isEmpty ? "\(names.joined(separator: ", ")) in" : ""
         printer.print("{ \(closureParameters)")
         printer.indent()
 
+        // TODO: Add support for types that are lowered to multiple parameters in closures
         let arguments = parameters.map {
-          $0.conversion.render(&printer, $0.name)
+          $0.conversion.render(&printer, $0.parameters.first!.name)
         }
 
         printer.print(
@@ -363,7 +580,7 @@ extension JNISwift2JavaGenerator {
             """
         )
 
-        let upcall = "environment!.interface.\(nativeResult.javaType.jniType.callMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -377,8 +594,92 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
 
-      case .initializeJavaKitWrapper(let wrapperName):
-        return "\(wrapperName)(javaThis: \(placeholder), environment: environment!)"
+      case .initializeJavaKitWrapper(let inner, let wrapperName):
+        let inner = inner.render(&printer, placeholder)
+        return "\(wrapperName)(javaThis: \(inner), environment: environment!)"
+
+      case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
+        let value = valueConversion.render(&printer, valueName)
+        return "\(discriminatorName) == 1 ? \(value) : nil"
+
+      case .optionalChain(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner)?"
+
+      case .optionalRaisingWidenIntegerType(let inner, let valueType, let combinedSwiftType, let valueSizeInBytes):
+        let inner = inner.render(&printer, placeholder)
+        let value = valueType == .boolean ? "$0 ? 1 : 0" : "$0"
+        let combinedSwiftTypeName = combinedSwiftType.moduleAndName.name
+        printer.print(
+          """
+          let value$ = \(inner).map {
+            \(combinedSwiftTypeName)(\(value)) << \(valueSizeInBytes * 8) | \(combinedSwiftTypeName)(1)
+          } ?? 0
+          """
+        )
+        return "value$"
+
+      case .optionalRaisingIndirectReturn(let inner, let returnType, let discriminatorParameterName, let placeholderValue):
+        printer.print("let result$: \(returnType.jniTypeName)")
+        printer.printBraceBlock("if let innerResult$ = \(placeholder)") { printer in
+          let inner = inner.render(&printer, "innerResult$")
+          printer.print(
+            """
+            result$ = \(inner) 
+            var flag$ = Int8(1)
+            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            """
+          )
+        }
+        printer.printBraceBlock("else") { printer in
+          let placeholderValue = placeholderValue.render(&printer, placeholder)
+          printer.print(
+            """
+            result$ = \(placeholderValue)
+            var flag$ = Int8(0)
+            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            """
+          )
+        }
+
+        return "result$"
+
+      case .method(let inner, let methodName, let arguments):
+        let inner = inner.render(&printer, placeholder)
+        let args = arguments.map { name, value in
+          let value = value.render(&printer, placeholder)
+          if let name {
+            return "\(name): \(value)"
+          } else {
+            return value
+          }
+        }
+        let argsStr = args.joined(separator: ", ")
+        return "\(inner).\(methodName)(\(argsStr))"
+
+      case .member(let inner, let member):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).\(member)"
+
+      case .optionalMap(let inner):
+        var printer = CodePrinter()
+        printer.printBraceBlock("\(placeholder).map") { printer in
+          let inner = inner.render(&printer, "$0")
+          printer.print("return \(inner)")
+        }
+        return printer.finalize()
+
+      case .unwrapOptional(let inner, let name, let fatalErrorMessage):
+        let unwrappedName = "\(name)_unwrapped$"
+        let inner = inner.render(&printer, placeholder)
+        printer.print(
+          """
+          guard let \(unwrappedName) = \(inner) else {
+            fatalError("\(fatalErrorMessage)")
+          }
+          """
+        )
+        return unwrappedName
       }
     }
   }

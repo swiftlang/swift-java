@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaTypes
 
 // MARK: Defaults
 
@@ -20,6 +21,7 @@ extension JNISwift2JavaGenerator {
   static let defaultJavaImports: Array<String> = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
+    "java.util.*",
 
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
@@ -279,11 +281,15 @@ extension JNISwift2JavaGenerator {
     let translatedDecl = translatedDecl(for: decl)! // Will always call with valid decl
     let nativeSignature = translatedDecl.nativeFunctionSignature
     let resultType = nativeSignature.result.javaType
-    var parameters = nativeSignature.parameters
-    if let selfParameter = nativeSignature.selfParameter {
-      parameters.append(selfParameter)
+    var parameters = nativeSignature.parameters.flatMap(\.parameters)
+    if let selfParameter = nativeSignature.selfParameter?.parameters {
+      parameters += selfParameter
     }
-    let renderedParameters = parameters.map { "\($0.javaType) \($0.name)"}.joined(separator: ", ")
+    parameters += nativeSignature.result.outParameters
+
+    let renderedParameters = parameters.map { javaParameter in
+        "\(javaParameter.type) \(javaParameter.name)"
+    }.joined(separator: ", ")
 
     printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
   }
@@ -306,6 +312,12 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = translatedFunctionSignature.selfParameter {
       let lowered = selfParameter.conversion.render(&printer, "this")
       arguments.append(lowered)
+    }
+
+    // Indirect return receivers
+    for outParameter in translatedFunctionSignature.resultType.outParameters {
+      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render());")
+      arguments.append(outParameter.name)
     }
 
     //=== Part 3: Downcall.

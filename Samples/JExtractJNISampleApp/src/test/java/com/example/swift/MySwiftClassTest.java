@@ -17,6 +17,10 @@ package com.example.swift;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftClassTest {

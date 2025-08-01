@@ -205,7 +205,8 @@ struct JNIStructTests {
         func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
           assert(self != 0, "self memory address was null")
           let selfBits$ = Int(Int64(fromJNI: self, in: environment!))
-          guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
+          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
+          guard let self$ else {
             fatalError("self memory address was null in call to \\(#function)!")
           }
           self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment!))
