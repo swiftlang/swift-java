@@ -278,6 +278,9 @@ extension FFMSwift2JavaGenerator {
       parentProtocol = "SwiftValue"
     }
 
+    if decl.swiftNominal.isSendable {
+      printer.print("@ThreadSafe // Sendable")
+    }
     printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)") {
       printer in
       // Constants

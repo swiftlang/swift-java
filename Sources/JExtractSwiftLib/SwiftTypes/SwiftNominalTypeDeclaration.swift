@@ -85,6 +85,22 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     super.init(moduleName: moduleName, name: node.name.text)
   }
 
+  /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
+  lazy var isSendable: Bool = {
+    // Check if Sendable is in the inheritance list
+    guard let inheritanceClause = self.syntax?.inheritanceClause else {
+      return false
+    }
+
+    for inheritedType in inheritanceClause.inheritedTypes {
+      if inheritedType.type.trimmedDescription == "Sendable" {
+        return true
+      }
+    }
+
+    return false
+  }()
+
   /// Determine the known standard library type for this nominal type
   /// declaration.
   private func computeKnownStandardLibraryType() -> SwiftKnownTypeDeclKind? {

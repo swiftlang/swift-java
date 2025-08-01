@@ -171,6 +171,9 @@ extension JNISwift2JavaGenerator {
   private func printNominal(
     _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
   ) {
+    if decl.swiftNominal.isSendable {
+      printer.print("@ThreadSafe // Sendable")
+    }
     printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends JNISwiftInstance") { printer in
       body(&printer)
     }
