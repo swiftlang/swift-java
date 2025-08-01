@@ -63,7 +63,8 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | `Foundation.Data`, `any Foundation.DataProtocol`                                     | ✅        | ❌   |
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
 | Protocols: `protocol`, existential parameters `any Collection`                       | ❌        | ❌   |
-| Optional types: `Int?`, `AnyObject?`                                                 | ❌        | ❌   |
+| Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
+| Optional return types: `func f() -> Int?`, `func g() -> MyClass?`                    | ❌        | ✅   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
 | Parameters: JavaKit wrapped types `JavaLong`, `JavaInteger`                          | ❌        | ✅   |
 | Return values: JavaKit wrapped types `JavaLong`, `JavaInteger`                       | ❌        | ❌   |
