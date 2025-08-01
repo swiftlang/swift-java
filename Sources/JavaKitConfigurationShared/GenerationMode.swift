@@ -59,7 +59,20 @@ extension JExtractUnsignedIntegerMode {
     }
   }
 
-  public static var `default`: JExtractUnsignedIntegerMode {
+  public static var `default`: Self {
     .annotate
+  }
+}
+
+/// The minimum access level which
+public enum JExtractMinimumAccessLevelMode: String, Codable {
+  case `public`
+  case `package`
+  case `internal`
+}
+
+extension JExtractMinimumAccessLevelMode {
+  public static var `default`: Self {
+    .public
   }
 }

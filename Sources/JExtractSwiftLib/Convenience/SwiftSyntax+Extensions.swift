@@ -51,21 +51,74 @@ extension DeclModifierSyntax {
 extension DeclModifierSyntax {
   var isPublic: Bool {
     switch self.name.tokenKind {
-    case .keyword(.private): return false
-    case .keyword(.fileprivate): return false
-    case .keyword(.internal): return false
-    case .keyword(.package): return false
-    case .keyword(.public): return true
-    case .keyword(.open): return true
-    default: return false
+    case .keyword(.private): false
+    case .keyword(.fileprivate): false
+    case .keyword(.internal): false
+    case .keyword(.package): false
+    case .keyword(.public): true
+    case .keyword(.open): true
+    default: false
     }
+  }
+
+  var isPackage: Bool {
+    switch self.name.tokenKind {
+    case .keyword(.private): false
+    case .keyword(.fileprivate): false
+    case .keyword(.internal): false
+    case .keyword(.package): true
+    case .keyword(.public): false
+    case .keyword(.open): false
+    default: false
+    }
+  }
+
+  var isAtLeastPackage: Bool {
+    isPackage || isPublic
+  }
+
+  var isInternal: Bool {
+    return switch self.name.tokenKind {
+    case .keyword(.private): false
+    case .keyword(.fileprivate): false
+    case .keyword(.internal): true
+    case .keyword(.package): false
+    case .keyword(.public): false
+    case .keyword(.open): false
+    default: false
+    }
+  }
+
+  var isAtLeastInternal: Bool {
+    isInternal || isPackage || isPublic
   }
 }
 
 extension WithModifiersSyntax {
   var isPublic: Bool {
-    self.modifiers.contains { modifier in
+    return self.modifiers.contains { modifier in
       modifier.isPublic
+    }
+  }
+
+  var isAtLeastPackage: Bool {
+    if self.modifiers.isEmpty {
+      return false
+    }
+
+    return self.modifiers.contains { modifier in
+      modifier.isAtLeastInternal
+    }
+  }
+
+  var isAtLeastInternal: Bool {
+    if self.modifiers.isEmpty {
+      // we assume that default access level is internal
+      return true
+    }
+
+    return self.modifiers.contains { modifier in
+      modifier.isAtLeastInternal
     }
   }
 }

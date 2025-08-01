@@ -46,6 +46,10 @@ public struct Configuration: Codable {
   public var effectiveUnsignedNumbersMode: JExtractUnsignedIntegerMode {
     unsignedNumbersMode ?? .default
   }
+  public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
+  public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {
+    minimumInputAccessLevelMode ?? .default
+  }
 
   // ==== java 2 swift ---------------------------------------------------------
 
