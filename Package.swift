@@ -32,7 +32,7 @@ func findJavaHome() -> String {
   }
 
 
-  if ProcessInfo.processInfo.environment["SPI_BUILD"] == "1" {
+  if ProcessInfo.processInfo.environment["SPI_PROCESSING"] == "1" {
     // just ignore that we're missing a JAVA_HOME when building in Swift Package Index
     return ""
   }
