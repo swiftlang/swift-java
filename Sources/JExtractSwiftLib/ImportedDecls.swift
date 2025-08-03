@@ -32,6 +32,7 @@ package class ImportedNominalType: ImportedDecl {
   package var initializers: [ImportedFunc] = []
   package var methods: [ImportedFunc] = []
   package var variables: [ImportedFunc] = []
+  package var cases: [ImportedEnumCase] = []
 
   init(swiftNominal: SwiftNominalTypeDeclaration) {
     self.swiftNominal = swiftNominal
@@ -43,6 +44,28 @@ package class ImportedNominalType: ImportedDecl {
 
   var qualifiedName: String {
     self.swiftNominal.qualifiedName
+  }
+}
+
+public final class ImportedEnumCase: ImportedDecl, CustomStringConvertible {
+  /// The case name
+  public var name: String
+
+  /// The enum parameters
+  var parameters: [SwiftEnumCaseParameter]
+
+  init(name: String, parameters: [SwiftEnumCaseParameter]) {
+    self.name = name
+    self.parameters = parameters
+  }
+
+  public var description: String {
+    """
+    ImportedEnumCase {
+      name: \(name),
+      parameters: \(parameters)
+    }
+    """
   }
 }
 

@@ -125,6 +125,11 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
+      if decl.swiftNominal.kind == .enum {
+        printEnumHelpers(&printer, decl)
+        printer.println()
+      }
+
       for initializer in decl.initializers {
         printFunctionDowncallMethods(&printer, initializer)
         printer.println()
@@ -185,6 +190,16 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock("public final class \(swiftModuleName)") { printer in
       body(&printer)
     }
+  }
+
+  private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.printBraceBlock("public enum Discriminator") { printer in
+      printer.print(
+        decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
+      )
+    }
+
+    printer.println()
   }
 
   private func printFunctionDowncallMethods(

@@ -65,6 +65,8 @@ final class Swift2JavaVisitor {
     case .subscriptDecl:
       // TODO: Implement
       break
+    case .enumCaseDecl(let node):
+      self.visit(enumCaseDecl: node, in: parent)
 
     default:
       break
@@ -128,6 +130,27 @@ final class Swift2JavaVisitor {
       typeContext.methods.append(imported)
     } else {
       translator.importedGlobalFuncs.append(imported)
+    }
+  }
+
+  func visit(enumCaseDecl node: EnumCaseDeclSyntax, in typeContext: ImportedNominalType?) {
+    do {
+      for caseElement in node.elements {
+        self.log.debug("Import case \(caseElement.name) of enum \(node.qualifiedNameForDebug)")
+
+        let parameters = try caseElement.parameterClause?.parameters.map {
+          try SwiftEnumCaseParameter($0, lookupContext: translator.lookupContext)
+        }
+
+        let imported = ImportedEnumCase(
+          name: caseElement.name.text,
+          parameters: parameters ?? []
+        )
+
+        typeContext?.cases.append(imported)
+      }
+    } catch {
+      self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
     }
   }
 
