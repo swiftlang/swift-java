@@ -22,6 +22,7 @@ package enum SwiftAPIKind {
   case initializer
   case getter
   case setter
+  case enumCase
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -54,16 +55,21 @@ public final class ImportedEnumCase: ImportedDecl, CustomStringConvertible {
   /// The enum parameters
   var parameters: [SwiftEnumCaseParameter]
 
-  init(name: String, parameters: [SwiftEnumCaseParameter]) {
+  /// A function that represents the Swift static "initializer" for cases
+  var caseFunction: ImportedFunc
+
+  init(name: String, parameters: [SwiftEnumCaseParameter], caseFunction: ImportedFunc) {
     self.name = name
     self.parameters = parameters
+    self.caseFunction = caseFunction
   }
 
   public var description: String {
     """
     ImportedEnumCase {
       name: \(name),
-      parameters: \(parameters)
+      parameters: \(parameters),
+      caseFunction: \(caseFunction)
     }
     """
   }
@@ -136,6 +142,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     let prefix = switch self.apiKind {
     case .getter: "getter:"
     case .setter: "setter:"
+    case .enumCase: "case:"
     case .function, .initializer: ""
     }
 

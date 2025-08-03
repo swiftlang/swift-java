@@ -97,6 +97,25 @@ extension SwiftFunctionSignature {
   }
 
   init(
+    _ node: EnumCaseElementSyntax,
+    enclosingType: SwiftType,
+    lookupContext: SwiftTypeLookupContext
+  ) throws {
+    let parameters = try node.parameterClause?.parameters.map { param in
+      try SwiftParameter(param, lookupContext: lookupContext)
+    }
+
+    self.init(
+      selfParameter: .initializer(enclosingType),
+      parameters: parameters ?? [],
+      result: SwiftResult(convention: .direct, type: enclosingType),
+      effectSpecifiers: [],
+      genericParameters: [],
+      genericRequirements: []
+    )
+  }
+
+  init(
     _ node: FunctionDeclSyntax,
     enclosingType: SwiftType?,
     lookupContext: SwiftTypeLookupContext

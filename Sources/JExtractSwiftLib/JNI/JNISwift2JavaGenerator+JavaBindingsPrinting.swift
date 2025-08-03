@@ -193,13 +193,24 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    // TODO: Move this to seperate file +Enum?
+    printEnumDiscriminator(&printer, decl)
+    printer.println()
+    printEnumStaticInitializers(&printer, decl)
+  }
+
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.printBraceBlock("public enum Discriminator") { printer in
       printer.print(
         decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
       )
     }
+  }
 
-    printer.println()
+  private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    for enumCase in decl.cases {
+      printFunctionDowncallMethods(&printer, enumCase.caseFunction)
+    }
   }
 
   private func printFunctionDowncallMethods(

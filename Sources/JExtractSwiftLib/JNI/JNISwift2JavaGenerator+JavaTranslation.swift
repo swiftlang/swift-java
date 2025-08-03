@@ -61,7 +61,7 @@ extension JNISwift2JavaGenerator {
       let javaName = switch decl.apiKind {
       case .getter: decl.javaGetterName
       case .setter: decl.javaSetterName
-      case .function, .initializer: decl.name
+      case .function, .initializer, .enumCase: decl.name
       }
 
       // Swift -> Java
@@ -137,7 +137,7 @@ extension JNISwift2JavaGenerator {
       parentName: String
     ) throws -> TranslatedFunctionSignature {
       let parameters = try functionSignature.parameters.enumerated().map { idx, param in
-        let parameterName = param.parameterName ?? "arg\(idx))"
+        let parameterName = param.parameterName ?? "arg\(idx)"
         return try translateParameter(swiftType: param.type, parameterName: parameterName, methodName: methodName, parentName: parentName)
       }
 

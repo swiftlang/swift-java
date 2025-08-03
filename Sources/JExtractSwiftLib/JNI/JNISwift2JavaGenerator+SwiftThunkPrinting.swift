@@ -102,6 +102,11 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    for enumCase in type.cases {
+      printSwiftFunctionThunk(&printer, enumCase.caseFunction)
+      printer.println()
+    }
+
     for method in type.methods {
       printSwiftFunctionThunk(&printer, method)
       printer.println()
@@ -189,6 +194,18 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
+
+    case .enumCase:
+      let downcallArguments = zip(
+        decl.functionSignature.parameters,
+        arguments
+      ).map { originalParam, argument in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+        return "\(label)\(argument)"
+      }
+
+      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: ", ")))" : ""
+      result = "\(callee).\(decl.name)\(associatedValues)"
 
     case .getter:
       result = "\(tryClause)\(callee).\(decl.name)"

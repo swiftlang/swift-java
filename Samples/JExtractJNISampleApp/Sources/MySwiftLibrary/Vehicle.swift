@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 public enum Vehicle {
-  case car
   case bicycle
+  case car(String)
+  case motorbike(String, horsePower: Int64)
 }

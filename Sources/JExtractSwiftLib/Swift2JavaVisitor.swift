@@ -134,6 +134,11 @@ final class Swift2JavaVisitor {
   }
 
   func visit(enumCaseDecl node: EnumCaseDeclSyntax, in typeContext: ImportedNominalType?) {
+    guard let typeContext else {
+      self.log.info("Enum case must be within a current type; \(node)")
+      return
+    }
+
     do {
       for caseElement in node.elements {
         self.log.debug("Import case \(caseElement.name) of enum \(node.qualifiedNameForDebug)")
@@ -142,12 +147,27 @@ final class Swift2JavaVisitor {
           try SwiftEnumCaseParameter($0, lookupContext: translator.lookupContext)
         }
 
-        let imported = ImportedEnumCase(
-          name: caseElement.name.text,
-          parameters: parameters ?? []
+        let signature = try SwiftFunctionSignature(
+          caseElement,
+          enclosingType: typeContext.swiftType,
+          lookupContext: translator.lookupContext
         )
 
-        typeContext?.cases.append(imported)
+        let caseFunction = ImportedFunc(
+          module: translator.swiftModuleName,
+          swiftDecl: node,
+          name: caseElement.name.text,
+          apiKind: .enumCase,
+          functionSignature: signature
+        )
+
+        let importedCase = ImportedEnumCase(
+          name: caseElement.name.text,
+          parameters: parameters ?? [],
+          caseFunction: caseFunction
+        )
+
+        typeContext.cases.append(importedCase)
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")

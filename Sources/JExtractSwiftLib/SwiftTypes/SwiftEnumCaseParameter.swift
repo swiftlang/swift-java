@@ -24,9 +24,8 @@ extension SwiftEnumCaseParameter {
     _ node: EnumCaseParameterSyntax,
     lookupContext: SwiftTypeLookupContext
   ) throws {
-
     self.init(
-      name: node.firstName?.text,
+      name: node.firstName?.identifier?.name,
       type: try SwiftType(node.type, lookupContext: lookupContext)
     )
   }

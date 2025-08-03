@@ -835,6 +835,10 @@ extension LoweredFunctionSignature {
     case .setter:
       assert(paramExprs.count == 1)
       resultExpr = "\(callee) = \(paramExprs[0])"
+
+    case .enumCase:
+      // This should not be called, but let's fatalError.
+      fatalError("Enum cases are not supported with FFM.")
     }
 
     // Lower the result.
