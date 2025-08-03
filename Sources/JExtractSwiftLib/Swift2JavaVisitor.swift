@@ -46,7 +46,7 @@ final class Swift2JavaVisitor {
     case .structDecl(let node):
       self.visit(nominalDecl: node, in: parent)
     case .enumDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(enumDecl: node, in: parent)
     case .protocolDecl(let node):
       self.visit(nominalDecl: node, in: parent)
     case .extensionDecl(let node):
@@ -83,6 +83,12 @@ final class Swift2JavaVisitor {
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType)
     }
+  }
+
+  func visit(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
+    self.visit(nominalDecl: node, in: parent)
+
+    self.synthesizeRawRepresentableConformance(enumDecl: node, in: parent)
   }
 
   func visit(extensionDecl node: ExtensionDeclSyntax, in parent: ImportedNominalType?) {
@@ -255,6 +261,32 @@ final class Swift2JavaVisitor {
     )
 
     typeContext.initializers.append(imported)
+  }
+
+  private func synthesizeRawRepresentableConformance(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
+    guard let imported = translator.importedNominalType(node, parent: parent) else {
+      return
+    }
+
+    if let firstInheritanceType = imported.swiftNominal.firstInheritanceType,
+      let inheritanceType = try? SwiftType(
+        firstInheritanceType,
+        lookupContext: translator.lookupContext
+      ),
+      inheritanceType.isRawTypeCompatible
+    {
+      if !imported.variables.contains(where: { $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType }) {
+        let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
+        self.visit(decl: decl, in: imported)
+      }
+
+      imported.variables.first?.signatureString
+
+      if !imported.initializers.contains(where: { $0.functionSignature.parameters.count == 1 && $0.functionSignature.parameters.first?.parameterName == "rawValue" && $0.functionSignature.parameters.first?.type == inheritanceType }) {
+        let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
+        self.visit(decl: decl, in: imported)
+      }
+    }
   }
 }
 

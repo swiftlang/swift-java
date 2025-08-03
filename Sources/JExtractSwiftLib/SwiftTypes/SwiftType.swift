@@ -103,6 +103,19 @@ enum SwiftType: Equatable {
     default: false
     }
   }
+
+  var isRawTypeCompatible: Bool {
+    switch self {
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string:
+        true
+      default:
+        false
+      }
+    default: false
+    }
+  }
 }
 
 extension SwiftType: CustomStringConvertible {
