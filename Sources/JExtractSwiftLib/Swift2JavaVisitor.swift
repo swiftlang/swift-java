@@ -276,15 +276,6 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
       return false
     }
 
-    if let node = self.as(InitializerDeclSyntax.self) {
-      let isFailable = node.optionalMark != nil
-
-      if isFailable {
-        log.warning("Skip import '\(self.qualifiedNameForDebug)': failable initializer")
-        return false
-      }
-    }
-
     return true
   }
 }

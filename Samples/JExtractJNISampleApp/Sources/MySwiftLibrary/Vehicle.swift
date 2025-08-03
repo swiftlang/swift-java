@@ -16,4 +16,39 @@ public enum Vehicle {
   case bicycle
   case car(String)
   case motorbike(String, horsePower: Int64)
+
+  public init?(name: String) {
+    switch name {
+      case "bicycle": self = .bicycle
+      case "car": self = .car("Unknown")
+      case "motorbike": self = .motorbike("Unknown", horsePower: 0)
+      default: return nil
+    }
+  }
+
+  public var name: String {
+    switch self {
+    case .bicycle: "bicycle"
+    case .car: "car"
+    case .motorbike: "motorbike"
+    }
+  }
+
+  public func isFasterThan(other: Vehicle) -> Bool {
+    switch (self, other) {
+      case (.bicycle, .bicycle), (.bicycle, .car), (.bicycle, .motorbike): false
+      case (.car, .bicycle): true
+      case (.car, .motorbike), (.car, .car): false
+      case (.motorbike, .bicycle), (.motorbike, .car): true
+      case (.motorbike, .motorbike): false
+    }
+  }
+
+  public mutating func upgrade() {
+    switch self {
+      case .bicycle: self = .car("Unknown")
+      case .car: self = .motorbike("Unknown", horsePower: 0)
+      case .motorbike: break
+    }
+  }
 }
