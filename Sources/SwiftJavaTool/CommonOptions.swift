@@ -21,7 +21,7 @@ import JavaUtilJar
 import JavaNet
 import SwiftSyntax
 import SwiftJavaConfigurationShared
-import SwiftJNIShared
+import SwiftJavaShared
 
 // - MARK: Common Options
 

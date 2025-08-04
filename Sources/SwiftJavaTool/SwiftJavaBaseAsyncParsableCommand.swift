@@ -23,7 +23,7 @@ import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaConfigurationShared
-import SwiftJNIShared
+import SwiftJavaShared
 
 protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
   var logLevel: Logger.Level { get set }

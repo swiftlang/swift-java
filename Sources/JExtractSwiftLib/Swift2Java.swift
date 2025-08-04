@@ -15,7 +15,7 @@
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftJNIShared
+import SwiftJavaShared
 import SwiftJavaConfigurationShared
 
 public struct SwiftToJava {

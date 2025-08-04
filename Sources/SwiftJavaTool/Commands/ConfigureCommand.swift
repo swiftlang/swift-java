@@ -23,7 +23,7 @@ import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaConfigurationShared
-import SwiftJNIShared
+import SwiftJavaShared
 
 extension SwiftJava {
   struct ConfigureCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJavaLib
-import SwiftJNIShared
+import SwiftJavaShared
 import CJNI
 import SwiftJNI
 
