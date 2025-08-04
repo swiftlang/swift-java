@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VehicleTest {
+public class VehicleEnumTest {
     @Test
     void bicycle() {
         try (var arena = new ConfinedSwiftMemorySession()) {

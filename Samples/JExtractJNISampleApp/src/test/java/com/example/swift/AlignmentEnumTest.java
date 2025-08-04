@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AlignmentTest {
+public class AlignmentEnumTest {
     @Test
     void rawValue() {
         try (var arena = new ConfinedSwiftMemorySession()) {
