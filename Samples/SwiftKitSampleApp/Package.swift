@@ -64,7 +64,7 @@ let package = Package(
       name: "MySwiftLibrary",
       dependencies: [
         .product(name: "SwiftJNI", package: "swift-java"),
-        .product(name: "JavaRuntime", package: "swift-java"),
+        .product(name: "CJNI", package: "swift-java"),
         .product(name: "SwiftKitSwift", package: "swift-java"),
       ],
       exclude: [

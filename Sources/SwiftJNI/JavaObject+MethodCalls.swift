@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
+import CJNI
 import JavaTypes
 
 /// Produce the mangling for a method with the given argument and result types.

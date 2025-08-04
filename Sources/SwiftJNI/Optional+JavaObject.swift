@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
+import CJNI
 import JavaTypes
 
 extension Optional: JavaValue where Wrapped: AnyJavaObject {

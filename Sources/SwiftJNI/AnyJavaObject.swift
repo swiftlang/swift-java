@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
+import CJNI
 
 /// Protocol that describes Swift types that are bridged to a Java class type.
 ///

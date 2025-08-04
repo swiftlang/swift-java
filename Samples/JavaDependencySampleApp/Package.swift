@@ -65,7 +65,7 @@ let package = Package(
       name: "JavaDependencySample",
       dependencies: [
         .product(name: "SwiftJNI", package: "swift-java"),
-        .product(name: "JavaRuntime", package: "swift-java"),
+        .product(name: "CJNI", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         "JavaCommonsCSV"
       ],
