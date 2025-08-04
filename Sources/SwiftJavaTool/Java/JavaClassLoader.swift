@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJavaLib
-import SwiftJNIShared
-import JavaRuntime
+import SwiftJavaShared
+import CJNI
 import SwiftJNI
 
 @JavaClass("java.lang.ClassLoader")

@@ -34,7 +34,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
 
-    // The name of the configuration file JavaKit.config from the target for
+    // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir)
       .appending(path: SwiftJavaConfigFileName)

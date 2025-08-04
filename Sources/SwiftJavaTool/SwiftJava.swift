@@ -23,7 +23,7 @@ import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaConfigurationShared
-import SwiftJNIShared
+import SwiftJavaShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main

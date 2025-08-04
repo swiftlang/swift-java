@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
+import CJNI
 
 extension AnyJavaObject {
   /// Look up the other class type

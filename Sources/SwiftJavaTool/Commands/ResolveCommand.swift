@@ -20,7 +20,7 @@ import Foundation
 import JavaUtilJar
 import SwiftJavaLib
 import SwiftJavaConfigurationShared
-import SwiftJNIShared
+import SwiftJavaShared
 import _Subprocess
 #if canImport(System)
 import System

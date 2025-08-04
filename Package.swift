@@ -101,8 +101,8 @@ let package = Package(
     ),
 
     .library(
-      name: "JavaRuntime",
-      targets: ["JavaRuntime"]
+      name: "CJNI",
+      targets: ["CJNI"]
     ),
 
     .library(
@@ -237,7 +237,7 @@ let package = Package(
     .target(
       name: "SwiftJNI",
       dependencies: [
-        "JavaRuntime",
+        "CJNI",
         "SwiftJNIMacros",
         "JavaTypes",
         "SwiftJavaConfigurationShared", // for Configuration reading at runtime
@@ -359,7 +359,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaRuntime",
+      name: "CJNI",
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -371,7 +371,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaKitShared"
+      name: "SwiftJavaShared"
     ),
 
     .target(
@@ -385,7 +385,7 @@ let package = Package(
         "JavaLangReflect",
         "JavaNet",
         "JavaTypes",
-        "JavaKitShared",
+        "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
         // .product(name: "Subprocess", package: "swift-subprocess")
         "_Subprocess",
@@ -410,7 +410,7 @@ let package = Package(
         "JavaNet",
         "SwiftJavaLib",
         "JExtractSwiftLib",
-        "JavaKitShared",
+        "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
       ],
       swiftSettings: [
@@ -433,7 +433,7 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaTypes",
-        "JavaKitShared",
+        "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
       ],
       swiftSettings: [
@@ -451,7 +451,7 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "JavaKitTests",
+      name: "SwiftJNITests",
       dependencies: ["SwiftJNI", "JavaNet"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -468,7 +468,7 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "JavaKitMacroTests",
+      name: "SwiftJNIMacroTests",
       dependencies: [
         "SwiftJNIMacros",
         .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),

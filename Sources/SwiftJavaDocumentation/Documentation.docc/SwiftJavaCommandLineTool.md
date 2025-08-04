@@ -180,7 +180,7 @@ The easiest way to build a command-line program in Swift is with the [Swift argu
 import ArgumentParser
 import SwiftJNI
 
-@JavaClass("org.swift.javakit.HelloSwiftMain")
+@JavaClass("org.swift.jni.HelloSwiftMain")
 struct HelloSwiftMain: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable verbose output")
   var verbose: Bool = false

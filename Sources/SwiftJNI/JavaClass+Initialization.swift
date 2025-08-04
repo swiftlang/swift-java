@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaRuntime
+import CJNI
 
 extension JavaClass {
   public typealias ObjectType = T

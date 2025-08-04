@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJNI
-import JavaRuntime
+import CJNI
 
 @JavaClass("com.example.swift.HelloJava2Swift")
 open class HelloJava2Swift: JavaObject {
