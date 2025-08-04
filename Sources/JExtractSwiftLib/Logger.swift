@@ -15,7 +15,7 @@
 import Foundation
 import SwiftSyntax
 import ArgumentParser
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 // Placeholder for some better logger, we could depend on swift-log
 public struct Logger {
@@ -114,7 +114,7 @@ public struct Logger {
 }
 
 extension Logger {
-  public typealias Level = JavaKitConfigurationShared.LogLevel
+  public typealias Level = SwiftJavaConfigurationShared.LogLevel
 }
 
 extension Logger.Level: ExpressibleByArgument {

@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
+import SwiftJNI
 import JavaUtilFunction
 import JavaIO
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import Foundation
 
 // Import the commons-csv library wrapper:

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing)
-import JavaKit
+import SwiftJNI
 import SwiftJavaLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
@@ -42,7 +42,7 @@ class Java2SwiftTests: XCTestCase {
       JavaObject.self,
       swiftTypeName: "MyJavaObject",
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.lang.Object")
         public struct MyJavaObject {
@@ -67,7 +67,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.Object": ("JavaObject", nil),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.lang.Class", extends: JavaObject.self)
         public struct MyJavaClass<T: AnyJavaObject> {
@@ -85,7 +85,7 @@ class Java2SwiftTests: XCTestCase {
       JavaMonth.self,
       swiftTypeName: "Month",
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         "enum MonthCases: Equatable",
         "case APRIL",
         "public var enumValue: MonthCases!",
@@ -164,7 +164,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.ProcessBuilder$Redirect": [JavaClass<ProcessBuilder.Redirect.JavaType>().as(JavaClass<JavaObject>.self)!],
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
           @JavaMethod
           public func redirectInput() -> ProcessBuilder.Redirect!
@@ -204,7 +204,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.ProcessBuilder$Redirect": [JavaClass<ProcessBuilder.Redirect.JavaType>().as(JavaClass<JavaObject>.self)!],
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
           @JavaMethod
           public func redirectInput() -> ProcessBuilder.PBRedirect!
@@ -274,7 +274,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaObject",
       asClass: true,
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.lang.Object")
         open class JavaObject {
@@ -308,7 +308,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.Object" : ("JavaObject", "JavaKit"),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.lang.String")
         open class JavaString: JavaObject {
@@ -343,7 +343,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Month",
       asClass: true,
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         "enum MonthCases: Equatable",
         "case APRIL",
         "public var enumValue: MonthCases!",
@@ -385,7 +385,7 @@ class Java2SwiftTests: XCTestCase {
         "java.net.URL" : ("URL", "JavaKitNetwork"),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.net.URLClassLoader")
         open class URLClassLoader: ClassLoader {
@@ -415,7 +415,7 @@ class Java2SwiftTests: XCTestCase {
         "java.net.URL" : ("URL", "JavaKitNetwork"),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.net.URLClassLoader")
         open class URLClassLoader: JavaObject {
@@ -445,7 +445,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.Byte" : ("JavaByte", "JavaKit"),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaClass("java.lang.Byte")
         open class JavaByte: JavaNumber {
@@ -468,7 +468,7 @@ class Java2SwiftTests: XCTestCase {
         "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
       ],
       expectedChunks: [
-        "import JavaKit",
+        "import SwiftJNI",
         """
         @JavaInterface("java.util.function.IntFunction")
         public struct MyJavaIntFunction<R: AnyJavaObject> {
@@ -561,7 +561,7 @@ class Java2SwiftTests: XCTestCase {
         "java.nio.ByteBuffer": ("NIOByteBuffer", "JavaKitNIO"),
       ],
       expectedChunks: [
-        "import JavaKitNIO",
+        "import SwiftJNINIO",
         """
         @JavaClass("java.nio.ByteBuffer")
         open class NIOByteBuffer: NIOBuffer {

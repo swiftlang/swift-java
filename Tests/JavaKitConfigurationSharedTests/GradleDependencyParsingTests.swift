@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite

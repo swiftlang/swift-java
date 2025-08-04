@@ -15,10 +15,10 @@
 import Foundation
 import ArgumentParser
 import SwiftJavaLib
-import JavaKit
+import SwiftJNI
 import JavaUtilJar
 import SwiftJavaLib
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 extension String {
   /// For a String that's of the form java.util.Vector, return the "Vector"

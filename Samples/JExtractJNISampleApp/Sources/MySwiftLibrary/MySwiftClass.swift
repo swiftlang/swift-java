@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
+import SwiftJNI
 
 public class MySwiftClass {
   public let x: Int64

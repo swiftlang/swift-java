@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
+import SwiftJNI
 import JavaLangReflect
 import JavaTypes
 import SwiftBasicFormat
 import SwiftSyntax
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import SwiftSyntaxBuilder
 
 /// Utility that translates Java classes into Swift source code to access

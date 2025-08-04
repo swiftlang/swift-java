@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
+import SwiftJNI
 import JavaLangReflect
 import SwiftSyntax
 
