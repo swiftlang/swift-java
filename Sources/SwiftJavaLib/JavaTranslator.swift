@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaKitReflection
+import JavaLangReflect
 import JavaTypes
 import SwiftBasicFormat
 import SwiftSyntax

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKitReflection
+import JavaLangReflect
 
 /// Errors that can occur when translating Java types into Swift.
 enum TranslationError: Error {

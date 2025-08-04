@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 import JavaKit
-import JavaKitReflection
+import JavaLangReflect
 
 /// Captures the relationship between two methods by comparing their parameter
 /// and result types.

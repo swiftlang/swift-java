@@ -17,9 +17,9 @@ import Foundation
 import SwiftJavaLib
 import JExtractSwiftLib
 import JavaKit
-import JavaKitJar
-import JavaKitNetwork
-import JavaKitReflection
+import JavaUtilJar
+import JavaNet
+import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import JavaKitConfigurationShared

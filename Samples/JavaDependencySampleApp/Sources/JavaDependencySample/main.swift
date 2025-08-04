@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaKitFunction
-import JavaKitIO
+import JavaUtilFunction
+import JavaIO
 import JavaKitConfigurationShared
 import Foundation
 

@@ -16,7 +16,7 @@ import Foundation
 import ArgumentParser
 import SwiftJavaLib
 import JavaKit
-import JavaKitJar
+import JavaUtilJar
 import SwiftJavaLib
 import JavaKitConfigurationShared
 
