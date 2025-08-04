@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaKitReflection
+import JavaLangReflect
 import SwiftSyntax
 
 /// Utility type that translates a single Java class into its corresponding

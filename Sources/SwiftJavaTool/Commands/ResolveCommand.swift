@@ -17,7 +17,7 @@ import Foundation
 import SwiftJavaLib
 import JavaKit
 import Foundation
-import JavaKitJar
+import JavaUtilJar
 import SwiftJavaLib
 import JavaKitConfigurationShared
 import JavaKitShared

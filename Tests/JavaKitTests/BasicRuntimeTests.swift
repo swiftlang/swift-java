@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaKitNetwork
+import JavaNet
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 /// Handy reference to the JVM abstraction.

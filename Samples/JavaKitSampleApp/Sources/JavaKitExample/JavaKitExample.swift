@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKit
-import JavaKitFunction
+import JavaUtilFunction
 
 enum SwiftWrappedError: Error {
   case message(String)

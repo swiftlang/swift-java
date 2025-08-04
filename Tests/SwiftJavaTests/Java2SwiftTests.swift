@@ -254,7 +254,7 @@ class Java2SwiftTests: XCTestCase {
       ],
       expectedChunks: [
         """
-        import JavaKitFunction
+        import JavaUtilFunction
         """,
         """
         @JavaClass("java.util.Objects", extends: JavaObject.self)
@@ -494,7 +494,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
       ],
       expectedChunks: [
-        "import JavaKitReflection",
+        "import JavaLangReflect",
         """
         @JavaClass("java.lang.reflect.Method")
         open class Method: Executable {
@@ -528,7 +528,7 @@ class Java2SwiftTests: XCTestCase {
         "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
       ],
       expectedChunks: [
-        "import JavaKitReflection",
+        "import JavaLangReflect",
         """
         @JavaClass("java.lang.reflect.Constructor")
         open class Constructor<T: AnyJavaObject>: Executable {
