@@ -15,11 +15,11 @@
 import Foundation
 import ArgumentParser
 import SwiftJavaLib
-import JavaKit
+import SwiftJNI
 import JavaUtilJar
 import SwiftJavaLib
 import JExtractSwiftLib
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 /// Extract Java bindings from Swift sources or interface files.
 ///

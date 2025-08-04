@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKit
+import SwiftJNI
 
 extension Executable {
   /// Whether this executable throws any checked exception.

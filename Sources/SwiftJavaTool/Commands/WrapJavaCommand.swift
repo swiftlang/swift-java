@@ -15,10 +15,10 @@
 import Foundation
 import ArgumentParser
 import SwiftJavaLib
-import JavaKit
+import SwiftJNI
 import JavaUtilJar
 import SwiftJavaLib
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 extension SwiftJava {
 

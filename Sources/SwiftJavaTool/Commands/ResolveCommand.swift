@@ -15,12 +15,12 @@
 import ArgumentParser
 import Foundation
 import SwiftJavaLib
-import JavaKit
+import SwiftJNI
 import Foundation
 import JavaUtilJar
 import SwiftJavaLib
-import JavaKitConfigurationShared
-import JavaKitShared
+import SwiftJavaConfigurationShared
+import SwiftJNIShared
 import _Subprocess
 #if canImport(System)
 import System
@@ -28,7 +28,7 @@ import System
 @preconcurrency import SystemPackage
 #endif
 
-typealias Configuration = JavaKitConfigurationShared.Configuration
+typealias Configuration = SwiftJavaConfigurationShared.Configuration
 
 extension SwiftJava {
   struct ResolveCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {

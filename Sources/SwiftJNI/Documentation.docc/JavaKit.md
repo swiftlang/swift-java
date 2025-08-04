@@ -200,7 +200,7 @@ let primes = sieveClass.findPrimes(100) // returns a List<JavaInteger>?
 Putting it all together, we can define a main program in `Sources/JavaSieve/main.swift` that looks like this:
 
 ```swift
-import JavaKit
+import SwiftJNI
 
 let jvm = try JavaVirtualMachine.shared(classpath: ["QuadraticSieve-1.0.jar"])
 do {

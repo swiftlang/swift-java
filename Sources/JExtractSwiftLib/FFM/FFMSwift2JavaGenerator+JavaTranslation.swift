@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(

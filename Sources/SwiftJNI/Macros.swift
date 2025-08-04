@@ -43,7 +43,7 @@ public macro JavaClass(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
   implements: (any AnyJavaObject.Type)?...
-) = #externalMacro(module: "JavaKitMacros", type: "JavaClassMacro")
+) = #externalMacro(module: "SwiftJNIMacros", type: "JavaClassMacro")
 
 /// Attached macro that declares that a particular `struct` type is a wrapper around a Java interface.
 ///
@@ -74,7 +74,7 @@ public macro JavaClass(
 )
 @attached(extension, conformances: AnyJavaObject)
 public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.Type)?...) =
-  #externalMacro(module: "JavaKitMacros", type: "JavaClassMacro")
+  #externalMacro(module: "SwiftJNIMacros", type: "JavaClassMacro")
 
 /// Attached macro that turns a Swift property into one that accesses a Java field on the underlying Java object.
 ///
@@ -88,7 +88,7 @@ public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.
 /// }
 /// ```
 @attached(accessor)
-public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
+public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "SwiftJNIMacros", type: "JavaFieldMacro")
 
 
 /// Attached macro that turns a Swift property into one that accesses a Java static field on the underlying Java object.
@@ -102,7 +102,7 @@ public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) = 
 /// }
 /// ```
 @attached(accessor)
-public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "JavaKitMacros", type: "JavaFieldMacro")
+public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "SwiftJNIMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
@@ -124,7 +124,7 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 ///
 /// corresponds to the Java constructor `HelloSwift(String name)`.
 @attached(body)
-public macro JavaMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaMethodMacro")
+public macro JavaMethod() = #externalMacro(module: "SwiftJNIMacros", type: "JavaMethodMacro")
 
 /// Attached macro that turns a Swift method on JavaClass into one that wraps
 /// a Java static method on the underlying Java class object.
@@ -136,7 +136,7 @@ public macro JavaMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaM
 /// func sayHelloBack(_ i: Int32) -> Double
 /// ```
 @attached(body)
-public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: "JavaMethodMacro")
+public macro JavaStaticMethod() = #externalMacro(module: "SwiftJNIMacros", type: "JavaMethodMacro")
 
 /// Macro that marks extensions to specify that all of the @JavaMethod
 /// methods are implementations of Java methods spelled as `native`.
@@ -161,4 +161,4 @@ public macro JavaStaticMethod() = #externalMacro(module: "JavaKitMacros", type: 
 /// }
 /// ```
 @attached(peer)
-public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "JavaKitMacros", type: "JavaImplementationMacro")
+public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "SwiftJNIMacros", type: "JavaImplementationMacro")
