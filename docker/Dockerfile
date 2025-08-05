@@ -20,7 +20,7 @@ ENV LANGUAGE=en_US.UTF-8
 
 # JDK dependency
 RUN curl -s "https://get.sdkman.io" | bash
-RUN source "/root/.sdkman/bin/sdkman-init.sh" && sdk install java 24.0.1-amzn --use
+RUN bash -c "source /root/.sdkman/bin/sdkman-init.sh && sdk install java 24.0.1-amzn"
 
 RUN curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
     tar zxf swiftly-$(uname -m).tar.gz && \
