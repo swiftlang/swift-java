@@ -85,4 +85,46 @@ public class VehicleEnumTest {
             assertEquals("motorbike", vehicle.getName());
         }
     }
+
+    @Test
+    void getAsBicycle() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            Vehicle.Bicycle bicycle = vehicle.getAsBicycle().orElseThrow();
+            assertNotNull(bicycle);
+        }
+    }
+
+    @Test
+    void getAsCar() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            assertEquals("BMW", car.arg0());
+        }
+    }
+
+    @Test
+    void getAsMotorbike() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, arena);
+            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            assertEquals("Yamaha", motorbike.arg0());
+            assertEquals(750, motorbike.horsePower());
+        }
+    }
+
+    @Test
+    void associatedValuesAreCopied() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            assertEquals("BMW", car.arg0());
+            vehicle.upgrade();
+            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            assertNotNull(motorbike);
+            // Motorbike should still remain
+            assertEquals("BMW", car.arg0());
+        }
+    }
 }

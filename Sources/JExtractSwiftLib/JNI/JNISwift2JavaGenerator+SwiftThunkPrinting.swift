@@ -103,7 +103,7 @@ extension JNISwift2JavaGenerator {
     }
 
     for enumCase in type.cases {
-      printSwiftFunctionThunk(&printer, enumCase.caseFunction)
+      printEnumCase(&printer, enumCase)
       printer.println()
     }
 
@@ -118,6 +118,64 @@ extension JNISwift2JavaGenerator {
     }
 
     printDestroyFunctionThunk(&printer, type)
+  }
+
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {
+    guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+      return
+    }
+
+    // Print static case initializer
+    printSwiftFunctionThunk(&printer, enumCase.caseFunction)
+    printer.println()
+
+    // Print getAsCase method
+    if !enumCase.parameters.isEmpty {
+      let selfParameter = JavaParameter(name: "self", type: .long)
+      let resultType = JavaType.class(package: javaPackage, name: "\(translatedCase.enumName).\(translatedCase.name)")
+      printCDecl(
+        &printer,
+        javaMethodName: "$getAs\(translatedCase.name)",
+        parentName: "\(translatedCase.enumName)",
+        parameters: [selfParameter],
+        resultType: resultType
+      ) { printer in
+        let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+          &printer,
+          swiftParentName: enumCase.enumType.nominalTypeDecl.name,
+          selfParameter
+        )
+        let caseNames = enumCase.parameters.enumerated().map { idx, parameter in
+          parameter.name ?? "_\(idx)"
+        }
+        let caseNamesWithLet = caseNames.map { "let \($0)" }
+        let methodSignature = MethodSignature(resultType: resultType, parameterTypes: translatedCase.conversions.map(\.native.javaType))
+        // TODO: Caching of class and static method ID.
+        printer.print(
+        """
+        guard case .\(enumCase.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
+          fatalError("Expected enum case '\(enumCase.name)', but was '\\(self$.pointee)'!")
+        }
+        let recordClass$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(translatedCase.enumName)$\(translatedCase.name)")!
+        let fromJNIID$ = environment.interface.GetStaticMethodID(environment, recordClass$, "fromJNI", "\(methodSignature.mangledName)")!
+        """
+        )
+
+        let upcallArguments = zip(translatedCase.conversions, caseNames).map { conversion, caseName in
+          // '0' is treated the same as a null pointer.
+          let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? 0" : ""
+          let result = conversion.native.conversion.render(&printer, caseName)
+          return "\(result)\(nullConversion)"
+        }
+        printer.print(
+          """
+          return withVaList([\(upcallArguments.joined(separator: ", "))]) {
+            return environment.interface.CallStaticObjectMethodV(environment, recordClass$, fromJNIID$, $0)
+          }
+          """
+        )
+      }
+    }
   }
 
   private func printSwiftFunctionThunk(

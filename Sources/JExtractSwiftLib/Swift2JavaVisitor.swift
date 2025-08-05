@@ -170,6 +170,8 @@ final class Swift2JavaVisitor {
         let importedCase = ImportedEnumCase(
           name: caseElement.name.text,
           parameters: parameters ?? [],
+          swiftDecl: node,
+          enumType: SwiftNominalType(nominalTypeDecl: typeContext.swiftNominal),
           caseFunction: caseFunction
         )
 

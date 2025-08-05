@@ -55,12 +55,24 @@ public final class ImportedEnumCase: ImportedDecl, CustomStringConvertible {
   /// The enum parameters
   var parameters: [SwiftEnumCaseParameter]
 
+  var swiftDecl: any DeclSyntaxProtocol
+
+  var enumType: SwiftNominalType
+
   /// A function that represents the Swift static "initializer" for cases
   var caseFunction: ImportedFunc
 
-  init(name: String, parameters: [SwiftEnumCaseParameter], caseFunction: ImportedFunc) {
+  init(
+    name: String,
+    parameters: [SwiftEnumCaseParameter],
+    swiftDecl: any DeclSyntaxProtocol,
+    enumType: SwiftNominalType,
+    caseFunction: ImportedFunc
+  ) {
     self.name = name
     self.parameters = parameters
+    self.swiftDecl = swiftDecl
+    self.enumType = enumType
     self.caseFunction = caseFunction
   }
 
@@ -69,9 +81,20 @@ public final class ImportedEnumCase: ImportedDecl, CustomStringConvertible {
     ImportedEnumCase {
       name: \(name),
       parameters: \(parameters),
+      swiftDecl: \(swiftDecl),
+      enumType: \(enumType),
       caseFunction: \(caseFunction)
     }
     """
+  }
+}
+
+extension ImportedEnumCase: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  public static func == (lhs: ImportedEnumCase, rhs: ImportedEnumCase) -> Bool {
+    return lhs === rhs
   }
 }
 

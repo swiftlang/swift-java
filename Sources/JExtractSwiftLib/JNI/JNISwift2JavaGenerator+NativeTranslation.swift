@@ -61,6 +61,23 @@ extension JNISwift2JavaGenerator {
       )
     }
 
+    func translateParameters(
+      _ parameters: [SwiftParameter],
+      translatedParameters: [TranslatedParameter],
+      methodName: String,
+      parentName: String
+    ) throws -> [NativeParameter] {
+      try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
+        let parameterName = translatedParameter.parameter.name
+        return try translate(
+          swiftParameter: swiftParameter,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName
+        )
+      }
+    }
+
     func translate(
       swiftParameter: SwiftParameter,
       parameterName: String,

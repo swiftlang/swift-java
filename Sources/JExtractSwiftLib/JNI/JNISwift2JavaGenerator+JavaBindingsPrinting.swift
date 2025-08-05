@@ -193,7 +193,6 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    // TODO: Move this to seperate file +Enum?
     printEnumDiscriminator(&printer, decl)
     printer.println()
     printEnumCaseInterface(&printer, decl)
@@ -212,7 +211,8 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-//    printer.print("public sealed interface Case {}")
+    printer.print("public sealed interface Case {}")
+    // TODO: Print `getCase()` method to allow for easy pattern matching.
   }
 
   private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
@@ -222,11 +222,54 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumCases(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-//    for enumCase in decl.cases {
-//      printer.printBraceBlock("public static final \(enumCase.name.firstCharacterUppercased) implements Case") { printer in
-//
-//      }
-//    }
+    for enumCase in decl.cases {
+      guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+        return
+      }
+
+      let members = translatedCase.translatedValues.map {
+        $0.parameter.renderParameter()
+      }
+
+      let caseName = enumCase.name.firstCharacterUppercased
+      let hasParameters = !enumCase.parameters.isEmpty
+
+      // Print record
+      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
+        if hasParameters {
+          let nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
+            "\(conversion.native.javaType) \(value.parameter.name)"
+          }
+          printer.print(#"@SuppressWarnings("unused")"#)
+          printer.printBraceBlock("static \(caseName) fromJNI(\(nativeResults.joined(separator: ", ")))") { printer in
+            let memberValues = zip(translatedCase.translatedValues, translatedCase.conversions).map { (value, conversion) in
+              let result = conversion.translated.conversion.render(&printer, value.parameter.name)
+              return result
+            }
+            printer.print("return new \(caseName)(\(memberValues.joined(separator: ", ")));")
+          }
+        }
+      }
+
+      // TODO: Optimize when all values can just be passed directly, instead of going through "middle type"?
+
+      // Print method to get enum as case
+      printer.printBraceBlock("public Optional<\(caseName)> getAs\(caseName)()") { printer in
+        // TODO: Check that discriminator is OK
+        if hasParameters {
+          printer.print(
+          """
+          return Optional.of($getAs\(caseName)(this.$memoryAddress()));
+          """
+          )
+        } else {
+          printer.print("return Optional.of(new \(caseName)());")
+        }
+      }
+      printer.print("private static native \(caseName) $getAs\(caseName)(long self);")
+
+      printer.println()
+    }
   }
 
   private func printFunctionDowncallMethods(
