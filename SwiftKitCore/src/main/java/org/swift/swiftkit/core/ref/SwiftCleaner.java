@@ -21,19 +21,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 
-public class Cleaner implements Runnable {
+public class SwiftCleaner implements Runnable {
     final ReferenceQueue<Object> referenceQueue;
     final List<PhantomCleanable> list;
 
-    private Cleaner() {
+    private SwiftCleaner() {
         this.referenceQueue = new ReferenceQueue<>();
         this.list = Collections.synchronizedList(new LinkedList<>());
     }
 
-    public static Cleaner create(ThreadFactory threadFactory) {
-        Cleaner cleaner = new Cleaner();
-        cleaner.start(threadFactory);
-        return cleaner;
+    public static SwiftCleaner create(ThreadFactory threadFactory) {
+        SwiftCleaner swiftCleaner = new SwiftCleaner();
+        swiftCleaner.start(threadFactory);
+        return swiftCleaner;
     }
 
     void start(ThreadFactory threadFactory) {

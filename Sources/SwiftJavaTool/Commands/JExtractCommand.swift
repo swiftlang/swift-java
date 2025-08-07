@@ -122,7 +122,7 @@ extension SwiftJava.JExtractCommand {
         () // OK
       }
     } else if self.mode == .ffm {
-      guard self.memoryManagementMode == .forceExplicit else {
+      guard self.memoryManagementMode == .explicit else {
         throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
       }
     }

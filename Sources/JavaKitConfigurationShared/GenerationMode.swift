@@ -81,24 +81,20 @@ extension JExtractMinimumAccessLevelMode {
 /// Configures how memory should be managed by the user
 public enum JExtractMemoryManagementMode: String, Codable {
   /// Force users to provide an explicit `SwiftArena` to all calls that require them.
-  case forceExplicit
+  case explicit
 
   /// Provide both explicit `SwiftArena` support
   /// and a default global automatic `SwiftArena` that will deallocate memory when the GC decides to.
-  case allowAutomatic
-
-  /// Force all memory management to a default global automatic `SwiftArena`
-  /// that will deallocate memory when the GC decides to.
-  case forceAutomatic
+  case allowGlobalAutomatic
 
   public static var `default`: Self {
-    .forceExplicit
+    .explicit
   }
 
   public var requiresGlobalArena: Bool {
     switch self {
-    case .forceExplicit: false
-    case .allowAutomatic, .forceAutomatic: true
+    case .explicit: false
+    case .allowGlobalAutomatic: true
     }
   }
 }

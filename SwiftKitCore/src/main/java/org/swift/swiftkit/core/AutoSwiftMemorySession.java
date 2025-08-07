@@ -15,7 +15,7 @@
 package org.swift.swiftkit.core;
 
 
-import org.swift.swiftkit.core.ref.Cleaner;
+import org.swift.swiftkit.core.ref.SwiftCleaner;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
@@ -38,10 +38,10 @@ import java.util.concurrent.ThreadFactory;
  * <p> Whenever possible, prefer using an explicitly managed {@link SwiftArena}, such as {@link SwiftArena#ofConfined()}.
  */
 final class AutoSwiftMemorySession implements SwiftArena {
-    private final Cleaner cleaner;
+    private final SwiftCleaner swiftCleaner;
 
     public AutoSwiftMemorySession(ThreadFactory cleanerThreadFactory) {
-        this.cleaner = Cleaner.create(cleanerThreadFactory);
+        this.swiftCleaner = SwiftCleaner.create(cleanerThreadFactory);
     }
 
     @Override
@@ -51,6 +51,6 @@ final class AutoSwiftMemorySession implements SwiftArena {
         // We make sure we don't capture `instance` in the
         // cleanup action, so we can ignore the warning below.
         var cleanupAction = instance.$createCleanup();
-        cleaner.register(instance, cleanupAction);
+        swiftCleaner.register(instance, cleanupAction);
     }
 }

@@ -18,17 +18,17 @@ import java.lang.ref.PhantomReference;
 
 public class PhantomCleanable extends PhantomReference<Object> {
     private final Runnable cleanupAction;
-    private final Cleaner cleaner;
+    private final SwiftCleaner swiftCleaner;
 
-    public PhantomCleanable(Object referent, Cleaner cleaner, Runnable cleanupAction) {
-        super(referent, cleaner.referenceQueue);
+    public PhantomCleanable(Object referent, SwiftCleaner swiftCleaner, Runnable cleanupAction) {
+        super(referent, swiftCleaner.referenceQueue);
         this.cleanupAction = cleanupAction;
-        this.cleaner = cleaner;
-        cleaner.list.add(this);
+        this.swiftCleaner = swiftCleaner;
+        swiftCleaner.list.add(this);
     }
 
     public void cleanup() {
-        if (cleaner.list.remove(this)) {
+        if (swiftCleaner.list.remove(this)) {
             cleanupAction.run();
         }
     }

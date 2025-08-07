@@ -16,8 +16,6 @@ import JavaTypes
 
 // MARK: Defaults
 
-private let globalArenaName = "GLOBAL_ARENA"
-
 extension JNISwift2JavaGenerator {
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
@@ -74,11 +72,6 @@ extension JNISwift2JavaGenerator {
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
-      if config.effectiveMemoryManagementMode.requiresGlobalArena {
-        printer.print("static final SwiftArena \(globalArenaName) = SwiftArena.ofAuto();")
-        printer.println()
-      }
-
       printer.print(
         """
         static final String LIB_NAME = "\(swiftModuleName)";
@@ -277,7 +270,8 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock(
         "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
       ) { printer in
-        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + ["\(swiftModuleName).\(globalArenaName)"]
+        let globalArenaName = "SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA"
+        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
         if translatedDecl.translatedFunctionSignature.resultType.javaType.isVoid {
           printer.print("\(call);")
@@ -288,10 +282,6 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    // Make any function with explicit arena private if we force automatic.
-    if config.effectiveMemoryManagementMode == .forceAutomatic && translatedSignature.requiresSwiftArena {
-      modifiers[0] = "private"
-    }
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }

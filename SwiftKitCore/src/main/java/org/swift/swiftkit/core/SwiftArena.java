@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadFactory;
  * <p> A confined arena has an associated owner thread that confines some operations to
  * associated owner thread such as {@link ClosableSwiftArena#close()}.
  */
-public interface SwiftArena  {
+public interface SwiftArena {
     /**
      * Register a Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
