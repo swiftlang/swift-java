@@ -14,6 +14,8 @@
 
 package org.swift.swiftkit.core;
 
+import java.util.concurrent.ThreadFactory;
+
 /**
  * A Swift arena manages Swift allocated memory for classes, structs, enums etc.
  * When an arena is closed, it will destroy all managed swift objects in a way appropriate to their type.
@@ -27,6 +29,15 @@ public interface SwiftArena  {
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
      */
     void register(SwiftInstance instance);
+
+    static ClosableSwiftArena ofConfined() {
+        return new ConfinedSwiftMemorySession(Thread.currentThread());
+    }
+
+    static SwiftArena ofAuto() {
+        ThreadFactory cleanerThreadFactory = r -> new Thread(r, "AutoSwiftArenaCleanerThread");
+        return new AutoSwiftMemorySession(cleanerThreadFactory);
+    }
 }
 
 /**

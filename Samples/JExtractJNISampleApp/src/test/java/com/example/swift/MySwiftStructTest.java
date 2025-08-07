@@ -16,13 +16,14 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.SwiftArena;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftStructTest {
     @Test
     void init() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             assertEquals(1337, s.getCapacity());
             assertEquals(42, s.getLen());
@@ -31,7 +32,7 @@ public class MySwiftStructTest {
 
     @Test
     void getAndSetLen() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             s.setLen(100);
             assertEquals(100, s.getLen());
@@ -40,7 +41,7 @@ public class MySwiftStructTest {
 
     @Test
     void increaseCap() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             long newCap = s.increaseCap(10);
             assertEquals(1347, newCap);
