@@ -67,6 +67,9 @@ extension SwiftJava {
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
     var minimumInputAccessLevel: JExtractMinimumAccessLevelMode = .default
 
+    @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allow-automatic`, user can omit this parameter and a global GC-based arena will be used. `force-automatic` removes all explicit memory management.")
+    var memoryManagementMode: JExtractMemoryManagementMode = .forceExplicit
+
     @Option(
       help: """
             A swift-java configuration file for a given Swift module name on which this module depends,
@@ -89,6 +92,7 @@ extension SwiftJava.JExtractCommand {
     config.writeEmptyFiles = writeEmptyFiles
     config.unsignedNumbersMode = unsignedNumbers
     config.minimumInputAccessLevelMode = minimumInputAccessLevel
+    config.memoryManagementMode = memoryManagementMode
 
     try checkModeCompatibility()
 
@@ -116,6 +120,10 @@ extension SwiftJava.JExtractCommand {
         throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
       case .wrapGuava:
         () // OK
+      }
+    } else if self.mode == .ffm {
+      guard self.memoryManagementMode == .forceExplicit else {
+        throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
       }
     }
   }
@@ -148,3 +156,4 @@ struct IllegalModeCombinationError: Error {
 extension JExtractGenerationMode: ExpressibleByArgument {}
 extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
 extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
+extension JExtractMemoryManagementMode: ExpressibleByArgument {}

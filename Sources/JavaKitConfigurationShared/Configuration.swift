@@ -51,6 +51,11 @@ public struct Configuration: Codable {
     minimumInputAccessLevelMode ?? .default
   }
 
+  public var memoryManagementMode: JExtractMemoryManagementMode?
+  public var effectiveMemoryManagementMode: JExtractMemoryManagementMode {
+    memoryManagementMode ?? .forceExplicit
+  }
+
   // ==== java 2 swift ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
