@@ -53,7 +53,6 @@ public class EnumBenchmark {
         Vehicle.Motorbike motorbike = state.vehicle.getAsMotorbike().orElseThrow();
         bh.consume(motorbike.arg0());
         bh.consume(motorbike.horsePower());
-
         return motorbike;
     }
 }

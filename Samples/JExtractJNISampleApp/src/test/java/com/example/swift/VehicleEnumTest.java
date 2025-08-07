@@ -127,4 +127,45 @@ public class VehicleEnumTest {
             assertEquals("BMW", car.arg0());
         }
     }
+
+    @Test
+    void getDiscriminator() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            assertEquals(Vehicle.Discriminator.BICYCLE, Vehicle.bicycle(arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.CAR, Vehicle.car("BMW", arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.MOTORBIKE, Vehicle.motorbike("Yamaha", 750, arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.TRANSFORMER, Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.bicycle(arena), arena).getDiscriminator());
+        }
+    }
+
+    @Test
+    void getCase() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            Vehicle.Case caseElement = vehicle.getCase(arena);
+            assertInstanceOf(Vehicle.Bicycle.class, caseElement);
+        }
+    }
+
+    @Test
+    void switchGetCase() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            switch (vehicle.getCase(arena)) {
+                case Vehicle.Bicycle b:
+                    fail("Was bicycle");
+                    break;
+                case Vehicle.Car car:
+                    assertEquals("BMW", car.arg0());
+                    break;
+                case Vehicle.Motorbike motorbike:
+                    fail("Was motorbike");
+                    break;
+                case Vehicle.Transformer transformer:
+                    fail("Was transformer");
+                    break;
+            }
+        }
+    }
+
 }

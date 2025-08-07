@@ -16,6 +16,7 @@ public enum Vehicle {
   case bicycle
   case car(String)
   case motorbike(String, horsePower: Int64)
+  indirect case transformer(front: Vehicle, back: Vehicle)
 
   public init?(name: String) {
     switch name {
@@ -31,16 +32,19 @@ public enum Vehicle {
     case .bicycle: "bicycle"
     case .car: "car"
     case .motorbike: "motorbike"
+    case .transformer: "transformer"
     }
   }
 
   public func isFasterThan(other: Vehicle) -> Bool {
     switch (self, other) {
-      case (.bicycle, .bicycle), (.bicycle, .car), (.bicycle, .motorbike): false
+      case (.bicycle, .bicycle), (.bicycle, .car), (.bicycle, .motorbike), (.bicycle, .transformer): false
       case (.car, .bicycle): true
-      case (.car, .motorbike), (.car, .car): false
+      case (.car, .motorbike), (.car, .transformer), (.car, .car): false
       case (.motorbike, .bicycle), (.motorbike, .car): true
-      case (.motorbike, .motorbike): false
+      case (.motorbike, .motorbike), (.motorbike, .transformer): false
+      case (.transformer, .bicycle), (.transformer, .car), (.transformer, .motorbike): true
+      case (.transformer, .transformer): false
     }
   }
 
@@ -48,7 +52,8 @@ public enum Vehicle {
     switch self {
       case .bicycle: self = .car("Unknown")
       case .car: self = .motorbike("Unknown", horsePower: 0)
-      case .motorbike: break
+      case .motorbike: self = .transformer(front: .car("BMW"), back: self)
+      case .transformer: break
     }
   }
 }

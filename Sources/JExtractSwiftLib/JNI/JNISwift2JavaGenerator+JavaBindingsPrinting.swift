@@ -208,11 +208,35 @@ extension JNISwift2JavaGenerator {
         decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
       )
     }
+
+    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+    }
+    printer.print("private static native int $getDiscriminator(long self);")
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.print("public sealed interface Case {}")
-    // TODO: Print `getCase()` method to allow for easy pattern matching.
+    printer.println()
+
+    let requiresSwiftArena = decl.cases.compactMap {
+      self.translatedEnumCase(for: $0)
+    }.contains(where: \.requiresSwiftArena)
+
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+      printer.print("Discriminator discriminator = this.getDiscriminator();")
+      printer.printBraceBlock("switch (discriminator)") { printer in
+        for enumCase in decl.cases {
+          guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+            continue
+          }
+          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
+          printer.print("case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();")
+        }
+      }
+      printer.print(#"throw new RuntimeException("Unknown discriminator value " + discriminator);"#)
+    }
   }
 
   private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
@@ -233,12 +257,16 @@ extension JNISwift2JavaGenerator {
 
       let caseName = enumCase.name.firstCharacterUppercased
       let hasParameters = !enumCase.parameters.isEmpty
+      let requiresSwiftArena = translatedCase.requiresSwiftArena
 
       // Print record
       printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
         if hasParameters {
-          let nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
+          var nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
             "\(conversion.native.javaType) \(value.parameter.name)"
+          }
+          if requiresSwiftArena {
+            nativeResults.append("SwiftArena swiftArena$")
           }
           printer.print(#"@SuppressWarnings("unused")"#)
           printer.printBraceBlock("static \(caseName) fromJNI(\(nativeResults.joined(separator: ", ")))") { printer in
@@ -254,19 +282,33 @@ extension JNISwift2JavaGenerator {
       // TODO: Optimize when all values can just be passed directly, instead of going through "middle type"?
 
       // Print method to get enum as case
-      printer.printBraceBlock("public Optional<\(caseName)> getAs\(caseName)()") { printer in
-        // TODO: Check that discriminator is OK
+      printer.printBraceBlock("public Optional<\(caseName)> getAs\(caseName)(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+        printer.print(
+          """
+          if (this.getDiscriminator() != Discriminator.\(caseName.uppercased())) {
+            return Optional.empty();
+          }
+          """
+        )
         if hasParameters {
+          var arguments = ["this.$memoryAddress()"]
+          if requiresSwiftArena {
+            arguments.append("swiftArena$")
+          }
           printer.print(
           """
-          return Optional.of($getAs\(caseName)(this.$memoryAddress()));
+          return Optional.of($getAs\(caseName)(\(arguments.joined(separator: ", "))));
           """
           )
         } else {
           printer.print("return Optional.of(new \(caseName)());")
         }
       }
-      printer.print("private static native \(caseName) $getAs\(caseName)(long self);")
+      var nativeParameters = ["long self"]
+      if requiresSwiftArena {
+        nativeParameters.append("SwiftArena swiftArena$")
+      }
+      printer.print("private static native \(caseName) $getAs\(caseName)(\(nativeParameters.joined(separator: ", ")));")
 
       printer.println()
     }

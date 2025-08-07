@@ -572,6 +572,10 @@ extension JNISwift2JavaGenerator {
     let translatedValues: [TranslatedParameter]
 
     let conversions: [(translated: TranslatedResult, native: NativeResult)]
+
+    var requiresSwiftArena: Bool {
+      conversions.contains(where: \.translated.conversion.requiresSwiftArena)
+    }
   }
 
   struct TranslatedFunctionDecl {
