@@ -16,6 +16,8 @@ import JavaTypes
 
 // MARK: Defaults
 
+private let globalArenaName = "GLOBAL_ARENA"
+
 extension JNISwift2JavaGenerator {
   /// Default set Java imports for every generated file
   static let defaultJavaImports: Array<String> = [
@@ -72,6 +74,11 @@ extension JNISwift2JavaGenerator {
     printImports(&printer)
 
     printModuleClass(&printer) { printer in
+      if config.effectiveMemoryManagementMode.requiresGlobalArena {
+        printer.print("static final SwiftArena \(globalArenaName) = SwiftArena.ofAuto();")
+        printer.println()
+      }
+
       printer.print(
         """
         static final String LIB_NAME = "\(swiftModuleName)";
@@ -247,29 +254,50 @@ extension JNISwift2JavaGenerator {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
+    let translatedSignature = translatedDecl.translatedFunctionSignature
 
     var modifiers = ["public"]
+
     if decl.isStatic || decl.isInitializer || !decl.hasParent {
       modifiers.append("static")
     }
 
-    let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map({ $0.parameter.renderParameter() })
-    if translatedSignature.requiresSwiftArena {
-      parameters.append("SwiftArena swiftArena$")
-    }
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
     let throwsClause = decl.isThrowing ? " throws Exception" : ""
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
-    let modifiersStr = modifiers.joined(separator: " ")
     let parametersStr = parameters.joined(separator: ", ")
 
+    // Print default global arena variation
+    if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
+      printDeclDocumentation(&printer, decl)
+      printer.printBraceBlock(
+        "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      ) { printer in
+        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + ["\(swiftModuleName).\(globalArenaName)"]
+        let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
+        if translatedDecl.translatedFunctionSignature.resultType.javaType.isVoid {
+          printer.print("\(call);")
+        } else {
+          printer.print("return \(call);")
+        }
+      }
+      printer.println()
+    }
+
+    // Make any function with explicit arena private if we force automatic.
+    if config.effectiveMemoryManagementMode == .forceAutomatic && translatedSignature.requiresSwiftArena {
+      modifiers[0] = "private"
+    }
+    if translatedSignature.requiresSwiftArena {
+      parameters.append("SwiftArena swiftArena$")
+    }
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
-      "\(annotationsStr)\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     ) { printer in
       printDowncall(&printer, decl)
     }

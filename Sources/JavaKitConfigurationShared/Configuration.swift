@@ -53,7 +53,7 @@ public struct Configuration: Codable {
 
   public var memoryManagementMode: JExtractMemoryManagementMode?
   public var effectiveMemoryManagementMode: JExtractMemoryManagementMode {
-    memoryManagementMode ?? .forceExplicit
+    memoryManagementMode ?? .default
   }
 
   // ==== java 2 swift ---------------------------------------------------------

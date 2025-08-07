@@ -68,7 +68,7 @@ extension SwiftJava {
     var minimumInputAccessLevel: JExtractMinimumAccessLevelMode = .default
 
     @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allow-automatic`, user can omit this parameter and a global GC-based arena will be used. `force-automatic` removes all explicit memory management.")
-    var memoryManagementMode: JExtractMemoryManagementMode = .forceExplicit
+    var memoryManagementMode: JExtractMemoryManagementMode = .default
 
     @Option(
       help: """

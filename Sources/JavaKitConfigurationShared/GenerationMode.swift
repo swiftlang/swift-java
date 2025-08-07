@@ -90,4 +90,15 @@ public enum JExtractMemoryManagementMode: String, Codable {
   /// Force all memory management to a default global automatic `SwiftArena`
   /// that will deallocate memory when the GC decides to.
   case forceAutomatic
+
+  public static var `default`: Self {
+    .forceExplicit
+  }
+
+  public var requiresGlobalArena: Bool {
+    switch self {
+    case .forceExplicit: false
+    case .allowAutomatic, .forceAutomatic: true
+    }
+  }
 }
