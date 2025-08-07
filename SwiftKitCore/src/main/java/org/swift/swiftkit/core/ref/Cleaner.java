@@ -1,17 +1,19 @@
 package org.swift.swiftkit.core.ref;
 
 import java.lang.ref.ReferenceQueue;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 
 public class Cleaner implements Runnable {
     final ReferenceQueue<Object> referenceQueue;
-    final LinkedList<PhantomCleanable> list;
+    final List<PhantomCleanable> list;
 
     private Cleaner() {
         this.referenceQueue = new ReferenceQueue<>();
-        this.list = new LinkedList<>();
+        this.list = Collections.synchronizedList(new LinkedList<>());
     }
 
     public static Cleaner create(ThreadFactory threadFactory) {
