@@ -15,7 +15,7 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MySwiftClassTest {
     @Test
     void init_noParameters() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(arena);
             assertNotNull(c);
         }
@@ -34,7 +34,7 @@ public class MySwiftClassTest {
 
     @Test
     void init_withParameters() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(1337, 42, arena);
             assertNotNull(c);
         }
@@ -42,7 +42,7 @@ public class MySwiftClassTest {
 
     @Test
     void sum() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(30, c.sum());
         }
@@ -50,7 +50,7 @@ public class MySwiftClassTest {
 
     @Test
     void xMultiplied() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(200, c.xMultiplied(10));
         }
@@ -58,7 +58,7 @@ public class MySwiftClassTest {
 
     @Test
     void throwingFunction() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             Exception exception = assertThrows(Exception.class, () -> c.throwingFunction());
 
@@ -68,7 +68,7 @@ public class MySwiftClassTest {
 
     @Test
     void constant() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(100, c.getConstant());
         }
@@ -76,7 +76,7 @@ public class MySwiftClassTest {
 
     @Test
     void mutable() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(0, c.getMutable());
             c.setMutable(42);
@@ -86,7 +86,7 @@ public class MySwiftClassTest {
 
     @Test
     void product() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(200, c.getProduct());
         }
@@ -94,7 +94,7 @@ public class MySwiftClassTest {
 
     @Test
     void throwingVariable() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
 
             Exception exception = assertThrows(Exception.class, () -> c.getThrowingVariable());
@@ -105,7 +105,7 @@ public class MySwiftClassTest {
 
     @Test
     void mutableDividedByTwo() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(0, c.getMutableDividedByTwo());
             c.setMutable(20);
@@ -117,7 +117,7 @@ public class MySwiftClassTest {
 
     @Test
     void isWarm() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertFalse(c.isWarm());
         }
@@ -125,7 +125,7 @@ public class MySwiftClassTest {
 
     @Test
     void sumWithX() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
             MySwiftClass c2 = MySwiftClass.init(50, 10, arena);
             assertEquals(70, c1.sumX(c2));
@@ -134,7 +134,7 @@ public class MySwiftClassTest {
 
     @Test
     void copy() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
             MySwiftClass c2 = c1.copy(arena);
 
@@ -146,7 +146,7 @@ public class MySwiftClassTest {
 
     @Test
     void addXWithJavaLong() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
             Long javaLong = 50L;
             assertEquals(70, c1.addXWithJavaLong(javaLong));
