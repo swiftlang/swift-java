@@ -102,9 +102,14 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    for enumCase in type.cases {
-      printEnumCase(&printer, enumCase)
+    if type.swiftNominal.kind == .enum {
+      printEnumDiscriminator(&printer, type)
       printer.println()
+
+      for enumCase in type.cases {
+        printEnumCase(&printer, enumCase)
+        printer.println()
+      }
     }
 
     for method in type.methods {
@@ -118,6 +123,28 @@ extension JNISwift2JavaGenerator {
     }
 
     printDestroyFunctionThunk(&printer, type)
+  }
+
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    printCDecl(
+      &printer,
+      javaMethodName: "$getDiscriminator",
+      parentName: type.swiftNominal.name,
+      parameters: [selfPointerParam],
+      resultType: .int
+    ) { printer in
+      let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+        &printer,
+        swiftParentName: type.swiftNominal.name,
+        selfPointerParam
+      )
+      printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
+        for (idx, enumCase) in type.cases.enumerated() {
+          printer.print("case .\(enumCase.name): return \(idx)")
+        }
+      }
+    }
   }
 
   private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {

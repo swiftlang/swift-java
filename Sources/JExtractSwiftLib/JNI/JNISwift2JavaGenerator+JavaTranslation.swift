@@ -88,26 +88,12 @@ extension JNISwift2JavaGenerator {
         parentName: parentName
       )
 
-      let conversions = try enumCase.parameters.map {
-        let result = SwiftResult(convention: .direct, type: $0.type)
+      let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
+        let result = SwiftResult(convention: .direct, type: parameter.type)
         let translatedResult = try self.translate(swiftResult: result)
-        let nativeResult = try nativeTranslation.translate(swiftResult: result)
+        let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: parameter.name ?? "arg\(idx)")
         return (translatedResult, nativeResult)
       }
-
-//      let nativeParameters = try nativeTranslation.translateParameters(
-//        enumCase.parameters.map {
-//          SwiftParameter(
-//            convention: .byValue,
-//            argumentLabel: $0.name,
-//            parameterName: $0.name,
-//            type: $0.type
-//          )
-//        },
-//        translatedParameters: translatedParameters,
-//        methodName: methodName,
-//        parentName: parentName
-//      )
 
       return TranslatedEnumCase(
         name: enumCase.name.firstCharacterUppercased,

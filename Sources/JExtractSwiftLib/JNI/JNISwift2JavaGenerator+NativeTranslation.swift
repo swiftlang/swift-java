@@ -385,7 +385,8 @@ extension JNISwift2JavaGenerator {
     }
 
     func translate(
-      swiftResult: SwiftResult
+      swiftResult: SwiftResult,
+      resultName: String = "result"
     ) throws -> NativeResult {
       switch swiftResult.type {
       case .nominal(let nominalType):
@@ -416,7 +417,7 @@ extension JNISwift2JavaGenerator {
 
         return NativeResult(
           javaType: .long,
-          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type)),
+          conversion: .getJNIValue(.allocateSwiftValue(name: resultName, swiftType: swiftResult.type)),
           outParameters: []
         )
 
