@@ -22,6 +22,7 @@ package enum SwiftAPIKind {
   case initializer
   case getter
   case setter
+  case enumCase
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -32,6 +33,7 @@ package class ImportedNominalType: ImportedDecl {
   package var initializers: [ImportedFunc] = []
   package var methods: [ImportedFunc] = []
   package var variables: [ImportedFunc] = []
+  package var cases: [ImportedEnumCase] = []
 
   init(swiftNominal: SwiftNominalTypeDeclaration) {
     self.swiftNominal = swiftNominal
@@ -43,6 +45,56 @@ package class ImportedNominalType: ImportedDecl {
 
   var qualifiedName: String {
     self.swiftNominal.qualifiedName
+  }
+}
+
+public final class ImportedEnumCase: ImportedDecl, CustomStringConvertible {
+  /// The case name
+  public var name: String
+
+  /// The enum parameters
+  var parameters: [SwiftEnumCaseParameter]
+
+  var swiftDecl: any DeclSyntaxProtocol
+
+  var enumType: SwiftNominalType
+
+  /// A function that represents the Swift static "initializer" for cases
+  var caseFunction: ImportedFunc
+
+  init(
+    name: String,
+    parameters: [SwiftEnumCaseParameter],
+    swiftDecl: any DeclSyntaxProtocol,
+    enumType: SwiftNominalType,
+    caseFunction: ImportedFunc
+  ) {
+    self.name = name
+    self.parameters = parameters
+    self.swiftDecl = swiftDecl
+    self.enumType = enumType
+    self.caseFunction = caseFunction
+  }
+
+  public var description: String {
+    """
+    ImportedEnumCase {
+      name: \(name),
+      parameters: \(parameters),
+      swiftDecl: \(swiftDecl),
+      enumType: \(enumType),
+      caseFunction: \(caseFunction)
+    }
+    """
+  }
+}
+
+extension ImportedEnumCase: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  public static func == (lhs: ImportedEnumCase, rhs: ImportedEnumCase) -> Bool {
+    return lhs === rhs
   }
 }
 
@@ -113,6 +165,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     let prefix = switch self.apiKind {
     case .getter: "getter:"
     case .setter: "setter:"
+    case .enumCase: "case:"
     case .function, .initializer: ""
     }
 

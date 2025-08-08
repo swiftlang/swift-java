@@ -39,6 +39,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl] = [:]
+  var translatedEnumCases: [ImportedEnumCase: TranslatedEnumCase] = [:]
 
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.

@@ -102,6 +102,16 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    if type.swiftNominal.kind == .enum {
+      printEnumDiscriminator(&printer, type)
+      printer.println()
+
+      for enumCase in type.cases {
+        printEnumCase(&printer, enumCase)
+        printer.println()
+      }
+    }
+
     for method in type.methods {
       printSwiftFunctionThunk(&printer, method)
       printer.println()
@@ -113,6 +123,87 @@ extension JNISwift2JavaGenerator {
     }
 
     printDestroyFunctionThunk(&printer, type)
+  }
+
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    printCDecl(
+      &printer,
+      javaMethodName: "$getDiscriminator",
+      parentName: type.swiftNominal.name,
+      parameters: [selfPointerParam],
+      resultType: .int
+    ) { printer in
+      let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+        &printer,
+        swiftParentName: type.swiftNominal.name,
+        selfPointerParam
+      )
+      printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
+        for (idx, enumCase) in type.cases.enumerated() {
+          printer.print("case .\(enumCase.name): return \(idx)")
+        }
+      }
+    }
+  }
+
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {
+    guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+      return
+    }
+
+    // Print static case initializer
+    printSwiftFunctionThunk(&printer, enumCase.caseFunction)
+    printer.println()
+
+    // Print getAsCase method
+    if !enumCase.parameters.isEmpty {
+      let selfParameter = JavaParameter(name: "self", type: .long)
+
+      let resultType = JavaType.class(package: javaPackage, name: "\(translatedCase.enumName).\(translatedCase.name).$NativeParameters")
+      printCDecl(
+        &printer,
+        javaMethodName: "$getAs\(translatedCase.name)",
+        parentName: "\(translatedCase.enumName)",
+        parameters: [selfParameter],
+        resultType: resultType
+      ) { printer in
+        let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+          &printer,
+          swiftParentName: enumCase.enumType.nominalTypeDecl.name,
+          selfParameter
+        )
+        let caseNames = enumCase.parameters.enumerated().map { idx, parameter in
+          parameter.name ?? "_\(idx)"
+        }
+        let caseNamesWithLet = caseNames.map { "let \($0)" }
+        let methodSignature = MethodSignature(resultType: .void, parameterTypes: translatedCase.conversions.map(\.native.javaType))
+        // TODO: Caching of class and static method ID.
+        printer.print(
+        """
+        guard case .\(enumCase.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
+          fatalError("Expected enum case '\(enumCase.name)', but was '\\(self$.pointee)'!")
+        }
+        let class$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(translatedCase.enumName)$\(translatedCase.name)$$NativeParameters")!
+        let constructorID$ = environment.interface.GetMethodID(environment, class$, "<init>", "\(methodSignature.mangledName)")!
+        """
+        )
+
+        let upcallArguments = zip(translatedCase.conversions, caseNames).map { conversion, caseName in
+          // '0' is treated the same as a null pointer.
+          let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? 0" : ""
+          let result = conversion.native.conversion.render(&printer, caseName)
+          return "\(result)\(nullConversion)"
+        }
+        printer.print(
+          """
+          return withVaList([\(upcallArguments.joined(separator: ", "))]) {
+            return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
+          }
+          """
+        )
+      }
+    }
   }
 
   private func printSwiftFunctionThunk(
@@ -189,6 +280,18 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
+
+    case .enumCase:
+      let downcallArguments = zip(
+        decl.functionSignature.parameters,
+        arguments
+      ).map { originalParam, argument in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+        return "\(label)\(argument)"
+      }
+
+      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: ", ")))" : ""
+      result = "\(callee).\(decl.name)\(associatedValues)"
 
     case .getter:
       result = "\(tryClause)\(callee).\(decl.name)"

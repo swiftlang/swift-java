@@ -61,6 +61,23 @@ extension JNISwift2JavaGenerator {
       )
     }
 
+    func translateParameters(
+      _ parameters: [SwiftParameter],
+      translatedParameters: [TranslatedParameter],
+      methodName: String,
+      parentName: String
+    ) throws -> [NativeParameter] {
+      try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
+        let parameterName = translatedParameter.parameter.name
+        return try translate(
+          swiftParameter: swiftParameter,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName
+        )
+      }
+    }
+
     func translate(
       swiftParameter: SwiftParameter,
       parameterName: String,
@@ -368,7 +385,8 @@ extension JNISwift2JavaGenerator {
     }
 
     func translate(
-      swiftResult: SwiftResult
+      swiftResult: SwiftResult,
+      resultName: String = "result"
     ) throws -> NativeResult {
       switch swiftResult.type {
       case .nominal(let nominalType):
@@ -399,7 +417,7 @@ extension JNISwift2JavaGenerator {
 
         return NativeResult(
           javaType: .long,
-          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type)),
+          conversion: .getJNIValue(.allocateSwiftValue(name: resultName, swiftType: swiftResult.type)),
           outParameters: []
         )
 

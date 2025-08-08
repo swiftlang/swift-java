@@ -1,0 +1,181 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+package com.example.swift;
+
+import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class VehicleEnumTest {
+    @Test
+    void bicycle() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            assertNotNull(vehicle);
+        }
+    }
+
+    @Test
+    void car() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("Porsche 911", arena);
+            assertNotNull(vehicle);
+        }
+    }
+
+    @Test
+    void motorbike() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, arena);
+            assertNotNull(vehicle);
+        }
+    }
+
+    @Test
+    void initName() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            assertFalse(Vehicle.init("bus", arena).isPresent());
+            Optional<Vehicle> vehicle = Vehicle.init("car", arena);
+            assertTrue(vehicle.isPresent());
+            assertNotNull(vehicle.get());
+        }
+    }
+
+    @Test
+    void nameProperty() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            assertEquals("bicycle", vehicle.getName());
+        }
+    }
+
+    @Test
+    void isFasterThan() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle bicycle = Vehicle.bicycle(arena);
+            Vehicle car = Vehicle.car("Porsche 911", arena);
+            assertFalse(bicycle.isFasterThan(car));
+            assertTrue(car.isFasterThan(bicycle));
+        }
+    }
+
+    @Test
+    void upgrade() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            assertEquals("bicycle", vehicle.getName());
+            vehicle.upgrade();
+            assertEquals("car", vehicle.getName());
+            vehicle.upgrade();
+            assertEquals("motorbike", vehicle.getName());
+        }
+    }
+
+    @Test
+    void getAsBicycle() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            Vehicle.Bicycle bicycle = vehicle.getAsBicycle().orElseThrow();
+            assertNotNull(bicycle);
+        }
+    }
+
+    @Test
+    void getAsCar() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            assertEquals("BMW", car.arg0());
+        }
+    }
+
+    @Test
+    void getAsMotorbike() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, arena);
+            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            assertEquals("Yamaha", motorbike.arg0());
+            assertEquals(750, motorbike.horsePower());
+        }
+    }
+
+    @Test
+    void getAsTransformer() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.car("BMW", arena), arena);
+            Vehicle.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
+            assertTrue(transformer.front().getAsBicycle().isPresent());
+            assertEquals("BMW", transformer.back().getAsCar().orElseThrow().arg0());
+        }
+    }
+
+    @Test
+    void associatedValuesAreCopied() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            assertEquals("BMW", car.arg0());
+            vehicle.upgrade();
+            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            assertNotNull(motorbike);
+            // Motorbike should still remain
+            assertEquals("BMW", car.arg0());
+        }
+    }
+
+    @Test
+    void getDiscriminator() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            assertEquals(Vehicle.Discriminator.BICYCLE, Vehicle.bicycle(arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.CAR, Vehicle.car("BMW", arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.MOTORBIKE, Vehicle.motorbike("Yamaha", 750, arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.TRANSFORMER, Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.bicycle(arena), arena).getDiscriminator());
+        }
+    }
+
+    @Test
+    void getCase() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.bicycle(arena);
+            Vehicle.Case caseElement = vehicle.getCase(arena);
+            assertInstanceOf(Vehicle.Bicycle.class, caseElement);
+        }
+    }
+
+    @Test
+    void switchGetCase() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.car("BMW", arena);
+            switch (vehicle.getCase(arena)) {
+                case Vehicle.Bicycle b:
+                    fail("Was bicycle");
+                    break;
+                case Vehicle.Car car:
+                    assertEquals("BMW", car.arg0());
+                    break;
+                case Vehicle.Motorbike motorbike:
+                    fail("Was motorbike");
+                    break;
+                case Vehicle.Transformer transformer:
+                    fail("Was transformer");
+                    break;
+            }
+        }
+    }
+
+}

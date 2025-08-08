@@ -125,6 +125,11 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
+      if decl.swiftNominal.kind == .enum {
+        printEnumHelpers(&printer, decl)
+        printer.println()
+      }
+
       for initializer in decl.initializers {
         printFunctionDowncallMethods(&printer, initializer)
         printer.println()
@@ -184,6 +189,127 @@ extension JNISwift2JavaGenerator {
   private func printModuleClass(_ printer: inout CodePrinter, body: (inout CodePrinter) -> Void) {
     printer.printBraceBlock("public final class \(swiftModuleName)") { printer in
       body(&printer)
+    }
+  }
+
+  private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printEnumDiscriminator(&printer, decl)
+    printer.println()
+    printEnumCaseInterface(&printer, decl)
+    printer.println()
+    printEnumStaticInitializers(&printer, decl)
+    printer.println()
+    printEnumCases(&printer, decl)
+  }
+
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.printBraceBlock("public enum Discriminator") { printer in
+      printer.print(
+        decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
+      )
+    }
+
+    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+    }
+    printer.print("private static native int $getDiscriminator(long self);")
+  }
+
+  private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print("public sealed interface Case {}")
+    printer.println()
+
+    let requiresSwiftArena = decl.cases.compactMap {
+      self.translatedEnumCase(for: $0)
+    }.contains(where: \.requiresSwiftArena)
+
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+      printer.print("Discriminator discriminator = this.getDiscriminator();")
+      printer.printBraceBlock("switch (discriminator)") { printer in
+        for enumCase in decl.cases {
+          guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+            continue
+          }
+          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
+          printer.print("case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();")
+        }
+      }
+      printer.print(#"throw new RuntimeException("Unknown discriminator value " + discriminator);"#)
+    }
+  }
+
+  private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    for enumCase in decl.cases {
+      printFunctionDowncallMethods(&printer, enumCase.caseFunction)
+    }
+  }
+
+  private func printEnumCases(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    for enumCase in decl.cases {
+      guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+        return
+      }
+
+      let members = translatedCase.translatedValues.map {
+        $0.parameter.renderParameter()
+      }
+
+      let caseName = enumCase.name.firstCharacterUppercased
+      let hasParameters = !enumCase.parameters.isEmpty
+      let requiresSwiftArena = translatedCase.requiresSwiftArena
+
+      // Print record
+      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
+        if hasParameters {
+          var nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
+            "\(conversion.native.javaType) \(value.parameter.name)"
+          }
+          printer.print("record $NativeParameters(\(nativeResults.joined(separator: ", "))) {}")
+          printer.println()
+
+          printer.print(#"@SuppressWarnings("unused")"#)
+          let swiftArenaParameter = requiresSwiftArena ? ", SwiftArena swiftArena$" : ""
+          printer.printBraceBlock("\(caseName)($NativeParameters parameters\(swiftArenaParameter))") { printer in
+            let memberValues = zip(translatedCase.translatedValues, translatedCase.conversions).map { (value, conversion) in
+              let result = conversion.translated.conversion.render(&printer, "parameters.\(value.parameter.name)")
+              return result
+            }
+            printer.print("this(\(memberValues.joined(separator: ", ")));")
+          }
+        }
+      }
+
+      // TODO: Optimize when all values can just be passed directly, instead of going through "middle type"?
+
+      // Print method to get enum as case
+      printer.printBraceBlock("public Optional<\(caseName)> getAs\(caseName)(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+        printer.print(
+          """
+          if (this.getDiscriminator() != Discriminator.\(caseName.uppercased())) {
+            return Optional.empty();
+          }
+          """
+        )
+        if hasParameters {
+          var arguments = ["$getAs\(caseName)(this.$memoryAddress())"]
+          if requiresSwiftArena {
+            arguments.append("swiftArena$")
+          }
+          printer.print(
+          """
+          return Optional.of(new \(caseName)(\(arguments.joined(separator: ", "))));
+          """
+          )
+        } else {
+          printer.print("return Optional.of(new \(caseName)());")
+        }
+      }
+      if hasParameters {
+        printer.print("private static native \(caseName).$NativeParameters $getAs\(caseName)(long self);")
+      }
+
+      printer.println()
     }
   }
 

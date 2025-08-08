@@ -36,7 +36,7 @@ extension JavaType {
     case .void: "V"
     case .array(let elementType): "[" + elementType.mangledName
     case .class(package: let package, name: let name):
-      "L\(package!).\(name);".replacingPeriodsWithSlashes()
+      "L\(package!).\(name.replacingPeriodsWithDollars());".replacingPeriodsWithSlashes()
     }
   }
 }
@@ -144,5 +144,10 @@ extension StringProtocol {
   /// periods (".").
   fileprivate func replacingSlashesWithPeriods() -> String {
     return String(self.map { $0 == "/" ? "." as Character : $0 })
+  }
+
+  /// Return the string after replacing all of the periods (".") with slashes ("$").
+  fileprivate func replacingPeriodsWithDollars() -> String {
+    return String(self.map { $0 == "." ? "$" as Character : $0 })
   }
 }

@@ -41,11 +41,67 @@ extension JNISwift2JavaGenerator {
     return translated
   }
 
+  func translatedEnumCase(
+    for decl: ImportedEnumCase
+  ) -> TranslatedEnumCase? {
+    if let cached = translatedEnumCases[decl] {
+      return cached
+    }
+
+    let translated: TranslatedEnumCase?
+    do {
+      let translation = JavaTranslation(
+        config: config,
+        swiftModuleName: swiftModuleName,
+        javaPackage: self.javaPackage,
+        javaClassLookupTable: self.javaClassLookupTable
+      )
+      translated = try translation.translate(enumCase: decl)
+    } catch {
+      self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
+      translated = nil
+    }
+
+    translatedEnumCases[decl] = translated
+    return translated
+  }
+
   struct JavaTranslation {
     let config: Configuration
     let swiftModuleName: String
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
+
+    func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
+      let nativeTranslation = NativeJavaTranslation(
+        config: self.config,
+        javaPackage: self.javaPackage,
+        javaClassLookupTable: self.javaClassLookupTable
+      )
+
+      let methodName = "" // TODO: Used for closures, replace with better name?
+      let parentName = "" // TODO: Used for closures, replace with better name?
+
+      let translatedValues = try self.translateParameters(
+        enumCase.parameters.map { ($0.name, $0.type) },
+        methodName: methodName,
+        parentName: parentName
+      )
+
+      let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
+        let result = SwiftResult(convention: .direct, type: parameter.type)
+        let translatedResult = try self.translate(swiftResult: result)
+        let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: parameter.name ?? "arg\(idx)")
+        return (translatedResult, nativeResult)
+      }
+
+      return TranslatedEnumCase(
+        name: enumCase.name.firstCharacterUppercased,
+        enumName: enumCase.enumType.nominalTypeDecl.name,
+        translatedValues: translatedValues,
+        conversions: conversions
+      )
+    }
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
       let nativeTranslation = NativeJavaTranslation(
@@ -61,7 +117,7 @@ extension JNISwift2JavaGenerator {
       let javaName = switch decl.apiKind {
       case .getter: decl.javaGetterName
       case .setter: decl.javaSetterName
-      case .function, .initializer: decl.name
+      case .function, .initializer, .enumCase: decl.name
       }
 
       // Swift -> Java
@@ -136,23 +192,14 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: String
     ) throws -> TranslatedFunctionSignature {
-      let parameters = try functionSignature.parameters.enumerated().map { idx, param in
-        let parameterName = param.parameterName ?? "arg\(idx))"
-        return try translateParameter(swiftType: param.type, parameterName: parameterName, methodName: methodName, parentName: parentName)
-      }
+      let parameters = try translateParameters(
+        functionSignature.parameters.map { ($0.parameterName, $0.type )},
+        methodName: methodName,
+        parentName: parentName
+      )
 
       // 'self'
-      let selfParameter: TranslatedParameter?
-      if case .instance(let swiftSelf) = functionSignature.selfParameter {
-        selfParameter = try self.translateParameter(
-          swiftType: swiftSelf.type,
-          parameterName: swiftSelf.parameterName ?? "self",
-          methodName: methodName,
-          parentName: parentName
-        )
-      } else {
-        selfParameter = nil
-      }
+      let selfParameter = try self.translateSelfParameter(functionSignature.selfParameter, methodName: methodName, parentName: parentName)
 
       let resultType = try translate(swiftResult: functionSignature.result)
 
@@ -161,6 +208,31 @@ extension JNISwift2JavaGenerator {
         parameters: parameters,
         resultType: resultType
       )
+    }
+
+    func translateParameters(
+      _ parameters: [(name: String?, type: SwiftType)],
+      methodName: String,
+      parentName: String
+    ) throws -> [TranslatedParameter] {
+      try parameters.enumerated().map { idx, param in
+        let parameterName = param.name ?? "arg\(idx)"
+        return try translateParameter(swiftType: param.type, parameterName: parameterName, methodName: methodName, parentName: parentName)
+      }
+    }
+
+    func translateSelfParameter(_ selfParameter: SwiftSelfParameter?, methodName: String, parentName: String) throws -> TranslatedParameter? {
+      // 'self'
+      if case .instance(let swiftSelf) = selfParameter {
+        return try self.translateParameter(
+          swiftType: swiftSelf.type,
+          parameterName: swiftSelf.parameterName ?? "self",
+          methodName: methodName,
+          parentName: parentName
+        )
+      } else {
+        return nil
+      }
     }
 
     func translateParameter(
@@ -472,6 +544,23 @@ extension JNISwift2JavaGenerator {
       default:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
+    }
+  }
+
+  struct TranslatedEnumCase {
+    /// The corresponding Java case class (CamelCased)
+    let name: String
+
+    /// The name of the translated enum
+    let enumName: String
+
+    /// A list of the translated associated values
+    let translatedValues: [TranslatedParameter]
+
+    let conversions: [(translated: TranslatedResult, native: NativeResult)]
+
+    var requiresSwiftArena: Bool {
+      conversions.contains(where: \.translated.conversion.requiresSwiftArena)
     }
   }
 

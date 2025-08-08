@@ -253,6 +253,8 @@ extension DeclSyntaxProtocol {
           }
         ))
         .triviaSanitizedDescription
+    case .enumCaseDecl(let node):
+      node.triviaSanitizedDescription
     default:
       fatalError("unimplemented \(self.kind)")
     }

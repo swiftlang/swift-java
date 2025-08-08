@@ -146,7 +146,7 @@ extension FFMSwift2JavaGenerator {
       let javaName = switch decl.apiKind {
       case .getter: decl.javaGetterName
       case .setter: decl.javaSetterName
-      case .function, .initializer: decl.name
+      case .function, .initializer, .enumCase: decl.name
       }
 
       // Signature.

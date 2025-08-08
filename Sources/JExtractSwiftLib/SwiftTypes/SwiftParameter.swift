@@ -58,6 +58,16 @@ enum SwiftParameterConvention: Equatable {
 }
 
 extension SwiftParameter {
+  init(_ node: EnumCaseParameterSyntax, lookupContext: SwiftTypeLookupContext) throws {
+    self.convention = .byValue
+    self.type = try SwiftType(node.type, lookupContext: lookupContext)
+    self.argumentLabel = nil
+    self.parameterName = node.firstName?.identifier?.name
+    self.argumentLabel = node.firstName?.identifier?.name
+  }
+}
+
+extension SwiftParameter {
   init(_ node: FunctionParameterSyntax, lookupContext: SwiftTypeLookupContext) throws {
     // Determine the convention. The default is by-value, but there are
     // specifiers on the type for other conventions (like `inout`).
