@@ -159,7 +159,8 @@ extension JNISwift2JavaGenerator {
     // Print getAsCase method
     if !enumCase.parameters.isEmpty {
       let selfParameter = JavaParameter(name: "self", type: .long)
-      let resultType = JavaType.class(package: javaPackage, name: "\(translatedCase.enumName).\(translatedCase.name)")
+
+      let resultType = JavaType.class(package: javaPackage, name: "\(translatedCase.enumName).\(translatedCase.name).$NativeParameters")
       printCDecl(
         &printer,
         javaMethodName: "$getAs\(translatedCase.name)",
@@ -176,15 +177,15 @@ extension JNISwift2JavaGenerator {
           parameter.name ?? "_\(idx)"
         }
         let caseNamesWithLet = caseNames.map { "let \($0)" }
-        let methodSignature = MethodSignature(resultType: resultType, parameterTypes: translatedCase.conversions.map(\.native.javaType))
+        let methodSignature = MethodSignature(resultType: .void, parameterTypes: translatedCase.conversions.map(\.native.javaType))
         // TODO: Caching of class and static method ID.
         printer.print(
         """
         guard case .\(enumCase.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
           fatalError("Expected enum case '\(enumCase.name)', but was '\\(self$.pointee)'!")
         }
-        let recordClass$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(translatedCase.enumName)$\(translatedCase.name)")!
-        let fromJNIID$ = environment.interface.GetStaticMethodID(environment, recordClass$, "fromJNI", "\(methodSignature.mangledName)")!
+        let class$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(translatedCase.enumName)$\(translatedCase.name)$$NativeParameters")!
+        let constructorID$ = environment.interface.GetMethodID(environment, class$, "<init>", "\(methodSignature.mangledName)")!
         """
         )
 
@@ -197,7 +198,7 @@ extension JNISwift2JavaGenerator {
         printer.print(
           """
           return withVaList([\(upcallArguments.joined(separator: ", "))]) {
-            return environment.interface.CallStaticObjectMethodV(environment, recordClass$, fromJNIID$, $0)
+            return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
           }
           """
         )

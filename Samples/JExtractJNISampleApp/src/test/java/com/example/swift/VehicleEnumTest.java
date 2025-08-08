@@ -115,6 +115,16 @@ public class VehicleEnumTest {
     }
 
     @Test
+    void getAsTransformer() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.car("BMW", arena), arena);
+            Vehicle.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
+            assertTrue(transformer.front().getAsBicycle().isPresent());
+            assertEquals("BMW", transformer.back().getAsCar().orElseThrow().arg0());
+        }
+    }
+
+    @Test
     void associatedValuesAreCopied() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             Vehicle vehicle = Vehicle.car("BMW", arena);

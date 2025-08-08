@@ -265,16 +265,17 @@ extension JNISwift2JavaGenerator {
           var nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
             "\(conversion.native.javaType) \(value.parameter.name)"
           }
-          if requiresSwiftArena {
-            nativeResults.append("SwiftArena swiftArena$")
-          }
+          printer.print("record $NativeParameters(\(nativeResults.joined(separator: ", "))) {}")
+          printer.println()
+
           printer.print(#"@SuppressWarnings("unused")"#)
-          printer.printBraceBlock("static \(caseName) fromJNI(\(nativeResults.joined(separator: ", ")))") { printer in
+          let swiftArenaParameter = requiresSwiftArena ? ", SwiftArena swiftArena$" : ""
+          printer.printBraceBlock("\(caseName)($NativeParameters parameters\(swiftArenaParameter))") { printer in
             let memberValues = zip(translatedCase.translatedValues, translatedCase.conversions).map { (value, conversion) in
-              let result = conversion.translated.conversion.render(&printer, value.parameter.name)
+              let result = conversion.translated.conversion.render(&printer, "parameters.\(value.parameter.name)")
               return result
             }
-            printer.print("return new \(caseName)(\(memberValues.joined(separator: ", ")));")
+            printer.print("this(\(memberValues.joined(separator: ", ")));")
           }
         }
       }
@@ -291,24 +292,22 @@ extension JNISwift2JavaGenerator {
           """
         )
         if hasParameters {
-          var arguments = ["this.$memoryAddress()"]
+          var arguments = ["$getAs\(caseName)(this.$memoryAddress())"]
           if requiresSwiftArena {
             arguments.append("swiftArena$")
           }
           printer.print(
           """
-          return Optional.of($getAs\(caseName)(\(arguments.joined(separator: ", "))));
+          return Optional.of(new \(caseName)(\(arguments.joined(separator: ", "))));
           """
           )
         } else {
           printer.print("return Optional.of(new \(caseName)());")
         }
       }
-      var nativeParameters = ["long self"]
-      if requiresSwiftArena {
-        nativeParameters.append("SwiftArena swiftArena$")
+      if hasParameters {
+        printer.print("private static native \(caseName).$NativeParameters $getAs\(caseName)(long self);")
       }
-      printer.print("private static native \(caseName) $getAs\(caseName)(\(nativeParameters.joined(separator: ", ")));")
 
       printer.println()
     }
