@@ -18,8 +18,8 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 
+import org.swift.swiftkit.core.SwiftArena;
 import org.swift.swiftkit.core.SwiftLibraries;
-import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
 public class HelloJava2SwiftJNI {
 
@@ -41,7 +41,7 @@ public class HelloJava2SwiftJNI {
 
         MySwiftClass.method();
 
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass myClass = MySwiftClass.init(10, 5, arena);
             MySwiftClass myClass2 = MySwiftClass.init(arena);
 
