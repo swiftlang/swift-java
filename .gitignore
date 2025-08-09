@@ -16,6 +16,7 @@ bin/
 BuildLogic/out/
 .index-build
 .build-vscode
+**/.vscode
 
 # Ignore gradle build artifacts
 .gradle
@@ -45,3 +46,4 @@ Package.resolved
 */**/*.swiftdeps
 */**/*.swiftdeps~
 */**/.docc-build/
+
