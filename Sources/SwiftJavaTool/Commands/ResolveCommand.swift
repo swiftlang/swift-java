@@ -119,7 +119,7 @@ extension SwiftJava.ResolveCommand {
   }
 
 
-  /// Resolves maven-style dependencies from swift-java.config under temporary project directory.
+  /// Resolves maven-style dependencies from swift-java.config under temporary project directory under `.build``.
   /// 
   /// - Parameter dependencies: maven-style dependencies to resolve
   /// - Returns: Colon-separated classpath

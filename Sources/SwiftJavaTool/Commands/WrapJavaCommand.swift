@@ -12,13 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import ArgumentParser
-import SwiftJavaLib
+import Foundation
 import JavaKit
+import JavaKitConfigurationShared
 import JavaKitJar
 import SwiftJavaLib
-import JavaKitConfigurationShared
 
 extension SwiftJava {
 
@@ -30,7 +29,8 @@ extension SwiftJava {
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
     @OptionGroup var commonJVMOptions: SwiftJava.CommonJVMOptions
 
-    @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
+    @Option(
+      help: "The name of the Swift module into which the resulting Swift types will be generated.")
     var swiftModule: String
 
     var effectiveSwiftModule: String {
@@ -39,14 +39,15 @@ extension SwiftJava {
 
     @Option(
       help: """
-            A swift-java configuration file for a given Swift module name on which this module depends,
-            e.g., JavaKitJar=Sources/JavaKitJar/swift-java.config. There should be one of these options
-            for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
-            """
+        A swift-java configuration file for a given Swift module name on which this module depends,
+        e.g., JavaKitJar=Sources/JavaKitJar/swift-java.config. There should be one of these options
+        for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
+        """
     )
     var dependsOn: [String] = []
 
-    @Option(help: "The names of Java classes whose declared native methods will be implemented in Swift.")
+    @Option(
+      help: "The names of Java classes whose declared native methods will be implemented in Swift.")
     var swiftNativeImplementation: [String] = []
 
     @Option(help: "Cache directory for intermediate results and other outputs between runs")
@@ -74,10 +75,11 @@ extension SwiftJava.WrapJavaCommand {
     print("[trace][swift-java] INPUT: \(input)")
 
     var classpathEntries = self.configureCommandJVMClasspath(
-        searchDirs: classpathSearchDirs, config: config)
+      searchDirs: classpathSearchDirs, config: config)
 
     // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in
+    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map {
+      moduleName, config in
       guard let moduleName else {
         throw JavaToSwiftError.badConfigOption
       }
@@ -87,11 +89,14 @@ extension SwiftJava.WrapJavaCommand {
 
     // Include classpath entries which libs we depend on require...
     for (fromModule, config) in dependentConfigs {
-      print("[trace][swift-java] Add dependent config (\(fromModule)) classpath elements: \(config.classpathEntries.count)")
+      print(
+        "[trace][swift-java] Add dependent config (\(fromModule)) classpath elements: \(config.classpathEntries.count)"
+      )
       // TODO: may need to resolve the dependent configs rather than just get their configs
       // TODO: We should cache the resolved classpaths as well so we don't do it many times
       for entry in config.classpathEntries {
-        print("[trace][swift-java] Add dependent config (\(fromModule)) classpath element: \(entry)")
+        print(
+          "[trace][swift-java] Add dependent config (\(fromModule)) classpath element: \(entry)")
         classpathEntries.append(entry)
       }
     }
@@ -108,6 +113,8 @@ extension SwiftJava.WrapJavaCommand {
 }
 
 extension SwiftJava.WrapJavaCommand {
+
+  /// using the --swift-module and --depends-on options, translates Java classes (defined in swift-java.config files) into Swift files.
   mutating func generateWrappers(
     config: Configuration,
     // classpathEntries: [String],
@@ -160,13 +167,15 @@ extension SwiftJava.WrapJavaCommand {
 
       // The current class we're in.
       let currentClass = allClassesToVisit[currentClassIndex]
-      guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType else {
+      guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType
+      else {
         continue
       }
 
       // Find all of the nested classes that weren't explicitly translated
       // already.
-      let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap { nestedClass in
+      let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap {
+        nestedClass in
         guard let nestedClass else { return nil }
 
         // If this is a local class, we're done.
@@ -183,7 +192,6 @@ extension SwiftJava.WrapJavaCommand {
         // Record this as a translated class.
         let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
           .defaultSwiftNameForJavaClass
-
 
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
         translator.translatedClasses[javaClassName] = (swiftName, nil)
@@ -210,18 +218,19 @@ extension SwiftJava.WrapJavaCommand {
       let importDecls = translator.getImportDecls()
 
       let swiftFileText = """
-                          // Auto-generated by Java-to-Swift wrapper generator.
-                          \(importDecls.map { $0.description }.joined())
-                          \(swiftClassDecls.map { $0.description }.joined(separator: "\n"))
+        // Auto-generated by Java-to-Swift wrapper generator.
+        \(importDecls.map { $0.description }.joined())
+        \(swiftClassDecls.map { $0.description }.joined(separator: "\n"))
 
-                          """
+        """
 
       var generatedFileOutputDir = self.actualOutputDirectory
       if self.swiftMatchPackageDirectoryStructure {
         generatedFileOutputDir?.append(path: javaClass.getPackageName().replacing(".", with: "/"))
       }
 
-      let swiftFileName = try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
+      let swiftFileName =
+        try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
         .swiftName.replacing(".", with: "+") + ".swift"
       try writeContents(
         swiftFileText,
