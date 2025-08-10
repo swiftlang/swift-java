@@ -104,7 +104,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
     }
   }
 
-  /// absolute path of the --swift-module module
+  /// Absolute path to the module specified by --swift-module.
   var effectiveSwiftModuleURL: Foundation.URL {
     let fm = FileManager.default
     return URL(fileURLWithPath: fm.currentDirectoryPath + "/Sources/\(self.effectiveSwiftModule)")
