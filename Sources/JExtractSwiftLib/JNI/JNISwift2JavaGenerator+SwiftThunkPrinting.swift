@@ -157,52 +157,48 @@ extension JNISwift2JavaGenerator {
     printer.println()
 
     // Print getAsCase method
-    if !enumCase.parameters.isEmpty {
-      let selfParameter = JavaParameter(name: "self", type: .long)
+    if !translatedCase.translatedValues.isEmpty {
+      printEnumGetAsCaseThunk(&printer, translatedCase)
+    }
+  }
 
-      let resultType = JavaType.class(package: javaPackage, name: "\(translatedCase.enumName).\(translatedCase.name).$NativeParameters")
-      printCDecl(
-        &printer,
-        javaMethodName: "$getAs\(translatedCase.name)",
-        parentName: "\(translatedCase.enumName)",
-        parameters: [selfParameter],
-        resultType: resultType
-      ) { printer in
-        let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
-          &printer,
-          swiftParentName: enumCase.enumType.nominalTypeDecl.name,
-          selfParameter
-        )
-        let caseNames = enumCase.parameters.enumerated().map { idx, parameter in
-          parameter.name ?? "_\(idx)"
-        }
-        let caseNamesWithLet = caseNames.map { "let \($0)" }
-        let methodSignature = MethodSignature(resultType: .void, parameterTypes: translatedCase.conversions.map(\.native.javaType))
-        // TODO: Caching of class and static method ID.
-        printer.print(
+  private func printEnumGetAsCaseThunk(
+    _ printer: inout CodePrinter,
+    _ enumCase: TranslatedEnumCase
+  ) {
+    printCDecl(
+      &printer,
+      enumCase.getAsCaseFunction
+    ) { printer in
+      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(&printer, "self")
+      let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
+        parameter.name ?? "_\(idx)"
+      }
+      let caseNamesWithLet = caseNames.map { "let \($0)" }
+      let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
+      // TODO: Caching of class and static method ID.
+      printer.print(
         """
-        guard case .\(enumCase.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
-          fatalError("Expected enum case '\(enumCase.name)', but was '\\(self$.pointee)'!")
+        guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
+          fatalError("Expected enum case '\(enumCase.original.name)', but was '\\(\(selfPointer).pointee)'!")
         }
-        let class$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(translatedCase.enumName)$\(translatedCase.name)$$NativeParameters")!
+        let class$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(enumCase.enumName)$\(enumCase.name)$$NativeParameters")!
         let constructorID$ = environment.interface.GetMethodID(environment, class$, "<init>", "\(methodSignature.mangledName)")!
         """
-        )
-
-        let upcallArguments = zip(translatedCase.conversions, caseNames).map { conversion, caseName in
-          // '0' is treated the same as a null pointer.
-          let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? 0" : ""
-          let result = conversion.native.conversion.render(&printer, caseName)
-          return "\(result)\(nullConversion)"
-        }
-        printer.print(
-          """
-          return withVaList([\(upcallArguments.joined(separator: ", "))]) {
-            return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
-          }
-          """
-        )
+      )
+      let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in
+        // '0' is treated the same as a null pointer.
+        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? 0" : ""
+        let result = conversion.native.conversion.render(&printer, caseName)
+        return "\(result)\(nullConversion)"
       }
+      printer.print(
+        """
+        return withVaList([\(upcallArguments.joined(separator: ", "))]) {
+          return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
+        }
+        """
+      )
     }
   }
 
@@ -215,21 +211,9 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    let nativeSignature = translatedDecl.nativeFunctionSignature
-    var parameters = nativeSignature.parameters.flatMap(\.parameters)
-
-    if let selfParameter = nativeSignature.selfParameter {
-      parameters += selfParameter.parameters
-    }
-
-    parameters += nativeSignature.result.outParameters
-
     printCDecl(
       &printer,
-      javaMethodName: translatedDecl.nativeFunctionName,
-      parentName: translatedDecl.parentName,
-      parameters: parameters,
-      resultType: nativeSignature.result.javaType
+      translatedDecl
     ) { printer in
       self.printFunctionDowncall(&printer, decl)
     }
@@ -328,6 +312,31 @@ extension JNISwift2JavaGenerator {
       )
     } else {
       printer.print(innerBody)
+    }
+  }
+
+  private func printCDecl(
+    _ printer: inout CodePrinter,
+    _ translatedDecl: TranslatedFunctionDecl,
+    _ body: (inout CodePrinter) -> Void
+  ) {
+    let nativeSignature = translatedDecl.nativeFunctionSignature
+    var parameters = nativeSignature.parameters.flatMap(\.parameters)
+
+    if let selfParameter = nativeSignature.selfParameter {
+      parameters += selfParameter.parameters
+    }
+
+    parameters += nativeSignature.result.outParameters
+
+    printCDecl(
+      &printer,
+      javaMethodName: translatedDecl.nativeFunctionName,
+      parentName: translatedDecl.parentName,
+      parameters: parameters,
+      resultType: nativeSignature.result.javaType
+    ) { printer in
+      body(&printer)
     }
   }
 

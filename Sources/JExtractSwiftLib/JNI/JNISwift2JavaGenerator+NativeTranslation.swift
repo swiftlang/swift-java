@@ -248,8 +248,11 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateOptionalResult(
-      wrappedType swiftType: SwiftType
+      wrappedType swiftType: SwiftType,
+      resultName: String = "result"
     ) throws -> NativeResult {
+      let discriminatorName = "\(resultName)_discriminator$"
+
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -275,7 +278,6 @@ extension JNISwift2JavaGenerator {
             )
           } else {
             // Use indirect byte array to store discriminator
-            let discriminatorName = "result_discriminator$"
 
             return NativeResult(
               javaType: javaType,
@@ -301,8 +303,6 @@ extension JNISwift2JavaGenerator {
         }
 
         // Assume JExtract imported class
-        let discriminatorName = "result_discriminator$"
-
         return NativeResult(
           javaType: .long,
           conversion: .optionalRaisingIndirectReturn(
@@ -467,6 +467,9 @@ extension JNISwift2JavaGenerator {
 
     case constant(String)
 
+    /// `input_component`
+    case combinedName(component: String)
+
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
 
@@ -520,6 +523,9 @@ extension JNISwift2JavaGenerator {
 
       case .constant(let value):
         return value
+
+      case .combinedName(let component):
+        return "\(placeholder)_\(component)"
 
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)

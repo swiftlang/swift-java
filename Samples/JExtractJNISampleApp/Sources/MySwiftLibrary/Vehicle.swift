@@ -14,15 +14,15 @@
 
 public enum Vehicle {
   case bicycle
-  case car(String)
-  case motorbike(String, horsePower: Int64)
+  case car(String, trailer: String?)
+  case motorbike(String, horsePower: Int64, helmets: Int32?)
   indirect case transformer(front: Vehicle, back: Vehicle)
 
   public init?(name: String) {
     switch name {
       case "bicycle": self = .bicycle
-      case "car": self = .car("Unknown")
-      case "motorbike": self = .motorbike("Unknown", horsePower: 0)
+      case "car": self = .car("Unknown", trailer: nil)
+      case "motorbike": self = .motorbike("Unknown", horsePower: 0, helmets: nil)
       default: return nil
     }
   }
@@ -50,9 +50,9 @@ public enum Vehicle {
 
   public mutating func upgrade() {
     switch self {
-      case .bicycle: self = .car("Unknown")
-      case .car: self = .motorbike("Unknown", horsePower: 0)
-      case .motorbike: self = .transformer(front: .car("BMW"), back: self)
+      case .bicycle: self = .car("Unknown", trailer: nil)
+      case .car: self = .motorbike("Unknown", horsePower: 0, helmets: nil)
+      case .motorbike: self = .transformer(front: .car("BMW", trailer: nil), back: self)
       case .transformer: break
     }
   }

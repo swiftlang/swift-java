@@ -256,59 +256,17 @@ extension JNISwift2JavaGenerator {
       }
 
       let caseName = enumCase.name.firstCharacterUppercased
-      let hasParameters = !enumCase.parameters.isEmpty
-      let requiresSwiftArena = translatedCase.requiresSwiftArena
 
       // Print record
       printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
-        if hasParameters {
-          var nativeResults = zip(translatedCase.translatedValues, translatedCase.conversions).map { value, conversion in
-            "\(conversion.native.javaType) \(value.parameter.name)"
-          }
-          printer.print("record $NativeParameters(\(nativeResults.joined(separator: ", "))) {}")
-          printer.println()
-
-          printer.print(#"@SuppressWarnings("unused")"#)
-          let swiftArenaParameter = requiresSwiftArena ? ", SwiftArena swiftArena$" : ""
-          printer.printBraceBlock("\(caseName)($NativeParameters parameters\(swiftArenaParameter))") { printer in
-            let memberValues = zip(translatedCase.translatedValues, translatedCase.conversions).map { (value, conversion) in
-              let result = conversion.translated.conversion.render(&printer, "parameters.\(value.parameter.name)")
-              return result
-            }
-            printer.print("this(\(memberValues.joined(separator: ", ")));")
-          }
+        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap { value, conversion in
+          ["\(conversion.native.javaType) \(value.parameter.name)"]
         }
+
+        printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
-      // TODO: Optimize when all values can just be passed directly, instead of going through "middle type"?
-
-      // Print method to get enum as case
-      printer.printBraceBlock("public Optional<\(caseName)> getAs\(caseName)(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
-        printer.print(
-          """
-          if (this.getDiscriminator() != Discriminator.\(caseName.uppercased())) {
-            return Optional.empty();
-          }
-          """
-        )
-        if hasParameters {
-          var arguments = ["$getAs\(caseName)(this.$memoryAddress())"]
-          if requiresSwiftArena {
-            arguments.append("swiftArena$")
-          }
-          printer.print(
-          """
-          return Optional.of(new \(caseName)(\(arguments.joined(separator: ", "))));
-          """
-          )
-        } else {
-          printer.print("return Optional.of(new \(caseName)());")
-        }
-      }
-      if hasParameters {
-        printer.print("private static native \(caseName).$NativeParameters $getAs\(caseName)(long self);")
-      }
-
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction)
       printer.println()
     }
   }
@@ -326,6 +284,7 @@ extension JNISwift2JavaGenerator {
 
     printJavaBindingWrapperHelperClass(&printer, decl)
 
+    printDeclDocumentation(&printer, decl)
     printJavaBindingWrapperMethod(&printer, decl)
   }
 
@@ -373,9 +332,12 @@ extension JNISwift2JavaGenerator {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
+    printJavaBindingWrapperMethod(&printer, translatedDecl)
+  }
 
+  private func printJavaBindingWrapperMethod(_ printer: inout CodePrinter, _ translatedDecl: TranslatedFunctionDecl) {
     var modifiers = ["public"]
-    if decl.isStatic || decl.isInitializer || !decl.hasParent {
+    if translatedDecl.isStatic {
       modifiers.append("static")
     }
 
@@ -385,7 +347,7 @@ extension JNISwift2JavaGenerator {
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }
-    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+    let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
@@ -393,18 +355,16 @@ extension JNISwift2JavaGenerator {
     let modifiersStr = modifiers.joined(separator: " ")
     let parametersStr = parameters.joined(separator: ", ")
 
-    printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
       "\(annotationsStr)\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
     ) { printer in
-      printDowncall(&printer, decl)
+      printDowncall(&printer, translatedDecl)
     }
 
-    printNativeFunction(&printer, decl)
+    printNativeFunction(&printer, translatedDecl)
   }
 
-  private func printNativeFunction(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = translatedDecl(for: decl)! // Will always call with valid decl
+  private func printNativeFunction(_ printer: inout CodePrinter, _ translatedDecl: TranslatedFunctionDecl) {
     let nativeSignature = translatedDecl.nativeFunctionSignature
     let resultType = nativeSignature.result.javaType
     var parameters = nativeSignature.parameters.flatMap(\.parameters)
@@ -422,9 +382,8 @@ extension JNISwift2JavaGenerator {
 
   private func printDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ translatedDecl: TranslatedFunctionDecl
   ) {
-    let translatedDecl = translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
     let translatedFunctionSignature = translatedDecl.translatedFunctionSignature
 
     // Regular parameters.

@@ -89,17 +89,70 @@ extension JNISwift2JavaGenerator {
       )
 
       let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
+        let resultName = parameter.name ?? "arg\(idx)"
         let result = SwiftResult(convention: .direct, type: parameter.type)
-        let translatedResult = try self.translate(swiftResult: result)
-        let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: parameter.name ?? "arg\(idx)")
-        return (translatedResult, nativeResult)
+        var translatedResult = try self.translate(swiftResult: result, resultName: resultName)
+        translatedResult.conversion = .replacingPlaceholder(translatedResult.conversion, placeholder: "$nativeParameters.\(resultName)")
+        let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: resultName)
+        return (translated: translatedResult, native: nativeResult)
       }
+
+      let caseName = enumCase.name.firstCharacterUppercased
+      let enumName = enumCase.enumType.nominalTypeDecl.name
+      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName).$NativeParameters")
+      let getAsCaseName = "getAs\(caseName)"
+      // If the case has no parameters, we can skip the native call.
+      let constructRecordConversion = JavaNativeConversionStep.method(.constant("Optional"), function: "of", arguments: [
+        .constructJavaClass(
+          .commaSeparated(conversions.map(\.translated.conversion)),
+          .class(package: nil,name: caseName)
+        )
+      ])
+      let getAsCaseFunction = TranslatedFunctionDecl(
+        name: getAsCaseName,
+        isStatic: false,
+        isThrowing: false,
+        nativeFunctionName: "$\(getAsCaseName)",
+        parentName: enumName,
+        functionTypes: [],
+        translatedFunctionSignature: TranslatedFunctionSignature(
+          selfParameter: TranslatedParameter(
+            parameter: JavaParameter(name: "self", type: .long),
+            conversion: .aggregate(
+              [
+                .ifStatement(.constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"), thenExp: .constant("return Optional.empty();")),
+                .valueMemoryAddress(.placeholder)
+              ]
+            )
+          ),
+          parameters: [],
+          resultType: TranslatedResult(
+            javaType: .class(package: nil, name: "Optional<\(caseName)>"),
+            outParameters: conversions.flatMap(\.translated.outParameters),
+            conversion: enumCase.parameters.isEmpty ? constructRecordConversion : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion])
+          )
+        ),
+        nativeFunctionSignature: NativeFunctionSignature(
+          selfParameter: NativeParameter(
+            parameters: [JavaParameter(name: "self", type: .long)],
+            conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false)
+          ),
+          parameters: [],
+          result: NativeResult(
+            javaType: nativeParametersType,
+            conversion: .placeholder,
+            outParameters: conversions.flatMap(\.native.outParameters)
+          )
+        )
+      )
 
       return TranslatedEnumCase(
         name: enumCase.name.firstCharacterUppercased,
         enumName: enumCase.enumType.nominalTypeDecl.name,
+        original: enumCase,
         translatedValues: translatedValues,
-        conversions: conversions
+        parameterConversions: conversions,
+        getAsCaseFunction: getAsCaseFunction
       )
     }
 
@@ -154,6 +207,8 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
+        isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
+        isThrowing: decl.isThrowing,
         nativeFunctionName: "$\(javaName)",
         parentName: parentName,
         functionTypes: funcTypes,
@@ -415,7 +470,7 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(swiftResult: SwiftResult) throws -> TranslatedResult {
+    func translate(swiftResult: SwiftResult, resultName: String = "result") throws -> TranslatedResult {
       let swiftType = swiftResult.type
 
       // If the result type should cause any annotations on the method, include them here.
@@ -429,7 +484,7 @@ extension JNISwift2JavaGenerator {
             guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
-            return try translateOptionalResult(wrappedType: genericArgs[0])
+            return try translateOptionalResult(wrappedType: genericArgs[0], resultName: resultName)
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
@@ -462,7 +517,7 @@ extension JNISwift2JavaGenerator {
         return TranslatedResult(javaType: .void, outParameters: [], conversion: .placeholder)
 
       case .optional(let wrapped):
-        return try translateOptionalResult(wrappedType: wrapped)
+        return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -470,8 +525,11 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateOptionalResult(
-      wrappedType swiftType: SwiftType
+      wrappedType swiftType: SwiftType,
+      resultName: String = "result"
     ) throws -> TranslatedResult {
+      let discriminatorName = "\(resultName)$_discriminator$"
+
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
@@ -509,13 +567,14 @@ extension JNISwift2JavaGenerator {
               javaType: .class(package: nil, name: returnType),
               annotations: parameterAnnotations,
               outParameters: [
-                OutParameter(name: "result_discriminator$", type: .array(.byte), allocation: .newArray(.byte, size: 1))
+                OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
               ],
               conversion: .toOptionalFromIndirectReturn(
-                discriminatorName: "result_discriminator$",
+                discriminatorName: .combinedName(component: "discriminator$"),
                 optionalClass: optionalClass,
                 javaType: javaType,
-                toValue: .placeholder
+                toValue: .placeholder,
+                resultName: resultName
               )
             )
           }
@@ -531,13 +590,14 @@ extension JNISwift2JavaGenerator {
           javaType: returnType,
           annotations: parameterAnnotations,
           outParameters: [
-            OutParameter(name: "result_discriminator$", type: .array(.byte), allocation: .newArray(.byte, size: 1))
+            OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
           ],
           conversion: .toOptionalFromIndirectReturn(
-            discriminatorName: "result_discriminator$",
+            discriminatorName: .combinedName(component: "discriminator$"),
             optionalClass: "Optional",
             javaType: .long,
-            toValue: .constructSwiftValue(.placeholder, .class(package: nil, name: nominalTypeName))
+            toValue: .constructSwiftValue(.placeholder, .class(package: nil, name: nominalTypeName)),
+            resultName: resultName
           )
         )
 
@@ -554,19 +614,30 @@ extension JNISwift2JavaGenerator {
     /// The name of the translated enum
     let enumName: String
 
+    /// The oringinal enum case.
+    let original: ImportedEnumCase
+
     /// A list of the translated associated values
     let translatedValues: [TranslatedParameter]
 
-    let conversions: [(translated: TranslatedResult, native: NativeResult)]
+    /// A list of parameter conversions
+    let parameterConversions: [(translated: TranslatedResult, native: NativeResult)]
 
+    let getAsCaseFunction: TranslatedFunctionDecl
+
+    /// Returns whether the parameters require an arena
     var requiresSwiftArena: Bool {
-      conversions.contains(where: \.translated.conversion.requiresSwiftArena)
+      parameterConversions.contains(where: \.translated.conversion.requiresSwiftArena)
     }
   }
 
   struct TranslatedFunctionDecl {
     /// Java function name
     let name: String
+
+    let isStatic: Bool
+
+    let isThrowing: Bool
 
     /// The name of the native function
     let nativeFunctionName: String
@@ -621,7 +692,7 @@ extension JNISwift2JavaGenerator {
     let outParameters: [OutParameter]
 
     /// Represents how to convert the Java native result into a user-facing result.
-    let conversion: JavaNativeConversionStep
+    var conversion: JavaNativeConversionStep
   }
 
   struct OutParameter {
@@ -662,6 +733,9 @@ extension JNISwift2JavaGenerator {
 
     case constant(String)
 
+    /// `input_component`
+    case combinedName(component: String)
+
     // Convert the results of the inner steps to a comma separated list.
     indirect case commaSeparated([JavaNativeConversionStep])
 
@@ -670,6 +744,9 @@ extension JNISwift2JavaGenerator {
 
     /// Call `new \(Type)(\(placeholder), swiftArena$)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
+
+    /// Call `new \(Type)(\(placeholder))`
+    indirect case constructJavaClass(JavaNativeConversionStep, JavaType)
 
     indirect case call(JavaNativeConversionStep, function: String)
 
@@ -686,18 +763,18 @@ extension JNISwift2JavaGenerator {
     indirect case subscriptOf(JavaNativeConversionStep, arguments: [JavaNativeConversionStep])
 
     static func toOptionalFromIndirectReturn(
-      discriminatorName: String,
+      discriminatorName: JavaNativeConversionStep,
       optionalClass: String,
       javaType: JavaType,
-      toValue valueConversion: JavaNativeConversionStep
+      toValue valueConversion: JavaNativeConversionStep,
+      resultName: String
     ) -> JavaNativeConversionStep {
       .aggregate(
-        name: "result$",
-        type: javaType,
+        variable: (name: "\(resultName)$", type: javaType),
         [
           .ternary(
             .equals(
-              .subscriptOf(.constant(discriminatorName), arguments: [.constant("0")]),
+              .subscriptOf(discriminatorName, arguments: [.constant("0")]),
               .constant("1")
             ),
             thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
@@ -708,7 +785,12 @@ extension JNISwift2JavaGenerator {
     }
 
     /// Perform multiple conversions using the same input.
-    case aggregate(name: String, type: JavaType, [JavaNativeConversionStep])
+    case aggregate(variable: (name: String, type: JavaType)? = nil, [JavaNativeConversionStep])
+
+    indirect case ifStatement(JavaNativeConversionStep, thenExp: JavaNativeConversionStep, elseExp: JavaNativeConversionStep? = nil)
+
+    /// Access a member of the value
+    indirect case replacingPlaceholder(JavaNativeConversionStep, placeholder: String)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -721,6 +803,9 @@ extension JNISwift2JavaGenerator {
       case .constant(let value):
         return value
 
+      case .combinedName(let component):
+        return "\(placeholder)_\(component)"
+
       case .commaSeparated(let list):
         return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
 
@@ -730,6 +815,10 @@ extension JNISwift2JavaGenerator {
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "new \(javaType.className!)(\(inner), swiftArena$)"
+
+      case .constructJavaClass(let inner, let javaType):
+        let inner = inner.render(&printer, placeholder)
+        return "new \(javaType.className!)(\(inner))"
 
       case .call(let inner, let function):
         let inner = inner.render(&printer, placeholder)
@@ -778,24 +867,49 @@ extension JNISwift2JavaGenerator {
         let arguments = arguments.map { $0.render(&printer, placeholder) }
         return "\(inner)[\(arguments.joined(separator: ", "))]"
 
-      case .aggregate(let name, let type, let steps):
+      case .aggregate(let variable, let steps):
         precondition(!steps.isEmpty, "Aggregate must contain steps")
-        printer.print("\(type) \(name) = \(placeholder);")
+        let toExplode: String
+        if let variable {
+          printer.print("\(variable.type) \(variable.name) = \(placeholder);")
+          toExplode = variable.name
+        } else {
+          toExplode = placeholder
+        }
         let steps = steps.map {
-          $0.render(&printer, name)
+          $0.render(&printer, toExplode)
         }
         return steps.last!
+
+      case .ifStatement(let cond, let thenExp, let elseExp):
+        let cond = cond.render(&printer, placeholder)
+        printer.printBraceBlock("if (\(cond))") { printer in
+          printer.print(thenExp.render(&printer, placeholder))
+        }
+        if let elseExp {
+          printer.printBraceBlock("else") { printer in
+            printer.print(elseExp.render(&printer, placeholder))
+          }
+        }
+
+        return ""
+
+      case .replacingPlaceholder(let inner, let placeholder):
+        return inner.render(&printer, placeholder)
       }
     }
 
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent:
+      case .placeholder, .constant, .isOptionalPresent, .combinedName:
         return false
 
       case .constructSwiftValue:
         return true
+
+      case .constructJavaClass(let inner, _):
+        return inner.requiresSwiftArena
 
       case .valueMemoryAddress(let inner):
         return inner.requiresSwiftArena
@@ -818,11 +932,17 @@ extension JNISwift2JavaGenerator {
       case .subscriptOf(let inner, _):
         return inner.requiresSwiftArena
 
-      case .aggregate(_, _, let steps):
+      case .aggregate(_, let steps):
         return steps.contains(where: \.requiresSwiftArena)
 
+      case .ifStatement(let cond, let thenExp, let elseExp):
+        return cond.requiresSwiftArena || thenExp.requiresSwiftArena || (elseExp?.requiresSwiftArena ?? false)
+
       case .call(let inner, _):
-      return inner.requiresSwiftArena
+        return inner.requiresSwiftArena
+
+      case .replacingPlaceholder(let inner, _):
+        return inner.requiresSwiftArena
       }
     }
   }

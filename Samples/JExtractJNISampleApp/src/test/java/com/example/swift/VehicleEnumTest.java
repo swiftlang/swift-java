@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +34,7 @@ public class VehicleEnumTest {
     @Test
     void car() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.car("Porsche 911", arena);
+            Vehicle vehicle = Vehicle.car("Porsche 911", Optional.empty(), arena);
             assertNotNull(vehicle);
         }
     }
@@ -41,7 +42,7 @@ public class VehicleEnumTest {
     @Test
     void motorbike() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, arena);
+            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.empty(), arena);
             assertNotNull(vehicle);
         }
     }
@@ -68,7 +69,7 @@ public class VehicleEnumTest {
     void isFasterThan() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             Vehicle bicycle = Vehicle.bicycle(arena);
-            Vehicle car = Vehicle.car("Porsche 911", arena);
+            Vehicle car = Vehicle.car("Porsche 911", Optional.empty(), arena);
             assertFalse(bicycle.isFasterThan(car));
             assertTrue(car.isFasterThan(bicycle));
         }
@@ -98,26 +99,35 @@ public class VehicleEnumTest {
     @Test
     void getAsCar() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             Vehicle.Car car = vehicle.getAsCar().orElseThrow();
             assertEquals("BMW", car.arg0());
+
+            vehicle = Vehicle.car("BMW", Optional.of("Long trailer"), arena);
+            car = vehicle.getAsCar().orElseThrow();
+            assertEquals("Long trailer", car.trailer().orElseThrow());
         }
     }
 
     @Test
     void getAsMotorbike() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, arena);
+            Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.empty(), arena);
             Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
             assertEquals("Yamaha", motorbike.arg0());
             assertEquals(750, motorbike.horsePower());
+            assertEquals(OptionalInt.empty(), motorbike.helmets());
+
+            vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.of(2), arena);
+            motorbike = vehicle.getAsMotorbike().orElseThrow();
+            assertEquals(OptionalInt.of(2), motorbike.helmets());
         }
     }
 
     @Test
     void getAsTransformer() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.car("BMW", arena), arena);
+            Vehicle vehicle = Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.car("BMW", Optional.empty(), arena), arena);
             Vehicle.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
             assertTrue(transformer.front().getAsBicycle().isPresent());
             assertEquals("BMW", transformer.back().getAsCar().orElseThrow().arg0());
@@ -127,7 +137,7 @@ public class VehicleEnumTest {
     @Test
     void associatedValuesAreCopied() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             Vehicle.Car car = vehicle.getAsCar().orElseThrow();
             assertEquals("BMW", car.arg0());
             vehicle.upgrade();
@@ -142,8 +152,8 @@ public class VehicleEnumTest {
     void getDiscriminator() {
         try (var arena = new ConfinedSwiftMemorySession()) {
             assertEquals(Vehicle.Discriminator.BICYCLE, Vehicle.bicycle(arena).getDiscriminator());
-            assertEquals(Vehicle.Discriminator.CAR, Vehicle.car("BMW", arena).getDiscriminator());
-            assertEquals(Vehicle.Discriminator.MOTORBIKE, Vehicle.motorbike("Yamaha", 750, arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.CAR, Vehicle.car("BMW", Optional.empty(), arena).getDiscriminator());
+            assertEquals(Vehicle.Discriminator.MOTORBIKE, Vehicle.motorbike("Yamaha", 750, OptionalInt.empty(), arena).getDiscriminator());
             assertEquals(Vehicle.Discriminator.TRANSFORMER, Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.bicycle(arena), arena).getDiscriminator());
         }
     }
@@ -160,7 +170,7 @@ public class VehicleEnumTest {
     @Test
     void switchGetCase() {
         try (var arena = new ConfinedSwiftMemorySession()) {
-            Vehicle vehicle = Vehicle.car("BMW", arena);
+            Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             switch (vehicle.getCase(arena)) {
                 case Vehicle.Bicycle b:
                     fail("Was bicycle");
