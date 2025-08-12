@@ -56,6 +56,8 @@ extension JNISwift2JavaGenerator {
         self.expectedOutputSwiftFiles.remove(moduleFilename)
       }
 
+      try self.writeJNICacheSource(&printer)
+
       for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
         let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
         let filename = "\(fileNameBase).swift"
@@ -77,6 +79,34 @@ extension JNISwift2JavaGenerator {
       }
     } catch {
       logger.warning("Failed to write to Swift thunks: \(moduleFilename)")
+    }
+  }
+
+  private func writeJNICacheSource(_ printer: inout CodePrinter) throws {
+    printer.print("import JavaKit")
+    printer.println()
+    printer.printBraceBlock("enum JNICaches") { printer in
+      let enumCases = self.analysis.importedTypes.values.filter { $0.swiftNominal.kind == .enum }.flatMap(\.cases)
+      for enumCase in enumCases {
+        printer.print("static var \(JNICaching.cacheName(for: enumCase)): _JNICache!")
+      }
+      printer.println()
+      printer.printBraceBlock("func cleanup()") { printer in
+        for enumCase in enumCases {
+          printer.print("JNICaches.\(JNICaching.cacheName(for: enumCase)) = nil")
+        }
+      }
+    }
+
+    let fileName = "\(self.swiftModuleName)+JNICaches.swift"
+
+    if let outputFile = try printer.writeContents(
+      outputDirectory: self.swiftOutputDirectory,
+      javaPackagePath: nil,
+      filename: fileName
+    ) {
+      print("[swift-java] Generated: \(fileName.bold) (at \(outputFile))")
+      self.expectedOutputSwiftFiles.remove(fileName)
     }
   }
 
@@ -156,9 +186,29 @@ extension JNISwift2JavaGenerator {
     printSwiftFunctionThunk(&printer, enumCase.caseFunction)
     printer.println()
 
+    // Print enum case native init
+    printEnumNativeInit(&printer, translatedCase)
+
     // Print getAsCase method
     if !translatedCase.translatedValues.isEmpty {
       printEnumGetAsCaseThunk(&printer, translatedCase)
+    }
+  }
+
+  private func printEnumNativeInit(_ printer: inout CodePrinter, _ enumCase: TranslatedEnumCase) {
+    printCDecl(
+      &printer,
+      javaMethodName: "$nativeInit",
+      parentName: "\(enumCase.original.enumType.nominalTypeDecl.name)$\(enumCase.name)$$JNI",
+      parameters: [],
+      resultType: .void
+    ) { printer in
+      // Setup caching
+      let nativeParametersClassName = "\(javaPackagePath)/\(enumCase.enumName)$\(enumCase.name)$$NativeParameters"
+      let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
+      let methods = #"[.init(name: "<init>", signature: "\#(methodSignature.mangledName)")]"#
+
+      printer.print(#"JNICaches.\#(JNICaching.cacheName(for: enumCase.original)) = _JNICache(environment: environment, className: "\#(nativeParametersClassName)", methods: \#(methods))"#)
     }
   }
 
@@ -176,14 +226,15 @@ extension JNISwift2JavaGenerator {
       }
       let caseNamesWithLet = caseNames.map { "let \($0)" }
       let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
-      // TODO: Caching of class and static method ID.
       printer.print(
         """
         guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
           fatalError("Expected enum case '\(enumCase.original.name)', but was '\\(\(selfPointer).pointee)'!")
         }
-        let class$ = environment.interface.FindClass(environment, "\(javaPackagePath)/\(enumCase.enumName)$\(enumCase.name)$$NativeParameters")!
-        let constructorID$ = environment.interface.GetMethodID(environment, class$, "<init>", "\(methodSignature.mangledName)")!
+        let cache$ = JNICaches.\(JNICaching.cacheName(for: enumCase.original))!
+        let class$ = cache$.javaClass
+        let method$ = _JNICache.Method(name: "<init>", signature: "\(methodSignature.mangledName)")
+        let constructorID$ = cache$[method$]
         """
       )
       let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in

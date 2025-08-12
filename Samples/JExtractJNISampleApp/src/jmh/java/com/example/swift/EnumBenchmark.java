@@ -22,6 +22,7 @@ import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -39,7 +40,7 @@ public class EnumBenchmark {
         @Setup(Level.Trial)
         public void beforeAll() {
             arena = new ConfinedSwiftMemorySession();
-            vehicle = Vehicle.motorbike("Yamaha", 900, arena);
+            vehicle = Vehicle.motorbike("Yamaha", 900, OptionalInt.empty(), arena);
         }
 
         @TearDown(Level.Trial)
@@ -49,7 +50,7 @@ public class EnumBenchmark {
     }
 
     @Benchmark
-    public Vehicle.Motorbike java_copy(BenchmarkState state, Blackhole bh) {
+    public Vehicle.Motorbike getAssociatedValues(BenchmarkState state, Blackhole bh) {
         Vehicle.Motorbike motorbike = state.vehicle.getAsMotorbike().orElseThrow();
         bh.consume(motorbike.arg0());
         bh.consume(motorbike.horsePower());
