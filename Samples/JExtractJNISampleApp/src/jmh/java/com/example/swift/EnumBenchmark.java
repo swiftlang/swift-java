@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 20245Apple Inc. and the Swift.org project authors
+// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.swift.swiftkit.core.ClosableSwiftArena;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class EnumBenchmark {
 
         @Setup(Level.Trial)
         public void beforeAll() {
-            arena = new ConfinedSwiftMemorySession();
+            arena = SwiftArena.ofConfined();
             vehicle = Vehicle.motorbike("Yamaha", 900, OptionalInt.empty(), arena);
         }
 
