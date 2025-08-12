@@ -49,7 +49,8 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Initializers: `class`, `struct`                                                      | ✅        | ✅   |
 | Optional Initializers / Throwing Initializers                                        | ❌        | ❌   |
 | Deinitializers:  `class`, `struct`                                                   | ✅        | ✅   |
-| `enum`, `actor`                                                                      | ❌        | ❌   |
+| `enum`                                                                               | ❌        | ✅   |
+| `actor`                                                                              | ❌        | ❌   |
 | Global Swift `func`                                                                  | ✅        | ✅   |
 | Class/struct member `func`                                                           | ✅        | ✅   |
 | Throwing functions: `func x() throws`                                                | ❌        | ✅   |
@@ -157,3 +158,113 @@ you are expected to add a Guava dependency to your Java project.
 | `Double`   | `double`                                               |
 
 > Note: The `wrap-guava` mode is currently only available in FFM mode of jextract.
+
+#### Enums
+
+> Note: Enums are currently only supported in JNI mode.
+
+Swift enums are extracted into a corresponding Java `class`. To support associated values
+all cases are also extracted as Java `record`s.
+
+Consider the following Swift enum:
+```swift
+public enum Vehicle {
+    case car(String)
+    case bicycle(maker: String)
+}
+```
+You can then instantiate a case of `Vehicle` by using one of the static methods:
+```java
+try (var arena = SwiftArena.ofConfined()) {
+    Vehicle vehicle = Vehicle.car("BMW", arena);
+    Optional<Vehicle.Car> car = vehicle.getAsCar();
+    assertEquals("BMW", car.orElseThrow().arg0());
+}
+```
+As you can see above, to access the associated values of a case you can call one of the
+`getAsX` methods that will return an Optional record with the associated values.
+```java
+try (var arena = SwiftArena.ofConfined()) {
+    Vehicle vehicle = Vehicle.bycicle("My Brand", arena);
+    Optional<Vehicle.Car> car = vehicle.getAsCar();
+    assertFalse(car.isPresent());
+    
+    Optional<Vehicle.Bicycle> bicycle = vehicle.getAsBicycle();
+    assertEquals("My Brand", bicycle.orElseThrow().maker());
+}
+```
+
+##### Switching
+
+If you only need to switch on the case and not access any associated values,
+you can use the `getDiscriminator()` method:
+```java
+Vehicle vehicle = ...;
+switch (vehicle.getDiscriminator()) {
+    case BICYCLE:
+        System.out.println("I am a bicycle!");
+        break
+    case CAR:
+        System.out.println("I am a car!");
+        break
+}
+```
+If you also want access to the associated values, you have various options
+depending on the Java version you are using.
+If you are running Java 21+ you can use [pattern matching for switch](https://openjdk.org/jeps/441):
+```java
+Vehicle vehicle = ...;
+switch (vehicle.getCase()) {
+    case Vehicle.Bicycle b:
+        System.out.println("Bicycle maker: " + b.maker());
+        break
+    case Vehicle.Car c:
+        System.out.println("Car: " + c.arg0());
+        break
+}
+```
+For Java 16+ you can use [pattern matching for instanceof](https://openjdk.org/jeps/394)
+```java
+Vehicle vehicle = ...;
+Vehicle.Case case = vehicle.getCase();
+if (case instanceof Vehicle.Bicycle b) {
+    System.out.println("Bicycle maker: " + b.maker());
+} else if(case instanceof Vehicle.Car c) {
+    System.out.println("Car: " + c.arg0());
+}
+```
+For any previous Java versions you can resort to casting the `Case` to the expected type:
+```java
+Vehicle vehicle = ...;
+Vehicle.Case case = vehicle.getCase();
+if (case instanceof Vehicle.Bicycle) {
+    Vehicle.Bicycle b = (Vehicle.Bicycle) case;
+    System.out.println("Bicycle maker: " + b.maker());
+} else if(case instanceof Vehicle.Car) {
+    Vehicle.Car c = (Vehicle.Car) case;
+    System.out.println("Car: " + c.arg0());
+}
+```
+
+##### RawRepresentable
+
+JExtract also supports extracting enums that conform to `RawRepresentable`
+by giving access to an optional initializer and the `rawValue` variable.
+Consider the following example:
+```swift
+public enum Alignment: String {
+    case horizontal
+    case vertical
+}
+```
+you can then initialize `Alignment` from a `String` and also retrieve back its `rawValue`:
+```java
+try (var arena = SwiftArena.ofConfined()) {
+    Optional<Alignment> alignment = Alignment.init("horizontal", arena);
+    assertEqual(HORIZONTAL, alignment.orElseThrow().getDiscriminator());
+    assertEqual("horizontal", alignment.orElseThrow().getRawValue());
+}
+```
+
+
+
