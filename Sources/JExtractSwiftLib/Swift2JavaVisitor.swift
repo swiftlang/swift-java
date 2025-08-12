@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -92,7 +92,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(extensionDecl node: ExtensionDeclSyntax, in parent: ImportedNominalType?) {
-    guard parent != nil else {
+    guard parent == nil else {
       // 'extension' in a nominal type is invalid. Ignore
       return
     }

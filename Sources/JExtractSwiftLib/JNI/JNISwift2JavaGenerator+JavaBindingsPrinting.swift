@@ -362,22 +362,38 @@ extension JNISwift2JavaGenerator {
       modifiers.append("static")
     }
 
-    let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
-    var parameters = translatedDecl.translatedFunctionSignature.parameters.map({ $0.parameter.renderParameter() })
-    if translatedSignature.requiresSwiftArena {
-      parameters.append("SwiftArena swiftArena$")
-    }
-    let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
+    var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
+    let throwsClause = decl.isThrowing ? " throws Exception" : ""
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
-    let modifiersStr = modifiers.joined(separator: " ")
     let parametersStr = parameters.joined(separator: ", ")
 
+    // Print default global arena variation
+    if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
+      printDeclDocumentation(&printer, decl)
+      printer.printBraceBlock(
+        "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      ) { printer in
+        let globalArenaName = "SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA"
+        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
+        let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
+        if translatedDecl.translatedFunctionSignature.resultType.javaType.isVoid {
+          printer.print("\(call);")
+        } else {
+          printer.print("return \(call);")
+        }
+      }
+      printer.println()
+    }
+
+    if translatedSignature.requiresSwiftArena {
+      parameters.append("SwiftArena swiftArena$")
+    }
     printer.printBraceBlock(
-      "\(annotationsStr)\(modifiersStr) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     ) { printer in
       prefix(&printer)
       printDowncall(&printer, translatedDecl)
