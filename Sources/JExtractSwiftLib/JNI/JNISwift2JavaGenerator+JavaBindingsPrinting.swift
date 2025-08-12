@@ -349,12 +349,13 @@ extension JNISwift2JavaGenerator {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
-    printJavaBindingWrapperMethod(&printer, translatedDecl)
+    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl)
   }
 
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
+    importedFunc: ImportedFunc? = nil,
     prefix: (inout CodePrinter) -> Void = { _ in }
   ) {
     var modifiers = ["public"]
@@ -362,9 +363,10 @@ extension JNISwift2JavaGenerator {
       modifiers.append("static")
     }
 
+    let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
-    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+    let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
@@ -373,7 +375,9 @@ extension JNISwift2JavaGenerator {
 
     // Print default global arena variation
     if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
-      printDeclDocumentation(&printer, decl)
+      if let importedFunc {
+        printDeclDocumentation(&printer, importedFunc)
+      }
       printer.printBraceBlock(
         "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
       ) { printer in
@@ -391,6 +395,9 @@ extension JNISwift2JavaGenerator {
 
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
+    }
+    if let importedFunc {
+      printDeclDocumentation(&printer, importedFunc)
     }
     printer.printBraceBlock(
       "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"

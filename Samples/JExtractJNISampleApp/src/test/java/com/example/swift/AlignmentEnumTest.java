@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AlignmentEnumTest {
     @Test
     void rawValue() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             Optional<Alignment> invalid = Alignment.init("invalid", arena);
             assertFalse(invalid.isPresent());
 
