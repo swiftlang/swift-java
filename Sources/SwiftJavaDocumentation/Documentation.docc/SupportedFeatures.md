@@ -159,7 +159,7 @@ you are expected to add a Guava dependency to your Java project.
 
 > Note: The `wrap-guava` mode is currently only available in FFM mode of jextract.
 
-#### Enums
+### Enums
 
 > Note: Enums are currently only supported in JNI mode.
 
@@ -194,7 +194,7 @@ try (var arena = SwiftArena.ofConfined()) {
 }
 ```
 
-##### Switching
+#### Switching
 
 If you only need to switch on the case and not access any associated values,
 you can use the `getDiscriminator()` method:
@@ -246,7 +246,7 @@ if (case instanceof Vehicle.Bicycle) {
 }
 ```
 
-##### RawRepresentable
+#### RawRepresentable
 
 JExtract also supports extracting enums that conform to `RawRepresentable`
 by giving access to an optional initializer and the `rawValue` variable.
