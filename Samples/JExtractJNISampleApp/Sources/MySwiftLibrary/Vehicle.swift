@@ -17,12 +17,14 @@ public enum Vehicle {
   case car(String, trailer: String?)
   case motorbike(String, horsePower: Int64, helmets: Int32?)
   indirect case transformer(front: Vehicle, back: Vehicle)
+  case boat(passengers: Int32?, length: Int16?)
 
   public init?(name: String) {
     switch name {
       case "bicycle": self = .bicycle
       case "car": self = .car("Unknown", trailer: nil)
       case "motorbike": self = .motorbike("Unknown", horsePower: 0, helmets: nil)
+      case "boat": self = .boat(passengers: nil, length: nil)
       default: return nil
     }
   }
@@ -33,6 +35,7 @@ public enum Vehicle {
     case .car: "car"
     case .motorbike: "motorbike"
     case .transformer: "transformer"
+    case .boat: "boat"
     }
   }
 
@@ -45,6 +48,7 @@ public enum Vehicle {
       case (.motorbike, .motorbike), (.motorbike, .transformer): false
       case (.transformer, .bicycle), (.transformer, .car), (.transformer, .motorbike): true
       case (.transformer, .transformer): false
+      default: false
     }
   }
 
@@ -53,7 +57,7 @@ public enum Vehicle {
       case .bicycle: self = .car("Unknown", trailer: nil)
       case .car: self = .motorbike("Unknown", horsePower: 0, helmets: nil)
       case .motorbike: self = .transformer(front: .car("BMW", trailer: nil), back: self)
-      case .transformer: break
+      case .transformer, .boat: break
     }
   }
 }

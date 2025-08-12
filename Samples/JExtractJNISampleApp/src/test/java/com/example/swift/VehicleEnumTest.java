@@ -117,7 +117,7 @@ public class VehicleEnumTest {
             assertEquals("Yamaha", motorbike.arg0());
             assertEquals(750, motorbike.horsePower());
             assertEquals(OptionalInt.empty(), motorbike.helmets());
-            
+
             vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.of(2), arena);
             motorbike = vehicle.getAsMotorbike().orElseThrow();
             assertEquals(OptionalInt.of(2), motorbike.helmets());
@@ -131,6 +131,16 @@ public class VehicleEnumTest {
             Vehicle.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
             assertTrue(transformer.front().getAsBicycle().isPresent());
             assertEquals("BMW", transformer.back().getAsCar().orElseThrow().arg0());
+        }
+    }
+
+    @Test
+    void getAsBoat() {
+        try (var arena = new ConfinedSwiftMemorySession()) {
+            Vehicle vehicle = Vehicle.boat(OptionalInt.of(10), Optional.of((short) 1), arena);
+            Vehicle.Boat boat = vehicle.getAsBoat().orElseThrow();
+            assertEquals(OptionalInt.of(10), boat.passengers());
+            assertEquals(Optional.of((short) 1), boat.length());
         }
     }
 
@@ -183,6 +193,9 @@ public class VehicleEnumTest {
                     break;
                 case Vehicle.Transformer transformer:
                     fail("Was transformer");
+                    break;
+                case Vehicle.Boat b:
+                    fail("Was boat");
                     break;
             }
         }

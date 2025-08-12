@@ -91,7 +91,7 @@ extension JNISwift2JavaGenerator {
         printer.print("static var \(JNICaching.cacheName(for: enumCase)): _JNICache!")
       }
       printer.println()
-      printer.printBraceBlock("func cleanup()") { printer in
+      printer.printBraceBlock("static func cleanup()") { printer in
         for enumCase in enumCases {
           printer.print("JNICaches.\(JNICaching.cacheName(for: enumCase)) = nil")
         }

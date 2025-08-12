@@ -555,6 +555,7 @@ extension JNISwift2JavaGenerator {
               conversion: .combinedValueToOptional(
                 .placeholder,
                 nextIntergralTypeWithSpaceForByte.javaType,
+                resultName: resultName,
                 valueType: javaType,
                 valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
                 optionalType: optionalClass
@@ -754,7 +755,7 @@ extension JNISwift2JavaGenerator {
 
     case isOptionalPresent
 
-    indirect case combinedValueToOptional(JavaNativeConversionStep, JavaType, valueType: JavaType, valueSizeInBytes: Int, optionalType: String)
+    indirect case combinedValueToOptional(JavaNativeConversionStep, JavaType, resultName: String, valueType: JavaType, valueSizeInBytes: Int, optionalType: String)
 
     indirect case ternary(JavaNativeConversionStep, thenExp: JavaNativeConversionStep, elseExp: JavaNativeConversionStep)
 
@@ -834,22 +835,22 @@ extension JNISwift2JavaGenerator {
         let argsStr = args.joined(separator: ", ")
         return "\(inner).\(methodName)(\(argsStr))"
 
-      case .combinedValueToOptional(let combined, let combinedType, let valueType, let valueSizeInBytes, let optionalType):
+      case .combinedValueToOptional(let combined, let combinedType, let resultName, let valueType, let valueSizeInBytes, let optionalType):
         let combined = combined.render(&printer, placeholder)
         printer.print(
           """
-          \(combinedType) combined$ = \(combined);
-          byte discriminator$ = (byte) (combined$ & 0xFF);
+          \(combinedType) \(resultName)_combined$ = \(combined);
+          byte \(resultName)_discriminator$ = (byte) (\(resultName)_combined$ & 0xFF);
           """
         )
 
         if valueType == .boolean {
-          printer.print("boolean value$ = ((byte) (combined$ >> 8)) != 0;")
+          printer.print("boolean \(resultName)_value$ = ((byte) (\(resultName)_combined$ >> 8)) != 0;")
         } else {
-          printer.print("\(valueType) value$ = (\(valueType)) (combined$ >> \(valueSizeInBytes * 8));")
+          printer.print("\(valueType) \(resultName)_value$ = (\(valueType)) (\(resultName)_combined$ >> \(valueSizeInBytes * 8));")
         }
 
-        return "discriminator$ == 1 ? \(optionalType).of(value$) : \(optionalType).empty()"
+        return "\(resultName)_discriminator$ == 1 ? \(optionalType).of(\(resultName)_value$) : \(optionalType).empty()"
 
       case .ternary(let cond, let thenExp, let elseExp):
         let cond = cond.render(&printer, placeholder)
@@ -920,7 +921,7 @@ extension JNISwift2JavaGenerator {
       case .method(let inner, _, let args):
         return inner.requiresSwiftArena || args.contains(where: \.requiresSwiftArena)
 
-      case .combinedValueToOptional(let inner, _, _, _, _):
+      case .combinedValueToOptional(let inner, _, _, _, _, _):
         return inner.requiresSwiftArena
 
       case .ternary(let cond, let thenExp, let elseExp):
