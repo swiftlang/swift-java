@@ -117,7 +117,7 @@ public class VehicleEnumTest {
             assertEquals("Yamaha", motorbike.arg0());
             assertEquals(750, motorbike.horsePower());
             assertEquals(OptionalInt.empty(), motorbike.helmets());
-
+            
             vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.of(2), arena);
             motorbike = vehicle.getAsMotorbike().orElseThrow();
             assertEquals(OptionalInt.of(2), motorbike.helmets());

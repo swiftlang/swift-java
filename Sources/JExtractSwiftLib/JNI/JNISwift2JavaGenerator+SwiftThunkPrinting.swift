@@ -98,6 +98,12 @@ extension JNISwift2JavaGenerator {
       }
     }
 
+    printer.println()
+    printer.print(#"@_cdecl("JNI_OnUnload")"#)
+    printer.printBraceBlock("func JNI_OnUnload(javaVM: UnsafeMutablePointer<JavaVM?>!, reserved: UnsafeMutableRawPointer!)") { printer in
+      printer.print("JNICaches.cleanup()")
+    }
+
     let fileName = "\(self.swiftModuleName)+JNICaches.swift"
 
     if let outputFile = try printer.writeContents(
