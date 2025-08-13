@@ -157,7 +157,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.1.2']
+        swift_version: ['6.1.2', 'nightly']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
@@ -185,7 +185,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.1.2']
+        swift_version: ['6.1.2', 'nightly']
         os_version: ['macos']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
