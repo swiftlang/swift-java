@@ -16,12 +16,7 @@
 ///
 /// This type is used internally in by the outputted JExtract wrappers
 /// to improve performance of any JNI lookups.
-///
-/// - Warning: This type is inherently thread-unsafe.
-///            We assume that there exists **at most** one of these
-///            per Java `class`, and it must only be initialized and modified in the
-///            static initializer of that Java class.
-public final class _JNICache: @unchecked Sendable {
+public final class _JNIMethodIDCache: Sendable {
   public struct Method: Hashable {
     public let name: String
     public let signature: String
@@ -32,9 +27,8 @@ public final class _JNICache: @unchecked Sendable {
     }
   }
 
-  var _class: jclass?
-  let environment: JNIEnvironment
-  let methods: [Method: jmethodID]
+  nonisolated(unsafe) let _class: jclass?
+  nonisolated(unsafe) let methods: [Method: jmethodID]
 
   public var javaClass: jclass {
     self._class!
@@ -44,7 +38,6 @@ public final class _JNICache: @unchecked Sendable {
     guard let clazz = environment.interface.FindClass(environment, className) else {
       fatalError("Class \(className) could not be found!")
     }
-    self.environment = environment
     self._class = environment.interface.NewGlobalRef(environment, clazz)!
     self.methods = methods.reduce(into: [:]) { (result, method) in
       if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, method.signature) {
@@ -60,12 +53,7 @@ public final class _JNICache: @unchecked Sendable {
     methods[method]
   }
 
-  func cleanup() {
+  public func cleanup(environment: UnsafeMutablePointer<JNIEnv?>!) {
     environment.interface.DeleteGlobalRef(environment, self._class)
-  }
-
-  deinit {
-    cleanup()
-    self._class = nil
   }
 }

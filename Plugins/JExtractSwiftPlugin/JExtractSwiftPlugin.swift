@@ -114,13 +114,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       outputSwiftDirectory.appending(path: "\(sourceModule.name)Module+SwiftJava.swift")
     ]
 
-    // Append any JNI cache files
-    if configuration?.mode == .jni {
-      outputSwiftFiles += [
-        outputSwiftDirectory.appending(path: "\(sourceModule.name)+JNICaches.swift")
-      ]
-    }
-
     // If the module uses 'Data' type, the thunk file is emitted as if 'Data' is declared
     // in that module. Declare the thunk file as the output.
     // FIXME: Make this conditional.

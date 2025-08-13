@@ -259,17 +259,6 @@ extension JNISwift2JavaGenerator {
 
       // Print record
       printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
-        printer.printBraceBlock("static class $JNI") { printer in
-          printer.print("private static native void $nativeInit();")
-        }
-
-        // Used to ensure static initializer has been calling to trigger caching.
-        printer.print("static void $ensureInitialized() {}")
-
-        printer.printBraceBlock("static") { printer in
-          printer.print("$JNI.$nativeInit();")
-        }
-
         let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap { value, conversion in
           ["\(conversion.native.javaType) \(value.parameter.name)"]
         }
@@ -277,13 +266,7 @@ extension JNISwift2JavaGenerator {
         printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
-      self.printJavaBindingWrapperMethod(
-        &printer,
-        translatedCase.getAsCaseFunction,
-        prefix: { printer in
-          printer.print("\(caseName).$ensureInitialized();")
-        }
-      )
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction)
       printer.println()
     }
   }
@@ -355,8 +338,7 @@ extension JNISwift2JavaGenerator {
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
-    importedFunc: ImportedFunc? = nil,
-    prefix: (inout CodePrinter) -> Void = { _ in }
+    importedFunc: ImportedFunc? = nil
   ) {
     var modifiers = ["public"]
     if translatedDecl.isStatic {
@@ -402,7 +384,6 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock(
       "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     ) { printer in
-      prefix(&printer)
       printDowncall(&printer, translatedDecl)
     }
 
