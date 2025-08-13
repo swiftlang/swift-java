@@ -15,7 +15,7 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -82,7 +82,7 @@ public class OptionalsTest {
 
     @Test
     void optionalClass() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(arena);
             assertEquals(Optional.empty(), MySwiftLibrary.optionalClass(Optional.empty(), arena));
             Optional<MySwiftClass> optionalClass = MySwiftLibrary.optionalClass(Optional.of(c), arena);
@@ -99,7 +99,7 @@ public class OptionalsTest {
 
     @Test
     void multipleOptionals() {
-        try (var arena = new ConfinedSwiftMemorySession()) {
+        try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(arena);
             OptionalLong result = MySwiftLibrary.multipleOptionals(
                     Optional.of((byte) 1),
