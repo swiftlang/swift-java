@@ -43,7 +43,7 @@ struct MemoryManagementModeTests {
          * }
          */
         public static MyClass f(SwiftArena swiftArena$) {
-          return new MyClass(SwiftModule.$f(), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena$);
         }
         """,
       ]
@@ -68,7 +68,7 @@ struct MemoryManagementModeTests {
         """,
         """
         public static MyClass f(SwiftArena swiftArena$) {
-          return new MyClass(SwiftModule.$f(), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena$);
         }
         """,
       ]
