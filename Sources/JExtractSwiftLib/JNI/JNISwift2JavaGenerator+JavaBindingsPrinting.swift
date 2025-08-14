@@ -117,8 +117,21 @@ extension JNISwift2JavaGenerator {
 
       printer.print(
         """
-        public \(decl.swiftNominal.name)(long selfPointer, SwiftArena swiftArena) {
+        private \(decl.swiftNominal.name)(long selfPointer, SwiftArena swiftArena) {
           super(selfPointer, swiftArena);
+        }
+
+        /** 
+         * Assume that the passed {@code long} represents a memory address of a {@link \(decl.swiftNominal.name)}.
+         * <p/>
+         * Warnings:
+         * <ul>
+         *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(decl.swiftNominal.name) types.</li>
+         *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
+         * </ul>
+         */
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
+          return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
         }
         """
       )
