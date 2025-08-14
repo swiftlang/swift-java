@@ -124,18 +124,49 @@ func assertOutput(
       continue
     }
 
-    for (no, (g, e)) in zip(gotLines.dropFirst(matchingOutputOffset), expectedLines).enumerated() {
-      if g.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0
-           || e.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0 {
-        continue
-      }
+    var currentExpectedLine: Int = 0
+    var currentGotLine: Int = matchingOutputOffset
 
-      let ge = g.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-      let ee = e.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-      if ge.commonPrefix(with: ee) != ee {
-        diffLineNumbers.append(no + matchingOutputOffset)
+    outer: while currentExpectedLine < expectedLines.count {
+      let expectedLine = expectedLines[currentExpectedLine].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-        #expect(ge == ee, sourceLocation: sourceLocation)
+      if expectedLine == "..." {
+        // Ignore the rest of output, if last line is placeholder.
+        guard currentExpectedLine != (expectedLines.count - 1) else {
+          break
+        }
+
+        let nextLine = expectedLines[currentExpectedLine + 1].trimmingCharacters(in: .whitespacesAndNewlines)
+        while currentGotLine < gotLines.count {
+          let gottenLine = gotLines[currentGotLine].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+          if gottenLine.commonPrefix(with: nextLine) == nextLine {
+            currentExpectedLine += 2
+            break
+          } else if nextLine == "..." {
+            // Skip any following "..."
+            currentExpectedLine += 1
+            break
+          } else {
+            currentGotLine += 1
+          }
+
+          if currentGotLine == gotLines.count {
+            diffLineNumbers.append(currentExpectedLine + matchingOutputOffset + 1)
+            Issue.record("Expected to find '\(nextLine)' after wildcard, but end of file reached.", sourceLocation: sourceLocation)
+            break outer
+          }
+        }
+
+        currentGotLine += 1
+      } else {
+        let gottenLine = gotLines[currentGotLine].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        if gottenLine.commonPrefix(with: expectedLine) != expectedLine {
+          diffLineNumbers.append(currentExpectedLine + matchingOutputOffset)
+
+          #expect(gottenLine == expectedLine, sourceLocation: sourceLocation)
+        }
+        currentGotLine += 1
+        currentExpectedLine += 1
       }
     }
 
