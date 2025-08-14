@@ -37,11 +37,11 @@ struct JNIJavaKitTests {
       expectedChunks: [
       """
       /**
-      * Downcall to Swift:
-      * {@snippet lang=swift :
-      * public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64)
-      * }
-      */
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64)
+       * }
+       */
       public static void function(java.lang.Long javaLong, java.lang.Integer javaInteger, long int) {
         SwiftModule.$function(javaLong, javaInteger, int);
       }

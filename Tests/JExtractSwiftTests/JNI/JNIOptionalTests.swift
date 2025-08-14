@@ -46,12 +46,12 @@ struct JNIOptionalTests {
        * public func optionalSugar(_ arg: Int64?) -> Int32?
        * }
        */
-       public static OptionalInt optionalSugar(OptionalLong arg) {
-         long combined$ = SwiftModule.$optionalSugar((byte) (arg.isPresent() ? 1 : 0), arg.orElse(0L));
-         byte discriminator$ = (byte) (combined$ & 0xFF);
-         int value$ = (int) (combined$ >> 32);
-         return discriminator$ == 1 ? OptionalInt.of(value$) : OptionalInt.empty();
-       }
+      public static OptionalInt optionalSugar(OptionalLong arg) {
+        long combined$ = SwiftModule.$optionalSugar((byte) (arg.isPresent() ? 1 : 0), arg.orElse(0L));
+        byte discriminator$ = (byte) (combined$ & 0xFF);
+        int value$ = (int) (combined$ >> 32);
+        return discriminator$ == 1 ? OptionalInt.of(value$) : OptionalInt.empty();
+      }
       """,
       """
       private static native long $optionalSugar(byte arg_discriminator, long arg_value);
@@ -92,16 +92,16 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
-        * }
-        */
-        public static Optional<String> optionalExplicit(Optional<String> arg) {
-          byte[] result_discriminator$ = new byte[1];
-          java.lang.String result$ = SwiftModule.$optionalExplicit((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null), result_discriminator$);
-          return (result_discriminator$[0] == 1) ? Optional.of(result$) : Optional.empty();
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
+       * }
+       */
+      public static Optional<String> optionalExplicit(Optional<String> arg) {
+        byte[] result_discriminator$ = new byte[1];
+        java.lang.String result$ = SwiftModule.$optionalExplicit((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null), result_discriminator$);
+        return (result_discriminator$[0] == 1) ? Optional.of(result$) : Optional.empty();
+      }
       """,
       """
       private static native java.lang.String $optionalExplicit(byte arg_discriminator, java.lang.String arg_value, byte[] result_discriminator$);
@@ -150,16 +150,16 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalClass(_ arg: MyClass?) -> MyClass?
-        * }
-        */
-        public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena$) {
-          byte[] result_discriminator$ = new byte[1];
-          long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result_discriminator$);
-          return (result_discriminator$[0] == 1) ? Optional.of(new MyClass(result$, swiftArena$)) : Optional.empty();
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalClass(_ arg: MyClass?) -> MyClass?
+       * }
+       */
+      public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena$) {
+        byte[] result_discriminator$ = new byte[1];
+        long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result_discriminator$);
+        return (result_discriminator$[0] == 1) ? Optional.of(new MyClass(result$, swiftArena$)) : Optional.empty();
+      }
       """,
       """
       private static native long $optionalClass(long arg, byte[] result_discriminator$);
@@ -213,14 +213,14 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalJavaKitClass(_ arg: JavaLong?)
-        * }
-        */
-        public static void optionalJavaKitClass(Optional<java.lang.Long> arg) {
-          SwiftModule.$optionalJavaKitClass(arg.orElse(null));
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalJavaKitClass(_ arg: JavaLong?)
+       * }
+       */
+      public static void optionalJavaKitClass(Optional<java.lang.Long> arg) {
+        SwiftModule.$optionalJavaKitClass(arg.orElse(null));
+      }
       """,
       """
       private static native void $optionalJavaKitClass(java.lang.Long arg);

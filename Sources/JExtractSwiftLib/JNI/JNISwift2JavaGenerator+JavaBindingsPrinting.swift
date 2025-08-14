@@ -356,11 +356,11 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       /**
-      * Downcall to Swift:
-      * {@snippet lang=swift :
-      * \(decl.signatureString)
-      * }
-      */
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * \(decl.signatureString)
+       * }
+       */
       """
     )
   }
