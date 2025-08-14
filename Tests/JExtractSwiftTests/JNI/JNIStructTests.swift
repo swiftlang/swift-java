@@ -56,10 +56,16 @@ struct JNIStructTests {
             System.loadLibrary(LIB_NAME);
             return true;
           }
-
-          public MyStruct(long selfPointer, SwiftArena swiftArena) {
+        """,
+        """
+          private MyStruct(long selfPointer, SwiftArena swiftArena) {
             super(selfPointer, swiftArena);
           }
+        """,
+        """
+        public static MyStruct wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
+          return new MyStruct(selfPointer, swiftArena);
+        }
         """
       ])
     try assertOutput(
@@ -110,7 +116,7 @@ struct JNIStructTests {
           * }
           */
         public static MyStruct init(long x, long y, SwiftArena swiftArena$) {
-          return new MyStruct(MyStruct.$init(x, y), swiftArena$);
+          return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena$);
         }
         """,
         """

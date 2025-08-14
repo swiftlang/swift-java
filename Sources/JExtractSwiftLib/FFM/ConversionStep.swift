@@ -123,7 +123,7 @@ enum ConversionStep: Equatable {
       // of splatting out text.
       let renderedArgumentList = renderedArguments.joined(separator: ", ")
       return "\(raw: type.description)(\(raw: renderedArgumentList))"
-
+    
     case .tuplify(let elements):
       let renderedElements: [String] = elements.enumerated().map { (index, element) in
         element.asExprSyntax(placeholder: "\(placeholder)_\(index)", bodyItems: &bodyItems)!.description
