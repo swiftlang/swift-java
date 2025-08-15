@@ -15,7 +15,7 @@
 import SwiftJNI
 import CJNI
 
-@JavaInterface("org.swift.javakit.dependencies.DependencyResolver")
+@JavaInterface("org.swift.jni.dependencies.DependencyResolver")
 public struct DependencyResolver {
 }
 

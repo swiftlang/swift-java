@@ -248,9 +248,9 @@ class Java2SwiftTests: XCTestCase {
       MyObjects.self,
       swiftTypeName: "MyJavaObjects",
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.util.function.Supplier" : ("MySupplier", "JavaKitFunction"),
-        "java.lang.String" : ("JavaString", "JavaKit"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.util.function.Supplier" : ("MySupplier", "JavaUtilFunction"),
+        "java.lang.String" : ("JavaString", "SwiftJNI"),
       ],
       expectedChunks: [
         """
@@ -305,7 +305,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaString",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
       ],
       expectedChunks: [
         "import SwiftJNI",
@@ -380,9 +380,9 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "URLClassLoader",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.lang.ClassLoader" : ("ClassLoader", "JavaKit"),
-        "java.net.URL" : ("URL", "JavaKitNetwork"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.lang.ClassLoader" : ("ClassLoader", "SwiftJNI"),
+        "java.net.URL" : ("URL", "JavaNet"),
       ],
       expectedChunks: [
         "import SwiftJNI",
@@ -411,8 +411,8 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "URLClassLoader",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.net.URL" : ("URL", "JavaKitNetwork"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.net.URL" : ("URL", "JavaNet"),
       ],
       expectedChunks: [
         "import SwiftJNI",
@@ -440,9 +440,9 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaByte",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.lang.Number" : ("JavaNumber", "JavaKit"),
-        "java.lang.Byte" : ("JavaByte", "JavaKit"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.lang.Number" : ("JavaNumber", "SwiftJNI"),
+        "java.lang.Byte" : ("JavaByte", "SwiftJNI"),
       ],
       expectedChunks: [
         "import SwiftJNI",
@@ -464,7 +464,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "MyJavaIntFunction",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
         "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
       ],
       expectedChunks: [
@@ -487,11 +487,11 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Method",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.lang.Class" : ("JavaClass", "JavaKit"),
-        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
-        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
-        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.lang.Class" : ("JavaClass", "SwiftJNI"),
+        "java.lang.reflect.Executable": ("Executable", "JavaLangReflect"),
+        "java.lang.reflect.Method": ("Method", "JavaLangReflect"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaLangReflect"),
       ],
       expectedChunks: [
         "import JavaLangReflect",
@@ -521,11 +521,11 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Constructor",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.lang.Class" : ("JavaClass", "JavaKit"),
-        "java.lang.reflect.Executable": ("Executable", "JavaKitReflection"),
-        "java.lang.reflect.Method": ("Method", "JavaKitReflection"),
-        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaKitReflection"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.lang.Class" : ("JavaClass", "SwiftJNI"),
+        "java.lang.reflect.Executable": ("Executable", "JavaLangReflect"),
+        "java.lang.reflect.Method": ("Method", "JavaLangReflect"),
+        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaLangReflect"),
       ],
       expectedChunks: [
         "import JavaLangReflect",
@@ -555,13 +555,13 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "NIOByteBuffer",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "JavaKit"),
-        "java.lang.Class" : ("JavaClass", "JavaKit"),
-        "java.nio.Buffer": ("NIOBuffer", "JavaKitNIO"),
-        "java.nio.ByteBuffer": ("NIOByteBuffer", "JavaKitNIO"),
+        "java.lang.Object" : ("JavaObject", "SwiftJNI"),
+        "java.lang.Class" : ("JavaClass", "SwiftJNI"),
+        "java.nio.Buffer": ("NIOBuffer", "JavaNio"),
+        "java.nio.ByteBuffer": ("NIOByteBuffer", "JavaNio"),
       ],
       expectedChunks: [
-        "import SwiftJNINIO",
+        "import JavaNio",
         """
         @JavaClass("java.nio.ByteBuffer")
         open class NIOByteBuffer: NIOBuffer {

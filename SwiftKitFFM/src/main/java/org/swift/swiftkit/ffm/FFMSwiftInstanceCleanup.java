@@ -16,6 +16,8 @@ package org.swift.swiftkit.ffm;
 
 import org.swift.swiftkit.core.SwiftInstanceCleanup;
 
+import static org.swift.swiftkit.ffm.SwiftJavaLogGroup.LIFECYCLE;
+
 import java.lang.foreign.MemorySegment;
 
 public class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
@@ -35,7 +37,7 @@ public class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
 
         // Allow null pointers just for AutoArena tests.
         if (type != null && memoryAddress != null) {
-            System.out.println("[debug] Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
+            SwiftRuntime.log(LIFECYCLE, "Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
             SwiftValueWitnessTable.destroy(type, memoryAddress);
         }
     }

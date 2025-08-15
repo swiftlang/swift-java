@@ -73,7 +73,7 @@ extension SwiftJava {
     @Option(
       help: """
             A swift-java configuration file for a given Swift module name on which this module depends,
-            e.g., Sources/JavaKitJar/swift-java.config. There should be one of these options
+            e.g., Sources/JavaJar/swift-java.config. There should be one of these options
             for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
             """
     )
