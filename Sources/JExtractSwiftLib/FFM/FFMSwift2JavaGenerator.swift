@@ -194,8 +194,8 @@ extension FFMSwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.STDLIB_DYLIB_NAME);
-            System.loadLibrary("SwiftKitSwift");
+            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFTKITSWIFT);
             System.loadLibrary(LIB_NAME);
             return true;
         }
@@ -343,10 +343,11 @@ extension FFMSwift2JavaGenerator {
         """
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
-            // Ensure Swift and our Lib are loaded during static initialization of the class.
-            System.loadLibrary("swiftCore");
-            System.loadLibrary("SwiftKitSwift");
-            System.loadLibrary(LIB_NAME);
+            if (SwiftLibraries.AUTO_LOAD_LIBS) {
+                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFTKITSWIFT);
+                System.loadLibrary(LIB_NAME);
+            }
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)
