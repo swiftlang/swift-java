@@ -297,7 +297,6 @@ extension JNISwift2JavaGenerator {
 
     printJavaBindingWrapperHelperClass(&printer, decl)
 
-    printDeclDocumentation(&printer, decl)
     printJavaBindingWrapperMethod(&printer, decl)
   }
 
