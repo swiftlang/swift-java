@@ -344,9 +344,9 @@ extension FFMSwift2JavaGenerator {
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             // Ensure Swift and our Lib are loaded during static initialization of the class.
-            SwiftLibraries.loadLibrary("swiftCore");
-            SwiftLibraries.loadLibrary("SwiftKitSwift");
-            SwiftLibraries.loadLibrary(LIB_NAME);
+            System.loadLibrary("swiftCore");
+            System.loadLibrary("SwiftKitSwift");
+            System.loadLibrary(LIB_NAME);
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)

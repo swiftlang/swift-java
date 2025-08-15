@@ -43,17 +43,6 @@ public final class SwiftLibraries {
     // ==== ------------------------------------------------------------------------------------------------------------
     // Loading libraries
 
-    public static void loadLibrary(String libname) {
-        // TODO: avoid concurrent loadResource calls; one load is enough esp since we cause File IO when we do that
-        try {
-            // try to load a dylib from our classpath, e.g. when we included it in our jar
-            loadResourceLibrary(libname);
-        } catch (UnsatisfiedLinkError | RuntimeException e) {
-            // fallback to plain system path loading
-            System.loadLibrary(libname);
-        }
-    }
-
     public static void loadResourceLibrary(String libname) {
         String resourceName = PlatformUtils.dynamicLibraryName(libname);
         if (CallTraces.TRACE_DOWNCALLS) {
