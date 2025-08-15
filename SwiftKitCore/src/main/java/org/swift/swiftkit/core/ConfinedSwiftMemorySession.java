@@ -28,17 +28,13 @@ public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
 
     final ConfinedResourceList resources;
 
-    public ConfinedSwiftMemorySession() {
-        this(Thread.currentThread());
-    }
-
     public ConfinedSwiftMemorySession(Thread owner) {
         this.owner = owner;
         this.state = new AtomicInteger(ACTIVE);
         this.resources = new ConfinedResourceList();
     }
 
-    public void checkValid() throws RuntimeException {
+    void checkValid() throws RuntimeException {
         if (this.owner != null && this.owner != Thread.currentThread()) {
             throw new WrongThreadException(String.format("ConfinedSwift arena is confined to %s but was closed from %s!", this.owner, Thread.currentThread()));
         } else if (this.state.get() < ACTIVE) {

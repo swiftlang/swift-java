@@ -18,9 +18,13 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
-COPY install_jdk.sh .
-
 # JDK dependency
-RUN bash -xc 'JDK_VENDOR=corretto ./install_jdk.sh'
-ENV JAVA_HOME="/usr/lib/jvm/default-jdk"
-ENV PATH="$PATH:/usr/lib/jvm/default-jdk/bin"
+RUN curl -s "https://get.sdkman.io" | bash
+RUN bash -c "source /root/.sdkman/bin/sdkman-init.sh && sdk install java 24.0.1-amzn"
+
+RUN curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && \
+    tar zxf swiftly-$(uname -m).tar.gz && \
+    ./swiftly init --quiet-shell-followup --assume-yes && \
+    . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
+    hash -r
+

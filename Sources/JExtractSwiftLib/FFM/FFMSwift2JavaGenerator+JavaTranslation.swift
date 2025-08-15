@@ -684,7 +684,7 @@ extension FFMSwift2JavaGenerator {
           outParameters: [
             JavaParameter(name: "", type: javaType)
           ],
-          conversion: .constructSwiftValue(.placeholder, javaType)
+          conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
         )
 
       case .tuple:
@@ -731,6 +731,9 @@ extension FFMSwift2JavaGenerator {
 
     // Call 'new \(Type)(\(placeholder), swiftArena$)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
+
+    /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
+    indirect case wrapMemoryAddressUnsafe(JavaConversionStep, JavaType)
 
     // Construct the type using the placeholder as arguments.
     indirect case construct(JavaConversionStep, JavaType)

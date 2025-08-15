@@ -56,13 +56,8 @@ public abstract class JNISwiftInstance extends SwiftInstance {
 
     @Override
     public SwiftInstanceCleanup $createCleanup() {
-        final AtomicBoolean statusDestroyedFlag = $statusDestroyedFlag();
-        Runnable markAsDestroyed = new Runnable() {
-            @Override
-            public void run() {
-                statusDestroyedFlag.set(true);
-            }
-        };
+        var statusDestroyedFlag = $statusDestroyedFlag();
+        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 
         return new JNISwiftInstanceCleanup(this.$createDestroyFunction(), markAsDestroyed);
     }
