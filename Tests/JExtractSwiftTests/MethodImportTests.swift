@@ -227,7 +227,7 @@ final class MethodImportTests {
         public static MySwiftClass globalReturnClass(AllocatingSwiftArena swiftArena$) {
           MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
           swiftjava___FakeModule_globalReturnClass.call(_result);
-          return new MySwiftClass(_result, swiftArena$);
+          return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """
     )
@@ -404,7 +404,7 @@ final class MethodImportTests {
         public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena$) {
             MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
             swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
-            return new MySwiftClass(_result, swiftArena$);
+            return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """
     )
@@ -449,7 +449,7 @@ final class MethodImportTests {
         public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena$) {
             MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
             swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
-            return new MySwiftStruct(_result, swiftArena$);
+            return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """
     )

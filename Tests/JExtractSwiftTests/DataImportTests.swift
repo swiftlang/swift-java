@@ -86,7 +86,7 @@ final class DataImportTests {
       ]
     )
   }
-
+  
   @Test("Import Data: JavaBindings")
   func data_javaBindings() throws {
 
@@ -167,7 +167,7 @@ final class DataImportTests {
         public static Data returnData(AllocatingSwiftArena swiftArena$) {
           MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
           swiftjava_SwiftModule_returnData.call(_result);
-          return new Data(_result, swiftArena$);
+          return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """,
 
@@ -210,7 +210,7 @@ final class DataImportTests {
         public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena$) {
           MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
           swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, _result);
-          return new Data(_result, swiftArena$);
+          return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """,
 
@@ -408,4 +408,5 @@ final class DataImportTests {
       ]
     )
   }
+  
 }

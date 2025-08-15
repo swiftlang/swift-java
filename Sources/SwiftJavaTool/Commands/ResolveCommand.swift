@@ -89,6 +89,15 @@ extension SwiftJava.ResolveCommand {
       resolvedClasspath: dependenciesClasspath)
   }
 
+
+  /// Resolves Java dependencies from swift-java.config and returns classpath information.
+  /// 
+  /// - Parameters:
+  ///   - swiftModule: module name from --swift-module. e.g.: --swift-module MySwiftModule
+  ///   - dependencies: parsed maven-style dependency descriptors (groupId:artifactId:version) 
+  ///                   from Sources/MySwiftModule/swift-java.config "dependencies" array.
+  ///
+  /// - Throws: 
   func resolveDependencies(
     swiftModule: String, dependencies: [JavaDependencyDescriptor]
   ) async throws -> ResolvedDependencyClasspath {
@@ -108,6 +117,11 @@ extension SwiftJava.ResolveCommand {
     return ResolvedDependencyClasspath(for: dependencies, classpath: dependenciesClasspath)
   }
 
+
+  /// Resolves maven-style dependencies from swift-java.config under temporary project directory.
+  /// 
+  /// - Parameter dependencies: maven-style dependencies to resolve
+  /// - Returns: Colon-separated classpath
   func resolveDependencies(dependencies: [JavaDependencyDescriptor]) async -> String {
     let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
       .appendingPathComponent(".build")
@@ -158,6 +172,7 @@ extension SwiftJava.ResolveCommand {
     }
   }
 
+  /// Creates Gradle project files (build.gradle, settings.gradle.kts) in temporary directory.
   func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor]) throws {
     let buildGradle = directory
       .appendingPathComponent("build.gradle", isDirectory: false)
@@ -189,7 +204,14 @@ extension SwiftJava.ResolveCommand {
       """
     try settingsGradleText.write(to: settingsGradle, atomically: true, encoding: .utf8)
   }
-
+  
+  /// Creates {MySwiftModule}.swift.classpath in the --output-directory. 
+  /// 
+  /// - Parameters:
+  ///   - swiftModule: Swift module name for classpath filename (--swift-module value)
+  ///   - outputDirectory: Directory path for classpath file (--output-directory value)
+  ///   - resolvedClasspath: Complete dependency classpath information
+  ///
   mutating func writeSwiftJavaClasspathFile(
     swiftModule: String,
     outputDirectory: String,
@@ -218,6 +240,7 @@ extension SwiftJava.ResolveCommand {
     return camelCased
   }
 
+  // copy gradlew & gradle.bat from root, throws error if there is no gradle setup.
   func copyGradlew(to resolverWorkDirectory: URL) throws {
     var searchDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
     

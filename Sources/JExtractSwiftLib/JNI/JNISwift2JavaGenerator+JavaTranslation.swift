@@ -510,7 +510,7 @@ extension JNISwift2JavaGenerator {
           javaType: javaType,
           annotations: resultAnnotations,
           outParameters: [],
-          conversion: .constructSwiftValue(.placeholder, javaType)
+          conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
         )
 
       case .tuple([]):
@@ -597,7 +597,7 @@ extension JNISwift2JavaGenerator {
             discriminatorName: .combinedName(component: "discriminator$"),
             optionalClass: "Optional",
             javaType: .long,
-            toValue: .constructSwiftValue(.placeholder, .class(package: nil, name: nominalTypeName)),
+            toValue: .wrapMemoryAddressUnsafe(.placeholder, .class(package: nil, name: nominalTypeName)),
             resultName: resultName
           )
         )
@@ -749,6 +749,9 @@ extension JNISwift2JavaGenerator {
     /// Call `new \(Type)(\(placeholder))`
     indirect case constructJavaClass(JavaNativeConversionStep, JavaType)
 
+    /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
+    indirect case wrapMemoryAddressUnsafe(JavaNativeConversionStep, JavaType)
+
     indirect case call(JavaNativeConversionStep, function: String)
 
     indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep] = [])
@@ -816,6 +819,10 @@ extension JNISwift2JavaGenerator {
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "new \(javaType.className!)(\(inner), swiftArena$)"
+        
+      case .wrapMemoryAddressUnsafe(let inner, let javaType):
+        let inner = inner.render(&printer, placeholder)
+        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
@@ -906,7 +913,7 @@ extension JNISwift2JavaGenerator {
       case .placeholder, .constant, .isOptionalPresent, .combinedName:
         return false
 
-      case .constructSwiftValue:
+      case .constructSwiftValue, .wrapMemoryAddressUnsafe:
         return true
 
       case .constructJavaClass(let inner, _):
