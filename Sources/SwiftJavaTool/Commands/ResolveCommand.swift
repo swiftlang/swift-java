@@ -98,7 +98,6 @@ extension SwiftJava.ResolveCommand {
   ///                   from Sources/MySwiftModule/swift-java.config "dependencies" array.
   ///
   /// - Throws: 
-  /// - Returns: `ResolvedDependencyClasspath`
   func resolveDependencies(
     swiftModule: String, dependencies: [JavaDependencyDescriptor]
   ) async throws -> ResolvedDependencyClasspath {
@@ -213,7 +212,6 @@ extension SwiftJava.ResolveCommand {
   ///   - outputDirectory: Directory path for classpath file (--output-directory value)
   ///   - resolvedClasspath: Complete dependency classpath information
   ///
-  /// - Throws: TBC
   mutating func writeSwiftJavaClasspathFile(
     swiftModule: String,
     outputDirectory: String,
