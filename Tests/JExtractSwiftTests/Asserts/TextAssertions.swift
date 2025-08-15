@@ -186,9 +186,17 @@ func assertOutput(
       print("==== ---------------------------------------------------------------")
       print("Got output:")
       let printFromLineNo = matchingOutputOffset
-      let printToLineNo = matchingOutputOffset + expectedLines.count
-      for (n, g) in gotLines.enumerated() where n >= printFromLineNo && n <= printToLineNo {
-        print("\(n): \(g)".red(if: diffLineNumbers.contains(n)))
+      for (n, g) in gotLines.enumerated() where n >= printFromLineNo {
+        let baseLine = "\(n): \(g)"
+        var line = baseLine
+        if diffLineNumbers.contains(n) {
+          line += "\n"
+          let leadingCount = "\(n): ".count
+          let message = "\(String(repeating: " ", count: leadingCount))\(String(repeating: "^", count: 8)) EXPECTED MATCH OR SEARCHING FROM HERE "
+          line += "\(message)\(String(repeating: "^", count: max(0, line.count - message.count)))"
+          line = line.red
+        }
+        print(line)
       }
       print("==== ---------------------------------------------------------------\n")
     }
