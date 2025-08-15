@@ -67,11 +67,11 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func helloWorld()
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func helloWorld()
+         * }
+         */
         public static void helloWorld() {
           SwiftModule.$helloWorld();
         }
@@ -81,11 +81,11 @@ struct JNIModuleTests {
         """,
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func takeIntegers(i1: Int8, i2: Int16, i3: Int32, i4: Int64) -> UInt16
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func takeIntegers(i1: Int8, i2: Int16, i3: Int32, i4: Int64) -> UInt16
+         * }
+         */
         @Unsigned
         public static char takeIntegers(byte i1, short i2, int i3, long i4) {
           return SwiftModule.$takeIntegers(i1, i2, i3, i4);
@@ -96,11 +96,11 @@ struct JNIModuleTests {
         """,
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func otherPrimitives(b: Bool, f: Float, d: Double)
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func otherPrimitives(b: Bool, f: Float, d: Double)
+         * }
+         */
         public static void otherPrimitives(boolean b, float f, double d) {
           SwiftModule.$otherPrimitives(b, f, d);
         }
@@ -151,11 +151,11 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func copy(_ string: String) -> String
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func copy(_ string: String) -> String
+         * }
+         */
         public static java.lang.String copy(java.lang.String string) {
           return SwiftModule.$copy(string);
         }
@@ -194,11 +194,11 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func methodA() throws
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func methodA() throws
+         * }
+         */
         public static void methodA() throws Exception {
           SwiftModule.$methodA();
         }
@@ -208,11 +208,11 @@ struct JNIModuleTests {
         """,
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func methodB() throws -> Int64
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func methodB() throws -> Int64
+         * }
+         */
         public static long methodB() throws Exception {
           return SwiftModule.$methodB();
         }
