@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 /// Determine if the given type needs any extra annotations that should be included
 /// in Java sources when the corresponding Java type is rendered.

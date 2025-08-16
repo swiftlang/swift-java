@@ -14,8 +14,8 @@
 
 import Benchmark
 import Foundation
-import JavaKit
-import JavaKitNetwork
+import SwiftJNI
+import JavaNet
 
 @MainActor let benchmarks = {
     var jvm: JavaVirtualMachine {

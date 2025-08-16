@@ -16,7 +16,7 @@ import Foundation
 import JavaTypes
 import SwiftBasicFormat
 import SwiftParser
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 
 /// Takes swift interfaces and translates them into Java used to access those.

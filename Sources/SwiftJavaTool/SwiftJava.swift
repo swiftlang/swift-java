@@ -16,14 +16,14 @@ import ArgumentParser
 import Foundation
 import SwiftJavaLib
 import JExtractSwiftLib
-import JavaKit
-import JavaKitJar
-import JavaKitNetwork
-import JavaKitReflection
+import SwiftJNI
+import JavaUtilJar
+import JavaNet
+import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import JavaKitConfigurationShared
-import JavaKitShared
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main

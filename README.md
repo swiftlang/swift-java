@@ -184,7 +184,7 @@ To view the rendered docc documentation you can use the docc preview command:
 xcrun docc preview Sources/SwiftJavaDocumentation/Documentation.docc
 
 # OR JavaKit to view JavaKit documentation:
-# xcrun docc preview Sources/JavaKit/Documentation.docc
+# xcrun docc preview Sources/SwiftJNI/Documentation.docc
 
 # ========================================
 # Starting Local Preview Server

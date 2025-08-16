@@ -72,7 +72,7 @@ OPTIONS:
 For example, the `JavaKitJar` library is generated with this command line:
 
 ```swift
-swift-java wrap-java --swift-module JavaKitJar --depends-on JavaKit=Sources/JavaKit/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
+swift-java wrap-java --swift-module JavaKitJar --depends-on SwiftJNI=Sources/SwiftJNI/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
 ```
 
 The `--swift-module JavaKitJar` parameter describes the name of the Swift module in which the code will be generated. 
@@ -149,7 +149,7 @@ with an associated target that depends on `JavaKit`:
 Now, in the `HelloSwift` Swift library, define a `struct` that provides the `main` method for the Java class we already defined:
 
 ```swift
-import JavaKit
+import SwiftJNI
 
 @JavaImplementation("org.swift.javakit.HelloSwiftMain")
 struct HelloSwiftMain {
@@ -178,9 +178,9 @@ The easiest way to build a command-line program in Swift is with the [Swift argu
 
 ```swift
 import ArgumentParser
-import JavaKit
+import SwiftJNI
 
-@JavaClass("org.swift.javakit.HelloSwiftMain")
+@JavaClass("org.swift.jni.HelloSwiftMain")
 struct HelloSwiftMain: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable verbose output")
   var verbose: Bool = false

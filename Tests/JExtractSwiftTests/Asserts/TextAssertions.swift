@@ -14,7 +14,7 @@
 
 import JExtractSwiftLib
 import Testing
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import struct Foundation.CharacterSet
 
 enum RenderKind {

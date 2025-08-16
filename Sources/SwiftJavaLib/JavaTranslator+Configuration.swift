@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 extension JavaTranslator {
 //  /// Read a configuration file from the given URL.

@@ -11,8 +11,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-import JavaKit
-import JavaKitReflection
+import SwiftJNI
+import JavaLangReflect
 
 /// Captures the relationship between two methods by comparing their parameter
 /// and result types.

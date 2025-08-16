@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJavaLib
-import JavaKitShared
-import JavaRuntime
-import JavaKit
+import SwiftJavaShared
+import CJNI
+import SwiftJNI
 
 @JavaClass("java.lang.ClassLoader")
 public struct ClassLoader {

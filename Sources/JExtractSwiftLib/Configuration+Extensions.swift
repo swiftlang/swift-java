@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaKitConfigurationShared // TODO: this should become SwiftJavaConfigurationShared
-import JavaTypes // TODO: this should become SwiftJavaConfigurationShared
+import SwiftJavaConfigurationShared
+import JavaTypes
 
 extension Configuration {
   public var effectiveUnsignedNumericsMode: UnsignedNumericsMode {
