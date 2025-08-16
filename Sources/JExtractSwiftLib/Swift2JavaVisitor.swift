@@ -46,7 +46,7 @@ final class Swift2JavaVisitor {
     case .structDecl(let node):
       self.visit(nominalDecl: node, in: parent)
     case .enumDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(enumDecl: node, in: parent)
     case .protocolDecl(let node):
       self.visit(nominalDecl: node, in: parent)
     case .extensionDecl(let node):
@@ -65,6 +65,8 @@ final class Swift2JavaVisitor {
     case .subscriptDecl:
       // TODO: Implement
       break
+    case .enumCaseDecl(let node):
+      self.visit(enumCaseDecl: node, in: parent)
 
     default:
       break
@@ -81,6 +83,12 @@ final class Swift2JavaVisitor {
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType)
     }
+  }
+
+  func visit(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
+    self.visit(nominalDecl: node, in: parent)
+
+    self.synthesizeRawRepresentableConformance(enumDecl: node, in: parent)
   }
 
   func visit(extensionDecl node: ExtensionDeclSyntax, in parent: ImportedNominalType?) {
@@ -128,6 +136,49 @@ final class Swift2JavaVisitor {
       typeContext.methods.append(imported)
     } else {
       translator.importedGlobalFuncs.append(imported)
+    }
+  }
+
+  func visit(enumCaseDecl node: EnumCaseDeclSyntax, in typeContext: ImportedNominalType?) {
+    guard let typeContext else {
+      self.log.info("Enum case must be within a current type; \(node)")
+      return
+    }
+
+    do {
+      for caseElement in node.elements {
+        self.log.debug("Import case \(caseElement.name) of enum \(node.qualifiedNameForDebug)")
+
+        let parameters = try caseElement.parameterClause?.parameters.map {
+          try SwiftEnumCaseParameter($0, lookupContext: translator.lookupContext)
+        }
+
+        let signature = try SwiftFunctionSignature(
+          caseElement,
+          enclosingType: typeContext.swiftType,
+          lookupContext: translator.lookupContext
+        )
+
+        let caseFunction = ImportedFunc(
+          module: translator.swiftModuleName,
+          swiftDecl: node,
+          name: caseElement.name.text,
+          apiKind: .enumCase,
+          functionSignature: signature
+        )
+
+        let importedCase = ImportedEnumCase(
+          name: caseElement.name.text,
+          parameters: parameters ?? [],
+          swiftDecl: node,
+          enumType: SwiftNominalType(nominalTypeDecl: typeContext.swiftNominal),
+          caseFunction: caseFunction
+        )
+
+        typeContext.cases.append(importedCase)
+      }
+    } catch {
+      self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
     }
   }
 
@@ -213,6 +264,32 @@ final class Swift2JavaVisitor {
 
     typeContext.initializers.append(imported)
   }
+
+  private func synthesizeRawRepresentableConformance(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
+    guard let imported = translator.importedNominalType(node, parent: parent) else {
+      return
+    }
+
+    if let firstInheritanceType = imported.swiftNominal.firstInheritanceType,
+      let inheritanceType = try? SwiftType(
+        firstInheritanceType,
+        lookupContext: translator.lookupContext
+      ),
+      inheritanceType.isRawTypeCompatible
+    {
+      if !imported.variables.contains(where: { $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType }) {
+        let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
+        self.visit(decl: decl, in: imported)
+      }
+
+      imported.variables.first?.signatureString
+
+      if !imported.initializers.contains(where: { $0.functionSignature.parameters.count == 1 && $0.functionSignature.parameters.first?.parameterName == "rawValue" && $0.functionSignature.parameters.first?.type == inheritanceType }) {
+        let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
+        self.visit(decl: decl, in: imported)
+      }
+    }
+  }
 }
 
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
@@ -231,15 +308,6 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
     guard !attributes.contains(where: { $0.isJava }) else {
       log.debug("Skip import '\(self.qualifiedNameForDebug)': is Java")
       return false
-    }
-
-    if let node = self.as(InitializerDeclSyntax.self) {
-      let isFailable = node.optionalMark != nil
-
-      if isFailable {
-        log.warning("Skip import '\(self.qualifiedNameForDebug)': failable initializer")
-        return false
-      }
     }
 
     return true

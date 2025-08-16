@@ -71,11 +71,6 @@ extension SwiftFunctionSignature {
       throw SwiftFunctionTranslationError.missingEnclosingType(node)
     }
 
-    // We do not yet support failable initializers.
-    if node.optionalMark != nil {
-      throw SwiftFunctionTranslationError.failableInitializer(node)
-    }
-
     let (genericParams, genericRequirements) = try Self.translateGenericParameters(
       parameterClause: node.genericParameterClause,
       whereClause: node.genericWhereClause,
@@ -86,13 +81,34 @@ extension SwiftFunctionSignature {
       lookupContext: lookupContext
     )
 
+    let type = node.optionalMark != nil ? .optional(enclosingType) : enclosingType
+
     self.init(
       selfParameter: .initializer(enclosingType),
       parameters: parameters,
-      result: SwiftResult(convention: .direct, type: enclosingType),
+      result: SwiftResult(convention: .direct, type: type),
       effectSpecifiers: effectSpecifiers,
       genericParameters: genericParams,
       genericRequirements: genericRequirements
+    )
+  }
+
+  init(
+    _ node: EnumCaseElementSyntax,
+    enclosingType: SwiftType,
+    lookupContext: SwiftTypeLookupContext
+  ) throws {
+    let parameters = try node.parameterClause?.parameters.map { param in
+      try SwiftParameter(param, lookupContext: lookupContext)
+    }
+
+    self.init(
+      selfParameter: .initializer(enclosingType),
+      parameters: parameters ?? [],
+      result: SwiftResult(convention: .direct, type: enclosingType),
+      effectSpecifiers: [],
+      genericParameters: [],
+      genericRequirements: []
     )
   }
 
