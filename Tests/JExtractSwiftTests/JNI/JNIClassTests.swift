@@ -66,11 +66,17 @@ struct JNIClassTests {
             System.loadLibrary(LIB_NAME);
             return true;
           }
-
-          public MyClass(long selfPointer, SwiftArena swiftArena) {
+        """,
+        """
+          private MyClass(long selfPointer, SwiftArena swiftArena) {
             super(selfPointer, swiftArena);
           }
         """,
+        """
+        public static MyClass wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
+          return new MyClass(selfPointer, swiftArena);
+        }
+        """
       ])
     try assertOutput(
       input: source,
@@ -164,7 +170,7 @@ struct JNIClassTests {
           * }
           */
         public static MyClass init(long x, long y, SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$init(x, y), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(x, y), swiftArena$);
         }
         """,
         """
@@ -175,7 +181,7 @@ struct JNIClassTests {
           * }
           */
         public static MyClass init(SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$init(), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(), swiftArena$);
         }
         """,
         """
@@ -309,7 +315,7 @@ struct JNIClassTests {
           * }
           */
         public MyClass copy(SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$copy(this.$memoryAddress()), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$copy(this.$memoryAddress()), swiftArena$);
         }
         """,
         """

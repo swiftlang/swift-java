@@ -407,6 +407,7 @@ extension FFMSwift2JavaGenerator {
         "arena$"
       }
 
+      // FIXME: use trailing$ convention
       let varName = outParameter.name.isEmpty ? "_result" : "_result_" + outParameter.name
 
       printer.print(
@@ -463,7 +464,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     switch self {
     case .placeholder, .explodedName, .constant, .readMemorySegment:
       return false
-    case .constructSwiftValue:
+    case .constructSwiftValue, .wrapMemoryAddressUnsafe:
       return true
 
     case .call(let inner, _, _), .cast(let inner, _), .construct(let inner, _),
@@ -482,7 +483,11 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return false
     case .readMemorySegment:
       return true
-    case .cast(let inner, _), .construct(let inner, _), .constructSwiftValue(let inner, _), .swiftValueSelfSegment(let inner):
+    case .cast(let inner, _), 
+         .construct(let inner, _), 
+         .constructSwiftValue(let inner, _), 
+         .swiftValueSelfSegment(let inner),
+         .wrapMemoryAddressUnsafe(let inner, _):
       return inner.requiresSwiftArena
     case .call(let inner, _, let withArena):
       return withArena || inner.requiresTemporaryArena
@@ -521,6 +526,10 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     case .constructSwiftValue(let inner, let javaType):
       let inner = inner.render(&printer, placeholder)
       return "new \(javaType.className!)(\(inner), swiftArena$)"
+
+    case .wrapMemoryAddressUnsafe(let inner, let javaType):
+      let inner = inner.render(&printer, placeholder)
+      return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
 
     case .construct(let inner, let javaType):
       let inner = inner.render(&printer, placeholder)
