@@ -101,6 +101,24 @@ extension JNISwift2JavaGenerator {
     printPackage(&printer)
     printImports(&printer)
 
+    switch decl.swiftNominal.kind {
+    case .actor, .class, .enum, .struct:
+      printConcreteType(&printer, decl)
+    case .protocol:
+      printProtocol(&printer, decl)
+    }
+  }
+
+  private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.printBraceBlock("public interface \(decl.swiftNominal.name)") { printer in
+      for variable in decl.variables {
+        printFunctionDowncallMethods(&printer, variable, signaturesOnly: true)
+        printer.println()
+      }
+    }
+  }
+
+  private func printConcreteType(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printNominal(&printer, decl) { printer in
       printer.print(
         """
@@ -279,14 +297,15 @@ extension JNISwift2JavaGenerator {
         printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
-      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction)
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, signaturesOnly: false)
       printer.println()
     }
   }
 
   private func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
+    signaturesOnly: Bool = false
   ) {
     guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
@@ -297,7 +316,7 @@ extension JNISwift2JavaGenerator {
 
     printJavaBindingWrapperHelperClass(&printer, decl)
 
-    printJavaBindingWrapperMethod(&printer, decl)
+    printJavaBindingWrapperMethod(&printer, decl, signaturesOnly: signaturesOnly)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -340,17 +359,22 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-  private func printJavaBindingWrapperMethod(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+  private func printJavaBindingWrapperMethod(_ printer: inout CodePrinter, _ decl: ImportedFunc, signaturesOnly: Bool) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
-    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl)
+    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, signaturesOnly: signaturesOnly)
+  }
+
+  public protocol Test {
+    var s: String { get }
   }
 
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
-    importedFunc: ImportedFunc? = nil
+    importedFunc: ImportedFunc? = nil,
+    signaturesOnly: Bool
   ) {
     var modifiers = ["public"]
     if translatedDecl.isStatic {
@@ -372,9 +396,7 @@ extension JNISwift2JavaGenerator {
       if let importedFunc {
         printDeclDocumentation(&printer, importedFunc)
       }
-      printer.printBraceBlock(
-        "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
-      ) { printer in
+      printer.printBraceBlock("\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)") { printer in
         let globalArenaName = "SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
@@ -393,13 +415,17 @@ extension JNISwift2JavaGenerator {
     if let importedFunc {
       printDeclDocumentation(&printer, importedFunc)
     }
-    printer.printBraceBlock(
-      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
-    ) { printer in
-      printDowncall(&printer, translatedDecl)
+    let signature = "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
+    if signaturesOnly {
+      printer.print("\(signature);")
+    } else {
+      printer.printBraceBlock(signature) { printer in
+        printDowncall(&printer, translatedDecl)
+      }
+
+      printNativeFunction(&printer, translatedDecl)
     }
 
-    printNativeFunction(&printer, translatedDecl)
   }
 
   private func printNativeFunction(_ printer: inout CodePrinter, _ translatedDecl: TranslatedFunctionDecl) {

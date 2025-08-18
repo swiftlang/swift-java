@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
+import org.swift.swiftkit.core.JNISwiftInstance;
 import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.Optional;

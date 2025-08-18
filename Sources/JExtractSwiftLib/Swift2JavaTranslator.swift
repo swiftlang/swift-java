@@ -200,7 +200,7 @@ extension Swift2JavaTranslator {
     _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
     parent: ImportedNominalType?
   ) -> ImportedNominalType? {
-    if !nominalNode.shouldExtract(config: config, log: log) {
+    if !nominalNode.shouldExtract(config: config, log: log, in: parent) {
       return nil
     }
 
@@ -225,7 +225,7 @@ extension Swift2JavaTranslator {
     guard swiftNominalDecl.moduleName == self.swiftModuleName else {
       return nil
     }
-    guard swiftNominalDecl.syntax!.shouldExtract(config: config, log: log) else {
+    guard swiftNominalDecl.syntax!.shouldExtract(config: config, log: log, in: nil) else {
       return nil
     }
 

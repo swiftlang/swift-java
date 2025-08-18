@@ -95,7 +95,11 @@ extension DeclModifierSyntax {
 }
 
 extension WithModifiersSyntax {
-  var isPublic: Bool {
+  func isPublic(in type: NominalTypeDeclSyntaxNode?) -> Bool {
+    if let type, case .protocolDecl(let protocolDecl) = Syntax(type).as(SyntaxEnum.self) {
+      return protocolDecl.isPublic(in: nil)
+    }
+
     return self.modifiers.contains { modifier in
       modifier.isPublic
     }

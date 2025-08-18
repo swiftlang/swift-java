@@ -105,7 +105,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(functionDecl node: FunctionDeclSyntax, in typeContext: ImportedNominalType?) {
-    guard node.shouldExtract(config: config, log: log) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext) else {
       return
     }
 
@@ -183,7 +183,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(variableDecl node: VariableDeclSyntax, in typeContext: ImportedNominalType?) {
-    guard node.shouldExtract(config: config, log: log) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext) else {
       return
     }
 
@@ -237,7 +237,7 @@ final class Swift2JavaVisitor {
       self.log.info("Initializer must be within a current type; \(node)")
       return
     }
-    guard node.shouldExtract(config: config, log: log) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext) else {
       return
     }
 
@@ -293,10 +293,10 @@ final class Swift2JavaVisitor {
 }
 
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
-  func shouldExtract(config: Configuration, log: Logger) -> Bool {
+  func shouldExtract(config: Configuration, log: Logger, in parent: ImportedNominalType?) -> Bool {
     let meetsRequiredAccessLevel: Bool =
       switch config.effectiveMinimumInputAccessLevelMode {
-      case .public: self.isPublic
+      case .public: self.isPublic(in: parent?.swiftNominal.syntax)
       case .package: self.isAtLeastPackage
       case .internal: self.isAtLeastInternal
       }
