@@ -110,11 +110,11 @@ struct JNIStructTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public init(x: Int64, y: Int64)
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public init(x: Int64, y: Int64)
+         * }
+         */
         public static MyStruct init(long x, long y, SwiftArena swiftArena$) {
           return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena$);
         }
@@ -182,11 +182,11 @@ struct JNIStructTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func doSomething(x: Int64)
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func doSomething(x: Int64)
+         * }
+         */
         public void doSomething(long x) {
           MyStruct.$doSomething(x, this.$memoryAddress());
         }

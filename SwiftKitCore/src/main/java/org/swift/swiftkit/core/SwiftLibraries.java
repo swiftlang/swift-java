@@ -24,35 +24,34 @@ import java.nio.file.StandardCopyOption;
 
 public final class SwiftLibraries {
 
-    public static final String STDLIB_DYLIB_NAME = "swiftCore";
-    public static final String SWIFTKITSWIFT_DYLIB_NAME = "SwiftKitSwift";
+    // Library names of core Swift and SwiftKit
+    public static final String LIB_NAME_SWIFT_CORE = "swiftCore";
+    public static final String LIB_NAME_SWIFT_CONCURRENCY = "swift_Concurrency";
+    public static final String LIB_NAME_SWIFTKITSWIFT = "SwiftKitSwift";
 
-    private static final String STDLIB_MACOS_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
+    /** 
+     * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
+     * <p/>
+     * If all libraries you need to load are available in paths passed to {@code -Djava.library.path} this should work correctly,
+     * however if attempting to load libraries from e.g. the jar as a resource, you may want to disable this.
+     */
+    public static final boolean AUTO_LOAD_LIBS = System.getProperty("swift-java.auto-load-libraries") == null ? 
+            true
+            : Boolean.getBoolean("swiftkit.auto-load-libraries");
 
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
     public static boolean loadLibraries(boolean loadSwiftKit) {
-        System.loadLibrary(STDLIB_DYLIB_NAME);
+        System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
         if (loadSwiftKit) {
-            System.loadLibrary(SWIFTKITSWIFT_DYLIB_NAME);
+            System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
         }
         return true;
     }
 
     // ==== ------------------------------------------------------------------------------------------------------------
     // Loading libraries
-
-    public static void loadLibrary(String libname) {
-        // TODO: avoid concurrent loadResource calls; one load is enough esp since we cause File IO when we do that
-        try {
-            // try to load a dylib from our classpath, e.g. when we included it in our jar
-            loadResourceLibrary(libname);
-        } catch (UnsatisfiedLinkError | RuntimeException e) {
-            // fallback to plain system path loading
-            System.loadLibrary(libname);
-        }
-    }
 
     public static void loadResourceLibrary(String libname) {
         String resourceName = PlatformUtils.dynamicLibraryName(libname);

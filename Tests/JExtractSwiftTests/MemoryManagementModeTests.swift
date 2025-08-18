@@ -37,14 +37,14 @@ struct MemoryManagementModeTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func f() -> MyClass
-          * }
-          */
-          public static MyClass f(SwiftArena swiftArena$) {
-            return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena$);
-          }
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func f() -> MyClass
+         * }
+         */
+        public static MyClass f(SwiftArena swiftArena$) {
+          return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena$);
+        }
         """,
       ]
     )

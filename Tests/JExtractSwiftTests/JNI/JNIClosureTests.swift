@@ -36,11 +36,11 @@ struct JNIClosureTests {
       """,
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func emptyClosure(closure: () -> ())
-        * }
-        */
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func emptyClosure(closure: () -> ())
+       * }
+       */
       public static void emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure) {
         SwiftModule.$emptyClosure(closure);
       }
@@ -88,11 +88,11 @@ struct JNIClosureTests {
       """,
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64)
-        * }
-        */
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64)
+       * }
+       */
       public static void closureWithArgumentsAndReturn(com.example.swift.SwiftModule.closureWithArgumentsAndReturn.closure closure) {
         SwiftModule.$closureWithArgumentsAndReturn(closure);
       }

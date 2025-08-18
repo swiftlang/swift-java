@@ -138,6 +138,11 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
+      if decl.swiftNominal.kind == .enum {
+        printEnumHelpers(&printer, decl)
+        printer.println()
+      }
+
       for initializer in decl.initializers {
         printFunctionDowncallMethods(&printer, initializer)
         printer.println()
@@ -197,6 +202,85 @@ extension JNISwift2JavaGenerator {
   private func printModuleClass(_ printer: inout CodePrinter, body: (inout CodePrinter) -> Void) {
     printer.printBraceBlock("public final class \(swiftModuleName)") { printer in
       body(&printer)
+    }
+  }
+
+  private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printEnumDiscriminator(&printer, decl)
+    printer.println()
+    printEnumCaseInterface(&printer, decl)
+    printer.println()
+    printEnumStaticInitializers(&printer, decl)
+    printer.println()
+    printEnumCases(&printer, decl)
+  }
+
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.printBraceBlock("public enum Discriminator") { printer in
+      printer.print(
+        decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
+      )
+    }
+
+    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+    }
+    printer.print("private static native int $getDiscriminator(long self);")
+  }
+
+  private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print("public sealed interface Case {}")
+    printer.println()
+
+    let requiresSwiftArena = decl.cases.compactMap {
+      self.translatedEnumCase(for: $0)
+    }.contains(where: \.requiresSwiftArena)
+
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+      printer.print("Discriminator discriminator = this.getDiscriminator();")
+      printer.printBraceBlock("switch (discriminator)") { printer in
+        for enumCase in decl.cases {
+          guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+            continue
+          }
+          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
+          printer.print("case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();")
+        }
+      }
+      printer.print(#"throw new RuntimeException("Unknown discriminator value " + discriminator);"#)
+    }
+  }
+
+  private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    for enumCase in decl.cases {
+      printFunctionDowncallMethods(&printer, enumCase.caseFunction)
+    }
+  }
+
+  private func printEnumCases(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    for enumCase in decl.cases {
+      guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+        return
+      }
+
+      let members = translatedCase.translatedValues.map {
+        $0.parameter.renderParameter()
+      }
+
+      let caseName = enumCase.name.firstCharacterUppercased
+
+      // Print record
+      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
+        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap { value, conversion in
+          ["\(conversion.native.javaType) \(value.parameter.name)"]
+        }
+
+        printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
+      }
+
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction)
+      printer.println()
     }
   }
 
@@ -260,17 +344,23 @@ extension JNISwift2JavaGenerator {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
-    let translatedSignature = translatedDecl.translatedFunctionSignature
+    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl)
+  }
 
+  private func printJavaBindingWrapperMethod(
+    _ printer: inout CodePrinter,
+    _ translatedDecl: TranslatedFunctionDecl,
+    importedFunc: ImportedFunc? = nil
+  ) {
     var modifiers = ["public"]
-
-    if decl.isStatic || decl.isInitializer || !decl.hasParent {
+    if translatedDecl.isStatic {
       modifiers.append("static")
     }
 
+    let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
-    let throwsClause = decl.isThrowing ? " throws Exception" : ""
+    let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
@@ -279,7 +369,9 @@ extension JNISwift2JavaGenerator {
 
     // Print default global arena variation
     if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
-      printDeclDocumentation(&printer, decl)
+      if let importedFunc {
+        printDeclDocumentation(&printer, importedFunc)
+      }
       printer.printBraceBlock(
         "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
       ) { printer in
@@ -298,18 +390,19 @@ extension JNISwift2JavaGenerator {
     if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }
-    printDeclDocumentation(&printer, decl)
+    if let importedFunc {
+      printDeclDocumentation(&printer, importedFunc)
+    }
     printer.printBraceBlock(
       "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     ) { printer in
-      printDowncall(&printer, decl)
+      printDowncall(&printer, translatedDecl)
     }
 
-    printNativeFunction(&printer, decl)
+    printNativeFunction(&printer, translatedDecl)
   }
 
-  private func printNativeFunction(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    let translatedDecl = translatedDecl(for: decl)! // Will always call with valid decl
+  private func printNativeFunction(_ printer: inout CodePrinter, _ translatedDecl: TranslatedFunctionDecl) {
     let nativeSignature = translatedDecl.nativeFunctionSignature
     let resultType = nativeSignature.result.javaType
     var parameters = nativeSignature.parameters.flatMap(\.parameters)
@@ -327,9 +420,8 @@ extension JNISwift2JavaGenerator {
 
   private func printDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ translatedDecl: TranslatedFunctionDecl
   ) {
-    let translatedDecl = translatedDecl(for: decl)! // We will only call this method if we can translate the decl.
     let translatedFunctionSignature = translatedDecl.translatedFunctionSignature
 
     // Regular parameters.
@@ -369,11 +461,11 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       /**
-      * Downcall to Swift:
-      * {@snippet lang=swift :
-      * \(decl.signatureString)
-      * }
-      */
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * \(decl.signatureString)
+       * }
+       */
       """
     )
   }
