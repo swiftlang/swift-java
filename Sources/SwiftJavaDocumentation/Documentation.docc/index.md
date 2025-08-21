@@ -11,14 +11,16 @@ Please refer to articles about the specific direction of interoperability you ar
 
 ### Getting started
 
-**SwiftJava** provides Java and Swift interoperability with minimal overhead. It eliminates the complex, error-prone process of manually compiling Java classes to C headers for native access. With SwiftJava, developers can achieve a flexible, safe, and high-performance connection between the two languages.
+**SwiftJava** provides Java and Swift interoperability with minimal overhead. It eliminates the complex, error-prone process such as manually compiling Java classes to C headers for native access. With SwiftJava, developers can achieve a flexible, safe, and high-performance connection between the two languages.
 
-#### Interoperability promotes
+**Interoperability promotes**
 - Incremental adoption of Swift
-- Reuse of libraries
+- Reuse of libraries across languages
+    - Access libraries with or without native APIs
+    - Implement performance-sensitive code in Swift
 - Support for ecosystem-specific build tools
 
-#### Tools
+**Tools**
 - Swift Package: 
     - JavaKit (Java -> Swift)
 - Java Library: 
@@ -26,6 +28,7 @@ Please refer to articles about the specific direction of interoperability you ar
 - Tooling: 
     - swift-java: command line tool 
     - Build tool integration: SwiftPM Plugin or Gradle 
+
 
 If you prefer a video introduction, you may want to watch this 
 [Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA) 
