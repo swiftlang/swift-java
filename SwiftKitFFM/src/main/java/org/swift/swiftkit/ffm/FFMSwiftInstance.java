@@ -19,7 +19,7 @@ import org.swift.swiftkit.core.SwiftInstanceCleanup;
 
 import java.lang.foreign.MemorySegment;
 
-public abstract class FFMSwiftInstance extends SwiftInstance {
+public abstract class FFMSwiftInstance implements SwiftInstance {
     private final MemorySegment memorySegment;
 
     /**

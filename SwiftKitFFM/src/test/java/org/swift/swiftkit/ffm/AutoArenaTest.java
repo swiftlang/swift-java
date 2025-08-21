@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoArenaTest {
 
@@ -47,6 +48,8 @@ public class AutoArenaTest {
     }
 
     private static class FakeSwiftInstance extends FFMSwiftInstance implements SwiftHeapObject {
+        private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+
         public FakeSwiftInstance(AllocatingSwiftArena arena) {
             super(MemorySegment.NULL, arena);
         }
@@ -54,6 +57,11 @@ public class AutoArenaTest {
         @Override
         public SwiftAnyType $swiftType() {
             return null;
+        }
+
+        @Override
+        public AtomicBoolean $statusDestroyedFlag() {
+            return $state$destroyed;
         }
     }
 }
