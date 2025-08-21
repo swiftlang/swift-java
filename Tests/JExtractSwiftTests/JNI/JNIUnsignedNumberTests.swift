@@ -27,11 +27,11 @@ final class JNIUnsignedNumberTests {
       expectedChunks: [
         """
         /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func unsignedChar(_ arg: UInt16)
-        * }
-        */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func unsignedChar(_ arg: UInt16)
+         * }
+         */
         public static void unsignedChar(@Unsigned char arg) {
           SwiftModule.$unsignedChar(arg);
         }
@@ -57,11 +57,11 @@ final class JNIUnsignedNumberTests {
       expectedChunks: [
         """
         /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func unsignedInt(_ arg: UInt32)
-        * }
-        */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func unsignedInt(_ arg: UInt32)
+         * }
+         */
         public static void unsignedInt(@Unsigned int arg) {
           SwiftModule.$unsignedInt(arg);
         }
@@ -83,11 +83,11 @@ final class JNIUnsignedNumberTests {
       expectedChunks: [
         """
         /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func returnUnsignedInt() -> UInt32
-        * }
-        */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func returnUnsignedInt() -> UInt32
+         * }
+         */
         @Unsigned
         public static int returnUnsignedInt() {
           return SwiftModule.$returnUnsignedInt();
@@ -137,11 +137,11 @@ final class JNIUnsignedNumberTests {
       expectedChunks: [
         """
           /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func unsignedLong(first: UInt64, second: UInt32) -> UInt32
-          * }
-          */
+           * Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func unsignedLong(first: UInt64, second: UInt32) -> UInt32
+           * }
+           */
           @Unsigned
           public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
             return SwiftModule.$unsignedLong(first, second);

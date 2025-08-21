@@ -2,7 +2,7 @@ version: 1
 builder:
   configs:
     - documentation_targets: [
-      SwiftJavaDocumentation,
-      JavaKit,
-      SwiftKitSwift
+      SwiftJavaDocumentation
     ]
+      # Drop this version pinning once 6.2 is released and docs are built with 6.2 by default to prevent it staying on 6.2 forever.
+      swift_version: 6.2

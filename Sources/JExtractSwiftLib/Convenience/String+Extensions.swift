@@ -24,6 +24,14 @@ extension String {
     return "\(f.uppercased())\(String(dropFirst()))"
   }
 
+  var firstCharacterLowercased: String {
+    guard let f = first else {
+      return self
+    }
+
+    return "\(f.lowercased())\(String(dropFirst()))"
+  }
+
   /// Returns whether the string is of the format `isX`
   var hasJavaBooleanNamingConvention: Bool {
     guard self.hasPrefix("is"), self.count > 2 else {

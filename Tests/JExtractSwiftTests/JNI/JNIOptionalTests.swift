@@ -46,12 +46,12 @@ struct JNIOptionalTests {
        * public func optionalSugar(_ arg: Int64?) -> Int32?
        * }
        */
-       public static OptionalInt optionalSugar(OptionalLong arg) {
-         long combined$ = SwiftModule.$optionalSugar((byte) (arg.isPresent() ? 1 : 0), arg.orElse(0L));
-         byte discriminator$ = (byte) (combined$ & 0xFF);
-         int value$ = (int) (combined$ >> 32);
-         return discriminator$ == 1 ? OptionalInt.of(value$) : OptionalInt.empty();
-       }
+      public static OptionalInt optionalSugar(OptionalLong arg) {
+        long result_combined$ = SwiftModule.$optionalSugar((byte) (arg.isPresent() ? 1 : 0), arg.orElse(0L));
+        byte result_discriminator$ = (byte) (result_combined$ & 0xFF);
+        int result_value$ = (int) (result_combined$ >> 32);
+        return result_discriminator$ == 1 ? OptionalInt.of(result_value$) : OptionalInt.empty();
+      }
       """,
       """
       private static native long $optionalSugar(byte arg_discriminator, long arg_value);
@@ -72,10 +72,10 @@ struct JNIOptionalTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__BJ")
         func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
-          let value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment!) : nil).map {
+          let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment!) : nil).map {
             Int64($0) << 32 | Int64(1)
           } ?? 0
-          return value$.getJNIValue(in: environment!)
+          return result_value$.getJNIValue(in: environment!)
         }
         """
       ]
@@ -92,16 +92,16 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
-        * }
-        */
-        public static Optional<String> optionalExplicit(Optional<String> arg) {
-          byte[] result_discriminator$ = new byte[1];
-          java.lang.String result$ = SwiftModule.$optionalExplicit((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null), result_discriminator$);
-          return (result_discriminator$[0] == 1) ? Optional.of(result$) : Optional.empty();
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
+       * }
+       */
+      public static Optional<String> optionalExplicit(Optional<String> arg) {
+        byte[] result$_discriminator$ = new byte[1];
+        java.lang.String result$ = SwiftModule.$optionalExplicit((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null), result$_discriminator$);
+        return (result$_discriminator$[0] == 1) ? Optional.of(result$) : Optional.empty();
+      }
       """,
       """
       private static native java.lang.String $optionalExplicit(byte arg_discriminator, java.lang.String arg_value, byte[] result_discriminator$);
@@ -127,12 +127,12 @@ struct JNIOptionalTests {
             result$ = innerResult$.getJNIValue(in: environment!) 
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:624
+          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:649
           else {
             result$ = String.jniPlaceholderValue
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:634
+          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:659
           return result$
         }
         """
@@ -150,16 +150,16 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalClass(_ arg: MyClass?) -> MyClass?
-        * }
-        */
-        public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena$) {
-          byte[] result_discriminator$ = new byte[1];
-          long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result_discriminator$);
-          return (result_discriminator$[0] == 1) ? Optional.of(new MyClass(result$, swiftArena$)) : Optional.empty();
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalClass(_ arg: MyClass?) -> MyClass?
+       * }
+       */
+      public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena$) {
+        byte[] result$_discriminator$ = new byte[1];
+        long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result$_discriminator$);
+        return (result$_discriminator$[0] == 1) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena$)) : Optional.empty();
+      }
       """,
       """
       private static native long $optionalClass(long arg, byte[] result_discriminator$);
@@ -190,12 +190,12 @@ struct JNIOptionalTests {
             result$ = _resultBits$.getJNIValue(in: environment!) 
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:624
+          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:649
           else {
             result$ = 0
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:634
+          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:659
           return result$
         }
         """
@@ -213,14 +213,14 @@ struct JNIOptionalTests {
       expectedChunks: [
       """
       /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public func optionalJavaKitClass(_ arg: JavaLong?)
-        * }
-        */
-        public static void optionalJavaKitClass(Optional<java.lang.Long> arg) {
-          SwiftModule.$optionalJavaKitClass(arg.orElse(null));
-        }
+       * Downcall to Swift:
+       * {@snippet lang=swift :
+       * public func optionalJavaKitClass(_ arg: JavaLong?)
+       * }
+       */
+      public static void optionalJavaKitClass(Optional<java.lang.Long> arg) {
+        SwiftModule.$optionalJavaKitClass(arg.orElse(null));
+      }
       """,
       """
       private static native void $optionalJavaKitClass(java.lang.Long arg);
@@ -243,7 +243,7 @@ struct JNIOptionalTests {
         func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
           SwiftModule.optionalJavaKitClass(arg.map {
             return JavaLong(javaThis: $0, environment: environment!)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:666
+          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:691
           )
         }
         """

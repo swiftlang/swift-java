@@ -66,11 +66,17 @@ struct JNIClassTests {
             System.loadLibrary(LIB_NAME);
             return true;
           }
-
-          public MyClass(long selfPointer, SwiftArena swiftArena) {
+        """,
+        """
+          private MyClass(long selfPointer, SwiftArena swiftArena) {
             super(selfPointer, swiftArena);
           }
         """,
+        """
+        public static MyClass wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
+          return new MyClass(selfPointer, swiftArena);
+        }
+        """
       ])
     try assertOutput(
       input: source,
@@ -158,24 +164,24 @@ struct JNIClassTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public init(x: Int64, y: Int64)
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public init(x: Int64, y: Int64)
+         * }
+         */
         public static MyClass init(long x, long y, SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$init(x, y), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(x, y), swiftArena$);
         }
         """,
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public init()
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public init()
+         * }
+         */
         public static MyClass init(SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$init(), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(), swiftArena$);
         }
         """,
         """
@@ -303,13 +309,13 @@ struct JNIClassTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func copy() -> MyClass
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func copy() -> MyClass
+         * }
+         */
         public MyClass copy(SwiftArena swiftArena$) {
-          return new MyClass(MyClass.$copy(this.$memoryAddress()), swiftArena$);
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$copy(this.$memoryAddress()), swiftArena$);
         }
         """,
         """
@@ -355,11 +361,11 @@ struct JNIClassTests {
       expectedChunks: [
         """
         /**
-          * Downcall to Swift:
-          * {@snippet lang=swift :
-          * public func isEqual(to other: MyClass) -> Bool
-          * }
-          */
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func isEqual(to other: MyClass) -> Bool
+         * }
+         */
         public boolean isEqual(MyClass other) {
           return MyClass.$isEqual(other.$memoryAddress(), this.$memoryAddress()); 
         }

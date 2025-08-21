@@ -194,8 +194,8 @@ extension FFMSwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.STDLIB_DYLIB_NAME);
-            System.loadLibrary("SwiftKitSwift");
+            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFTKITSWIFT);
             System.loadLibrary(LIB_NAME);
             return true;
         }
@@ -216,8 +216,21 @@ extension FFMSwift2JavaGenerator {
 
       printer.print(
         """
-        public \(decl.swiftNominal.name)(MemorySegment segment, AllocatingSwiftArena arena) {
+        private \(decl.swiftNominal.name)(MemorySegment segment, AllocatingSwiftArena arena) {
           super(segment, arena);
+        }
+
+        /** 
+         * Assume that the passed {@code MemorySegment} represents a memory address of a {@link \(decl.swiftNominal.name)}.
+         * <p/>
+         * Warnings:
+         * <ul>
+         *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(decl.swiftNominal.name) types.</li>
+         *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
+         * </ul>
+         */
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(MemorySegment selfPointer, AllocatingSwiftArena swiftArena) {
+          return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
         }
         """
       )
@@ -330,10 +343,11 @@ extension FFMSwift2JavaGenerator {
         """
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
-            // Ensure Swift and our Lib are loaded during static initialization of the class.
-            SwiftLibraries.loadLibrary("swiftCore");
-            SwiftLibraries.loadLibrary("SwiftKitSwift");
-            SwiftLibraries.loadLibrary(LIB_NAME);
+            if (SwiftLibraries.AUTO_LOAD_LIBS) {
+                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFTKITSWIFT);
+                System.loadLibrary(LIB_NAME);
+            }
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)

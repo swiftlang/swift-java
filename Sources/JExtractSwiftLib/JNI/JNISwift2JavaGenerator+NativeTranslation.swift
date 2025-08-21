@@ -61,6 +61,23 @@ extension JNISwift2JavaGenerator {
       )
     }
 
+    func translateParameters(
+      _ parameters: [SwiftParameter],
+      translatedParameters: [TranslatedParameter],
+      methodName: String,
+      parentName: String
+    ) throws -> [NativeParameter] {
+      try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
+        let parameterName = translatedParameter.parameter.name
+        return try translate(
+          swiftParameter: swiftParameter,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName
+        )
+      }
+    }
+
     func translate(
       swiftParameter: SwiftParameter,
       parameterName: String,
@@ -231,8 +248,11 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateOptionalResult(
-      wrappedType swiftType: SwiftType
+      wrappedType swiftType: SwiftType,
+      resultName: String = "result"
     ) throws -> NativeResult {
+      let discriminatorName = "\(resultName)_discriminator$"
+
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -249,6 +269,7 @@ extension JNISwift2JavaGenerator {
               conversion: .getJNIValue(
                 .optionalRaisingWidenIntegerType(
                   .placeholder,
+                  resultName: resultName,
                   valueType: javaType,
                   combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
                   valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
@@ -258,7 +279,6 @@ extension JNISwift2JavaGenerator {
             )
           } else {
             // Use indirect byte array to store discriminator
-            let discriminatorName = "result_discriminator$"
 
             return NativeResult(
               javaType: javaType,
@@ -284,8 +304,6 @@ extension JNISwift2JavaGenerator {
         }
 
         // Assume JExtract imported class
-        let discriminatorName = "result_discriminator$"
-
         return NativeResult(
           javaType: .long,
           conversion: .optionalRaisingIndirectReturn(
@@ -368,7 +386,8 @@ extension JNISwift2JavaGenerator {
     }
 
     func translate(
-      swiftResult: SwiftResult
+      swiftResult: SwiftResult,
+      resultName: String = "result"
     ) throws -> NativeResult {
       switch swiftResult.type {
       case .nominal(let nominalType):
@@ -378,7 +397,7 @@ extension JNISwift2JavaGenerator {
             guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
-            return try translateOptionalResult(wrappedType: genericArgs[0])
+            return try translateOptionalResult(wrappedType: genericArgs[0], resultName: resultName)
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
@@ -399,7 +418,7 @@ extension JNISwift2JavaGenerator {
 
         return NativeResult(
           javaType: .long,
-          conversion: .getJNIValue(.allocateSwiftValue(name: "result", swiftType: swiftResult.type)),
+          conversion: .getJNIValue(.allocateSwiftValue(name: resultName, swiftType: swiftResult.type)),
           outParameters: []
         )
 
@@ -411,7 +430,7 @@ extension JNISwift2JavaGenerator {
         )
 
       case .optional(let wrapped):
-        return try translateOptionalResult(wrappedType: wrapped)
+        return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
@@ -449,6 +468,9 @@ extension JNISwift2JavaGenerator {
 
     case constant(String)
 
+    /// `input_component`
+    case combinedName(component: String)
+
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
 
@@ -480,7 +502,7 @@ extension JNISwift2JavaGenerator {
 
     indirect case optionalChain(NativeSwiftConversionStep)
 
-    indirect case optionalRaisingWidenIntegerType(NativeSwiftConversionStep, valueType: JavaType, combinedSwiftType: SwiftKnownTypeDeclKind, valueSizeInBytes: Int)
+    indirect case optionalRaisingWidenIntegerType(NativeSwiftConversionStep, resultName: String, valueType: JavaType, combinedSwiftType: SwiftKnownTypeDeclKind, valueSizeInBytes: Int)
 
     indirect case optionalRaisingIndirectReturn(NativeSwiftConversionStep, returnType: JavaType, discriminatorParameterName: String, placeholderValue: NativeSwiftConversionStep)
 
@@ -502,6 +524,9 @@ extension JNISwift2JavaGenerator {
 
       case .constant(let value):
         return value
+
+      case .combinedName(let component):
+        return "\(placeholder)_\(component)"
 
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
@@ -606,18 +631,18 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(inner)?"
 
-      case .optionalRaisingWidenIntegerType(let inner, let valueType, let combinedSwiftType, let valueSizeInBytes):
+      case .optionalRaisingWidenIntegerType(let inner, let resultName, let valueType, let combinedSwiftType, let valueSizeInBytes):
         let inner = inner.render(&printer, placeholder)
         let value = valueType == .boolean ? "$0 ? 1 : 0" : "$0"
         let combinedSwiftTypeName = combinedSwiftType.moduleAndName.name
         printer.print(
           """
-          let value$ = \(inner).map {
+          let \(resultName)_value$ = \(inner).map {
             \(combinedSwiftTypeName)(\(value)) << \(valueSizeInBytes * 8) | \(combinedSwiftTypeName)(1)
           } ?? 0
           """
         )
-        return "value$"
+        return "\(resultName)_value$"
 
       case .optionalRaisingIndirectReturn(let inner, let returnType, let discriminatorParameterName, let placeholderValue):
         printer.print("let result$: \(returnType.jniTypeName)")
