@@ -93,6 +93,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     return firstInheritanceType.type
   }()
 
+  var inheritanceTypes: InheritedTypeListSyntax? {
+    self.syntax?.inheritanceClause?.inheritedTypes
+  }
+
   /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
   lazy var isSendable: Bool = {
     // Check if Sendable is in the inheritance list

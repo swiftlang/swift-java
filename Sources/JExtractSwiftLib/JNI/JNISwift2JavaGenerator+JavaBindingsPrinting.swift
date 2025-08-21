@@ -212,7 +212,9 @@ extension JNISwift2JavaGenerator {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
     }
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends JNISwiftInstance") { printer in
+    let implements = decl.inheritedTypes.compactMap(\.asNominalTypeDeclaration).filter { $0.kind == .protocol }.map(\.name)
+    let implementsClause = !implements.isEmpty ? " implements \(implements.joined(separator: ", "))" : ""
+    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends JNISwiftInstance\(implementsClause)") { printer in
       body(&printer)
     }
   }
@@ -364,10 +366,6 @@ extension JNISwift2JavaGenerator {
       fatalError("Decl was not translated, \(decl)")
     }
     printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, signaturesOnly: signaturesOnly)
-  }
-
-  public protocol Test {
-    var s: String { get }
   }
 
   private func printJavaBindingWrapperMethod(

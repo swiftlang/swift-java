@@ -239,7 +239,7 @@ extension Swift2JavaTranslator {
       return alreadyImported
     }
 
-    let importedNominal = ImportedNominalType(swiftNominal: nominal)
+    let importedNominal = try? ImportedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
 
     importedTypes[fullName] = importedNominal
     return importedNominal

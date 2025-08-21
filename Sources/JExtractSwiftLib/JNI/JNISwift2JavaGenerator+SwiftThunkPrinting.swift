@@ -109,6 +109,15 @@ extension JNISwift2JavaGenerator {
     printJNICache(&printer, type)
     printer.println()
 
+    switch type.swiftNominal.kind {
+    case .actor, .class, .enum, .struct:
+      printConcreteTypeThunks(&printer, type)
+    case .protocol:
+      printProtocolThunks(&printer, type)
+    }
+  }
+
+  private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     for initializer in type.initializers {
       printSwiftFunctionThunk(&printer, initializer)
       printer.println()
@@ -136,6 +145,12 @@ extension JNISwift2JavaGenerator {
 
     printDestroyFunctionThunk(&printer, type)
   }
+
+  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let protocolName = type.swiftNominal.name
+
+  }
+
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)

@@ -16,9 +16,18 @@ public protocol SomeProtocol {
   var constant: Int64 { get }
   var mutable: Int64 { get set }
 
-  static func staticMethod()
-
   func name() -> String
+}
 
-  init()
+public class ConcreteSomeProtocol: SomeProtocol {
+  public let constant: Int64 = 42
+  public var mutable: Int64 = 0
+
+  public func name() -> String {
+    return "ConcreteSomeProtocol"
+  }
+}
+
+public func takeProtocol(_ proto: some SomeProtocol) -> Int64 {
+  return proto.constant
 }
