@@ -13,7 +13,7 @@ Please refer to articles about the specific direction of interoperability you ar
 
 TODO: Some general intro
 
-If you prefer a video introduction, you may want to this 
+If you prefer a video introduction, you may want to watch this 
 [Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA) 
 WWDC 2025 session,
 which is a quick overview of all the features and approaches offered by SwiftJava.
