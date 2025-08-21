@@ -24,8 +24,8 @@ Please refer to articles about the specific direction of interoperability you ar
 - Java Library: 
     - SwiftKit (Swift -> Java)
 - Tooling: 
-    - swift-java: command line tool [SwiftJavaCommandLineTool](#SwiftJavaCommandLineTool)
-    - Build tool integration: SwiftPM Plugin or Gradle [SwiftPMPlugin](#SwiftPMPlugin)
+    - swift-java: command line tool 
+    - Build tool integration: SwiftPM Plugin or Gradle 
 
 If you prefer a video introduction, you may want to watch this 
 [Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA) 
