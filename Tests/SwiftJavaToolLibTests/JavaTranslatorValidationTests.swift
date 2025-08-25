@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaLib
+import SwiftJavaToolLib
 import XCTest
 
 final class JavaTranslatorValidationTests: XCTestCase {

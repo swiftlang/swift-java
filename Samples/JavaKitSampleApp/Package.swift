@@ -65,7 +65,7 @@ let package = Package(
     .target(
       name: "JavaKitExample",
       dependencies: [
-        .product(name: "SwiftJNI", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         .product(name: "JavaUtilJar", package: "swift-java"),
       ],

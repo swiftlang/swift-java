@@ -30,7 +30,7 @@ let package = Package(
       name: "JavaProbablyPrime",
       dependencies: [
         .product(name: "JavaUtil", package: "swift-java"),
-        .product(name: "SwiftJNI", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ],
       swiftSettings: [

@@ -14,9 +14,9 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaLib
+import SwiftJavaToolLib
 import JExtractSwiftLib
-import SwiftJNI
+import SwiftJava
 import JavaUtilJar
 import JavaNet
 import JavaLangReflect

@@ -54,7 +54,7 @@ let package = Package(
         .target(
             name: "JavaMath",
             dependencies: [
-              .product(name: "SwiftJNI", package: "swift-java"),
+              .product(name: "SwiftJava", package: "swift-java"),
               .product(name: "JavaUtilJar", package: "swift-java"),
             ],
             exclude: ["swift-java.config"],
@@ -72,7 +72,7 @@ let package = Package(
             name: "JavaSieve",
             dependencies: [
                 "JavaMath",
-                .product(name: "SwiftJNI", package: "swift-java"),
+                .product(name: "SwiftJava", package: "swift-java"),
                 .product(name: "JavaUtil", package: "swift-java"),
             ],
             exclude: ["swift-java.config"],

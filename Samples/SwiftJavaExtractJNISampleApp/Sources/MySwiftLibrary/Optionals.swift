@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 
 public func optionalBool(input: Optional<Bool>) -> Bool? {
   return input

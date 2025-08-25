@@ -52,7 +52,7 @@ let package = Package(
       name: "JavaApiCallBenchmarks",
       dependencies: [
         .product(name: "CJNI", package: "swift-java"),
-        .product(name: "SwiftJNI", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "JavaNet", package: "swift-java"),
         .product(name: "Benchmark", package: "package-benchmark"),
       ],

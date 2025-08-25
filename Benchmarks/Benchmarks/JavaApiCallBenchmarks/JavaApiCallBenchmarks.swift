@@ -14,7 +14,7 @@
 
 import Benchmark
 import Foundation
-import SwiftJNI
+import SwiftJava
 import JavaNet
 
 @MainActor let benchmarks = {

@@ -14,11 +14,11 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaLib
-import SwiftJNI
+import SwiftJavaToolLib
+import SwiftJava
 import Foundation
 import JavaUtilJar
-import SwiftJavaLib
+import SwiftJavaToolLib
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import _Subprocess

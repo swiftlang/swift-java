@@ -14,10 +14,10 @@
 
 import Foundation
 import ArgumentParser
-import SwiftJavaLib
-import SwiftJNI
+import SwiftJavaToolLib
+import SwiftJava
 import JavaUtilJar
-import SwiftJavaLib
+import SwiftJavaToolLib
 import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 

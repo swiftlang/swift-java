@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaLib
+import SwiftJavaToolLib
 import SwiftJavaShared
 import CJNI
-import SwiftJNI
+import SwiftJava
 
 @JavaClass("java.lang.ClassLoader")
 public struct ClassLoader {

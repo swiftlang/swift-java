@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import JavaUtilFunction
 
 enum SwiftWrappedError: Error {

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import CJNI
 
 @JavaInterface("org.swift.jni.dependencies.DependencyResolver")

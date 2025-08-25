@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import JavaLangReflect
 import JavaTypes
 import SwiftBasicFormat
@@ -45,7 +45,7 @@ package class JavaTranslator {
   /// an AnyJavaObject-conforming type) whereas the entry here should map to
   /// a value type.
   package let translatedToValueTypes: [String: (swiftType: String, swiftModule: String) ] = [
-    "java.lang.String": ("String", "SwiftJNI"),
+    "java.lang.String": ("String", "SwiftJava"),
   ]
 
   /// The set of Swift modules that need to be imported to make the generated
@@ -93,7 +93,7 @@ extension JavaTranslator {
 
   /// Default set of modules that will always be imported.
   private static let defaultImportedSwiftModules: Set<String> = [
-    "SwiftJNI",
+    "SwiftJava",
     "CJNI",
   ]
 }

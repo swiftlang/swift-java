@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 
 // TODO: We should be able to autogenerate this as an extension based on
 // knowing that JavaClass was defined elsewhere.

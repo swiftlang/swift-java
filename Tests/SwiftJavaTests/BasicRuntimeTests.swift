@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import JavaNet
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 

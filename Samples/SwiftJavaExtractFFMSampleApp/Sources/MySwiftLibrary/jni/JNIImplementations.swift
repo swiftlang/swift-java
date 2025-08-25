@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import CJNI
 
 @JavaClass("com.example.swift.HelloJava2Swift")

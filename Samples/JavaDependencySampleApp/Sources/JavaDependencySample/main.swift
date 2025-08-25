@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJNI
+import SwiftJava
 import JavaUtilFunction
 import JavaIO
 import SwiftJavaConfigurationShared

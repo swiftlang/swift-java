@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import ArgumentParser
-import SwiftJNI
+import SwiftJava
 
 @main
 struct ProbablyPrime: ParsableCommand {

@@ -11,7 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-import SwiftJNI
+import SwiftJava
 
 extension JavaIterator: IteratorProtocol {
   public typealias Element = E
