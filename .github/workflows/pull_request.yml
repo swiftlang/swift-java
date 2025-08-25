@@ -166,8 +166,8 @@ jobs:
           'JavaProbablyPrime',
           'JavaSieve',
           'SwiftAndJavaJarSampleLib',
-          'SwiftKitSampleApp',
-          'JExtractJNISampleApp',
+          'SwiftJavaExtractFFMSampleApp',
+          'SwiftJavaExtractJNISampleApp',
         ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -194,8 +194,8 @@ jobs:
           'JavaProbablyPrime',
           'JavaSieve',
           'SwiftAndJavaJarSampleLib',
-          'SwiftKitSampleApp',
-          'JExtractJNISampleApp',
+          'SwiftJavaExtractFFMSampleApp',
+          'SwiftJavaExtractJNISampleApp',
         ]
     steps:
       - uses: actions/checkout@v4
