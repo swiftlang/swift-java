@@ -36,7 +36,7 @@ Java `native` functions. JavaKit simplifies the type conversions
 | **This list is very work in progress** |               |    
 
 
-### JExtract: Swift -> Java
+### JExtract – calling Swift from Java
 
 SwiftJava's `swift-java jextract` tool automates generating Java bindings from Swift sources.
 
