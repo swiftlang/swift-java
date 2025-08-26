@@ -182,7 +182,7 @@ public struct JavaRepositoryDescriptor: Hashable, Codable {
       return """
         maven {
           url "\(url)"
-          \((artifactUrls ?? []).map({ "artifactUrls(\($0))" }).joined(separator: "\n"))
+          \((artifactUrls ?? []).map({ "artifactUrls(\"\($0)\")" }).joined(separator: "\n"))
         }
         """
     }
