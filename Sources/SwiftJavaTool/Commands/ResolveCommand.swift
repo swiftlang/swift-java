@@ -75,19 +75,19 @@ extension SwiftJava.ResolveCommand {
       return
     }
 
-    var repositoriesToResolve: [JavaRepositoryDescriptor] = []
+    var configuredRepositories: [JavaRepositoryDescriptor] = []
 
     if let repositories = config.repositories {
-      repositoriesToResolve += repositories
+      configuredRepositories += repositories
     }
 
-    if !repositoriesToResolve.contains(where: { $0.type == .mavenCentral }) {
+    if !configuredRepositories.contains(where: { $0.type == .mavenCentral }) {
       // swift-java dependencies are originally located in mavenCentral
-      repositoriesToResolve.append(JavaRepositoryDescriptor(type: .mavenCentral))
+      configuredRepositories.append(JavaRepositoryDescriptor(type: .mavenCentral))
     }
 
     let dependenciesClasspath =
-      try await resolveDependencies(swiftModule: swiftModule, dependencies: dependenciesToResolve, repositories: repositoriesToResolve)
+      try await resolveDependencies(swiftModule: swiftModule, dependencies: dependenciesToResolve, repositories: configuredRepositories)
 
     // FIXME: disentangle the output directory from SwiftJava and then make it a required option in this Command
     guard let outputDirectory = self.commonOptions.outputDirectory else {
@@ -102,11 +102,12 @@ extension SwiftJava.ResolveCommand {
 
 
   /// Resolves Java dependencies from swift-java.config and returns classpath information.
-  /// 
+  ///  
   /// - Parameters:
   ///   - swiftModule: module name from --swift-module. e.g.: --swift-module MySwiftModule
   ///   - dependencies: parsed maven-style dependency descriptors (groupId:artifactId:version) 
   ///                   from Sources/MySwiftModule/swift-java.config "dependencies" array.
+  ///   - repositories: repositories used to resolve dependencies
   ///
   /// - Throws: 
   func resolveDependencies(
@@ -136,7 +137,7 @@ extension SwiftJava.ResolveCommand {
   /// Resolves maven-style dependencies from swift-java.config under temporary project directory.
   ///  
   /// - Parameter dependencies: maven-style dependencies to resolve
-  /// - Parameter repositories: maven-style repositories to resolve
+  /// - Parameter repositories: repositories used to resolve dependencies
   /// - Returns: Colon-separated classpath
   func resolveDependencies(workDir: URL, dependencies: [JavaDependencyDescriptor]) async -> String {
     print("Create directory: \(workDir.absoluteString)")
