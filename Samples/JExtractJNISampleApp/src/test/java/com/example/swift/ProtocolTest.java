@@ -19,13 +19,21 @@ import org.swift.swiftkit.core.SwiftArena;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SomeProtocolTest {
+public class ProtocolTest {
     @Test
     void takeProtocol() {
         try (var arena = SwiftArena.ofConfined()) {
-            ConcreteSomeProtocol proto1 = ConcreteSomeProtocol.init(10, arena);
-            ConcreteSomeProtocol proto2 = ConcreteSomeProtocol.init(20, arena);
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, arena);
+            ConcreteProtocolAB proto2 = ConcreteProtocolAB.init(20, arena);
             assertEquals(30, MySwiftLibrary.takeProtocol(proto1, proto2));
+        }
+    }
+
+    @Test
+    void takeCombinedProtocol() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, arena);
+            assertEquals(20, MySwiftLibrary.takeCombinedProtocol(proto1));
         }
     }
 }

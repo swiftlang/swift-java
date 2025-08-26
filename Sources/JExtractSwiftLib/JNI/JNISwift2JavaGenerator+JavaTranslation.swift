@@ -440,7 +440,7 @@ extension JNISwift2JavaGenerator {
           javaGenericName: "$T\(parameterPosition)"
         )
 
-      case .metatype, .tuple, .genericParameter:
+      case .metatype, .tuple, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -464,26 +464,43 @@ extension JNISwift2JavaGenerator {
       parameterName: String,
       javaGenericName: String
     ) throws -> TranslatedParameter {
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: protocolType, config: config)
-
       switch protocolType {
-      case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.name
-        let protocolType = JavaType.class(package: nil, name: nominalTypeName)
+      case .nominal:
+        return try translateProtocolParameter(protocolTypes: [protocolType], parameterName: parameterName, javaGenericName: javaGenericName)
 
-        // We assume this is a JExtract class.
-        return TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: .generic(name: javaGenericName, extends: [protocolType]),
-            annotations: parameterAnnotations
-          ),
-          conversion: .commaSeparated([.valueMemoryAddress(.placeholder), .typeMetadataAddress(.placeholder)])
-        )
+      case .composite(let types):
+        return try translateProtocolParameter(protocolTypes: types, parameterName: parameterName, javaGenericName: javaGenericName)
 
       default:
         throw JavaTranslationError.unsupportedSwiftType(protocolType)
       }
+    }
+
+    private func translateProtocolParameter(
+      protocolTypes: [SwiftType],
+      parameterName: String,
+      javaGenericName: String
+    ) throws -> TranslatedParameter {
+      let javaProtocolTypes = try protocolTypes.map {
+        switch $0 {
+        case .nominal(let nominalType):
+          let nominalTypeName = nominalType.nominalTypeDecl.name
+          return JavaType.class(package: nil, name: nominalTypeName)
+
+        default:
+          throw JavaTranslationError.unsupportedSwiftType($0)
+        }
+      }
+
+      // We assume this is a JExtract class.
+      return TranslatedParameter(
+        parameter: JavaParameter(
+          name: parameterName,
+          type: .generic(name: javaGenericName, extends: javaProtocolTypes),
+          annotations: []
+        ),
+        conversion: .commaSeparated([.valueMemoryAddress(.placeholder), .typeMetadataAddress(.placeholder)])
+      )
     }
 
     func translateOptionalParameter(
@@ -604,7 +621,7 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrapped):
         return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }

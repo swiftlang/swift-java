@@ -344,6 +344,9 @@ struct CdeclLowering {
 
     case .optional(let wrapped):
       return try lowerOptionalParameter(wrapped, convention: convention, parameterName: parameterName, genericParameters: genericParameters, genericRequirements: genericRequirements)
+
+    case .composite:
+      throw LoweringError.unhandledType(type)
     }
   }
 
@@ -412,7 +415,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
 
-    case .function, .metatype, .optional:
+    case .function, .metatype, .optional, .composite:
       throw LoweringError.unhandledType(.optional(wrappedType))
     }
   }
@@ -513,7 +516,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -667,7 +670,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName)
       )
 
-    case .genericParameter, .function, .optional, .existential, .opaque:
+    case .genericParameter, .function, .optional, .existential, .opaque, .composite:
       throw LoweringError.unhandledType(type)
     }
   }

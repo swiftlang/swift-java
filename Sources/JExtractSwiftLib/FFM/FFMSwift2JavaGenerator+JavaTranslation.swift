@@ -472,6 +472,9 @@ extension FFMSwift2JavaGenerator {
           genericParameters: genericParameters,
           genericRequirements: genericRequirements
         )
+
+      case .composite:
+        throw JavaTranslationError.unhandledType(swiftType)
       }
     }
 
@@ -691,7 +694,7 @@ extension FFMSwift2JavaGenerator {
         // TODO: Implement.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .genericParameter, .optional, .function, .existential, .opaque:
+      case .genericParameter, .optional, .function, .existential, .opaque, .composite:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 

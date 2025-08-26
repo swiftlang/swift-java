@@ -186,7 +186,7 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .genericParameter:
+      case .metatype, .tuple, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -198,22 +198,38 @@ extension JNISwift2JavaGenerator {
       switch protocolType {
       case .nominal(let nominalType):
         let protocolName = nominalType.nominalTypeDecl.qualifiedName
+        return try translateProtocolParameter(protocolNames: [protocolName], parameterName: parameterName)
 
-        return NativeParameter(
-          parameters: [
-            JavaParameter(name: parameterName, type: .long),
-            JavaParameter(name: "\(parameterName)_typeMetadataAddress", type: .long)
-          ],
-          conversion: .extractSwiftProtocolValue(
-            .placeholder,
-            typeMetadataVariableName: .combinedName(component: "typeMetadataAddress"),
-            protocolName: protocolName
-          )
-        )
+      case .composite(let types):
+        let protocolNames = try types.map {
+          guard let nominalTypeName = $0.asNominalType?.nominalTypeDecl.qualifiedName else {
+            throw JavaTranslationError.unsupportedSwiftType($0)
+          }
+          return nominalTypeName
+        }
+
+        return try translateProtocolParameter(protocolNames: protocolNames, parameterName: parameterName)
 
       default:
         throw JavaTranslationError.unsupportedSwiftType(protocolType)
       }
+    }
+
+    private func translateProtocolParameter(
+      protocolNames: [String],
+      parameterName: String
+    ) throws -> NativeParameter {
+      return NativeParameter(
+        parameters: [
+          JavaParameter(name: parameterName, type: .long),
+          JavaParameter(name: "\(parameterName)_typeMetadataAddress", type: .long)
+        ],
+        conversion: .extractSwiftProtocolValue(
+          .placeholder,
+          typeMetadataVariableName: .combinedName(component: "typeMetadataAddress"),
+          protocolNames: protocolNames
+        )
+      )
     }
 
     func translateOptionalParameter(
@@ -382,7 +398,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -411,7 +427,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -463,7 +479,7 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrapped):
         return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter:
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
     }
@@ -514,7 +530,7 @@ extension JNISwift2JavaGenerator {
     indirect case extractSwiftProtocolValue(
       NativeSwiftConversionStep,
       typeMetadataVariableName: NativeSwiftConversionStep,
-      protocolName: String
+      protocolNames: [String]
     )
 
     /// Extracts a swift type at a pointer given by a long.
@@ -577,10 +593,12 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment!)"
 
-      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolName):
+      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
         let inner = inner.render(&printer, placeholder)
         let typeMetadataVariableName = typeMetadataVariableName.render(&printer, placeholder)
         let existentialName = "\(inner)Existential$"
+
+        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
 
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
@@ -593,10 +611,10 @@ extension JNISwift2JavaGenerator {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
-          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(protocolName)
+          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(compositeProtocolName)
           #else
-          func \(inner)doLoad<Ty>(_ ty: Ty.Type) -> any \(protocolName) {
-            \(inner)RawPointer$.load(as: ty) as! any \(protocolName)
+          func \(inner)doLoad<Ty>(_ ty: Ty.Type) -> any \(compositeProtocolName) {
+            \(inner)RawPointer$.load(as: ty) as! any \(compositeProtocolName)
           }
           let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)doLoad)
           #endif

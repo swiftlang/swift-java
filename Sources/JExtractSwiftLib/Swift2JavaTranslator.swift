@@ -146,6 +146,8 @@ extension Swift2JavaTranslator {
         return check(ty)
       case .existential(let ty), .opaque(let ty):
         return check(ty)
+      case .composite(let types):
+        return types.contains(where: check)
       case .genericParameter:
         return false
       }
