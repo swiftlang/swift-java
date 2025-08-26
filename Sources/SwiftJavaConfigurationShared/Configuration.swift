@@ -99,6 +99,8 @@ public struct Configuration: Codable {
 
   // Java dependencies we need to fetch for this target.
   public var dependencies: [JavaDependencyDescriptor]?
+  // Java repositories for this target when fetching dependencies.
+  public var repositories: [JavaRepositoryDescriptor]?
 
   public init() {
   }
@@ -149,6 +151,41 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 
   struct JavaDependencyDescriptorError: Error {
     let message: String
+  }
+}
+
+/// Descriptor for [repositories](https://docs.gradle.org/current/userguide/supported_repository_types.html#sec:maven-repo)
+public struct JavaRepositoryDescriptor: Hashable, Codable {
+  public enum RepositoryType: String, Codable {
+    case mavenLocal, mavenCentral
+    case maven // TODO: ivy .. https://docs.gradle.org/current/userguide/supported_repository_types.html#sec:maven-repo
+  }
+
+  public var type: RepositoryType
+  public var url: String?
+  public var artifactUrls: [String]?
+
+  public init(type: RepositoryType, url: String? = nil, artifactUrls: [String]? = nil) {
+    self.type = type
+    self.url = url
+    self.artifactUrls = artifactUrls
+  }
+
+  public var descriptionGradleStyle: String? {
+    switch type {
+    case .mavenLocal, .mavenCentral:
+      return "\(type.rawValue)()"
+    case .maven:
+      guard let url else {
+        return nil
+      }
+      return """
+        maven {
+          url "\(url)"
+          \((artifactUrls ?? []).map({ "artifactUrls(\($0))" }).joined(separator: "\n"))
+        }
+        """
+    }
   }
 }
 
