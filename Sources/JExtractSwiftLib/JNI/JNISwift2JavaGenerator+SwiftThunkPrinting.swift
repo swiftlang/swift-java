@@ -143,12 +143,13 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    printTypeMetadataAddressThunk(&printer, type)
+    printer.println()
     printDestroyFunctionThunk(&printer, type)
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let protocolName = type.swiftNominal.name
-
   }
 
 
@@ -428,6 +429,23 @@ extension JNISwift2JavaGenerator {
 
       """
     )
+  }
+
+  private func printTypeMetadataAddressThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    printCDecl(
+      &printer,
+      javaMethodName: "$typeMetadataAddressDowncall",
+      parentName: type.swiftNominal.name,
+      parameters: [],
+      resultType: .long
+    ) { printer in
+      printer.print(
+        """
+        let metadataPointer = unsafeBitCast(\(type.swiftNominal.qualifiedName).self, to: UnsafeRawPointer.self)
+        return Int64(Int(bitPattern: metadataPointer)).getJNIValue(in: environment)
+        """
+      )
+    }
   }
 
   /// Prints the implementation of the destroy function.

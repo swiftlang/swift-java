@@ -12,17 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-public protocol SomeProtocol {
-  var constant: Int64 { get }
-  var mutable: Int64 { get set }
+public class ConcreteSomeProtocol: SomeProtocol {
+  public let constant: Int64
+  public var mutable: Int64 = 0
 
-  func name() -> String
-}
+  public func name() -> String {
+    return "ConcreteSomeProtocol"
+  }
 
-public func takeProtocol(_ proto1: some SomeProtocol, _ proto2: some SomeProtocol) -> Int64 {
-  return proto1.constant + proto2.constant
-}
-
-public func takeGenericProtocol<First: SomeProtocol, Second: SomeProtocol>(_ proto1: First, _ proto2: Second) -> Int64 {
-  return proto1.constant + proto2.constant
+  public init(constant: Int64) {
+    self.constant = constant
+  }
 }

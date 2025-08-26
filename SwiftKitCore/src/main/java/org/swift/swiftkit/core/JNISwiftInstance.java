@@ -29,6 +29,8 @@ public interface JNISwiftInstance extends SwiftInstance {
      */
     Runnable $createDestroyFunction();
 
+    long $typeMetadataAddress();
+
     @Override
     default SwiftInstanceCleanup $createCleanup() {
         var statusDestroyedFlag = $statusDestroyedFlag();

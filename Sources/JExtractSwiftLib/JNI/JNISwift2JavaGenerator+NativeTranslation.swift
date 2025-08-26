@@ -33,8 +33,8 @@ extension JNISwift2JavaGenerator {
         translatedParameter,
         swiftParameter in
         let parameterName = translatedParameter.parameter.name
-        return try translate(
-          swiftParameter: swiftParameter,
+        return try translateParameter(
+          type: swiftParameter.type,
           parameterName: parameterName,
           methodName: methodName,
           parentName: parentName
@@ -44,8 +44,8 @@ extension JNISwift2JavaGenerator {
       // Lower the self parameter.
       let nativeSelf: NativeParameter? = switch functionSignature.selfParameter {
       case .instance(let selfParameter):
-        try translate(
-          swiftParameter: selfParameter,
+        try translateParameter(
+          type: selfParameter.type,
           parameterName: selfParameter.parameterName ?? "self",
           methodName: methodName,
           parentName: parentName
@@ -69,8 +69,8 @@ extension JNISwift2JavaGenerator {
     ) throws -> [NativeParameter] {
       try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
         let parameterName = translatedParameter.parameter.name
-        return try translate(
-          swiftParameter: swiftParameter,
+        return try translateParameter(
+          type: swiftParameter.type,
           parameterName: parameterName,
           methodName: methodName,
           parentName: parentName
@@ -78,13 +78,13 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(
-      swiftParameter: SwiftParameter,
+    func translateParameter(
+      type: SwiftType,
       parameterName: String,
       methodName: String,
       parentName: String
     ) throws -> NativeParameter {
-      switch swiftParameter.type {
+      switch type {
       case .nominal(let nominalType):
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
@@ -92,7 +92,7 @@ extension JNISwift2JavaGenerator {
           switch knownType {
           case .optional:
             guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+              throw JavaTranslationError.unsupportedSwiftType(type)
             }
             return try translateOptionalParameter(
               wrappedType: genericArgs[0],
@@ -102,14 +102,14 @@ extension JNISwift2JavaGenerator {
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
                   javaType.implementsJavaValue else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+              throw JavaTranslationError.unsupportedSwiftType(type)
             }
 
             return NativeParameter(
               parameters: [
                 JavaParameter(name: parameterName, type: javaType)
               ],
-              conversion: .initFromJNI(.placeholder, swiftType: swiftParameter.type)
+              conversion: .initFromJNI(.placeholder, swiftType: type)
             )
 
           }
@@ -117,7 +117,7 @@ extension JNISwift2JavaGenerator {
 
         if nominalType.isJavaKitWrapper {
           guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
-            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftParameter.type)
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(type)
           }
 
           return NativeParameter(
@@ -140,7 +140,7 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(name: parameterName, type: .long)
           ],
-          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: swiftParameter.type))
+          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type))
         )
 
       case .tuple([]):
@@ -180,8 +180,39 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .existential, .opaque, .genericParameter:
-        throw JavaTranslationError.unsupportedSwiftType(swiftParameter.type)
+      case .opaque(let proto), .existential(let proto):
+        return try translateProtocolParameter(
+          protocolType: proto,
+          parameterName: parameterName
+        )
+
+      case .metatype, .tuple, .genericParameter:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+      }
+    }
+
+    func translateProtocolParameter(
+      protocolType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      switch protocolType {
+      case .nominal(let nominalType):
+        let protocolName = nominalType.nominalTypeDecl.qualifiedName
+
+        return NativeParameter(
+          parameters: [
+            JavaParameter(name: parameterName, type: .long),
+            JavaParameter(name: "\(parameterName)_typeMetadataAddress", type: .long)
+          ],
+          conversion: .extractSwiftProtocolValue(
+            .placeholder,
+            typeMetadataVariableName: .combinedName(component: "typeMetadataAddress"),
+            protocolName: protocolName
+          )
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(protocolType)
       }
     }
 
@@ -480,6 +511,12 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(from: value, in: environment!)`
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
+    indirect case extractSwiftProtocolValue(
+      NativeSwiftConversionStep,
+      typeMetadataVariableName: NativeSwiftConversionStep,
+      protocolName: String
+    )
+
     /// Extracts a swift type at a pointer given by a long.
     indirect case extractSwiftValue(
       NativeSwiftConversionStep,
@@ -540,6 +577,33 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment!)"
 
+      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolName):
+        let inner = inner.render(&printer, placeholder)
+        let typeMetadataVariableName = typeMetadataVariableName.render(&printer, placeholder)
+        let existentialName = "\(inner)Existential$"
+
+        // TODO: Remove the _openExistential when we decide to only support language mode v6+
+        printer.print(
+          """
+          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment!))) else {
+            fatalError("\(typeMetadataVariableName) memory address was null")
+          }
+          let \(inner)DynamicType$: Any.Type = unsafeBitCast(\(inner)TypeMetadataPointer$, to: Any.Type.self)
+          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment!))) else {
+            fatalError("\(inner) memory address was null")
+          }
+          #if hasFeature(ImplicitOpenExistentials)
+          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(protocolName)
+          #else
+          func \(inner)doLoad<Ty>(_ ty: Ty.Type) -> any \(protocolName) {
+            \(inner)RawPointer$.load(as: ty) as! any \(protocolName)
+          }
+          let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)doLoad)
+          #endif
+          """
+        )
+        return existentialName
+
       case .extractSwiftValue(let inner, let swiftType, let allowNil):
         let inner = inner.render(&printer, placeholder)
         let pointerName = "\(inner)$"
@@ -584,7 +648,14 @@ extension JNISwift2JavaGenerator {
 
         let methodSignature = MethodSignature(
           resultType: nativeResult.javaType,
-          parameterTypes: parameters.flatMap { $0.parameters.map(\.type) }
+          parameterTypes: parameters.flatMap {
+            $0.parameters.map { parameter in
+              guard case .concrete(let type) = parameter.type else {
+                fatalError("Closures do not support Java generics")
+              }
+              return type
+            }
+          }
         )
 
         let names = parameters.flatMap { $0.parameters.map(\.name) }

@@ -22,6 +22,7 @@ extension JNISwift2JavaGenerator {
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "java.util.*",
+    "java.util.concurrent.atomic.AtomicBoolean",
 
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
@@ -110,7 +111,8 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.printBraceBlock("public interface \(decl.swiftNominal.name)") { printer in
+    let extends = ["JNISwiftInstance"]
+    printer.printBraceBlock("public interface \(decl.swiftNominal.name) extends \(extends.joined(separator: ", "))") { printer in
       for variable in decl.variables {
         printFunctionDowncallMethods(&printer, variable, signaturesOnly: true)
         printer.println()
@@ -133,10 +135,23 @@ extension JNISwift2JavaGenerator {
         """
       )
 
+      let p1: UnsafeMutableRawPointer!
+      let ex = UnsafeMutablePointer<(any Equatable)>.allocate(capacity: 1)
+
       printer.print(
         """
+        /**
+        * The designated constructor of any imported Swift types.
+        *
+        * @param selfPointer  a pointer to the memory containing the value
+        * @param swiftArena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
+        */
         private \(decl.swiftNominal.name)(long selfPointer, SwiftArena swiftArena) {
-          super(selfPointer, swiftArena);
+          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
+          this.selfPointer = selfPointer;
+
+          // Only register once we have fully initialized the object since this will need the object pointer.
+          swiftArena.register(this);
         }
 
         /** 
@@ -150,6 +165,25 @@ extension JNISwift2JavaGenerator {
          */
         public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
           return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
+        }
+        """
+      )
+
+      printer.print(
+        """
+        // Pointer to the "self".
+        private final long selfPointer;
+        
+        /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
+        private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+        
+        public long $memoryAddress() {
+          return this.selfPointer;
+        }
+        
+        @Override
+        public AtomicBoolean $statusDestroyedFlag() {
+          return $state$destroyed;
         }
         """
       )
@@ -176,6 +210,8 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
+      printTypeMetadataAddressFunction(&printer, decl)
+      printer.println()
       printDestroyFunction(&printer, decl)
     }
   }
@@ -212,9 +248,10 @@ extension JNISwift2JavaGenerator {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
     }
-    let implements = decl.inheritedTypes.compactMap(\.asNominalTypeDeclaration).filter { $0.kind == .protocol }.map(\.name)
-    let implementsClause = !implements.isEmpty ? " implements \(implements.joined(separator: ", "))" : ""
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends JNISwiftInstance\(implementsClause)") { printer in
+    var implements = ["JNISwiftInstance"]
+    implements += decl.inheritedTypes.compactMap(\.asNominalTypeDeclaration).filter { $0.kind == .protocol }.map(\.name)
+    let implementsClause = implements.joined(separator: ", ")
+    printer.printBraceBlock("public final class \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
       body(&printer)
     }
   }
@@ -384,6 +421,17 @@ extension JNISwift2JavaGenerator {
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
     let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
 
+    let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [String: [JavaType]]()) { generics, parameter in
+      guard case .generic(let name, let extends) = parameter.parameter.type else {
+        return
+      }
+      generics[name] = extends
+    }
+      .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
+      .joined(separator: ", ")
+    let genericsStr = generics.isEmpty ? "" : "<" + generics + ">"
+    modifiers.append(genericsStr)
+
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
@@ -494,13 +542,33 @@ extension JNISwift2JavaGenerator {
     )
   }
 
+  private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    printer.print("private static native long $typeMetadataAddressDowncall();")
+
+    let funcName = "$typeMetadataAddress"
+    printer.print("@Override")
+    printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
+      printer.print(
+        """
+        long self$ = this.$memoryAddress();
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+              "this", this,
+              "self", self$);
+        }
+        return \(type.swiftNominal.name).$typeMetadataAddressDowncall();
+        """
+      )
+    }
+  }
+
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     printer.print("private static native void $destroy(long selfPointer);")
 
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
-    printer.printBraceBlock("protected Runnable \(funcName)()") { printer in
+    printer.printBraceBlock("public Runnable \(funcName)()") { printer in
       printer.print(
         """
         long self$ = this.$memoryAddress();

@@ -396,9 +396,12 @@ extension FFMSwift2JavaGenerator {
 
     // Indirect return receivers.
     for outParameter in translatedSignature.result.outParameters {
-      let memoryLayout = renderMemoryLayoutValue(for: outParameter.type)
+      guard case .concrete(let type) = outParameter.type else {
+        continue
+      }
+      let memoryLayout = renderMemoryLayoutValue(for: type)
 
-      let arena = if let className = outParameter.type.className,
+      let arena = if let className = type.className,
          analysis.importedTypes[className] != nil {
         // Use passed-in 'SwiftArena' for 'SwiftValue'.
         "swiftArena$"
