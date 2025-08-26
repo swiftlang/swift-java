@@ -169,7 +169,7 @@ In order to run JMH benchmarks you can:
 
 ```bash
 cd Samples/SwiftKitSampleApp
-gradle jmh
+./gradlew jmh
 ```
 
 Please read documentation of both performance testing tools and understand that results must be interpreted and not just taken at face value. Benchmarking is tricky and environment sensitive task, so please be careful when constructing and reading benchmarks and their results. If in doubt, please reach out on the forums.
@@ -183,8 +183,8 @@ To view the rendered docc documentation you can use the docc preview command:
 ```bash
 xcrun docc preview Sources/SwiftJavaDocumentation/Documentation.docc
 
-# OR JavaKit to view JavaKit documentation:
-# xcrun docc preview Sources/SwiftJNI/Documentation.docc
+# OR SwiftJava to view SwiftJava documentation:
+# xcrun docc preview Sources/SwiftJava/Documentation.docc
 
 # ========================================
 # Starting Local Preview Server
