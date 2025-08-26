@@ -13,9 +13,17 @@
 //===----------------------------------------------------------------------===//
 
 public protocol ProtocolB {
-  var constant: Int64 { get }
+  var constantB: Int64 { get }
 }
 
 public func takeCombinedProtocol(_ proto: some ProtocolA & ProtocolB) -> Int64 {
-  return proto.constant + proto.constant
+  return proto.constantA + proto.constantB
+}
+
+public func takeGenericProtocol<First: ProtocolA, Second: ProtocolB>(_ proto1: First, _ proto2: Second) -> Int64 {
+  return proto1.constantA + proto2.constantB
+}
+
+public func takeCombinedGenericProtocol<T: ProtocolA & ProtocolB>(_ proto: T) -> Int64 {
+  return proto.constantA + proto.constantB
 }

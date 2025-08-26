@@ -13,14 +13,16 @@
 //===----------------------------------------------------------------------===//
 
 public class ConcreteProtocolAB: ProtocolA, ProtocolB {
-  public let constant: Int64
+  public let constantA: Int64
+  public let constantB: Int64
   public var mutable: Int64 = 0
 
   public func name() -> String {
     return "ConcreteProtocolAB"
   }
 
-  public init(constant: Int64) {
-    self.constant = constant
+  public init(constantA: Int64, constantB: Int64) {
+    self.constantA = constantA
+    self.constantB = constantB
   }
 }

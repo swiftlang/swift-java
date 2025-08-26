@@ -81,7 +81,8 @@ extension JNISwift2JavaGenerator {
       let nativeTranslation = NativeJavaTranslation(
         config: self.config,
         javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable
+        javaClassLookupTable: self.javaClassLookupTable,
+        knownTypes: self.knownTypes
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -167,7 +168,8 @@ extension JNISwift2JavaGenerator {
       let nativeTranslation = NativeJavaTranslation(
         config: self.config,
         javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable
+        javaClassLookupTable: self.javaClassLookupTable,
+        knownTypes: self.knownTypes
       )
 
       // Types with no parent will be outputted inside a "module" class.
@@ -440,7 +442,18 @@ extension JNISwift2JavaGenerator {
           javaGenericName: "$T\(parameterPosition)"
         )
 
-      case .metatype, .tuple, .genericParameter, .composite:
+      case .genericParameter(let generic):
+        if let concreteTy = swiftType.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
+          return try translateProtocolParameter(
+            protocolType: concreteTy,
+            parameterName: parameterName,
+            javaGenericName: generic.name
+          )
+        }
+
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+
+      case .metatype, .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }

@@ -23,8 +23,8 @@ public class ProtocolTest {
     @Test
     void takeProtocol() {
         try (var arena = SwiftArena.ofConfined()) {
-            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, arena);
-            ConcreteProtocolAB proto2 = ConcreteProtocolAB.init(20, arena);
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            ConcreteProtocolAB proto2 = ConcreteProtocolAB.init(20, 1, arena);
             assertEquals(30, MySwiftLibrary.takeProtocol(proto1, proto2));
         }
     }
@@ -32,8 +32,25 @@ public class ProtocolTest {
     @Test
     void takeCombinedProtocol() {
         try (var arena = SwiftArena.ofConfined()) {
-            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, arena);
-            assertEquals(20, MySwiftLibrary.takeCombinedProtocol(proto1));
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            assertEquals(15, MySwiftLibrary.takeCombinedProtocol(proto1));
+        }
+    }
+
+    @Test
+    void takeGenericProtocol() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            ConcreteProtocolAB proto2 = ConcreteProtocolAB.init(20, 1, arena);
+            assertEquals(11, MySwiftLibrary.takeGenericProtocol(proto1, proto2));
+        }
+    }
+
+    @Test
+    void takeCombinedGenericProtocol() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            assertEquals(15, MySwiftLibrary.takeCombinedGenericProtocol(proto1));
         }
     }
 }

@@ -27,6 +27,38 @@ extension SwiftType {
       genericRequirements: genericRequirements
     )
   }
+
+  /// Returns the protocol type if this is a generic parameter in the list
+  func typeIn(
+    genericParameters: [SwiftGenericParameterDeclaration],
+    genericRequirements: [SwiftGenericRequirement]
+  ) -> SwiftType? {
+    switch self {
+    case .genericParameter(let genericParam):
+      if genericParameters.contains(genericParam) {
+        let types: [SwiftType] = genericRequirements.compactMap {
+          guard case .inherits(let left, let right) = $0, left == self else {
+            return nil
+          }
+          return right
+        }
+
+        if types.isEmpty {
+          // TODO: Any??
+          return nil
+        } else if types.count == 1 {
+          return types.first!
+        } else {
+          return .composite(types)
+        }
+      }
+
+      return nil
+
+    default:
+      return nil
+    }
+  }
 }
 
 private func representativeConcreteType(

@@ -21,6 +21,7 @@ extension JNISwift2JavaGenerator {
     let config: Configuration
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
+    var knownTypes: SwiftKnownTypes
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -37,7 +38,9 @@ extension JNISwift2JavaGenerator {
           type: swiftParameter.type,
           parameterName: parameterName,
           methodName: methodName,
-          parentName: parentName
+          parentName: parentName,
+          genericParameters: functionSignature.genericParameters,
+          genericRequirements: functionSignature.genericRequirements
         )
       }
 
@@ -48,7 +51,9 @@ extension JNISwift2JavaGenerator {
           type: selfParameter.type,
           parameterName: selfParameter.parameterName ?? "self",
           methodName: methodName,
-          parentName: parentName
+          parentName: parentName,
+          genericParameters: functionSignature.genericParameters,
+          genericRequirements: functionSignature.genericRequirements
         )
       case nil, .initializer(_), .staticMethod(_):
         nil
@@ -65,7 +70,9 @@ extension JNISwift2JavaGenerator {
       _ parameters: [SwiftParameter],
       translatedParameters: [TranslatedParameter],
       methodName: String,
-      parentName: String
+      parentName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> [NativeParameter] {
       try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
         let parameterName = translatedParameter.parameter.name
@@ -73,7 +80,9 @@ extension JNISwift2JavaGenerator {
           type: swiftParameter.type,
           parameterName: parameterName,
           methodName: methodName,
-          parentName: parentName
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
       }
     }
@@ -82,7 +91,9 @@ extension JNISwift2JavaGenerator {
       type: SwiftType,
       parameterName: String,
       methodName: String,
-      parentName: String
+      parentName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> NativeParameter {
       switch type {
       case .nominal(let nominalType):
@@ -186,7 +197,17 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .genericParameter, .composite:
+      case .genericParameter:
+        if let concreteTy = type.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
+          return try translateProtocolParameter(
+            protocolType: concreteTy,
+            parameterName: parameterName
+          )
+        }
+
+        throw JavaTranslationError.unsupportedSwiftType(type)
+
+      case .metatype, .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -613,10 +634,10 @@ extension JNISwift2JavaGenerator {
           #if hasFeature(ImplicitOpenExistentials)
           let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(compositeProtocolName)
           #else
-          func \(inner)doLoad<Ty>(_ ty: Ty.Type) -> any \(compositeProtocolName) {
+          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> any \(compositeProtocolName) {
             \(inner)RawPointer$.load(as: ty) as! any \(compositeProtocolName)
           }
-          let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)doLoad)
+          let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)DoLoad)
           #endif
           """
         )

@@ -13,16 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 public protocol ProtocolA {
-  var constant: Int64 { get }
+  var constantA: Int64 { get }
   var mutable: Int64 { get set }
 
   func name() -> String
 }
 
 public func takeProtocol(_ proto1: any ProtocolA, _ proto2: some ProtocolA) -> Int64 {
-  return proto1.constant + proto2.constant
-}
-
-public func takeGenericProtocol<First: ProtocolA, Second: ProtocolA>(_ proto1: First, _ proto2: Second) -> Int64 {
-  return proto1.constant + proto2.constant
+  return proto1.constantA + proto2.constantA
 }
