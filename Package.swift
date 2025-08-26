@@ -94,45 +94,45 @@ let package = Package(
     .macOS(.v15)
   ],
   products: [
-    // ==== JavaKit (i.e. calling Java directly Swift utilities)
+    // ==== SwiftJava (i.e. calling Java directly Swift utilities)
     .library(
-      name: "JavaKit",
-      targets: ["JavaKit"]
+      name: "SwiftJava",
+      targets: ["SwiftJava"]
     ),
 
     .library(
-      name: "JavaRuntime",
-      targets: ["JavaRuntime"]
+      name: "CJNI",
+      targets: ["CJNI"]
     ),
 
     .library(
-      name: "JavaKitCollection",
-      targets: ["JavaKitCollection"]
+      name: "JavaUtil",
+      targets: ["JavaUtil"]
     ),
 
     .library(
-      name: "JavaKitFunction",
-      targets: ["JavaKitFunction"]
+      name: "JavaUtilFunction",
+      targets: ["JavaUtilFunction"]
     ),
 
     .library(
-      name: "JavaKitJar",
-      targets: ["JavaKitJar"]
+      name: "JavaUtilJar",
+      targets: ["JavaUtilJar"]
     ),
 
     .library(
-      name: "JavaKitNetwork",
-      targets: ["JavaKitNetwork"]
+      name: "JavaNet",
+      targets: ["JavaNet"]
     ),
 
     .library(
-      name: "JavaKitIO",
-      targets: ["JavaKitIO"]
+      name: "JavaIO",
+      targets: ["JavaIO"]
     ),
 
     .library(
-      name: "JavaKitReflection",
-      targets: ["JavaKitReflection"]
+      name: "JavaLangReflect",
+      targets: ["JavaLangReflect"]
     ),
 
     .library(
@@ -212,13 +212,13 @@ let package = Package(
     .target(
       name: "SwiftJavaDocumentation",
       dependencies: [
-        "JavaKit",
+        "SwiftJava",
         "SwiftKitSwift",
       ]
     ),
     
     .macro(
-      name: "JavaKitMacros",
+      name: "SwiftJavaMacros",
       dependencies: [
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -235,12 +235,12 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaKit",
+      name: "SwiftJava",
       dependencies: [
-        "JavaRuntime",
-        "JavaKitMacros",
+        "CJNI",
+        "SwiftJavaMacros",
         "JavaTypes",
-        "JavaKitConfigurationShared", // for Configuration reading at runtime
+        "SwiftJavaConfigurationShared", // for Configuration reading at runtime
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
@@ -268,8 +268,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitCollection",
-      dependencies: ["JavaKit"],
+      name: "JavaUtil",
+      dependencies: ["SwiftJava"],
+      path: "Sources/JavaStdlib/JavaUtil",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -277,8 +278,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitFunction",
-      dependencies: ["JavaKit"],
+      name: "JavaUtilFunction",
+      dependencies: ["SwiftJava"],
+      path: "Sources/JavaStdlib/JavaUtilFunction",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -286,8 +288,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitJar",
-      dependencies: ["JavaKit", "JavaKitCollection"],
+      name: "JavaUtilJar",
+      dependencies: ["SwiftJava", "JavaUtil"],
+      path: "Sources/JavaStdlib/JavaUtilJar",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -295,8 +298,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitNetwork",
-      dependencies: ["JavaKit", "JavaKitCollection"],
+      name: "JavaNet",
+      dependencies: ["SwiftJava", "JavaUtil"],
+      path: "Sources/JavaStdlib/JavaNet",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -304,8 +308,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitIO",
-      dependencies: ["JavaKit", "JavaKitCollection"],
+      name: "JavaIO",
+      dependencies: ["SwiftJava", "JavaUtil"],
+      path: "Sources/JavaStdlib/JavaIO",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -313,8 +318,9 @@ let package = Package(
       ]
     ),
     .target(
-      name: "JavaKitReflection",
-      dependencies: ["JavaKit", "JavaKitCollection"],
+      name: "JavaLangReflect",
+      dependencies: ["SwiftJava", "JavaUtil"],
+      path: "Sources/JavaStdlib/JavaLangReflect",
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -353,7 +359,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaRuntime",
+      name: "CJNI",
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -361,26 +367,26 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaKitConfigurationShared"
+      name: "SwiftJavaConfigurationShared"
     ),
 
     .target(
-      name: "JavaKitShared"
+      name: "SwiftJavaShared"
     ),
 
     .target(
-      name: "SwiftJavaLib",
+      name: "SwiftJavaToolLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-        "JavaKit",
-        "JavaKitJar",
-        "JavaKitReflection",
-        "JavaKitNetwork",
+        "SwiftJava",
+        "JavaUtilJar",
+        "JavaLangReflect",
+        "JavaNet",
         "JavaTypes",
-        "JavaKitShared",
-        "JavaKitConfigurationShared",
+        "SwiftJavaShared",
+        "SwiftJavaConfigurationShared",
         // .product(name: "Subprocess", package: "swift-subprocess")
         "_Subprocess",
       ],
@@ -399,13 +405,13 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "SystemPackage", package: "swift-system"),
-        "JavaKit",
-        "JavaKitJar",
-        "JavaKitNetwork",
-        "SwiftJavaLib",
+        "SwiftJava",
+        "JavaUtilJar",
+        "JavaNet",
+        "SwiftJavaToolLib",
         "JExtractSwiftLib",
-        "JavaKitShared",
-        "JavaKitConfigurationShared",
+        "SwiftJavaShared",
+        "SwiftJavaConfigurationShared",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -427,8 +433,8 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         "JavaTypes",
-        "JavaKitShared",
-        "JavaKitConfigurationShared",
+        "SwiftJavaShared",
+        "SwiftJavaConfigurationShared",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -445,8 +451,11 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "JavaKitTests",
-      dependencies: ["JavaKit", "JavaKitNetwork"],
+      name: "SwiftJavaTests",
+      dependencies: [
+        "SwiftJava", 
+        "JavaNet"
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -455,16 +464,18 @@ let package = Package(
 
     .testTarget(
       name: "JavaTypesTests",
-      dependencies: ["JavaTypes"],
+      dependencies: [
+        "JavaTypes"
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ]
     ),
 
     .testTarget(
-      name: "JavaKitMacroTests",
+      name: "SwiftJavaMacrosTests",
       dependencies: [
-        "JavaKitMacros",
+        "SwiftJavaMacros",
         .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
       ],
       swiftSettings: [
@@ -473,8 +484,10 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "SwiftJavaTests",
-      dependencies: ["SwiftJavaLib"],
+      name: "SwiftJavaToolLibTests",
+      dependencies: [
+        "SwiftJavaToolLib"
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
@@ -482,8 +495,8 @@ let package = Package(
     ),
 
     .testTarget(
-      name: "JavaKitConfigurationSharedTests",
-      dependencies: ["JavaKitConfigurationShared"],
+      name: "SwiftJavaConfigurationSharedTests",
+      dependencies: ["SwiftJavaConfigurationShared"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])

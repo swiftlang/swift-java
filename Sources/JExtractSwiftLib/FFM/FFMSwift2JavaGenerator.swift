@@ -15,7 +15,7 @@
 import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {

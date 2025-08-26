@@ -51,9 +51,9 @@ let package = Package(
     .executableTarget(
       name: "JavaApiCallBenchmarks",
       dependencies: [
-        .product(name: "JavaRuntime", package: "swift-java"),
-        .product(name: "JavaKit", package: "swift-java"),
-        .product(name: "JavaKitNetwork", package: "swift-java"),
+        .product(name: "CJNI", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaNet", package: "swift-java"),
         .product(name: "Benchmark", package: "package-benchmark"),
       ],
       path: "Benchmarks/JavaApiCallBenchmarks",

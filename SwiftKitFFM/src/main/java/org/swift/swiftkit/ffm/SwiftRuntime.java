@@ -17,6 +17,7 @@ package org.swift.swiftkit.ffm;
 import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.util.PlatformUtils;
+import org.swift.swiftkit.ffm.SwiftRuntime.swiftjava;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
@@ -460,4 +461,30 @@ public class SwiftRuntime {
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
 
+    public static void log(SwiftJavaLogGroup group, String message) {
+        if (group.isEnabled()) {
+            System.err.println(message);
+        }
+    }
+    
+    public static void log(SwiftJavaLogGroup group, String format, String ...args) {
+        if (group.isEnabled()) {
+            System.err.println(String.format(format, (Object[]) args));
+        }
+    }
+
+}
+
+enum SwiftJavaLogGroup {
+    LIFECYCLE;
+
+    static boolean LOG_LIFECYCLE = 
+        Boolean.getBoolean("swift-java.log.lifecycle");
+
+    boolean isEnabled() {
+        switch (this) {
+            case LIFECYCLE: return LOG_LIFECYCLE;
+        }
+        throw new IllegalArgumentException("Not handled log group: " + this);
+    }
 }

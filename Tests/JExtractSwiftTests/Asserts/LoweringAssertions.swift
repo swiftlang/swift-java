@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing) import JExtractSwiftLib
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 import Testing
 

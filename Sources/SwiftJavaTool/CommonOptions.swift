@@ -14,14 +14,14 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaLib
+import SwiftJavaToolLib
 import JExtractSwiftLib
-import JavaKit
-import JavaKitJar
-import JavaKitNetwork
+import SwiftJava
+import JavaUtilJar
+import JavaNet
 import SwiftSyntax
-import JavaKitConfigurationShared
-import JavaKitShared
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
 
 // - MARK: Common Options
 
