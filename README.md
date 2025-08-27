@@ -138,7 +138,7 @@ cd Samples/JavaKitSampleApp
 To run a simple example app showcasing the jextract (Java calling Swift) approach you can:
 
 ```bash
-./gradlew Samples:SwiftKitSampleApp:run
+./gradlew Samples:SwiftJavaExtractFFMSampleApp:run
 ```
 
 This will also generate the necessary sources (by invoking jextract, extracting the `Sources/ExampleSwiftLibrary`) 
@@ -152,7 +152,7 @@ Please refer to the [Samples](Samples) directory for more sample apps which show
 
 You can run Swift [ordo-one/package-benchmark](https://github.com/ordo-one/package-benchmark) and OpenJDK [JMH](https://github.com/openjdk/jmh) benchmarks in this project.
 
-Swift benchmarks are located under `Benchmarks/` and JMH benchmarks are currently part of the SwiftKit sample project: `Samples/SwiftKitSampleApp/src/jmh` because they depend on generated sources from the sample.
+Swift benchmarks are located under `Benchmarks/` and JMH benchmarks are currently part of the SwiftKit sample project: `Samples/SwiftJavaExtractFFMSampleApp/src/jmh` because they depend on generated sources from the sample.
 
 ### Swift benchmarks
 
@@ -168,7 +168,7 @@ swift package benchmark
 In order to run JMH benchmarks you can:
 
 ```bash
-cd Samples/SwiftKitSampleApp
+cd Samples/SwiftJavaExtractFFMSampleApp
 ./gradlew jmh
 ```
 
