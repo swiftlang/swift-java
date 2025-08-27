@@ -240,7 +240,7 @@ if let url = myObject.as(URL.self) {
 SwiftJava supports implementing Java `native` methods in Swift using JNI with the `@JavaImplementation` macro. In Java, the method must be declared as `native`, e.g.,
 
 ```java
-package org.swift.javakit.example;
+package org.swift.swiftjava.example;
 
 public class HelloSwift {
     static {
@@ -256,7 +256,7 @@ On the Swift side, the Java class needs to be exposed to Swift through `swift-ja
 ```swift
 {
   "classes" : {
-    "org.swift.javakit.example.HelloSwift" : "Hello",
+    "org.swift.swiftjava.example.HelloSwift" : "Hello",
   }
 }
 ```
@@ -264,7 +264,7 @@ On the Swift side, the Java class needs to be exposed to Swift through `swift-ja
 Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplementation`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, SwiftJava produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
 
 ```swift
-@JavaImplementation("org.swift.javakit.HelloSwift")
+@JavaImplementation("org.swift.swiftjava.HelloSwift")
 extension Hello: HelloNativeMethods {
   @JavaMethod
   func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
