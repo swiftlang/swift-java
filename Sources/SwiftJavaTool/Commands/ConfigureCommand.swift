@@ -35,9 +35,7 @@ extension SwiftJava {
     @OptionGroup var commonJVMOptions: SwiftJava.CommonJVMOptions
 
     // TODO: This should be a "make wrappers" option that just detects when we give it a jar
-    @Flag(
-      help: "Specifies that the input is a *.jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes."
-    )
+    @Flag(help: "Specifies that the input is a *.jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes.")
     var jar: Bool = false
 
     @Option(
@@ -57,9 +55,7 @@ extension SwiftJava {
       swiftModule
     }
 
-    @Argument(
-      help: "The input file, which is either a swift-java configuration file or (if '-jar' was specified) a Jar file."
-    )
+    @Argument(help: "The input file, which is either a swift-java configuration file or (if '-jar' was specified) a Jar file.")
     var input: String?
   }
 }
@@ -199,7 +195,6 @@ extension SwiftJava.ConfigureCommand {
         javaCanonicalName.defaultSwiftNameForJavaClass
     }
   }
-
 }
 
 package func fileOrDirectoryExists(at path: String) -> Bool {
