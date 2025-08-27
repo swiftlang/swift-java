@@ -15,7 +15,7 @@
 import Foundation
 import SwiftParser
 import SwiftSyntax
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator

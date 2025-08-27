@@ -14,11 +14,11 @@
 
 import Foundation
 import ArgumentParser
-import SwiftJavaLib
-import JavaKit
-import JavaKitJar
-import SwiftJavaLib
-import JavaKitConfigurationShared
+import SwiftJavaToolLib
+import SwiftJava
+import JavaUtilJar
+import SwiftJavaToolLib
+import SwiftJavaConfigurationShared
 
 extension String {
   /// For a String that's of the form java.util.Vector, return the "Vector"

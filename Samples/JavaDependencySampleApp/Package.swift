@@ -64,9 +64,9 @@ let package = Package(
     .executableTarget(
       name: "JavaDependencySample",
       dependencies: [
-        .product(name: "JavaKit", package: "swift-java"),
-        .product(name: "JavaRuntime", package: "swift-java"),
-        .product(name: "JavaKitFunction", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "CJNI", package: "swift-java"),
+        .product(name: "JavaUtilFunction", package: "swift-java"),
         "JavaCommonsCSV"
       ],
       exclude: ["swift-java.config"],
@@ -82,11 +82,11 @@ let package = Package(
     .target(
       name: "JavaCommonsCSV",
       dependencies: [
-        .product(name: "JavaKit", package: "swift-java"),
-        .product(name: "JavaKitFunction", package: "swift-java"),
-        .product(name: "JavaKitCollection", package: "swift-java"),
-        .product(name: "JavaKitIO", package: "swift-java"),
-        .product(name: "JavaKitNetwork", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaUtilFunction", package: "swift-java"),
+        .product(name: "JavaUtil", package: "swift-java"),
+        .product(name: "JavaIO", package: "swift-java"),
+        .product(name: "JavaNet", package: "swift-java"),
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [

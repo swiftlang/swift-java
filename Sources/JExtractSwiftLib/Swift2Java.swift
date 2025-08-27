@@ -15,8 +15,8 @@
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import JavaKitShared
-import JavaKitConfigurationShared // TODO: this should become SwiftJavaConfigurationShared
+import SwiftJavaShared
+import SwiftJavaConfigurationShared
 
 public struct SwiftToJava {
   let config: Configuration

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 import Testing
 
 final class MethodImportTests {

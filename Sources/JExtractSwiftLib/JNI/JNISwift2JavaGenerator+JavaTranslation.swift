@@ -15,7 +15,7 @@
 import Darwin
 
 import JavaTypes
-import JavaKitConfigurationShared
+import SwiftJavaConfigurationShared
 
 extension JNISwift2JavaGenerator {
   func translatedDecl(

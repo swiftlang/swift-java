@@ -65,9 +65,9 @@ let package = Package(
     .target(
       name: "JavaKitExample",
       dependencies: [
-        .product(name: "JavaKit", package: "swift-java"),
-        .product(name: "JavaKitFunction", package: "swift-java"),
-        .product(name: "JavaKitJar", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaUtilFunction", package: "swift-java"),
+        .product(name: "JavaUtilJar", package: "swift-java"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

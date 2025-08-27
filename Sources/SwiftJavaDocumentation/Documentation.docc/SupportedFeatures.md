@@ -33,10 +33,10 @@ Java `native` functions. JavaKit simplifies the type conversions
 | Java `abstract class`                  | TODO          |
 | Java `enum`                            | ❌             |
 | Java methods: `static`, member           | ✅ `@JavaMethod` |
-| **This list is very work in progress** |               |
+| **This list is very work in progress** |               |    
 
 
-### JExtract: Java -> Swift
+### JExtract – calling Swift from Java
 
 SwiftJava's `swift-java jextract` tool automates generating Java bindings from Swift sources.
 

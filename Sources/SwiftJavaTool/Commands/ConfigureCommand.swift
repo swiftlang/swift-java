@@ -14,16 +14,16 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaLib
+import SwiftJavaToolLib
 import JExtractSwiftLib
-import JavaKit
-import JavaKitJar
-import JavaKitNetwork
-import JavaKitReflection
+import SwiftJava
+import JavaUtilJar
+import JavaNet
+import JavaLangReflect
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import JavaKitConfigurationShared
-import JavaKitShared
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
 
 extension SwiftJava {
   struct ConfigureCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
