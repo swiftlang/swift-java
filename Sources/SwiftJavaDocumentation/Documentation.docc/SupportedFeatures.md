@@ -60,10 +60,15 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ❌   |
 | Arrays: `[UInt8]`, `[T]`                                                             | ❌        | ❌   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
-| Generic functions                                                                    | ❌        | ❌   |
+| Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
+| Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
 | `Foundation.Data`, `any Foundation.DataProtocol`                                     | ✅        | ❌   |
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
-| Protocols: `protocol`, existential parameters `any Collection`                       | ❌        | ❌   |
+| Protocols: `protocol`                                                                | ❌        | ✅   |
+| Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
+| Existential return types `f() -> any Collection `                                    | ❌        | ❌   |
+| Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
+| Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
 | Optional return types: `func f() -> Int?`, `func g() -> MyClass?`                    | ❌        | ✅   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
@@ -90,7 +95,6 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Result builders                                                                      | ❌        | ❌   |
 | Automatic Reference Counting of class types / lifetime safety                        | ✅        | ✅   |
 | Value semantic types (e.g. struct copying)                                           | ❌        | ❌   |
-| Opaque types: `func get() -> some Builder`, func take(worker: some Worker)           | ❌        | ❌   |
 | Swift concurrency: `func async`, `actor`, `distribued actor`                         | ❌        | ❌   |
 |                                                                                      |          |     |
 |                                                                                      |          |     |
@@ -266,5 +270,41 @@ try (var arena = SwiftArena.ofConfined()) {
 }
 ```
 
+### Protocols
 
+> Note: Protocols are currently only supported in JNI mode.
 
+Protocols are imported as Java `interface`s. For now, we require that all
+concrete types of an interface wrap a Swift instance. In the future, we will add support
+for providing Java-based implementations of interfaces, that you can pass to Java functions.
+
+Consider the following Swift protocol:
+```swift
+protocol Named {
+    var name: String { get }
+
+    func describe() -> String
+}
+```
+will be exported as
+```java
+interface Named extends JNISwiftInstance {
+    public String getName();
+
+    public String describe();
+}
+```
+
+#### Parameters
+Any opaque, existential or generic parameters are imported as Java generics.
+This means that the following function:
+```swift
+func f<S: A & B>(x: S, y: any C, z: some D)
+```
+will be exported as
+```java
+<S extends A & B, T1 extends C, T2 extends D> void f(S x, T1 y, T2 z)   
+```
+
+#### Return types
+Protocols are not yet supported as return types.
