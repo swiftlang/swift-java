@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CJNI
+import CSwiftJavaJNI
 import JavaTypes
 
 extension Optional: JavaValue where Wrapped: AnyJavaObject {

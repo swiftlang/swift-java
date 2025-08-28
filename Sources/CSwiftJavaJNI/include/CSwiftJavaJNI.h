@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef Swift_CJNI_h
-#define Swift_CJNI_h
+#ifndef CSwiftJavaJNI_h
+#define CSwiftJavaJNI_h
 
 #include <jni.h>
 
-#endif /* Swift_CJNI_h */
+#endif /* CSwiftJavaJNI_h */
