@@ -1,8 +1,8 @@
-# JavaKit
+# SwiftJava 
 
 Library and tools to make it easy to use Java libraries from Swift using the Java Native Interface (JNI).
 
-## JavaKit: Using Java libraries from Swift
+## SwiftJava: Using Java libraries from Swift
 
 Existing Java libraries can be wrapped for use in Swift with the `swift-java`
 tool. In a Swift program, the most direct way to access a Java API is to use the SwiftPM plugin to provide Swift wrappers for the Java classes. To do so, add a configuration file `swift-java.config` into the source directory for the Swift target. This is a JSON file that specifies Java classes and the Swift type name that should be generated to wrap them. For example, the following file maps `java.math.BigInteger` to a Swift type named `BigInteger`:
@@ -77,7 +77,7 @@ Swift ensures that the Java garbage collector will keep the object alive until `
 
 ### Creating a Java Virtual Machine instance from Swift
 
-When JavaKit requires a running Java Virtual Machine to use an operation (for example, to create an instance of `BigInteger`), it will query to determine if one is running and, if not, create one. To exercise more control over the creation and configuration of the Java virtual machine, use the `JavaVirtualMachine` class, which provides creation and query operations. One can create a shared instance by calling `JavaVirtualMachine.shared()`, optionally passing along extra options to the JVM (such as the class path):
+When SwiftJava requires a running Java Virtual Machine to use an operation (for example, to create an instance of `BigInteger`), it will query to determine if one is running and, if not, create one. To exercise more control over the creation and configuration of the Java virtual machine, use the `JavaVirtualMachine` class, which provides creation and query operations. One can create a shared instance by calling `JavaVirtualMachine.shared()`, optionally passing along extra options to the JVM (such as the class path):
 
 ```swift
 let javaVirtualMachine = try JavaVirtualMachine.shared()
@@ -100,7 +100,7 @@ let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
 Java libraries are often distributed as Jar files. The `swift-java` tool can inspect a Jar file to create a `swift-java.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
 
 ```swift
-swift-java generate --module-name JavaSieve --jar QuadraticSieve-1.0.jar
+swift-java configure --swift-module JavaSieve --jar QuadraticSieve-1.0.jar 
 ```
 
 The resulting configuration file will look something like this:
@@ -138,7 +138,7 @@ The resulting configuration file will look something like this:
 }
 ```
 
-As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`JavaKit`) and apply the `swift-java` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
+As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Package.swift` should depend on the `swift-java` package modules (`SwiftJava`) and apply the `swift-java` plugin. This makes all of the Java classes found in the Jar file available to Swift within the `JavaSieve` target.
 
 If you inspect the build output, there are a number of warnings that look like this:
 
@@ -152,7 +152,7 @@ These warnings mean that some of the APIs in the Java library aren't available i
         .target(
             name: "JavaMath",
             dependencies: [
-              .product(name: "JavaKit", package: "swift-java"),
+              .product(name: "SwiftJava", package: "swift-java"),
             ],
             plugins: [
               .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
@@ -237,10 +237,10 @@ if let url = myObject.as(URL.self) {
 
 ### Implementing Java `native` methods in Swift
 
-JavaKit supports implementing Java `native` methods in Swift using JNI with the `@JavaImplementation` macro. In Java, the method must be declared as `native`, e.g.,
+SwiftJava supports implementing Java `native` methods in Swift using JNI with the `@JavaImplementation` macro. In Java, the method must be declared as `native`, e.g.,
 
 ```java
-package org.swift.javakit.example;
+package org.swift.swiftjava.example;
 
 public class HelloSwift {
     static {
@@ -256,15 +256,15 @@ On the Swift side, the Java class needs to be exposed to Swift through `swift-ja
 ```swift
 {
   "classes" : {
-    "org.swift.javakit.example.HelloSwift" : "Hello",
+    "org.swift.swiftjava.example.HelloSwift" : "Hello",
   }
 }
 ```
 
-Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplementation`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, JavaKit produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
+Implementations of `native` methods are written in an extension of the Swift type that has been marked with `@JavaImplementation`. The methods themselves must be marked with `@JavaMethod`, indicating that they are available to Java as well. To help ensure that the Swift code implements all of the `native` methods with the right signatures, SwiftJava produces a protocol with the Swift type name suffixed by `NativeMethods`. Declare conformance to that protocol and implement its requirements, for example:
 
 ```swift
-@JavaImplementation("org.swift.javakit.HelloSwift")
+@JavaImplementation("org.swift.swiftjava.HelloSwift")
 extension Hello: HelloNativeMethods {
   @JavaMethod
   func reportStatistics(_ meaning: String, _ numbers: [Double]) -> String {
@@ -278,7 +278,7 @@ Java native methods that throw any checked exception should be marked as `throws
 
 The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment? = nil`, which will receive the JNI environment in which the function is being executed. In case of nil, the `JavaVirtualMachine.shared().environment()` value will be used.
 
-## JavaKit: Using Java libraries from Swift
+## SwiftJava: Using Java libraries from Swift
 
 This section describes how Java libraries and mapped into Swift and their use from Swift.
 
@@ -353,7 +353,7 @@ for entry in jarFile.entries()! {
 
 `JavaMethod` is a [function body macro](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0415-function-body-macros.md) that translates the argument and result types to/from Java and performs a call to the named method via JNI.
 
-A Java method or constructor that throws a checked exception should be marked as `throws` in Swift. Swift's projection of Java throwable types (as `JavaKit.Throwable`) conforms to the Swift `Error` protocol, so Java exceptions will be rethrown as Swift errors.
+A Java method or constructor that throws a checked exception should be marked as `throws` in Swift. Swift's projection of Java throwable types (as `SwiftJava.Throwable`) conforms to the Swift `Error` protocol, so Java exceptions will be rethrown as Swift errors.
 
 ### Java <-> Swift Type mapping
 
@@ -380,14 +380,14 @@ For Swift projections of Java classes, the Swift type itself conforms to the `An
 Because Java has implicitly nullability of references, `AnyJavaObject` types do not  directly conform to `JavaValue`: rather, optionals of  `AnyJavaObject`-conforming type conform to `JavaValue`. This requires Swift code to deal with the optionality
 at interface boundaries rather than invite implicit NULL pointer dereferences.
 
-A number of JavaKit modules provide Swift projections of Java classes and interfaces. Here are a few:
+A number of SwiftJava modules provide Swift projections of Java classes and interfaces. Here are a few:
 
 | Java class            | Swift class    | Swift module     |
 | --------------------- | -------------- | ---------------- |
-| `java.lang.Object`    | `JavaObject`   | `JavaKit`        |
-| `java.lang.Class<T>`  | `JavaClass<T>` | `JavaKit`        |
-| `java.lang.Throwable` | `Throwable`    | `JavaKit`        |
-| `java.net.URL`        | `URL`          | `JavaKitNetwork` |
+| `java.lang.Object`    | `JavaObject`   | `SwiftJava`        |
+| `java.lang.Class<T>`  | `JavaClass<T>` | `SwiftJava`        |
+| `java.lang.Throwable` | `Throwable`    | `SwiftJava`        |
+| `java.net.URL`        | `URL`          | `JavaNet` |
 
 The `swift-java` tool can translate any other Java classes into Swift projections. The easiest way to use `swift-java` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document
 
@@ -406,7 +406,7 @@ When building Java sources using the JavaCompilerPlugin this option is passed by
 
 ### Class objects and static methods
 
-Every `AnyJavaObject` has a property `javaClass` that provides an instance of `JavaClass` specialized to the type. For example, `url.javaClass` will produce an instance of `JavaClass<URL>`. The `JavaClass` instance is a wrapper around a Java class object (`java.lang.Class`) that has two roles in Swift. First, it provides access to all of the APIs on the Java class object. The `JavaKitReflection` library, for example, exposes these APIs and the types they depend on (`Method`,
+Every `AnyJavaObject` has a property `javaClass` that provides an instance of `JavaClass` specialized to the type. For example, `url.javaClass` will produce an instance of `JavaClass<URL>`. The `JavaClass` instance is a wrapper around a Java class object (`java.lang.Class`) that has two roles in Swift. First, it provides access to all of the APIs on the Java class object. The `JavaLangReflect` library, for example, exposes these APIs and the types they depend on (`Method`,
  `Constructor`, etc.) for dynamic reflection. Second, the `JavaClass` provides access to the `static` methods on the Java class. For example, [`java.net.URLConnection`](https://docs.oracle.com/javase/8/docs/api/java/net/URLConnection.html) has static methods to access default settings, such as the default for the `allowUserInteraction` field. These are exposed as instance methods on `JavaClass`, e.g.,
 
 ```swift

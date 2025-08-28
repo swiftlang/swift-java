@@ -1,0 +1,4 @@
+module CSwiftJavaJNI {
+    umbrella header "CSwiftJavaJNI.h"
+    export *
+}

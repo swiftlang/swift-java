@@ -12,4 +12,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import CJNI
+@_exported import CSwiftJavaJNI
