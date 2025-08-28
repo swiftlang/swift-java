@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CJNI
+import CSwiftJavaJNI
 import JavaTypes
 
 /// Produce the mangling for a method with the given argument and result types.

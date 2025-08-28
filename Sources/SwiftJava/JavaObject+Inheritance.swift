@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CJNI
+import CSwiftJavaJNI
 
 extension AnyJavaObject {
   /// Look up the other class type

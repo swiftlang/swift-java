@@ -101,8 +101,8 @@ let package = Package(
     ),
 
     .library(
-      name: "CJNI",
-      targets: ["CJNI"]
+      name: "CSwiftJavaJNI",
+      targets: ["CSwiftJavaJNI"]
     ),
 
     .library(
@@ -237,7 +237,7 @@ let package = Package(
     .target(
       name: "SwiftJava",
       dependencies: [
-        "CJNI",
+        "CSwiftJavaJNI",
         "SwiftJavaMacros",
         "JavaTypes",
         "SwiftJavaConfigurationShared", // for Configuration reading at runtime
@@ -359,7 +359,7 @@ let package = Package(
     ),
 
     .target(
-      name: "CJNI",
+      name: "CSwiftJavaJNI",
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
