@@ -127,12 +127,12 @@ struct JNIOptionalTests {
             result$ = innerResult$.getJNIValue(in: environment!) 
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:649
+          }
           else {
             result$ = String.jniPlaceholderValue
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:659
+          }
           return result$
         }
         """
@@ -190,12 +190,12 @@ struct JNIOptionalTests {
             result$ = _resultBits$.getJNIValue(in: environment!) 
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:649
+          }
           else {
             result$ = 0
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:659
+          }
           return result$
         }
         """
@@ -243,7 +243,7 @@ struct JNIOptionalTests {
         func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
           SwiftModule.optionalJavaKitClass(arg.map {
             return JavaLong(javaThis: $0, environment: environment!)
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:691
+          }
           )
         }
         """

@@ -38,8 +38,8 @@ package class ImportedNominalType: ImportedDecl {
 
   init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
     self.swiftNominal = swiftNominal
-    self.inheritedTypes = try swiftNominal.inheritanceTypes?.compactMap {
-      try SwiftType($0.type, lookupContext: lookupContext)
+    self.inheritedTypes = swiftNominal.inheritanceTypes?.compactMap {
+      try? SwiftType($0.type, lookupContext: lookupContext)
     } ?? []
   }
 

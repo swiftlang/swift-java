@@ -256,7 +256,10 @@ extension JNISwift2JavaGenerator {
       printer.print("@ThreadSafe // Sendable")
     }
     var implements = ["JNISwiftInstance"]
-    implements += decl.inheritedTypes.compactMap(\.asNominalTypeDeclaration).filter { $0.kind == .protocol }.map(\.name)
+    implements += decl.inheritedTypes
+      .compactMap(\.asNominalTypeDeclaration)
+      .filter { $0.kind == .protocol }
+      .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
     printer.printBraceBlock("public final class \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
       body(&printer)
@@ -428,11 +431,11 @@ extension JNISwift2JavaGenerator {
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
     let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
 
-    let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [String: [JavaType]]()) { generics, parameter in
+    let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) { generics, parameter in
       guard case .generic(let name, let extends) = parameter.parameter.type else {
         return
       }
-      generics[name] = extends
+      generics.append((name, extends))
     }
       .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
       .joined(separator: ", ")

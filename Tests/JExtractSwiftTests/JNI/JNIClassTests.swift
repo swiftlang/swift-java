@@ -55,9 +55,12 @@ struct JNIClassTests {
 
         import org.swift.swiftkit.core.*;
         import org.swift.swiftkit.core.util.*;
+        import java.util.*;
+        import java.util.concurrent.atomic.AtomicBoolean;
+        import org.swift.swiftkit.core.annotations.*;
         """,
         """
-        public final class MyClass extends JNISwiftInstance {
+        public final class MyClass implements JNISwiftInstance {
           static final String LIB_NAME = "SwiftModule";
 
           @SuppressWarnings("unused")
@@ -68,9 +71,21 @@ struct JNIClassTests {
           }
         """,
         """
-          private MyClass(long selfPointer, SwiftArena swiftArena) {
-            super(selfPointer, swiftArena);
-          }
+        private final long selfPointer;
+        """,
+        """
+        public long $memoryAddress() {
+          return this.selfPointer;
+        }
+        """,
+        """
+        private MyClass(long selfPointer, SwiftArena swiftArena) {
+          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
+          this.selfPointer = selfPointer;
+        
+          // Only register once we have fully initialized the object since this will need the object pointer.
+          swiftArena.register(this);
+        }
         """,
         """
         public static MyClass wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
@@ -92,7 +107,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @Override
-        protected Runnable $createDestroyFunction() {
+        public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("MyClass.$createDestroyFunction",

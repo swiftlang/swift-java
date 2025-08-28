@@ -46,7 +46,7 @@ final class SendableTests {
       expectedChunks: [
         """
         @ThreadSafe // Sendable
-        public final class SendableStruct extends JNISwiftInstance {
+        public final class SendableStruct implements JNISwiftInstance {
           static final String LIB_NAME = "SwiftModule";
         """,
       ]
