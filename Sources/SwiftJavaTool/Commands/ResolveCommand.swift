@@ -205,7 +205,7 @@ extension SwiftJava.ResolveCommand {
       """
       plugins { id 'java-library' }
       repositories { 
-          \(repositories.compactMap(\.descriptionGradleStyle).joined(separator: "\n"))
+          \(repositories.compactMap({ $0.renderGradleRepository() }).joined(separator: "\n"))
       }
 
       dependencies {
