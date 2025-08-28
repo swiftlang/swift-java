@@ -171,7 +171,7 @@ extension JNISwift2JavaGenerator {
 
       printer.print(
         """
-        // Pointer to the "self".
+        /** Pointer to the "self". */
         private final long selfPointer;
         
         /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
