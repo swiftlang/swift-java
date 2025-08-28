@@ -17,9 +17,15 @@ import JavaUtilFunction
 import JavaIO
 import SwiftJavaConfigurationShared
 import Foundation
+#if canImport(System)
+import System
+#endif
 
 // Import the commons-csv library wrapper:
 import JavaCommonsCSV
+
+// Import the json library wrapper:
+import JavaJson
 
 print("")
 print("")
@@ -51,5 +57,34 @@ for record in try CSVFormatClass.RFC4180.parse(reader)!.getRecords()! {
     print("Field: \(field)")
   }
 }
+
+print("Now testing Json library...")
+
+let json = Json(#"{"host": "localhost", "port": 80}"#)
+
+precondition(json.hasOwnProperty("port"))
+
+print(json.get("port").toString())
+precondition(json.get("port").as(JavaInteger.self)!.intValue() == 80)
+
+#if canImport(System)
+extension FilePath {
+    static var currentWorkingDirectory: Self {
+        let path = getcwd(nil, 0)!
+        defer { free(path) }
+        return .init(String(cString: path))
+    }
+}
+print("Reading swift-java.config inside JavaJson folder...")
+
+let configPath = FilePath.currentWorkingDirectory.appending("Sources/JavaJson/swift-java.config").string
+
+let config = try JavaClass<Json>().of.url("file://" + configPath)!
+
+precondition(config.hasOwnProperty("repositories"))
+
+print(config.toString())
+
+#endif
 
 print("Done.")
