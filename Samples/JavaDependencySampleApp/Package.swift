@@ -67,7 +67,8 @@ let package = Package(
         .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "CSwiftJavaJNI", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
-        "JavaCommonsCSV"
+        "JavaCommonsCSV",
+        "JavaJson",
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
@@ -95,6 +96,25 @@ let package = Package(
       ],
       plugins: [
 //        .plugin(name: "SwiftJavaBootstrapJavaPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+      ]
+    ),
+
+    .target(
+      name: "JavaJson",
+      dependencies: [
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaUtilFunction", package: "swift-java"),
+        .product(name: "JavaUtil", package: "swift-java"),
+        .product(name: "JavaIO", package: "swift-java"),
+        .product(name: "JavaNet", package: "swift-java"),
+      ],
+      exclude: ["swift-java.config"],
+      swiftSettings: [
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+        .swiftLanguageMode(.v5),
+      ],
+      plugins: [
         .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
