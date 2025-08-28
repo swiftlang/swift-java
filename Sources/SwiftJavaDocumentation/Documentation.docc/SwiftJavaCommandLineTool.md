@@ -199,9 +199,89 @@ struct HelloSwiftMain: ParsableCommand {
 
 ### Download Java dependencies in Swift builds: swift-java resolve
 
-> TIP: See the `Samples/DependencySampleApp` for a fully functional showcase of this mode.
+> TIP: See the `Samples/JavaDependencySampleApp` for a fully functional showcase of this mode.
 
-TODO: documentation on this feature
+
+The `swift-java resolve` command automates the process of downloading and resolving Java dependencies for your Swift project. This is configured through your `swift-java.config` file, where you can declare both the dependencies you need and the repositories from which to fetch them.
+
+To get started, add a `dependencies` array to your configuration file, listing the Maven coordinates for each required library (e.g., `group:artifact:version`). You may also include a `repositories` array to specify custom Maven repositories. For example:
+
+```json
+{
+  "classes": {
+    "org.apache.commons.io.FilenameUtils": "FilenameUtils",
+    "org.apache.commons.io.IOCase": "IOCase",
+    "org.apache.commons.csv.CSVFormat": "CSVFormat",
+    "org.apache.commons.csv.CSVParser": "CSVParser",
+    "org.apache.commons.csv.CSVRecord": "CSVRecord"
+  },
+  "dependencies": [
+    "org.apache.commons:commons-csv:1.12.0"
+  ]
+}
+```
+
+To resolve and download these dependencies, run:
+
+```bash
+# See Samples/JavaDependencySampleApp/ci-validate.sh for a complete example
+swift-java resolve \
+  swift-java.config \
+  --swift-module JavaCommonsCSV \
+  --output-directory .build/plugins/JavaCommonsCSV/destination/SwiftJavaPlugin/
+```
+
+The tool will fetch all specified dependencies from the repositories listed in your config (or Maven Central by default), and generate a `swift-java.classpath` file. This file is then used for building and running your Swift-Java interop code.
+
+If you do not specify any `repositories`, dependencies are resolved from Maven Central. To use a custom or private repository, add it to the `repositories` array, for example:
+
+```json
+{
+  "repositories": [
+    { "type": "maven", "url": "https://repo.mycompany.com/maven2" },
+    {
+      "type": "maven",
+      "url": "https://repo2.mycompany.com/maven2",
+      "artifactUrls": [
+        "https://repo.mycompany.com/jars",
+        "https://repo.mycompany.com/jars2"
+      ]
+    },
+    { "type": "maven", "url": "https://secure.repo.com/maven2" },
+    { "type": "mavenLocal", "includeGroups": ["com.example.myproject"] },
+    { "type": "maven", "url": "build/repo" }, // Relative to build folder of the temporary project, better to use absolute path here, no need to add `file:` prefix
+    { "type": "mavenCentral" },
+    { "type": "mavenLocal" },
+    { "type": "google" }
+  ]
+}
+```
+
+> Note: Authentication for private repositories is not currently handled directly by `swift-java`. If you need to access packages from a private repository that requires credentials, you can use Maven to download the required artifacts and then reference them via your local Maven repository in your configuration.
+
+For practical usage, refer to `Samples/JavaDependencySampleApp` and the tests in `Tests/SwiftJavaTests/JavaRepositoryTests.swift`.
+
+This workflow streamlines Java dependency management for Swift projects, letting you use Java libraries without manually downloading JAR files.
+
+#### About the `classes` section
+
+The `classes` section in your `swift-java.config` file specifies which Java classes should be made available in Swift, and what their corresponding Swift type names should be. Each entry maps a fully-qualified Java class name to a Swift type name. For example:
+
+```json
+{
+  "classes": {
+    "org.apache.commons.io.FilenameUtils" : "FilenameUtils",
+    "org.apache.commons.io.IOCase" : "IOCase",
+    "org.apache.commons.csv.CSVFormat" : "CSVFormat",
+    "org.apache.commons.csv.CSVParser" : "CSVParser",
+    "org.apache.commons.csv.CSVRecord" : "CSVRecord"
+  }
+}
+```
+ 
+When you run `swift-java wrap-java` (or build your project with the plugin), Swift source files are generated for each mapped class. For instance, the above config will result in `CSVFormat.swift`, `CSVParser.swift`, `CSVRecord.swift`, `FilenameUtils.swift` and `IOCase.swift` files, each containing a Swift class that wraps the corresponding Java class and exposes its constructors, methods, and fields for use in Swift.
+
+This mapping allows you to use Java APIs directly from Swift, with type-safe wrappers and automatic bridging of method calls and data types.
 
 ### Expose Swift code to Java: swift-java jextract
 
