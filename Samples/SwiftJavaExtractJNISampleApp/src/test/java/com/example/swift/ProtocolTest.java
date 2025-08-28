@@ -53,4 +53,23 @@ public class ProtocolTest {
             assertEquals(15, MySwiftLibrary.takeCombinedGenericProtocol(proto1));
         }
     }
+
+    @Test
+    void protocolVariables() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ProtocolA proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            assertEquals(10, proto1.getConstantA());
+            assertEquals(0, proto1.getMutable());
+            proto1.setMutable(3);
+            assertEquals(3, proto1.getMutable());
+        }
+    }
+
+    @Test
+    void protocolMethod() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ProtocolA proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            assertEquals("ConcreteProtocolAB", proto1.name());
+        }
+    }
 }

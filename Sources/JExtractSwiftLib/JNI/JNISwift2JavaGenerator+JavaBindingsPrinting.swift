@@ -113,6 +113,16 @@ extension JNISwift2JavaGenerator {
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     let extends = ["JNISwiftInstance"]
     printer.printBraceBlock("public interface \(decl.swiftNominal.name) extends \(extends.joined(separator: ", "))") { printer in
+      for initializer in decl.initializers {
+        printFunctionDowncallMethods(&printer, initializer, signaturesOnly: true)
+        printer.println()
+      }
+
+      for method in decl.methods {
+        printFunctionDowncallMethods(&printer, method, signaturesOnly: true)
+        printer.println()
+      }
+
       for variable in decl.variables {
         printFunctionDowncallMethods(&printer, variable, signaturesOnly: true)
         printer.println()
@@ -134,9 +144,6 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
-
-      let p1: UnsafeMutableRawPointer!
-      let ex = UnsafeMutablePointer<(any Equatable)>.allocate(capacity: 1)
 
       printer.print(
         """
@@ -429,8 +436,10 @@ extension JNISwift2JavaGenerator {
     }
       .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
       .joined(separator: ", ")
-    let genericsStr = generics.isEmpty ? "" : "<" + generics + ">"
-    modifiers.append(genericsStr)
+
+    if !generics.isEmpty {
+      modifiers.append("<" + generics + ">")
+    }
 
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
