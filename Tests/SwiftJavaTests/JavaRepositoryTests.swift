@@ -62,6 +62,9 @@ class JavaRepositoryTests {
     try await #expect(processExitsWith: .failure, "andriodCoreInCentral") {
       try await resolve(configuration: .andriodCoreInCentral)
     }
+    try await #expect(processExitsWith: .failure, "androidLifecycleInRepo") {
+      try await resolve(configuration: .androidLifecycleInRepo)
+    }
   }
 
   @Test
@@ -203,6 +206,25 @@ extension SwiftJavaConfigurationShared.Configuration {
     configuration.swiftModule = "JavaAndroidCommon"
     configuration.dependencies = [
       JavaDependencyDescriptor(groupID: "android.arch.core", artifactID: "common", version: "1.1.1")
+    ]
+    return configuration
+  }()
+
+  static let androidLifecycleInRepo: Configuration = {
+    var configuration = Configuration()
+    configuration.swiftModule = "JavaAndroidLifecycle"
+    configuration.dependencies = [
+      JavaDependencyDescriptor(groupID: "android.arch.lifecycle", artifactID: "common", version: "1.1.1")
+    ]
+    // using the following property to download to local repo
+    configuration.packageToDownload = #""android.arch.lifecycle:common:1.1.1""#
+    configuration.remoteRepo = "https://maven.google.com"
+    configuration.splitPackage = true
+
+    configuration.repositories = [
+      .maven(url: JavaRepositoryTests.localJarRepo/*, artifactUrls: [
+        JavaRepositoryTests.localPomRepo
+      ]*/)
     ]
     return configuration
   }()
