@@ -484,6 +484,7 @@ let package = Package(
       name: "SwiftJavaTests",
       dependencies: [
         "SwiftJava", 
+        "SwiftJavaTool",
         "JavaNet"
       ],
       swiftSettings: [
