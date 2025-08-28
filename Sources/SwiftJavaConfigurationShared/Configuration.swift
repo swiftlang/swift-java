@@ -171,7 +171,7 @@ public struct JavaRepositoryDescriptor: Hashable, Codable {
     self.artifactUrls = artifactUrls
   }
 
-  public var descriptionGradleStyle: String? {
+  public func renderGradleRepository() -> String? {
     switch type {
     case .mavenLocal, .mavenCentral:
       return "\(type.rawValue)()"
