@@ -81,9 +81,9 @@ extension SwiftJava.ResolveCommand {
       configuredRepositories += repositories
     }
 
-    if !configuredRepositories.contains(where: { $0.type == .mavenCentral }) {
+    if !configuredRepositories.contains(where: { $0 == .other("mavenCentral") }) {
       // swift-java dependencies are originally located in mavenCentral
-      configuredRepositories.append(JavaRepositoryDescriptor(type: .mavenCentral))
+      configuredRepositories.append(.other("mavenCentral"))
     }
 
     let dependenciesClasspath =
