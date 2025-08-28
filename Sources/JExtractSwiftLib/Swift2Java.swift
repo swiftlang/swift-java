@@ -124,8 +124,15 @@ public struct SwiftToJava {
   }
   
   func canExtract(from file: URL) -> Bool {
-    file.lastPathComponent.hasSuffix(".swift") ||
-    file.lastPathComponent.hasSuffix(".swiftinterface")
+    guard file.lastPathComponent.hasSuffix(".swift") || 
+          file.lastPathComponent.hasSuffix(".swiftinterface") else {
+      return false
+    }
+    if file.lastPathComponent.hasSuffix("+SwiftJava.swift") {
+      return false
+    }
+
+    return true
   }
 
 }
