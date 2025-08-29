@@ -237,7 +237,7 @@ switch (vehicle.getCase()) {
         System.out.println("Car: " + name);
         break;
     default:
-     break
+        break;
 }
 ```
 
