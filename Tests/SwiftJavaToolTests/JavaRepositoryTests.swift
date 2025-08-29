@@ -14,28 +14,16 @@
 
 import Foundation
 @testable import SwiftJavaConfigurationShared
-@testable import SwiftJavaTool // test in terminal, if xcode can't find the module
+@testable import SwiftJavaTool // test in terminal with sandbox disabled, if xcode can't find the module
 import Testing
 
 @Suite(.serialized)
 class JavaRepositoryTests {
-  static let localRepo: String = {
-    let directory = FileManager.default.temporaryDirectory.appendingPathComponent("SwiftJavaTest-Local-Repo", isDirectory: true)
-    try! FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-    return directory.path
-  }()
+  static let localRepo: String = String.localRepoRootDirectory.appending("/All")
 
-  static let localJarRepo: String = {
-    let directory = FileManager.default.temporaryDirectory.appendingPathComponent("SwiftJavaTest-Local-Repo-Jar-Only", isDirectory: true)
-    try! FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-    return directory.path
-  }()
+  static let localJarRepo: String = String.localRepoRootDirectory.appending("/JarOnly")
 
-  static let localPomRepo: String = {
-    let directory = FileManager.default.temporaryDirectory.appendingPathComponent("SwiftJavaTest-Local-Repo-Pom-Only", isDirectory: true)
-    try! FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-    return directory.path
-  }()
+  static let localPomRepo: String = String.localRepoRootDirectory.appending("/PomOnly")
 
   deinit {
     for item in [Self.localRepo, Self.localJarRepo, Self.localPomRepo] {
@@ -48,46 +36,45 @@ class JavaRepositoryTests {
     try await resolve(configuration: configuration)
   }
 
+  #if compiler(>=6.2)
   @Test
   func nonResolvableDependency() async throws {
     try await #expect(processExitsWith: .failure, "commonCSVWithUnknownDependencies") {
       try await resolve(configuration: .commonCSVWithUnknownDependencies)
     }
-    try await #expect(processExitsWith: .failure, "jitpackJsonUsingCentralRepository") {
-      try await resolve(configuration: .jitpackJsonUsingCentralRepository)
+    try await #expect(processExitsWith: .failure, "helloWorldInLocalRepoIncludeIOOnly") {
+      try await resolve(configuration: .helloWorldInLocalRepoIncludeIOOnly)
     }
-    try await #expect(processExitsWith: .failure, "jitpackJsonInRepoIncludeIOOnly") {
-      try await resolve(configuration: .jitpackJsonInRepoIncludeIOOnly)
+    try await #expect(processExitsWith: .failure, "androidCoreInCentral") {
+      try await resolve(configuration: .androidCoreInCentral)
     }
-    try await #expect(processExitsWith: .failure, "andriodCoreInCentral") {
-      try await resolve(configuration: .andriodCoreInCentral)
-    }
-    try await #expect(processExitsWith: .failure, "androidLifecycleInRepo") {
-      try await resolve(configuration: .androidLifecycleInRepo)
+    try await #expect(processExitsWith: .failure, "helloWorldInRepoWithoutArtifact") {
+      try await resolve(configuration: .helloWorldInRepoWithoutArtifact)
     }
   }
+  #endif
 
   @Test
   func respositoryDecoding() throws {
     let data = """
-      [
-        { "type": "maven", "url": "https://repo.mycompany.com/maven2" },
-        {
-          "type": "maven",
-          "url": "https://repo2.mycompany.com/maven2",
-          "artifactUrls": [
-            "https://repo.mycompany.com/jars",
-            "https://repo.mycompany.com/jars2"
-          ]
-        },
-        { "type": "maven", "url": "https://secure.repo.com/maven2" },
-        { "type": "mavenLocal", "includeGroups": ["com.example.myproject"] },
-        { "type": "maven", "url": "build/repo" },
-        { "type": "mavenCentral" },
-        { "type": "mavenLocal" },
-        { "type": "google" }
-      ]
-      """.data(using: .utf8)!
+    [
+      { "type": "maven", "url": "https://repo.mycompany.com/maven2" },
+      {
+        "type": "maven",
+        "url": "https://repo2.mycompany.com/maven2",
+        "artifactUrls": [
+          "https://repo.mycompany.com/jars",
+          "https://repo.mycompany.com/jars2"
+        ]
+      },
+      { "type": "maven", "url": "https://secure.repo.com/maven2" },
+      { "type": "mavenLocal", "includeGroups": ["com.example.myproject"] },
+      { "type": "maven", "url": "build/repo" },
+      { "type": "mavenCentral" },
+      { "type": "mavenLocal" },
+      { "type": "google" }
+    ]
+    """.data(using: .utf8)!
     let repositories = try JSONDecoder().decode([JavaRepositoryDescriptor].self, from: data)
     #expect(!repositories.isEmpty, "Expected to decode at least one repository")
     #expect(repositories.contains(.maven(url: "https://repo.mycompany.com/maven2")), "Expected to contain the default repository")
@@ -105,80 +92,83 @@ private func resolve(configuration: SwiftJavaConfigurationShared.Configuration) 
   var config = configuration
   var command = try SwiftJava.ResolveCommand.parse([
     "--output-directory",
-    ".build/\(configuration.swiftModule!)/destination/SwiftJavaPlugin/",
+    ".build/\(configuration.swiftModule!)/destination/SwiftJavaPlugin",
 
     "--swift-module",
-    configuration.swiftModule!
+    configuration.swiftModule!,
   ])
-  try await config.downloadIfNeeded()
+  try config.publishSampleJavaProjectIfNeeded()
   try await command.runSwiftJavaCommand(config: &config)
 }
 
 extension SwiftJavaConfigurationShared.Configuration {
   static var resolvableConfigurations: [Configuration] = [
     .commonCSV, .jitpackJson,
-    .jitpackJsonInRepo,
-    andriodCoreInGoogle
+    .helloWorldInTempRepo,
+    .helloWorldInLocalRepo,
+    .helloWorldInRepoWithCustomArtifacts,
+    .androidCoreInGoogle,
   ]
 
+  /// Tests with Apache Commons CSV in mavenCentral
   static let commonCSV: Configuration = {
     var configuration = Configuration()
     configuration.swiftModule = "JavaCommonCSV"
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.apache.commons", artifactID: "commons-csv", version: "1.12.0")
+      JavaDependencyDescriptor(groupID: "org.apache.commons", artifactID: "commons-csv", version: "1.12.0"),
     ]
     return configuration
   }()
 
+  /// Tests with JSON library from Jitpack
   static let jitpackJson: Configuration = {
     var configuration = Configuration()
     configuration.swiftModule = "JavaJson"
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.andrejs", artifactID: "json", version: "1.2")
+      JavaDependencyDescriptor(groupID: "org.andrejs", artifactID: "json", version: "1.2"),
     ]
     configuration.repositories = [.maven(url: "https://jitpack.io")]
     return configuration
   }()
 
-  static let jitpackJsonInRepo: Configuration = {
+  /// Tests with local library HelloWorld published to temporary local maven repo
+  static let helloWorldInTempRepo: Configuration = {
     var configuration = Configuration()
-    configuration.swiftModule = "JavaJson"
+    configuration.swiftModule = "HelloWorld"
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.andrejs", artifactID: "json", version: "1.2")
+      JavaDependencyDescriptor(groupID: "com.example", artifactID: "HelloWorld", version: "1.0.0"),
     ]
-    // using the following property to download to local repo
-    configuration.packageToDownload = #""org.andrejs:json:1.2""#
-    configuration.remoteRepo = "https://jitpack.io"
+    configuration.packageToPublish = "SimpleJavaProject"
 
-    let repo = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".m2/repository")
-    configuration.repositories = [.maven(url: repo.path)]
+    configuration.repositories = [.maven(url: JavaRepositoryTests.localRepo)]
+    return configuration
+  }()
+  
+  /// Tests with local library HelloWorld published to user's local maven repo
+  static let helloWorldInLocalRepo: Configuration = {
+    var configuration = Configuration.helloWorldInTempRepo
+
+    configuration.repositories = [.mavenLocal(includeGroups: ["com.example"])]
     return configuration
   }()
 
-  static let androidLifecycleInRepoWithCustomArtifacts: Configuration = {
-    var configuration = Configuration()
-    configuration.swiftModule = "JavaAndroidLifecycle"
-    configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "android.arch.lifecycle", artifactID: "common", version: "1.1.1")
-    ]
-    // using the following property to download to local repo
-    configuration.packageToDownload = #""android.arch.lifecycle:common:1.1.1""#
-    configuration.remoteRepo = "https://maven.google.com"
-    configuration.splitPackage = true
-
+  /// Tests with local library HelloWorld published to temporary local maven repo, with custom artifact URLs
+  static let helloWorldInRepoWithCustomArtifacts: Configuration = {
+    var configuration = Configuration.helloWorldInTempRepo
     configuration.repositories = [
-      .maven(url: JavaRepositoryTests.localJarRepo, artifactUrls: [
-        JavaRepositoryTests.localPomRepo
-      ])
+      .maven(url: JavaRepositoryTests.localPomRepo, artifactUrls: [
+        JavaRepositoryTests.localJarRepo,
+      ]),
     ]
     return configuration
   }()
 
-  static let andriodCoreInGoogle: Configuration = {
+  /// Tests with Android Core library in Google's Maven repository
+  static let androidCoreInGoogle: Configuration = {
     var configuration = Configuration()
     configuration.swiftModule = "JavaAndroidCommon"
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "android.arch.core", artifactID: "common", version: "1.1.1")
+      JavaDependencyDescriptor(groupID: "android.arch.core", artifactID: "common", version: "1.1.1"),
     ]
     configuration.repositories = [.other("google")] // google()
     return configuration
@@ -186,140 +176,74 @@ extension SwiftJavaConfigurationShared.Configuration {
 
   // MARK: - Non resolvable dependencies
 
+  /// Tests with Apache Commons CSV in mavenCentral, but with an unknown dependency, it should fail
   static let commonCSVWithUnknownDependencies: Configuration = {
     var configuration = Configuration.commonCSV
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.apache.commons.unknown", artifactID: "commons-csv", version: "1.12.0")
+      JavaDependencyDescriptor(groupID: "org.apache.commons.unknown", artifactID: "commons-csv", version: "1.12.0"),
     ]
     return configuration
   }()
 
-  static let jitpackJsonInRepoIncludeIOOnly: Configuration = {
-    var configuration = Configuration()
-    configuration.swiftModule = "JavaJson"
-    configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.andrejs", artifactID: "json", version: "1.2")
-    ]
-    // using the following property to download to local repo
-    configuration.packageToDownload = #""org.andrejs:json:1.2""#
-    configuration.remoteRepo = "https://jitpack.io"
-    // use local repo, since includeGroups only applied to mavenLocal
-    configuration.preferredLocalRepo = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".m2/repository").path
-
+  /// Tests with local library HelloWorld published to user's local maven repo, but trying to include a group that doesn't match, it should fail
+  static let helloWorldInLocalRepoIncludeIOOnly: Configuration = {
+    var configuration = Configuration.helloWorldInLocalRepo
     configuration.repositories = [.mavenLocal(includeGroups: ["commons-io"])]
     return configuration
   }()
 
-  static let jitpackJsonUsingCentralRepository: Configuration = {
-    var configuration = Configuration()
-    configuration.swiftModule = "JavaJson"
-    configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "org.andrejs", artifactID: "json", version: "1.2")
-    ]
-    return configuration
-  }()
-
-  static let andriodCoreInCentral: Configuration = {
+  /// Tests with Android Core library in mavenCentral, it should fail because it's only in Google's repo
+  static let androidCoreInCentral: Configuration = {
     var configuration = Configuration()
     configuration.swiftModule = "JavaAndroidCommon"
     configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "android.arch.core", artifactID: "common", version: "1.1.1")
+      JavaDependencyDescriptor(groupID: "android.arch.core", artifactID: "common", version: "1.1.1"),
     ]
     return configuration
   }()
 
-  static let androidLifecycleInRepo: Configuration = {
-    var configuration = Configuration()
-    configuration.swiftModule = "JavaAndroidLifecycle"
-    configuration.dependencies = [
-      JavaDependencyDescriptor(groupID: "android.arch.lifecycle", artifactID: "common", version: "1.1.1")
-    ]
-    // using the following property to download to local repo
-    configuration.packageToDownload = #""android.arch.lifecycle:common:1.1.1""#
-    configuration.remoteRepo = "https://maven.google.com"
-    configuration.splitPackage = true
+  /// Tests with local library HelloWorld published to temporary local maven repo, but without artifactUrls, it should fail
+  static let helloWorldInRepoWithoutArtifact: Configuration = {
+    var configuration = Configuration.helloWorldInTempRepo
 
     configuration.repositories = [
-      .maven(url: JavaRepositoryTests.localJarRepo/*, artifactUrls: [
-        JavaRepositoryTests.localPomRepo
-      ]*/)
+      .maven(url: JavaRepositoryTests.localJarRepo /* , artifactUrls: [
+         JavaRepositoryTests.localPomRepo
+       ] */ ),
     ]
     return configuration
   }()
 }
 
-// MARK: - Download to local repo
+// MARK: - Publish sample java project to local repo
 
 private extension SwiftJavaConfigurationShared.Configuration {
-  /// in json format, which means string needs to be quoted
-  var packageToDownload: String? {
+  var packageToPublish: String? {
     get { javaPackage }
     set { javaPackage = newValue }
   }
 
-  var remoteRepo: String? {
-    get { outputJavaDirectory }
-    set { outputJavaDirectory = newValue }
-  }
-
-  /// whether to download jar and pom files separately
-  var splitPackage: Bool? {
-    get { writeEmptyFiles }
-    set { writeEmptyFiles = newValue }
-  }
-
-  var preferredLocalRepo: String? {
-    get { classpath }
-    set { classpath = newValue }
-  }
-
-  func downloadIfNeeded() async throws {
+  func publishSampleJavaProjectIfNeeded() throws {
     guard
-      let data = packageToDownload?.data(using: .utf8),
-      let descriptor = try? JSONDecoder().decode(JavaDependencyDescriptor.self, from: data),
-      let repo = remoteRepo
+      let packageName = packageToPublish
     else {
       return
     }
-    let splitPackage = splitPackage ?? false
 
     let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    process.executableURL = URL(fileURLWithPath: .gradlewPath)
     process.arguments = [
-      "mvn", "dependency:get",
-      "-DremoteRepositories=\(repo)",
-      "-DgroupId=\(descriptor.groupID)",
-      "-DartifactId=\(descriptor.artifactID)",
-      "-Dversion=\(descriptor.version)",
-      "-q"
+      "-p", "\(String.packageDirectory)/Tests/SwiftJavaToolTests/\(packageName)",
+      "publishAllArtifacts", 
+      "publishToMavenLocal", // also publish to maven local to test includeGroups"
+      "-q",
     ]
-
-    if splitPackage {
-      print("Downloading: \(descriptor) from \(repo) to \(JavaRepositoryTests.localJarRepo) and \(JavaRepositoryTests.localPomRepo)".yellow)
-      process.arguments?.append(contentsOf: [
-        "-Dpackaging=jar",
-        "-Dmaven.repo.local=\(JavaRepositoryTests.localJarRepo)",
-        "&&",
-        "mvn", "dependency:get",
-        "-DremoteRepositories=\(repo)",
-        "-DgroupId=\(descriptor.groupID)",
-        "-DartifactId=\(descriptor.artifactID)",
-        "-Dversion=\(descriptor.version)",
-        "-Dpackaging=pom",
-        "-Dmaven.repo.local=\(JavaRepositoryTests.localPomRepo)",
-        "-q"
-      ])
-    } else {
-      let repoPath = classpath ?? JavaRepositoryTests.localRepo
-      print("Downloading: \(descriptor) from \(repo) to \(repoPath)".yellow)
-      process.arguments?.append("-Dmaven.repo.local=\(repoPath)")
-    }
 
     try process.run()
     process.waitUntilExit()
 
     if process.terminationStatus == 0 {
-      print("Download complete: \(descriptor)".green)
+      print("Published \(packageName) to: \(String.localRepoRootDirectory)".green)
     } else {
       throw NSError(
         domain: "DownloadError",
@@ -327,5 +251,26 @@ private extension SwiftJavaConfigurationShared.Configuration {
         userInfo: [NSLocalizedDescriptionKey: "Unzip failed with status \(process.terminationStatus)"]
       )
     }
+  }
+}
+
+private extension String {
+  static var packageDirectory: Self {
+    let path = getcwd(nil, 0)!
+    // current directory where `swift test` is run, usually swift-java
+    defer { free(path) }
+    
+    let dir = String(cString: path)
+    // TODO: This needs to be tested in Xcode as well, for now Xcode can't run tests, due to this issue: https://github.com/swiftlang/swift-java/issues/281
+    precondition(dir.hasSuffix("swift-java"), "Please run the tests from the swift-java directory")
+    return dir
+  }
+
+  static var localRepoRootDirectory: Self {
+    packageDirectory + "/.build/SwiftJavaToolTests/LocalRepo"
+  }
+
+  static var gradlewPath: Self {
+    packageDirectory + "/gradlew"
   }
 }
