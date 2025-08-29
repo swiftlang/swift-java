@@ -209,10 +209,10 @@ Vehicle vehicle = ...;
 switch (vehicle.getDiscriminator()) {
     case BICYCLE:
         System.out.println("I am a bicycle!");
-        break
+        break;
     case CAR:
         System.out.println("I am a car!");
-        break
+        break;
 }
 ```
 If you also want access to the associated values, you have various options
@@ -223,12 +223,24 @@ Vehicle vehicle = ...;
 switch (vehicle.getCase()) {
     case Vehicle.Bicycle b:
         System.out.println("Bicycle maker: " + b.maker());
-        break
+        break;
     case Vehicle.Car c:
         System.out.println("Car: " + c.arg0());
-        break
+        break;
 }
 ```
+or even, destructuring the records in the switch statement's pattern match directly:
+```java
+Vehicle vehicle = ...;
+switch (vehicle.getCase()) {
+    case Vehicle.Car(var name, var unused):
+        System.out.println("Car: " + name);
+        break;
+    default:
+     break
+}
+```
+
 For Java 16+ you can use [pattern matching for instanceof](https://openjdk.org/jeps/394)
 ```java
 Vehicle vehicle = ...;
