@@ -162,6 +162,10 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 public enum JavaRepositoryDescriptor: Hashable, Codable, Equatable {
 
   /// Haven't found a proper way to test credentials, packages that need to download from private repo can be downloaded by maven and then use local repo instead
+  /// 
+  /// References: 
+  ///   - [Maven repositories](https://docs.gradle.org/current/userguide/supported_repository_types.html#sec:maven-repo)
+  ///   - [Artifacts](https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.repositories.MavenArtifactRepository.html#:~:text=urls)-,Adds%20some%20additional%20URLs%20to%20use%20to%20find%20artifact%20files.%20Note%20that%20these%20URLs%20are%20not%20used%20to%20find%20POM%20files.,-The)
   case maven(url: String, artifactUrls: [String]? = nil)
   case mavenLocal(includeGroups: [String]? = nil)
   case other(_ type: String)
