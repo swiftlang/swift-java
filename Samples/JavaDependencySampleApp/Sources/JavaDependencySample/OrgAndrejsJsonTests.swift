@@ -14,9 +14,6 @@
 
 import Foundation
 import SwiftJava
-#if canImport(System)
-import System
-#endif
 
 // Import the json library wrapper:
 import OrgAndrejsJson
@@ -32,27 +29,22 @@ enum OrgAndrejsJsonTests {
         print(json.get("port").toString())
         precondition(json.get("port").as(JavaInteger.self)!.intValue() == 80)
 
-        #if canImport(System)
         print("Reading swift-java.config inside OrgAndrejsJson folder...")
 
-        let configPath = FilePath.currentWorkingDirectory.appending("Sources/OrgAndrejsJson/swift-java.config").string
+        let configPath = String.currentWorkingDirectory.appending("/Sources/OrgAndrejsJson/swift-java.config")
 
         let config = try JavaClass<Json>().of.url("file://" + configPath)!
 
         precondition(config.hasOwnProperty("repositories"))
 
         print(config.toString())
-
-        #endif
     }
 }
 
-#if canImport(System)
-extension FilePath {
+private extension String {
     static var currentWorkingDirectory: Self {
         let path = getcwd(nil, 0)!
         defer { free(path) }
-        return .init(String(cString: path))
+        return String(cString: path)
     }
 }
-#endif
