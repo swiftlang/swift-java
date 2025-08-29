@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoArenaTest {
 

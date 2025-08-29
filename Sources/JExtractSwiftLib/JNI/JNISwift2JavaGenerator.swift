@@ -28,6 +28,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let javaPackage: String
   let swiftOutputDirectory: String
   let javaOutputDirectory: String
+  let lookupContext: SwiftTypeLookupContext
 
   let javaClassLookupTable: JavaClassLookupTable
 
@@ -61,6 +62,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
     self.javaClassLookupTable = javaClassLookupTable
+    self.lookupContext = translator.lookupContext
 
      // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {

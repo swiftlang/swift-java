@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.JNISwiftInstance;
 import org.swift.swiftkit.core.SwiftArena;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class AutoArenaTest {
 
     @Test
@@ -45,13 +47,30 @@ public class AutoArenaTest {
         }
     }
 
-    private static class FakeSwiftInstance extends JNISwiftInstance {
+    private static class FakeSwiftInstance implements JNISwiftInstance {
+        AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+
         public FakeSwiftInstance(SwiftArena arena) {
-            super(1, arena);
+            arena.register(this);
         }
 
-        protected Runnable $createDestroyFunction() {
+        public Runnable $createDestroyFunction() {
             return () -> {};
+        }
+
+        @Override
+        public long $typeMetadataAddress() {
+            return 0;
+        }
+
+        @Override
+        public long $memoryAddress() {
+            return 0;
+        }
+
+        @Override
+        public AtomicBoolean $statusDestroyedFlag() {
+            return $state$destroyed;
         }
     }
 }

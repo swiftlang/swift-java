@@ -39,9 +39,12 @@ struct JNIEnumTests {
 
         import org.swift.swiftkit.core.*;
         import org.swift.swiftkit.core.util.*;
+        import java.util.*;
+        import java.util.concurrent.atomic.AtomicBoolean;
+        import org.swift.swiftkit.core.annotations.*;
         """,
         """
-        public final class MyEnum extends JNISwiftInstance {
+        public final class MyEnum implements JNISwiftInstance {
           static final String LIB_NAME = "SwiftModule";
 
           @SuppressWarnings("unused")
@@ -53,7 +56,19 @@ struct JNIEnumTests {
         """,
         """
         private MyEnum(long selfPointer, SwiftArena swiftArena) {
-          super(selfPointer, swiftArena);
+          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
+          this.selfPointer = selfPointer;
+        
+          // Only register once we have fully initialized the object since this will need the object pointer.
+          swiftArena.register(this);
+        }
+        """,
+        """
+        private final long selfPointer;
+        """,
+        """
+        public long $memoryAddress() {
+          return this.selfPointer;
         }
         """,
         """
@@ -66,7 +81,7 @@ struct JNIEnumTests {
         """,
         """
         @Override
-        protected Runnable $createDestroyFunction() {
+        public Runnable $createDestroyFunction() {
         long self$ = this.$memoryAddress();
         if (CallTraces.TRACE_DOWNCALLS) {
           CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
