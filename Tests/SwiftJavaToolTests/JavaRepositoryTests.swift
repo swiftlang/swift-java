@@ -69,7 +69,25 @@ class JavaRepositoryTests {
 
   @Test
   func respositoryDecoding() throws {
-    let data = #"[{"type":"maven","url":"https://repo.mycompany.com/maven2"},{"type":"maven","url":"https://repo2.mycompany.com/maven2","artifactUrls":["https://repo.mycompany.com/jars","https://repo.mycompany.com/jars2"]},{"type":"maven","url":"https://secure.repo.com/maven2","credentials":{"username":"user123","password":"secret"}},{"type":"mavenLocal","includeGroups":["com.example.myproject"]},{"type":"maven","url":"build/repo"},{"type":"mavenCentral"},{"type":"mavenLocal"},{"type":"google"}]"#.data(using: .utf8)!
+    let data = """
+      [
+        { "type": "maven", "url": "https://repo.mycompany.com/maven2" },
+        {
+          "type": "maven",
+          "url": "https://repo2.mycompany.com/maven2",
+          "artifactUrls": [
+            "https://repo.mycompany.com/jars",
+            "https://repo.mycompany.com/jars2"
+          ]
+        },
+        { "type": "maven", "url": "https://secure.repo.com/maven2" },
+        { "type": "mavenLocal", "includeGroups": ["com.example.myproject"] },
+        { "type": "maven", "url": "build/repo" },
+        { "type": "mavenCentral" },
+        { "type": "mavenLocal" },
+        { "type": "google" }
+      ]
+      """.data(using: .utf8)!
     let repositories = try JSONDecoder().decode([JavaRepositoryDescriptor].self, from: data)
     #expect(!repositories.isEmpty, "Expected to decode at least one repository")
     #expect(repositories.contains(.maven(url: "https://repo.mycompany.com/maven2")), "Expected to contain the default repository")
