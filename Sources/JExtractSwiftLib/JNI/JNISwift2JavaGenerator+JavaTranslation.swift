@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Darwin
-
 import JavaTypes
 import SwiftJavaConfigurationShared
 

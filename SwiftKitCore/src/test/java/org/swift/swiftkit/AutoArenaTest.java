@@ -59,6 +59,11 @@ public class AutoArenaTest {
         }
 
         @Override
+        public long $typeMetadataAddress() {
+            return 0;
+        }
+
+        @Override
         public long $memoryAddress() {
             return 0;
         }
