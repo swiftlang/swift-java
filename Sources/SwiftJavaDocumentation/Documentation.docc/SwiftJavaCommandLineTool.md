@@ -257,7 +257,7 @@ If you do not specify any `repositories`, dependencies are resolved from Maven C
 }
 ```
 
-> Note: Authentication for private repositories is not currently handled directly by `swift-java`. If you need to access packages from a private repository that requires credentials, you can use Maven to download the required artifacts and then reference them via your local Maven repository in your configuration.
+> Note: [Authentication for private repositories is not currently handled directly by `swift-java`](https://github.com/swiftlang/swift-java/issues/382). If you need to access packages from a private repository that requires credentials, you can use Maven to download the required artifacts and then reference them via your local Maven repository in your configuration.
 
 For practical usage, refer to `Samples/JavaDependencySampleApp` and the tests in `Tests/SwiftJavaTests/JavaRepositoryTests.swift`.
 
