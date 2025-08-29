@@ -246,9 +246,9 @@ private extension SwiftJavaConfigurationShared.Configuration {
       print("Published \(packageName) to: \(String.localRepoRootDirectory)".green)
     } else {
       throw NSError(
-        domain: "DownloadError",
+        domain: "PublishError",
         code: Int(process.terminationStatus),
-        userInfo: [NSLocalizedDescriptionKey: "Unzip failed with status \(process.terminationStatus)"]
+        userInfo: [NSLocalizedDescriptionKey: "Publish failed with status \(process.terminationStatus)"]
       )
     }
   }
