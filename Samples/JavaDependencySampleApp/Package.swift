@@ -68,7 +68,7 @@ let package = Package(
         .product(name: "CSwiftJavaJNI", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         "JavaCommonsCSV",
-        "JavaJson",
+        "OrgAndrejsJson",
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
@@ -101,7 +101,7 @@ let package = Package(
     ),
 
     .target(
-      name: "JavaJson",
+      name: "OrgAndrejsJson",
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
