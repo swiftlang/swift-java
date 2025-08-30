@@ -453,8 +453,22 @@ let package = Package(
     .testTarget(
       name: "SwiftJavaTests",
       dependencies: [
-        "SwiftJava", 
+        "SwiftJava",
         "JavaNet"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+
+    .testTarget(
+      name: "SwiftJavaToolTests",
+      dependencies: [
+        "SwiftJavaTool",
+      ],
+      exclude: [
+        "SimpleJavaProject",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

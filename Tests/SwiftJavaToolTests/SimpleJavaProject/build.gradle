@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+// Task to publish both JAR and POM to three separate locations
+tasks.register('publishAllArtifacts') {
+    dependsOn jar, generatePomFileForMavenJavaPublication
+    doLast {
+        def gradleDir = new File(System.getProperty('user.dir'), ".build/SwiftJavaToolTests") // Usually .build in swift-java
+        def jarDest = new File(gradleDir, "LocalRepo/JarOnly/${project.group.replace('.', '/')}/${project.name}/${project.version}")
+        def pomDest = new File(gradleDir, "LocalRepo/PomOnly/${project.group.replace('.', '/')}/${project.name}/${project.version}")
+        def allDest = new File(gradleDir, "LocalRepo/All/${project.group.replace('.', '/')}/${project.name}/${project.version}")
+        def jarFile = tasks.jar.archiveFile.get().asFile
+        def pomFile = file("${buildDir}/publications/mavenJava/pom-default.xml")
+        def pomName = "${project.name}-${project.version}.pom"
+
+        // Copy JAR to all destinations
+        [jarDest, allDest].each { dest ->
+            copy {
+                from jarFile
+                into dest
+            }
+        }
+        // Copy POM to all destinations
+        [pomDest, allDest].each { dest ->
+            copy {
+                from pomFile
+                into dest
+                rename { String fileName -> pomName }
+            }
+        }
+    }
+}

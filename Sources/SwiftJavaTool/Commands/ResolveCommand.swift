@@ -75,8 +75,19 @@ extension SwiftJava.ResolveCommand {
       return
     }
 
+    var configuredRepositories: [JavaRepositoryDescriptor] = []
+
+    if let repositories = config.repositories {
+      configuredRepositories += repositories
+    }
+
+    if !configuredRepositories.contains(where: { $0 == .other("mavenCentral") }) {
+      // swift-java dependencies are originally located in mavenCentral
+      configuredRepositories.append(.other("mavenCentral"))
+    }
+
     let dependenciesClasspath =
-      try await resolveDependencies(swiftModule: swiftModule, dependencies: dependenciesToResolve)
+      try await resolveDependencies(swiftModule: swiftModule, dependencies: dependenciesToResolve, repositories: configuredRepositories)
 
     // FIXME: disentangle the output directory from SwiftJava and then make it a required option in this Command
     guard let outputDirectory = self.commonOptions.outputDirectory else {
@@ -91,20 +102,22 @@ extension SwiftJava.ResolveCommand {
 
 
   /// Resolves Java dependencies from swift-java.config and returns classpath information.
-  /// 
+  ///  
   /// - Parameters:
   ///   - swiftModule: module name from --swift-module. e.g.: --swift-module MySwiftModule
   ///   - dependencies: parsed maven-style dependency descriptors (groupId:artifactId:version) 
   ///                   from Sources/MySwiftModule/swift-java.config "dependencies" array.
+  ///   - repositories: repositories used to resolve dependencies
   ///
   /// - Throws: 
   func resolveDependencies(
-    swiftModule: String, dependencies: [JavaDependencyDescriptor]
+    swiftModule: String, dependencies: [JavaDependencyDescriptor],
+    repositories: [JavaRepositoryDescriptor]
   ) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
 
-    let dependenciesClasspath = await resolveDependencies(dependencies: dependencies)
+    let dependenciesClasspath = await resolveDependencies(dependencies: dependencies, repositories: repositories)
     let classpathEntries = dependenciesClasspath.split(separator: ":")
 
     print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ", terminator: "")
@@ -119,10 +132,11 @@ extension SwiftJava.ResolveCommand {
 
 
   /// Resolves maven-style dependencies from swift-java.config under temporary project directory.
-  /// 
+  ///  
   /// - Parameter dependencies: maven-style dependencies to resolve
+  /// - Parameter repositories: repositories used to resolve dependencies
   /// - Returns: Colon-separated classpath
-  func resolveDependencies(dependencies: [JavaDependencyDescriptor]) async -> String {
+  func resolveDependencies(dependencies: [JavaDependencyDescriptor], repositories: [JavaRepositoryDescriptor]) async -> String {
     let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
       .appendingPathComponent(".build")
     let resolverDir = try! createTemporaryDirectory(in: workDir)
@@ -135,7 +149,7 @@ extension SwiftJava.ResolveCommand {
     
     try! copyGradlew(to: resolverDir)
 
-    try! printGradleProject(directory: resolverDir, dependencies: dependencies)
+    try! printGradleProject(directory: resolverDir, dependencies: dependencies, repositories: repositories)
 
     if #available(macOS 15, *) {
       let process = try! await _Subprocess.run(
@@ -173,14 +187,16 @@ extension SwiftJava.ResolveCommand {
   }
 
   /// Creates Gradle project files (build.gradle, settings.gradle.kts) in temporary directory.
-  func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor]) throws {
+  func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor], repositories: [JavaRepositoryDescriptor]) throws {
     let buildGradle = directory
       .appendingPathComponent("build.gradle", isDirectory: false)
 
     let buildGradleText =
       """
       plugins { id 'java-library' }
-      repositories { mavenCentral() }
+      repositories { 
+          \(repositories.compactMap({ $0.renderGradleRepository() }).joined(separator: "\n"))
+      }
 
       dependencies {
         \(dependencies.map({ dep in "implementation(\"\(dep.descriptionGradleStyle)\")" }).joined(separator: ",\n"))
