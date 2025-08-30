@@ -47,7 +47,7 @@ struct JNIStructTests {
         """,])
       try assertOutput(input: source, .jni, .java, expectedChunks: [
         """
-        public final class MyStruct extends JNISwiftInstance {
+        public final class MyStruct implements JNISwiftInstance {
           static final String LIB_NAME = "SwiftModule";
 
           @SuppressWarnings("unused")
@@ -58,9 +58,13 @@ struct JNIStructTests {
           }
         """,
         """
-          private MyStruct(long selfPointer, SwiftArena swiftArena) {
-            super(selfPointer, swiftArena);
-          }
+        private MyStruct(long selfPointer, SwiftArena swiftArena) {
+          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
+          this.selfPointer = selfPointer;
+        
+          // Only register once we have fully initialized the object since this will need the object pointer.
+          swiftArena.register(this);
+        }
         """,
         """
         public static MyStruct wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
@@ -80,7 +84,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @Override
-        protected Runnable $createDestroyFunction() {
+        public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("MyStruct.$createDestroyFunction",

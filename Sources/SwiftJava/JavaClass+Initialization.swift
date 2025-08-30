@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CJNI
+import CSwiftJavaJNI
 
 extension JavaClass {
   public typealias ObjectType = T

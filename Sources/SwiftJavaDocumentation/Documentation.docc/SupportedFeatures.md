@@ -60,10 +60,17 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ❌   |
 | Arrays: `[UInt8]`, `[T]`                                                             | ❌        | ❌   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
-| Generic functions                                                                    | ❌        | ❌   |
-| `Foundation.Data`, `any Foundation.DataProtocol`                                     | ✅        | ❌   |
+| Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
+| Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
-| Protocols: `protocol`, existential parameters `any Collection`                       | ❌        | ❌   |
+| Protocols: `protocol`                                                                | ❌        | ✅   |
+| Protocols: `protocol` with associated types                                          | ❌        | ❌   |
+| Existential parameters `f(x: any SomeProtocol) `                                     | ❌        | ✅   |
+| Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
+| Existential return types `f() -> any Collection `                                    | ❌        | ❌   |
+| Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ❌   |
+| Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
+| Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
 | Optional return types: `func f() -> Int?`, `func g() -> MyClass?`                    | ❌        | ✅   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
@@ -90,7 +97,6 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Result builders                                                                      | ❌        | ❌   |
 | Automatic Reference Counting of class types / lifetime safety                        | ✅        | ✅   |
 | Value semantic types (e.g. struct copying)                                           | ❌        | ❌   |
-| Opaque types: `func get() -> some Builder`, func take(worker: some Worker)           | ❌        | ❌   |
 | Swift concurrency: `func async`, `actor`, `distribued actor`                         | ❌        | ❌   |
 |                                                                                      |          |     |
 |                                                                                      |          |     |
@@ -203,10 +209,10 @@ Vehicle vehicle = ...;
 switch (vehicle.getDiscriminator()) {
     case BICYCLE:
         System.out.println("I am a bicycle!");
-        break
+        break;
     case CAR:
         System.out.println("I am a car!");
-        break
+        break;
 }
 ```
 If you also want access to the associated values, you have various options
@@ -217,12 +223,24 @@ Vehicle vehicle = ...;
 switch (vehicle.getCase()) {
     case Vehicle.Bicycle b:
         System.out.println("Bicycle maker: " + b.maker());
-        break
+        break;
     case Vehicle.Car c:
         System.out.println("Car: " + c.arg0());
-        break
+        break;
 }
 ```
+or even, destructuring the records in the switch statement's pattern match directly:
+```java
+Vehicle vehicle = ...;
+switch (vehicle.getCase()) {
+    case Vehicle.Car(var name, var unused):
+        System.out.println("Car: " + name);
+        break;
+    default:
+        break;
+}
+```
+
 For Java 16+ you can use [pattern matching for instanceof](https://openjdk.org/jeps/394)
 ```java
 Vehicle vehicle = ...;
@@ -266,5 +284,47 @@ try (var arena = SwiftArena.ofConfined()) {
 }
 ```
 
+### Protocols
 
+> Note: Protocols are currently only supported in JNI mode. 
+>
+> With the exception of `any DataProtocol` which is handled as `Foundation.Data` in the FFM mode.
 
+Swift `protocol` types are imported as Java `interface`s. For now, we require that all
+concrete types of an interface wrap a Swift instance. In the future, we will add support
+for providing Java-based implementations of interfaces, that you can pass to Java functions.
+
+Consider the following Swift protocol:
+```swift
+protocol Named {
+    var name: String { get }
+
+    func describe() -> String
+}
+```
+will be exported as
+```java
+interface Named extends JNISwiftInstance {
+    public String getName();
+
+    public String describe();
+}
+```
+
+#### Parameters
+Any opaque, existential or generic parameters are imported as Java generics.
+This means that the following function:
+```swift
+func f<S: A & B>(x: S, y: any C, z: some D)
+```
+will be exported as
+```java
+<S extends A & B, T1 extends C, T2 extends D> void f(S x, T1 y, T2 z)   
+```
+On the Java side, only SwiftInstance implementing types may be passed; 
+so this isn't a way for compatibility with just any arbitrary Java interfaces, 
+but specifically, for allowing passing concrete binding types generated by jextract from Swift types
+which conform a to a given Swift protocol.
+
+#### Returning protocol types
+Protocols are not yet supported as return types.

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,9 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef Swift_CJNI_h
-#define Swift_CJNI_h
+public protocol ProtocolA {
+  var constantA: Int64 { get }
+  var mutable: Int64 { get set }
 
-#include <jni.h>
+  func name() -> String
+}
 
-#endif /* Swift_CJNI_h */
+public func takeProtocol(_ proto1: any ProtocolA, _ proto2: some ProtocolA) -> Int64 {
+  return proto1.constantA + proto2.constantA
+}

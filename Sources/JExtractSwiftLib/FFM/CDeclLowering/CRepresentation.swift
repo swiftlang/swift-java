@@ -68,7 +68,7 @@ extension CType {
     case .optional(let wrapped) where wrapped.isPointer:
       try self.init(cdeclType: wrapped)
 
-    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential:
+    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }

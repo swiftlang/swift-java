@@ -14,32 +14,7 @@
 
 package org.swift.swiftkit.core;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public abstract class JNISwiftInstance extends SwiftInstance {
-    // Pointer to the "self".
-    protected final long selfPointer;
-
-    /**
-     * The designated constructor of any imported Swift types.
-     *
-     * @param selfPointer a pointer to the memory containing the value
-     * @param arena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
-     */
-    protected JNISwiftInstance(long selfPointer, SwiftArena arena) {
-        SwiftObjects.requireNonZero(selfPointer, "selfPointer");
-        this.selfPointer = selfPointer;
-
-        // Only register once we have fully initialized the object since this will need the object pointer.
-        arena.register(this);
-    }
-
-    @Override
-    public long $memoryAddress() {
-        return this.selfPointer;
-    }
-
+public interface JNISwiftInstance extends SwiftInstance {
     /**
      * Creates a function that will be called when the value should be destroyed.
      * This will be code-generated to call a native method to do deinitialization and deallocation.
@@ -52,10 +27,12 @@ public abstract class JNISwiftInstance extends SwiftInstance {
      *
      * @return a function that is called when the value should be destroyed.
      */
-    protected abstract Runnable $createDestroyFunction();
+    Runnable $createDestroyFunction();
+
+    long $typeMetadataAddress();
 
     @Override
-    public SwiftInstanceCleanup $createCleanup() {
+    default SwiftInstanceCleanup $createCleanup() {
         var statusDestroyedFlag = $statusDestroyedFlag();
         Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
 

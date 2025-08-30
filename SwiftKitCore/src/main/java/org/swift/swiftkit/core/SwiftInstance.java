@@ -16,12 +16,7 @@ package org.swift.swiftkit.core;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class SwiftInstance {
-
-    // TODO: make this a flagset integer and/or use a field updater
-    /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
-    private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
-
+public interface SwiftInstance {
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
      *
@@ -29,14 +24,14 @@ public abstract class SwiftInstance {
      *          is kept alive using some means (e.g. a class remains retained), as
      *          this function does not ensure safety of the address in any way.
      */
-    public abstract long $memoryAddress();
+    long $memoryAddress();
 
     /**
      * Called when the arena has decided the value should be destroyed.
      * <p/>
      * <b>Warning:</b> The cleanup action must not capture {@code this}.
      */
-    public abstract SwiftInstanceCleanup $createCleanup();
+    SwiftInstanceCleanup $createCleanup();
 
     /**
      * Exposes a boolean value which can be used to indicate if the object was destroyed.
@@ -45,10 +40,7 @@ public abstract class SwiftInstance {
      * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
      * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
      */
-    public final AtomicBoolean $statusDestroyedFlag() {
-        return this.$state$destroyed;
-    }
-
+    AtomicBoolean $statusDestroyedFlag();
     /**
      * Ensures that this instance has not been destroyed.
      * <p/>
@@ -56,8 +48,8 @@ public abstract class SwiftInstance {
      * to be thrown. This check should be performed before accessing {@code $memorySegment} to prevent
      * use-after-free errors.
      */
-    protected final void $ensureAlive() {
-        if (this.$state$destroyed.get()) {
+    default void $ensureAlive() {
+        if (this.$statusDestroyedFlag().get()) {
             throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
         }
     }

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJava
-import CJNI
+import CSwiftJavaJNI
 
 @JavaInterface("org.swift.jni.dependencies.DependencyResolver")
 public struct DependencyResolver {

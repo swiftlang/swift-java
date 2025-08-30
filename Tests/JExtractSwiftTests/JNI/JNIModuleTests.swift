@@ -46,6 +46,7 @@ struct JNIModuleTests {
       import org.swift.swiftkit.core.*;
       import org.swift.swiftkit.core.util.*;
       import java.util.*;
+      import java.util.concurrent.atomic.AtomicBoolean;
       import org.swift.swiftkit.core.annotations.*;
 
       public final class SwiftModule {

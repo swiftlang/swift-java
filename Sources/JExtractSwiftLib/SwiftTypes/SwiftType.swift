@@ -37,6 +37,9 @@ enum SwiftType: Equatable {
   /// `some <type>`
   indirect case opaque(SwiftType)
 
+  /// `type1` & `type2`
+  indirect case composite([SwiftType])
+
   static var void: Self {
     return .tuple([])
   }
@@ -45,7 +48,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
-    case .genericParameter, .function, .metatype, .optional, .existential, .opaque: nil
+    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite: nil
     }
   }
 
@@ -88,7 +91,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .optional, .tuple, .existential, .opaque:
+    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite:
       return false
     }
   }
@@ -123,7 +126,7 @@ extension SwiftType: CustomStringConvertible {
   /// requires parentheses.
   private var postfixRequiresParentheses: Bool {
     switch self {
-    case .function, .existential, .opaque: true
+    case .function, .existential, .opaque, .composite: true
     case .genericParameter, .metatype, .nominal, .optional, .tuple: false
     }
   }
@@ -147,6 +150,8 @@ extension SwiftType: CustomStringConvertible {
       return "any \(constraintType)"
     case .opaque(let constraintType):
       return "some \(constraintType)"
+    case .composite(let types):
+      return types.map(\.description).joined(separator: " & ")
     }
   }
 }
@@ -208,7 +213,7 @@ extension SwiftNominalType {
 extension SwiftType {
   init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     switch type.as(TypeSyntaxEnum.self) {
-    case .arrayType, .classRestrictionType, .compositionType,
+    case .arrayType, .classRestrictionType,
         .dictionaryType, .missingType, .namedOpaqueReturnType,
         .packElementType, .packExpansionType, .suppressedType:
       throw TypeTranslationError.unimplementedType(type)
@@ -311,6 +316,13 @@ extension SwiftType {
       } else {
         self = .opaque(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
       }
+
+    case .compositionType(let compositeType):
+      let types = try compositeType.elements.map {
+        try SwiftType($0.type, lookupContext: lookupContext)
+      }
+
+      self = .composite(types)
     }
   }
 
