@@ -4,13 +4,13 @@ Summary of features supported by the swift-java interoperability libraries and t
 
 ## Overview
 
-JavaKit supports both directions of interoperability, using Swift macros and source generation 
+SwiftJava supports both directions of interoperability, using Swift macros and source generation 
 (via the `swift-java wrap-java` command).
 
 ### Java -> Swift
 
-It is possible to use JavaKit macros and the `wrap-java` command to simplify implementing
-Java `native` functions. JavaKit simplifies the type conversions
+It is possible to use SwiftJava macros and the `wrap-java` command to simplify implementing
+Java `native` functions. SwiftJava simplifies the type conversions
 
 > tip: This direction of interoperability is covered in the WWDC2025 session 'Explore Swift and Java interoperability' 
 > around the [7-minute mark](https://youtu.be/QSHO-GUGidA?si=vUXxphTeO-CHVZ3L&t=448).
@@ -74,8 +74,8 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
 | Optional return types: `func f() -> Int?`, `func g() -> MyClass?`                    | ❌        | ✅   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
-| Parameters: JavaKit wrapped types `JavaLong`, `JavaInteger`                          | ❌        | ✅   |
-| Return values: JavaKit wrapped types `JavaLong`, `JavaInteger`                       | ❌        | ❌   |
+| Parameters: SwiftJava wrapped types `JavaLong`, `JavaInteger`                          | ❌        | ✅   |
+| Return values: SwiftJava wrapped types `JavaLong`, `JavaInteger`                       | ❌        | ❌   |
 | Unsigned primitive types: `UInt`, `UInt8`, `UInt16`, `UInt32`, `UInt64`              | ✅ *      | ✅ * |
 | String (with copying data)                                                           | ✅        | ✅   |
 | Variadic parameters: `T...`                                                          | ❌        | ❌   |

@@ -2,7 +2,7 @@
 
 This repository contains two approaches to Swift/Java interoperability.
 
-- Swift library (`JavaKit`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
+- Swift library (`SwiftJava`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
 - The `swift-java` tool which which offers automated ways to import or "extract" bindings to sources or libraries in either language. The results are bindings for Swift or Java.
 
 ## :construction: :construction: :construction: Early Development :construction: :construction: :construction: 
@@ -19,11 +19,11 @@ The primary purpose of this repository is to create an environment for collabora
 
 This project consists of different modules which have different Swift and Java runtime requirements.
 
-## JavaKit macros
+## SwiftJava macros
 
-JavaKit is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
+SwiftJava is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
 
-It is possible to generate Swift bindings to Java libraries using JavaKit by using the `swift-java wrap-java` command.
+It is possible to generate Swift bindings to Java libraries using SwiftJava by using the `swift-java wrap-java` command.
 
 Required language/runtime versions:
 - **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integration
@@ -124,12 +124,12 @@ Please always use the gradle wrapper (`./gradlew`) to make sure to use the appro
 
 Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
 
-#### JavaKit (Swift -> Java)
+#### SwiftJava (Swift -> Java)
 
 To run a simple app showcasing a Swift process calling into a Java library you can run: 
 
 ```bash
-cd Samples/JavaKitSampleApp
+cd Samples/SwiftJavaExtractFFMSampleApp
 ./ci-validate.sh # which is just `swift build` and a `java -cp ...` invocation of the compiled program
 ```
 
