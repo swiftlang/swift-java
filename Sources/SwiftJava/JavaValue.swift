@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
 
 /// Describes a type that can be bridged with Java.
 ///

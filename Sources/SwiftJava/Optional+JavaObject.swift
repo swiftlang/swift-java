@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
 
 extension Optional: JavaValue where Wrapped: AnyJavaObject {
   public typealias JNIType = jobject?

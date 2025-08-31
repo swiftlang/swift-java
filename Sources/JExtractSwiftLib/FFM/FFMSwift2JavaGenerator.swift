@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaConfigurationShared

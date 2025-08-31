@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
 extension Bool: JavaValue {
   public typealias JNIType = jboolean

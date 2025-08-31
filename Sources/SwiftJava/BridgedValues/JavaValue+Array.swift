@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
 extension Array: JavaValue where Element: JavaValue {
   public typealias JNIType = jobject?

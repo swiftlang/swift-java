@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
 extension UInt8: JavaValue {
   public typealias JNIType = jbyte

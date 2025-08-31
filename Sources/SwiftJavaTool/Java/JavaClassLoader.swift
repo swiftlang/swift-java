@@ -14,7 +14,6 @@
 
 import SwiftJavaToolLib
 import SwiftJavaShared
-import CSwiftJavaJNI
 import SwiftJava
 
 @JavaClass("java.lang.ClassLoader")

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
 
 #if canImport(Android)
 typealias JNINativeInterface_ = JNINativeInterface

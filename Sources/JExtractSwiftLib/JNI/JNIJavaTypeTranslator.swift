@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJNI
 import SwiftJavaConfigurationShared
 
 enum JNIJavaTypeTranslator {

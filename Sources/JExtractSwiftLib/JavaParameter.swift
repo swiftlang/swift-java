@@ -12,15 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJNI
 
 /// Represent a parameter in Java code.
-struct JavaParameter {
+public struct JavaParameter {
   enum ParameterType: CustomStringConvertible {
     case concrete(JavaType)
     case generic(name: String, extends: [JavaType])
 
-    var jniTypeSignature: String {
+    public var jniTypeSignature: String {
       switch self {
       case .concrete(let type):
         return type.jniTypeSignature
@@ -34,25 +34,25 @@ struct JavaParameter {
       }
     }
 
-    var jniTypeName: String {
+    public var jniTypeName: String {
       switch self {
       case .concrete(let type): type.jniTypeName
       case .generic: "jobject?"
       }
     }
 
-    var description: String {
+    public var description: String {
       switch self {
       case .concrete(let type): type.description
       case .generic(let name, _): name
       }
     }
   }
-  var name: String
+  public var name: String
   var type: ParameterType
 
   /// Parameter annotations are used in parameter declarations like this: `@Annotation int example`
-  let annotations: [JavaAnnotation]
+  public let annotations: [JavaAnnotation]
 
   init(name: String, type: ParameterType, annotations: [JavaAnnotation] = []) {
     self.name = name

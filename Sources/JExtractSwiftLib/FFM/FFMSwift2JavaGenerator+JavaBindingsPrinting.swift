@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJNI
 
 extension FFMSwift2JavaGenerator {
   package func printFunctionDowncallMethods(

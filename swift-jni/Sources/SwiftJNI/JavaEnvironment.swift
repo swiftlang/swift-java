@@ -12,9 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef CSwiftJavaJNI_h
-#define CSwiftJavaJNI_h
 
-#include <jni.h>
+#if canImport(Android)
+typealias JNINativeInterface_ = JNINativeInterface
+#endif
 
-#endif /* CSwiftJavaJNI_h */
+extension UnsafeMutablePointer<JNIEnv?> {
+  public var interface: JNINativeInterface_ { self.pointee!.pointee }
+}

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
 extension Float: JavaValue {
   public typealias JNIType = jfloat

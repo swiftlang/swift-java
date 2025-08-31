@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
 extension String: JavaValue {
   public typealias JNIType = jstring?

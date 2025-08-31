@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJNI
 import SwiftJavaConfigurationShared
 
 extension FFMSwift2JavaGenerator {
