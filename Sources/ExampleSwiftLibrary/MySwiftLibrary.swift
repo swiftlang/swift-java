@@ -19,6 +19,8 @@
 
 #if os(Linux)
 import Glibc
+#elseif os(Android)
+import Android
 #elseif os(Windows)
 import CRT
 #elseif canImport(Darwin)
