@@ -19,6 +19,11 @@ The primary purpose of this repository is to create an environment for collabora
 
 This project consists of different modules which have different Swift and Java runtime requirements.
 
+### SwiftJNI
+
+SwiftJava depends on the SwiftJNI module from the separate [swift-jni](https://github.com/swiftlang/swift-jni)
+package, which provides a standard interface to the Java Native Interface.
+
 ## SwiftJava macros
 
 SwiftJava is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
@@ -51,7 +56,7 @@ Required language/runtime versions:
 In this mode, the generated sources will use the legacy JNI approach to calling native code.
 
 This mode is more limited in some performance and flexibility that it can offer, however it is the most compatible, since even very old JVM's as well as even Android systems can be supported by this mode.
-We recommend this mode when FFM is not available, or wide ranging deployment compatibility is your priority. When performance is paramaunt, we recommend the FFM mode instead.
+We recommend this mode when FFM is not available, or wide ranging deployment compatibility is your priority. When performance is paramount, we recommend the FFM mode instead.
 
 Required language/runtime versions:
 - **Swift 6.1**, because of dependence on rich swift interface files  
