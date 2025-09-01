@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
@@ -95,3 +97,5 @@ extension JavaFieldMacro: AccessorMacro {
     return false
   }
 }
+
+#endif

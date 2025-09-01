@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension Field {
     /// Whether this is a 'static' field.
     public var isStatic: Bool {
@@ -23,3 +24,4 @@ extension Field {
     return (getModifiers() & 16) != 0
   }
 }
+#endif

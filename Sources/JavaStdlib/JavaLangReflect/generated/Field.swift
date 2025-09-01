@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.Field")
 open class Field: AccessibleObject {
   @JavaMethod
@@ -114,3 +115,4 @@ extension JavaClass<Field> {
   @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 }
+#endif

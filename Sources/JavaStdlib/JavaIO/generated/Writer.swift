@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.Writer", implements: Appendable.self, Closeable.self, Flushable.self)
 open class Writer: JavaObject {
   @JavaMethod
@@ -47,3 +48,4 @@ extension JavaClass<Writer> {
   @JavaStaticMethod
   public func nullWriter() -> Writer!
 }
+#endif

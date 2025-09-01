@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.LongPredicate")
 public struct JavaLongPredicate {
   @JavaMethod
@@ -16,3 +17,4 @@ public struct JavaLongPredicate {
   @JavaMethod
   public func negate() -> JavaLongPredicate?
 }
+#endif

@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 enum MacroErrors: Error {
   case unrecognizedJavaClassMacro(String)
   case javaImplementationRequiresExtension
@@ -22,3 +24,5 @@ enum MacroErrors: Error {
   case missingEnvironment
   case macroOutOfContext(String)
 }
+
+#endif

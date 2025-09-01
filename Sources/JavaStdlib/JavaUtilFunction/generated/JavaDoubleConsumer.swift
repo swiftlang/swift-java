@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleConsumer")
 public struct JavaDoubleConsumer {
   @JavaMethod
@@ -10,3 +11,4 @@ public struct JavaDoubleConsumer {
   @JavaMethod
   public func andThen(_ arg0: JavaDoubleConsumer?) -> JavaDoubleConsumer?
 }
+#endif

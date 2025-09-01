@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.LongConsumer")
 public struct JavaLongConsumer {
   @JavaMethod
@@ -10,3 +11,4 @@ public struct JavaLongConsumer {
   @JavaMethod
   public func andThen(_ arg0: JavaLongConsumer?) -> JavaLongConsumer?
 }
+#endif

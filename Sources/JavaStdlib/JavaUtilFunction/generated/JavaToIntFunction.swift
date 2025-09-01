@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ToIntFunction")
 public struct JavaToIntFunction<T: AnyJavaObject> {
   @JavaMethod
   public func applyAsInt(_ arg0: JavaObject?) -> Int32
 }
+#endif

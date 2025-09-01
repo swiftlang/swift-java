@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.BufferedInputStream")
 open class BufferedInputStream: InputStream {
   @JavaMethod
@@ -37,3 +38,4 @@ open class BufferedInputStream: InputStream {
   @JavaMethod
   open override func markSupported() -> Bool
 }
+#endif

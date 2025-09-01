@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleBinaryOperator")
 public struct JavaDoubleBinaryOperator {
   @JavaMethod
   public func applyAsDouble(_ arg0: Double, _ arg1: Double) -> Double
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.net.URL")
 open class URL: JavaObject {
   @JavaMethod
@@ -70,3 +71,4 @@ open class URL: JavaObject {
   @JavaMethod
   open func toURI() throws -> URI!
 }
+#endif

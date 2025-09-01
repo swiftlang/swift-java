@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension Enumeration: Sequence, IteratorProtocol {
   public typealias Element = E
 
@@ -21,3 +22,4 @@ extension Enumeration: Sequence, IteratorProtocol {
     return nextElement()?.as(Element.self)!
   }
 }
+#endif

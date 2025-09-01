@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.GenericDeclaration")
 public struct GenericDeclaration {
   @JavaMethod
@@ -28,3 +29,4 @@ public struct GenericDeclaration {
   @JavaMethod
   public func getDeclaredAnnotations() -> [Annotation?]
 }
+#endif

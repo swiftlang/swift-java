@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
@@ -165,3 +167,5 @@ extension JavaImplementationMacro: PeerMacro {
     return exposedMembers
   }
 }
+
+#endif

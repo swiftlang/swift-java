@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 import SwiftSyntaxBuilder
 @_spi(Testing) import SwiftSyntaxMacroExpansion
@@ -158,3 +160,5 @@ extension TypeSyntaxProtocol {
     typeReference.description
   }
 }
+
+#endif

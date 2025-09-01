@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.Collection")
 public struct JavaCollection<E: AnyJavaObject> {
   @JavaMethod
@@ -49,3 +50,4 @@ public struct JavaCollection<E: AnyJavaObject> {
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 }
+#endif

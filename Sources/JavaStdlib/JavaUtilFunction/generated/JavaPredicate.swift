@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.Predicate")
 public struct JavaPredicate<T: AnyJavaObject> {
   @JavaMethod
@@ -26,3 +27,4 @@ extension JavaClass {
   public func isEqual<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaPredicate<JavaObject>?
   where ObjectType == JavaPredicate<T>
 }
+#endif

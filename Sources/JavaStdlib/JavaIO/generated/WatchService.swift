@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.nio.file.WatchService", extends: Closeable.self)
 public struct WatchService {
   @JavaMethod
   public func close() throws
 }
+#endif

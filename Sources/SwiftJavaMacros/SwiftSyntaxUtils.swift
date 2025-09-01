@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 
 extension FunctionParameterSyntax {
@@ -29,3 +31,5 @@ extension FunctionParameterSyntax {
     return firstName.text
   }
 }
+
+#endif

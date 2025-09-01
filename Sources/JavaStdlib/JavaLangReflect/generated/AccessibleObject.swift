@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.AccessibleObject")
 open class AccessibleObject: JavaObject {
   @JavaMethod
@@ -41,3 +42,4 @@ extension JavaClass<AccessibleObject> {
   @JavaStaticMethod
   public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
 }
+#endif

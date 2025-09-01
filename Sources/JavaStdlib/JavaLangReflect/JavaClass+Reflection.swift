@@ -16,6 +16,7 @@ import SwiftJava
 
 // TODO: We should be able to autogenerate this as an extension based on
 // knowing that JavaClass was defined elsewhere.
+#if SwiftJavaMacrosSupport
 extension JavaClass {
   @JavaMethod
   public func getDeclaredMethods() -> [Method?]
@@ -47,3 +48,4 @@ extension JavaClass {
   @JavaMethod
   public func getAnnotations() -> [Annotation?]
 }
+#endif

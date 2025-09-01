@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.ParameterizedType", extends: Type.self)
 public struct ParameterizedType {
   @JavaMethod
@@ -16,3 +17,4 @@ public struct ParameterizedType {
   @JavaMethod
   public func getTypeName() -> String
 }
+#endif

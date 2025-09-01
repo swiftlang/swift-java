@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.List")
 public struct List<E: AnyJavaObject> {
   @JavaMethod
@@ -140,3 +141,4 @@ extension JavaClass {
   @JavaStaticMethod
   public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?, _ arg3: JavaObject?, _ arg4: JavaObject?, _ arg5: JavaObject?, _ arg6: JavaObject?, _ arg7: JavaObject?, _ arg8: JavaObject?, _ arg9: JavaObject?) -> List<JavaObject>! where ObjectType == List<E>
 }
+#endif

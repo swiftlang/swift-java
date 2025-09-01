@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.WildcardType", extends: Type.self)
 public struct WildcardType {
   @JavaMethod
@@ -13,3 +14,4 @@ public struct WildcardType {
   @JavaMethod
   public func getTypeName() -> String
 }
+#endif

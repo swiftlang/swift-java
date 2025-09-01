@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.Set", extends: JavaCollection<JavaObject>.self)
 public struct JavaSet<E: AnyJavaObject> {
   @JavaMethod
@@ -89,3 +90,4 @@ extension JavaClass {
   @JavaStaticMethod
   public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
 }
+#endif

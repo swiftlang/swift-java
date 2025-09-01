@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.nio.charset.Charset")
 open class Charset: JavaObject {
   @JavaMethod
@@ -47,3 +48,4 @@ extension JavaClass<Charset> {
   @JavaStaticMethod
   public func isSupported(_ arg0: String) -> Bool
 }
+#endif

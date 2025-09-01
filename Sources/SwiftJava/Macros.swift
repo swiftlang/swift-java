@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 /// Attached macro that declares that a particular `struct` type is a wrapper around a Java class.
 ///
 /// Use this macro to describe a type that was implemented as a class in Java. The
@@ -162,3 +163,5 @@ public macro JavaStaticMethod() = #externalMacro(module: "SwiftJavaMacros", type
 /// ```
 @attached(peer)
 public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "SwiftJavaMacros", type: "JavaImplementationMacro")
+
+#endif

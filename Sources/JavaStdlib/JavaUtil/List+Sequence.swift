@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension List: Sequence {
   public typealias Element = E
   public typealias Iterator = JavaIterator<E>
@@ -20,4 +21,5 @@ extension List: Sequence {
     return self.iterator()!.as(JavaIterator<E>.self)!
   }
 }
+#endif
 

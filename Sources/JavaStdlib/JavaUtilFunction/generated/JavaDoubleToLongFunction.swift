@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleToLongFunction")
 public struct JavaDoubleToLongFunction {
   @JavaMethod
   public func applyAsLong(_ arg0: Double) -> Int64
 }
+#endif

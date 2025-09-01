@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.Function")
 public struct JavaFunction<T: AnyJavaObject, R: AnyJavaObject> {
   @JavaMethod
@@ -23,3 +24,4 @@ extension JavaClass {
     JavaObject, JavaObject
   >? where ObjectType == JavaFunction<T, R>
 }
+#endif

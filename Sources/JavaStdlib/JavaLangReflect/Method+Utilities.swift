@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension Method {
   /// Whether this is a 'public' method.
   public var isPublic: Bool {
@@ -33,3 +34,4 @@ extension Method {
     return (getModifiers() & 256) != 0
   }
 }
+#endif

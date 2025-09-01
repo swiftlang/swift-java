@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.nio.file.Path")
 public struct Path {
   @JavaMethod
@@ -86,3 +87,4 @@ extension JavaClass<Path> {
   @JavaStaticMethod
   public func of(_ arg0: String, _ arg1: [String]) -> Path!
 }
+#endif

@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.Supplier")
 public struct JavaSupplier<T: AnyJavaObject> {
   @JavaMethod
   public func get() -> JavaObject?
 }
+#endif

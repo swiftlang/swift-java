@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ObjDoubleConsumer")
 public struct JavaObjDoubleConsumer<T: AnyJavaObject> {
   @JavaMethod
   public func accept(_ arg0: JavaObject?, _ arg1: Double)
 }
+#endif

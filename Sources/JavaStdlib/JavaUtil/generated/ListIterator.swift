@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.ListIterator", extends: JavaIterator<JavaObject>.self)
 public struct ListIterator<E: AnyJavaObject> {
   @JavaMethod
@@ -31,3 +32,4 @@ public struct ListIterator<E: AnyJavaObject> {
   @JavaMethod
   public func previous() -> JavaObject!
 }
+#endif

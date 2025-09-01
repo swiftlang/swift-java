@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.Stack")
 open class Stack<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -22,3 +23,4 @@ open class Stack<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func pop() -> JavaObject!
 }
+#endif

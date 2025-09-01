@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 // Translate all Java Throwable instances in a Swift error.
 extension Throwable: Error, CustomStringConvertible {
   public var description: String {
@@ -26,3 +27,4 @@ extension JavaClass<Throwable> {
     return !self.is(RuntimeException.self) && !self.is(JavaError.self)
   }
 }
+#endif

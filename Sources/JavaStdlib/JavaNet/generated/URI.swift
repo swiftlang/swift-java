@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.net.URI")
 open class URI: JavaObject {
   @JavaMethod
@@ -110,3 +111,4 @@ extension JavaClass<URI> {
   @JavaStaticMethod
   public func create(_ arg0: String) -> URI!
 }
+#endif

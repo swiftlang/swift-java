@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.Constructor")
 open class Constructor<T: AnyJavaObject>: Executable {
   @JavaMethod
@@ -77,3 +78,4 @@ extension JavaClass {
   @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 }
+#endif

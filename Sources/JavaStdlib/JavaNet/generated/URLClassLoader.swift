@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.net.URLClassLoader")
 open class URLClassLoader: JavaObject {
   @JavaMethod
@@ -33,3 +34,4 @@ extension JavaClass<URLClassLoader> {
   @JavaStaticMethod
   public func newInstance(_ arg0: [URL?]) -> URLClassLoader!
 }
+#endif

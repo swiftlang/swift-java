@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.jar.Manifest")
 open class Manifest: JavaObject {
   @JavaMethod
@@ -28,3 +29,4 @@ open class Manifest: JavaObject {
   @JavaMethod
   open func getAttributes(_ arg0: String) -> Attributes!
 }
+#endif

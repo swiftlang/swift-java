@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface(
   "java.util.function.UnaryOperator", extends: JavaFunction<JavaObject, JavaObject>.self)
 public struct JavaUnaryOperator<T: AnyJavaObject> {
@@ -23,3 +24,4 @@ extension JavaClass {
   public func identity<T: AnyJavaObject>() -> JavaUnaryOperator<JavaObject>?
   where ObjectType == JavaUnaryOperator<T>
 }
+#endif

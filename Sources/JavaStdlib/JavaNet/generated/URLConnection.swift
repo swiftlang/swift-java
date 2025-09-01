@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.net.URLConnection")
 public struct URLConnection {
   @JavaMethod
@@ -161,3 +162,4 @@ extension JavaClass<URLConnection> {
   @JavaMethod
   public func guessContentTypeFromName(_ arg0: String) -> String
 }
+#endif

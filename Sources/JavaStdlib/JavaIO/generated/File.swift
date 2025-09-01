@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.File")
 open class File: JavaObject {
   @JavaMethod
@@ -164,3 +165,4 @@ extension JavaClass<File> {
   @JavaStaticMethod
   public func createTempFile(_ arg0: String, _ arg1: String, _ arg2: File?) throws -> File!
 }
+#endif

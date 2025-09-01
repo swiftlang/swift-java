@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.IntBinaryOperator")
 public struct JavaIntBinaryOperator {
   @JavaMethod
   public func applyAsInt(_ arg0: Int32, _ arg1: Int32) -> Int32
 }
+#endif

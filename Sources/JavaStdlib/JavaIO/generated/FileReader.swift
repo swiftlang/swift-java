@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.FileReader")
 open class FileReader: InputStreamReader {
   @JavaMethod
@@ -19,3 +20,4 @@ open class FileReader: InputStreamReader {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 }
+#endif

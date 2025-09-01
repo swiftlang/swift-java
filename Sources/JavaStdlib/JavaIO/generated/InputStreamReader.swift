@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.InputStreamReader")
 open class InputStreamReader: Reader {
   @JavaMethod
@@ -28,3 +29,4 @@ open class InputStreamReader: Reader {
   @JavaMethod
   open func getEncoding() -> String
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.InputStream", implements: Closeable.self)
 open class InputStream: JavaObject {
   @JavaMethod
@@ -53,3 +54,4 @@ extension JavaClass<InputStream> {
   @JavaStaticMethod
   public func nullInputStream() -> InputStream!
 }
+#endif

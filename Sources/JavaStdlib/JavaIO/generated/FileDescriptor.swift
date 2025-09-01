@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.FileDescriptor")
 open class FileDescriptor: JavaObject {
   @JavaMethod
@@ -23,3 +24,4 @@ extension JavaClass<FileDescriptor> {
   @JavaStaticField(isFinal: true)
   public var err: FileDescriptor!
 }
+#endif

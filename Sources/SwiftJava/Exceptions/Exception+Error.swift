@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension JavaClass<Exception> {
   /// Determine whether this instance is a checked exception (which must be
   /// handled) vs. an unchecked exception (which is not handled).
@@ -19,3 +20,4 @@ extension JavaClass<Exception> {
     return !self.is(RuntimeException.self)
   }
 }
+#endif

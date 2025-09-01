@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.Executable", implements: GenericDeclaration.self)
 open class Executable: AccessibleObject {
   @JavaMethod
@@ -75,3 +76,4 @@ extension JavaClass<Executable> {
   @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 }
+#endif

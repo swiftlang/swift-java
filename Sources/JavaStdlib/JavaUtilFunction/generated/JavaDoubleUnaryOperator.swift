@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleUnaryOperator")
 public struct JavaDoubleUnaryOperator {
   @JavaMethod
@@ -17,3 +18,4 @@ extension JavaClass<JavaDoubleUnaryOperator> {
   @JavaStaticMethod
   public func identity() -> JavaDoubleUnaryOperator?
 }
+#endif

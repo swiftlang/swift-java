@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ToIntBiFunction")
 public struct JavaToIntBiFunction<T: AnyJavaObject, U: AnyJavaObject> {
   @JavaMethod
   public func applyAsInt(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Int32
 }
+#endif

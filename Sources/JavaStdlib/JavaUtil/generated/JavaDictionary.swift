@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.Dictionary")
 open class JavaDictionary<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -28,3 +29,4 @@ open class JavaDictionary<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func keys() -> Enumeration<JavaObject>!
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.Queue", extends: JavaCollection<JavaObject>.self)
 public struct Queue<E: AnyJavaObject> {
   @JavaMethod
@@ -64,3 +65,4 @@ public struct Queue<E: AnyJavaObject> {
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.TreeMap")
 open class TreeMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -120,3 +121,4 @@ extension TreeMap {
   open func setValue(_ arg0: JavaObject?) -> JavaObject!
   }
 }
+#endif

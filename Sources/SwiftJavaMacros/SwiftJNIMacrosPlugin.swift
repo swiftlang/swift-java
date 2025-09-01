@@ -12,9 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 import SwiftCompilerPlugin
 import SwiftSyntaxMacros
+#endif
 
+#if SwiftJavaMacrosSupport
 @main
 struct SwiftJavaMacrosPlugin: CompilerPlugin {
   var providingMacros: [Macro.Type] = [
@@ -24,3 +27,11 @@ struct SwiftJavaMacrosPlugin: CompilerPlugin {
     JavaMethodMacro.self,
   ]
 }
+#else
+@main
+struct Dummy {
+  public static func main() {
+    fatalError("Placeholder; macros are disabled")
+  }
+}
+#endif

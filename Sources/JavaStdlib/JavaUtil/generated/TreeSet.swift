@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.TreeSet")
 open class TreeSet<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -70,3 +71,4 @@ open class TreeSet<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func higher(_ arg0: JavaObject?) -> JavaObject!
 }
+#endif

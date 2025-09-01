@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension JNIEnvironment {
   /// Execute a JNI call and check for an exception at the end. Translate
   /// any Java exception into an error.
@@ -44,3 +45,4 @@ extension JNIEnvironment {
     }
   }
 }
+#endif

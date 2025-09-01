@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.GenericArrayType", extends: Type.self)
 public struct GenericArrayType {
   @JavaMethod
@@ -10,3 +11,4 @@ public struct GenericArrayType {
   @JavaMethod
   public func getTypeName() -> String
 }
+#endif

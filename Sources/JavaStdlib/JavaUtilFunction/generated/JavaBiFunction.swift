@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.BiFunction")
 public struct JavaBiFunction<T: AnyJavaObject, U: AnyJavaObject, R: AnyJavaObject> {
   @JavaMethod
@@ -12,3 +13,4 @@ public struct JavaBiFunction<T: AnyJavaObject, U: AnyJavaObject, R: AnyJavaObjec
     JavaObject, JavaObject, JavaObject
   >?
 }
+#endif

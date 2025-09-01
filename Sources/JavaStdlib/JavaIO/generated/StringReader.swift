@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.StringReader")
 open class StringReader: Reader {
   @JavaMethod
@@ -31,3 +32,4 @@ open class StringReader: Reader {
   @JavaMethod
   open override func markSupported() -> Bool
 }
+#endif

@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.Parameter")
 open class Parameter: JavaObject {
   @JavaMethod
@@ -62,3 +63,4 @@ open class Parameter: JavaObject {
   @JavaMethod
   open func isImplicit() -> Bool
 }
+#endif
