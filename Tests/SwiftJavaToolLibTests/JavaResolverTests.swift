@@ -14,11 +14,11 @@
 
 import Foundation
 @testable import SwiftJavaConfigurationShared
-@testable import SwiftJavaTool // test in terminal with sandbox disabled, if xcode can't find the module
+@testable import SwiftJavaToolLib
 import Testing
 
 @Suite(.serialized)
-class JavaRepositoryTests {
+class JavaResolverTests {
   static let localRepo: String = String.localRepoRootDirectory.appending("/All")
 
   static let localJarRepo: String = String.localRepoRootDirectory.appending("/JarOnly")
@@ -39,16 +39,16 @@ class JavaRepositoryTests {
   #if compiler(>=6.2)
   @Test
   func nonResolvableDependency() async throws {
-    try await #expect(processExitsWith: .failure, "commonCSVWithUnknownDependencies") {
+    await #expect(processExitsWith: .failure, "commonCSVWithUnknownDependencies") {
       try await resolve(configuration: .commonCSVWithUnknownDependencies)
     }
-    try await #expect(processExitsWith: .failure, "helloWorldInLocalRepoIncludeIOOnly") {
+    await #expect(processExitsWith: .failure, "helloWorldInLocalRepoIncludeIOOnly") {
       try await resolve(configuration: .helloWorldInLocalRepoIncludeIOOnly)
     }
-    try await #expect(processExitsWith: .failure, "androidCoreInCentral") {
+    await #expect(processExitsWith: .failure, "androidCoreInCentral") {
       try await resolve(configuration: .androidCoreInCentral)
     }
-    try await #expect(processExitsWith: .failure, "helloWorldInRepoWithoutArtifact") {
+    await #expect(processExitsWith: .failure, "helloWorldInRepoWithoutArtifact") {
       try await resolve(configuration: .helloWorldInRepoWithoutArtifact)
     }
   }
@@ -90,18 +90,16 @@ class JavaRepositoryTests {
 // Wired issue with #require, marking the function as static seems to resolve it
 private func resolve(configuration: SwiftJavaConfigurationShared.Configuration) async throws {
   var config = configuration
-  var command = try SwiftJava.ResolveCommand.parse([
-    "--output-directory",
-    ".build/\(configuration.swiftModule!)/destination/SwiftJavaPlugin",
-
-    "--swift-module",
-    configuration.swiftModule!,
-  ])
   try config.publishSampleJavaProjectIfNeeded()
-  try await command.runSwiftJavaCommand(config: &config)
+  try await JavaResolver.runResolveCommand(
+    config: &config,
+    input: nil,
+    swiftModule: configuration.swiftModule!,
+    outputDirectory: ".build/\(configuration.swiftModule!)/destination/SwiftJavaPlugin"
+  )
 }
 
-extension SwiftJavaConfigurationShared.Configuration {
+extension SwiftJavaConfigurationShared.Configuration: @unchecked Sendable {
   static var resolvableConfigurations: [Configuration] = [
     .commonCSV, .jitpackJson,
     .helloWorldInTempRepo,
@@ -140,7 +138,7 @@ extension SwiftJavaConfigurationShared.Configuration {
     ]
     configuration.packageToPublish = "SimpleJavaProject"
 
-    configuration.repositories = [.maven(url: JavaRepositoryTests.localRepo)]
+    configuration.repositories = [.maven(url: JavaResolverTests.localRepo)]
     return configuration
   }()
   
@@ -156,8 +154,8 @@ extension SwiftJavaConfigurationShared.Configuration {
   static let helloWorldInRepoWithCustomArtifacts: Configuration = {
     var configuration = Configuration.helloWorldInTempRepo
     configuration.repositories = [
-      .maven(url: JavaRepositoryTests.localPomRepo, artifactUrls: [
-        JavaRepositoryTests.localJarRepo,
+      .maven(url: JavaResolverTests.localPomRepo, artifactUrls: [
+        JavaResolverTests.localJarRepo,
       ]),
     ]
     return configuration
@@ -207,8 +205,8 @@ extension SwiftJavaConfigurationShared.Configuration {
     var configuration = Configuration.helloWorldInTempRepo
 
     configuration.repositories = [
-      .maven(url: JavaRepositoryTests.localJarRepo /* , artifactUrls: [
-         JavaRepositoryTests.localPomRepo
+      .maven(url: JavaResolverTests.localJarRepo /* , artifactUrls: [
+         JavaResolverTests.localPomRepo
        ] */ ),
     ]
     return configuration
@@ -230,10 +228,17 @@ private extension SwiftJavaConfigurationShared.Configuration {
       return
     }
 
+    var gradlewPath = String.packageDirectory + "/gradlew"
+    if !FileManager.default.fileExists(atPath: gradlewPath) {
+      let currentWorkingDir = URL(filePath: .packageDirectory).appendingPathComponent(".build", isDirectory: true)
+      try JavaResolver.copyGradlew(to: currentWorkingDir)
+      gradlewPath = currentWorkingDir.appendingPathComponent("gradlew").path
+    }
     let process = Process()
-    process.executableURL = URL(fileURLWithPath: .gradlewPath)
+    process.executableURL = URL(fileURLWithPath: gradlewPath)
+    let packagePath = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent(packageName).path
     process.arguments = [
-      "-p", "\(String.packageDirectory)/Tests/SwiftJavaToolTests/\(packageName)",
+      "-p", "\(packagePath)",
       "publishAllArtifacts", 
       "publishToMavenLocal", // also publish to maven local to test includeGroups"
       "-q",
@@ -261,16 +266,14 @@ private extension String {
     defer { free(path) }
     
     let dir = String(cString: path)
-    // TODO: This needs to be tested in Xcode as well, for now Xcode can't run tests, due to this issue: https://github.com/swiftlang/swift-java/issues/281
-    precondition(dir.hasSuffix("swift-java"), "Please run the tests from the swift-java directory")
-    return dir
+    if dir.hasSuffix("swift-java") { // most likely running with `swift test`
+      return dir
+    } else {
+      return FileManager.default.temporaryDirectory.path
+    }
   }
 
   static var localRepoRootDirectory: Self {
     packageDirectory + "/.build/SwiftJavaToolTests/LocalRepo"
-  }
-
-  static var gradlewPath: Self {
-    packageDirectory + "/gradlew"
   }
 }
