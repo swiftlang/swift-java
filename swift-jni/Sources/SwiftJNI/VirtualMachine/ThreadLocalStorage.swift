@@ -14,8 +14,8 @@
 
 #if canImport(Darwin)
 import Darwin
-#elseif canImport(Bionic)
-import Bionic
+#elseif canImport(Android)
+import Android
 #elseif canImport(Glibc)
 import Glibc
 #elseif canImport(Musl)
@@ -24,12 +24,12 @@ import Musl
 import WinSDK
 #endif
 
-#if !(canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl) || canImport(WinSDK))
+#if !(canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl) || canImport(WinSDK))
 private var _globalTlsValue: UnsafeMutableRawPointer?
 #endif
 
 package struct ThreadLocalStorage: ~Copyable {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
   private typealias PlatformKey = pthread_key_t
 #elseif canImport(WinSDK)
   private typealias PlatformKey = DWORD
@@ -45,14 +45,14 @@ package struct ThreadLocalStorage: ~Copyable {
 
   package typealias OnThreadExit = @convention(c) (_: Value) -> ()
 
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
   private var _key: PlatformKey
 #elseif canImport(WinSDK)
   private let _key: PlatformKey
 #endif
 
   package init(onThreadExit: OnThreadExit) {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
     _key = 0
     pthread_key_create(&_key, onThreadExit)
 #elseif canImport(WinSDK)
@@ -61,7 +61,7 @@ package struct ThreadLocalStorage: ~Copyable {
   }
 
   package func get() -> UnsafeMutableRawPointer? {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
     pthread_getspecific(_key)
 #elseif canImport(WinSDK)
     FlsGetValue(_key)
@@ -71,7 +71,7 @@ package struct ThreadLocalStorage: ~Copyable {
   }
 
   package func set(_ value: Value) {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
     pthread_setspecific(_key, value)
 #elseif canImport(WinSDK)
     FlsSetValue(_key, value)
@@ -81,7 +81,7 @@ package struct ThreadLocalStorage: ~Copyable {
   }
 
   deinit {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+#if canImport(Darwin) || canImport(Android) || canImport(Glibc) || canImport(Musl)
     pthread_key_delete(_key)
 #elseif canImport(WinSDK)
     FlsFree(_key)

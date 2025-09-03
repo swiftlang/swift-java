@@ -12,11 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-
-#if canImport(Android)
-typealias JNINativeInterface_ = JNINativeInterface
-#endif
 
 extension UnsafeMutablePointer<JNIEnv?> {
   public var interface: JNINativeInterface_ { self.pointee!.pointee }

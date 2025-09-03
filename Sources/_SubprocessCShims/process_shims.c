@@ -252,6 +252,10 @@ int _subprocess_spawn(
 // MARK: - Linux (fork/exec + posix_spawn fallback)
 #if TARGET_OS_LINUX
 
+#ifndef __GLIBC_PREREQ
+#define __GLIBC_PREREQ(maj, min) 0
+#endif
+
 #if _POSIX_SPAWN
 static int _subprocess_is_addchdir_np_available() {
 #if defined(__GLIBC__) && !__GLIBC_PREREQ(2, 29)
@@ -302,6 +306,8 @@ static int _subprocess_addchdir_np(
     //  - FreeBSD 13.1 (May 2022)
     //  - Android 14 (October 2023)
     return posix_spawn_file_actions_addchdir_np(file_actions, path);
+#elif defined(__ANDROID__)
+    // noop
 #else
     // Standardized posix_spawn_file_actions_addchdir version (POSIX.1-2024, June 2024) available in:
     //  - Solaris 11.4 (August 2018)

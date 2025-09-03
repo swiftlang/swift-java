@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 import SwiftSyntax
 
 extension FFMSwift2JavaGenerator {

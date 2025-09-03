@@ -9,7 +9,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(Glibc) || canImport(Bionic) || canImport(Musl)
+#if canImport(Glibc) || canImport(Android) || canImport(Musl)
 
 #if canImport(System)
 import System
@@ -19,8 +19,8 @@ import System
 
 #if canImport(Glibc)
 import Glibc
-#elseif canImport(Bionic)
-import Bionic
+#elseif canImport(Android)
+import Android
 #elseif canImport(Musl)
 import Musl
 #endif
@@ -318,4 +318,4 @@ private func _setupMonitorSignalHandler() {
     setup
 }
 
-#endif  // canImport(Glibc) || canImport(Bionic) || canImport(Musl)
+#endif  // canImport(Glibc) || canImport(Android) || canImport(Musl)

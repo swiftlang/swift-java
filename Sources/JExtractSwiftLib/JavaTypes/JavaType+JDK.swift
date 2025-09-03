@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJNI
 
 extension JavaType {
   /// The description of the type java.lang.foreign.MemorySegment.

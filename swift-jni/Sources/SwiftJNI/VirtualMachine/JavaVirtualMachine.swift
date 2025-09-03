@@ -343,3 +343,10 @@ extension JavaVirtualMachine {
     case classpathEntryNotFound(entry: String, classpath: [String])
   }
 }
+
+// TODO: rather than linking to libjvm at build time, we can simply load these two functions at runtime based on the `JAVA_HOME` environment (and various heuristics), which will prevent the need for unsafe linker flags in Package.swift. This will be necessary for Android support, which doesn't expose `JNI_GetCreatedJavaVMs` as part of the NDK, but which is the only reliable way to obtain a handle to the ambient ART/JVM.
+
+nonisolated(unsafe) private let JNI_CreateJavaVM_Dynamic: (_ pvm: UnsafeMutablePointer<JavaVMPointer?>, _ penv: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ args: UnsafeMutableRawPointer) -> jint = { fatalError("TODO") }()
+
+nonisolated(unsafe) private let JNI_GetCreatedJavaVMs_Dynamic: (_: UnsafeMutablePointer<JavaVMPointer?>, _: jsize, _: UnsafeMutablePointer<jsize>) -> jint = { fatalError("TODO") }()
+

@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
-
 /// Describes a type that can be bridged with Java.
 ///
 /// `JavaValue` is the base protocol for bridging between Swift types and their

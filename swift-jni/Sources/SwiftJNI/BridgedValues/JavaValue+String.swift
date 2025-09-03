@@ -12,58 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 
-extension Array: JavaValue where Element: JavaValue {
-  public typealias JNIType = jobject?
+extension String: JavaValue {
+  public typealias JNIType = jstring?
 
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.l }
 
-  public static var javaType: JavaType { .array(Element.javaType) }
+  public static var javaType: JavaType {
+    .class(package: "java.lang", name: "String")
+  }
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    let jniCount = environment.interface.GetArrayLength(environment, value)
-    let jniArray: [Element.JNIType] =
-      if let value {
-        .init(
-          unsafeUninitializedCapacity: Int(jniCount)
-        ) { buffer, initializedCount in
-          Element.jniGetArrayRegion(in: environment)(
-            environment,
-            value,
-            0,
-            jniCount,
-            buffer.baseAddress
-          )
-          initializedCount = Int(jniCount)
-        }
-      } else {
-        []
-      }
-
-    // FIXME: If we have a 1:1 match between the Java layout and the
-    // Swift layout, as we do for integer/float types, we can do some
-    // awful alias tricks above to have JNI fill in the contents of the
-    // array directly without this extra copy. For now, just map.
-    self = jniArray.map { Element(fromJNI: $0, in: environment) }
+    guard let value else {
+      self.init()
+      return
+    }
+    let cString = environment.interface.GetStringUTFChars(environment, value, nil)!
+    defer { environment.interface.ReleaseStringUTFChars(environment, value, cString) }
+    self = String(cString: cString) // copy
   }
 
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
-    // FIXME: If we have a 1:1 match between the Java layout and the
-    // Swift layout, as we do for integer/float types, we can do some
-    // awful alias tries to avoid creating the second array here.
-    let jniArray = Element.jniNewArray(in: environment)(environment, Int32(count))!
-    let jniElementBuffer: [Element.JNIType] = map {
-      $0.getJNIValue(in: environment)
-    }
-    Element.jniSetArrayRegion(in: environment)(
-      environment,
-      jniArray,
-      0,
-      jsize(count),
-      jniElementBuffer
-    )
-    return jniArray
+    // FIXME: this works, but isn't great. Swift uses UTF8 and Java uses UTF8 with
+    // some encoding quirks for non-ascii. So round-tripping via UTF16 is unfortunate,
+    // but correct, so good enough for now.
+    var utfBuffer = Array(utf16)
+    return environment.interface.NewString(environment, &utfBuffer, Int32(utfBuffer.count))
   }
 
   public static func jniMethodCall(in environment: JNIEnvironment) -> JNIMethodCall<JNIType> {
@@ -92,9 +66,9 @@ extension Array: JavaValue where Element: JavaValue {
 
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
     return { environment, size in
-      // FIXME: We should have a bridged JavaArray that we can use here.
-      let arrayClass = environment.interface.FindClass(environment, "java/lang/Array")
-      return environment.interface.NewObjectArray(environment, size, arrayClass, nil)
+      // FIXME: Introduce a JavaString class that we can use for this.
+      let stringClass = environment.interface.FindClass(environment, "java/lang/String")
+      return environment.interface.NewObjectArray(environment, size, stringClass, nil)
     }
   }
 
@@ -119,7 +93,7 @@ extension Array: JavaValue where Element: JavaValue {
     }
   }
 
-  public static var jniPlaceholderValue: jobject? {
+  public static var jniPlaceholderValue: jstring? {
     nil
   }
 }

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
 
 /// Stores a reference to a Java object, managing it as a global reference so
 /// that the Java virtual machine will not move or deallocate the object

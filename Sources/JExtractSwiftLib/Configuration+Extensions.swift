@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJavaConfigurationShared
-import JavaTypes
+import SwiftJNI
 
 extension Configuration {
   public var effectiveUnsignedNumericsMode: UnsignedNumericsMode {

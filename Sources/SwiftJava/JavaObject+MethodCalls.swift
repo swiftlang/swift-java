@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
 
 /// Produce the mangling for a method with the given argument and result types.
 private func methodMangling<each Param: JavaValue>(
