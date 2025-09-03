@@ -103,7 +103,7 @@ extension SwiftJava.JExtractCommand {
       config.inputSwiftDirectory = "\(FileManager.default.currentDirectoryPath)/Sources/\(swiftModule)"
     }
 
-    print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(self.mode)".bold)
+    print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(config.mode ?? .ffm)".bold)
 
     // Load all of the dependent configurations and associate them with Swift modules.
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn)
