@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleSupplier")
 public struct JavaDoubleSupplier {
   @JavaMethod
   public func getAsDouble() -> Double
 }
+#endif

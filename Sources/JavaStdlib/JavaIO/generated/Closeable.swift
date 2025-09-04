@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.io.Closeable")
 public struct Closeable {
   @JavaMethod
   public func close() throws
 }
+#endif

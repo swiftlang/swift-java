@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.PriorityQueue")
 open class PriorityQueue<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -55,3 +56,4 @@ open class PriorityQueue<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func offer(_ arg0: JavaObject?) -> Bool
 }
+#endif

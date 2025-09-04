@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.BiPredicate")
 public struct JavaBiPredicate<T: AnyJavaObject, U: AnyJavaObject> {
   @JavaMethod
@@ -20,3 +21,4 @@ public struct JavaBiPredicate<T: AnyJavaObject, U: AnyJavaObject> {
   @JavaMethod
   public func negate() -> JavaBiPredicate<JavaObject, JavaObject>?
 }
+#endif

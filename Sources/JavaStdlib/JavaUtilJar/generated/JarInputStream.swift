@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.jar.JarInputStream")
 open class JarInputStream: JavaObject {
   @JavaMethod
@@ -140,3 +141,4 @@ extension JavaClass<JarInputStream> {
   @JavaStaticField(isFinal: true)
   public var ENDCOM: Int32
 }
+#endif

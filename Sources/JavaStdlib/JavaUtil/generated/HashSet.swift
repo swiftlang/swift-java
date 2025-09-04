@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.HashSet", implements: JavaSet<JavaObject>.self)
 open class HashSet<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -50,3 +51,4 @@ extension JavaClass {
   @JavaStaticMethod
   public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>! where ObjectType == HashSet<E>
 }
+#endif

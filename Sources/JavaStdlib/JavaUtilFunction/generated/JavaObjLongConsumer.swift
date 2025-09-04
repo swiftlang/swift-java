@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ObjLongConsumer")
 public struct JavaObjLongConsumer<T: AnyJavaObject> {
   @JavaMethod
   public func accept(_ arg0: JavaObject?, _ arg1: Int64)
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.Iterator")
 public struct JavaIterator<E: AnyJavaObject> {
   @JavaMethod
@@ -13,3 +14,4 @@ public struct JavaIterator<E: AnyJavaObject> {
   @JavaMethod
   public func next() -> JavaObject!
 }
+#endif

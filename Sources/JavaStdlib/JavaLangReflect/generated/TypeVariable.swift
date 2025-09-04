@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.TypeVariable", extends: Type.self)
 public struct TypeVariable<D: AnyJavaObject> {
   @JavaMethod
@@ -40,3 +41,4 @@ public struct TypeVariable<D: AnyJavaObject> {
   @JavaMethod
   public func getDeclaredAnnotations() -> [Annotation?]
 }
+#endif

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 extension Constructor {
   /// Whether this is a 'public' constructor.
   public var isPublic: Bool {
@@ -23,3 +24,4 @@ extension Constructor {
     return (getModifiers() & 256) != 0
   }
 }
+#endif

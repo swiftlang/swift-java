@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ToLongFunction")
 public struct JavaToLongFunction<T: AnyJavaObject> {
   @JavaMethod
   public func applyAsLong(_ arg0: JavaObject?) -> Int64
 }
+#endif

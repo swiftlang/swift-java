@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface(
   "java.util.function.BinaryOperator",
   extends: JavaBiFunction<JavaObject, JavaObject, JavaObject>.self)
@@ -14,3 +15,4 @@ public struct JavaBinaryOperator<T: AnyJavaObject> {
     JavaObject, JavaObject, JavaObject
   >?
 }
+#endif

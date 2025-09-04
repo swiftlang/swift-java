@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.io.Flushable")
 public struct Flushable {
   @JavaMethod
   public func flush() throws
 }
+#endif

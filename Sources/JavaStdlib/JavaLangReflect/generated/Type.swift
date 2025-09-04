@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.Type")
 public struct Type {
   @JavaMethod
   public func getTypeName() -> String
 }
+#endif

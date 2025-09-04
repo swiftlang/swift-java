@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.BooleanSupplier")
 public struct JavaBooleanSupplier {
   @JavaMethod
   public func getAsBoolean() -> Bool
 }
+#endif

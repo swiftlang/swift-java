@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.ObjIntConsumer")
 public struct JavaObjIntConsumer<T: AnyJavaObject> {
   @JavaMethod
   public func accept(_ arg0: JavaObject?, _ arg1: Int32)
 }
+#endif

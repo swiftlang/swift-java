@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.lang.reflect.Method")
 open class Method: Executable {
   @JavaMethod
@@ -89,3 +90,4 @@ extension JavaClass<Method> {
   @JavaStaticField(isFinal: true)
   public var DECLARED: Int32
 }
+#endif

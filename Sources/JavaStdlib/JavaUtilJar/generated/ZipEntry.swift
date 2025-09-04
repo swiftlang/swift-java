@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.zip.ZipEntry")
 open class ZipEntry: JavaObject {
   @JavaMethod
@@ -194,3 +195,4 @@ extension JavaClass<ZipEntry> {
   @JavaStaticField(isFinal: true)
   public var ENDCOM: Int32
 }
+#endif

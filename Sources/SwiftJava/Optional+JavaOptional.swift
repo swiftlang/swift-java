@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
 public extension Optional where Wrapped: AnyJavaObject {
   func toJavaOptional() -> JavaOptional<Wrapped> {
     return try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
@@ -79,3 +80,4 @@ public extension Optional where Wrapped == Int64 {
     }
   }
 }
+#endif

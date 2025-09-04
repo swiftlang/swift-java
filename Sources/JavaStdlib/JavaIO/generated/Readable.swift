@@ -2,7 +2,9 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.Readable")
 public struct Readable {
 
 }
+#endif

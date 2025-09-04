@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 import SwiftSyntaxMacros
 
@@ -76,3 +78,5 @@ enum GenerationMode {
     return nil
   }
 }
+
+#endif

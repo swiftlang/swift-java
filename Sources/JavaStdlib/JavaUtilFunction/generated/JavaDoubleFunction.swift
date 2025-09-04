@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.DoubleFunction")
 public struct JavaDoubleFunction<R: AnyJavaObject> {
   @JavaMethod
   public func apply(_ arg0: Double) -> JavaObject?
 }
+#endif

@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.jar.Attributes")
 open class Attributes: JavaObject {
   @JavaMethod
@@ -133,3 +134,4 @@ extension JavaClass<Attributes.Name> {
   @JavaStaticField(isFinal: true)
   public var MULTI_RELEASE: Attributes.Name!
 }
+#endif

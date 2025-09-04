@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.ArrayDeque")
 open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -118,3 +119,4 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func descendingIterator() -> JavaIterator<JavaObject>!
 }
+#endif

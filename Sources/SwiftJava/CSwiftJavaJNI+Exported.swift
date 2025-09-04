@@ -12,26 +12,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if SwiftJavaMacrosSupport
-import SwiftCompilerPlugin
-import SwiftSyntaxMacros
-#endif
-
-#if SwiftJavaMacrosSupport
-@main
-struct SwiftJavaMacrosPlugin: CompilerPlugin {
-  var providingMacros: [Macro.Type] = [
-    JavaImplementationMacro.self,
-    JavaClassMacro.self,
-    JavaFieldMacro.self,
-    JavaMethodMacro.self,
-  ]
-}
-#else
-@main
-struct Dummy {
-  public static func main() {
-    fatalError("Placeholder; macros are disabled")
-  }
-}
-#endif
+@_exported import CSwiftJavaJNI
