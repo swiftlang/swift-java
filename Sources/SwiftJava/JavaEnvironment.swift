@@ -15,7 +15,7 @@
 import CSwiftJavaJNI
 
 #if canImport(Android)
-typealias JNINativeInterface_ = JNINativeInterface
+public typealias JNINativeInterface_ = JNINativeInterface
 #endif
 
 extension UnsafeMutablePointer<JNIEnv?> {
