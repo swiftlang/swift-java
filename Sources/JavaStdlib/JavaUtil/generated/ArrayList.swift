@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
 open class ArrayList<E: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -115,3 +116,4 @@ open class ArrayList<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func listIterator() -> ListIterator<JavaObject>!
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.reflect.AnnotatedType")
 public struct AnnotatedType {
   @JavaMethod
@@ -31,3 +32,4 @@ public struct AnnotatedType {
   @JavaMethod
   public func getDeclaredAnnotationsByType(_ arg0: JavaClass<Annotation>?) -> [Annotation?]
 }
+#endif

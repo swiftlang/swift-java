@@ -3,6 +3,7 @@ import SwiftJava
 import JavaUtil
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.jar.JarFile")
 open class JarFile: JavaObject {
   @JavaMethod
@@ -156,3 +157,4 @@ extension JavaClass<JarFile> {
   @JavaStaticField(isFinal: true)
   public var ENDCOM: Int32
 }
+#endif

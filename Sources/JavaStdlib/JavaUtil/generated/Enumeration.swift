@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.Enumeration")
 public struct Enumeration<E: AnyJavaObject> {
   @JavaMethod
@@ -13,3 +14,4 @@ public struct Enumeration<E: AnyJavaObject> {
   @JavaMethod
   public func nextElement() -> JavaObject!
 }
+#endif

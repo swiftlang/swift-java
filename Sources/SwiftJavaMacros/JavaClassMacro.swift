@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if SwiftJavaMacrosSupport
+
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
@@ -169,3 +171,5 @@ extension ClassDeclSyntax {
     return name.text == "JavaObject"
   }
 }
+
+#endif

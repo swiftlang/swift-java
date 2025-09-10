@@ -1,10 +1,13 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
 import PackageDescription
 
 import Foundation
+
+// Package Trait Names 
+let SwiftJavaMacrosSupport: String = "SwiftJavaMacrosSupport"
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,
@@ -196,6 +199,17 @@ let package = Package(
     ),
 
   ],
+
+  traits: [
+    .init(
+      name: SwiftJavaMacrosSupport, 
+      description: "Enable @JavaMethod, @JavaClass and other Swift macros which are used in wrapping Java types"
+    ),
+    .default(enabledTraits: [
+      SwiftJavaMacrosSupport
+    ]) // enabled by default, but downstream libraries may disable macros if they don't use them
+  ],
+
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "601.0.1"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
@@ -208,6 +222,7 @@ let package = Package(
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
   ],
+
   targets: [
     .target(
       name: "SwiftJavaDocumentation",
@@ -220,8 +235,8 @@ let package = Package(
     .macro(
       name: "SwiftJavaMacros",
       dependencies: [
-        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax", condition: .when(traits: [SwiftJavaMacrosSupport])),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax", condition: .when(traits: [SwiftJavaMacrosSupport])),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
@@ -237,10 +252,10 @@ let package = Package(
     .target(
       name: "SwiftJava",
       dependencies: [
-        "CSwiftJavaJNI",
-        "SwiftJavaMacros",
-        "JavaTypes",
-        "SwiftJavaConfigurationShared", // for Configuration reading at runtime
+        .byName(name: "CSwiftJavaJNI"),
+        .byName(name: "JavaTypes"),
+        .byName(name: "SwiftJavaMacros", condition: .when(traits: [SwiftJavaMacrosSupport])),
+        .byName(name: "SwiftJavaConfigurationShared"), // for Configuration reading at runtime
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [

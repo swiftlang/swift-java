@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.IntPredicate")
 public struct JavaIntPredicate {
   @JavaMethod
@@ -16,3 +17,4 @@ public struct JavaIntPredicate {
   @JavaMethod
   public func negate() -> JavaIntPredicate?
 }
+#endif

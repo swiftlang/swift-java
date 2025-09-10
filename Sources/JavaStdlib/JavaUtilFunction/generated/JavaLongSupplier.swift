@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.LongSupplier")
 public struct JavaLongSupplier {
   @JavaMethod
   public func getAsLong() -> Int64
 }
+#endif

@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 import SwiftJava
 
+#if SwiftJavaMacrosSupport
 extension JavaIterator: IteratorProtocol {
   public typealias Element = E
 
@@ -25,3 +26,4 @@ extension JavaIterator: IteratorProtocol {
     return nil
   }
 }
+#endif

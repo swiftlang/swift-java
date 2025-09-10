@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.IntSupplier")
 public struct JavaIntSupplier {
   @JavaMethod
   public func getAsInt() -> Int32
 }
+#endif

@@ -15,6 +15,7 @@
 import CSwiftJavaJNI
 import JavaTypes
 
+#if SwiftJavaMacrosSupport
 extension Optional: JavaValue where Wrapped: AnyJavaObject {
   public typealias JNIType = jobject?
 
@@ -101,3 +102,4 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
     nil
   }
 }
+#endif

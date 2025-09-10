@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.lang.annotation.Annotation")
 public struct Annotation {
   @JavaMethod
@@ -16,3 +17,4 @@ public struct Annotation {
   @JavaMethod
   public func annotationType() -> JavaClass<Annotation>!
 }
+#endif

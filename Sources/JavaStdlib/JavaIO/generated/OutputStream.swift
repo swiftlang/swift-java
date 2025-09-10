@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.OutputStream", implements: Closeable.self, Flushable.self)
 open class OutputStream: JavaObject {
   @JavaMethod
@@ -26,3 +27,4 @@ extension JavaClass<OutputStream> {
   @JavaStaticMethod
   public func nullOutputStream() -> OutputStream!
 }
+#endif

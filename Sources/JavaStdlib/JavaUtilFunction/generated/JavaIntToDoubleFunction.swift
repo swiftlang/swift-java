@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.IntToDoubleFunction")
 public struct JavaIntToDoubleFunction {
   @JavaMethod
   public func applyAsDouble(_ arg0: Int32) -> Double
 }
+#endif

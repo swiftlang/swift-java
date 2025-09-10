@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.BitSet")
 open class BitSet: JavaObject {
   @JavaMethod
@@ -107,3 +108,4 @@ extension JavaClass<BitSet> {
   @JavaStaticMethod
   public func valueOf(_ arg0: [Int8]) -> BitSet!
 }
+#endif

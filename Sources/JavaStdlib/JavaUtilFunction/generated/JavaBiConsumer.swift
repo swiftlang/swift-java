@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.BiConsumer")
 public struct JavaBiConsumer<T: AnyJavaObject, U: AnyJavaObject> {
   @JavaMethod
@@ -12,3 +13,4 @@ public struct JavaBiConsumer<T: AnyJavaObject, U: AnyJavaObject> {
     JavaObject, JavaObject
   >?
 }
+#endif

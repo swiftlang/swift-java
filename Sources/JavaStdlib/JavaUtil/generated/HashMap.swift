@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.HashMap")
 open class HashMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
@@ -65,3 +66,4 @@ extension JavaClass {
   @JavaStaticMethod
   public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<JavaObject, JavaObject>! where ObjectType == HashMap<K, V>
 }
+#endif

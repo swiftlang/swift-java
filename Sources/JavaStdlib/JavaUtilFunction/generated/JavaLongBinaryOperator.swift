@@ -2,8 +2,10 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.LongBinaryOperator")
 public struct JavaLongBinaryOperator {
   @JavaMethod
   public func applyAsLong(_ arg0: Int64, _ arg1: Int64) -> Int64
 }
+#endif

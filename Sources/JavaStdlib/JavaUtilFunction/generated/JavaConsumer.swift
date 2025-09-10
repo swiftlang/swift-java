@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaInterface("java.util.function.Consumer")
 public struct JavaConsumer<T: AnyJavaObject> {
   @JavaMethod
@@ -10,3 +11,4 @@ public struct JavaConsumer<T: AnyJavaObject> {
   @JavaMethod
   public func andThen(_ arg0: JavaConsumer<JavaObject>?) -> JavaConsumer<JavaObject>?
 }
+#endif

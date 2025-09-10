@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.util.LinkedList")
 public struct LinkedList<E: AnyJavaObject> {
   @JavaMethod
@@ -175,3 +176,4 @@ public struct LinkedList<E: AnyJavaObject> {
   @JavaMethod
   public func wait() throws
 }
+#endif

@@ -2,6 +2,7 @@
 import SwiftJava
 import CSwiftJavaJNI
 
+#if SwiftJavaMacrosSupport
 @JavaClass("java.io.Reader", implements: Readable.self, Closeable.self)
 open class Reader: JavaObject {
   @JavaMethod
@@ -38,3 +39,4 @@ extension JavaClass<Reader> {
   @JavaStaticMethod
   public func nullReader() -> Reader!
 }
+#endif

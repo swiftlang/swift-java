@@ -14,6 +14,7 @@
 
 import SwiftJava
 
+#if SwiftJavaMacrosSupport
 extension Executable {
   /// Whether this executable throws any checked exception.
   public var throwsCheckedException: Bool {
@@ -29,3 +30,4 @@ extension Executable {
     return false
   }
 }
+#endif
