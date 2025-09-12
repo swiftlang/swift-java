@@ -69,27 +69,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
     outputDirectory: Foundation.URL?,
     to filename: String,
     description: String) throws {
-    guard let outputDir = outputDirectory else {
-      print("// \(filename) - \(description)")
-      print(contents)
-      return
-    }
-
-    // If we haven't tried to create the output directory yet, do so now before
-    // we write any files to it.
-    // if !createdOutputDirectory {
-    try FileManager.default.createDirectory(
-      at: outputDir,
-      withIntermediateDirectories: true
-    )
-    // createdOutputDirectory = true
-    //}
-
-    // Write the file:
-    let file = outputDir.appendingPathComponent(filename)
-    print("[trace][swift-java] Writing \(description) to '\(file.path)'... ", terminator: "")
-    try contents.write(to: file, atomically: true, encoding: .utf8)
-    print("done.".green)
+      try JavaResolver.writeContents(contents, outputDirectory: outputDirectory, to: filename, description: description)
   }
 }
 
