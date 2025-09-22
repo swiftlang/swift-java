@@ -117,9 +117,9 @@ extension SwiftJava.JExtractCommand {
     if self.mode == .jni {
       switch self.unsignedNumbers {
       case .annotate:
-        throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
-      case .wrapGuava:
         () // OK
+      case .wrapGuava:
+        throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
       }
     } else if self.mode == .ffm {
       guard self.memoryManagementMode == .explicit else {
