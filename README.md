@@ -94,7 +94,7 @@ The use of JDK 24 is required to build the project, even though the libraries be
 When using sdkman the easiest way to export JAVA_HOME is to export the "current" used JDK's home, like this:
 
 ```bash
-export JAVA_HOME="$(sdk home java current)
+export JAVA_HOME="$(sdk home java current)"
 ```
 
 ### Testing your changes 
