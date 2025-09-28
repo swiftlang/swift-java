@@ -148,6 +148,8 @@ struct JavaClassTranslator {
       self.swiftSuperclass = nil
     }
 
+    print("[\(fullName)] SWUFT SUPER CLASS = \(swiftSuperclass)")
+
     // Interfaces.
     self.swiftInterfaces = javaClass.getGenericInterfaces().compactMap { (javaType) -> String? in
       guard let javaType else {
@@ -791,6 +793,7 @@ extension JavaClassTranslator {
           return true
         }
       } catch {
+        // FIXME: logging
       }
     }
 

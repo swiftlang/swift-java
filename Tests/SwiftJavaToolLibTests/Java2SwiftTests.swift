@@ -64,7 +64,7 @@ class Java2SwiftTests: XCTestCase {
       JavaClass<JavaObject>.self,
       swiftTypeName: "MyJavaClass",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil),
+        "java.lang.Object": SwiftTypeName(module: nil, name: "JavaObject"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -115,10 +115,10 @@ class Java2SwiftTests: XCTestCase {
       MyArrayList<JavaObject>.self,
       swiftTypeName: "JavaArrayList",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil),
-        "java.lang.reflect.Array": ("JavaArray", nil),
-        "java.util.List": ("JavaList", nil),
-        "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
+        "java.lang.Object": SwiftTypeName(module: nil, name: "JavaObject"),
+        "java.lang.reflect.Array": SwiftTypeName(module: nil, name: "JavaArray"),
+        "java.util.List": SwiftTypeName(module: nil, name: "JavaList"),
+        "java.util.function.IntFunction": SwiftTypeName(module: nil, name: "MyJavaIntFunction"),
       ],
       expectedChunks: [
         """
@@ -138,8 +138,8 @@ class Java2SwiftTests: XCTestCase {
       MyLinkedList<JavaObject>.self,
       swiftTypeName: "JavaLinkedList",
       translatedClasses: [
-        "java.lang.Object": ("JavaObject", nil),
-        "java.util.List": ("JavaList", nil),
+        "java.lang.Object": SwiftTypeName(module: nil, name: "JavaObject"),
+        "java.util.List": SwiftTypeName(module: nil, name: "JavaList"),
       ],
       expectedChunks: [
         """
@@ -155,9 +155,9 @@ class Java2SwiftTests: XCTestCase {
       ProcessBuilder.self,
       swiftTypeName: "ProcessBuilder",
       translatedClasses: [
-        "java.lang.ProcessBuilder": ("ProcessBuilder", nil),
-        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.Redirect", nil),
-        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.Redirect.Type", nil),
+        "java.lang.ProcessBuilder": SwiftTypeName(module: nil, name: "ProcessBuilder"),
+        "java.lang.ProcessBuilder$Redirect": SwiftTypeName(module: nil, name: "ProcessBuilder.Redirect"),
+        "java.lang.ProcessBuilder$Redirect$Type": SwiftTypeName(module: nil, name: "ProcessBuilder.Redirect.Type"),
       ],
       nestedClasses: [
         "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
@@ -195,9 +195,9 @@ class Java2SwiftTests: XCTestCase {
       ProcessBuilder.self,
       swiftTypeName: "ProcessBuilder",
       translatedClasses: [
-        "java.lang.ProcessBuilder": ("ProcessBuilder", nil),
-        "java.lang.ProcessBuilder$Redirect": ("ProcessBuilder.PBRedirect", nil),
-        "java.lang.ProcessBuilder$Redirect$Type": ("ProcessBuilder.PBRedirect.JavaType", nil),
+        "java.lang.ProcessBuilder": SwiftTypeName(module: nil, name: "ProcessBuilder"),
+        "java.lang.ProcessBuilder$Redirect": SwiftTypeName(module: nil, name: "ProcessBuilder.PBRedirect"),
+        "java.lang.ProcessBuilder$Redirect$Type": SwiftTypeName(module: nil, name: "ProcessBuilder.PBRedirect.JavaType"),
       ],
       nestedClasses: [
         "java.lang.ProcessBuilder": [JavaClass<ProcessBuilder.Redirect>().as(JavaClass<JavaObject>.self)!],
@@ -248,9 +248,9 @@ class Java2SwiftTests: XCTestCase {
       MyObjects.self,
       swiftTypeName: "MyJavaObjects",
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.util.function.Supplier" : ("MySupplier", "JavaUtilFunction"),
-        "java.lang.String" : ("JavaString", "SwiftJava"),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.util.function.Supplier" : SwiftTypeName(module: "JavaUtilFunction", name: "MySupplier"),
+        "java.lang.String" : SwiftTypeName(module: "SwiftJava", name: "JavaString"),
       ],
       expectedChunks: [
         """
@@ -305,7 +305,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaString",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -380,9 +380,9 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "URLClassLoader",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.lang.ClassLoader" : ("ClassLoader", "SwiftJava"),
-        "java.net.URL" : ("URL", "JavaNet"),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.ClassLoader" : SwiftTypeName(module: "SwiftJava", name: "ClassLoader"),
+        "java.net.URL" : SwiftTypeName(module: "JavaNet", name: "URL"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -411,8 +411,8 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "URLClassLoader",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.net.URL" : ("URL", "JavaNet"),
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.net.URL": SwiftTypeName(module: "JavaNet", name: "URL"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -440,9 +440,9 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaByte",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.lang.Number" : ("JavaNumber", "SwiftJava"),
-        "java.lang.Byte" : ("JavaByte", "SwiftJava"),
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Number": SwiftTypeName(module: "SwiftJava", name: "JavaNumber"),
+        "java.lang.Byte": SwiftTypeName(module: "SwiftJava", name: "JavaByte"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -464,8 +464,8 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "MyJavaIntFunction",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.util.function.IntFunction": ("MyJavaIntFunction", nil),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.util.function.IntFunction": SwiftTypeName(module: nil, name: "MyJavaIntFunction"),
       ],
       expectedChunks: [
         "import SwiftJava",
@@ -487,11 +487,11 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Method",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.lang.Class" : ("JavaClass", "SwiftJava"),
-        "java.lang.reflect.Executable": ("Executable", "JavaLangReflect"),
-        "java.lang.reflect.Method": ("Method", "JavaLangReflect"),
-        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaLangReflect"),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Class" : SwiftTypeName(module: "SwiftJava", name: "JavaClass"),
+        "java.lang.reflect.Executable": SwiftTypeName(module: "JavaLangReflect", name:  "Executable"),
+        "java.lang.reflect.Method": SwiftTypeName(module: "JavaLangReflect", name:  "Method"),
+        "java.lang.reflect.TypeVariable" : SwiftTypeName(module: "JavaLangReflect", name: "TypeVariable"),
       ],
       expectedChunks: [
         "import JavaLangReflect",
@@ -521,11 +521,11 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "Constructor",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.lang.Class" : ("JavaClass", "SwiftJava"),
-        "java.lang.reflect.Executable": ("Executable", "JavaLangReflect"),
-        "java.lang.reflect.Method": ("Method", "JavaLangReflect"),
-        "java.lang.reflect.TypeVariable" : ("TypeVariable", "JavaLangReflect"),
+        "java.lang.Object" : SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Class" : SwiftTypeName(module: "SwiftJava", name: "JavaClass"),
+        "java.lang.reflect.Executable": SwiftTypeName(module: "JavaLangReflect", name: "Executable"),
+        "java.lang.reflect.Method": SwiftTypeName(module: "JavaLangReflect", name: "Method"),
+        "java.lang.reflect.TypeVariable" : SwiftTypeName(module: "JavaLangReflect", name: "TypeVariable"),
       ],
       expectedChunks: [
         "import JavaLangReflect",
@@ -555,10 +555,10 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "NIOByteBuffer",
       asClass: true,
       translatedClasses: [
-        "java.lang.Object" : ("JavaObject", "SwiftJava"),
-        "java.lang.Class" : ("JavaClass", "SwiftJava"),
-        "java.nio.Buffer": ("NIOBuffer", "JavaNio"),
-        "java.nio.ByteBuffer": ("NIOByteBuffer", "JavaNio"),
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Class": SwiftTypeName(module: "SwiftJava", name: "JavaClass"),
+        "java.nio.Buffer": SwiftTypeName(module: "JavaNio", name: "NIOBuffer"),
+        "java.nio.ByteBuffer": SwiftTypeName(module: "JavaNio", name: "NIOByteBuffer"),
       ],
       expectedChunks: [
         "import JavaNio",
@@ -643,9 +643,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   _ javaType: JavaClassType.Type,
   swiftTypeName: String,
   asClass: Bool = false,
-  translatedClasses: [
-    String: (swiftType: String, swiftModule: String?)
-  ] = [:],
+  translatedClasses: [String: SwiftTypeName] = [:],
   nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
   file: StaticString = #filePath,
@@ -659,7 +657,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   )
 
   translator.translatedClasses = translatedClasses
-  translator.translatedClasses[javaType.fullJavaClassName] = (swiftTypeName, nil)
+  translator.translatedClasses[javaType.fullJavaClassName] = SwiftTypeName(module: nil, name: swiftTypeName)
   translator.nestedClasses = nestedClasses
   translator.startNewFile()
 
