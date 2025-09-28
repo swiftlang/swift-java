@@ -16,11 +16,6 @@ import Foundation
 import SwiftJavaConfigurationShared
 
 extension JavaTranslator {
-//  /// Read a configuration file from the given URL.
-//  package static func readConfiguration(from url: URL) throws -> Configuration {
-//    let contents = try Data(contentsOf: url)
-//    return try JSONDecoder().decode(Configuration.self, from: contents)
-//  }
 
   /// Load the configuration file with the given name to populate the known set of
   /// translated Java classes.
@@ -30,10 +25,8 @@ extension JavaTranslator {
     }
   
     for (javaClassName, swiftName) in classes {
-      translatedClasses[javaClassName] = (
-        swiftType: swiftName,
-        swiftModule: swiftModule
-      )
+      print("SET = \(javaClassName)") // XXX
+      translatedClasses[javaClassName] = SwiftTypeName(module: swiftModule, name: swiftName)
     }
   }
 }

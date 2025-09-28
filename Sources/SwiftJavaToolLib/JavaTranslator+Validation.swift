@@ -12,24 +12,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-package extension JavaTranslator {
-  struct SwiftTypeName: Hashable {
-    let swiftType: String
-    let swiftModule: String?
+public typealias JavaFullyQualifiedTypeName = String
 
-    package init(swiftType: String, swiftModule: String?) {
-      self.swiftType = swiftType
-      self.swiftModule = swiftModule
+package struct SwiftTypeName: Hashable, CustomStringConvertible {
+  package let swiftModule: String?
+  package let swiftType: String
+
+  package init(module: String?, name: String) {
+    self.swiftModule = module
+    self.swiftType = name
+  }
+
+  package var description: String {
+    if let swiftModule {
+      "`\(swiftModule)/\(swiftType)`"
+    } else {
+      "`\(swiftType)`"
     }
   }
+}
+
+package extension JavaTranslator {
 
   struct SwiftToJavaMapping: Equatable {
     let swiftType: SwiftTypeName
-    let javaTypes: [String]
+    let javaTypes: [JavaFullyQualifiedTypeName]
 
-    package init(swiftType: SwiftTypeName, javaTypes: [String]) {
+    package init(swiftType: SwiftTypeName, javaTypes: [JavaFullyQualifiedTypeName]) {
       self.swiftType = swiftType
       self.javaTypes = javaTypes
+      precondition(!javaTypes.contains("com.google.protobuf.AbstractMessage$Builder"), 
+        "\(swiftType) mapped as \(javaTypes)\n\(CommandLine.arguments.joined(separator: " "))") // XXX
     }
   }
 
@@ -48,15 +61,23 @@ package extension JavaTranslator {
 
     private func mappingDescription(mapping: SwiftToJavaMapping) -> String {
       let javaTypes = mapping.javaTypes.map { "'\($0)'" }.joined(separator: ", ")
-      return "Swift Type: '\(mapping.swiftType.swiftModule ?? "")'.'\(mapping.swiftType.swiftType)', Java Types: \(javaTypes)"
+      return "Swift module: '\(mapping.swiftType.swiftModule ?? "")', type: '\(mapping.swiftType.swiftType)', Java Types: \(javaTypes)"
 
     }
   }
   func validateClassConfiguration() throws(ValidationError) {
+    // for a in translatedClasses {
+    //   print("MAPPING = \(a.key) -> \(a.value.swiftModule?.escapedSwiftName ?? "").\(a.value.swiftType.escapedSwiftName)")
+    // }
+
     // Group all classes by swift name
-    let groupedDictionary: [SwiftTypeName: [(String, (String, String?))]] = Dictionary(grouping: translatedClasses, by: { SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule) })
+    let groupedDictionary: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = Dictionary(grouping: translatedClasses, by: { 
+      // SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule) 
+      $0.value
+    })
     // Find all that are mapped to multiple names
-    let multipleClassesMappedToSameName: [SwiftTypeName: [(String, (String, String?))]] = groupedDictionary.filter { (key: SwiftTypeName, value: [(String, (String, String?))]) in
+    let multipleClassesMappedToSameName: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = groupedDictionary.filter { 
+        (key: SwiftTypeName, value: [(JavaFullyQualifiedTypeName, SwiftTypeName)]) in
       value.count > 1
     }
 

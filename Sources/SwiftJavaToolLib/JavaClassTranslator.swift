@@ -791,6 +791,7 @@ extension JavaClassTranslator {
           return true
         }
       } catch {
+        // FIXME: logging
       }
     }
 

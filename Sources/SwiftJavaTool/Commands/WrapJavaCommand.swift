@@ -14,15 +14,18 @@
 
 import Foundation
 import ArgumentParser
+import Logging
 import SwiftJavaToolLib
 import SwiftJava
 import JavaUtilJar
-import SwiftJavaToolLib
 import SwiftJavaConfigurationShared
 
 extension SwiftJava {
 
   struct WrapJavaCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
+
+    static let log: Logging.Logger = .init(label: "swift-java:\(configuration.commandName!)")
+
     static let configuration = CommandConfiguration(
       commandName: "wrap-java",
       abstract: "Wrap Java classes with corresponding Swift bindings.")
@@ -74,7 +77,7 @@ extension SwiftJava.WrapJavaCommand {
     print("[trace][swift-java] INPUT: \(input)")
 
     var classpathEntries = self.configureCommandJVMClasspath(
-        searchDirs: classpathSearchDirs, config: config)
+        searchDirs: classpathSearchDirs, config: config, log: Self.log)
 
     // Load all of the dependent configurations and associate them with Swift modules.
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in
@@ -136,12 +139,21 @@ extension SwiftJava.WrapJavaCommand {
     translator.addConfiguration(config, forSwiftModule: effectiveSwiftModule)
 
     // Load all of the explicitly-requested classes.
-    let classLoader = try JavaClass<ClassLoader>(environment: environment)
+    let classLoader = try! JavaClass<ClassLoader>(environment: environment)
       .getSystemClassLoader()!
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, _) in config.classes ?? [:] {
+
+      if let filterPackage = config.filterJavaPackage {
+        if javaClassName.starts(with: filterPackage) {
+          log.info("SKIP Wrapping java type: \(javaClassName)")
+          continue
+        }
+      }
+      log.info("Wrapping java type: \(javaClassName)")
+
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
-        print("warning: could not find Java class '\(javaClassName)'")
+        log.warning("Could not load Java class '\(javaClassName)', skipping.")
         continue
       }
 
@@ -175,8 +187,9 @@ extension SwiftJava.WrapJavaCommand {
           return nil
         }
 
+
         // If this class has been explicitly mentioned, we're done.
-        if translator.translatedClasses[javaClassName] != nil {
+        guard translator.translatedClasses[javaClassName] == nil else {
           return nil
         }
 
@@ -184,9 +197,8 @@ extension SwiftJava.WrapJavaCommand {
         let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
           .defaultSwiftNameForJavaClass
 
-
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
-        translator.translatedClasses[javaClassName] = (swiftName, nil)
+        translator.translatedClasses[javaClassName] = SwiftTypeName(module: nil, name: swiftName)
         return nestedClass
       }
 

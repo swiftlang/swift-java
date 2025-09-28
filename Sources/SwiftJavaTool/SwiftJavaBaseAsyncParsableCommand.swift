@@ -24,9 +24,13 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
+import Logging
 
 protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
-  var logLevel: Logger.Level { get set }
+
+  var log: Logging.Logger { get }
+
+  var logLevel: JExtractSwiftLib.Logger.Level { get set }
 
   /// Must be implemented with an `@OptionGroup` in Command implementations
   var commonOptions: SwiftJava.CommonOptions { get set }
@@ -45,8 +49,8 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
 extension SwiftJavaBaseAsyncParsableCommand {
   public mutating func run() async {
-    print("[info][swift-java] Run \(Self.self): \(CommandLine.arguments.joined(separator: " "))")
-    print("[info][swift-java] Current work directory: \(URL(fileURLWithPath: ".").path)")
+    self.log.info("Run \(Self.self): \(CommandLine.arguments.joined(separator: " "))")
+    self.log.info("Current work directory: \(URL(fileURLWithPath: ".").path)")
 
     do {
       var config = try readInitialConfiguration(command: self)
@@ -54,12 +58,12 @@ extension SwiftJavaBaseAsyncParsableCommand {
     } catch {
       // We fail like this since throwing out of the run often ends up hiding the failure reason when it is executed as SwiftPM plugin (!)
       let message = "Failed with error: \(error)"
-      print("[error][java-swift] \(message)")
+      self.log.error("\(message)")
       fatalError(message)
     }
 
     // Just for debugging so it is clear which command has finished
-    print("[debug][swift-java] " + "Done: ".green + CommandLine.arguments.joined(separator: " ").green)
+    self.log.debug("\("Done: ".green) \(CommandLine.arguments.joined(separator: " ").green)")
   }
 }
 
@@ -77,7 +81,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
     // If we haven't tried to create the output directory yet, do so now before
     // we write any files to it.
-    // if !createdOutputDirectory {
+    // if !createdOutputDirectory { // FIXME: do we need this
     try FileManager.default.createDirectory(
       at: outputDir,
       withIntermediateDirectories: true
@@ -95,7 +99,11 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
 
 extension SwiftJavaBaseAsyncParsableCommand {
-  var logLevel: Logger.Level {
+  var log: Logging.Logger { // FIXME: replace with stored property inside specific commands
+    .init(label: "swift-java")
+  }
+
+  var logLevel: JExtractSwiftLib.Logger.Level {
     get {
       self.commonOptions.logLevel
     }
@@ -116,8 +124,6 @@ extension SwiftJavaBaseAsyncParsableCommand {
       if outputDirectory == "-" {
         return nil
       }
-//      print("[debug][swift-java] Module base directory based on outputDirectory!")
-//      return URL(fileURLWithPath: outputDirectory)
     }
 
     // Put the result into Sources/\(swiftModule).
