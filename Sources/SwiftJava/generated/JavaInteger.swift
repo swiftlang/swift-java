@@ -3,7 +3,6 @@ import CSwiftJavaJNI
 
 @JavaClass("java.lang.Integer")
 open class JavaInteger: JavaNumber {
-
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
@@ -121,10 +120,10 @@ extension JavaClass<JavaInteger> {
   public func valueOf(_ arg0: String) throws -> JavaInteger!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaInteger!
+  public func valueOf(_ arg0: Int32) -> JavaInteger!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int32) -> JavaInteger!
+  public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaInteger!
 
   @JavaStaticMethod
   public func toHexString(_ arg0: Int32) -> String
@@ -133,10 +132,16 @@ extension JavaClass<JavaInteger> {
   public func decode(_ arg0: String) throws -> JavaInteger!
 
   @JavaStaticMethod
-  public func parseInt(_ arg0: String) throws -> Int32
+  public func parseInt(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int32
 
   @JavaStaticMethod
   public func parseInt(_ arg0: String, _ arg1: Int32) throws -> Int32
+
+  @JavaStaticMethod
+  public func parseInt(_ arg0: String) throws -> Int32
+
+  @JavaStaticMethod
+  public func highestOneBit(_ arg0: Int32) -> Int32
 
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int32) -> Int64
@@ -145,19 +150,19 @@ extension JavaClass<JavaInteger> {
   public func sum(_ arg0: Int32, _ arg1: Int32) -> Int32
 
   @JavaStaticMethod
-  public func toUnsignedString(_ arg0: Int32, _ arg1: Int32) -> String
-
-  @JavaStaticMethod
   public func toUnsignedString(_ arg0: Int32) -> String
 
   @JavaStaticMethod
-  public func parseUnsignedInt(_ arg0: String) throws -> Int32
+  public func toUnsignedString(_ arg0: Int32, _ arg1: Int32) -> String
 
   @JavaStaticMethod
   public func parseUnsignedInt(_ arg0: String, _ arg1: Int32) throws -> Int32
 
   @JavaStaticMethod
-  public func getInteger(_ arg0: String, _ arg1: JavaInteger?) -> JavaInteger!
+  public func parseUnsignedInt(_ arg0: String) throws -> Int32
+
+  @JavaStaticMethod
+  public func parseUnsignedInt(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int32
 
   @JavaStaticMethod
   public func getInteger(_ arg0: String, _ arg1: Int32) -> JavaInteger!
@@ -166,13 +171,13 @@ extension JavaClass<JavaInteger> {
   public func getInteger(_ arg0: String) -> JavaInteger!
 
   @JavaStaticMethod
+  public func getInteger(_ arg0: String, _ arg1: JavaInteger?) -> JavaInteger!
+
+  @JavaStaticMethod
   public func toOctalString(_ arg0: Int32) -> String
 
   @JavaStaticMethod
   public func toBinaryString(_ arg0: Int32) -> String
-
-  @JavaStaticMethod
-  public func highestOneBit(_ arg0: Int32) -> Int32
 
   @JavaStaticMethod
   public func lowestOneBit(_ arg0: Int32) -> Int32

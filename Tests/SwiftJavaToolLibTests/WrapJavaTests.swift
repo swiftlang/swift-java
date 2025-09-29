@@ -213,11 +213,11 @@ func assertWrapJavaOutput(
     }
 
     XCTFail("Expected chunk: \n" +
-    "\(expectedChunk.yellow)" + 
-    "\n" + 
-    "not found in:\n" +
-    "\(swiftCompleteOutputText)",
-     file: file, line: line)
+      "\(expectedChunk.yellow)" + 
+      "\n" + 
+      "not found in:\n" +
+      "\(swiftCompleteOutputText)",
+      file: file, line: line)
   }
 
   print(swiftCompleteOutputText)

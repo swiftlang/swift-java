@@ -19,6 +19,7 @@ import SwiftBasicFormat
 import SwiftSyntax
 import SwiftJavaConfigurationShared
 import SwiftSyntaxBuilder
+import Foundation
 
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
