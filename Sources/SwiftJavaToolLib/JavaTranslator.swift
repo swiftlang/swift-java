@@ -257,7 +257,7 @@ extension JavaTranslator {
       return translated.swiftType
     }
 
-    fatalError("Not translated: \(name); Had:\n\(translatedClasses)")
+    print("DEBUG >>> Not translated: \(name)")
     throw TranslationError.untranslatedJavaClass(name)
   }
 }

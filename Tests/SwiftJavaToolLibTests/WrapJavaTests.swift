@@ -20,18 +20,18 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 
 class WrapJavaTests: XCTestCase {
 
-  let JavaSource: String = 
-  """
-  package com.example;
-
-  class ExampleSimpleClass {}
-  """
-
   func testWrapJavaFromCompiledJavaSource() async throws {
-    let classpathURL = try await compileJava(JavaSource)
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class ExampleSimpleClass {}
+      """)
 
     try assertWrapJavaOutput(
-      javaClassName: "com.example.ExampleSimpleClass",
+      javaClassNames: [
+        "com.example.ExampleSimpleClass"
+      ],
       classpath: [classpathURL],
       expectedChunks: [
         """
@@ -41,6 +41,58 @@ class WrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.ExampleSimpleClass")
         open class ExampleSimpleClass: JavaObject {
+        """
+      ]
+    )
+  }
+
+  /*
+  /Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/CompressingStore.swift:6:30: error: reference to generic type 'AbstractStore' requires arguments in <...>
+ 4 |
+ 5 | @JavaClass("voldemort.store.compress.CompressingStore")
+ 6 | open class CompressingStore: AbstractStore {
+   |                              `- error: reference to generic type 'AbstractStore' requires arguments in <...>
+ 7 |   @JavaMethod
+ 8 |   open override func getCapability(_ arg0: StoreCapabilityType?) -> JavaObject!
+
+/Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/AbstractStore.swift:6:12: note: generic type 'AbstractStore' declared here
+ 4 |
+ 5 | @JavaClass("voldemort.store.AbstractStore", implements: Store<JavaObject, JavaObject, JavaObject>.self)
+ 6 | open class AbstractStore<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject>: JavaObject {
+   |            `- note: generic type 'AbstractStore' declared here
+ 7 |   @JavaMethod
+ 8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
+  */
+  func testGenericSuperclass() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class ByteArray {}
+      // class CompressingStore extends AbstractStore<ByteArray, byte[], byte[]> {}
+      abstract class AbstractStore<K, V, T> implements Store<K, V, T> {}
+      interface Store<K, V, T> {}
+
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ByteArray",
+        "com.example.Store",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+        @JavaClass("com.example.ByteArray")
+        open class ByteArray: JavaObject {
+        """,
+        """
+        @JavaInterface("com.example.Store")
+        public struct Store<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject> {
         """
       ]
     )
@@ -84,11 +136,10 @@ func compileJava(_ sourceText: String) async throws -> URL {
   return classesDirectory
 }
 
-
 /// Translate a Java class and assert that the translated output contains
 /// each of the expected "chunks" of text.
 func assertWrapJavaOutput(
-  javaClassName: String,
+  javaClassNames: [String],
   classpath: [URL],
   expectedChunks: [String],
   function: String = #function,
@@ -109,27 +160,32 @@ func assertWrapJavaOutput(
   let classLoader = try! JavaClass<JavaClassLoader>(environment: environment)
     .getSystemClassLoader()!
 
-  var javaClasses: [JavaClass<JavaObject>] = []
-  guard let javaClass = try classLoader.loadClass(javaClassName) else {
-    fatalError("Could not load Java class '\(javaClassName)' in test \(function) @ \(file):\(line)!")
-  }
-  javaClasses.append(javaClass)
-
-  // FIXME: deduplicate this with SwiftJava.WrapJavaCommand.runCommand !!!
-  // TODO: especially because nested classes
-  // WrapJavaCommand().<TODO>
-
-  let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
-          .defaultSwiftNameForJavaClass
-  translator.translatedClasses[javaClassName] =
-    .init(module: nil, name: swiftUnqualifiedName)
-
-  try translator.validateClassConfiguration()
 
   // FIXME: deduplicate this
   translator.startNewFile()
-  let swiftClassDecls = try translator.translateClass(javaClass)
-  let importDecls = translator.getImportDecls()
+
+  var swiftCompleteOutputText = ""
+
+  var javaClasses: [JavaClass<JavaObject>] = []
+  for javaClassName in javaClassNames {
+    guard let javaClass = try classLoader.loadClass(javaClassName) else {
+      fatalError("Could not load Java class '\(javaClassName)' in test \(function) @ \(file):\(line)!")
+    }
+    javaClasses.append(javaClass)
+
+    // FIXME: deduplicate this with SwiftJava.WrapJavaCommand.runCommand !!!
+    // TODO: especially because nested classes
+    // WrapJavaCommand().<TODO>
+
+    let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
+            .defaultSwiftNameForJavaClass
+    translator.translatedClasses[javaClassName] =
+      .init(module: nil, name: swiftUnqualifiedName)
+
+    try translator.validateClassConfiguration() 
+
+    let swiftClassDecls = try translator.translateClass(javaClass)
+    let importDecls = translator.getImportDecls()
 
   let swiftFileText = 
     """
@@ -138,12 +194,18 @@ func assertWrapJavaOutput(
     \(swiftClassDecls.map { $0.description }.joined(separator: "\n"))
 
     """
+    swiftCompleteOutputText += swiftFileText
+  }
 
   for expectedChunk in expectedChunks {
-    if swiftFileText.contains(expectedChunk) {
+    if swiftCompleteOutputText.contains(expectedChunk) {
       continue
     }
 
-    XCTFail("Expected chunk '\(expectedChunk)' not found in '\(swiftFileText)'", file: file, line: line)
+    XCTFail("Expected chunk '\(expectedChunk)' not found in '\(swiftCompleteOutputText)'",
+     file: file, line: line)
   }
+
+  print("=============================================")
+  print(swiftCompleteOutputText)
 }
