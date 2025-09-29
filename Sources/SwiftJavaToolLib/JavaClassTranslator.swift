@@ -113,6 +113,8 @@ struct JavaClassTranslator {
   /// Prepare translation for the given Java class (or interface).
   init(javaClass: JavaClass<JavaObject>, translator: JavaTranslator) throws {
     let fullName = javaClass.getName()
+    print("TRANSLATE = \(fullName)")
+    
     self.javaClass = javaClass
     self.translator = translator
     self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
