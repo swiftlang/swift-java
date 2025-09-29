@@ -31,6 +31,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func isHidden() -> Bool
 
   @JavaMethod
+  open func getGenericSuperclass() -> JavaType
+  
+  @JavaMethod
   open func getSuperclass() -> JavaClass<JavaObject>!
 
   @JavaMethod
