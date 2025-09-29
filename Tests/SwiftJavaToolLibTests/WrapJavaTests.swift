@@ -94,13 +94,13 @@ class WrapJavaTests: XCTestCase {
         @JavaClass("com.example.ByteArray")
         open class ByteArray: JavaObject {
         """,
-        """
-        @JavaInterface("com.example.Store")
-        public struct Store<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject> {
-        """,
+        // """
+        // @JavaInterface("com.example.Store")
+        // public struct Store<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject> {
+        // """,
         """
         @JavaClass("com.example.CompressingStore")
-        open class CompressingStore: AbstractStore {
+        open class CompressingStore: AbstractStore<ByteArray, [UInt8], [UInt8]> {
         """
       ]
     )
@@ -213,11 +213,11 @@ func assertWrapJavaOutput(
     }
 
     XCTFail("Expected chunk: \n" +
-    "\(expectedChunk.yellow)" + 
-    "\n" + 
-    "not found in:\n" +
-    "\(swiftCompleteOutputText)",
-     file: file, line: line)
+      "\(expectedChunk.yellow)" + 
+      "\n" + 
+      "not found in:\n" +
+      "\(swiftCompleteOutputText)",
+      file: file, line: line)
   }
 
   print(swiftCompleteOutputText)

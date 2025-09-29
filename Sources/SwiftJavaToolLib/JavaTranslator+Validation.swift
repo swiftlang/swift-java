@@ -23,6 +23,14 @@ package struct SwiftTypeName: Hashable, CustomStringConvertible {
     self.swiftType = name
   }
 
+  package var qualifiedName: String {
+    if let swiftModule {
+      "\(swiftModule).\(swiftType)"
+    } else {
+      "\(swiftType)"
+    }
+  }
+
   package var description: String {
     if let swiftModule {
       "`\(swiftModule)/\(swiftType)`"

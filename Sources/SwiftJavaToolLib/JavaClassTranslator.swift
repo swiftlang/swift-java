@@ -47,7 +47,7 @@ struct JavaClassTranslator {
   let effectiveJavaSuperclass: JavaClass<JavaObject>?
 
   /// The Swift name of the superclass.
-  let swiftSuperclass: String?
+  let swiftSuperclass: SwiftJavaParameterizedType?
 
   /// The Swift names of the interfaces that this class implements.
   let swiftInterfaces: [String]
@@ -114,7 +114,7 @@ struct JavaClassTranslator {
   init(javaClass: JavaClass<JavaObject>, translator: JavaTranslator) throws {
     let fullName = javaClass.getName()
     print("TRANSLATE = \(fullName)")
-    
+
     self.javaClass = javaClass
     self.translator = translator
     self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
@@ -128,29 +128,45 @@ struct JavaClassTranslator {
     self.javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
-    // Superclass.
+    // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
-      var swiftSuperclass: String? = nil
+      var javaGenericSuperclass: JavaReflectType? = javaClass.getGenericSuperclass()
+      var swiftSuperclassName: String? = nil
+      var swiftSuperclassTypeArgs: [String] = []
       while let javaSuperclassNonOpt = javaSuperclass {
         do {
-          swiftSuperclass = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
+          swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
+          if let javaGenericSuperclass = javaGenericSuperclass?.as(JavaReflectParameterizedType.self) {
+            print("javaGenericSuperclass = \(javaGenericSuperclass)")
+            for typeArg in javaGenericSuperclass.getActualTypeArguments() {
+              let javaTypeArgName = typeArg?.getTypeName() ?? ""
+              if let swiftTypeArgName = self.translator.translatedClasses[javaTypeArgName] {
+                swiftSuperclassTypeArgs.append(swiftTypeArgName.qualifiedName)
+              } else {
+                swiftSuperclassTypeArgs.append("/* MISSING MAPPING FOR */ \(javaTypeArgName)")
+              }
+            }
+          }
           break
         } catch {
           translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
         }
 
         javaSuperclass = javaSuperclassNonOpt.getSuperclass()
+        javaGenericSuperclass = javaClass.getGenericSuperclass()
       }
 
+      print("swiftSuperclassTypeArgs = \(swiftSuperclassTypeArgs)")
+
       self.effectiveJavaSuperclass = javaSuperclass
-      self.swiftSuperclass = swiftSuperclass
+      self.swiftSuperclass = SwiftJavaParameterizedType(
+        name: swiftSuperclassName, 
+        typeArguments: swiftSuperclassTypeArgs)
     } else {
       self.effectiveJavaSuperclass = nil
       self.swiftSuperclass = nil
     }
-
-    print("[\(fullName)] SWUFT SUPER CLASS = \(swiftSuperclass)")
 
     // Interfaces.
     self.swiftInterfaces = javaClass.getGenericInterfaces().compactMap { (javaType) -> String? in
@@ -333,7 +349,14 @@ extension JavaClassTranslator {
     let inheritanceClause: String
     if translateAsClass {
       extends = ""
-      inheritanceClause = swiftSuperclass.map { ": \($0)" } ?? ""
+      inheritanceClause = 
+        if let swiftSuperclass, swiftSuperclass.typeArguments.isEmpty {
+           ": \(swiftSuperclass.name)" 
+        } else if let swiftSuperclass {
+           ": \(swiftSuperclass.name)<\(swiftSuperclass.typeArguments.joined(separator: ", "))>" 
+        } else { 
+          "" 
+        }
     } else {
       extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
       inheritanceClause = ""
