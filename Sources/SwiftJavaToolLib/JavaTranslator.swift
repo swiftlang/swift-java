@@ -37,7 +37,8 @@ package class JavaTranslator {
   /// A mapping from the name of each known Java class to the corresponding
   /// Swift type name and its Swift module.
   package var translatedClasses: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
-    "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject")
+    "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+    "byte[]": SwiftTypeName(module: nil, name: "[UInt8]")
   ]
 
   /// A mapping from the name of each known Java class with the Swift value type
