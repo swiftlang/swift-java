@@ -19,6 +19,23 @@ The primary purpose of this repository is to create an environment for collabora
 
 This project consists of different modules which have different Swift and Java runtime requirements.
 
+On macOS for example, you can install the JDK with [homebrew](https://brew.sh) using
+
+```bash
+$ brew install openjdk
+# and create a symlink into /Library/Java/JavaVirtualMachines
+$ sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+
+# or if you have a distribution as cask it will be installed into /Library/Java/JavaVirtualMachines
+$ brew install --cask temurin
+```
+
+or you can use a JDK manager like [sdkman](https://sdkman.io/install/) and set your `JAVA_HOME` environment variable
+
+```bash
+$ export JAVA_HOME="$(sdk home java current)"
+```
+
 ## SwiftJava macros
 
 SwiftJava is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
