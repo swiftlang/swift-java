@@ -27,7 +27,7 @@ $ brew install openjdk
 $ sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 
 # or if you have a distribution as cask it will be installed into /Library/Java/JavaVirtualMachines
-$ brew install --cask temurin
+$ brew install --cask corretto
 ```
 
 or you can use a JDK manager like [sdkman](https://sdkman.io/install/) and set your `JAVA_HOME` environment variable
