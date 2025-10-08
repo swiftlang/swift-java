@@ -1,4 +1,4 @@
-name: Release Publisher
+name: 'Publish (Java): RELEASE'
 on:
   push:
     tags:
@@ -13,7 +13,7 @@ jobs:
         swift_version: ['6.1.3']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        java: ['25']
+        jdk_version: [ 24, 17 ]
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     steps:
