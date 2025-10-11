@@ -30,11 +30,11 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
-    let sourceDir = target.directory.string
+    let sourceDir = URL(filePath: target.directory.string)
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
+    let configFile = sourceDir.appending(path: "swift-java.config")
     let config: Configuration?
 
     if let configData = try? Data(contentsOf: configFile) {
@@ -51,13 +51,14 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
       }
 
       let sourceFilePath = sourceFileURL.path
-      guard sourceFilePath.starts(with: sourceDir) else {
+      let sourceDirPath = sourceDir.path
+      guard sourceFilePath.starts(with: sourceDirPath) else {
         fatalError("Could not get relative path for source file \(sourceFilePath)")
       }
 
       return URL(filePath: context.pluginWorkDirectoryURL.path)
         .appending(path: "Java")
-        .appending(path: String(sourceFilePath.dropFirst(sourceDir.count)))
+        .appending(path: String(sourceFilePath.dropFirst(sourceDirPath.count)))
         .deletingPathExtension()
         .appendingPathExtension("class")
     }
