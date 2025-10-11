@@ -66,12 +66,17 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     let javaHome = URL(filePath: findJavaHome())
     let javaClassFileURL = context.pluginWorkDirectoryURL
       .appending(path: "Java")
+  #if os(Windows)
+    let javac = "javac.exe"
+  #else
+    let javac = "javac"
+  #endif
     return [
       .buildCommand(
         displayName: "Compiling \(javaFiles.count) Java files for target \(sourceModule.name) to \(javaClassFileURL)",
         executable: javaHome
           .appending(path: "bin")
-          .appending(path: "javac"),
+          .appending(path: javac),
         arguments: javaFiles.map { $0.path(percentEncoded: false) } + [
           "-d", javaClassFileURL.path(),
           "-parameters", // keep parameter names, which allows us to emit them in generated Swift decls
