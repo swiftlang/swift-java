@@ -77,8 +77,8 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
         executable: javaHome
           .appending(path: "bin")
           .appending(path: javac),
-        arguments: javaFiles.map { $0.path(percentEncoded: false) } + [
-          "-d", javaClassFileURL.path(),
+        arguments: javaFiles.map { $0.path } + [
+          "-d", javaClassFileURL.path,
           "-parameters", // keep parameter names, which allows us to emit them in generated Swift decls
         ] + (config?.compilerVersionArgs ?? []),
         inputFiles: javaFiles,
