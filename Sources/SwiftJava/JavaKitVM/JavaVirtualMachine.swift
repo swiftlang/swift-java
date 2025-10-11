@@ -25,6 +25,14 @@ typealias JNIEnvPointer = UnsafeMutablePointer<JNIEnv?>
 typealias JNIEnvPointer = UnsafeMutableRawPointer
 #endif
 
+extension FileManager {
+#if os(Windows)
+  static let pathSeparator = ";"
+#else
+  static let pathSeparator = ":"
+#endif
+}
+
 public final class JavaVirtualMachine: @unchecked Sendable {
   /// The JNI version that we depend on.
   static let jniVersion = JNI_VERSION_1_6
@@ -81,8 +89,8 @@ public final class JavaVirtualMachine: @unchecked Sendable {
           print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)") // TODO: stderr
         }
       }
-      let colonSeparatedClassPath = classpath.joined(separator: ":")
-      allVMOptions.append("-Djava.class.path=\(colonSeparatedClassPath)")
+      let pathSeparatedClassPath = classpath.joined(separator: FileManager.pathSeparator)
+      allVMOptions.append("-Djava.class.path=\(pathSeparatedClassPath)")
     }
     allVMOptions.append(contentsOf: vmOptions)
 
@@ -237,7 +245,7 @@ extension JavaVirtualMachine {
     ignoreUnrecognized: Bool = false,
     replace: Bool = false
   ) throws -> JavaVirtualMachine {
-    precondition(!classpath.contains(where: { $0.contains(":") }), "Classpath element must not contain `:`! Split the path into elements! Was: \(classpath)")
+    precondition(!classpath.contains(where: { $0.contains(FileManager.pathSeparator) }), "Classpath element must not contain `\(FileManager.pathSeparator)`! Split the path into elements! Was: \(classpath)")
 
     return try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
       // If we already have a JavaVirtualMachine instance, return it.
