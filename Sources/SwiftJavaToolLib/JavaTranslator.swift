@@ -19,6 +19,7 @@ import SwiftBasicFormat
 import SwiftSyntax
 import SwiftJavaConfigurationShared
 import SwiftSyntaxBuilder
+import Foundation
 
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
@@ -35,7 +36,10 @@ package class JavaTranslator {
 
   /// A mapping from the name of each known Java class to the corresponding
   /// Swift type name and its Swift module.
-  package var translatedClasses: [String: (swiftType: String, swiftModule: String?)] = [:]
+  package var translatedClasses: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
+    "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+    "byte[]": SwiftTypeName(module: nil, name: "[UInt8]")
+  ]
 
   /// A mapping from the name of each known Java class with the Swift value type
   /// (and its module) to which it is mapped.
@@ -44,8 +48,8 @@ package class JavaTranslator {
   /// `translatedClasses` should map to a representation of the Java class (i.e.,
   /// an AnyJavaObject-conforming type) whereas the entry here should map to
   /// a value type.
-  package let translatedToValueTypes: [String: (swiftType: String, swiftModule: String) ] = [
-    "java.lang.String": ("String", "SwiftJava"),
+  package let translatedToValueTypes: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
+    "java.lang.String": SwiftTypeName(module: "SwiftJava", name: "String"),
   ]
 
   /// The set of Swift modules that need to be imported to make the generated
@@ -233,7 +237,10 @@ extension JavaTranslator {
     if preferValueTypes, let translatedValueType = translatedToValueTypes[name] {
       // Note that we need to import this Swift module.
       if translatedValueType.swiftModule != swiftModuleName {
-        importedSwiftModules.insert(translatedValueType.swiftModule)
+        guard let module = translatedValueType.swiftModule else { 
+          preconditionFailure("Translated value type must have Swift module, but was nil! Type: \(translatedValueType)")
+        }
+        importedSwiftModules.insert(module)
       }
 
       return translatedValueType.swiftType
@@ -252,6 +259,7 @@ extension JavaTranslator {
       return translated.swiftType
     }
 
+    print("DEBUG >>> Not translated: \(name)")
     throw TranslationError.untranslatedJavaClass(name)
   }
 }

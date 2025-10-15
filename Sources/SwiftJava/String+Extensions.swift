@@ -13,17 +13,15 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import ArgumentParser
-import SwiftJavaToolLib
-import SwiftJava
-import JavaUtilJar
-import SwiftJavaToolLib
-import SwiftJavaConfigurationShared
+// import SwiftJavaToolLib
+// import SwiftJava
+// import JavaUtilJar
+// import SwiftJavaConfigurationShared
 
 extension String {
   /// For a String that's of the form java.util.Vector, return the "Vector"
   /// part.
-  var defaultSwiftNameForJavaClass: String {
+  package var defaultSwiftNameForJavaClass: String {
     if let dotLoc = lastIndex(of: ".") {
       let afterDot = index(after: dotLoc)
       return String(self[afterDot...]).javaClassNameToCanonicalName.adjustedSwiftTypeName
@@ -36,12 +34,12 @@ extension String {
 extension String {
   /// Replace all of the $'s for nested names with "." to turn a Java class
   /// name into a Java canonical class name,
-  var javaClassNameToCanonicalName: String {
+  package var javaClassNameToCanonicalName: String {
     return replacing("$", with: ".")
   }
 
   /// Whether this is the name of an anonymous class.
-  var isLocalJavaClass: Bool {
+  package var isLocalJavaClass: Bool {
     for segment in split(separator: "$") {
       if let firstChar = segment.first, firstChar.isNumber {
         return true
@@ -52,7 +50,7 @@ extension String {
   }
 
   /// Adjust type name for "bad" type names that don't work well in Swift.
-  var adjustedSwiftTypeName: String {
+  package var adjustedSwiftTypeName: String {
     switch self {
     case "Type": return "JavaType"
     default: return self
