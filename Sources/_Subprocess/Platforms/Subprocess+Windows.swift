@@ -1213,8 +1213,7 @@ extension UInt8 {
 extension OutputProtocol {
     internal func output(from data: [UInt8]) throws -> OutputType {
         return try data.withUnsafeBytes {
-            let span = RawSpan(_unsafeBytes: $0)
-            return try self.output(from: span)
+            return try self.output(from: $0)
         }
     }
 }

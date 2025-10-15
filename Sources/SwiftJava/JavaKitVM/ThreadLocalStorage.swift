@@ -56,7 +56,7 @@ package struct ThreadLocalStorage: ~Copyable {
     _key = 0
     pthread_key_create(&_key, onThreadExit)
 #elseif canImport(WinSDK)
-    key = FlsAlloc(onThreadExit)
+    _key = FlsAlloc(onThreadExit)
 #endif
   }
 

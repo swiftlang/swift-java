@@ -30,11 +30,11 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
-    let sourceDir = target.directory.string
+    let sourceDir = URL(filePath: target.directory.string)
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
+    let configFile = sourceDir.appending(path: "swift-java.config")
     let config: Configuration?
 
     if let configData = try? Data(contentsOf: configFile) {
@@ -51,13 +51,14 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
       }
 
       let sourceFilePath = sourceFileURL.path
-      guard sourceFilePath.starts(with: sourceDir) else {
+      let sourceDirPath = sourceDir.path
+      guard sourceFilePath.starts(with: sourceDirPath) else {
         fatalError("Could not get relative path for source file \(sourceFilePath)")
       }
 
       return URL(filePath: context.pluginWorkDirectoryURL.path)
         .appending(path: "Java")
-        .appending(path: String(sourceFilePath.dropFirst(sourceDir.count)))
+        .appending(path: String(sourceFilePath.dropFirst(sourceDirPath.count)))
         .deletingPathExtension()
         .appendingPathExtension("class")
     }
@@ -65,14 +66,19 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     let javaHome = URL(filePath: findJavaHome())
     let javaClassFileURL = context.pluginWorkDirectoryURL
       .appending(path: "Java")
+  #if os(Windows)
+    let javac = "javac.exe"
+  #else
+    let javac = "javac"
+  #endif
     return [
       .buildCommand(
         displayName: "Compiling \(javaFiles.count) Java files for target \(sourceModule.name) to \(javaClassFileURL)",
         executable: javaHome
           .appending(path: "bin")
-          .appending(path: "javac"),
-        arguments: javaFiles.map { $0.path(percentEncoded: false) } + [
-          "-d", javaClassFileURL.path(),
+          .appending(path: javac),
+        arguments: javaFiles.map { $0.path } + [
+          "-d", javaClassFileURL.path,
           "-parameters", // keep parameter names, which allows us to emit them in generated Swift decls
         ] + (config?.compilerVersionArgs ?? []),
         inputFiles: javaFiles,
