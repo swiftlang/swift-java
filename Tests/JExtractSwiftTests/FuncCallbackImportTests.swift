@@ -42,7 +42,7 @@ final class FuncCallbackImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
 
@@ -131,7 +131,7 @@ final class FuncCallbackImportTests {
     config.swiftModule = "__FakeModule"
     let st = Swift2JavaTranslator(config: config)
 
-    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMeMore" }!
 
@@ -247,7 +247,7 @@ final class FuncCallbackImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: Self.class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first { $0.name == "withBuffer" }!
 

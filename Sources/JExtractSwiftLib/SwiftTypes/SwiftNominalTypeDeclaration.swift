@@ -19,17 +19,34 @@ import SwiftSyntax
 public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax
 
 package class SwiftTypeDeclaration {
+
+  // The short path from module root to the file in which this nominal was originally declared.
+  // E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
+  let sourceFilePath: String
+
   /// The module in which this nominal type is defined. If this is a nested type, the
   /// module might be different from that of the parent type, if this nominal type
   /// is defined in an extension within another module.
   let moduleName: String
 
-  /// The name of this nominal type, e.g., 'MyCollection'.
+  /// The name of this nominal type, e.g. 'MyCollection'.
   let name: String
 
-  init(moduleName: String, name: String) {
+  init(sourceFilePath: String, moduleName: String, name: String) {
+    self.sourceFilePath = sourceFilePath
     self.moduleName = moduleName
     self.name = name
+  }
+}
+
+/// A syntax node paired with a simple file path 
+package struct SwiftJavaInputFile {
+  let syntax: SourceFileSyntax
+  /// Simple file path of the file from which the syntax node was parsed.
+  let path: String
+  package init(syntax: SourceFileSyntax, path: String) {
+    self.syntax = syntax
+    self.path = path
   }
 }
 
@@ -66,6 +83,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   /// Create a nominal type declaration from the syntax node for a nominal type
   /// declaration.
   init(
+    sourceFilePath: String,
     moduleName: String,
     parent: SwiftNominalTypeDeclaration?,
     node: NominalTypeDeclSyntaxNode
@@ -82,7 +100,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
-    super.init(moduleName: moduleName, name: node.name.text)
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
   }
 
   lazy var firstInheritanceType: TypeSyntax? = {
@@ -145,11 +163,12 @@ package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
   let syntax: GenericParameterSyntax
 
   init(
+    sourceFilePath: String,
     moduleName: String,
     node: GenericParameterSyntax
   ) {
     self.syntax = node
-    super.init(moduleName: moduleName, name: node.name.text)
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
   }
 }
 

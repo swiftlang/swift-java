@@ -60,16 +60,14 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {
       self.expectedOutputSwiftFiles = Set(translator.inputs.compactMap { (input) -> String? in
-        guard let filePathPart = input.filePath.split(separator: "/\(translator.swiftModuleName)/").last else {
+        guard let filePathPart = input.path.split(separator: "/\(translator.swiftModuleName)/").last else {
           return nil
         }
 
         return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
       })
       self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
-
-      // FIXME: Can we avoid this?
-      self.expectedOutputSwiftFiles.insert("Data+SwiftJava.swift")
+      self.expectedOutputSwiftFiles.insert("Foundation+SwiftJava.swift")
     } else {
       self.expectedOutputSwiftFiles = []
     }
@@ -77,16 +75,12 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   func generate() throws {
     try writeSwiftThunkSources()
-    print("[swift-java] Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
+    log.info("Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
 
     try writeExportedJavaSources()
-    print("[swift-java] Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
+    log.info("Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
 
-    let pendingFileCount = self.expectedOutputSwiftFiles.count
-    if pendingFileCount > 0 {
-      print("[swift-java] Write empty [\(pendingFileCount)] 'expected' files in: \(swiftOutputDirectory)/")
-      try writeSwiftExpectedEmptySources()
-    }
+    try writeSwiftExpectedEmptySources()
   }
 }
 
@@ -134,7 +128,7 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
-        print("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
+        log.info("Generated: \((ty.swiftNominal.name.bold + ".java").bold) (at \(outputFile.absoluteString))")
       }
     }
 
@@ -148,7 +142,7 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename)
       {
-        print("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
+        log.info("Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
       }
     }
   }

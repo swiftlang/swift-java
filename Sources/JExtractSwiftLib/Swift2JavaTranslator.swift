@@ -32,12 +32,7 @@ public final class Swift2JavaTranslator {
 
   // ==== Input
 
-  struct Input {
-    let filePath: String
-    let syntax: SourceFileSyntax
-  }
-
-  var inputs: [Input] = []
+  var inputs: [SwiftJavaInputFile] = []
 
   /// A list of used Swift class names that live in dependencies, e.g. `JavaInteger`
   package var dependenciesClasses: [String] = []
@@ -85,15 +80,12 @@ extension Swift2JavaTranslator {
   package func add(filePath: String, text: String) {
     log.trace("Adding: \(filePath)")
     let sourceFileSyntax = Parser.parse(source: text)
-    self.inputs.append(Input(filePath: filePath, syntax: sourceFileSyntax))
+    self.inputs.append(SwiftJavaInputFile(syntax: sourceFileSyntax, path: filePath))
   }
 
   /// Convenient method for analyzing single file.
-  package func analyze(
-    file: String,
-    text: String
-  ) throws {
-    self.add(filePath: file, text: text)
+  package func analyze(path: String, text: String) throws {
+    self.add(filePath: path, text: text)
     try self.analyze()
   }
 
@@ -104,8 +96,8 @@ extension Swift2JavaTranslator {
     let visitor = Swift2JavaVisitor(translator: self)
 
     for input in self.inputs {
-      log.trace("Analyzing \(input.filePath)")
-      visitor.visit(sourceFile: input.syntax)
+      log.trace("Analyzing \(input.path)")
+      visitor.visit(inputFile: input)
     }
 
     // If any API uses 'Foundation.Data' or 'FoundationEssentials.Data', 
@@ -113,7 +105,7 @@ extension Swift2JavaTranslator {
     if let dataDecl = self.symbolTable[.foundationData] ?? self.symbolTable[.essentialsData] {
       let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
       if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
-        visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil)
+        visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift")
       }
     }
   }
@@ -123,7 +115,7 @@ extension Swift2JavaTranslator {
 
     let symbolTable = SwiftSymbolTable.setup(
       moduleName: self.swiftModuleName,
-      inputs.map({ $0.syntax }) + [dependenciesSource],
+      inputs + [dependenciesSource],
       log: self.log
     )
     self.lookupContext = SwiftTypeLookupContext(symbolTable: symbolTable)
@@ -184,13 +176,14 @@ extension Swift2JavaTranslator {
   }
 
   /// Returns a source file that contains all the available dependency classes.
-  private func buildDependencyClassesSourceFile() -> SourceFileSyntax {
+  private func buildDependencyClassesSourceFile() -> SwiftJavaInputFile {
     let contents = self.dependenciesClasses.map {
       "public class \($0) {}"
     }
     .joined(separator: "\n")
 
-    return SourceFileSyntax(stringLiteral: contents)
+    let syntax = SourceFileSyntax(stringLiteral: contents)
+    return SwiftJavaInputFile(syntax: syntax, path: "FakeDependencyClassesSourceFile.swift")
   }
 }
 
