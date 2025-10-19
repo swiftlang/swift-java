@@ -411,7 +411,7 @@ extension FFMSwift2JavaGenerator {
               conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
-          case .data:
+          case .data, .essentialsData:
             break
 
           default:
@@ -515,7 +515,7 @@ extension FFMSwift2JavaGenerator {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
           switch knownType {
-          case .data, .dataProtocol:
+          case .data, .dataProtocol, .essentialsData, .essentialsDataProtocol:
             break
           default:
             throw JavaTranslationError.unhandledType(.optional(swiftType))
@@ -658,7 +658,7 @@ extension FFMSwift2JavaGenerator {
               )
             )
 
-          case .data:
+          case .data, .essentialsData:
             break
 
           case .unsafePointer, .unsafeMutablePointer:

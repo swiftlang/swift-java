@@ -37,6 +37,8 @@ struct SwiftKnownTypes {
 
   var dataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.dataProtocol])) }
   var data: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.data])) }
+  var essentialsDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsDataProtocol])) }
+  var essentialsData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsData])) }
 
   func unsafePointer(_ pointeeType: SwiftType) -> SwiftType {
     .nominal(
@@ -79,6 +81,7 @@ struct SwiftKnownTypes {
   func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftType? {
     switch knownProtocol {
     case .dataProtocol: return self.data
+    case .essentialsDataProtocol: return self.essentialsData
     default: return nil
     }
   }

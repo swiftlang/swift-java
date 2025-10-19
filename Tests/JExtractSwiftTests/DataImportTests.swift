@@ -31,6 +31,21 @@ final class DataImportTests {
     public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
 
+    let essentials_data_interfaceFile =
+    """
+    import FoundationEssentials
+    
+    public func receiveData(dat: Data)
+    public func returnData() -> Data
+    """
+
+  let essentials_dataProtocol_interfaceFile =
+    """
+    import FoundationEssentials
+    
+    public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
+    """
+
 
   @Test("Import Data: Swift thunks")
   func data_swiftThunk() throws {
@@ -40,6 +55,57 @@ final class DataImportTests {
       expectedChunks: [
         """
         import Foundation
+        """,
+        """
+        @_cdecl("swiftjava_SwiftModule_receiveData_dat")
+        public func swiftjava_SwiftModule_receiveData_dat(_ dat: UnsafeRawPointer) {
+          receiveData(dat: dat.assumingMemoryBound(to: Data.self).pointee)
+        }
+        """,
+        """
+        @_cdecl("swiftjava_SwiftModule_returnData")
+        public func swiftjava_SwiftModule_returnData(_ _result: UnsafeMutableRawPointer) {
+          _result.assumingMemoryBound(to: Data.self).initialize(to: returnData())
+        }
+        """,
+
+        """
+        @_cdecl("swiftjava_getType_SwiftModule_Data")
+        public func swiftjava_getType_SwiftModule_Data() -> UnsafeMutableRawPointer /* Any.Type */ {
+          return unsafeBitCast(Data.self, to: UnsafeMutableRawPointer.self)
+        }
+        """,
+
+        """
+        @_cdecl("swiftjava_SwiftModule_Data_init_bytes_count")
+        public func swiftjava_SwiftModule_Data_init_bytes_count(_ bytes: UnsafeRawPointer, _ count: Int, _ _result: UnsafeMutableRawPointer) {
+          _result.assumingMemoryBound(to: Data.self).initialize(to: Data(bytes: bytes, count: count))
+        }
+        """,
+
+        """
+        @_cdecl("swiftjava_SwiftModule_Data_count$get")
+        public func swiftjava_SwiftModule_Data_count$get(_ self: UnsafeRawPointer) -> Int {
+          return self.assumingMemoryBound(to: Data.self).pointee.count
+        }
+        """,
+
+        """
+        @_cdecl("swiftjava_SwiftModule_Data_withUnsafeBytes__")
+        public func swiftjava_SwiftModule_Data_withUnsafeBytes__(_ body: @convention(c) (UnsafeRawPointer?, Int) -> Void, _ self: UnsafeRawPointer) {
+          self.assumingMemoryBound(to: Data.self).pointee.withUnsafeBytes({ (_0) in
+            return body(_0.baseAddress, _0.count)
+          })
+        }
+        """,
+      ]
+    )
+
+    try assertOutput(
+      input: essentials_data_interfaceFile, .ffm, .swift,
+      expectedChunks: [
+        """
+        import FoundationEssentials
         """,
         """
         @_cdecl("swiftjava_SwiftModule_receiveData_dat")
@@ -340,6 +406,26 @@ final class DataImportTests {
       expectedChunks: [
         """
         import Foundation
+        """,
+        """
+        @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat_dat2")
+        public func swiftjava_SwiftModule_receiveDataProtocol_dat_dat2(_ dat: UnsafeRawPointer, _ dat2: UnsafeRawPointer?) {
+          receiveDataProtocol(dat: dat.assumingMemoryBound(to: Data.self).pointee, dat2: dat2?.assumingMemoryBound(to: Data.self).pointee)
+        }
+        """,
+
+        // Just to make sure 'Data' is imported.
+        """
+        @_cdecl("swiftjava_getType_SwiftModule_Data")
+        """
+      ]
+    )
+
+    try assertOutput(
+      input: essentials_dataProtocol_interfaceFile, .ffm, .swift,
+      expectedChunks: [
+        """
+        import FoundationEssentials
         """,
         """
         @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat_dat2")

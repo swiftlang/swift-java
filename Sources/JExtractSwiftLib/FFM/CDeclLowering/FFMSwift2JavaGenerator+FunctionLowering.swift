@@ -282,7 +282,7 @@ struct CdeclLowering {
             )
           }
 
-        case .data:
+        case .data, .essentialsData:
           break
 
         default:
@@ -375,7 +375,7 @@ struct CdeclLowering {
     case .nominal(let nominal):
       if let knownType = nominal.nominalTypeDecl.knownTypeKind {
         switch knownType {
-        case .data:
+        case .data, .essentialsData:
           break
         case .unsafeRawPointer, .unsafeMutableRawPointer:
           throw LoweringError.unhandledType(.optional(wrappedType))
@@ -387,7 +387,7 @@ struct CdeclLowering {
           throw LoweringError.unhandledType(.optional(wrappedType))
         case .void, .string:
           throw LoweringError.unhandledType(.optional(wrappedType))
-        case .dataProtocol:
+        case .dataProtocol, .essentialsDataProtocol:
           throw LoweringError.unhandledType(.optional(wrappedType))
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
@@ -505,7 +505,7 @@ struct CdeclLowering {
             ])
           )
 
-        case .data:
+        case .data, .essentialsData:
           break
 
         default:
@@ -606,7 +606,7 @@ struct CdeclLowering {
         case .void:
           return LoweredResult(cdeclResultType: .void, cdeclOutParameters: [], conversion: .placeholder)
 
-        case .data:
+        case .data, .essentialsData:
           break
 
         case .string, .optional:
