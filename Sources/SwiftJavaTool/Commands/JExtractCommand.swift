@@ -86,6 +86,7 @@ extension SwiftJava.JExtractCommand {
     if let javaPackage {
       config.javaPackage = javaPackage
     }
+    config.mode = mode
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
