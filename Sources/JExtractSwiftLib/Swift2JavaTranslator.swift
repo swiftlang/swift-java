@@ -108,10 +108,10 @@ extension Swift2JavaTranslator {
       visitor.visit(sourceFile: input.syntax)
     }
 
-    // If any API uses 'Foundation.Data', import 'Data' as if it's declared in
-    // this module.
-    if let dataDecl = self.symbolTable[.data] {
-      let dataProtocolDecl = self.symbolTable[.dataProtocol]!
+    // If any API uses 'Foundation.Data' or 'FoundationEssentials.Data', 
+    // import 'Data' as if it's declared in this module.
+    if let dataDecl = self.symbolTable[.data] ?? self.symbolTable[.essentialsData] {
+      let dataProtocolDecl = (self.symbolTable[.dataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
       if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
         visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil)
       }

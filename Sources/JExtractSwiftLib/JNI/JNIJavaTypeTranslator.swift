@@ -50,7 +50,7 @@ enum JNIJavaTypeTranslator {
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
-        .optional, .data, .dataProtocol:
+        .optional, .data, .dataProtocol, .essentialsData, .essentialsDataProtocol:
       return nil
     }
   }

@@ -18,6 +18,7 @@ import SwiftSyntaxBuilder
 enum SwiftKnownModule: String {
   case swift = "Swift"
   case foundation = "Foundation"
+  case foundationEssentials = "FoundationEssentials"
 
   var name: String {
     return self.rawValue
@@ -27,13 +28,15 @@ enum SwiftKnownModule: String {
     return switch self {
     case .swift: swiftSymbolTable
     case .foundation: foundationSymbolTable
+    case .foundationEssentials: foundationEssentialsSymbolTable
     }
   }
 
   var sourceFile: SourceFileSyntax {
     return switch self {
     case .swift: swiftSourceFile
-    case .foundation: foundationSourceFile
+    case .foundation: foundationEssentialsSourceFile
+    case .foundationEssentials: foundationEssentialsSourceFile
     }
   }
 }
@@ -41,6 +44,12 @@ enum SwiftKnownModule: String {
 private var swiftSymbolTable: SwiftModuleSymbolTable {
   var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "Swift", importedModules: [:])
   builder.handle(sourceFile: swiftSourceFile)
+  return builder.finalize()
+}
+
+private var foundationEssentialsSymbolTable: SwiftModuleSymbolTable {
+  var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "FoundationEssentials", importedModules: ["Swift": swiftSymbolTable])
+  builder.handle(sourceFile: foundationEssentialsSourceFile)
   return builder.finalize()
 }
 
@@ -87,7 +96,7 @@ private let swiftSourceFile: SourceFileSyntax = """
   }
   """
 
-private let foundationSourceFile: SourceFileSyntax = """
+private let foundationEssentialsSourceFile: SourceFileSyntax = """
   public protocol DataProtocol {}
   
   public struct Data: DataProtocol {
@@ -96,3 +105,9 @@ private let foundationSourceFile: SourceFileSyntax = """
     public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
   }
   """
+
+private var foundationSourceFile: SourceFileSyntax {
+  // On platforms other than Darwin, imports such as FoundationEssentials, FoundationNetworking, etc. are used, 
+  // so this file should be created by combining the files of the aforementioned modules.
+  foundationEssentialsSourceFile
+}
