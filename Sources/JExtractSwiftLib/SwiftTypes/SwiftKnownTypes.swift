@@ -35,8 +35,8 @@ struct SwiftKnownTypes {
   var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawPointer])) }
   var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeMutableRawPointer])) }
 
-  var dataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.dataProtocol])) }
-  var data: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.data])) }
+  var foundationDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationDataProtocol])) }
+  var foundationData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationData])) }
   var essentialsDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsDataProtocol])) }
   var essentialsData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsData])) }
 
@@ -80,7 +80,7 @@ struct SwiftKnownTypes {
   /// given protocol kind. E.g. `String` for `StringProtocol`
   func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftType? {
     switch knownProtocol {
-    case .dataProtocol: return self.data
+    case .foundationDataProtocol: return self.foundationData
     case .essentialsDataProtocol: return self.essentialsData
     default: return nil
     }

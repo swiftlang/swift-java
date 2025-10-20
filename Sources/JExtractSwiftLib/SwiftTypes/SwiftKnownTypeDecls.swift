@@ -15,7 +15,7 @@
 import SwiftSyntax
 
 enum SwiftKnownTypeDeclKind: String, Hashable {
-  // MARK: -Std
+  // Swift
   case bool = "Swift.Bool"
   case int = "Swift.Int"
   case uint = "Swift.UInt"
@@ -41,10 +41,10 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case void = "Swift.Void"
   case string = "Swift.String"
 
-  // MARK: -Foundation
-  case dataProtocol = "Foundation.DataProtocol"
+  // Foundation
+  case foundationDataProtocol = "Foundation.DataProtocol"
   case essentialsDataProtocol = "FoundationEssentials.DataProtocol"
-  case data = "Foundation.Data"
+  case foundationData = "Foundation.Data"
   case essentialsData = "FoundationEssentials.Data"
 
   var moduleAndName: (module: String, name: String) {

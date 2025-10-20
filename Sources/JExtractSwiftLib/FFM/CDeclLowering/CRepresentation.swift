@@ -126,8 +126,8 @@ extension SwiftKnownTypeDeclKind {
     )
     case .void: .void
     case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, 
-    .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .data, .dataProtocol, .essentialsData, 
-    .essentialsDataProtocol, .optional:
+      .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol, 
+      .essentialsData, .essentialsDataProtocol, .optional:
        nil
     }
   }
