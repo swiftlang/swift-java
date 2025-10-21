@@ -13,6 +13,7 @@ runs:
         distribution: ${{ matrix.jdk_vendor }}
         java-version: |
           24
+          21
           17
         cache: 'gradle'
     - name: Set JAVA_HOME_{N}
