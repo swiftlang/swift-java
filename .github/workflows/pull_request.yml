@@ -130,7 +130,7 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install jemalloc
-        run: apt-get update && apt-get install -y jemalloc
+        run: apt-get install -y libjemalloc-dev
       - name: Swift Benchmarks
         run: swift package --package-path Benchmarks/ benchmark
 
