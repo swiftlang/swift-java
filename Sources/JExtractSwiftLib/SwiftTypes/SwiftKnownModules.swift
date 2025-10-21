@@ -48,13 +48,20 @@ private var swiftSymbolTable: SwiftModuleSymbolTable {
 }
 
 private var foundationEssentialsSymbolTable: SwiftModuleSymbolTable {
-  var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "FoundationEssentials", importedModules: ["Swift": swiftSymbolTable])
+  var builder = SwiftParsedModuleSymbolTableBuilder(
+    moduleName: "FoundationEssentials", 
+    requiredAvailablityOfModuleWithName: "FoundationEssentials",
+    alternativeModules: .init(isMainSourceOfSymbols: false, moduleNames: ["Foundation"]),
+    importedModules: ["Swift": swiftSymbolTable])
   builder.handle(sourceFile: foundationEssentialsSourceFile)
   return builder.finalize()
 }
 
 private var foundationSymbolTable: SwiftModuleSymbolTable {
-  var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "Foundation", importedModules: ["Swift": swiftSymbolTable])
+  var builder = SwiftParsedModuleSymbolTableBuilder(
+    moduleName: "Foundation", 
+    alternativeModules: .init(isMainSourceOfSymbols: true, moduleNames: ["FoundationEssentials"]),
+    importedModules: ["Swift": swiftSymbolTable])
   builder.handle(sourceFile: foundationSourceFile)
   return builder.finalize()
 }
