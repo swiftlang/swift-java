@@ -245,7 +245,8 @@ let package = Package(
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"], .when(platforms: [.macOS, .linux, .windows]))
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"], .when(platforms: [.macOS, .linux, .windows])),
+        .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)), // Workaround for https://github.com/swiftlang/swift/issues/84899
       ],
       linkerSettings: [
         .unsafeFlags(
