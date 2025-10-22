@@ -26,6 +26,10 @@ struct ImportedSwiftModule: Hashable {
     self.isMainSourceOfSymbols = isMainSourceOfSymbols
   }
 
+  static func ==(lhs: Self, rhs: Self) -> Bool {
+    lhs.name == rhs.name
+  }
+
   func hash(into hasher: inout Hasher) {
     hasher.combine(name)
   }
