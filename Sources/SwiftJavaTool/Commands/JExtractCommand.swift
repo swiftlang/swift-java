@@ -40,7 +40,7 @@ extension SwiftJava {
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
 
     @Option(help: "The mode of generation to use for the output files. Used with jextract mode.")
-    var mode: JExtractGenerationMode = .ffm
+    var mode: JExtractGenerationMode?
 
     @Option(help: "The name of the Swift module into which the resulting Swift types will be generated.")
     var swiftModule: String
@@ -85,6 +85,11 @@ extension SwiftJava.JExtractCommand {
   func runSwiftJavaCommand(config: inout Configuration) async throws {
     if let javaPackage {
       config.javaPackage = javaPackage
+    }
+    if let mode {
+      config.mode = mode
+    } else if config.mode == nil {
+      config.mode = .ffm
     }
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
