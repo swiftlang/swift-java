@@ -128,7 +128,7 @@ extension FFMSwift2JavaGenerator {
     let mainSymbolSourceModules = Set(
       self.lookupContext.symbolTable.importedModules.values.filter { $0.alternativeModules?.isMainSourceOfSymbols ?? false }.map(\.moduleName)
     )
-
+    
     for module in self.lookupContext.symbolTable.importedModules.keys.sorted() {
       guard module != "Swift" else {
         continue
@@ -167,9 +167,13 @@ extension FFMSwift2JavaGenerator {
         }
       }
 
-      printer.print("#else")
-      printer.print("import \(module)")
-      printer.print("#endif")
+      if (importGroups.keys.isEmpty) {
+        printer.print("import \(module)")
+      } else {
+        printer.print("#else")
+        printer.print("import \(module)")
+        printer.print("#endif")
+      }
     }
     printer.println()
   }
