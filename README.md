@@ -82,9 +82,9 @@ This does require the use of the relatively recent [JEP-454: Foreign Function & 
 This is the primary way we envision calling Swift code from server-side Java libraries and applications.
 
 Required language/runtime versions:
-- **Swift 6.1**, because of dependence on rich swift interface files  
-- **JDK 24+** 
-  - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-24.
+- **Swift 6.1**, because of dependence on rich swift interface files
+- **JDK 25+**
+  - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-25.
 
 ## swift-java jextract --mode=jni
 
@@ -104,7 +104,7 @@ This project contains multiple builds, living side by side together.
 
 You will need to have:
 - Swift (6.1.x+)
-- Java (24+ for FFM, even though we support lower JDK targets)
+- Java (25+ for FFM, even though we support lower JDK targets)
 - Gradle (installed by "Gradle wrapper" automatically when you run gradle through `./gradlew`)
 
 ### Preparing your environment
@@ -123,12 +123,12 @@ however any recent enough Java distribution should work correctly. You can use s
 # Install sdkman from: https://sdkman.io
 curl -s "https://get.sdkman.io" | bash
 sdk install java 17.0.15-amzn
-sdk install java 24.0.1-amzn
+sdk install java 25.0.1-amzn
 
-sdk use java 24.0.1-amzn
+sdk use java 25.0.1-amzn
 ```
 
-The use of JDK 24 is required to build the project, even though the libraries being published may target lower Java versions.
+The use of JDK 25 is required to build the project, even though the libraries being published may target lower Java versions.
 
 ❗️ Please make sure to `export JAVA_HOME` such that swift-java can find the necessary java libraries!
 When using sdkman the easiest way to export JAVA_HOME is to export the "current" used JDK's home, like this:

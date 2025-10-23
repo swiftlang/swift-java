@@ -10,19 +10,19 @@ SWIFT_VERSION="$(swift -version | awk '/Swift version/ { print $3 }')"
 # This is how env variables are set by setup-java
 if [ "$(uname -m)" = 'arm64' ]; then
   ARCH=ARM64
-  JAVAC="${JAVA_HOME_24_ARM64}/bin/javac"
-  JAVA="${JAVA_HOME_24_ARM64}/bin/java"
+  JAVAC="${JAVA_HOME_25_ARM64}/bin/javac"
+  JAVA="${JAVA_HOME_25_ARM64}/bin/java"
 else
   ARCH=X64
-  JAVAC="${JAVA_HOME_24_X64}/bin/javac"
-  JAVA="${JAVA_HOME_24_X64}/bin/java"
+  JAVAC="${JAVA_HOME_25_X64}/bin/javac"
+  JAVA="${JAVA_HOME_25_X64}/bin/java"
 fi
 
-if [ -n "$JAVA_HOME_24_$ARCH" ]; then
-   export JAVA_HOME="$JAVA_HOME_24_$ARCH"
+if [ -n "$JAVA_HOME_25_$ARCH" ]; then
+   export JAVA_HOME="$JAVA_HOME_25_$ARCH"
 elif [ "$(uname -s)" = 'Linux' ]
 then
-  export PATH="${PATH}:/usr/lib/jvm/jdk-24/bin" # we need to make sure to use the latest JDK to actually compile/run the executable
+  export PATH="${PATH}:/usr/lib/jvm/jdk-25/bin" # we need to make sure to use the latest JDK to actually compile/run the executable
 fi
 
 # check if we can compile a plain Example file that uses the generated Java bindings that should be in the generated jar
