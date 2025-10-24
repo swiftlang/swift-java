@@ -14,7 +14,7 @@
 ##===----------------------------------------------------------------------===##
 set -euo pipefail
 
-# We need JDK 24 because that's the supported version with latest FFM
+# We need JDK 25 because that's the supported version with latest FFM
 # However, we also need JDK 23 at most because Gradle does not support 24.
 
 # Supported JDKs: corretto
@@ -36,9 +36,9 @@ download_and_install_jdk() {
     if [ "$JDK_VENDOR" = 'corretto' ]; then
         if [ "$(uname -m)" = 'aarch64' ]; then
             case "$jdk_version" in
-                "24")
-                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-aarch64-linux-jdk.tar.gz"
-                    expected_md5="3b543f4e971350b73d0ab6d8174cc030"
+                "25")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-25-aarch64-linux-jdk.tar.gz"
+                    expected_md5="37588d5d2a24b26525b9c563ad65cc77"
                     ;;
                 *)
                     echo "Unsupported JDK version: '$jdk_version'"
@@ -47,9 +47,9 @@ download_and_install_jdk() {
             esac
         else
             case "$jdk_version" in
-                "24")
-                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-24-x64-linux-jdk.tar.gz"
-                    expected_md5="130885ded3cbfc712fbe9f7dace45a52"
+                "25")
+                    jdk_url="https://corretto.aws/downloads/latest/amazon-corretto-25-x64-linux-jdk.tar.gz"
+                    expected_md5="7e56b1a9d71637ce4dc4047b23d0453e"
                     ;;
                 *)
                     echo "Unsupported JDK version: '$jdk_version'"
@@ -94,12 +94,12 @@ download_and_install_jdk() {
     cd "$HOME"
 }
 
-# Usage: Install JDK 24
-download_and_install_jdk "24"
+# Usage: Install JDK 25
+download_and_install_jdk "25"
 
 ls -la /usr/lib/jvm/
 cd /usr/lib/jvm/
-ln -s jdk-24 default-jdk
+ln -s jdk-25 default-jdk
 find . | grep java | grep bin
 echo "JAVA_HOME = /usr/lib/jvm/default-jdk"
 /usr/lib/jvm/default-jdk/bin/java -version

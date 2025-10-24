@@ -12,7 +12,7 @@ runs:
       with:
         distribution: ${{ matrix.jdk_vendor }}
         java-version: |
-          24
+          25
           17
         cache: 'gradle'
     - name: Set JAVA_HOME_{N}
@@ -23,10 +23,10 @@ runs:
         elif [[ -n "$JAVA_HOME_21_ARM64" ]]; then
           echo "JAVA_HOME_21=$JAVA_HOME_21_ARM64" >> $GITHUB_ENV
         fi
-        if [[ -n "$JAVA_HOME_24_X64" ]]; then
-          echo "JAVA_HOME_24=$JAVA_HOME_24_X64" >> $GITHUB_ENV
-        elif [[ -n "$JAVA_HOME_24_ARM64" ]]; then
-          echo "JAVA_HOME_24=$JAVA_HOME_24_ARM64" >> $GITHUB_ENV
+        if [[ -n "$JAVA_HOME_25_X64" ]]; then
+          echo "JAVA_HOME_25=$JAVA_HOME_25_X64" >> $GITHUB_ENV
+        elif [[ -n "$JAVA_HOME_25_ARM64" ]]; then
+          echo "JAVA_HOME_25=$JAVA_HOME_25_ARM64" >> $GITHUB_ENV
         fi
       # - name: Check Java environment
       #  shell: bash
