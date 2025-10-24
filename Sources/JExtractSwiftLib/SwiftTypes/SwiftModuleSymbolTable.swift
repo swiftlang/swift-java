@@ -19,6 +19,12 @@ struct SwiftModuleSymbolTable: SwiftSymbolTableProtocol {
   /// The name of this module.
   let moduleName: String
 
+  /// The name of module required to be imported and checked via canImport statement.
+  let requiredAvailablityOfModuleWithName: String?
+
+  /// Data about alternative modules which provides desired symbos e.g. FoundationEssentials is non-Darwin platform alternative for Foundation
+  let alternativeModules: AlternativeModuleNamesData?
+
   /// The top-level nominal types, found by name.
   var topLevelTypes: [String: SwiftNominalTypeDeclaration] = [:]
 
@@ -35,5 +41,19 @@ struct SwiftModuleSymbolTable: SwiftSymbolTableProtocol {
   // Look for a nested type with the given name.
   func lookupNestedType(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftNominalTypeDeclaration? {
     nestedTypes[parent]?[name]
+  }
+
+  func isAlternative(for moduleName: String) -> Bool {
+    alternativeModules.flatMap { $0.moduleNames.contains(moduleName) } ?? false
+  }
+}
+
+extension SwiftModuleSymbolTable {
+  struct AlternativeModuleNamesData {
+    /// Flag indicating module should be used as source of symbols to avoid duplication of symbols.
+    let isMainSourceOfSymbols: Bool
+
+    /// Names of modules which are alternative for currently checked module.
+    let moduleNames: Set<String>
   }
 }

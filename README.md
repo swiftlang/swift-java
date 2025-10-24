@@ -7,11 +7,9 @@ This repository contains two approaches to Swift/Java interoperability.
 
 ## :construction: Early Development :construction: 
 
-**:construction: This is a *very early* prototype and everything is subject to change. :construction:** 
+**:construction: This project is in early development, please keep this in mind as you try out the project and do provide feedback about any issues you encounter. :construction:** 
 
-Parts of this project are incomplete, not fleshed out, and subject to change without any notice.
-
-The primary purpose of this repository is to create an environment for collaboration and joint exploration of the Swift/Java interoperability story. The project will transition to a more structured approach once key goals have been outlined.
+There is no guarantee about API stability of this package, neither in the Java or Swift parts, until the project releases a stable 1.0 release; APIs may change without prior notice.
 
 ### :construction: Self-publish support Java libraries (SwiftKit)
 
@@ -66,7 +64,7 @@ SwiftJava is a Swift library offering macros which simplify writing JNI code "by
 It is possible to generate Swift bindings to Java libraries using SwiftJava by using the `swift-java wrap-java` command.
 
 Required language/runtime versions:
-- **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integration
+- **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integratio
 - **Swift 6.0.x**, because the library uses modern Swift macros
 
 **swift-java jextract** 

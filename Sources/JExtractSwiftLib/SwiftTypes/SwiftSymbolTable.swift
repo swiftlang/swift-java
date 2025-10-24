@@ -42,6 +42,9 @@ package class SwiftSymbolTable {
   let parsedModule:SwiftModuleSymbolTable
 
   private var knownTypeToNominal: [SwiftKnownTypeDeclKind: SwiftNominalTypeDeclaration] = [:]
+  private var prioritySortedImportedModules: [SwiftModuleSymbolTable] {
+    importedModules.values.sorted(by: { ($0.alternativeModules?.isMainSourceOfSymbols ?? false) && $0.moduleName < $1.moduleName })
+  }
 
   init(parsedModule: SwiftModuleSymbolTable, importedModules: [String: SwiftModuleSymbolTable]) {
     self.parsedModule = parsedModule
@@ -58,18 +61,22 @@ extension SwiftSymbolTable {
 
     // Prepare imported modules.
     // FIXME: Support arbitrary dependencies.
-    var moduleNames: Set<String> = []
+    var modules: Set<ImportedSwiftModule> = []
     for sourceFile in sourceFiles {
-      moduleNames.formUnion(importingModuleNames(sourceFile: sourceFile))
+      modules.formUnion(importingModules(sourceFile: sourceFile))
     }
     var importedModules: [String: SwiftModuleSymbolTable] = [:]
     importedModules[SwiftKnownModule.swift.name] = SwiftKnownModule.swift.symbolTable
-    for moduleName in moduleNames.sorted() {
+    for module in modules {
+      // We don't need duplicates of symbols, first known definition is enough to parse module
+      // e.g Data from FoundationEssentials and Foundation collide and lead to different results due to random order of keys in Swift's Dictionary
+      // guard module.isMainSourceOfSymbols || !importedModules.contains(where: { $0.value.isAlternative(for: String)}) else { continue }
+
       if
-        importedModules[moduleName] == nil,
-        let knownModule = SwiftKnownModule(rawValue: moduleName)
+        importedModules[module.name] == nil,
+        let knownModule = SwiftKnownModule(rawValue: module.name)
       {
-        importedModules[moduleName] = knownModule.symbolTable
+        importedModules[module.name] = knownModule.symbolTable
       }
     }
 
@@ -95,7 +102,7 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
       return parsedResult
     }
 
-    for importedModule in importedModules.values {
+    for importedModule in prioritySortedImportedModules {
       if let result = importedModule.lookupTopLevelNominalType(name) {
         return result
       }
