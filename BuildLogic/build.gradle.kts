@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -23,4 +25,14 @@ dependencies {
 
 plugins {
     `kotlin-dsl`
+}
+
+kotlin {
+    jvmToolchain(25)
+
+    compilerOptions {
+        // Kotlin does not yet support  JDK 25, so we use 24 for kotlin specifically
+        // in order to avoid this warning: "Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target"
+        jvmTarget.set(JvmTarget.JVM_24)
+    }
 }
