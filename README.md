@@ -30,7 +30,7 @@ $ export JAVA_HOME="$(sdk home java current)"
 
 ## Self-publish supporting Java libraries
 
-Swift-java relies on supporting libraries that are under active development and not yet publisehd to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
+Swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
 
 To publish the libraries to your local maven repository (`$HOME/.m2`), you can run:
 
