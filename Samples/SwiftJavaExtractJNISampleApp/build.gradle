@@ -40,16 +40,16 @@ def swiftProductsWithJExtractPlugin() {
     def stdout = new ByteArrayOutputStream()
     def stderr = new ByteArrayOutputStream()
 
-    def result = exec {
-        commandLine 'swift', 'package', 'describe', '--type', 'json'
-        standardOutput = stdout
-        errorOutput = stderr
-        ignoreExitValue = true
-    }
+    def processBuilder = new ProcessBuilder('swift', 'package', 'describe', '--type', 'json')
+    def process = processBuilder.start()
 
+    process.consumeProcessOutput(stdout, stderr)
+    process.waitFor()
+
+    def exitValue = process.exitValue()
     def jsonOutput = stdout.toString()
 
-    if (result.exitValue == 0) {
+    if (exitValue == 0) {
         def json = new JsonSlurper().parseText(jsonOutput)
         def products = json.targets
                 .findAll { target ->
@@ -150,6 +150,7 @@ tasks.clean {
 dependencies {
     implementation(project(':SwiftKitCore'))
 
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // TODO: workaround for not finding junit: https://github.com/gradle/gradle/issues/34512
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
