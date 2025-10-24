@@ -16,7 +16,14 @@ import JExtractSwiftLib
 import Testing
 
 final class DataImportTests {
-  let data_interfaceFile =
+  private static let ifConfigImport = """
+  #if canImport(FoundationEssentials)
+  import FoundationEssentials
+  #else
+  import Foundation
+  #endif
+  """
+  private static let foundationData_interfaceFile =
     """
     import Foundation
     
@@ -24,23 +31,53 @@ final class DataImportTests {
     public func returnData() -> Data
     """
 
-  let dataProtocol_interfaceFile =
+  private static let foundationDataProtocol_interfaceFile =
     """
     import Foundation
     
     public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
 
+  private static let essentialsData_interfaceFile =
+    """
+    import FoundationEssentials
+    
+    public func receiveData(dat: Data)
+    public func returnData() -> Data
+    """
 
-  @Test("Import Data: Swift thunks")
-  func data_swiftThunk() throws {
+  private static let essentialsDataProtocol_interfaceFile =
+    """
+    import FoundationEssentials
+    
+    public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
+    """
+  private static let ifConfigData_interfaceFile =
+    """
+    \(ifConfigImport)
+    
+    public func receiveData(dat: Data)
+    public func returnData() -> Data
+    """
+
+  private static let ifConfigDataProtocol_interfaceFile =
+    """
+    \(ifConfigImport)
+    
+    public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
+    """
+
+  @Test("Import Data: Swift thunks", arguments: zip(
+    [Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile, Self.ifConfigData_interfaceFile],
+    ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
+  ))
+  func data_swiftThunk(fileContent: String, expectedImportChunk: String) throws {
 
     try assertOutput(
-      input: data_interfaceFile, .ffm, .swift,
+      input: fileContent, .ffm, .swift,
+      detectChunkByInitialLines: 10,
       expectedChunks: [
-        """
-        import Foundation
-        """,
+        expectedImportChunk,
         """
         @_cdecl("swiftjava_SwiftModule_receiveData_dat")
         public func swiftjava_SwiftModule_receiveData_dat(_ dat: UnsafeRawPointer) {
@@ -87,11 +124,12 @@ final class DataImportTests {
     )
   }
   
-  @Test("Import Data: JavaBindings")
-  func data_javaBindings() throws {
-
+  @Test("Import Data: JavaBindings", arguments: [
+    Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile, Self.ifConfigData_interfaceFile
+  ])
+  func data_javaBindings(fileContent: String) throws {
     try assertOutput(
-      input: data_interfaceFile, .ffm, .java,
+      input: fileContent, .ffm, .java,
       expectedChunks: [
         """
         /**
@@ -333,14 +371,15 @@ final class DataImportTests {
     )
   }
 
-  @Test("Import DataProtocol: Swift thunks")
-  func dataProtocol_swiftThunk() throws {
+  @Test("Import DataProtocol: Swift thunks", arguments: zip(
+    [Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile, Self.ifConfigDataProtocol_interfaceFile], 
+    ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
+  ))
+  func dataProtocol_swiftThunk(fileContent: String, expectedImportChunk: String) throws {
     try assertOutput(
-      input: dataProtocol_interfaceFile, .ffm, .swift,
+      input: fileContent, .ffm, .swift,
       expectedChunks: [
-        """
-        import Foundation
-        """,
+        expectedImportChunk,
         """
         @_cdecl("swiftjava_SwiftModule_receiveDataProtocol_dat_dat2")
         public func swiftjava_SwiftModule_receiveDataProtocol_dat_dat2(_ dat: UnsafeRawPointer, _ dat2: UnsafeRawPointer?) {
@@ -356,11 +395,13 @@ final class DataImportTests {
     )
   }
 
-  @Test("Import DataProtocol: JavaBindings")
-  func dataProtocol_javaBindings() throws {
+  @Test("Import DataProtocol: JavaBindings", arguments: [
+    Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile, Self.ifConfigDataProtocol_interfaceFile
+  ])
+  func dataProtocol_javaBindings(fileContent: String) throws {
 
     try assertOutput(
-      input: dataProtocol_interfaceFile, .ffm, .java,
+      input: fileContent, .ffm, .java,
       expectedChunks: [
         """
         /**
