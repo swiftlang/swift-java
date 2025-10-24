@@ -190,8 +190,8 @@ extension JavaVirtualMachine {
 
     // If we failed to attach, report that.
     if let attachError = VMError(fromJNIError: attachResult) {
+      // throw attachError
       fatalError("JVM Error: \(attachError)")
-      throw attachError
     }
 
     JavaVirtualMachine.destroyTLS.set(jniEnv!)

@@ -70,7 +70,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -110,7 +110,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.name == "globalTakeInt"
@@ -152,7 +152,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.name == "globalTakeIntLongString"
@@ -196,7 +196,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.name == "globalReturnClass"
@@ -240,7 +240,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.name == "swapRawBufferPointer"
@@ -287,7 +287,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.name == "helloMemberFunction"
@@ -330,7 +330,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .info
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.methods.first {
       $0.name == "makeInt"
@@ -373,7 +373,7 @@ final class MethodImportTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .info
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let initDecl: ImportedFunc = st.importedTypes["MySwiftClass"]!.initializers.first {
       $0.name == "init"
@@ -418,7 +418,7 @@ final class MethodImportTests {
 
     st.log.logLevel = .info
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let initDecl: ImportedFunc = st.importedTypes["MySwiftStruct"]!.initializers.first {
       $0.name == "init"

@@ -39,7 +39,7 @@ extension SwiftSymbolTableProtocol {
 
 package class SwiftSymbolTable {
   let importedModules: [String: SwiftModuleSymbolTable]
-  let parsedModule:SwiftModuleSymbolTable
+  let parsedModule: SwiftModuleSymbolTable
 
   private var knownTypeToNominal: [SwiftKnownTypeDeclKind: SwiftNominalTypeDeclaration] = [:]
   private var prioritySortedImportedModules: [SwiftModuleSymbolTable] {
@@ -55,15 +55,16 @@ package class SwiftSymbolTable {
 extension SwiftSymbolTable {
   package static func setup(
     moduleName: String,
-    _ sourceFiles: some Collection<SourceFileSyntax>,
+    _ inputFiles: some Collection<SwiftJavaInputFile>,
     log: Logger
   ) -> SwiftSymbolTable {
 
     // Prepare imported modules.
     // FIXME: Support arbitrary dependencies.
     var modules: Set<ImportedSwiftModule> = []
-    for sourceFile in sourceFiles {
-      modules.formUnion(importingModules(sourceFile: sourceFile))
+    for inputFile in inputFiles {
+      let importedModules = importingModules(sourceFile: inputFile.syntax)
+      modules.formUnion(importedModules)
     }
     var importedModules: [String: SwiftModuleSymbolTable] = [:]
     importedModules[SwiftKnownModule.swift.name] = SwiftKnownModule.swift.symbolTable
@@ -84,8 +85,8 @@ extension SwiftSymbolTable {
 
     var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: moduleName, importedModules: importedModules, log: log)
     // First, register top-level and nested nominal types to the symbol table.
-    for sourceFile in sourceFiles {
-      builder.handle(sourceFile: sourceFile)
+    for sourceFile in inputFiles {
+      builder.handle(sourceFile: sourceFile.syntax, sourceFilePath: sourceFile.path)
     }
     let parsedModule = builder.finalize()
     return SwiftSymbolTable(parsedModule: parsedModule, importedModules: importedModules)

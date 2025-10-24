@@ -27,8 +27,14 @@ package enum SwiftAPIKind {
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
 /// imported and is being translated into Java.
-package class ImportedNominalType: ImportedDecl {
+package final class ImportedNominalType: ImportedDecl {
   let swiftNominal: SwiftNominalTypeDeclaration
+
+  // The short path from module root to the file in which this nominal was originally declared.
+  // E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
+  package var sourceFilePath: String {
+    self.swiftNominal.sourceFilePath
+  }
 
   package var initializers: [ImportedFunc] = []
   package var methods: [ImportedFunc] = []

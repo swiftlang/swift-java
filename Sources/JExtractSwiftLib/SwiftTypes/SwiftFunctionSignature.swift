@@ -195,7 +195,7 @@ extension SwiftFunctionSignature {
         guard parameterNode.specifier == nil else {
           throw SwiftFunctionTranslationError.genericParameterSpecifier(parameterNode)
         }
-        let param = try lookupContext.typeDeclaration(for: parameterNode) as! SwiftGenericParameterDeclaration
+        let param = try lookupContext.typeDeclaration(for: parameterNode, sourceFilePath: "FIXME_HAS_NO_PATH.swift") as! SwiftGenericParameterDeclaration
         params.append(param)
         if let inheritedNode = parameterNode.inheritedType {
           let inherited = try SwiftType(inheritedNode, lookupContext: lookupContext)

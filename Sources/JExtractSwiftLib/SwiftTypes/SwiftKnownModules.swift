@@ -43,7 +43,7 @@ enum SwiftKnownModule: String {
 
 private var swiftSymbolTable: SwiftModuleSymbolTable {
   var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "Swift", importedModules: [:])
-  builder.handle(sourceFile: swiftSourceFile)
+  builder.handle(sourceFile: swiftSourceFile, sourceFilePath: "SwiftStdlib.swift") // FIXME: missing path here
   return builder.finalize()
 }
 
@@ -53,7 +53,7 @@ private var foundationEssentialsSymbolTable: SwiftModuleSymbolTable {
     requiredAvailablityOfModuleWithName: "FoundationEssentials",
     alternativeModules: .init(isMainSourceOfSymbols: false, moduleNames: ["Foundation"]),
     importedModules: ["Swift": swiftSymbolTable])
-  builder.handle(sourceFile: foundationEssentialsSourceFile)
+  builder.handle(sourceFile: foundationEssentialsSourceFile, sourceFilePath: "FakeFoundation.swift")
   return builder.finalize()
 }
 
@@ -62,7 +62,7 @@ private var foundationSymbolTable: SwiftModuleSymbolTable {
     moduleName: "Foundation", 
     alternativeModules: .init(isMainSourceOfSymbols: true, moduleNames: ["FoundationEssentials"]),
     importedModules: ["Swift": swiftSymbolTable])
-  builder.handle(sourceFile: foundationSourceFile)
+  builder.handle(sourceFile: foundationSourceFile, sourceFilePath: "Foundation.swift")
   return builder.finalize()
 }
 

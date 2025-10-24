@@ -34,7 +34,10 @@ struct SwiftSymbolTableSuite {
       """
     let symbolTable = SwiftSymbolTable.setup(
       moduleName: "MyModule",
-      [sourceFile1, sourceFile2],
+      [
+        .init(syntax: sourceFile1, path: "Fake.swift"),
+        .init(syntax: sourceFile2, path: "Fake2.swift")
+      ],
       log: Logger(label: "swift-java", logLevel: .critical)
     )
 

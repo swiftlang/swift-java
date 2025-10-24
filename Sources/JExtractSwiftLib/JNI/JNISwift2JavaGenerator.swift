@@ -67,16 +67,14 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
      // If we are forced to write empty files, construct the expected outputs
     if translator.config.writeEmptyFiles ?? false {
       self.expectedOutputSwiftFiles = Set(translator.inputs.compactMap { (input) -> String? in
-        guard let filePathPart = input.filePath.split(separator: "/\(translator.swiftModuleName)/").last else {
+        guard let filePathPart = input.path.split(separator: "/\(translator.swiftModuleName)/").last else {
           return nil
         }
 
         return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
       })
       self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
-
-      // FIXME: Can we avoid this?
-      self.expectedOutputSwiftFiles.insert("Data+SwiftJava.swift")
+      self.expectedOutputSwiftFiles.insert("Foundation+SwiftJava.swift")
     } else {
       self.expectedOutputSwiftFiles = []
     }

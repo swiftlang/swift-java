@@ -239,7 +239,7 @@ extension FunctionDescriptorTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = logLevel
 
-    try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let funcDecl = st.importedGlobalFuncs.first {
       $0.name == methodIdentifier
@@ -273,7 +273,7 @@ extension FunctionDescriptorTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = logLevel
 
-    try st.analyze(file: "/fake/Sample.swiftinterface", text: interfaceFile)
+    try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
 
     let generator = FFMSwift2JavaGenerator(
       config: config,

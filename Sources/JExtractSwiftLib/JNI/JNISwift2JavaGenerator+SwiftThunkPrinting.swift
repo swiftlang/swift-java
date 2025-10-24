@@ -26,8 +26,16 @@ extension JNISwift2JavaGenerator {
   }
 
   package func writeSwiftExpectedEmptySources() throws {
+    let pendingFileCount = self.expectedOutputSwiftFiles.count
+    guard pendingFileCount > 0 else {
+      return // no need to write any empty files, yay
+    }
+    
+    print("[swift-java] Write empty [\(self.expectedOutputSwiftFiles.count)] 'expected' files in: \(swiftOutputDirectory)/")
+    
     for expectedFileName in self.expectedOutputSwiftFiles {
-      logger.trace("Write empty file: \(expectedFileName) ...")
+      logger.debug("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
+
 
       var printer = CodePrinter()
       printer.print("// Empty file generated on purpose")
@@ -52,27 +60,46 @@ extension JNISwift2JavaGenerator {
         javaPackagePath: nil,
         filename: moduleFilename
       ) {
-        print("[swift-java] Generated: \(moduleFilenameBase.bold).swift (at \(outputFile))")
+        logger.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
         self.expectedOutputSwiftFiles.remove(moduleFilename)
       }
 
-      for (_, ty) in self.analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key }) {
-        let fileNameBase = "\(ty.swiftNominal.qualifiedName)+SwiftJava"
-        let filename = "\(fileNameBase).swift"
-        logger.debug("Printing contents: \(filename)")
+      // === All types
+      // We have to write all types to their corresponding output file that matches the file they were declared in,
+      // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
+      for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(grouping: self.analysis.importedTypes, by: { $0.value.sourceFilePath }) {
+        logger.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")
 
+        let importedTypesForThisFile = group.value
+          .map(\.value)
+          .sorted(by: { $0.qualifiedName < $1.qualifiedName })
+
+        let inputFileName = "\(group.key)".split(separator: "/").last ?? "__Unknown.swift"
+        let filename = "\(inputFileName)".replacing(".swift", with: "+SwiftJava.swift")
+
+        for ty in importedTypesForThisFile {
+          logger.info("Printing Swift thunks for type: \(ty.qualifiedName.bold)")
+          printer.printSeparator("Thunks for \(ty.qualifiedName)")
+
+          do {
+            try printNominalTypeThunks(&printer, ty)
+          } catch {
+            logger.warning("Failed to print to Swift thunks for type'\(ty.qualifiedName)' to '\(filename)', error: \(error)")
+          }
+          
+        }
+
+        logger.warning("Write Swift thunks file: \(filename.bold)")
         do {
-          try printNominalTypeThunks(&printer, ty)
-
           if let outputFile = try printer.writeContents(
             outputDirectory: self.swiftOutputDirectory,
             javaPackagePath: nil,
             filename: filename) {
-            print("[swift-java] Generated: \(fileNameBase.bold).swift (at \(outputFile))")
+            logger.info("Done writing Swift thunks to: \(outputFile.absoluteString)")
             self.expectedOutputSwiftFiles.remove(filename)
           }
         } catch {
-          logger.warning("Failed to write to Swift thunks: \(filename)")
+          logger.warning("Failed to write to Swift thunks: \(filename), error: \(error)")
         }
       }
     } catch {

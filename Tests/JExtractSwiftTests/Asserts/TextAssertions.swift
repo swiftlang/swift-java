@@ -42,7 +42,7 @@ func assertOutput(
   let translator = Swift2JavaTranslator(config: config)
   translator.dependenciesClasses = Array(javaClassLookupTable.keys)
 
-  try! translator.analyze(file: "/fake/Fake.swiftinterface", text: input)
+  try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
   let output: String
   var printer: CodePrinter = CodePrinter(mode: .accumulateAll)

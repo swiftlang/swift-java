@@ -93,6 +93,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       $0.pathExtension == "swift"
     }
 
+    // Output Swift files are just Java filename based converted to Swift files one-to-one
     var outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
       guard sourceFileURL.isFileURL else {
         return nil as URL?
@@ -102,7 +103,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       guard sourceFilePath.starts(with: sourceDir) else {
         fatalError("Could not get relative path for source file \(sourceFilePath)")
       }
-      var outputURL = outputSwiftDirectory
+      let outputURL = outputSwiftDirectory
         .appending(path: String(sourceFilePath.dropFirst(sourceDir.count).dropLast(sourceFileURL.lastPathComponent.count + 1)))
 
       let inputFileName = sourceFileURL.deletingPathExtension().lastPathComponent
@@ -116,10 +117,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // If the module uses 'Data' type, the thunk file is emitted as if 'Data' is declared
     // in that module. Declare the thunk file as the output.
-    // FIXME: Make this conditional.
     outputSwiftFiles += [
-      outputSwiftDirectory.appending(path: "Data+SwiftJava.swift")
+      outputSwiftDirectory.appending(path: "Foundation+SwiftJava.swift")
     ]
+
+    print("[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))")
 
     return [
       .buildCommand(

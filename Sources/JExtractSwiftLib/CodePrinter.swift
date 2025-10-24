@@ -216,14 +216,28 @@ extension CodePrinter {
   
   /// - Returns: the output path of the generated file, if any (i.e. not in accumulate in memory mode)
   package mutating func writeContents(
-    outputDirectory: String,
+    outputDirectory _outputDirectory: String,
     javaPackagePath: String?,
-    filename: String
+    filename _filename: String
   ) throws -> URL? {
+
+    // We handle 'filename' that has a path, since that simplifies passing paths from root output directory enourmously.
+    // This just moves the directory parts into the output directory part in order for us to create the sub-directories.
+    let outputDirectory: String
+    let filename: String
+    if _filename.contains(PATH_SEPARATOR) {
+      let parts = _filename.split(separator: PATH_SEPARATOR)
+      outputDirectory = _outputDirectory.appending(PATH_SEPARATOR).appending(parts.dropLast().joined(separator: PATH_SEPARATOR))
+      filename = "\(parts.last!)"
+    } else {
+      outputDirectory = _outputDirectory
+      filename = _filename
+    }
+
     guard self.mode != .accumulateAll else {
       // if we're accumulating everything, we don't want to finalize/flush any contents
       // let's mark that this is where a write would have happened though:
-      print("// ^^^^ Contents of: \(outputDirectory)/\(filename)")
+      print("// ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
       return nil
     }
 
@@ -233,7 +247,7 @@ extension CodePrinter {
         "// ==== ---------------------------------------------------------------------------------------------------"
       )
       if let javaPackagePath {
-        print("// \(javaPackagePath)/\(filename)")
+        print("// \(javaPackagePath)\(PATH_SEPARATOR)\(filename)")
       } else {
         print("// \(filename)")
       }
@@ -242,9 +256,15 @@ extension CodePrinter {
     }
 
     let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(separator: PATH_SEPARATOR)
-    log.trace("Prepare target directory: \(targetDirectory)")
-    try FileManager.default.createDirectory(
-      atPath: targetDirectory, withIntermediateDirectories: true)
+    log.debug("Prepare target directory: '\(targetDirectory)' for file \(filename.bold)")
+    do {
+      try FileManager.default.createDirectory(
+        atPath: targetDirectory, withIntermediateDirectories: true)
+    } catch {
+      // log and throw since it can be confusing what the reason for failing the write was otherwise
+      log.warning("Failed to create directory: \(targetDirectory)")
+      throw error
+    }
 
     let outputPath = Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename)
     try contents.write(

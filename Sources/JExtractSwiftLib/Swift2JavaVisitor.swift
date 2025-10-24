@@ -29,41 +29,42 @@ final class Swift2JavaVisitor {
 
   var log: Logger { translator.log }
 
-  func visit(sourceFile node: SourceFileSyntax) {
+  func visit(inputFile: SwiftJavaInputFile) {
+    let node = inputFile.syntax
     for codeItem in node.statements {
       if let declNode = codeItem.item.as(DeclSyntax.self) {
-        self.visit(decl: declNode, in: nil)
+        self.visit(decl: declNode, in: nil, sourceFilePath: inputFile.path)
       }
     }
   }
 
-  func visit(decl node: DeclSyntax, in parent: ImportedNominalType?) {
+  func visit(decl node: DeclSyntax, in parent: ImportedNominalType?, sourceFilePath: String) {
     switch node.as(DeclSyntaxEnum.self) {
     case .actorDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .classDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .structDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .enumDecl(let node):
-      self.visit(enumDecl: node, in: parent)
+      self.visit(enumDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .protocolDecl(let node):
-      self.visit(nominalDecl: node, in: parent)
+      self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .extensionDecl(let node):
-      self.visit(extensionDecl: node, in: parent)
+      self.visit(extensionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .typeAliasDecl:
       break // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
     case .associatedTypeDecl:
-      break // TODO: Implement
+      break // TODO: Implement associated types
 
     case .initializerDecl(let node):
       self.visit(initializerDecl: node, in: parent)
     case .functionDecl(let node):
-      self.visit(functionDecl: node, in: parent)
+      self.visit(functionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .variableDecl(let node):
-      self.visit(variableDecl: node, in: parent)
+      self.visit(variableDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .subscriptDecl:
-      // TODO: Implement
+      // TODO: Implement subscripts
       break
     case .enumCaseDecl(let node):
       self.visit(enumCaseDecl: node, in: parent)
@@ -75,23 +76,32 @@ final class Swift2JavaVisitor {
 
   func visit(
     nominalDecl node: some DeclSyntaxProtocol & DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax,
-    in parent: ImportedNominalType?
+    in parent: ImportedNominalType?,
+    sourceFilePath: String
   ) {
     guard let importedNominalType = translator.importedNominalType(node, parent: parent) else {
       return
     }
     for memberItem in node.memberBlock.members {
-      self.visit(decl: memberItem.decl, in: importedNominalType)
+      self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
   }
 
-  func visit(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
-    self.visit(nominalDecl: node, in: parent)
+  func visit(
+    enumDecl node: EnumDeclSyntax,
+    in parent: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
+    self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
 
     self.synthesizeRawRepresentableConformance(enumDecl: node, in: parent)
   }
 
-  func visit(extensionDecl node: ExtensionDeclSyntax, in parent: ImportedNominalType?) {
+  func visit(
+    extensionDecl node: ExtensionDeclSyntax,
+    in parent: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
     guard parent == nil else {
       // 'extension' in a nominal type is invalid. Ignore
       return
@@ -100,11 +110,15 @@ final class Swift2JavaVisitor {
       return
     }
     for memberItem in node.memberBlock.members {
-      self.visit(decl: memberItem.decl, in: importedNominalType)
+      self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
   }
 
-  func visit(functionDecl node: FunctionDeclSyntax, in typeContext: ImportedNominalType?) {
+  func visit(
+    functionDecl node: FunctionDeclSyntax, 
+    in typeContext: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
     guard node.shouldExtract(config: config, log: log, in: typeContext) else {
       return
     }
@@ -139,7 +153,10 @@ final class Swift2JavaVisitor {
     }
   }
 
-  func visit(enumCaseDecl node: EnumCaseDeclSyntax, in typeContext: ImportedNominalType?) {
+  func visit(
+    enumCaseDecl node: EnumCaseDeclSyntax, 
+    in typeContext: ImportedNominalType?
+  ) {
     guard let typeContext else {
       self.log.info("Enum case must be within a current type; \(node)")
       return
@@ -182,7 +199,11 @@ final class Swift2JavaVisitor {
     }
   }
 
-  func visit(variableDecl node: VariableDeclSyntax, in typeContext: ImportedNominalType?) {
+  func visit(
+    variableDecl node: VariableDeclSyntax, 
+    in typeContext: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
     guard node.shouldExtract(config: config, log: log, in: typeContext) else {
       return
     }
@@ -232,7 +253,10 @@ final class Swift2JavaVisitor {
     }
   }
 
-  func visit(initializerDecl node: InitializerDeclSyntax, in typeContext: ImportedNominalType?) {
+  func visit(
+    initializerDecl node: InitializerDeclSyntax,
+    in typeContext: ImportedNominalType?,
+  ) {
     guard let typeContext else {
       self.log.info("Initializer must be within a current type; \(node)")
       return
@@ -265,7 +289,10 @@ final class Swift2JavaVisitor {
     typeContext.initializers.append(imported)
   }
 
-  private func synthesizeRawRepresentableConformance(enumDecl node: EnumDeclSyntax, in parent: ImportedNominalType?) {
+  private func synthesizeRawRepresentableConformance(
+    enumDecl node: EnumDeclSyntax,
+    in parent: ImportedNominalType?
+    ) {
     guard let imported = translator.importedNominalType(node, parent: parent) else {
       return
     }
@@ -279,14 +306,15 @@ final class Swift2JavaVisitor {
     {
       if !imported.variables.contains(where: { $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType }) {
         let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
-        self.visit(decl: decl, in: imported)
+        self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
 
+      // FIXME: why is this un-used
       imported.variables.first?.signatureString
 
       if !imported.initializers.contains(where: { $0.functionSignature.parameters.count == 1 && $0.functionSignature.parameters.first?.parameterName == "rawValue" && $0.functionSignature.parameters.first?.type == inheritanceType }) {
         let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
-        self.visit(decl: decl, in: imported)
+        self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
     }
   }

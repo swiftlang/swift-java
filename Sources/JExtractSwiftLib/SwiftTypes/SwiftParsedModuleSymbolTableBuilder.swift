@@ -50,7 +50,8 @@ struct SwiftParsedModuleSymbolTableBuilder {
 extension SwiftParsedModuleSymbolTableBuilder {
 
   mutating func handle(
-    sourceFile: SourceFileSyntax
+    sourceFile: SourceFileSyntax,
+    sourceFilePath: String
   ) {
     // Find top-level type declarations.
     for statement in sourceFile.statements {
@@ -60,10 +61,10 @@ extension SwiftParsedModuleSymbolTableBuilder {
       }
 
       if let nominalTypeNode = decl.asNominal {
-        self.handle(nominalTypeDecl: nominalTypeNode, parent: nil)
+        self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalTypeNode, parent: nil)
       }
       if let extensionNode = decl.as(ExtensionDeclSyntax.self) {
-        self.handle(extensionDecl: extensionNode)
+        self.handle(extensionDecl: extensionNode, sourceFilePath: sourceFilePath)
       }
     }
   }
@@ -71,6 +72,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
   /// Add a nominal type declaration and all of the nested types within it to the symbol
   /// table.
   mutating func handle(
+    sourceFilePath: String,
     nominalTypeDecl node: NominalTypeDeclSyntaxNode,
     parent: SwiftNominalTypeDeclaration?
   ) {
@@ -83,6 +85,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
 
     // Otherwise, create the nominal type declaration.
     let nominalTypeDecl = SwiftNominalTypeDeclaration(
+      sourceFilePath: sourceFilePath,
       moduleName: moduleName,
       parent: parent,
       node: node
@@ -96,26 +99,28 @@ extension SwiftParsedModuleSymbolTableBuilder {
       symbolTable.topLevelTypes[nominalTypeDecl.name] = nominalTypeDecl
     }
 
-    self.handle(memberBlock: node.memberBlock, parent: nominalTypeDecl)
+    self.handle(sourceFilePath: sourceFilePath, memberBlock: node.memberBlock, parent: nominalTypeDecl)
   }
 
   mutating func handle(
+    sourceFilePath: String,
     memberBlock node: MemberBlockSyntax,
     parent: SwiftNominalTypeDeclaration
   ) {
     for member in node.members {
       // Find any nested types within this nominal type and add them.
       if let nominalMember = member.decl.asNominal {
-        self.handle(nominalTypeDecl: nominalMember, parent: parent)
+        self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalMember, parent: parent)
       }
     }
 
   }
 
   mutating func handle(
-    extensionDecl node: ExtensionDeclSyntax
+    extensionDecl node: ExtensionDeclSyntax,
+    sourceFilePath: String
   ) {
-    if !self.tryHandle(extension: node) {
+    if !self.tryHandle(extension: node, sourceFilePath: sourceFilePath) {
       self.unresolvedExtensions.append(node)
     }
   }
@@ -123,7 +128,8 @@ extension SwiftParsedModuleSymbolTableBuilder {
   /// Add any nested types within the given extension to the symbol table.
   /// If the extended nominal type can't be resolved, returns false.
   mutating func tryHandle(
-    extension node: ExtensionDeclSyntax
+    extension node: ExtensionDeclSyntax,
+    sourceFilePath: String
   ) -> Bool {
     // Try to resolve the type referenced by this extension declaration.
     // If it fails, we'll try again later.
@@ -141,7 +147,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
     }
 
     // Find any nested types within this extension and add them.
-    self.handle(memberBlock: node.memberBlock, parent: extendedNominal)
+    self.handle(sourceFilePath: sourceFilePath, memberBlock: node.memberBlock, parent: extendedNominal)
     return true
   }
 
@@ -158,7 +164,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
     while !unresolvedExtensions.isEmpty {
       var extensions = self.unresolvedExtensions
       extensions.removeAll(where: {
-        self.tryHandle(extension: $0)
+        self.tryHandle(extension: $0, sourceFilePath: "FIXME_MISSING_FILEPATH.swift") // FIXME: missing filepath here in finalize
       })
 
       // If we didn't resolve anything, we're done.

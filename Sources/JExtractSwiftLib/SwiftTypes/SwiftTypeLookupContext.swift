@@ -48,7 +48,7 @@ class SwiftTypeLookupContext {
         }
 
       case .lookInMembers(let scopeNode):
-        if let nominalDecl = try typeDeclaration(for: scopeNode) {
+        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
           if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl as! SwiftNominalTypeDeclaration) {
             return found
           }
@@ -74,9 +74,9 @@ class SwiftTypeLookupContext {
     for name in names {
       switch name {
       case .identifier(let identifiableSyntax, _):
-        return try? typeDeclaration(for: identifiableSyntax)
+        return try? typeDeclaration(for: identifiableSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
       case .declaration(let namedDeclSyntax):
-        return try? typeDeclaration(for: namedDeclSyntax)
+        return try? typeDeclaration(for: namedDeclSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
       case .implicit(let implicitDecl):
         // TODO: Implement
         _ = implicitDecl
@@ -90,7 +90,7 @@ class SwiftTypeLookupContext {
 
   /// Returns the type declaration object associated with the `Syntax` node.
   /// If there's no declaration created, create an instance on demand, and cache it.
-  func typeDeclaration(for node: some SyntaxProtocol) throws -> SwiftTypeDeclaration? {
+  func typeDeclaration(for node: some SyntaxProtocol, sourceFilePath: String) throws -> SwiftTypeDeclaration? {
     if let found = typeDecls[node.id] {
       return found
     }
@@ -98,17 +98,17 @@ class SwiftTypeLookupContext {
     let typeDecl: SwiftTypeDeclaration
     switch Syntax(node).as(SyntaxEnum.self) {
     case .genericParameter(let node):
-      typeDecl = SwiftGenericParameterDeclaration(moduleName: symbolTable.moduleName, node: node)
+      typeDecl = SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: symbolTable.moduleName, node: node)
     case .classDecl(let node):
-      typeDecl = try nominalTypeDeclaration(for: node)
+      typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .actorDecl(let node):
-      typeDecl = try nominalTypeDeclaration(for: node)
+      typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .structDecl(let node):
-      typeDecl = try nominalTypeDeclaration(for: node)
+      typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .enumDecl(let node):
-      typeDecl = try nominalTypeDeclaration(for: node)
+      typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .protocolDecl(let node):
-      typeDecl = try nominalTypeDeclaration(for: node)
+      typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .typeAliasDecl:
       fatalError("typealias not implemented")
     case .associatedTypeDecl:
@@ -122,8 +122,9 @@ class SwiftTypeLookupContext {
   }
 
   /// Create a nominal type declaration instance for the specified syntax node.
-  private func nominalTypeDeclaration(for node: NominalTypeDeclSyntaxNode) throws -> SwiftNominalTypeDeclaration {
+  private func nominalTypeDeclaration(for node: NominalTypeDeclSyntaxNode, sourceFilePath: String) throws -> SwiftNominalTypeDeclaration {
     SwiftNominalTypeDeclaration(
+      sourceFilePath: sourceFilePath,
       moduleName: self.symbolTable.moduleName,
       parent: try parentTypeDecl(for: node),
       node: node
@@ -136,7 +137,7 @@ class SwiftTypeLookupContext {
     while let parentDecl = node.ancestorDecl {
       switch parentDecl.as(DeclSyntaxEnum.self) {
       case .structDecl, .classDecl, .actorDecl, .enumDecl, .protocolDecl:
-        return (try typeDeclaration(for: parentDecl) as! SwiftNominalTypeDeclaration)
+        return (try typeDeclaration(for: parentDecl, sourceFilePath: "FIXME_NO_SOURCE_FILE.swift") as! SwiftNominalTypeDeclaration) // FIXME: need to get the source file of the parent
       default:
         node = parentDecl
         continue
