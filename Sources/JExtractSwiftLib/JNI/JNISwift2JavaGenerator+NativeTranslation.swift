@@ -526,6 +526,7 @@ extension JNISwift2JavaGenerator {
           javaType: result.javaType,
           conversion: .asyncBlocking(
             result.conversion,
+            isThrowing: functionSignature.effectSpecifiers.contains(.throws),
             swiftFunctionResultType: functionSignature.result.type
           ),
           outParameters: result.outParameters
@@ -619,7 +620,7 @@ extension JNISwift2JavaGenerator {
 
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
-    indirect case asyncBlocking(NativeSwiftConversionStep, swiftFunctionResultType: SwiftType)
+    indirect case asyncBlocking(NativeSwiftConversionStep, isThrowing: Bool, swiftFunctionResultType: SwiftType)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -849,24 +850,30 @@ extension JNISwift2JavaGenerator {
         )
         return unwrappedName
 
-      case .asyncBlocking(let inner, let swiftFunctionResultType):
+      case .asyncBlocking(let inner, let isThrowing, let swiftFunctionResultType):
         printer.print("let _semaphore$ = SwiftJava._Semaphore(value: 0)")
-        printer.print("var swiftResult$: \(swiftFunctionResultType)!")
+        let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
+        printer.print("var swiftResult$: \(resultType)!")
 
         printer.printBraceBlock("Task") { printer in
-          printer.print(
-            """
-            swiftResult$ = await \(placeholder)
-            _semaphore$.signal()
-            """
-          )
+          if isThrowing {
+            printer.printBraceBlock("do") { printer in
+              printer.print("swiftResult$ = await Result.success(\(placeholder))")
+            }
+            printer.printBraceBlock("catch") { printer in
+              printer.print("swiftResult$ = Result.failure(error)")
+            }
+          } else {
+            printer.print("swiftResult$ = await \(placeholder)")
+          }
+          printer.print("_semaphore$.signal()")
         }
         printer.print(
           """
           _semaphore$.wait() 
           """
         )
-        let inner = inner.render(&printer, "swiftResult$")
+        let inner = inner.render(&printer, isThrowing ? "try swiftResult$.get()" : "swiftResult$")
         return inner
       }
     }

@@ -12,15 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
-
-public func asyncSum(i1: Int64, i2: Int64) async -> Int64 {
-  try? await Task.sleep(for: .milliseconds(500))
-  return i1 + i2
-}
-
-public func asyncCopy(myClass: MySwiftClass) async throws -> MySwiftClass {
-  let new = MySwiftClass(x: myClass.x, y: myClass.y)
-  try await Task.sleep(for: .milliseconds(500))
-  return new
+enum MySwiftError: Error {
+  case swiftError
 }

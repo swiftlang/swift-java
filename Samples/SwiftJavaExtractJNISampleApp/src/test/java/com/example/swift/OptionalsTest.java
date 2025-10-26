@@ -14,6 +14,7 @@
 
 package com.example.swift;
 
+import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
 
@@ -22,8 +23,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OptionalsTest {
     @Test
@@ -111,6 +111,15 @@ public class OptionalsTest {
                     Optional.of(true)
             );
             assertEquals(result, OptionalLong.of(1L));
+        }
+    }
+
+    @Test
+    void optionalThrows() {
+        try (var arena = SwiftArena.ofConfined()) {
+            Exception exception = assertThrows(Exception.class, () -> MySwiftLibrary.optionalThrowing());
+
+            assertEquals("swiftError", exception.getMessage());
         }
     }
 }

@@ -245,7 +245,7 @@ extension SwiftFunctionSignature {
     if signature.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
     }
-    if let asyncSpecifier = signature.effectSpecifiers?.asyncSpecifier {
+    if signature.effectSpecifiers?.asyncSpecifier != nil {
       effectSpecifiers.append(.async)
     }
 

@@ -353,29 +353,41 @@ extension JNISwift2JavaGenerator {
     }
 
     // Lower the result.
-    let innerBody: String
-    if !decl.functionSignature.result.type.isVoid {
-      let loweredResult = nativeSignature.result.conversion.render(&printer, result)
-      innerBody = "return \(loweredResult)"
-    } else {
-      innerBody = result
+    func innerBody(in printer: inout CodePrinter) -> String {
+      if !decl.functionSignature.result.type.isVoid {
+        let loweredResult = nativeSignature.result.conversion.render(&printer, result)
+        return "return \(loweredResult)"
+      } else {
+        return result
+      }
     }
 
     if decl.isThrowing {
-      // TODO: Handle classes for dummy value
-      let dummyReturn = !nativeSignature.result.javaType.isVoid ? "return \(decl.functionSignature.result.type).jniPlaceholderValue" : ""
+      let dummyReturn: String
+
+      if nativeSignature.result.javaType.isVoid {
+        dummyReturn = ""
+      } else {
+        // We assume it is something that implements JavaValue
+        dummyReturn = "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
+      }
+
+      printer.print("do {")
+      printer.indent()
+      printer.print(innerBody(in: &printer))
+      printer.outdent()
+      printer.print("} catch {")
+      printer.indent()
       printer.print(
-          """
-          do {
-            \(innerBody)
-          } catch {
-            environment.throwAsException(error)
-            \(dummyReturn)
-          }
-          """
+        """
+        environment.throwAsException(error)
+        \(dummyReturn)
+        """
       )
+      printer.outdent()
+      printer.print("}")
     } else {
-      printer.print(innerBody)
+      printer.print(innerBody(in: &printer))
     }
   }
 
