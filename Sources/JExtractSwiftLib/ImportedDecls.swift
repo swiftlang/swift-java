@@ -192,6 +192,10 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     self.functionSignature.effectSpecifiers.contains(.throws)
   }
 
+  var isAsync: Bool {
+    self.functionSignature.effectSpecifiers.contains(.async)
+  }
+
   init(
     module: String,
     swiftDecl: any DeclSyntaxProtocol,

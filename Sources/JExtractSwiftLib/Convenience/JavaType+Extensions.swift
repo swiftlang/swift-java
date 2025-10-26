@@ -111,4 +111,29 @@ extension JavaType {
       false
     }
   }
+
+  var wrapperClassIfNeeded: JavaType {
+    switch self {
+    case .boolean:
+      return .class(package: nil, name: "Boolean")
+    case .byte(let parameterAnnotations):
+      return .class(package: nil, name: "Byte")
+    case .char(let parameterAnnotations):
+      return .class(package: nil, name: "Character")
+    case .short(let parameterAnnotations):
+      return .class(package: nil, name: "Short")
+    case .int(let parameterAnnotations):
+      return .class(package: nil, name: "Integer")
+    case .long(let parameterAnnotations):
+      return .class(package: nil, name: "Long")
+    case .float:
+      return .class(package: nil, name: "Float")
+    case .double:
+      return .class(package: nil, name: "Double")
+    case .void:
+      return .class(package: nil, name: "Void")
+    default:
+      return self
+    }
+  }
 }

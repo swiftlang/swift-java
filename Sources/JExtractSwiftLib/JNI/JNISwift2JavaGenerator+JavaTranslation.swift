@@ -118,6 +118,7 @@ extension JNISwift2JavaGenerator {
         name: getAsCaseName,
         isStatic: false,
         isThrowing: false,
+        isAsync: false,
         nativeFunctionName: "$\(getAsCaseName)",
         parentName: enumName,
         functionTypes: [],
@@ -216,6 +217,7 @@ extension JNISwift2JavaGenerator {
         name: javaName,
         isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
+        isAsync: decl.isAsync,
         nativeFunctionName: "$\(javaName)",
         parentName: parentName,
         functionTypes: funcTypes,
@@ -279,7 +281,11 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
-      let resultType = try translate(swiftResult: functionSignature.result)
+      var resultType = try translate(swiftResult: functionSignature.result)
+
+      if functionSignature.effectSpecifiers.contains(.async) {
+        resultType = asyncResultConversion(result: resultType, mode: config.effectiveAsyncMode)
+      }
 
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
@@ -467,6 +473,35 @@ extension JNISwift2JavaGenerator {
 
       case .wrapGuava:
         fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
+      }
+    }
+
+    func asyncResultConversion(
+      result: TranslatedResult,
+      mode: JExtractAsyncMode
+    ) -> TranslatedResult {
+      switch mode {
+      case .completableFuture:
+        let supplyAsyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
+          .aggregate([
+            .print(result.conversion),
+            .null
+          ])
+        } else {
+          result.conversion
+        }
+
+        return TranslatedResult(
+          javaType: .class(package: "java.util.concurrent", name: "CompletableFuture<\(result.javaType.wrapperClassIfNeeded)>"),
+          annotations: result.annotations,
+          outParameters: result.outParameters,
+          conversion: .method(.constant("java.util.concurrent.CompletableFuture"), function: "supplyAsync", arguments: [
+            .lambda(body: supplyAsyncBodyConversion)
+          ])
+        )
+
+      case .future:
+        fatalError("TODO")
       }
     }
 
@@ -753,6 +788,8 @@ extension JNISwift2JavaGenerator {
 
     let isThrowing: Bool
 
+    let isAsync: Bool
+
     /// The name of the native function
     let nativeFunctionName: String
 
@@ -912,6 +949,17 @@ extension JNISwift2JavaGenerator {
     /// Access a member of the value
     indirect case replacingPlaceholder(JavaNativeConversionStep, placeholder: String)
 
+    /// `return value`
+    indirect case `return`(JavaNativeConversionStep)
+
+    /// `() -> { return body; }`
+    indirect case lambda(body: JavaNativeConversionStep)
+
+    case null
+
+    /// Prints the conversion step, ignoring the output.
+    indirect case print(JavaNativeConversionStep)
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -1024,13 +1072,37 @@ extension JNISwift2JavaGenerator {
 
       case .replacingPlaceholder(let inner, let placeholder):
         return inner.render(&printer, placeholder)
+
+      case .return(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "return \(inner);"
+
+      case .lambda(let body):
+        var printer = CodePrinter()
+        printer.printBraceBlock("() ->") { printer in
+          let body = body.render(&printer, placeholder)
+          if !body.isEmpty {
+            printer.print("return \(body);")
+          } else {
+            printer.print("return;")
+          }
+        }
+        return printer.finalize()
+
+      case .null:
+        return "null"
+
+      case .print(let inner):
+        let inner = inner.render(&printer, placeholder)
+        printer.print("\(inner);")
+        return ""
       }
     }
 
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent, .combinedName:
+      case .placeholder, .constant, .isOptionalPresent, .combinedName, .null:
         return false
 
       case .constructSwiftValue, .wrapMemoryAddressUnsafe:
@@ -1073,6 +1145,15 @@ extension JNISwift2JavaGenerator {
         return inner.requiresSwiftArena
 
       case .replacingPlaceholder(let inner, _):
+        return inner.requiresSwiftArena
+
+      case .return(let inner):
+        return inner.requiresSwiftArena
+
+      case .lambda(let body):
+        return body.requiresSwiftArena
+
+      case .print(let inner):
         return inner.requiresSwiftArena
       }
     }

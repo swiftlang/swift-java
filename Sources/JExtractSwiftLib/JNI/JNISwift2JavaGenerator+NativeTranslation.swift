@@ -59,10 +59,20 @@ extension JNISwift2JavaGenerator {
         nil
       }
 
-      return try NativeFunctionSignature(
+      var result = try translate(swiftResult: functionSignature.result)
+
+      if functionSignature.effectSpecifiers.contains(.async) {
+        result = asyncResultConversion(
+          result: result,
+          functionSignature: functionSignature,
+          mode: config.effectiveAsyncMode
+        )
+      }
+
+      return NativeFunctionSignature(
         selfParameter: nativeSelf,
         parameters: parameters,
-        result: translate(swiftResult: functionSignature.result)
+        result: result
       )
     }
 
@@ -504,6 +514,27 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
     }
+
+    func asyncResultConversion(
+      result: NativeResult,
+      functionSignature: SwiftFunctionSignature,
+      mode: JExtractAsyncMode
+    ) -> NativeResult {
+      switch mode {
+      case .completableFuture:
+        return NativeResult(
+          javaType: result.javaType,
+          conversion: .asyncBlocking(
+            result.conversion,
+            swiftFunctionResultType: functionSignature.result.type
+          ),
+          outParameters: result.outParameters
+        )
+
+      case .future:
+        fatalError("TODO")
+      }
+    }
   }
 
   struct NativeFunctionSignature {
@@ -587,6 +618,8 @@ extension JNISwift2JavaGenerator {
     indirect case optionalMap(NativeSwiftConversionStep)
 
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
+
+    indirect case asyncBlocking(NativeSwiftConversionStep, swiftFunctionResultType: SwiftType)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -815,6 +848,26 @@ extension JNISwift2JavaGenerator {
           """
         )
         return unwrappedName
+
+      case .asyncBlocking(let inner, let swiftFunctionResultType):
+        printer.print("let _semaphore$ = SwiftJava._Semaphore(value: 0)")
+        printer.print("var swiftResult$: \(swiftFunctionResultType)!")
+
+        printer.printBraceBlock("Task") { printer in
+          printer.print(
+            """
+            swiftResult$ = await \(placeholder)
+            _semaphore$.signal()
+            """
+          )
+        }
+        printer.print(
+          """
+          _semaphore$.wait() 
+          """
+        )
+        let inner = inner.render(&printer, "swiftResult$")
+        return inner
       }
     }
   }
