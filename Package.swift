@@ -169,9 +169,9 @@ let package = Package(
 
     // Support library written in Swift for SwiftKit "Java"
     .library(
-      name: "SwiftKitSwift",
+      name: "SwiftJavaRuntimeSupport",
       type: .dynamic,
-      targets: ["SwiftKitSwift"]
+      targets: ["SwiftJavaRuntimeSupport"]
     ),
 
     .library(
@@ -213,7 +213,7 @@ let package = Package(
       name: "SwiftJavaDocumentation",
       dependencies: [
         "SwiftJava",
-        "SwiftKitSwift",
+        "SwiftJavaRuntimeSupport",
       ]
     ),
     
@@ -351,7 +351,7 @@ let package = Package(
       ]
     ),
     .target(
-      name: "SwiftKitSwift",
+      name: "SwiftJavaRuntimeSupport",
       dependencies: [],
       swiftSettings: [
         .swiftLanguageMode(.v5),

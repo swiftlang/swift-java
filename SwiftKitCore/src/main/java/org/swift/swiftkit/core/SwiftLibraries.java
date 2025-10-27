@@ -27,7 +27,7 @@ public final class SwiftLibraries {
     // Library names of core Swift and SwiftKit
     public static final String LIB_NAME_SWIFT_CORE = "swiftCore";
     public static final String LIB_NAME_SWIFT_CONCURRENCY = "swift_Concurrency";
-    public static final String LIB_NAME_SWIFTKITSWIFT = "SwiftKitSwift";
+    public static final String LIB_NAME_SWIFT_JAVA_RUNTIME_SUPPORT = "SwiftJavaRuntimeSupport";
 
     /** 
      * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
@@ -42,10 +42,10 @@ public final class SwiftLibraries {
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
-    public static boolean loadLibraries(boolean loadSwiftKit) {
-        System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
-        if (loadSwiftKit) {
-            System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
+    public static boolean loadLibraries(boolean loadSwiftJavaRuntimeSupport) {
+        System.loadLibrary(LIB_NAME_SWIFT_JAVA_RUNTIME_SUPPORT);
+        if (loadSwiftJavaRuntimeSupport) {
+            System.loadLibrary(LIB_NAME_SWIFT_JAVA_RUNTIME_SUPPORT);
         }
         return true;
     }

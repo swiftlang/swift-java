@@ -30,7 +30,7 @@ import wasi_pthread
 #endif
 
 public final class _Semaphore: @unchecked Sendable {
-  #if canImport(Darwin)
+  #if canImport(Dispatch)
   private let sem: DispatchSemaphore
   #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
   private let sem: UnsafeMutablePointer<sem_t> = UnsafeMutablePointer.allocate(capacity: 1)
