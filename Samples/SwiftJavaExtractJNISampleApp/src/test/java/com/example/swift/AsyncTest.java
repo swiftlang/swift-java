@@ -39,12 +39,19 @@ public class AsyncTest {
     }
 
     @Test
-    void asyncCopy() throws Exception {
+    void asyncSleep() {
+        CompletableFuture<Void> future = MySwiftLibrary.asyncSleep();
+        future.join();
+    }
+
+    @Test
+    void asyncCopy() {
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(10, 5, arena);
             CompletableFuture<MySwiftClass> future = MySwiftLibrary.asyncCopy(obj, arena);
 
             MySwiftClass result = future.join();
+
             assertEquals(10, result.getX());
             assertEquals(5, result.getY());
         }

@@ -354,11 +354,12 @@ extension JNISwift2JavaGenerator {
 
     // Lower the result.
     func innerBody(in printer: inout CodePrinter) -> String {
+      let loweredResult = nativeSignature.result.conversion.render(&printer, result)
+
       if !decl.functionSignature.result.type.isVoid {
-        let loweredResult = nativeSignature.result.conversion.render(&printer, result)
         return "return \(loweredResult)"
       } else {
-        return result
+        return loweredResult
       }
     }
 
