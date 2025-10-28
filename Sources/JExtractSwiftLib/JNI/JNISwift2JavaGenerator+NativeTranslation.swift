@@ -855,7 +855,7 @@ extension JNISwift2JavaGenerator {
         let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
         printer.print("var swiftResult$: \(resultType)!")
 
-        printer.printBraceBlock("Task") { printer in
+        func printInner(printer: inout CodePrinter) {
           if isThrowing {
             printer.printBraceBlock("do") { printer in
               printer.print("swiftResult$ = await Result.success(\(placeholder))")
@@ -867,6 +867,17 @@ extension JNISwift2JavaGenerator {
             printer.print("swiftResult$ = await \(placeholder)")
           }
           printer.print("_semaphore$.signal()")
+        }
+
+        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+          printer.printBraceBlock("Task.immediate") { printer in
+            printInner(printer: &printer)
+          }
+        }
+        printer.printBraceBlock("else") { printer in
+          printer.printBraceBlock("Task") { printer in
+            printInner(printer: &printer)
+          }
         }
         printer.print(
           """
