@@ -73,7 +73,7 @@ This does require the use of the relatively recent [JEP-454: Foreign Function & 
 This is the primary way we envision calling Swift code from server-side Java libraries and applications.
 
 Required language/runtime versions:
-- **Swift 6.1**, because of dependence on rich swift interface files
+- **Swift 6.2**, because of dependence on rich swift interface files
 - **JDK 25+**
   - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-25.
 
@@ -85,7 +85,7 @@ This mode is more limited in some performance and flexibility that it can offer,
 We recommend this mode when FFM is not available, or wide ranging deployment compatibility is your priority. When performance is paramaunt, we recommend the FFM mode instead.
 
 Required language/runtime versions:
-- **Swift 6.1**, because of dependence on rich swift interface files  
+- **Swift 6.2**, because of dependence on rich swift interface files  
 - **Java 7+**, including 
 
 
@@ -94,7 +94,7 @@ Required language/runtime versions:
 This project contains multiple builds, living side by side together.
 
 You will need to have:
-- Swift (6.1.x+)
+- Swift (6.2.x+)
 - Java (25+ for FFM, even though we support lower JDK targets)
 - Gradle (installed by "Gradle wrapper" automatically when you run gradle through `./gradlew`)
 
@@ -104,7 +104,7 @@ Install **Swift**, the easiest way to do this is to use **Swiftly**: [swift.org/
 This should automatically install a recent Swift, but you can always make sure by running:
 
 ```bash
-swiftly install 6.1.2 --use
+swiftly install 6.2 --use
 ```
 
 Install a recent enough Java distribution. We validate this project using Corretto so you can choose to use that as well,
