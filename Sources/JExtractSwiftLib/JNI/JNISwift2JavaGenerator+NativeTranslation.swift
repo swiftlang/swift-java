@@ -851,7 +851,7 @@ extension JNISwift2JavaGenerator {
         return unwrappedName
 
       case .asyncBlocking(let inner, let isThrowing, let swiftFunctionResultType):
-        printer.print("let _semaphore$ = SwiftJava._Semaphore(value: 0)")
+        printer.print("let _semaphore$ = _Semaphore(value: 0)")
         let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
         printer.print("var swiftResult$: \(resultType)!")
 
