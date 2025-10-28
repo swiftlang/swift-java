@@ -521,7 +521,7 @@ extension JNISwift2JavaGenerator {
       mode: JExtractAsyncMode
     ) -> NativeResult {
       switch mode {
-      case .completableFuture:
+      case .completableFuture, .future:
         return NativeResult(
           javaType: result.javaType,
           conversion: .asyncBlocking(
@@ -531,9 +531,6 @@ extension JNISwift2JavaGenerator {
           ),
           outParameters: result.outParameters
         )
-
-      case .future:
-        fatalError("TODO")
       }
     }
   }

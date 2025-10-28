@@ -496,12 +496,29 @@ extension JNISwift2JavaGenerator {
           annotations: result.annotations,
           outParameters: result.outParameters,
           conversion: .method(.constant("java.util.concurrent.CompletableFuture"), function: "supplyAsync", arguments: [
-            .lambda(body: supplyAsyncBodyConversion)
+            .lambda(body: supplyAsyncBodyConversion),
+            .constant("SwiftAsync.SWIFT_ASYNC_EXECUTOR")
           ])
         )
 
       case .future:
-        fatalError("TODO")
+        let asyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
+          .aggregate([
+            .print(result.conversion),
+            .null
+          ])
+        } else {
+          result.conversion
+        }
+
+        return TranslatedResult(
+          javaType: .class(package: "java.util.concurrent", name: "Future<\(result.javaType.wrapperClassIfNeeded)>"),
+          annotations: result.annotations,
+          outParameters: result.outParameters,
+          conversion: .method(.constant("SwiftAsync.SWIFT_ASYNC_EXECUTOR"), function: "submit", arguments: [
+            .lambda(body: asyncBodyConversion)
+          ])
+        )
       }
     }
 
