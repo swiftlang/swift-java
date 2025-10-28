@@ -465,6 +465,7 @@ extension JNISwift2JavaGenerator {
 
       import SwiftJava
       import CSwiftJavaJNI
+      import SwiftJavaRuntimeSupport
 
       """
     )

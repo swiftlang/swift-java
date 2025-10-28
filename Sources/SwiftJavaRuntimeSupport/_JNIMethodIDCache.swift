@@ -12,6 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CSwiftJavaJNI
+import SwiftJava
+
 /// A cache used to hold references for JNI method and classes.
 ///
 /// This type is used internally in by the outputted JExtract wrappers

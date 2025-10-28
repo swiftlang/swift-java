@@ -352,7 +352,10 @@ let package = Package(
     ),
     .target(
       name: "SwiftJavaRuntimeSupport",
-      dependencies: [],
+      dependencies: [
+        "CSwiftJavaJNI",
+        "SwiftJava"
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
