@@ -26,7 +26,6 @@ public enum JExtractAsyncMode: String, Codable {
   case future
 }
 
-
 extension JExtractAsyncMode {
   public static var `default`: Self {
     .completableFuture
