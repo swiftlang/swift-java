@@ -328,3 +328,19 @@ which conform a to a given Swift protocol.
 
 #### Returning protocol types
 Protocols are not yet supported as return types.
+
+### `async` methods
+
+> Note: Importing `async` methods is currently only available in the JNI mode of jextract.
+
+Asynchronous methods in Swift can be extraced using different modes, which are explained in detail below.
+
+#### Async mode: completable-future (default)
+
+In this mode `async` methods in Swift are extracted as methods returning a `java.util.concurrent.CompletableFuture`.
+This mode gives the most flexibility and should be prefered if your platform supports `CompletableFuture`.
+
+#### Async mode: future
+
+This is a mode for legacy platforms, where `CompletableFuture` is not available, such as Android 23 and below.
+In this mode `async` methods in Swift are extracted as methods returning a `java.util.concurrent.Future`.
