@@ -16,22 +16,16 @@ package org.swift.swiftkit.core;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class SwiftAsync {
 
-    private static final ThreadFactory SWIFT_ASYNC_THREAD_FACTORY = new ThreadFactory() {
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix = "swift-async-pool-";
-
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
-            t.setDaemon(true);
-            return t;
-        }
-    };
-
-    public static final ExecutorService SWIFT_ASYNC_EXECUTOR = Executors.newCachedThreadPool(SWIFT_ASYNC_THREAD_FACTORY);
+    public static final ExecutorService SWIFT_ASYNC_EXECUTOR = new ForkJoinPool(
+            Runtime.getRuntime().availableProcessors(),
+            ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+            null,
+            true
+    );
 }
