@@ -14,5 +14,5 @@
 
 enum SwiftEffectSpecifier: Equatable {
   case `throws`
-  case async
+  case `async`
 }

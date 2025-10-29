@@ -28,7 +28,7 @@ public enum JavaType: Equatable, Hashable {
 
   /// A Java class separated into its package (e.g., "java.lang") and class name
   /// (e.g., "Object")
-  case `class`(package: String?, name: String)
+  case `class`(package: String?, name: String, typeParameters: [JavaType] = [])
 
   /// A Java array.
   indirect case array(JavaType)

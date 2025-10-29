@@ -35,7 +35,7 @@ extension JavaType {
     case .short: "S"
     case .void: "V"
     case .array(let elementType): "[" + elementType.mangledName
-    case .class(package: let package, name: let name):
+    case .class(package: let package, name: let name, _):
       "L\(package!).\(name.replacingPeriodsWithDollars());".replacingPeriodsWithSlashes()
     }
   }

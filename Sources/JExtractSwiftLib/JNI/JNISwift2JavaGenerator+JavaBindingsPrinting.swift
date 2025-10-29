@@ -522,7 +522,7 @@ extension JNISwift2JavaGenerator {
 
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.resultType.outParameters {
-      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render());")
+      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));")
       arguments.append(outParameter.name)
     }
 

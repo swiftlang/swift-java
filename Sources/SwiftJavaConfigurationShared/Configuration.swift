@@ -57,9 +57,9 @@ public struct Configuration: Codable {
     memoryManagementMode ?? .default
   }
 
-  public var asyncMode: JExtractAsyncMode?
-  public var effectiveAsyncMode: JExtractAsyncMode {
-    asyncMode ?? .default
+  public var asyncFuncMode: JExtractAsyncFuncMode?
+  public var effectiveAsyncFuncMode: JExtractAsyncFuncMode {
+    asyncFuncMode ?? .default
   }
 
   // ==== java 2 swift ---------------------------------------------------------

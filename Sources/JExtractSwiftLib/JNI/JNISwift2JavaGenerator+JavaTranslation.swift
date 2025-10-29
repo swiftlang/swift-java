@@ -182,13 +182,13 @@ extension JNISwift2JavaGenerator {
       }
 
       // Swift -> Java
-      let translatedFunctionSignature = try translate(
+      var translatedFunctionSignature = try translate(
         functionSignature: decl.functionSignature,
         methodName: javaName,
         parentName: parentName
       )
       // Java -> Java (native)
-      let nativeFunctionSignature = try nativeTranslation.translate(
+      var nativeFunctionSignature = try nativeTranslation.translate(
         functionSignature: decl.functionSignature,
         translatedFunctionSignature: translatedFunctionSignature,
         methodName: javaName,
@@ -211,6 +211,16 @@ extension JNISwift2JavaGenerator {
         default:
           break
         }
+      }
+
+      // Handle async methods
+      if decl.functionSignature.isAsync {
+        self.convertToAsync(
+          translatedFunctionSignature: &translatedFunctionSignature,
+          nativeFunctionSignature: &nativeFunctionSignature,
+          originalFunctionSignature: decl.functionSignature,
+          mode: config.effectiveAsyncFuncMode
+        )
       }
 
       return TranslatedFunctionDecl(
@@ -281,11 +291,7 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
-      var resultType = try translate(swiftResult: functionSignature.result)
-
-      if functionSignature.effectSpecifiers.contains(.async) {
-        resultType = asyncResultConversion(result: resultType, mode: config.effectiveAsyncMode)
-      }
+      let resultType = try translate(swiftResult: functionSignature.result)
 
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
@@ -476,49 +482,58 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func asyncResultConversion(
-      result: TranslatedResult,
-      mode: JExtractAsyncMode
-    ) -> TranslatedResult {
+    func convertToAsync(
+      translatedFunctionSignature: inout TranslatedFunctionSignature,
+      nativeFunctionSignature: inout NativeFunctionSignature,
+      originalFunctionSignature: SwiftFunctionSignature,
+      mode: JExtractAsyncFuncMode
+    ) {
       switch mode {
       case .completableFuture:
-        let supplyAsyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
-          .aggregate([
-            .print(result.conversion),
-            .null
-          ])
-        } else {
-          result.conversion
-        }
+//        let supplyAsyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
+//          .aggregate([
+//            .print(result.conversion),
+//            .null
+//          ])
+//        } else {
+//          result.conversion
+//        }
 
-        return TranslatedResult(
-          javaType: .class(package: "java.util.concurrent", name: "CompletableFuture<\(result.javaType.wrapperClassIfNeeded)>"),
+        // Update translated function
+
+        let nativeFutureType = JavaType.completableFuture(nativeFunctionSignature.result.javaType)
+
+        let futureOutParameter = OutParameter(
+          name: "$future",
+          type: nativeFutureType,
+          allocation: .new
+        )
+
+        let result = translatedFunctionSignature.resultType
+        translatedFunctionSignature.resultType = TranslatedResult(
+          javaType: .completableFuture(translatedFunctionSignature.resultType.javaType),
           annotations: result.annotations,
-          outParameters: result.outParameters,
-          conversion: .method(.constant("java.util.concurrent.CompletableFuture"), function: "supplyAsync", arguments: [
-            .lambda(body: supplyAsyncBodyConversion),
-            .constant("SwiftAsync.SWIFT_ASYNC_EXECUTOR")
+          outParameters: result.outParameters + [futureOutParameter],
+          conversion: .aggregate(variable: nil, [
+            .print(.placeholder), // Make the downcall
+            .method(.constant("$future"), function: "thenApply", arguments: [
+             .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
+           ])
           ])
         )
+
+        // Update native function
+        nativeFunctionSignature.result.javaType = .void
+        nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
+          nativeFunctionSignature.result.conversion,
+          swiftFunctionResultType: originalFunctionSignature.result.type,
+          nativeReturnType: nativeFunctionSignature.result.javaType,
+          outParameters: nativeFunctionSignature.result.outParameters
+        )
+        nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
 
       case .future:
-        let asyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
-          .aggregate([
-            .print(result.conversion),
-            .null
-          ])
-        } else {
-          result.conversion
-        }
-
-        return TranslatedResult(
-          javaType: .class(package: "java.util.concurrent", name: "Future<\(result.javaType.wrapperClassIfNeeded)>"),
-          annotations: result.annotations,
-          outParameters: result.outParameters,
-          conversion: .method(.constant("SwiftAsync.SWIFT_ASYNC_EXECUTOR"), function: "submit", arguments: [
-            .lambda(body: asyncBodyConversion)
-          ])
-        )
+        fatalError()
       }
     }
 
@@ -866,11 +881,15 @@ extension JNISwift2JavaGenerator {
   struct OutParameter {
     enum Allocation {
       case newArray(JavaType, size: Int)
+      case new
 
-      func render() -> String {
+      func render(type: JavaType) -> String {
         switch self {
         case .newArray(let javaType, let size):
           "new \(javaType)[\(size)]"
+
+        case .new:
+          "new \(type)()"
         }
       }
     }
@@ -969,8 +988,8 @@ extension JNISwift2JavaGenerator {
     /// `return value`
     indirect case `return`(JavaNativeConversionStep)
 
-    /// `() -> { return body; }`
-    indirect case lambda(body: JavaNativeConversionStep)
+    /// `(args) -> { return body; }`
+    indirect case lambda(args: [String] = [], body: JavaNativeConversionStep)
 
     case null
 
@@ -1094,9 +1113,9 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "return \(inner);"
 
-      case .lambda(let body):
+      case .lambda(let args, let body):
         var printer = CodePrinter()
-        printer.printBraceBlock("() ->") { printer in
+        printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {
             printer.print("return \(body);")
@@ -1167,7 +1186,7 @@ extension JNISwift2JavaGenerator {
       case .return(let inner):
         return inner.requiresSwiftArena
 
-      case .lambda(let body):
+      case .lambda(_, let body):
         return body.requiresSwiftArena
 
       case .print(let inner):

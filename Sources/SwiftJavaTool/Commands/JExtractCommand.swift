@@ -79,8 +79,8 @@ extension SwiftJava {
     )
     var dependsOn: [String] = []
 
-    @Option(help: "The mode to use for extracting asynchronous Swift code. By default async methods are extracted as Java functions returning CompletableFuture.")
-    var asyncMode: JExtractAsyncMode = .default
+    @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
+    var asyncFuncMode: JExtractAsyncFuncMode = .default
   }
 }
 
@@ -101,7 +101,7 @@ extension SwiftJava.JExtractCommand {
     config.unsignedNumbersMode = unsignedNumbers
     config.minimumInputAccessLevelMode = minimumInputAccessLevel
     config.memoryManagementMode = memoryManagementMode
-    config.asyncMode = asyncMode
+    config.asyncFuncMode = asyncFuncMode
 
     try checkModeCompatibility()
 
@@ -166,4 +166,4 @@ extension JExtractGenerationMode: ExpressibleByArgument {}
 extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
 extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
 extension JExtractMemoryManagementMode: ExpressibleByArgument {}
-extension JExtractAsyncMode: ExpressibleByArgument {}
+extension JExtractAsyncFuncMode: ExpressibleByArgument {}

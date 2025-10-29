@@ -59,42 +59,13 @@ extension JNISwift2JavaGenerator {
         nil
       }
 
-      var result = try translate(swiftResult: functionSignature.result)
-
-      if functionSignature.effectSpecifiers.contains(.async) {
-        result = asyncResultConversion(
-          result: result,
-          functionSignature: functionSignature,
-          mode: config.effectiveAsyncMode
-        )
-      }
+      let result = try translate(swiftResult: functionSignature.result)
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
         parameters: parameters,
         result: result
       )
-    }
-
-    func translateParameters(
-      _ parameters: [SwiftParameter],
-      translatedParameters: [TranslatedParameter],
-      methodName: String,
-      parentName: String,
-      genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
-    ) throws -> [NativeParameter] {
-      try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
-        let parameterName = translatedParameter.parameter.name
-        return try translateParameter(
-          type: swiftParameter.type,
-          parameterName: parameterName,
-          methodName: methodName,
-          parentName: parentName,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements
-        )
-      }
     }
 
     func translateParameter(
@@ -514,31 +485,12 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
       }
     }
-
-    func asyncResultConversion(
-      result: NativeResult,
-      functionSignature: SwiftFunctionSignature,
-      mode: JExtractAsyncMode
-    ) -> NativeResult {
-      switch mode {
-      case .completableFuture, .future:
-        return NativeResult(
-          javaType: result.javaType,
-          conversion: .asyncBlocking(
-            result.conversion,
-            isThrowing: functionSignature.effectSpecifiers.contains(.throws),
-            swiftFunctionResultType: functionSignature.result.type
-          ),
-          outParameters: result.outParameters
-        )
-      }
-    }
   }
 
   struct NativeFunctionSignature {
     let selfParameter: NativeParameter?
-    let parameters: [NativeParameter]
-    let result: NativeResult
+    var parameters: [NativeParameter]
+    var result: NativeResult
   }
 
   struct NativeParameter {
@@ -551,8 +503,8 @@ extension JNISwift2JavaGenerator {
   }
 
   struct NativeResult {
-    let javaType: JavaType
-    let conversion: NativeSwiftConversionStep
+    var javaType: JavaType
+    var conversion: NativeSwiftConversionStep
 
     /// Out parameters for populating the indirect return values.
     var outParameters: [JavaParameter]
@@ -617,7 +569,12 @@ extension JNISwift2JavaGenerator {
 
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
-    indirect case asyncBlocking(NativeSwiftConversionStep, isThrowing: Bool, swiftFunctionResultType: SwiftType)
+    indirect case asyncCompleteFuture(
+      NativeSwiftConversionStep,
+      swiftFunctionResultType: SwiftType,
+      nativeReturnType: JavaType,
+      outParameters: [JavaParameter]
+    )
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -635,15 +592,15 @@ extension JNISwift2JavaGenerator {
 
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
-        return "\(inner).getJNIValue(in: environment!)"
+        return "\(inner).getJNIValue(in: environment)"
 
       case .getJValue(let inner):
         let inner = inner.render(&printer, placeholder)
-        return "\(inner).getJValue(in: environment!)"
+        return "\(inner).getJValue(in: environment)"
 
       case .initFromJNI(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
-        return "\(swiftType)(fromJNI: \(inner), in: environment!)"
+        return "\(swiftType)(fromJNI: \(inner), in: environment)"
 
       case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
         let inner = inner.render(&printer, placeholder)
@@ -847,42 +804,85 @@ extension JNISwift2JavaGenerator {
         )
         return unwrappedName
 
-      case .asyncBlocking(let inner, let isThrowing, let swiftFunctionResultType):
-        printer.print("let _semaphore$ = _Semaphore(value: 0)")
-        let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
-        printer.print("var swiftResult$: \(resultType)!")
-
-        func printInner(printer: inout CodePrinter) {
-          if isThrowing {
-            printer.printBraceBlock("do") { printer in
-              printer.print("swiftResult$ = await Result.success(\(placeholder))")
-            }
-            printer.printBraceBlock("catch") { printer in
-              printer.print("swiftResult$ = Result.failure(error)")
-            }
-          } else {
-            printer.print("swiftResult$ = await \(placeholder)")
-          }
-          printer.print("_semaphore$.signal()")
+      case .asyncCompleteFuture(
+        let inner,
+        let swiftFunctionResultType,
+        let nativeReturnType,
+        let outParameters
+      ):
+        // Global ref all indirect returns
+        for outParameter in outParameters {
+          printer.print("let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))")
         }
 
-        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
-          printer.printBraceBlock("Task.immediate") { printer in
-            printInner(printer: &printer)
-          }
-        }
-        printer.printBraceBlock("else") { printer in
-          printer.printBraceBlock("Task") { printer in
-            printInner(printer: &printer)
-          }
-        }
         printer.print(
           """
-          _semaphore$.wait() 
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          let completableFutureClazz$ = environment.interface.FindClass(environment, "java/util/concurrent/CompletableFuture")!
+          let completeMethodID = environment.interface.GetMethodID(environment, completableFutureClazz$, "complete", "(Ljava/lang/Object;)Z")!
           """
         )
-        let inner = inner.render(&printer, isThrowing ? "try swiftResult$.get()" : "swiftResult$")
-        return inner
+
+        printer.printBraceBlock("Task") { printer in
+          printer.print("let swiftResult$ = await \(placeholder)")
+          printer.print(
+            """
+            let environment = try JavaVirtualMachine.shared().environment()
+            """
+          )
+          printer.printBraceBlock("defer") { printer in
+            printer.print("environment.interface.DeleteGlobalRef(environment, globalFuture)")
+            for outParameter in outParameters {
+              printer.print("environment.interface.DeleteGlobalRef(environment, \(outParameter.name))")
+            }
+          }
+          let inner = inner.render(&printer, "swiftResult$")
+          if swiftFunctionResultType.isVoid {
+            printer.print(inner)
+          } else {
+            printer.printBraceBlock("withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)])") { printer in
+              printer.print("environment.interface.CallBooleanMethodV(environment, globalFuture, completeMethodID, $0)")
+            }
+          }
+        }
+
+        return ""
+
+//        printer.print("let _semaphore$ = _Semaphore(value: 0)")
+//        let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
+//        printer.print("var swiftResult$: \(resultType)!")
+//
+//        func printInner(printer: inout CodePrinter) {
+//          if isThrowing {
+//            printer.printBraceBlock("do") { printer in
+//              printer.print("swiftResult$ = await Result.success(\(placeholder))")
+//            }
+//            printer.printBraceBlock("catch") { printer in
+//              printer.print("swiftResult$ = Result.failure(error)")
+//            }
+//          } else {
+//            printer.print("swiftResult$ = await \(placeholder)")
+//          }
+//          printer.print("_semaphore$.signal()")
+//        }
+//
+//        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+//          printer.printBraceBlock("Task.immediate") { printer in
+//            printInner(printer: &printer)
+//          }
+//        }
+//        printer.printBraceBlock("else") { printer in
+//          printer.printBraceBlock("Task") { printer in
+//            printInner(printer: &printer)
+//          }
+//        }
+//        printer.print(
+//          """
+//          _semaphore$.wait() 
+//          """
+//        )
+//        let inner = inner.render(&printer, isThrowing ? "try swiftResult$.get()" : "swiftResult$")
+//        return inner
       }
     }
   }

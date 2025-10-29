@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Configures how Swift `async` functions should be extracted by jextract.
-public enum JExtractAsyncMode: String, Codable {
+public enum JExtractAsyncFuncMode: String, Codable {
   /// Extract Swift `async` APIs as Java functions that return `CompletableFuture`s.
   case completableFuture
 
@@ -26,7 +26,7 @@ public enum JExtractAsyncMode: String, Codable {
   case future
 }
 
-extension JExtractAsyncMode {
+extension JExtractAsyncFuncMode {
   public static var `default`: Self {
     .completableFuture
   }

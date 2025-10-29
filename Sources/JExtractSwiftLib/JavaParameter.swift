@@ -24,6 +24,7 @@ struct JavaParameter {
       switch self {
       case .concrete(let type):
         return type.jniTypeSignature
+
       case .generic(_, let extends):
         guard !extends.isEmpty else {
           return "Ljava/lang/Object;"

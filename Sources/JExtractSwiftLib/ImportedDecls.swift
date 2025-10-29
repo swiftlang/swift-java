@@ -193,7 +193,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 
   var isAsync: Bool {
-    self.functionSignature.effectSpecifiers.contains(.async)
+    self.functionSignature.isAsync
   }
 
   init(

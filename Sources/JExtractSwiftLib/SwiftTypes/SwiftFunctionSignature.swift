@@ -30,6 +30,10 @@ public struct SwiftFunctionSignature: Equatable {
   var genericParameters: [SwiftGenericParameterDeclaration]
   var genericRequirements: [SwiftGenericRequirement]
 
+  var isAsync: Bool {
+    effectSpecifiers.contains(.async)
+  }
+
   init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],
