@@ -57,7 +57,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Typed throws: `func x() throws(E)`                                                   | ❌        | ❌   |
 | Stored properties: `var`, `let` (with `willSet`, `didSet`)                           | ✅        | ✅   |
 | Computed properties: `var` (incl. `throws`)                                          | ✅ / TODO | ✅   |
-| Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ❌   |
+| Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
 | Arrays: `[UInt8]`, `[T]`                                                             | ❌        | ❌   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
@@ -97,7 +97,6 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Result builders                                                                      | ❌        | ❌   |
 | Automatic Reference Counting of class types / lifetime safety                        | ✅        | ✅   |
 | Value semantic types (e.g. struct copying)                                           | ❌        | ❌   |
-| Swift concurrency: `func async`, `actor`, `distribued actor`                         | ❌        | ❌   |
 |                                                                                      |          |     |
 |                                                                                      |          |     |
 
@@ -329,18 +328,20 @@ which conform a to a given Swift protocol.
 #### Returning protocol types
 Protocols are not yet supported as return types.
 
-### `async` methods
+### `async` functions
 
-> Note: Importing `async` methods is currently only available in the JNI mode of jextract.
+> Note: Importing `async` functions is currently only available in the JNI mode of jextract.
 
-Asynchronous methods in Swift can be extraced using different modes, which are explained in detail below.
+Asynchronous functions in Swift can be extraced using different modes, which are explained below.
 
-#### Async mode: completable-future (default)
+#### Async function mode: completable-future (default)
 
-In this mode `async` methods in Swift are extracted as methods returning a `java.util.concurrent.CompletableFuture`.
+In this mode `async` functions in Swift are extracted as Java methods returning a `java.util.concurrent.CompletableFuture`.
 This mode gives the most flexibility and should be prefered if your platform supports `CompletableFuture`.
 
 #### Async mode: future
 
 This is a mode for legacy platforms, where `CompletableFuture` is not available, such as Android 23 and below.
-In this mode `async` methods in Swift are extracted as methods returning a `java.util.concurrent.Future`.
+In this mode `async` functions in Swift are extracted as Java methods returning a `java.util.concurrent.Future`.
+To enable this mode pass the `--async-func-mode future` command line option, 
+or set the `asyncFuncMode` configuration value in `swift-java.config`
