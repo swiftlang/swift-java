@@ -165,6 +165,11 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       log("No dependencies to fetch for target \(sourceModule.name)")
     }
     
+    // Add all the core Java stdlib modules as --depends-on
+    let javaStdlibModules = getExtractedJavaStdlibModules()
+    log("Include Java standard library SwiftJava modules: \(javaStdlibModules)")
+    arguments += javaStdlibModules.flatMap { ["--depends-on", $0] }
+
     if !outputSwiftFiles.isEmpty {
       arguments += [ configFile.path(percentEncoded: false) ]
 
@@ -235,4 +240,30 @@ extension SwiftJavaBuildToolPlugin {
   func outputFilePath(context: PluginContext, generated: Bool, filename: String) -> URL {
     outputDirectory(context: context, generated: generated).appending(path: filename)
   }
+}
+
+func getExtractedJavaStdlibModules() -> [String] {
+  let fileManager = FileManager.default
+  let sourcesPath = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .appendingPathComponent("Sources")
+    .appendingPathComponent("JavaStdlib")
+
+  guard let stdlibDirContents = try? fileManager.contentsOfDirectory(
+    at: sourcesPath,
+    includingPropertiesForKeys: [.isDirectoryKey],
+    options: [.skipsHiddenFiles]
+  ) else {
+    return []
+  }
+
+  return stdlibDirContents.compactMap { url in
+    guard let resourceValues = try? url.resourceValues(forKeys: [.isDirectoryKey]),
+          let isDirectory = resourceValues.isDirectory,
+          isDirectory else {
+      return nil
+    }
+    return url.lastPathComponent
+  }.sorted()
 }

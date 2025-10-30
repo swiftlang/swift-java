@@ -118,6 +118,7 @@ extension SwiftJava.WrapJavaCommand {
     environment: JNIEnvironment
   ) throws {
     let translator = JavaTranslator(
+      config: config,
       swiftModuleName: effectiveSwiftModule,
       environment: environment,
       translateAsClass: true

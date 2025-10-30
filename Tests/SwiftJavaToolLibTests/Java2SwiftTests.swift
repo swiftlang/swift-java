@@ -14,6 +14,7 @@
 
 @_spi(Testing)
 import SwiftJava
+import SwiftJavaConfigurationShared
 import SwiftJavaToolLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
@@ -643,6 +644,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   _ javaType: JavaClassType.Type,
   swiftTypeName: String,
   asClass: Bool = false,
+  config: Configuration = Configuration(),
   translatedClasses: [String: SwiftTypeName] = [:],
   nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
@@ -651,6 +653,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
 ) throws {
   let environment = try jvm.environment()
   let translator = JavaTranslator(
+    config: config,
     swiftModuleName: "SwiftModule",
     environment: environment,
     translateAsClass: asClass

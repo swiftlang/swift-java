@@ -24,6 +24,8 @@ import Foundation
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
 package class JavaTranslator {
+  let config: Configuration
+
   /// The name of the Swift module that we are translating into.
   let swiftModuleName: String
 
@@ -68,11 +70,13 @@ package class JavaTranslator {
   package var nestedClasses: [String: [JavaClass<JavaObject>]] = [:]
 
   package init(
+    config: Configuration,
     swiftModuleName: String,
     environment: JNIEnvironment,
     translateAsClass: Bool = false,
     format: BasicFormat = JavaTranslator.defaultFormat
   ) {
+    self.config = config
     self.swiftModuleName = swiftModuleName
     self.environment = environment
     self.translateAsClass = translateAsClass
@@ -259,7 +263,6 @@ extension JavaTranslator {
       return translated.swiftType
     }
 
-    print("DEBUG >>> Not translated: \(name)")
     throw TranslationError.untranslatedJavaClass(name)
   }
 }

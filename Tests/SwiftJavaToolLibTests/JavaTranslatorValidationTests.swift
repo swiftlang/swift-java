@@ -14,10 +14,11 @@
 
 import SwiftJavaToolLib
 import XCTest
+import SwiftJavaConfigurationShared
 
 final class JavaTranslatorValidationTests: XCTestCase {
   func testValidationError() throws {
-    let translator = try JavaTranslator(swiftModuleName: "SwiftModule", environment: jvm.environment())
+    let translator = try JavaTranslator(config: Configuration(), swiftModuleName: "SwiftModule", environment: jvm.environment())
     translator.translatedClasses = [
       "TestClass": SwiftTypeName(module: "Module1", name: "Class1"),
       "TestClass2": SwiftTypeName(module: "Module2", name: "Class1"),

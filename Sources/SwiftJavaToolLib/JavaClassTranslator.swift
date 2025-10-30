@@ -15,6 +15,7 @@
 import SwiftJava
 import JavaLangReflect
 import SwiftSyntax
+import SwiftJavaConfigurationShared
 
 /// Utility type that translates a single Java class into its corresponding
 /// Swift type and any additional helper types or functions.
@@ -212,8 +213,9 @@ struct JavaClassTranslator {
     for method in methods {
       guard let method else { continue }
 
-      // Only look at public and protected methods here.
-      guard method.isPublic || method.isProtected else { continue }
+      guard shouldExtract(method: method) else {
+        continue
+      }
 
       // Skip any methods that are expected to be implemented in Swift. We will
       // visit them in the second pass, over the *declared* methods, because
@@ -246,6 +248,20 @@ struct JavaClassTranslator {
 
 /// MARK: Collection of Java class members.
 extension JavaClassTranslator {
+
+  /// Determines whether a method should be extracted for translation.
+  /// Only look at public and protected methods here.
+  private func shouldExtract(method: Method) -> Bool {
+    switch self.translator.config.effectiveMinimumInputAccessLevelMode {
+      case .internal:
+        return method.isPublic || method.isProtected || method.isPackage
+      case .package:
+        return method.isPublic || method.isProtected || method.isPackage
+      case .public:
+        return method.isPublic || method.isProtected
+    }
+  }
+
   /// Add a field to the appropriate lists(s) for later translation.
   private mutating func addField(_ field: Field) {
     // Static fields go into a separate list.
@@ -805,9 +821,7 @@ extension JavaClassTranslator {
           continue
         }
 
-        // Ignore non-public, non-protected methods because they would not
-        // have been render into the Swift superclass.
-        if !overriddenMethod.isPublic && !overriddenMethod.isProtected {
+        guard shouldExtract(method: overriddenMethod) else {
           continue
         }
 

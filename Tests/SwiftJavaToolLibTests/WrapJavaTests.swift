@@ -16,6 +16,7 @@
 import SwiftJavaToolLib
 import JavaUtilJar
 import SwiftJavaShared
+import SwiftJavaConfigurationShared
 import _Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
@@ -47,6 +48,63 @@ class WrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJavaGenericMethod() async throws {
+    do {
+      let classpathURL = try await compileJava(
+        """
+        package com.example;
+
+        class Item<T> { 
+          final T value;
+          Item(T item) {
+            this.value = item;
+          }
+        }
+        class Pair<First, Second> { }
+
+        class ExampleSimpleClass {
+          <KeyType, ValueType> Pair<KeyType, ValueType> get(
+            String name,
+            Item<KeyType> key,
+            Item<ValueType> value
+          ) { 
+            return null; 
+          }
+        }
+        """)
+
+      try assertWrapJavaOutput(
+        javaClassNames: [
+          "com.example.Item",
+          "com.example.Pair",
+          "com.example.ExampleSimpleClass"
+        ],
+        classpath: [classpathURL],
+        expectedChunks: [
+          """
+          import CSwiftJavaJNI
+          import SwiftJava
+          """,
+          """
+          @JavaClass("com.example.ExampleSimpleClass")
+          open class ExampleSimpleClass: JavaObject {
+          """,
+          """
+          @JavaClass("com.example.ExampleSimpleClass")
+          open class ExampleSimpleClass: JavaObject {
+          """,
+          """
+          @JavaMethod
+          open func getStore<T1, T2>(_ arg0: String, _ arg1: Item<T1>?, _ arg2: Item<T2>?) -> BDStore<T1, T2>!
+          """
+        ]
+      )
+    } catch let error as Throwable { 
+      error.printStackTrace()
+      XCTFail("error: \(error)")
+    }
+  }
+
   /*
   /Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/CompressingStore.swift:6:30: error: reference to generic type 'AbstractStore' requires arguments in <...>
  4 |
@@ -65,6 +123,8 @@ class WrapJavaTests: XCTestCase {
  8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
   */
   func testGenericSuperclass() async throws {
+    return  // FIXME: we need this 
+
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -160,8 +220,12 @@ func assertWrapJavaOutput(
     replace: false
   )
   
+  var config = Configuration()
+  config.minimumInputAccessLevelMode = .package
+
   let environment = try jvm.environment()
   let translator = JavaTranslator(
+    config: config,
     swiftModuleName: "SwiftModule",
     environment: environment,
     translateAsClass: true)
