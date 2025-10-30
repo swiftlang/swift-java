@@ -32,16 +32,17 @@ struct JNIAsyncTests {
          * public func asyncVoid() async
          * }
          */
-        public static java.util.concurrent.CompletableFuture<Void> asyncVoid() {
-          return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            SwiftModule.$asyncVoid();
-            return null;
+        public static java.util.concurrent.CompletableFuture<java.lang.Void> asyncVoid() {
+          java.util.concurrent.CompletableFuture<java.lang.Void> $future = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          SwiftModule.$asyncVoid($future);
+          return $future.thenApply((futureResult$) -> {
+            return futureResult$;
           }
           );
         }
         """,
         """
-        private static native void $asyncVoid();
+        private static native void $asyncVoid(java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
         """,
       ]
     )
@@ -55,24 +56,33 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__")
-        func Java_com_example_swift_SwiftModule__00024asyncVoid__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
-          let _semaphore$ = _Semaphore(value: 0)
-          var swiftResult$: ()!
+        @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
             Task.immediate {
-              swiftResult$ = await SwiftModule.asyncVoid()
-              _semaphore$.signal()
+              var environment = environment!
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.asyncVoid()
+              environment = try JavaVirtualMachine.shared().environment()
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
             }
           }
           else {
             Task {
-              swiftResult$ = await SwiftModule.asyncVoid()
-              _semaphore$.signal()
+              var environment = try! JavaVirtualMachine.shared().environment()
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.asyncVoid()
+              environment = try JavaVirtualMachine.shared().environment()
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
             }
           }
-          _semaphore$.wait() 
-          swiftResult$
         }
         """
       ]
@@ -93,16 +103,17 @@ struct JNIAsyncTests {
          * public func async() async throws
          * }
          */
-        public static java.util.concurrent.CompletableFuture<Void> async() {
-          return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            SwiftModule.$async();
-            return null;
+        public static java.util.concurrent.CompletableFuture<java.lang.Void> async() {
+          java.util.concurrent.CompletableFuture<java.lang.Void> $future = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          SwiftModule.$async($future);
+          return $future.thenApply((futureResult$) -> {
+            return futureResult$;
           }
           );
         }
         """,
         """
-        private static native void $async();
+        private static native void $async(java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
         """,
       ]
     )
@@ -116,39 +127,48 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__")
-        func Java_com_example_swift_SwiftModule__00024async__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
-          do {
-            let _semaphore$ = _Semaphore(value: 0)
-            var swiftResult$: Result<(), any Error>!
-            if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
-              Task.immediate {
-                do {
-                  swiftResult$ = await Result.success(try SwiftModule.async())
-                }
-                catch {
-                  swiftResult$ = Result.failure(error)
-                }
-                _semaphore$.signal()
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            Task.immediate {
+              var environment = environment!
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              do {
+                let swiftResult$ = await try SwiftModule.async()
+                environment = try JavaVirtualMachine.shared().environment()
+                environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+              }
+              catch {
+                let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+                let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
+                catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
               }
             }
-            else {
-              Task {
-                do {
-                  swiftResult$ = await Result.success(try SwiftModule.async())
-                }
-                catch {
-                  swiftResult$ = Result.failure(error)
-                }
-                _semaphore$.signal()
-              }
-            }
-            _semaphore$.wait() 
-            try swiftResult$.get()
-          } catch {
-            environment.throwAsException(error)
-            
           }
+          else {
+            Task {
+              var environment = try! JavaVirtualMachine.shared().environment()
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              do {
+                let swiftResult$ = await try SwiftModule.async()
+                environment = try JavaVirtualMachine.shared().environment()
+                environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+              }
+              catch {
+                let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+                let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
+                catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+              }
+            }
+          }
+        }
         """
       ]
     )
@@ -168,15 +188,17 @@ struct JNIAsyncTests {
          * public func async(i: Int64) async -> Int64
          * }
          */
-        public static java.util.concurrent.CompletableFuture<Long> async(long i) {
-          return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            return SwiftModule.$async(i);
+        public static java.util.concurrent.CompletableFuture<java.lang.Long> async(long i) {
+          java.util.concurrent.CompletableFuture<java.lang.Long> $future = new java.util.concurrent.CompletableFuture<java.lang.Long>();
+          SwiftModule.$async(i, $future);
+          return $future.thenApply((futureResult$) -> {
+            return futureResult$;
           }
           );
         }
         """,
         """
-        private static native long $async(long i);
+        private static native void $async(long i, java.util.concurrent.CompletableFuture<java.lang.Long> result_future);
         """,
       ]
     )
@@ -190,24 +212,38 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__J")
-        func Java_com_example_swift_SwiftModule__00024async__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong) -> jlong {
-          let _semaphore$ = _Semaphore(value: 0)
-          var swiftResult$: Int64!
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_future: jobject?) {
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
             Task.immediate {
-              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
-              _semaphore$.signal()
+              var environment = environment!
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
+              environment = try JavaVirtualMachine.shared().environment()
+              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)]) {
+                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
+              }
             }
           }
           else {
             Task {
-              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
-              _semaphore$.signal()
+              var environment = try! JavaVirtualMachine.shared().environment()
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
+              environment = try JavaVirtualMachine.shared().environment()
+              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)]) {
+                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
+              }
             }
           }
-          _semaphore$.wait() 
-          return swiftResult$.getJNIValue(in: environment)
+          return 
         }
         """
       ]
@@ -233,14 +269,16 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<MyClass> async(MyClass c, SwiftArena swiftArena$) {
-          return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$async(c.$memoryAddress()), swiftArena$);
+          java.util.concurrent.CompletableFuture<java.lang.Long> $future = new java.util.concurrent.CompletableFuture<java.lang.Long>();
+          SwiftModule.$async(c.$memoryAddress(), $future);
+          return $future.thenApply((futureResult$) -> {
+            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
           }
           );
         }
         """,
         """
-        private static native long $async(long c);
+        private static native void $async(long c, java.util.concurrent.CompletableFuture<java.lang.Long> result_future);
         """,
       ]
     )
@@ -258,33 +296,50 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__J")
-        func Java_com_example_swift_SwiftModule__00024async__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong) -> jlong {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
           assert(c != 0, "c memory address was null")
           let cBits$ = Int(Int64(fromJNI: c, in: environment))
           let c$ = UnsafeMutablePointer<MyClass>(bitPattern: cBits$)
           guard let c$ else {
             fatalError("c memory address was null in call to \\(#function)!")
           }
-          let _semaphore$ = _Semaphore(value: 0)
-          var swiftResult$: MyClass!
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
             Task.immediate {
-              swiftResult$ = await SwiftModule.async(c: c$.pointee)
-              _semaphore$.signal()
-            } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:873
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:872
+              var environment = environment!
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.async(c: c$.pointee)
+              environment = try JavaVirtualMachine.shared().environment()
+              let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+              result$.initialize(to: swiftResult$)
+              let resultBits$ = Int64(Int(bitPattern: result$))
+              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)]) {
+                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
+              }
+            }
+          }
           else {
             Task {
-              swiftResult$ = await SwiftModule.async(c: c$.pointee)
-              _semaphore$.signal()
-            } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:878
-          } // render(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+NativeTranslation.swift:877
-          _semaphore$.wait() 
-          let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          result$.initialize(to: swiftResult$)
-          let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+              var environment = try! JavaVirtualMachine.shared().environment()
+              defer {
+                let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+                environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+              }
+              let swiftResult$ = await SwiftModule.async(c: c$.pointee)
+              environment = try JavaVirtualMachine.shared().environment()
+              let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+              result$.initialize(to: swiftResult$)
+              let resultBits$ = Int64(Int(bitPattern: result$))
+              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)]) {
+                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
+              }
+            }
+          }
+          return 
         }
         """
       ]

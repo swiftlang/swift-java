@@ -36,28 +36,3 @@ public func asyncOptional(i: Int64) async throws -> Int64? {
 public func asyncThrows() async throws {
   throw MySwiftError.swiftError
 }
-
-public func asyncRunningSum() async -> Int64 {
-    let totalSum = await withTaskGroup(of: Int64.self) { group in
-        // 1. Add child tasks to the group
-        for number in stride(from: Int64(1), through: 100, by: 1) {
-            group.addTask {
-                try? await Task.sleep(for: .milliseconds(number))
-                return number
-            }
-        }
-
-        var collectedSum: Int64 = 0
-
-        // `for await ... in group` loops as each child task completes,
-        // (not necessarily in the order they were added).
-        for await number in group {
-            collectedSum += number
-        }
-
-        return collectedSum
-    }
-
-    // This is the value returned by the `withTaskGroup` closure.
-    return totalSum
-}

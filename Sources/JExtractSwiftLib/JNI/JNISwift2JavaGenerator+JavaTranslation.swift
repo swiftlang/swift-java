@@ -1096,10 +1096,6 @@ extension JNISwift2JavaGenerator {
       case .replacingPlaceholder(let inner, let placeholder):
         return inner.render(&printer, placeholder)
 
-      case .return(let inner):
-        let inner = inner.render(&printer, placeholder)
-        return "return \(inner);"
-
       case .lambda(let args, let body):
         var printer = CodePrinter()
         printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
@@ -1111,9 +1107,6 @@ extension JNISwift2JavaGenerator {
           }
         }
         return printer.finalize()
-
-      case .null:
-        return "null"
 
       case .print(let inner):
         let inner = inner.render(&printer, placeholder)
