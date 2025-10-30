@@ -24,7 +24,7 @@ import java.nio.file.StandardCopyOption;
 
 public final class SwiftLibraries {
 
-    // Library names of core Swift and SwiftKit
+    // Library names of core Swift and SwiftRuntimeFunctions
     public static final String LIB_NAME_SWIFT_CORE = "swiftCore";
     public static final String LIB_NAME_SWIFT_CONCURRENCY = "swift_Concurrency";
     public static final String LIB_NAME_SWIFT_RUNTIME_FUNCTIONS = "SwiftRuntimeFunctions";
@@ -43,7 +43,7 @@ public final class SwiftLibraries {
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
     public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
-        System.loadLibrary(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+        System.loadLibrary(LIB_NAME_SWIFT_CORE);
         if (loadSwiftRuntimeFunctions) {
             System.loadLibrary(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
         }
