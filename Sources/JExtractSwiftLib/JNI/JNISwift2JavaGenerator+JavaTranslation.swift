@@ -523,9 +523,6 @@ extension JNISwift2JavaGenerator {
           isThrowing: originalFunctionSignature.isThrowing
         )
         nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
-
-      case .future:
-        fatalError()
       }
     }
 
