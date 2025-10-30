@@ -11,8 +11,8 @@ open class Executable: AccessibleObject {
   @JavaMethod
   open func getModifiers() -> Int32
 
-  @JavaMethod
-  open func getTypeParameters() -> [TypeVariable<JavaObject>?]
+  // @JavaMethod // FIXME why does this clash with Method.getTypeParameters?
+  // open func getTypeParameters() -> [TypeVariable<JavaObject>?]
 
   @JavaMethod
   open func getParameterTypes() -> [JavaClass<JavaObject>?]

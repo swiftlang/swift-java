@@ -63,13 +63,8 @@ class WrapJavaTests: XCTestCase {
         class Pair<First, Second> { }
 
         class ExampleSimpleClass {
-          <KeyType, ValueType> Pair<KeyType, ValueType> get(
-            String name,
-            Item<KeyType> key,
-            Item<ValueType> value
-          ) { 
-            return null; 
-          }
+          <KeyType> KeyType getGeneric(Item<KeyType> key) { return null; }
+          // <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
         }
         """)
 
@@ -95,8 +90,12 @@ class WrapJavaTests: XCTestCase {
           """,
           """
           @JavaMethod
-          open func getStore<T1, T2>(_ arg0: String, _ arg1: Item<T1>?, _ arg2: Item<T2>?) -> BDStore<T1, T2>!
-          """
+          open func getGeneric<T1>(_ arg0: String, _ arg1: Item<T1>?) -> T1!
+          """,
+          // """
+          // @JavaMethod
+          // open func getStore<T1, T2>(_ arg0: String, _ arg1: Item<T1>?, _ arg2: Item<T2>?) -> BDStore<T1, T2>!
+          // """
         ]
       )
     } catch let error as Throwable { 

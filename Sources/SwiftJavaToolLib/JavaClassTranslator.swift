@@ -576,21 +576,41 @@ extension JavaClassTranslator {
   package func renderMethod(
     _ javaMethod: Method,
     implementedInSwift: Bool,
-    genericParameterClause: String = "",
+    genericParameterClause __genericParameterClause: String = "", // FIXME: why is this a string, fix this...
     whereClause: String = ""
   ) throws -> DeclSyntax {
+    // Map the generic params on the method.
+    let typeParameters = javaMethod.getTypeParameters()
+    var genericParameterClauseStr = __genericParameterClause
+    if typeParameters.count(where: {$0 != nil }) > 0 {
+      genericParameterClauseStr = "<"
+      genericParameterClauseStr += typeParameters.map { typeParam in 
+        // FIXME: determine if it is some other constraint
+        "\(typeParam!.getTypeName()): AnyJavaObject"
+      }.joined(separator: ", ")
+      genericParameterClauseStr += ">"
+    }
+
     // Map the parameters.
     let parameters = try translateJavaParameters(javaMethod.getParameters())
 
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
 
+    print("javaMethod.getReturnType() == \(javaMethod.getReturnType())")
+    print("javaMethod.getGenericReturnType() == \(javaMethod.getGenericReturnType())")
+
     // Map the result type.
     let resultTypeStr: String
-    let resultType = try translator.getSwiftTypeNameAsString(
-      javaMethod.getGenericReturnType()!,
-      preferValueTypes: true,
+    let resultType = try translator.getSwiftReturnTypeNameAsString(
+      method: javaMethod, 
+      preferValueTypes: true, 
       outerOptional: .implicitlyUnwrappedOptional
     )
+    // let resultType = try translator.getSwiftTypeNameAsString(
+    //   javaMethod.getGenericReturnType()!,
+    //   preferValueTypes: true,
+    //   outerOptional: .implicitlyUnwrappedOptional
+    // )
 
     // FIXME: cleanup the checking here
     if resultType != "Void" && resultType != "Swift.Void" {
@@ -632,15 +652,15 @@ extension JavaClassTranslator {
 
 
       return """
-        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
-        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClause)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
           \(body)
         }
         """
     } else {
       return """
-        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClause)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }
   }

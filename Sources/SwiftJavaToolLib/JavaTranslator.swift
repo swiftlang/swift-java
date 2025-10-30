@@ -120,6 +120,24 @@ extension JavaTranslator {
 
 // MARK: Type translation
 extension JavaTranslator {
+func getSwiftReturnTypeNameAsString(
+    method: JavaLangReflect.Method,
+    preferValueTypes: Bool,
+    outerOptional: OptionalKind
+  ) throws -> String {
+    let returnType = method.getReturnType()
+    let genericReturnType = method.getGenericReturnType()
+
+    // Special handle the case when the return type is the generic type of the method: `<T> T foo()`
+    if returnType?.getCanonicalName() == "java.lang.Object" { 
+      if let genericReturnType {
+        return genericReturnType.getTypeName()
+      } 
+    }
+
+    return try getSwiftTypeNameAsString(genericReturnType!, preferValueTypes: preferValueTypes, outerOptional: outerOptional)
+  }
+
   /// Turn a Java type into a string.
   func getSwiftTypeNameAsString(
     _ javaType: Type,
