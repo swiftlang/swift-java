@@ -107,11 +107,11 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ")
         func Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong, y: jlong, y_typeMetadataAddress: jlong) {
-          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment!))) else {
+          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
             fatalError("x_typeMetadataAddress memory address was null")
           }
           let xDynamicType$: Any.Type = unsafeBitCast(xTypeMetadataPointer$, to: Any.Type.self)
-          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment!))) else {
+          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment))) else {
             fatalError("x memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -122,11 +122,11 @@ struct JNIProtocolTests {
           }
           let xExistential$ = _openExistential(xDynamicType$, do: xDoLoad)
           #endif
-          guard let yTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: y_typeMetadataAddress, in: environment!))) else {
+          guard let yTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: y_typeMetadataAddress, in: environment))) else {
             fatalError("y_typeMetadataAddress memory address was null")
           }
           let yDynamicType$: Any.Type = unsafeBitCast(yTypeMetadataPointer$, to: Any.Type.self)
-          guard let yRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: y, in: environment!))) else {
+          guard let yRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: y, in: environment))) else {
             fatalError("y memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -172,11 +172,11 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__JJ")
         func Java_com_example_swift_SwiftModule__00024takeGeneric__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jlong, s_typeMetadataAddress: jlong) {
-          guard let sTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: s_typeMetadataAddress, in: environment!))) else {
+          guard let sTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: s_typeMetadataAddress, in: environment))) else {
             fatalError("s_typeMetadataAddress memory address was null")
           }
           let sDynamicType$: Any.Type = unsafeBitCast(sTypeMetadataPointer$, to: Any.Type.self)
-          guard let sRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: s, in: environment!))) else {
+          guard let sRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: s, in: environment))) else {
             fatalError("s memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -222,11 +222,11 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__JJ")
         func Java_com_example_swift_SwiftModule__00024takeComposite__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong) {
-          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment!))) else {
+          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
             fatalError("x_typeMetadataAddress memory address was null")
           }
           let xDynamicType$: Any.Type = unsafeBitCast(xTypeMetadataPointer$, to: Any.Type.self)
-          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment!))) else {
+          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment))) else {
             fatalError("x memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)

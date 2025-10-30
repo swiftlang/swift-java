@@ -196,18 +196,18 @@ struct JNIAsyncTests {
           var swiftResult$: Int64!
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
             Task.immediate {
-              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment!))
+              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               _semaphore$.signal()
             }
           }
           else {
             Task {
-              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment!))
+              swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               _semaphore$.signal()
             }
           }
           _semaphore$.wait() 
-          return swiftResult$.getJNIValue(in: environment!)
+          return swiftResult$.getJNIValue(in: environment)
         }
         """
       ]
@@ -261,7 +261,7 @@ struct JNIAsyncTests {
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__J")
         func Java_com_example_swift_SwiftModule__00024async__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong) -> jlong {
           assert(c != 0, "c memory address was null")
-          let cBits$ = Int(Int64(fromJNI: c, in: environment!))
+          let cBits$ = Int(Int64(fromJNI: c, in: environment))
           let c$ = UnsafeMutablePointer<MyClass>(bitPattern: cBits$)
           guard let c$ else {
             fatalError("c memory address was null in call to \\(#function)!")
@@ -284,7 +284,7 @@ struct JNIAsyncTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: swiftResult$)
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """
       ]

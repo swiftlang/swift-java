@@ -224,25 +224,25 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2")
         func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
-          result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment!)))
+          result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024third__JI")
         func Java_com_example_swift_MyEnum__00024third__JI(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
-          result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment!), y: Int32(fromJNI: y, in: environment!)))
+          result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment), y: Int32(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """
       ])
@@ -302,7 +302,7 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(Ljava/lang/String;)V")
           let constructorID$ = cache$[method$]
-          return withVaList([_0.getJNIValue(in: environment!) ?? 0]) {
+          return withVaList([_0.getJNIValue(in: environment) ?? 0]) {
             return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
           }
         }
@@ -318,7 +318,7 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(JI)V")
           let constructorID$ = cache$[method$]
-          return withVaList([x.getJNIValue(in: environment!), y.getJNIValue(in: environment!)]) {
+          return withVaList([x.getJNIValue(in: environment), y.getJNIValue(in: environment)]) {
             return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
           }
         }

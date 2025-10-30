@@ -526,7 +526,7 @@ extension JNISwift2JavaGenerator {
     /// `value.getJValue(in:)`
     indirect case getJValue(NativeSwiftConversionStep)
 
-    /// `SwiftType(from: value, in: environment!)`
+    /// `SwiftType(from: value, in: environment)`
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
     indirect case extractSwiftProtocolValue(
@@ -613,11 +613,11 @@ extension JNISwift2JavaGenerator {
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
           """
-          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment!))) else {
+          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment))) else {
             fatalError("\(typeMetadataVariableName) memory address was null")
           }
           let \(inner)DynamicType$: Any.Type = unsafeBitCast(\(inner)TypeMetadataPointer$, to: Any.Type.self)
-          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment!))) else {
+          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment))) else {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -640,7 +640,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print(
           """
-          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment!))
+          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
           let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)
           """
         )
@@ -698,13 +698,13 @@ extension JNISwift2JavaGenerator {
 
         printer.print(
             """
-            let class$ = environment!.interface.GetObjectClass(environment, \(placeholder))
-            let methodID$ = environment!.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+            let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
             let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
             """
         )
 
-        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let upcall = "environment.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -720,7 +720,7 @@ extension JNISwift2JavaGenerator {
 
       case .initializeJavaKitWrapper(let inner, let wrapperName):
         let inner = inner.render(&printer, placeholder)
-        return "\(wrapperName)(javaThis: \(inner), environment: environment!)"
+        return "\(wrapperName)(javaThis: \(inner), environment: environment)"
 
       case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
         let value = valueConversion.render(&printer, valueName)
