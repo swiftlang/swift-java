@@ -490,15 +490,6 @@ extension JNISwift2JavaGenerator {
     ) {
       switch mode {
       case .completableFuture:
-//        let supplyAsyncBodyConversion: JavaNativeConversionStep = if result.javaType.isVoid {
-//          .aggregate([
-//            .print(result.conversion),
-//            .null
-//          ])
-//        } else {
-//          result.conversion
-//        }
-
         // Update translated function
 
         let nativeFutureType = JavaType.completableFuture(nativeFunctionSignature.result.javaType)
@@ -986,13 +977,8 @@ extension JNISwift2JavaGenerator {
     /// Access a member of the value
     indirect case replacingPlaceholder(JavaNativeConversionStep, placeholder: String)
 
-    /// `return value`
-    indirect case `return`(JavaNativeConversionStep)
-
     /// `(args) -> { return body; }`
     indirect case lambda(args: [String] = [], body: JavaNativeConversionStep)
-
-    case null
 
     /// Prints the conversion step, ignoring the output.
     indirect case print(JavaNativeConversionStep)
@@ -1139,7 +1125,7 @@ extension JNISwift2JavaGenerator {
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent, .combinedName, .null:
+      case .placeholder, .constant, .isOptionalPresent, .combinedName:
         return false
 
       case .constructSwiftValue, .wrapMemoryAddressUnsafe:
@@ -1182,9 +1168,6 @@ extension JNISwift2JavaGenerator {
         return inner.requiresSwiftArena
 
       case .replacingPlaceholder(let inner, _):
-        return inner.requiresSwiftArena
-
-      case .return(let inner):
         return inner.requiresSwiftArena
 
       case .lambda(_, let body):
