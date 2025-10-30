@@ -573,7 +573,8 @@ extension JNISwift2JavaGenerator {
       NativeSwiftConversionStep,
       swiftFunctionResultType: SwiftType,
       nativeReturnType: JavaType,
-      outParameters: [JavaParameter]
+      outParameters: [JavaParameter],
+      isThrowing: Bool
     )
 
     /// Returns the conversion string applied to the placeholder.
@@ -808,7 +809,8 @@ extension JNISwift2JavaGenerator {
         let inner,
         let swiftFunctionResultType,
         let nativeReturnType,
-        let outParameters
+        let outParameters,
+        let isThrowing
       ):
         // Global ref all indirect returns
         for outParameter in outParameters {
@@ -818,71 +820,66 @@ extension JNISwift2JavaGenerator {
         printer.print(
           """
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
-          let completableFutureClazz$ = environment.interface.FindClass(environment, "java/util/concurrent/CompletableFuture")!
-          let completeMethodID = environment.interface.GetMethodID(environment, completableFutureClazz$, "complete", "(Ljava/lang/Object;)Z")!
           """
         )
 
-        printer.printBraceBlock("Task") { printer in
+        func printDo(printer: inout CodePrinter) {
           printer.print("let swiftResult$ = await \(placeholder)")
-          printer.print(
-            """
-            let environment = try JavaVirtualMachine.shared().environment()
-            """
-          )
-          printer.printBraceBlock("defer") { printer in
-            printer.print("environment.interface.DeleteGlobalRef(environment, globalFuture)")
-            for outParameter in outParameters {
-              printer.print("environment.interface.DeleteGlobalRef(environment, \(outParameter.name))")
-            }
-          }
+          printer.print("environment = try JavaVirtualMachine.shared().environment()")
           let inner = inner.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
-            printer.print(inner)
+            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
           } else {
             printer.printBraceBlock("withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)])") { printer in
-              printer.print("environment.interface.CallBooleanMethodV(environment, globalFuture, completeMethodID, $0)")
+              printer.print("environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)")
             }
           }
         }
 
-        return ""
+        func printTask(printer: inout CodePrinter) {
+          printer.printBraceBlock("defer") { printer in
+            // Defer might on any thread, so we need to attach environment.
+            printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
+            printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)")
+            for outParameter in outParameters {
+              printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, \(outParameter.name))")
+            }
+          }
+          if isThrowing {
+            printer.printBraceBlock("do") { printer in
+              printDo(printer: &printer)
+            }
+            printer.printBraceBlock("catch") { printer in
+              // We might not be on the same thread after the suspension, so we need to attach the thread again.
+              printer.print(
+              """
+              let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+              let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
+              catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+              """
+              )
+            }
+          } else {
+            printDo(printer: &printer)
+          }
+        }
 
-//        printer.print("let _semaphore$ = _Semaphore(value: 0)")
-//        let resultType = isThrowing ? "Result<\(swiftFunctionResultType), any Error>" : swiftFunctionResultType.description
-//        printer.print("var swiftResult$: \(resultType)!")
-//
-//        func printInner(printer: inout CodePrinter) {
-//          if isThrowing {
-//            printer.printBraceBlock("do") { printer in
-//              printer.print("swiftResult$ = await Result.success(\(placeholder))")
-//            }
-//            printer.printBraceBlock("catch") { printer in
-//              printer.print("swiftResult$ = Result.failure(error)")
-//            }
-//          } else {
-//            printer.print("swiftResult$ = await \(placeholder)")
-//          }
-//          printer.print("_semaphore$.signal()")
-//        }
-//
-//        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
-//          printer.printBraceBlock("Task.immediate") { printer in
-//            printInner(printer: &printer)
-//          }
-//        }
-//        printer.printBraceBlock("else") { printer in
-//          printer.printBraceBlock("Task") { printer in
-//            printInner(printer: &printer)
-//          }
-//        }
-//        printer.print(
-//          """
-//          _semaphore$.wait() 
-//          """
-//        )
-//        let inner = inner.render(&printer, isThrowing ? "try swiftResult$.get()" : "swiftResult$")
-//        return inner
+        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+          printer.printBraceBlock("Task.immediate") { printer in
+            // Immediate runs on the caller thread, so we don't need to attach the environment again.
+            printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
+            printTask(printer: &printer)
+          }
+        }
+        printer.printBraceBlock("else") { printer in
+          printer.printBraceBlock("Task") { printer in
+            // We can be on any thread, so we need to attach the thread.
+            printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
+            printTask(printer: &printer)
+          }
+        }
+
+        return ""
       }
     }
   }

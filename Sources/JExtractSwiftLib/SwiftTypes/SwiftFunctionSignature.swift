@@ -34,6 +34,10 @@ public struct SwiftFunctionSignature: Equatable {
     effectSpecifiers.contains(.async)
   }
 
+  var isThrowing: Bool {
+    effectSpecifiers.contains(.throws)
+  }
+
   init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],

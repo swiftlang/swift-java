@@ -33,6 +33,10 @@ public func asyncOptional(i: Int64) async throws -> Int64? {
   return i
 }
 
+public func asyncThrows() async throws {
+  throw MySwiftError.swiftError
+}
+
 public func asyncRunningSum() async -> Int64 {
     let totalSum = await withTaskGroup(of: Int64.self) { group in
         // 1. Add child tasks to the group

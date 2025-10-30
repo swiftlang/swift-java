@@ -33,7 +33,7 @@ import static org.swift.swiftkit.core.util.StringUtils.stripSuffix;
 public class SwiftRuntime {
 
     public static final String STDLIB_DYLIB_NAME = "swiftCore";
-    public static final String SWIFT_JAVA_RUNTIME_SUPPORT_DYLIB_NAME = "SwiftJavaRuntimeSupport";
+    public static final String SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME = "SwiftRuntimeFunctions";
 
     private static final String STDLIB_MACOS_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
 
@@ -42,10 +42,10 @@ public class SwiftRuntime {
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
-    public static boolean loadLibraries(boolean loadSwiftJavaRuntimeSupport) {
+    public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
         System.loadLibrary(STDLIB_DYLIB_NAME);
-        if (loadSwiftJavaRuntimeSupport) {
-            System.loadLibrary(SWIFT_JAVA_RUNTIME_SUPPORT_DYLIB_NAME);
+        if (loadSwiftRuntimeFunctions) {
+            System.loadLibrary(SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME);
         }
         return true;
     }

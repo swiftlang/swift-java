@@ -56,4 +56,22 @@ public class AsyncTest {
             assertEquals(5, result.getY());
         }
     }
+
+    @Test
+    void asyncThrows() {
+        CompletableFuture<Void> future = MySwiftLibrary.asyncThrows();
+
+        ExecutionException ex = assertThrows(ExecutionException.class, future::get);
+
+        Throwable cause = ex.getCause();
+        assertNotNull(cause);
+        assertEquals(Exception.class, cause.getClass());
+        assertEquals("swiftError", cause.getMessage());
+    }
+
+    @Test
+    void asyncOptional() {
+        CompletableFuture<OptionalLong> future = MySwiftLibrary.asyncOptional(42);
+        assertEquals(OptionalLong.of(42), future.join());
+    }
 }

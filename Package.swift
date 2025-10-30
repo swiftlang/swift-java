@@ -170,8 +170,13 @@ let package = Package(
     // Support library written in Swift for SwiftKit "Java"
     .library(
       name: "SwiftJavaRuntimeSupport",
-      type: .dynamic,
       targets: ["SwiftJavaRuntimeSupport"]
+    ),
+
+    .library(
+      name: "SwiftRuntimeFunctions",
+      type: .dynamic,
+      targets: ["SwiftRuntimeFunctions"]
     ),
 
     .library(
@@ -214,6 +219,7 @@ let package = Package(
       dependencies: [
         "SwiftJava",
         "SwiftJavaRuntimeSupport",
+        "SwiftRuntimeFunctions",
       ]
     ),
     
@@ -352,6 +358,18 @@ let package = Package(
     ),
     .target(
       name: "SwiftJavaRuntimeSupport",
+      dependencies: [
+        "CSwiftJavaJNI",
+        "SwiftJava"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+
+    .target(
+      name: "SwiftRuntimeFunctions",
       dependencies: [
         "CSwiftJavaJNI",
         "SwiftJava"

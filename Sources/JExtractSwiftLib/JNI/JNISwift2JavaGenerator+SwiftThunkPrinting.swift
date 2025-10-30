@@ -363,7 +363,7 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    if decl.isThrowing {
+    if decl.isThrowing, !decl.isAsync {
       let dummyReturn: String
 
       if nativeSignature.result.javaType.isVoid {
