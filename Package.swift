@@ -370,10 +370,6 @@ let package = Package(
 
     .target(
       name: "SwiftRuntimeFunctions",
-      dependencies: [
-        "CSwiftJavaJNI",
-        "SwiftJava"
-      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
