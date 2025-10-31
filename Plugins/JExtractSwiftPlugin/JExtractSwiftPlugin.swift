@@ -90,15 +90,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     if let unsignedNumbersMode = configuration.unsignedNumbersMode {
-      arguments += ["--unsigned-numbers", \(unsignedNumbersMode.rawValue.kebabCased)]
+      arguments += ["--unsigned-numbers", unsignedNumbersMode.rawValue]
     }
 
     if let minimumInputAccessLevelMode = configuration.minimumInputAccessLevelMode {
-      arguments += ["--minimum-input-access-level", \(minimumInputAccessLevelMode.rawValue.kebabCased)]
+      arguments += ["--minimum-input-access-level", minimumInputAccessLevelMode.rawValue]
     }
 
     if let memoryManagementMode = configuration.memoryManagementMode {
-      arguments += ["--memory-management-mode", \(memoryManagementMode.rawValue.kebabCased)]
+      arguments += ["--memory-management-mode", memoryManagementMode.rawValue]
     }
 
     let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
