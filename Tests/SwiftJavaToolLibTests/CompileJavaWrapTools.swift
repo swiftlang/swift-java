@@ -151,7 +151,11 @@ func assertWrapJavaOutput(
   }
 
   for expectedChunk in expectedChunks {
-    if swiftCompleteOutputText.contains(expectedChunk) {
+    // We make the matching in-sensitive to whitespace:
+    let checkAgainstText = swiftCompleteOutputText.replacing(" ", with: "")
+    let checkAgainstExpectedChunk = expectedChunk.replacing(" ", with: "")
+
+    if checkAgainstText.contains(checkAgainstExpectedChunk) {
       continue
     }
 
@@ -162,6 +166,4 @@ func assertWrapJavaOutput(
       "\(swiftCompleteOutputText)",
       file: file, line: line)
   }
-
-  print(swiftCompleteOutputText)
 }

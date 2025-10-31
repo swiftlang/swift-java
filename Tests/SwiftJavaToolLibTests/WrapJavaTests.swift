@@ -114,9 +114,11 @@ class WrapJavaTests: XCTestCase {
         }
         class Pair<First, Second> { }
 
-        class ExampleSimpleClass {
+        final class ExampleSimpleClass {
           // use in return type
-          <KeyType, NotUsedParam> KeyType getGeneric() { return null; }
+          <KeyType, NotUsedParam> KeyType getGeneric() { 
+            return null;
+          }
         }
         """)
 
