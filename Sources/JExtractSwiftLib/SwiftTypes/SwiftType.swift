@@ -215,7 +215,7 @@ extension SwiftType {
     switch type.as(TypeSyntaxEnum.self) {
     case .arrayType, .classRestrictionType,
         .dictionaryType, .missingType, .namedOpaqueReturnType,
-        .packElementType, .packExpansionType, .suppressedType:
+        .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
       throw TypeTranslationError.unimplementedType(type)
 
     case .attributedType(let attributedType):

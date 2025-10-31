@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftDiagnostics
-import SwiftSyntax
+@_spi(ExperimentalLanguageFeatures) import SwiftSyntax
 
 extension WithModifiersSyntax {
   var accessControlModifiers: DeclModifierListSyntax {
@@ -218,6 +218,8 @@ extension DeclSyntaxProtocol {
       } else {
         "var"
       }
+    case .usingDecl(let node):
+      node.nameForDebug
     }
   }
 

@@ -58,7 +58,7 @@ It is possible to generate Swift bindings to Java libraries using SwiftJava by u
 
 Required language/runtime versions:
 - **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integratio
-- **Swift 6.0.x**, because the library uses modern Swift macros
+- **Swift 6.2.x**, because the library uses modern Swift macros
 
 **swift-java jextract** 
 
