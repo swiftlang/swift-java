@@ -95,8 +95,8 @@ public struct SwiftToJava {
 
     try translator.analyze()
 
-    switch config.mode {
-    case .some(.ffm), .none:
+    switch config.effectiveMode {
+    case .ffm:
       let generator = FFMSwift2JavaGenerator(
         config: self.config,
         translator: translator,

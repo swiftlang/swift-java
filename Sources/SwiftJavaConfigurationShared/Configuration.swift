@@ -39,6 +39,9 @@ public struct Configuration: Codable {
   public var outputJavaDirectory: String?
 
   public var mode: JExtractGenerationMode?
+  public var effectiveMode: JExtractGenerationMode {
+    mode ?? .default
+  }
 
   public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
 
