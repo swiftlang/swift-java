@@ -24,10 +24,10 @@ import java.nio.file.StandardCopyOption;
 
 public final class SwiftLibraries {
 
-    // Library names of core Swift and SwiftKit
+    // Library names of core Swift and SwiftRuntimeFunctions
     public static final String LIB_NAME_SWIFT_CORE = "swiftCore";
     public static final String LIB_NAME_SWIFT_CONCURRENCY = "swift_Concurrency";
-    public static final String LIB_NAME_SWIFTKITSWIFT = "SwiftKitSwift";
+    public static final String LIB_NAME_SWIFT_RUNTIME_FUNCTIONS = "SwiftRuntimeFunctions";
 
     /** 
      * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
@@ -42,10 +42,10 @@ public final class SwiftLibraries {
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
-    public static boolean loadLibraries(boolean loadSwiftKit) {
-        System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
-        if (loadSwiftKit) {
-            System.loadLibrary(LIB_NAME_SWIFTKITSWIFT);
+    public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
+        System.loadLibrary(LIB_NAME_SWIFT_CORE);
+        if (loadSwiftRuntimeFunctions) {
+            System.loadLibrary(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
         }
         return true;
     }

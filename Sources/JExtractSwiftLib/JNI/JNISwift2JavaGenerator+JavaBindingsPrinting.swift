@@ -429,7 +429,7 @@ extension JNISwift2JavaGenerator {
     let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
-    let throwsClause = translatedDecl.isThrowing ? " throws Exception" : ""
+    let throwsClause = translatedDecl.isThrowing && !translatedDecl.isAsync ? " throws Exception" : ""
 
     let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) { generics, parameter in
       guard case .generic(let name, let extends) = parameter.parameter.type else {
@@ -483,7 +483,6 @@ extension JNISwift2JavaGenerator {
 
       printNativeFunction(&printer, translatedDecl)
     }
-
   }
 
   private func printNativeFunction(_ printer: inout CodePrinter, _ translatedDecl: TranslatedFunctionDecl) {
@@ -523,7 +522,7 @@ extension JNISwift2JavaGenerator {
 
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.resultType.outParameters {
-      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render());")
+      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));")
       arguments.append(outParameter.name)
     }
 

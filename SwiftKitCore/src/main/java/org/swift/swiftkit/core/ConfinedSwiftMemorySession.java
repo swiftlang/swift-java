@@ -16,6 +16,8 @@ package org.swift.swiftkit.core;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
@@ -23,21 +25,17 @@ public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     final static int CLOSED = 0;
     final static int ACTIVE = 1;
 
-    final Thread owner;
     final AtomicInteger state;
 
     final ConfinedResourceList resources;
 
-    public ConfinedSwiftMemorySession(Thread owner) {
-        this.owner = owner;
+    public ConfinedSwiftMemorySession() {
         this.state = new AtomicInteger(ACTIVE);
         this.resources = new ConfinedResourceList();
     }
 
     void checkValid() throws RuntimeException {
-        if (this.owner != null && this.owner != Thread.currentThread()) {
-            throw new WrongThreadException(String.format("ConfinedSwift arena is confined to %s but was closed from %s!", this.owner, Thread.currentThread()));
-        } else if (this.state.get() < ACTIVE) {
+        if (this.state.get() < ACTIVE) {
             throw new RuntimeException("SwiftArena is already closed!");
         }
     }
@@ -61,8 +59,7 @@ public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     }
 
     static final class ConfinedResourceList implements SwiftResourceList {
-        // TODO: Could use intrusive linked list to avoid one indirection here
-        final List<SwiftInstanceCleanup> resourceCleanups = new LinkedList<>();
+        final Queue<SwiftInstanceCleanup> resourceCleanups = new ConcurrentLinkedQueue<>();
 
         void add(SwiftInstanceCleanup cleanup) {
             resourceCleanups.add(cleanup);

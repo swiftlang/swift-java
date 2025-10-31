@@ -12,15 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Determines which source generation mode JExtract should be using: JNI or Foreign Function and Memory.
-public enum JExtractGenerationMode: String, Codable {
-  /// Foreign Value and Memory API
-  case ffm
-
-  /// Java Native Interface
-  case jni
-}
-
 /// Configures how Swift unsigned integers should be extracted by jextract.
 public enum JExtractUnsignedIntegerMode: String, Codable {
   /// Treat unsigned Swift integers as their signed equivalents in Java signatures,
@@ -51,6 +42,7 @@ public enum JExtractUnsignedIntegerMode: String, Codable {
 //  case widenOrAnnotate
 }
 
+
 extension JExtractUnsignedIntegerMode {
   public var needsConversion: Bool {
     switch self {
@@ -61,40 +53,5 @@ extension JExtractUnsignedIntegerMode {
 
   public static var `default`: Self {
     .annotate
-  }
-}
-
-/// The minimum access level which
-public enum JExtractMinimumAccessLevelMode: String, Codable {
-  case `public`
-  case `package`
-  case `internal`
-}
-
-extension JExtractMinimumAccessLevelMode {
-  public static var `default`: Self {
-    .public
-  }
-}
-
-
-/// Configures how memory should be managed by the user
-public enum JExtractMemoryManagementMode: String, Codable {
-  /// Force users to provide an explicit `SwiftArena` to all calls that require them.
-  case explicit
-
-  /// Provide both explicit `SwiftArena` support
-  /// and a default global automatic `SwiftArena` that will deallocate memory when the GC decides to.
-  case allowGlobalAutomatic
-
-  public static var `default`: Self {
-    .explicit
-  }
-
-  public var requiresGlobalArena: Bool {
-    switch self {
-    case .explicit: false
-    case .allowGlobalAutomatic: true
-    }
   }
 }

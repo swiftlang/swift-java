@@ -51,9 +51,13 @@ extension JavaType: CustomStringConvertible {
     case .double: "double"
     case .void: "void"
     case .array(let elementType): "\(elementType.description)[]"
-    case .class(package: let package, name: let name):
+    case .class(package: let package, name: let name, let typeParameters):
       if let package {
-        "\(package).\(name)"
+        if !typeParameters.isEmpty {
+          "\(package).\(name)<\(typeParameters.map(\.description).joined(separator: ", "))>"
+        } else {
+          "\(package).\(name)"
+        }
       } else {
         name
       }
@@ -64,7 +68,7 @@ extension JavaType: CustomStringConvertible {
   /// and nil otherwise.
   public var className: String? {
     switch self {
-    case .class(_, let name):
+    case .class(_, let name, _):
       return name
     default:
       return nil
@@ -75,9 +79,9 @@ extension JavaType: CustomStringConvertible {
   /// and nil otherwise.
   public var fullyQualifiedClassName: String? {
     switch self {
-    case .class(.some(let package), let name):
+    case .class(.some(let package), let name, _):
       return "\(package).\(name)"
-    case .class(nil, let name):
+    case .class(nil, let name, _):
       return name
     default:
       return nil

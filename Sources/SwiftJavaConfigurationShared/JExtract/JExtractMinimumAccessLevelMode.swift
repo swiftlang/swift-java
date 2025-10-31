@@ -12,7 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-enum SwiftEffectSpecifier: Equatable {
-  case `throws`
-  case `async`
+/// The minimum access level which
+public enum JExtractMinimumAccessLevelMode: String, Codable {
+  case `public`
+  case `package`
+  case `internal`
+}
+
+extension JExtractMinimumAccessLevelMode {
+  public static var `default`: Self {
+    .public
+  }
 }

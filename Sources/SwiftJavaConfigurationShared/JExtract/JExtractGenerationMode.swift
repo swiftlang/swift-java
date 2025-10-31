@@ -12,7 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-enum SwiftEffectSpecifier: Equatable {
-  case `throws`
-  case `async`
+/// Determines which source generation mode JExtract should be using: JNI or Foreign Function and Memory.
+public enum JExtractGenerationMode: String, Codable {
+  /// Foreign Value and Memory API
+  case ffm
+
+  /// Java Native Interface
+  case jni
 }

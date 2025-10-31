@@ -34,9 +34,9 @@ extension JavaType {
     case .array(.float): "jfloatArray?"
     case .array(.double): "jdoubleArray?"
     case .array: "jobjectArray?"
-    case .class(package: "java.lang", name: "String"): "jstring?"
-    case .class(package: "java.lang", name: "Class"): "jclass?"
-    case .class(package: "java.lang", name: "Throwable"): "jthrowable?"
+    case .class(package: "java.lang", name: "String", _): "jstring?"
+    case .class(package: "java.lang", name: "Class", _): "jclass?"
+    case .class(package: "java.lang", name: "Throwable", _): "jthrowable?"
     case .class: "jobject?"
     }
   }

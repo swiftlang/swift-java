@@ -221,9 +221,9 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024init__JJ")
         func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment!), y: Int64(fromJNI: y, in: environment!)))
+          result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """,
         """
@@ -232,7 +232,7 @@ struct JNIClassTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init())
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """,
       ]
@@ -303,12 +303,12 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
         func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
           assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment!))
+          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
           guard let self$ else {
             fatalError("self memory address was null in call to \\(#function)!")
           }
-          self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment!))
+          self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
         }
         """
       ]
@@ -352,7 +352,7 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024copy__J")
         func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
           assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment!))
+          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
           guard let self$ else {
             fatalError("self memory address was null in call to \\(#function)!")
@@ -360,7 +360,7 @@ struct JNIClassTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: self$.pointee.copy())
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment!)
+          return resultBits$.getJNIValue(in: environment)
         }
         """
       ]
@@ -404,18 +404,18 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024isEqual__JJ")
         func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, self: jlong) -> jboolean {
           assert(other != 0, "other memory address was null")
-          let otherBits$ = Int(Int64(fromJNI: other, in: environment!))
+          let otherBits$ = Int(Int64(fromJNI: other, in: environment))
           let other$ = UnsafeMutablePointer<MyClass>(bitPattern: otherBits$) 
           guard let other$ else {
             fatalError("other memory address was null in call to \\(#function)!")
           }
           assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment!))
+          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
           guard let self$ else {
             fatalError("self memory address was null in call to \\(#function)!")
           }
-          return self$.pointee.isEqual(to: other$.pointee).getJNIValue(in: environment!)
+          return self$.pointee.isEqual(to: other$.pointee).getJNIValue(in: environment)
         }
         """
       ]

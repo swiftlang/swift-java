@@ -59,32 +59,13 @@ extension JNISwift2JavaGenerator {
         nil
       }
 
-      return try NativeFunctionSignature(
+      let result = try translate(swiftResult: functionSignature.result)
+
+      return NativeFunctionSignature(
         selfParameter: nativeSelf,
         parameters: parameters,
-        result: translate(swiftResult: functionSignature.result)
+        result: result
       )
-    }
-
-    func translateParameters(
-      _ parameters: [SwiftParameter],
-      translatedParameters: [TranslatedParameter],
-      methodName: String,
-      parentName: String,
-      genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
-    ) throws -> [NativeParameter] {
-      try zip(translatedParameters, parameters).map { translatedParameter, swiftParameter in
-        let parameterName = translatedParameter.parameter.name
-        return try translateParameter(
-          type: swiftParameter.type,
-          parameterName: parameterName,
-          methodName: methodName,
-          parentName: parentName,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements
-        )
-      }
     }
 
     func translateParameter(
@@ -508,8 +489,8 @@ extension JNISwift2JavaGenerator {
 
   struct NativeFunctionSignature {
     let selfParameter: NativeParameter?
-    let parameters: [NativeParameter]
-    let result: NativeResult
+    var parameters: [NativeParameter]
+    var result: NativeResult
   }
 
   struct NativeParameter {
@@ -522,8 +503,8 @@ extension JNISwift2JavaGenerator {
   }
 
   struct NativeResult {
-    let javaType: JavaType
-    let conversion: NativeSwiftConversionStep
+    var javaType: JavaType
+    var conversion: NativeSwiftConversionStep
 
     /// Out parameters for populating the indirect return values.
     var outParameters: [JavaParameter]
@@ -545,7 +526,7 @@ extension JNISwift2JavaGenerator {
     /// `value.getJValue(in:)`
     indirect case getJValue(NativeSwiftConversionStep)
 
-    /// `SwiftType(from: value, in: environment!)`
+    /// `SwiftType(from: value, in: environment)`
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
     indirect case extractSwiftProtocolValue(
@@ -588,6 +569,14 @@ extension JNISwift2JavaGenerator {
 
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
+    indirect case asyncCompleteFuture(
+      NativeSwiftConversionStep,
+      swiftFunctionResultType: SwiftType,
+      nativeReturnType: JavaType,
+      outParameters: [JavaParameter],
+      isThrowing: Bool
+    )
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -604,15 +593,15 @@ extension JNISwift2JavaGenerator {
 
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
-        return "\(inner).getJNIValue(in: environment!)"
+        return "\(inner).getJNIValue(in: environment)"
 
       case .getJValue(let inner):
         let inner = inner.render(&printer, placeholder)
-        return "\(inner).getJValue(in: environment!)"
+        return "\(inner).getJValue(in: environment)"
 
       case .initFromJNI(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
-        return "\(swiftType)(fromJNI: \(inner), in: environment!)"
+        return "\(swiftType)(fromJNI: \(inner), in: environment)"
 
       case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
         let inner = inner.render(&printer, placeholder)
@@ -624,11 +613,11 @@ extension JNISwift2JavaGenerator {
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
           """
-          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment!))) else {
+          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment))) else {
             fatalError("\(typeMetadataVariableName) memory address was null")
           }
           let \(inner)DynamicType$: Any.Type = unsafeBitCast(\(inner)TypeMetadataPointer$, to: Any.Type.self)
-          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment!))) else {
+          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment))) else {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -651,7 +640,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print(
           """
-          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment!))
+          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
           let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)
           """
         )
@@ -709,13 +698,13 @@ extension JNISwift2JavaGenerator {
 
         printer.print(
             """
-            let class$ = environment!.interface.GetObjectClass(environment, \(placeholder))
-            let methodID$ = environment!.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+            let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
             let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
             """
         )
 
-        let upcall = "environment!.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+        let upcall = "environment.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -731,7 +720,7 @@ extension JNISwift2JavaGenerator {
 
       case .initializeJavaKitWrapper(let inner, let wrapperName):
         let inner = inner.render(&printer, placeholder)
-        return "\(wrapperName)(javaThis: \(inner), environment: environment!)"
+        return "\(wrapperName)(javaThis: \(inner), environment: environment)"
 
       case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
         let value = valueConversion.render(&printer, valueName)
@@ -815,6 +804,82 @@ extension JNISwift2JavaGenerator {
           """
         )
         return unwrappedName
+
+      case .asyncCompleteFuture(
+        let inner,
+        let swiftFunctionResultType,
+        let nativeReturnType,
+        let outParameters,
+        let isThrowing
+      ):
+        // Global ref all indirect returns
+        for outParameter in outParameters {
+          printer.print("let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))")
+        }
+
+        printer.print(
+          """
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          """
+        )
+
+        func printDo(printer: inout CodePrinter) {
+          printer.print("let swiftResult$ = await \(placeholder)")
+          printer.print("environment = try JavaVirtualMachine.shared().environment()")
+          let inner = inner.render(&printer, "swiftResult$")
+          if swiftFunctionResultType.isVoid {
+            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
+          } else {
+            printer.printBraceBlock("withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)])") { printer in
+              printer.print("environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)")
+            }
+          }
+        }
+
+        func printTask(printer: inout CodePrinter) {
+          printer.printBraceBlock("defer") { printer in
+            // Defer might on any thread, so we need to attach environment.
+            printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
+            printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)")
+            for outParameter in outParameters {
+              printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, \(outParameter.name))")
+            }
+          }
+          if isThrowing {
+            printer.printBraceBlock("do") { printer in
+              printDo(printer: &printer)
+            }
+            printer.printBraceBlock("catch") { printer in
+              // We might not be on the same thread after the suspension, so we need to attach the thread again.
+              printer.print(
+              """
+              let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+              let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
+              catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+              """
+              )
+            }
+          } else {
+            printDo(printer: &printer)
+          }
+        }
+
+        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+          printer.printBraceBlock("Task.immediate") { printer in
+            // Immediate runs on the caller thread, so we don't need to attach the environment again.
+            printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
+            printTask(printer: &printer)
+          }
+        }
+        printer.printBraceBlock("else") { printer in
+          printer.printBraceBlock("Task") { printer in
+            // We can be on any thread, so we need to attach the thread.
+            printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
+            printTask(printer: &printer)
+          }
+        }
+
+        return ""
       }
     }
   }

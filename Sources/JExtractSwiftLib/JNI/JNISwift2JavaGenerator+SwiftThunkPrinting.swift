@@ -353,29 +353,42 @@ extension JNISwift2JavaGenerator {
     }
 
     // Lower the result.
-    let innerBody: String
-    if !decl.functionSignature.result.type.isVoid {
+    func innerBody(in printer: inout CodePrinter) -> String {
       let loweredResult = nativeSignature.result.conversion.render(&printer, result)
-      innerBody = "return \(loweredResult)"
-    } else {
-      innerBody = result
+
+      if !decl.functionSignature.result.type.isVoid {
+        return "return \(loweredResult)"
+      } else {
+        return loweredResult
+      }
     }
 
-    if decl.isThrowing {
-      // TODO: Handle classes for dummy value
-      let dummyReturn = !nativeSignature.result.javaType.isVoid ? "return \(decl.functionSignature.result.type).jniPlaceholderValue" : ""
+    if decl.isThrowing, !decl.isAsync {
+      let dummyReturn: String
+
+      if nativeSignature.result.javaType.isVoid {
+        dummyReturn = ""
+      } else {
+        // We assume it is something that implements JavaValue
+        dummyReturn = "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
+      }
+
+      printer.print("do {")
+      printer.indent()
+      printer.print(innerBody(in: &printer))
+      printer.outdent()
+      printer.print("} catch {")
+      printer.indent()
       printer.print(
-          """
-          do {
-            \(innerBody)
-          } catch {
-            environment.throwAsException(error)
-            \(dummyReturn)
-          }
-          """
+        """
+        environment.throwAsException(error)
+        \(dummyReturn)
+        """
       )
+      printer.outdent()
+      printer.print("}")
     } else {
-      printer.print(innerBody)
+      printer.print(innerBody(in: &printer))
     }
   }
 
@@ -453,6 +466,7 @@ extension JNISwift2JavaGenerator {
 
       import SwiftJava
       import CSwiftJavaJNI
+      import SwiftJavaRuntimeSupport
 
       """
     )

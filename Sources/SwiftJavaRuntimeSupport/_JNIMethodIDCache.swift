@@ -12,6 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CSwiftJavaJNI
+import SwiftJava
+
 /// A cache used to hold references for JNI method and classes.
 ///
 /// This type is used internally in by the outputted JExtract wrappers
@@ -20,10 +23,12 @@ public final class _JNIMethodIDCache: Sendable {
   public struct Method: Hashable {
     public let name: String
     public let signature: String
+    public let isStatic: Bool
 
-    public init(name: String, signature: String) {
+    public init(name: String, signature: String, isStatic: Bool = false) {
       self.name = name
       self.signature = signature
+      self.isStatic = isStatic
     }
   }
 
@@ -40,10 +45,18 @@ public final class _JNIMethodIDCache: Sendable {
     }
     self._class = environment.interface.NewGlobalRef(environment, clazz)!
     self.methods = methods.reduce(into: [:]) { (result, method) in
-      if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, method.signature) {
-        result[method] = methodID
+      if method.isStatic {
+        if let methodID = environment.interface.GetStaticMethodID(environment, clazz, method.name, method.signature) {
+          result[method] = methodID
+        } else {
+          fatalError("Static method \(method.signature) with signature \(method.signature) not found in class \(className)")
+        }
       } else {
-        fatalError("Method \(method.signature) with signature \(method.signature) not found in class \(className)")
+        if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, method.signature) {
+          result[method] = methodID
+        } else {
+          fatalError("Method \(method.signature) with signature \(method.signature) not found in class \(className)")
+        }
       }
     }
   }

@@ -24,7 +24,7 @@ public interface AllocatingSwiftArena extends SwiftArena, SegmentAllocator {
     MemorySegment allocate(long byteSize, long byteAlignment);
 
     static ClosableAllocatingSwiftArena ofConfined() {
-        return new FFMConfinedSwiftMemorySession(Thread.currentThread());
+        return new FFMConfinedSwiftMemorySession();
     }
 
     static AllocatingSwiftArena ofAuto() {

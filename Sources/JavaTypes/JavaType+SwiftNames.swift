@@ -25,7 +25,7 @@ extension JavaType {
       .array:
       return false
 
-    case .class(package: "java.lang", name: "String"):
+    case .class(package: "java.lang", name: "String", _):
       return !stringIsValueType
 
     case .class:
@@ -38,7 +38,7 @@ extension JavaType {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
          .array:
       return false
-    case .class(package: "java.lang", name: "Runnable"):
+    case .class(package: "java.lang", name: "Runnable", _):
       return true
     case .class:
       return false
@@ -57,7 +57,7 @@ extension JavaType {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void,
          .array:
       return false
-    case .class(package: "java.lang", name: "String"):
+    case .class(package: "java.lang", name: "String", _):
       return true
     case .class:
       return false

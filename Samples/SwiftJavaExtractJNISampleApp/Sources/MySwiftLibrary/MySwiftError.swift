@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-enum SwiftEffectSpecifier: Equatable {
-  case `throws`
-  case `async`
+enum MySwiftError: Error {
+  case swiftError
 }

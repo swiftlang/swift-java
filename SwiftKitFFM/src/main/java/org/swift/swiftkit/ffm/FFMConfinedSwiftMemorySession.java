@@ -22,8 +22,8 @@ import java.lang.foreign.MemorySegment;
 final class FFMConfinedSwiftMemorySession extends ConfinedSwiftMemorySession implements AllocatingSwiftArena, ClosableAllocatingSwiftArena {
     final Arena arena;
 
-    public FFMConfinedSwiftMemorySession(Thread owner) {
-        super(owner);
+    public FFMConfinedSwiftMemorySession() {
+        super();
         this.arena = Arena.ofConfined();
     }
 

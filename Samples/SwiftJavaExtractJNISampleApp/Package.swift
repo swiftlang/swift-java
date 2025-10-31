@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
@@ -62,7 +62,7 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "CSwiftJavaJNI", package: "swift-java"),
-        .product(name: "SwiftKitSwift", package: "swift-java"),
+        .product(name: "SwiftJavaRuntimeSupport", package: "swift-java"),
       ],
       exclude: [
         "swift-java.config"

@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
@@ -169,9 +169,14 @@ let package = Package(
 
     // Support library written in Swift for SwiftKit "Java"
     .library(
-      name: "SwiftKitSwift",
+      name: "SwiftJavaRuntimeSupport",
+      targets: ["SwiftJavaRuntimeSupport"]
+    ),
+
+    .library(
+      name: "SwiftRuntimeFunctions",
       type: .dynamic,
-      targets: ["SwiftKitSwift"]
+      targets: ["SwiftRuntimeFunctions"]
     ),
 
     .library(
@@ -197,7 +202,7 @@ let package = Package(
 
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax", from: "601.0.1"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
 
@@ -213,7 +218,8 @@ let package = Package(
       name: "SwiftJavaDocumentation",
       dependencies: [
         "SwiftJava",
-        "SwiftKitSwift",
+        "SwiftJavaRuntimeSupport",
+        "SwiftRuntimeFunctions",
       ]
     ),
     
@@ -351,8 +357,19 @@ let package = Package(
       ]
     ),
     .target(
-      name: "SwiftKitSwift",
-      dependencies: [],
+      name: "SwiftJavaRuntimeSupport",
+      dependencies: [
+        "CSwiftJavaJNI",
+        "SwiftJava"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
+
+    .target(
+      name: "SwiftRuntimeFunctions",
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
