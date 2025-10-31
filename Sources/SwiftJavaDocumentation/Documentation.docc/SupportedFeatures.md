@@ -139,7 +139,7 @@ on the Java side.
 #### Unsigned numbers mode: wrapGuava
 
 You can configure `jextract` (in FFM mode) to instead import unsigned values as their unsigned type-safe representations
-as offered by the Guava library: `UnsignedLong` or `UnsignedInt`.  To enable this mode pass the `--unsigned-numbers wrapGuava`
+as offered by the Guava library: `UnsignedLong` or `UnsignedInt`.  To enable this mode pass the `--unsigned-numbers-mode wrapGuava`
 command line option, or set the corresponding configuration value in `swift-java.config` (TODO).
 
 This approach is type-safe, however it incurs a performance penalty for allocating a wrapper class for every 

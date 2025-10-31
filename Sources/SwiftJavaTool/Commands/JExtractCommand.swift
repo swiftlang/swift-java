@@ -62,10 +62,10 @@ extension SwiftJava {
     var writeEmptyFiles: Bool = false
 
     @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrapGuava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
-    var unsignedNumbers: JExtractUnsignedIntegerMode?
+    var unsignedNumbersMode: JExtractUnsignedIntegerMode?
 
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
-    var minimumInputAccessLevel: JExtractMinimumAccessLevelMode?
+    var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
 
     @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allowGlobalAutomatic`, user can omit this parameter and a global GC-based arena will be used.")
     var memoryManagementMode: JExtractMemoryManagementMode?
@@ -86,16 +86,21 @@ extension SwiftJava.JExtractCommand {
     if let javaPackage {
       config.javaPackage = javaPackage
     }
-    configure(&config.mode, overrideWith: mode)
+    configure(&config.mode, overrideWith: self.mode)
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
-    config.writeEmptyFiles = writeEmptyFiles
-    configure(&config.unsignedNumbersMode, overrideWith: unsignedNumbers)
-    configure(&config.minimumInputAccessLevelMode, overrideWith: minimumInputAccessLevelMode)
-    configure(&config.memoryManagementMode, overrideWith: memoryManagementMode)
 
-    try checkModeCompatibility()
+    // @Flag does not support optional, so we check ourself if it is passed
+    let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
+    configure(&config.writeEmptyFiles, overrideWith: writeEmptyFiles)
+
+    config.writeEmptyFiles = writeEmptyFiles
+    configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
+    configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
+    configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
+
+    try checkModeCompatibility(config: config)
 
     if let inputSwift = commonOptions.inputSwift {
       config.inputSwiftDirectory = inputSwift
@@ -104,7 +109,7 @@ extension SwiftJava.JExtractCommand {
       config.inputSwiftDirectory = "\(FileManager.default.currentDirectoryPath)/Sources/\(swiftModule)"
     }
 
-    print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(config.mode ?? .ffm)".bold)
+    print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(config.effectiveMode)".bold)
 
     // Load all of the dependent configurations and associate them with Swift modules.
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn)
@@ -114,16 +119,16 @@ extension SwiftJava.JExtractCommand {
   }
 
   /// Check if the configured modes are compatible, and fail if not
-  func checkModeCompatibility() throws {
-    if self.mode == .jni {
-      switch self.unsignedNumbers {
+  func checkModeCompatibility(config: Configuration) throws {
+    if config.effectiveMode == .jni {
+      switch config.effectiveUnsignedNumbersMode {
       case .annotate:
         () // OK
       case .wrapGuava:
         throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
       }
-    } else if self.mode == .ffm {
-      guard self.memoryManagementMode == .explicit else {
+    } else if config.effectiveMode == .ffm {
+      guard config.effectiveMemoryManagementMode == .explicit else {
         throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
       }
     }
