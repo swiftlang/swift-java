@@ -62,13 +62,13 @@ extension SwiftJava {
     var writeEmptyFiles: Bool = false
 
     @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrapGuava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
-    var unsignedNumbers: JExtractUnsignedIntegerMode = .default
+    var unsignedNumbers: JExtractUnsignedIntegerMode?
 
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
-    var minimumInputAccessLevel: JExtractMinimumAccessLevelMode = .default
+    var minimumInputAccessLevel: JExtractMinimumAccessLevelMode?
 
     @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allowGlobalAutomatic`, user can omit this parameter and a global GC-based arena will be used.")
-    var memoryManagementMode: JExtractMemoryManagementMode = .default
+    var memoryManagementMode: JExtractMemoryManagementMode?
 
     @Option(
       help: """
@@ -86,18 +86,14 @@ extension SwiftJava.JExtractCommand {
     if let javaPackage {
       config.javaPackage = javaPackage
     }
-    if let mode {
-      config.mode = mode
-    } else if config.mode == nil {
-      config.mode = .ffm
-    }
+    configure(&config.mode, overrideWith: mode)
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
     config.writeEmptyFiles = writeEmptyFiles
-    config.unsignedNumbersMode = unsignedNumbers
-    config.minimumInputAccessLevelMode = minimumInputAccessLevel
-    config.memoryManagementMode = memoryManagementMode
+    configure(&config.unsignedNumbersMode, overrideWith: unsignedNumbers)
+    configure(&config.minimumInputAccessLevelMode, overrideWith: minimumInputAccessLevelMode)
+    configure(&config.memoryManagementMode, overrideWith: memoryManagementMode)
 
     try checkModeCompatibility()
 
@@ -130,6 +126,12 @@ extension SwiftJava.JExtractCommand {
       guard self.memoryManagementMode == .explicit else {
         throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
       }
+    }
+  }
+
+  func configure<T>(_ setting: inout T, overrideWith value: T?) {
+    if let value {
+      setting = value
     }
   }
 }
