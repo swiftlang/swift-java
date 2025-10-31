@@ -99,16 +99,16 @@ struct JavaClassTranslator {
   }
 
   /// The generic parameter clause for the Swift version of the Java class.
-  var genericParameterClause: String {
+  var genericParameters: [String] {
     if javaTypeParameters.isEmpty {
-      return ""
+      return []
     }
 
     let genericParameters = javaTypeParameters.map { param in
       "\(param.getName()): AnyJavaObject"
     }
 
-    return "<\(genericParameters.joined(separator: ", "))>"
+    return genericParameters
   }
 
   /// Prepare translation for the given Java class (or interface).
@@ -387,6 +387,13 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
+    let genericParameterClause = 
+      if genericParameters.isEmpty { 
+        ""
+      } else {
+        "<\(genericParameters.joined(separator: ", "))>"
+      }
+
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass";
     let introducer = translateAsClass ? "open class" : "public struct"
@@ -439,7 +446,7 @@ extension JavaClassTranslator {
       }
 
       let genericArgumentClause = "<\(genericParameterNames.joined(separator: ", "))>"
-      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)"
+      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)" // FIXME: move the 'where ...' part into the render bit
     } else {
       staticMemberWhereClause = ""
     }
@@ -461,7 +468,7 @@ extension JavaClassTranslator {
       do {
         return try renderMethod(
           method, implementedInSwift: /*FIXME:*/false,
-          genericParameterClause: genericParameterClause,
+          genericParameters: genericParameters,
           whereClause: staticMemberWhereClause
         )
       } catch {
@@ -478,7 +485,7 @@ extension JavaClassTranslator {
 
     // Specify the specialization arguments when needed.
     let extSpecialization: String
-    if genericParameterClause.isEmpty {
+    if genericParameters.isEmpty {
       extSpecialization = "<\(swiftTypeName)>"
     } else {
       extSpecialization = ""
@@ -574,24 +581,51 @@ extension JavaClassTranslator {
       """
   }
 
+  func genericParameterIsUsedInSignature(_ typeParam: TypeVariable<Method>, in method: Method) -> Bool {
+    // --- Return type
+    // Is the return type exactly the type param
+    // FIXME: make this equals based?
+    if method.getGenericReturnType().getTypeName() == typeParam.getTypeName() {
+      return true
+    }
+
+    if let parameterizedReturnType = method.getGenericReturnType().as(ParameterizedType.self) {
+      for actualTypeParam in parameterizedReturnType.getActualTypeArguments() {
+        guard let actualTypeParam else { continue }
+        if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
   /// Translates the given Java method into a Swift declaration.
   package func renderMethod(
     _ javaMethod: Method,
     implementedInSwift: Bool,
-    genericParameterClause __genericParameterClause: String = "", // FIXME: why is this a string, fix this...
+    genericParameters: [String] = [],
     whereClause: String = ""
   ) throws -> DeclSyntax {
     // Map the generic params on the method.
+    var allGenericParameters = genericParameters
     let typeParameters = javaMethod.getTypeParameters()
-    var genericParameterClauseStr = __genericParameterClause
-    if typeParameters.count(where: {$0 != nil }) > 0 {
-      genericParameterClauseStr = "<"
-      genericParameterClauseStr += typeParameters.map { typeParam in 
-        // FIXME: determine if it is some other constraint
-        "\(typeParam!.getTypeName()): AnyJavaObject"
-      }.joined(separator: ", ")
-      genericParameterClauseStr += ">"
+    if typeParameters.contains(where: {$0 != nil }) {
+      allGenericParameters += typeParameters.compactMap { typeParam in 
+        guard let typeParam else { return nil }
+        guard genericParameterIsUsedInSignature(typeParam, in: javaMethod) else {
+          return nil
+        }
+        return "\(typeParam.getTypeName()): AnyJavaObject"
+      }
     }
+    let genericParameterClauseStr = 
+      if allGenericParameters.isEmpty {
+        ""
+      } else {
+        "<\(allGenericParameters.joined(separator: ", "))>"
+      }
 
     // Map the parameters.
     let parameters = try translateJavaParameters(javaMethod)
@@ -617,6 +651,7 @@ extension JavaClassTranslator {
       resultTypeStr = ""
     }
 
+    // --- Handle other effects
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
     let methodAttribute: AttributeSyntax = implementedInSwift
@@ -642,11 +677,12 @@ extension JavaClassTranslator {
 
       let resultOptional: String = resultType.optionalWrappedType() ?? resultType
       let baseBody: ExprSyntax = "\(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", ")))"
-      let body: ExprSyntax = if let optionalType = resultType.optionalWrappedType() {
-        "Optional(javaOptional: \(baseBody))"
-      } else {
-        baseBody
-      }
+      let body: ExprSyntax = 
+        if resultType.optionalWrappedType() != nil {
+          "Optional(javaOptional: \(baseBody))"
+        } else {
+          baseBody
+        }
 
 
       return """
