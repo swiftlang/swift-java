@@ -251,16 +251,14 @@ extension JNISwift2JavaGenerator {
         """
       )
       let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in
-        // '0' is treated the same as a null pointer.
-        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? 0" : ""
+        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? nil" : ""
         let result = conversion.native.conversion.render(&printer, caseName)
-        return "\(result)\(nullConversion)"
+        return "jvalue(\(conversion.native.javaType.jniFieldName): \(result)\(nullConversion))"
       }
       printer.print(
         """
-        return withVaList([\(upcallArguments.joined(separator: ", "))]) {
-          return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
-        }
+        let newObjectArgs$: [jvalue] = [\(upcallArguments.joined(separator: ", "))]
+        return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         """
       )
     }

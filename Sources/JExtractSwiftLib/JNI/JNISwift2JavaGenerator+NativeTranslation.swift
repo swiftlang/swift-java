@@ -830,9 +830,12 @@ extension JNISwift2JavaGenerator {
           if swiftFunctionResultType.isVoid {
             printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
           } else {
-            printer.printBraceBlock("withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)])") { printer in
-              printer.print("environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)")
-            }
+            printer.print(
+              """
+              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              """
+            )
           }
         }
 

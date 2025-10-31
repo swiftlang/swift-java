@@ -302,9 +302,8 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(Ljava/lang/String;)V")
           let constructorID$ = cache$[method$]
-          return withVaList([_0.getJNIValue(in: environment) ?? 0]) {
-            return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
-          }
+          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNIValue(in: environment) ?? nil)]
+          return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,
         """
@@ -318,9 +317,8 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(JI)V")
           let constructorID$ = cache$[method$]
-          return withVaList([x.getJNIValue(in: environment), y.getJNIValue(in: environment)]) {
-            return environment.interface.NewObjectV(environment, class$, constructorID$, $0)
-          }
+          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNIValue(in: environment)), jvalue(i: y.getJNIValue(in: environment))]
+          return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """
       ])
