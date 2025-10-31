@@ -95,7 +95,6 @@ extension SwiftJava.JExtractCommand {
     let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
     configure(&config.writeEmptyFiles, overrideWith: writeEmptyFiles)
 
-    config.writeEmptyFiles = writeEmptyFiles
     configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
@@ -134,7 +133,7 @@ extension SwiftJava.JExtractCommand {
     }
   }
 
-  func configure<T>(_ setting: inout T, overrideWith value: T?) {
+  func configure<T>(_ setting: inout T?, overrideWith value: T?) {
     if let value {
       setting = value
     }
