@@ -16,12 +16,14 @@
 import SwiftJavaToolLib
 import JavaUtilJar
 import SwiftJavaShared
+import JavaNet
 import SwiftJavaConfigurationShared
 import _Subprocess
-import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import Testing // import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
-class WrapJavaTests: XCTestCase {
+final class WrapJavaTests {
 
+  @Test
   func testWrapJavaFromCompiledJavaSource() async throws {
     let classpathURL = try await compileJava(
       """
@@ -48,149 +50,141 @@ class WrapJavaTests: XCTestCase {
     )
   }
 
+  @Test
   func testWrapJavaGenericMethod_singleGeneric() async throws {
-    do {
-      let classpathURL = try await compileJava(
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class Item<T> { 
+        final T value;
+        Item(T item) {
+          this.value = item;
+        }
+      }
+      class Pair<First, Second> { }
+
+      class ExampleSimpleClass {
+        <KeyType> KeyType getGeneric(Item<KeyType> key) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Item",
+        "com.example.Pair",
+        "com.example.ExampleSimpleClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
         """
-        package com.example;
-
-        class Item<T> { 
-          final T value;
-          Item(T item) {
-            this.value = item;
-          }
-        }
-        class Pair<First, Second> { }
-
-        class ExampleSimpleClass {
-          <KeyType> KeyType getGeneric(Item<KeyType> key) { return null; }
-        }
-        """)
-
-      try assertWrapJavaOutput(
-        javaClassNames: [
-          "com.example.Item",
-          "com.example.Pair",
-          "com.example.ExampleSimpleClass"
-        ],
-        classpath: [classpathURL],
-        expectedChunks: [
-          """
-          import CSwiftJavaJNI
-          import SwiftJava
-          """,
-          """
-          @JavaClass("com.example.ExampleSimpleClass")
-          open class ExampleSimpleClass: JavaObject {
-          """,
-          """
-          @JavaClass("com.example.ExampleSimpleClass")
-          open class ExampleSimpleClass: JavaObject {
-          """,
-          """
-          @JavaMethod
-          open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType {
-          """,
-        ]
-      )
-    } catch let error as Throwable { 
-      error.printStackTrace()
-      XCTFail("error: \(error)")
-    }
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+        @JavaClass("com.example.Pair")
+        open class Pair<First: AnyJavaObject, Second: AnyJavaObject>: JavaObject {
+        """,
+        """
+        @JavaClass("com.example.ExampleSimpleClass")
+        open class ExampleSimpleClass: JavaObject {
+        """,
+        """
+        @JavaMethod
+        open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType
+        """,
+      ]
+    )
   }
 
   // This is just a warning in Java, but a hard error in Swift, so we must 'prune' generic params
+  @Test
   func testWrapJavaGenericMethod_pruneNotUsedGenericParam() async throws {
-    do {
-      let classpathURL = try await compileJava(
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class Item<T> { 
+        final T value;
+        Item(T item) {
+          this.value = item;
+        }
+      }
+      class Pair<First, Second> { }
+
+      final class ExampleSimpleClass {
+        // use in return type
+        <KeyType, NotUsedParam> KeyType getGeneric() { 
+          return null;
+        }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Item",
+        "com.example.Pair",
+        "com.example.ExampleSimpleClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
         """
-        package com.example;
-
-        class Item<T> { 
-          final T value;
-          Item(T item) {
-            this.value = item;
-          }
-        }
-        class Pair<First, Second> { }
-
-        final class ExampleSimpleClass {
-          // use in return type
-          <KeyType, NotUsedParam> KeyType getGeneric() { 
-            return null;
-          }
-        }
-        """)
-
-      try assertWrapJavaOutput(
-        javaClassNames: [
-          "com.example.Item",
-          "com.example.Pair",
-          "com.example.ExampleSimpleClass"
-        ],
-        classpath: [classpathURL],
-        expectedChunks: [
-          """
-          @JavaMethod
-          open func getGeneric<KeyType: AnyJavaObject>() -> KeyType
-          """,
-        ]
-      )
-    } catch let error as Throwable { 
-      error.printStackTrace()
-      XCTFail("error: \(error)")
-    }
+        @JavaMethod
+        open func getGeneric<KeyType: AnyJavaObject>() -> KeyType
+        """,
+      ]
+    )
   }
   
+  @Test
   func testWrapJavaGenericMethod_multipleGenerics() async throws {
-    do {
-      let classpathURL = try await compileJava(
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class Item<T> { 
+        final T value;
+        Item(T item) {
+          this.value = item;
+        }
+      }
+      class Pair<First, Second> { }
+
+      class ExampleSimpleClass {
+        <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Item",
+        "com.example.Pair",
+        "com.example.ExampleSimpleClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
         """
-        package com.example;
-
-        class Item<T> { 
-          final T value;
-          Item(T item) {
-            this.value = item;
-          }
-        }
-        class Pair<First, Second> { }
-
-        class ExampleSimpleClass {
-          <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
-        }
-        """)
-
-      try assertWrapJavaOutput(
-        javaClassNames: [
-          "com.example.Item",
-          "com.example.Pair",
-          "com.example.ExampleSimpleClass"
-        ],
-        classpath: [classpathURL],
-        expectedChunks: [
-          """
-          import CSwiftJavaJNI
-          import SwiftJava
-          """,
-          """
-          @JavaClass("com.example.ExampleSimpleClass")
-          open class ExampleSimpleClass: JavaObject {
-          """,
-          """
-          @JavaClass("com.example.ExampleSimpleClass")
-          open class ExampleSimpleClass: JavaObject {
-          """,
-          """
-          @JavaMethod
-          open func getPair<KeyType: AnyJavaObject, ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Item<KeyType>?, _ arg2: Item<ValueType>) -> KeyType {
-          """,
-        ]
-      )
-    } catch let error as Throwable { 
-      error.printStackTrace()
-      XCTFail("error: \(error)")
-    }
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+        @JavaClass("com.example.Item")
+        open class Item<T: AnyJavaObject>: JavaObject {
+        """,
+        """
+        @JavaClass("com.example.Pair")
+        open class Pair<First: AnyJavaObject, Second: AnyJavaObject>: JavaObject {
+        """,
+        """
+        @JavaClass("com.example.ExampleSimpleClass")
+        open class ExampleSimpleClass: JavaObject {
+        """,
+        """
+        @JavaMethod
+        open func getPair<KeyType: AnyJavaObject, ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Item<KeyType>?, _ arg2: Item<ValueType>?) -> Pair<KeyType, ValueType>!
+        """,
+      ]
+    )
   }
 
   /*
@@ -210,6 +204,7 @@ class WrapJavaTests: XCTestCase {
  7 |   @JavaMethod
  8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
   */
+  @Test
   func testGenericSuperclass() async throws {
     return  // FIXME: we need this 
 

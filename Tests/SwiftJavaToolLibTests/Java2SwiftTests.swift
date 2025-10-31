@@ -581,61 +581,58 @@ class Java2SwiftTests: XCTestCase {
 }
 
 @JavaClass("java.lang.ClassLoader")
-public struct ClassLoader { }
+fileprivate struct ClassLoader { }
 
 @JavaClass("java.security.SecureClassLoader")
-public struct SecureClassLoader { }
+fileprivate struct SecureClassLoader { }
 
 @JavaClass("java.net.URLClassLoader")
-public struct URLClassLoader { }
-
+fileprivate struct URLClassLoader { }
 
 @JavaClass("java.util.ArrayList")
-public struct MyArrayList<E: AnyJavaObject> {
+fileprivate struct MyArrayList<E: AnyJavaObject> {
 }
 
 @JavaClass("java.util.LinkedList")
-public struct MyLinkedList<E: AnyJavaObject> {
+fileprivate struct MyLinkedList<E: AnyJavaObject> {
 }
 
 @JavaClass("java.lang.String")
-public struct MyJavaString {
+fileprivate struct MyJavaString {
 }
 
 @JavaClass("java.util.Objects")
-public struct MyObjects { }
+fileprivate struct MyObjects { }
 
 @JavaInterface("java.util.function.Supplier")
-public struct MySupplier { }
+fileprivate struct MySupplier { }
 
 @JavaInterface("java.util.function.IntFunction")
-public struct MyJavaIntFunction<R: AnyJavaObject> {
+fileprivate struct MyJavaIntFunction<R: AnyJavaObject> {
 }
 
 @JavaClass("java.lang.reflect.Method", extends: Executable.self)
-public struct Method {
+fileprivate struct Method {
 }
 
 @JavaClass("java.lang.reflect.Constructor", extends: Executable.self)
-public struct Constructor {
+fileprivate struct Constructor {
 }
 
 @JavaClass("java.lang.reflect.Executable")
-public struct Executable {
+fileprivate struct Executable {
 }
 
 @JavaInterface("java.lang.reflect.TypeVariable")
-public struct TypeVariable<D: AnyJavaObject> {
+fileprivate struct TypeVariable<D: AnyJavaObject> {
 }
 
 @JavaClass("java.nio.Buffer")
-open class NIOBuffer: JavaObject {
-
+fileprivate class NIOBuffer: JavaObject {
 }
 
 @JavaClass("java.nio.ByteBuffer")
-open class NIOByteBuffer: NIOBuffer {
-
+fileprivate class NIOByteBuffer: NIOBuffer {
 }
 
 /// Translate a Java class and assert that the translated output contains

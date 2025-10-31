@@ -35,7 +35,7 @@ final class FFMNestedTypesTests {
     let st = Swift2JavaTranslator(config: config)
     st.log.logLevel = .error
 
-    try st.analyze(file: "Fake.swift", text: class_interfaceFile)
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let generator = FFMSwift2JavaGenerator(
       config: config,

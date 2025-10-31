@@ -15,12 +15,14 @@
 @_spi(Testing) import SwiftJava
 import SwiftJavaToolLib
 import JavaUtilJar
+import JavaNet
 import SwiftJavaShared
 import SwiftJavaConfigurationShared
 import _Subprocess
-import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import Testing // import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import Foundation
 
-fileprivate func createTemporaryDirectory(in directory: URL) throws -> URL {
+fileprivate func createTemporaryDirectory(in directory: Foundation.URL) throws -> Foundation.URL {
   let uuid = UUID().uuidString
   let resolverDirectoryURL = directory.appendingPathComponent("swift-java-testing-\(uuid)")
 
@@ -30,13 +32,13 @@ fileprivate func createTemporaryDirectory(in directory: URL) throws -> URL {
 }
 
 /// Returns the directory that should be added to the classpath of the JVM to analyze the sources.
-func compileJava(_ sourceText: String) async throws -> URL {
+func compileJava(_ sourceText: String) async throws -> Foundation.URL {
   let sourceFile = try TempFile.create(suffix: "java", sourceText)
   
   let classesDirectory = try createTemporaryDirectory(in: FileManager.default.temporaryDirectory)
   
   let javacProcess = try await _Subprocess.run(
-    .path("/usr/bin/javac"),
+    .path(.init("\(javaHome)" + "/bin/javac")),
     arguments: [
       "-d", classesDirectory.path, // output directory for .class files
       sourceFile.path
@@ -60,15 +62,16 @@ func compileJava(_ sourceText: String) async throws -> URL {
 
 func withJavaTranslator(
   javaClassNames:  [String],
-  classpath: [URL],
+  classpath: [Foundation.URL],
   body: (JavaTranslator) throws -> (),
   function: String = #function,
   file: StaticString = #filePath,
   line: UInt = #line
 ) throws {
+  print("New withJavaTranslator, for classpath: \(classpath)")
   let jvm = try JavaVirtualMachine.shared(
     classpath: classpath.map(\.path),
-    replace: false
+    replace: true
   )
   
   var config = Configuration()
@@ -88,16 +91,18 @@ func withJavaTranslator(
 /// each of the expected "chunks" of text.
 func assertWrapJavaOutput(
   javaClassNames: [String],
-  classpath: [URL],
+  classpath: [Foundation.URL],
   expectedChunks: [String],
   function: String = #function,
   file: StaticString = #filePath,
   line: UInt = #line
 ) throws {
   let jvm = try JavaVirtualMachine.shared(
-    classpath: classpath.map(\.path),
+    //classpath: classpath.map(\.path),
     replace: false
   )
+  // Do NOT destroy the jvm here, because the JavaClasses will need to deinit,
+  // and do so while the env is still valid...
   
   var config = Configuration()
   config.minimumInputAccessLevelMode = .package
@@ -109,9 +114,8 @@ func assertWrapJavaOutput(
     environment: environment,
     translateAsClass: true)
 
-  let classLoader = try! JavaClass<JavaClassLoader>(environment: environment)
-    .getSystemClassLoader()!
-
+  let classpathJavaURLs = classpath.map({ try! URL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
+  let classLoader = URLClassLoader(classpathJavaURLs, environment: environment)
 
   // FIXME: deduplicate this
   translator.startNewFile()
@@ -120,7 +124,7 @@ func assertWrapJavaOutput(
 
   var javaClasses: [JavaClass<JavaObject>] = []
   for javaClassName in javaClassNames {
-    guard let javaClass = try classLoader.loadClass(javaClassName) else {
+    guard let javaClass = try! classLoader.loadClass(javaClassName) else {
       fatalError("Could not load Java class '\(javaClassName)' in test \(function) @ \(file):\(line)!")
     }
     javaClasses.append(javaClass)
@@ -155,15 +159,12 @@ func assertWrapJavaOutput(
     let checkAgainstText = swiftCompleteOutputText.replacing(" ", with: "")
     let checkAgainstExpectedChunk = expectedChunk.replacing(" ", with: "")
 
-    if checkAgainstText.contains(checkAgainstExpectedChunk) {
-      continue
-    }
-
-    XCTFail("Expected chunk: \n" +
+let failureMessage = "Expected chunk: \n" +
       "\(expectedChunk.yellow)" + 
       "\n" + 
       "not found in:\n" +
-      "\(swiftCompleteOutputText)",
-      file: file, line: line)
+      "\(swiftCompleteOutputText)"
+    #expect(checkAgainstText.contains(checkAgainstExpectedChunk), 
+      "\(failureMessage)")
   }
 }

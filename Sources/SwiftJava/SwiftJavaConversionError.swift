@@ -12,19 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaToolLib
-import SwiftJavaShared
-import CSwiftJavaJNI
-import SwiftJava
+/// Used to indicate Swift/Java conversion failures.
+public struct SwiftJavaConversionError: Error {
+  public let message: String 
 
-// FIXME: do we need this here or can we rely on the generated one?
-@JavaClass("java.lang.ClassLoader")
-public struct ClassLoader {
-  @JavaMethod
-  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
-}
-
-extension JavaClass<ClassLoader> {
-  @JavaStaticMethod
-  public func getSystemClassLoader() -> ClassLoader?
+  public init(_ message: String) {
+    self.message = message
+  }
 }

@@ -202,8 +202,6 @@ let package = Package(
 
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
-
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
@@ -422,7 +420,6 @@ let package = Package(
     .executableTarget(
       name: "SwiftJavaTool",
       dependencies: [
-        .product(name: "Logging", package: "swift-log"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),

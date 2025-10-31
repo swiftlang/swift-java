@@ -15,7 +15,7 @@
 import Foundation
 
 /// Detected JAVA_HOME for this process.
-package let javaHome = findJavaHome()
+package let javaHome: String = findJavaHome()
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,

@@ -114,8 +114,6 @@ struct JavaClassTranslator {
   /// Prepare translation for the given Java class (or interface).
   init(javaClass: JavaClass<JavaObject>, translator: JavaTranslator) throws {
     let fullName = javaClass.getName()
-    print("TRANSLATE = \(fullName)")
-
     self.javaClass = javaClass
     self.translator = translator
     self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
@@ -139,7 +137,6 @@ struct JavaClassTranslator {
         do {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
           if let javaGenericSuperclass = javaGenericSuperclass?.as(JavaReflectParameterizedType.self) {
-            print("javaGenericSuperclass = \(javaGenericSuperclass)")
             for typeArg in javaGenericSuperclass.getActualTypeArguments() {
               let javaTypeArgName = typeArg?.getTypeName() ?? ""
               if let swiftTypeArgName = self.translator.translatedClasses[javaTypeArgName] {
@@ -157,8 +154,6 @@ struct JavaClassTranslator {
         javaSuperclass = javaSuperclassNonOpt.getSuperclass()
         javaGenericSuperclass = javaClass.getGenericSuperclass()
       }
-
-      print("swiftSuperclassTypeArgs = \(swiftSuperclassTypeArgs)")
 
       self.effectiveJavaSuperclass = javaSuperclass
       self.swiftSuperclass = SwiftJavaParameterizedType(

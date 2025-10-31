@@ -145,7 +145,6 @@ func getSwiftReturnTypeNameAsString(
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
-      print("get the javaType ==== \(javaType)")
 
     //   if let method,
     //      let parameterizedType = javaType.as(ParameterizedType.self) {
@@ -201,9 +200,6 @@ func getSwiftReturnTypeNameAsString(
 
     // Handle parameterized types by recursing on the raw type and the type
     // arguments.
-    print("parameterizedType = \(javaType.as(ParameterizedType.self))")
-    print("parameterizedType.getRawType() = \(javaType.as(ParameterizedType.self)?.getRawType())")
-
     if let parameterizedType = javaType.as(ParameterizedType.self) {
       if let rawJavaType = parameterizedType.getRawType() {
         var rawSwiftType = try getSwiftTypeNameAsString(
@@ -211,8 +207,6 @@ func getSwiftReturnTypeNameAsString(
           preferValueTypes: false,
           outerOptional: outerOptional
         )
-        print("MAPPED rawSwiftType = \(rawSwiftType)")
-        print("MAPPED parameterizedType.getActualTypeArguments() = \(parameterizedType.getActualTypeArguments())")
 
         let optionalSuffix: String
         if let lastChar = rawSwiftType.last, lastChar == "?" || lastChar == "!" {
@@ -239,8 +233,6 @@ func getSwiftReturnTypeNameAsString(
 
           return mappedSwiftName
         }
-
-        print("MAPPED ->> typeArguments = \(typeArguments)")
 
         return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(optionalSuffix)"
       }
