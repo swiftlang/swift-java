@@ -566,6 +566,8 @@ extension JavaClassTranslator {
     let accessModifier = javaConstructor.isPublic ? "public " : ""
     let convenienceModifier = translateAsClass ? "convenience " : ""
     let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
+    
+    // FIXME: handle generics in constructors
     return """
       @JavaMethod
       \(raw: nonoverrideAttribute)\(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
@@ -592,12 +594,8 @@ extension JavaClassTranslator {
     }
 
     // Map the parameters.
-    let parameters = try translateJavaParameters(javaMethod.getParameters())
-
+    let parameters = try translateJavaParameters(javaMethod)
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
-
-    print("javaMethod.getReturnType() == \(javaMethod.getReturnType())")
-    print("javaMethod.getGenericReturnType() == \(javaMethod.getGenericReturnType())")
 
     // Map the result type.
     let resultTypeStr: String
@@ -763,7 +761,30 @@ extension JavaClassTranslator {
   }
 
   // Translate a Java parameter list into Swift parameters.
-  private func translateJavaParameters(_ parameters: [Parameter?]) throws -> [FunctionParameterSyntax] {
+  private func translateJavaParameters(
+    _ javaMethod: JavaLangReflect.Method
+  ) throws -> [FunctionParameterSyntax] {
+    let parameters: [Parameter?] = javaMethod.getParameters()
+
+    return try parameters.compactMap { javaParameter in
+      guard let javaParameter else { return nil }
+
+      let typeName = try translator.getSwiftTypeNameAsString(
+        method: javaMethod,
+        javaParameter.getParameterizedType()!,
+        preferValueTypes: true,
+        outerOptional: .optional
+      )
+      let paramName = javaParameter.getName()
+      return "_ \(raw: paramName): \(raw: typeName)"
+    }
+  }
+
+  // Translate a Java parameter list into Swift parameters.
+  @available(*, deprecated, message: "Prefer the method based version") // FIXME: constructors are not well handled
+  private func translateJavaParameters(
+    _ parameters: [Parameter?]
+  ) throws -> [FunctionParameterSyntax] {
     return try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 

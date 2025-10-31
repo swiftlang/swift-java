@@ -135,15 +135,26 @@ func getSwiftReturnTypeNameAsString(
       } 
     }
 
-    return try getSwiftTypeNameAsString(genericReturnType!, preferValueTypes: preferValueTypes, outerOptional: outerOptional)
+    return try getSwiftTypeNameAsString(method: method, genericReturnType!, preferValueTypes: preferValueTypes, outerOptional: outerOptional)
   }
 
   /// Turn a Java type into a string.
   func getSwiftTypeNameAsString(
+    method: JavaLangReflect.Method? = nil,
     _ javaType: Type,
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
+      print("get the javaType ==== \(javaType)")
+
+    //   if let method,
+    //      let parameterizedType = javaType.as(ParameterizedType.self) {
+    //     if method.getGenericParameterTypes().contains(where: {$0?.getTypeName() == javaType.getTypeName()}) {
+    //       fatalError("java type = \(javaType.as(ParameterizedType.self))")
+    //       return javaType.getTypeName()
+    //     }
+    //  }
+
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
@@ -190,30 +201,49 @@ func getSwiftReturnTypeNameAsString(
 
     // Handle parameterized types by recursing on the raw type and the type
     // arguments.
-    if let parameterizedType = javaType.as(ParameterizedType.self),
-      let rawJavaType = parameterizedType.getRawType()
-    {
-      var rawSwiftType = try getSwiftTypeNameAsString(
-        rawJavaType,
-        preferValueTypes: false,
-        outerOptional: outerOptional
-      )
+    print("parameterizedType = \(javaType.as(ParameterizedType.self))")
+    print("parameterizedType.getRawType() = \(javaType.as(ParameterizedType.self)?.getRawType())")
 
-      let optionalSuffix: String
-      if let lastChar = rawSwiftType.last, lastChar == "?" || lastChar == "!" {
-        optionalSuffix = "\(lastChar)"
-        rawSwiftType.removeLast()
-      } else {
-        optionalSuffix = ""
-      }
+    if let parameterizedType = javaType.as(ParameterizedType.self) {
+      if let rawJavaType = parameterizedType.getRawType() {
+        var rawSwiftType = try getSwiftTypeNameAsString(
+          rawJavaType,
+          preferValueTypes: false,
+          outerOptional: outerOptional
+        )
+        print("MAPPED rawSwiftType = \(rawSwiftType)")
+        print("MAPPED parameterizedType.getActualTypeArguments() = \(parameterizedType.getActualTypeArguments())")
 
-      let typeArguments = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
-        try typeArg.map { typeArg in
-          try getSwiftTypeNameAsString(typeArg, preferValueTypes: false, outerOptional: .nonoptional)
+        let optionalSuffix: String
+        if let lastChar = rawSwiftType.last, lastChar == "?" || lastChar == "!" {
+          optionalSuffix = "\(lastChar)"
+          rawSwiftType.removeLast()
+        } else {
+          optionalSuffix = ""
         }
-      }
 
-      return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(optionalSuffix)"
+        let typeArguments: [String] = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
+          guard let typeArg else { return nil }
+          
+          let mappedSwiftName = try getSwiftTypeNameAsString(method: method, typeArg, preferValueTypes: false, outerOptional: .nonoptional)
+
+          // FIXME: improve the get instead...
+          if mappedSwiftName == nil || mappedSwiftName == "JavaObject" {
+            // Try to salvage it, is it perhaps a type parameter?
+            if let method {
+              if method.getTypeParameters().contains(where: { $0?.getTypeName() == typeArg.getTypeName() }) {
+                return typeArg.getTypeName()
+              }
+            }
+          }
+
+          return mappedSwiftName
+        }
+
+        print("MAPPED ->> typeArguments = \(typeArguments)")
+
+        return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(optionalSuffix)"
+      }
     }
 
     // Handle direct references to Java classes.

@@ -48,7 +48,7 @@ class WrapJavaTests: XCTestCase {
     )
   }
 
-  func testWrapJavaGenericMethod() async throws {
+  func testWrapJavaGenericMethod_singleGeneric() async throws {
     do {
       let classpathURL = try await compileJava(
         """
@@ -64,7 +64,6 @@ class WrapJavaTests: XCTestCase {
 
         class ExampleSimpleClass {
           <KeyType> KeyType getGeneric(Item<KeyType> key) { return null; }
-          // <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
         }
         """)
 
@@ -90,12 +89,59 @@ class WrapJavaTests: XCTestCase {
           """,
           """
           @JavaMethod
-          open func getGeneric<T1>(_ arg0: String, _ arg1: Item<T1>?) -> T1!
+          open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType {
           """,
-          // """
-          // @JavaMethod
-          // open func getStore<T1, T2>(_ arg0: String, _ arg1: Item<T1>?, _ arg2: Item<T2>?) -> BDStore<T1, T2>!
-          // """
+        ]
+      )
+    } catch let error as Throwable { 
+      error.printStackTrace()
+      XCTFail("error: \(error)")
+    }
+  }
+  
+  func testWrapJavaGenericMethod_multipleGenerics() async throws {
+    do {
+      let classpathURL = try await compileJava(
+        """
+        package com.example;
+
+        class Item<T> { 
+          final T value;
+          Item(T item) {
+            this.value = item;
+          }
+        }
+        class Pair<First, Second> { }
+
+        class ExampleSimpleClass {
+          <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
+        }
+        """)
+
+      try assertWrapJavaOutput(
+        javaClassNames: [
+          "com.example.Item",
+          "com.example.Pair",
+          "com.example.ExampleSimpleClass"
+        ],
+        classpath: [classpathURL],
+        expectedChunks: [
+          """
+          import CSwiftJavaJNI
+          import SwiftJava
+          """,
+          """
+          @JavaClass("com.example.ExampleSimpleClass")
+          open class ExampleSimpleClass: JavaObject {
+          """,
+          """
+          @JavaClass("com.example.ExampleSimpleClass")
+          open class ExampleSimpleClass: JavaObject {
+          """,
+          """
+          @JavaMethod
+          open func getPair<KeyType: AnyJavaObject, ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Item<KeyType>?, _ arg2: Item<ValueType>) -> KeyType {
+          """,
         ]
       )
     } catch let error as Throwable { 
