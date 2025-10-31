@@ -89,6 +89,18 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       arguments += ["--java-package", javaPackage]
     }
 
+    if let unsignedNumbersMode = configuration.unsignedNumbersMode {
+      arguments += ["--unsigned-numbers", \(unsignedNumbersMode.rawValue.kebabCased)]
+    }
+
+    if let minimumInputAccessLevelMode = configuration.minimumInputAccessLevelMode {
+      arguments += ["--minimum-input-access-level", \(minimumInputAccessLevelMode.rawValue.kebabCased)]
+    }
+
+    if let memoryManagementMode = configuration.memoryManagementMode {
+      arguments += ["--memory-management-mode", \(memoryManagementMode.rawValue.kebabCased)]
+    }
+
     let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
       $0.pathExtension == "swift"
     }

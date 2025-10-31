@@ -67,7 +67,7 @@ extension SwiftJava {
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
     var minimumInputAccessLevel: JExtractMinimumAccessLevelMode = .default
 
-    @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allow-automatic`, user can omit this parameter and a global GC-based arena will be used. `force-automatic` removes all explicit memory management.")
+    @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allow-global-automatic`, user can omit this parameter and a global GC-based arena will be used.")
     var memoryManagementMode: JExtractMemoryManagementMode = .default
 
     @Option(

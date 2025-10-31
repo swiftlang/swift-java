@@ -66,14 +66,33 @@ extension PluginContext {
       .appending(path: "generated")
       .appending(path: "java")
   }
-  
+
   var outputSwiftDirectory: URL {
     self.pluginWorkDirectoryURL
       .appending(path: "Sources")
   }
-  
+
   func cachedClasspathFile(swiftModule: String) -> URL {
     self.pluginWorkDirectoryURL
       .appending(path: "\(swiftModule)", directoryHint: .notDirectory)
+  }
+}
+
+extension String {
+  var kebabCased: String {
+    var result = ""
+
+    for (index, char) in input.enumerated() {
+      if char.isUppercase {
+        if index != 0 {
+          result.append("-")
+        }
+        result.append(char.lowercased())
+      } else {
+        result.append(char)
+      }
+    }
+
+    return result
   }
 }
