@@ -224,9 +224,8 @@ struct JNIAsyncTests {
               }
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try JavaVirtualMachine.shared().environment()
-              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)]) {
-                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
-              }
+              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           else {
@@ -238,9 +237,8 @@ struct JNIAsyncTests {
               }
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try JavaVirtualMachine.shared().environment()
-              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)]) {
-                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
-              }
+              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           return 
@@ -317,9 +315,8 @@ struct JNIAsyncTests {
               let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
               result$.initialize(to: swiftResult$)
               let resultBits$ = Int64(Int(bitPattern: result$))
-              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)]) {
-                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
-              }
+              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           else {
@@ -334,9 +331,8 @@ struct JNIAsyncTests {
               let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
               result$.initialize(to: swiftResult$)
               let resultBits$ = Int64(Int(bitPattern: result$))
-              withVaList([SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)]) {
-                environment.interface.CallBooleanMethodV(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, $0)
-              }
+              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)
+              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           return 
