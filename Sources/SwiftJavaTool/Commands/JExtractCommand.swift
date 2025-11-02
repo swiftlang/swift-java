@@ -80,7 +80,7 @@ extension SwiftJava {
     var dependsOn: [String] = []
 
     @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
-    var asyncFuncMode: JExtractAsyncFuncMode = .default
+    var asyncFuncMode: JExtractAsyncFuncMode?
   }
 }
 
