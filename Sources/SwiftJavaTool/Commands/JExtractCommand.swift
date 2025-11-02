@@ -93,7 +93,6 @@ extension SwiftJava.JExtractCommand {
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
-    config.asyncFuncMode = asyncFuncMode
 
     // @Flag does not support optional, so we check ourself if it is passed
     let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
@@ -102,6 +101,7 @@ extension SwiftJava.JExtractCommand {
     configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
+    configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
 
     try checkModeCompatibility(config: config)
 
