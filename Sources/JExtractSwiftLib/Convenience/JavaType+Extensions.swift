@@ -25,7 +25,7 @@ extension JavaType {
     case .long: return "J"
     case .float: return "F"
     case .double: return "D"
-    case .class(let package, let name):
+    case .class(let package, let name, _):
       let nameWithInnerClasses = name.replacingOccurrences(of: ".", with: "$")
       if let package {
         return "L\(package.replacingOccurrences(of: ".", with: "/"))/\(nameWithInnerClasses);"
@@ -109,6 +109,32 @@ extension JavaType {
       true
     default:
       false
+    }
+  }
+
+  /// Returns the boxed type, or self if the type is already a Java class.
+  var boxedType: JavaType {
+    switch self {
+    case .boolean:
+      return .class(package: "java.lang", name: "Boolean")
+    case .byte:
+      return .class(package: "java.lang", name: "Byte")
+    case .char:
+      return .class(package: "java.lang", name: "Character")
+    case .short:
+      return .class(package: "java.lang", name: "Short")
+    case .int:
+      return .class(package: "java.lang", name: "Integer")
+    case .long:
+      return .class(package: "java.lang", name: "Long")
+    case .float:
+      return .class(package: "java.lang", name: "Float")
+    case .double:
+      return .class(package: "java.lang", name: "Double")
+    case .void:
+      return .class(package: "java.lang", name: "Void")
+    default:
+      return self
     }
   }
 }

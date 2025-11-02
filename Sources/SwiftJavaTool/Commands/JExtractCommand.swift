@@ -78,6 +78,9 @@ extension SwiftJava {
             """
     )
     var dependsOn: [String] = []
+
+    @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
+    var asyncFuncMode: JExtractAsyncFuncMode = .default
   }
 }
 
@@ -90,6 +93,7 @@ extension SwiftJava.JExtractCommand {
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
+    config.asyncFuncMode = asyncFuncMode
 
     // @Flag does not support optional, so we check ourself if it is passed
     let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
@@ -168,3 +172,4 @@ extension JExtractGenerationMode: ExpressibleByArgument {}
 extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
 extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
 extension JExtractMemoryManagementMode: ExpressibleByArgument {}
+extension JExtractAsyncFuncMode: ExpressibleByArgument {}

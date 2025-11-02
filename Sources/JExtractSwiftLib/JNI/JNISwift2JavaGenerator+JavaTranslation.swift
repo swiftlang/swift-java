@@ -118,6 +118,7 @@ extension JNISwift2JavaGenerator {
         name: getAsCaseName,
         isStatic: false,
         isThrowing: false,
+        isAsync: false,
         nativeFunctionName: "$\(getAsCaseName)",
         parentName: enumName,
         functionTypes: [],
@@ -181,13 +182,13 @@ extension JNISwift2JavaGenerator {
       }
 
       // Swift -> Java
-      let translatedFunctionSignature = try translate(
+      var translatedFunctionSignature = try translate(
         functionSignature: decl.functionSignature,
         methodName: javaName,
         parentName: parentName
       )
       // Java -> Java (native)
-      let nativeFunctionSignature = try nativeTranslation.translate(
+      var nativeFunctionSignature = try nativeTranslation.translate(
         functionSignature: decl.functionSignature,
         translatedFunctionSignature: translatedFunctionSignature,
         methodName: javaName,
@@ -212,10 +213,21 @@ extension JNISwift2JavaGenerator {
         }
       }
 
+      // Handle async methods
+      if decl.functionSignature.isAsync {
+        self.convertToAsync(
+          translatedFunctionSignature: &translatedFunctionSignature,
+          nativeFunctionSignature: &nativeFunctionSignature,
+          originalFunctionSignature: decl.functionSignature,
+          mode: config.effectiveAsyncFuncMode
+        )
+      }
+
       return TranslatedFunctionDecl(
         name: javaName,
         isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
+        isAsync: decl.isAsync,
         nativeFunctionName: "$\(javaName)",
         parentName: parentName,
         functionTypes: funcTypes,
@@ -467,6 +479,50 @@ extension JNISwift2JavaGenerator {
 
       case .wrapGuava:
         fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
+      }
+    }
+
+    func convertToAsync(
+      translatedFunctionSignature: inout TranslatedFunctionSignature,
+      nativeFunctionSignature: inout NativeFunctionSignature,
+      originalFunctionSignature: SwiftFunctionSignature,
+      mode: JExtractAsyncFuncMode
+    ) {
+      switch mode {
+      case .completableFuture:
+        // Update translated function
+
+        let nativeFutureType = JavaType.completableFuture(nativeFunctionSignature.result.javaType)
+
+        let futureOutParameter = OutParameter(
+          name: "$future",
+          type: nativeFutureType,
+          allocation: .new
+        )
+
+        let result = translatedFunctionSignature.resultType
+        translatedFunctionSignature.resultType = TranslatedResult(
+          javaType: .completableFuture(translatedFunctionSignature.resultType.javaType),
+          annotations: result.annotations,
+          outParameters: result.outParameters + [futureOutParameter],
+          conversion: .aggregate(variable: nil, [
+            .print(.placeholder), // Make the downcall
+            .method(.constant("$future"), function: "thenApply", arguments: [
+             .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
+           ])
+          ])
+        )
+
+        // Update native function
+        nativeFunctionSignature.result.javaType = .void
+        nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
+          nativeFunctionSignature.result.conversion,
+          swiftFunctionResultType: originalFunctionSignature.result.type,
+          nativeReturnType: nativeFunctionSignature.result.javaType,
+          outParameters: nativeFunctionSignature.result.outParameters,
+          isThrowing: originalFunctionSignature.isThrowing
+        )
+        nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
       }
     }
 
@@ -753,6 +809,8 @@ extension JNISwift2JavaGenerator {
 
     let isThrowing: Bool
 
+    let isAsync: Bool
+
     /// The name of the native function
     let nativeFunctionName: String
 
@@ -812,11 +870,15 @@ extension JNISwift2JavaGenerator {
   struct OutParameter {
     enum Allocation {
       case newArray(JavaType, size: Int)
+      case new
 
-      func render() -> String {
+      func render(type: JavaType) -> String {
         switch self {
         case .newArray(let javaType, let size):
           "new \(javaType)[\(size)]"
+
+        case .new:
+          "new \(type)()"
         }
       }
     }
@@ -911,6 +973,12 @@ extension JNISwift2JavaGenerator {
 
     /// Access a member of the value
     indirect case replacingPlaceholder(JavaNativeConversionStep, placeholder: String)
+
+    /// `(args) -> { return body; }`
+    indirect case lambda(args: [String] = [], body: JavaNativeConversionStep)
+
+    /// Prints the conversion step, ignoring the output.
+    indirect case print(JavaNativeConversionStep)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -1024,6 +1092,23 @@ extension JNISwift2JavaGenerator {
 
       case .replacingPlaceholder(let inner, let placeholder):
         return inner.render(&printer, placeholder)
+
+      case .lambda(let args, let body):
+        var printer = CodePrinter()
+        printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
+          let body = body.render(&printer, placeholder)
+          if !body.isEmpty {
+            printer.print("return \(body);")
+          } else {
+            printer.print("return;")
+          }
+        }
+        return printer.finalize()
+
+      case .print(let inner):
+        let inner = inner.render(&printer, placeholder)
+        printer.print("\(inner);")
+        return ""
       }
     }
 
@@ -1073,6 +1158,12 @@ extension JNISwift2JavaGenerator {
         return inner.requiresSwiftArena
 
       case .replacingPlaceholder(let inner, _):
+        return inner.requiresSwiftArena
+
+      case .lambda(_, let body):
+        return body.requiresSwiftArena
+
+      case .print(let inner):
         return inner.requiresSwiftArena
       }
     }

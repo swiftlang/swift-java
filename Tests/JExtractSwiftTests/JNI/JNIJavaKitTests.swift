@@ -71,7 +71,7 @@ struct JNIJavaKitTests {
           guard let javaInteger_unwrapped$ = javaInteger else {
             fatalError("javaInteger was null in call to \\(#function), but Swift requires non-optional!")
           }
-          SwiftModule.function(javaLong: JavaLong(javaThis: javaLong_unwrapped$, environment: environment!), javaInteger: JavaInteger(javaThis: javaInteger_unwrapped$, environment: environment!), int: Int64(fromJNI: int, in: environment!))
+          SwiftModule.function(javaLong: JavaLong(javaThis: javaLong_unwrapped$, environment: environment), javaInteger: JavaInteger(javaThis: javaInteger_unwrapped$, environment: environment), int: Int64(fromJNI: int, in: environment))
         }
         """
       ]

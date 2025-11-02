@@ -30,6 +30,14 @@ public struct SwiftFunctionSignature: Equatable {
   var genericParameters: [SwiftGenericParameterDeclaration]
   var genericRequirements: [SwiftGenericRequirement]
 
+  var isAsync: Bool {
+    effectSpecifiers.contains(.async)
+  }
+
+  var isThrowing: Bool {
+    effectSpecifiers.contains(.throws)
+  }
+
   init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],
@@ -245,8 +253,8 @@ extension SwiftFunctionSignature {
     if signature.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
     }
-    if let asyncSpecifier = signature.effectSpecifiers?.asyncSpecifier {
-      throw SwiftFunctionTranslationError.async(asyncSpecifier)
+    if signature.effectSpecifiers?.asyncSpecifier != nil {
+      effectSpecifiers.append(.async)
     }
 
     let parameters = try signature.parameterClause.parameters.map { param in
@@ -331,7 +339,7 @@ extension SwiftFunctionSignature {
       effectSpecifiers.append(.throws)
     }
     if let asyncSpecifier = decl.effectSpecifiers?.asyncSpecifier {
-      throw SwiftFunctionTranslationError.async(asyncSpecifier)
+      effectSpecifiers.append(.async)
     }
     return effectSpecifiers
   }

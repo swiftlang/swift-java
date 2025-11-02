@@ -31,7 +31,7 @@ public interface SwiftArena {
     void register(SwiftInstance instance);
 
     static ClosableSwiftArena ofConfined() {
-        return new ConfinedSwiftMemorySession(Thread.currentThread());
+        return new ConfinedSwiftMemorySession();
     }
 
     static SwiftArena ofAuto() {

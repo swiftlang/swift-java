@@ -73,10 +73,10 @@ tasks.test {
     }
 }
 
-// SwiftKit depends on SwiftKitSwift (Swift library that this Java library calls into)
+// SwiftKit depends on SwiftRuntimeFunctions (Swift library that this Java library calls into)
 
 def compileSwift = tasks.register("compileSwift", Exec) {
-    description "Compile the swift-java SwiftKitSwift dynamic library that SwiftKit (Java) calls into"
+    description "Compile the swift-java SwiftRuntimeFunctions dynamic library that SwiftKit (Java) calls into"
 
     inputs.file(new File(rootDir, "Package.swift"))
     inputs.dir(new File(rootDir, "Sources/")) // a bit generous, but better safe than sorry, and include all Swift source changes
@@ -84,7 +84,7 @@ def compileSwift = tasks.register("compileSwift", Exec) {
 
     workingDir = rootDir
     commandLine "swift"
-    args("build", "--target", "SwiftKitSwift")
+    args("build", "--target", "SwiftRuntimeFunctions")
 }
 tasks.build {
     dependsOn("compileSwift")

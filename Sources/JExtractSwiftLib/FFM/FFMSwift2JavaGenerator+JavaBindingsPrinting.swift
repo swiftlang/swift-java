@@ -453,7 +453,7 @@ extension FFMSwift2JavaGenerator {
   func renderMemoryLayoutValue(for javaType: JavaType) -> String {
     if let layout = ForeignValueLayout(javaType: javaType) {
       return layout.description
-    } else if case .class(package: _, name: let customClass) = javaType {
+    } else if case .class(package: _, name: let customClass, _) = javaType {
       return ForeignValueLayout(customType: customClass).description
     } else {
       fatalError("renderMemoryLayoutValue not supported for \(javaType)")

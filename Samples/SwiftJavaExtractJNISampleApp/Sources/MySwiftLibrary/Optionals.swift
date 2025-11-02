@@ -62,6 +62,10 @@ public func optionalJavaKitLong(input: Optional<JavaLong>) -> Int64? {
   }
 }
 
+public func optionalThrowing() throws -> Int64? {
+  throw MySwiftError.swiftError
+}
+
 public func multipleOptionals(
   input1: Optional<Int8>,
   input2: Optional<Int16>,

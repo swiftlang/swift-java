@@ -63,10 +63,10 @@ struct JNIClosureTests {
         @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2")
         func Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.emptyClosure(closure: { 
-            let class$ = environment!.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment!.interface.GetMethodID(environment, class$, "apply", "()V")!
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "()V")!
             let arguments$: [jvalue] = []
-            environment!.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
           )
         }
@@ -115,10 +115,10 @@ struct JNIClosureTests {
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2")
         func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.closureWithArgumentsAndReturn(closure: { _0, _1 in
-            let class$ = environment!.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment!.interface.GetMethodID(environment, class$, "apply", "(JZ)J")!
-            let arguments$: [jvalue] = [_0.getJValue(in: environment!), _1.getJValue(in: environment!)]
-            return Int64(fromJNI: environment!.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment!)
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "(JZ)J")!
+            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

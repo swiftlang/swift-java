@@ -42,24 +42,19 @@ class SwiftTypeLookupContext {
           return typeDeclaration(for: names)
         }
 
-      case .fromFileScope(_, let names):
-        if !names.isEmpty {
-          return typeDeclaration(for: names)
-        }
-
-      case .lookInMembers(let scopeNode):
+      case .lookForMembers(let scopeNode):
         if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
           if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl as! SwiftNominalTypeDeclaration) {
             return found
           }
         }
 
-      case .lookInGenericParametersOfExtendedType(let extensionNode):
+      case .lookForGenericParameters(let extensionNode):
         // TODO: Implement
         _ = extensionNode
         break
 
-      case .mightIntroduceDollarIdentifiers:
+      case .lookForImplicitClosureParameters:
         // Dollar identifier can't be a type, ignore.
         break
       }
@@ -81,8 +76,9 @@ class SwiftTypeLookupContext {
         // TODO: Implement
         _ = implicitDecl
         break
-      case .dollarIdentifier:
-        break
+      case .equivalentNames(let equivalentNames):
+        // TODO: Implement
+        _ = equivalentNames
       }
     }
     return nil

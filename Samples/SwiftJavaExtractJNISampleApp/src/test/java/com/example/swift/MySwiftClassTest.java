@@ -152,4 +152,12 @@ public class MySwiftClassTest {
             assertEquals(70, c1.addXWithJavaLong(javaLong));
         }
     }
+
+    @Test
+    void getAsyncVariable() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            assertEquals(42, c1.getGetAsync().join());
+        }
+    }
 }
