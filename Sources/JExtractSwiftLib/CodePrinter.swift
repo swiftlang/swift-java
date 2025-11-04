@@ -70,6 +70,20 @@ public struct CodePrinter {
     }
   }
 
+  public mutating func printHashIfBlock(
+    _ header: Any,
+    function: String = #function,
+    file: String = #fileID,
+    line: UInt = #line,
+    body: (inout CodePrinter) throws -> ()
+  ) rethrows {
+    print("#if \(header)")
+    indent()
+    try body(&self)
+    outdent()
+    print("#endif // end of \(header)", .sloc, function: function, file: file, line: line)
+  }
+
   public mutating func printBraceBlock(
     _ header: Any,
     function: String = #function,
