@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Logging
 import ArgumentParser
 import Foundation
 import SwiftJavaToolLib
@@ -27,6 +28,9 @@ import SwiftJavaShared
 
 extension SwiftJava {
   struct ConfigureCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
+
+    static let log: Logging.Logger = Logger(label: "swift-java:\(configuration.commandName!)")
+
     static let configuration = CommandConfiguration(
       commandName: "configure",
       abstract: "Configure and emit a swift-java.config file based on an input dependency or jar file")
@@ -63,7 +67,7 @@ extension SwiftJava {
 extension SwiftJava.ConfigureCommand {
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
     let classpathEntries = self.configureCommandJVMClasspath(
-        searchDirs: [self.effectiveSwiftModuleURL], config: config)
+        searchDirs: [self.effectiveSwiftModuleURL], config: config, log: Self.log)
 
     let jvm =
       try self.makeJVM(classpathEntries: classpathEntries)
