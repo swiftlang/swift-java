@@ -825,7 +825,7 @@ extension JNISwift2JavaGenerator {
 
         func printDo(printer: inout CodePrinter) {
           printer.print("let swiftResult$ = await \(placeholder)")
-          printer.print("environment = try JavaVirtualMachine.shared().environment()")
+          printer.print("environment = try! JavaVirtualMachine.shared().environment()")
           let inner = inner.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
             printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
