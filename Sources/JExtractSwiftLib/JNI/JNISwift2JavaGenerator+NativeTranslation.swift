@@ -867,14 +867,20 @@ extension JNISwift2JavaGenerator {
           }
         }
 
+        printer.print("var taskInitialized = false") // FIXME: horrible hack so we can keep having CI for Linux with 6.1.2 until build issues with 6.2 are resovled
+        printer.print("#if swift(>=6.2)")
         printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+        printer.print("taskInitialized = true")
           printer.printBraceBlock("Task.immediate") { printer in
             // Immediate runs on the caller thread, so we don't need to attach the environment again.
             printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
             printTask(printer: &printer)
           }
         }
-        printer.printBraceBlock("else") { printer in
+        printer.print("#endif // canImport(Darwin)")
+
+        // printer.printBraceBlock("else") { printer in
+        printer.printBraceBlock("if !taskInitialized") { printer in
           printer.printBraceBlock("Task") { printer in
             // We can be on any thread, so we need to attach the thread.
             printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
