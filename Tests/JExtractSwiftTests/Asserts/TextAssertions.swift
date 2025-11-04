@@ -179,7 +179,9 @@ func assertOutput(
         print("==== ---------------------------------------------------------------")
         print("Expected output:")
         for (n, e) in expectedLines.enumerated() {
-          print("\(n): \(e)".yellow(if: diffLineNumbers.map({$0 - matchingOutputOffset}).contains(n)))
+          let isMismatch = diffLineNumbers.map({$0 - matchingOutputOffset}).contains(n)
+          let marker = isMismatch ? " // <<<<<<<<<<< mismatch" : ""
+          print("\(n): \(e)\(marker)".yellow(if: isMismatch))
         }
       }
 
@@ -188,15 +190,7 @@ func assertOutput(
       let printFromLineNo = matchingOutputOffset
       for (n, g) in gotLines.enumerated() where n >= printFromLineNo {
         let baseLine = "\(n): \(g)"
-        var line = baseLine
-        if diffLineNumbers.contains(n) {
-          line += "\n"
-          let leadingCount = "\(n): ".count
-          let message = "\(String(repeating: " ", count: leadingCount))\(String(repeating: "^", count: 8)) EXPECTED MATCH OR SEARCHING FROM HERE "
-          line += "\(message)\(String(repeating: "^", count: max(0, line.count - message.count)))"
-          line = line.red
-        }
-        print(line)
+        print(baseLine)
       }
       print("==== ---------------------------------------------------------------\n")
     }
@@ -248,14 +242,18 @@ func assertOutput(
       print("==== ---------------------------------------------------------------")
       print("Expected output:")
       for (n, e) in expectedLines.enumerated() {
-        print("\(e)".yellow(if: diffLineNumbers.contains(n)))
+        let isMismatch = diffLineNumbers.contains(n)
+        let marker = isMismatch ? " // <<<<<<<< error: mismatch" : ""
+        print("\(e)\(marker)".yellow(if: isMismatch))
       }
     }
 
     print("==== ---------------------------------------------------------------")
     print("Got output:")
     for (n, g) in gotLines.enumerated() {
-      print("\(g)".red(if: diffLineNumbers.contains(n)))
+      let isMismatch = diffLineNumbers.contains(n)
+      let marker = isMismatch ? "// <<<<<<<< error: mismatch" : ""
+      print("\(g)\(marker)".red(if: isMismatch))
     }
     print("==== ---------------------------------------------------------------\n")
   }

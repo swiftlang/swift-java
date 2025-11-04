@@ -825,7 +825,7 @@ extension JNISwift2JavaGenerator {
 
         func printDo(printer: inout CodePrinter) {
           printer.print("let swiftResult$ = await \(placeholder)")
-          printer.print("environment = try JavaVirtualMachine.shared().environment()")
+          printer.print("environment = try! JavaVirtualMachine.shared().environment()")
           let inner = inner.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
             printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
@@ -839,7 +839,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        func printTask(printer: inout CodePrinter) {
+        func printTaskBody(printer: inout CodePrinter) {
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.
             printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
@@ -867,18 +867,22 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
-          printer.printBraceBlock("Task.immediate") { printer in
-            // Immediate runs on the caller thread, so we don't need to attach the environment again.
-            printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
-            printTask(printer: &printer)
+        printer.print("var task: Task<Void, Never>? = nil")
+        printer.printHashIfBlock("swift(>=6.2)") { printer in 
+          printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+            printer.printBraceBlock("task = Task.immediate") { printer in
+              // Immediate runs on the caller thread, so we don't need to attach the environment again.
+              printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
+              printTaskBody(printer: &printer)
+            }
           }
         }
-        printer.printBraceBlock("else") { printer in
-          printer.printBraceBlock("Task") { printer in
+
+        printer.printBraceBlock("if task == nil") { printer in
+          printer.printBraceBlock("task = Task") { printer in
             // We can be on any thread, so we need to attach the thread.
             printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
-            printTask(printer: &printer)
+            printTaskBody(printer: &printer)
           }
         }
 
