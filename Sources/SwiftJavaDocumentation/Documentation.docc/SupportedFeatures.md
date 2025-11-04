@@ -135,10 +135,10 @@ on the Java side.
 | `Float`    | `float`   |
 | `Double`   | `double`  |
 
-#### Unsigned numbers mode: wrap-guava
+#### Unsigned numbers mode: wrapGuava
 
 You can configure `jextract` (in FFM mode) to instead import unsigned values as their unsigned type-safe representations
-as offered by the Guava library: `UnsignedLong` or `UnsignedInt`.  To enable this mode pass the `--unsigned-numbers wrap-guava`
+as offered by the Guava library: `UnsignedLong` or `UnsignedInt`.  To enable this mode pass the `--unsigned-numbers-mode wrapGuava`
 command line option, or set the corresponding configuration value in `swift-java.config` (TODO).
 
 This approach is type-safe, however it incurs a performance penalty for allocating a wrapper class for every 
@@ -162,7 +162,7 @@ you are expected to add a Guava dependency to your Java project.
 | `Float`    | `float`                                                |
 | `Double`   | `double`                                               |
 
-> Note: The `wrap-guava` mode is currently only available in FFM mode of jextract.
+> Note: The `wrapGuava` mode is currently only available in FFM mode of jextract.
 
 ### Enums
 

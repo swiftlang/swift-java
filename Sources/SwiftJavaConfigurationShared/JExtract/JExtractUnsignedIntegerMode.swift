@@ -11,7 +11,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-
 /// Configures how Swift unsigned integers should be extracted by jextract.
 public enum JExtractUnsignedIntegerMode: String, Codable {
   /// Treat unsigned Swift integers as their signed equivalents in Java signatures,

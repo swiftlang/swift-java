@@ -102,8 +102,7 @@ def jextract = tasks.register("jextract", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    // TODO: -v for debugging build issues...
-    args("build", "-v") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
+    args("build") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
     // If we wanted to execute a specific subcommand, we can like this:
     //     args("run",/*
     //             "swift-java", "jextract",

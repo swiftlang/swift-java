@@ -66,12 +66,12 @@ extension PluginContext {
       .appending(path: "generated")
       .appending(path: "java")
   }
-  
+
   var outputSwiftDirectory: URL {
     self.pluginWorkDirectoryURL
       .appending(path: "Sources")
   }
-  
+
   func cachedClasspathFile(swiftModule: String) -> URL {
     self.pluginWorkDirectoryURL
       .appending(path: "\(swiftModule)", directoryHint: .notDirectory)
