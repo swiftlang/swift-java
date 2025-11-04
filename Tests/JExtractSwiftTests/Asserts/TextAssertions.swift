@@ -189,13 +189,6 @@ func assertOutput(
       for (n, g) in gotLines.enumerated() where n >= printFromLineNo {
         let baseLine = "\(n): \(g)"
         var line = baseLine
-        if diffLineNumbers.contains(n) {
-          line += "\n"
-          let leadingCount = "\(n): ".count
-          let message = "\(String(repeating: " ", count: leadingCount))\(String(repeating: "^", count: 8)) EXPECTED MATCH OR SEARCHING FROM HERE "
-          line += "\(message)\(String(repeating: "^", count: max(0, line.count - message.count)))"
-          line = line.red
-        }
         print(line)
       }
       print("==== ---------------------------------------------------------------\n")
