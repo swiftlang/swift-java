@@ -3,7 +3,7 @@
 set -x
 set -e
 
-swift build # as a workaround for building swift build from within gradle having issues on CI sometimes
+swift build --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
 
 ./gradlew run
 ./gradlew test

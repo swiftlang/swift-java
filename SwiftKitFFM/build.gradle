@@ -86,7 +86,8 @@ def compileSwift = tasks.register("compileSwift", Exec) {
 
     workingDir = rootDir
     commandLine "swift"
-    args("build", "--target", "SwiftRuntimeFunctions")
+    // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+    args("build", "--disable-experimental-prebuilts", "--target", "SwiftRuntimeFunctions")
 }
 tasks.build {
     dependsOn("compileSwift")

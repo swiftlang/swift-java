@@ -116,7 +116,8 @@ def jextract = tasks.register("jextract", Exec) {
 
     workingDir = layout.projectDirectory
     commandLine "swift"
-    args("build") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
+    // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+    args("build", "--disable-experimental-prebuilts") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
     // If we wanted to execute a specific subcommand, we can like this:
     //     args("run",/*
     //             "swift-java", "jextract",
