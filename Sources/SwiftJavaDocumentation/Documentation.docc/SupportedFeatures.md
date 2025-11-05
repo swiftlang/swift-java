@@ -47,7 +47,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Swift Feature                                                                        | FFM      | JNI |
 |--------------------------------------------------------------------------------------|----------|-----|
 | Initializers: `class`, `struct`                                                      | ✅        | ✅   |
-| Optional Initializers / Throwing Initializers                                        | ❌        | ❌   |
+| Optional Initializers / Throwing Initializers                                        | ❌        | ✅   |
 | Deinitializers:  `class`, `struct`                                                   | ✅        | ✅   |
 | `enum`                                                                               | ❌        | ✅   |
 | `actor`                                                                              | ❌        | ❌   |

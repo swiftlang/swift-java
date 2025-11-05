@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 import org.swift.swiftkit.core.SwiftArena;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySwiftStructTest {
@@ -27,6 +29,17 @@ public class MySwiftStructTest {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             assertEquals(1337, s.getCapacity());
             assertEquals(42, s.getLen());
+        }
+    }
+
+    @Test
+    void init_optional() {
+        try (var arena = SwiftArena.ofConfined()) {
+            assertEquals(Optional.empty(), MySwiftStruct.init(false, arena));
+
+            Optional<MySwiftStruct> optionalStruct = MySwiftStruct.init(true, arena);
+            assertTrue(optionalStruct.isPresent());
+            assertEquals(10, optionalStruct.get().getLen());
         }
     }
 

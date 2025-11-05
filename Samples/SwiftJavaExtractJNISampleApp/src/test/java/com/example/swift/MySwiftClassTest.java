@@ -41,6 +41,17 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void init_throwing() {
+        try (var arena = SwiftArena.ofConfined()) {
+            Exception exception = assertThrows(Exception.class, () -> MySwiftClass.init(true, arena));
+            assertEquals("swiftError", exception.getMessage());
+
+            MySwiftClass c = assertDoesNotThrow(() -> MySwiftClass.init(false, arena));
+            assertNotNull(c);
+        }
+    }
+
+    @Test
     void sum() {
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
