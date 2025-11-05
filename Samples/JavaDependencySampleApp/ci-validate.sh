@@ -8,8 +8,11 @@ swift run --disable-sandbox
 
 # explicitly invoke resolve without explicit path or dependency
 # the dependencies should be uses from the --swift-module
-swift run swift-java resolve \
-  --disable-experimental-prebuilts # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418 
+
+# FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418 
+swift run \
+  --disable-experimental-prebuilts \
+  swift-java resolve \
   Sources/JavaCommonsCSV/swift-java.config \
   --swift-module JavaCommonsCSV \
   --output-directory .build/plugins/outputs/javadependencysampleapp/JavaCommonsCSV/destination/SwiftJavaPlugin/
