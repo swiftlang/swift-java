@@ -38,7 +38,7 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Swift Build
-        run: swift build
+        run: swift build --disable-experimental-prebuilts # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
       - name: Run documentation check
         run: ./.github/scripts/validate_docs.sh
 
@@ -132,7 +132,7 @@ jobs:
       - name: Install jemalloc
         run: apt-get update && apt-get install -y libjemalloc-dev
       - name: Swift Benchmarks
-        run: swift package --package-path Benchmarks/ benchmark
+        run: swift package --package-path Benchmarks/ --disable-experimental-prebuilts benchmark # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418 
 
   test-swift:
     name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
@@ -152,9 +152,9 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Swift Build
-        run: "swift build --build-tests --disable-sandbox"
+        run: swift build --build-tests --disable-sandbox --disable-experimental-prebuilts # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418 
       - name: Swift Test
-        run: "swift test"
+        run: swift test --disable-experimental-prebuilts # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418 
 
   test-swift-macos:
     name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
