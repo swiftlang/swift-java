@@ -21,6 +21,14 @@ public struct MySwiftStruct {
     self.len = len
   }
 
+  public init?(doInit: Bool) {
+      if doInit {
+        self.init(cap: 10, len: 10)
+      } else {
+        return nil
+      }
+    }
+
   public func getCapacity() -> Int64 {
     self.cap
   }

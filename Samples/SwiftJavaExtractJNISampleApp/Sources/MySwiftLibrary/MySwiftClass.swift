@@ -59,6 +59,14 @@ public class MySwiftClass {
     self.y = 5
   }
 
+  convenience public init(throwing: Bool) throws {
+    if throwing {
+      throw MySwiftError.swiftError
+    } else {
+      self.init()
+    }
+  }
+
   deinit {
     p("deinit called!")
   }
