@@ -177,7 +177,7 @@ jobs:
         run: "swift test"
 
   build-swift-android:
-    name: Build (Swift/Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -195,8 +195,8 @@ jobs:
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
         run: |
-          apt-get -q update && apt-get -yq install curl
-          cd Samples/SwiftJavaExtractJNISampleApp \
+          apt-get -q update && apt-get -yq install curl \
+          cd Samples/SwiftJavaExtractJNISampleApp
           curl -s --retry 3 https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/install-and-build-with-sdk.sh | \
           bash -s -- --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
 
