@@ -1,9 +1,15 @@
 # Swift Java Interoperability Tools and Libraries
 
-This repository contains two approaches to Swift/Java interoperability.
+This project contains tools and libraries that facilitate **Swift & Java Interoperability**.
 
 - Swift library (`SwiftJava`) and bindings generator that allows a Swift program to make use of Java libraries by wrapping Java classes in corresponding Swift types, allowing Swift to directly call any wrapped Java API.
 - The `swift-java` tool which offers automated ways to import or "extract" bindings to sources or libraries in either language. The results are bindings for Swift or Java.
+
+## Introduction
+
+If you'd like to check out a quick introduction to Swift & Java interoperability, you may be interested in this presentation from WWDC25: [WWDC25: Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA).
+
+While we work on more quickstarts and documentation, please refer to the Sample projects located in [Samples/](Samples/) that showcase the various ways you can use swift-java in your Swift or Java projects.
 
 ## Dependencies
 
