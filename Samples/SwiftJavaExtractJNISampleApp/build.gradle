@@ -100,10 +100,19 @@ def jextract = tasks.register("jextract", Exec) {
         }
     }
 
+    // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+    def cmdArgs = ["build", "--disable-experimental-prebuilts"]
+
+    // Check if the 'swiftSdk' project property was passed
+    if (project.hasProperty('swiftSdk')) {
+        // If it was, add the --sdk argument and its value
+        cmdArgs.add("--swift-sdk")
+        cmdArgs.add(project.property('swiftSdk').toString())
+    }
+
     workingDir = layout.projectDirectory
     commandLine "swift"
-    // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
-    args("build", "--disable-experimental-prebuilts") // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
+    args(cmdArgs) // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
     // If we wanted to execute a specific subcommand, we can like this:
     //     args("run",/*
     //             "swift-java", "jextract",
