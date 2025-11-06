@@ -177,7 +177,7 @@ jobs:
         run: "swift test"
 
   build-swift-android:
-    name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
+    name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} android:${{matrix.sdk_triple}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
