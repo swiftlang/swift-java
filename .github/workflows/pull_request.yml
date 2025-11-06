@@ -195,7 +195,7 @@ jobs:
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
         run: |
-          apt-get -q update && apt-get -yq install curl \
+          apt-get -q update && apt-get -yq install curl
           cd Samples/SwiftJavaExtractJNISampleApp
           curl -s --retry 3 https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/install-and-build-with-sdk.sh | \
           bash -s -- --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
