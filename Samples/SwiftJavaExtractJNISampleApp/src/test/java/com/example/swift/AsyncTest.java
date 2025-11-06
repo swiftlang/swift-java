@@ -74,4 +74,10 @@ public class AsyncTest {
         CompletableFuture<OptionalLong> future = MySwiftLibrary.asyncOptional(42);
         assertEquals(OptionalLong.of(42), future.join());
     }
+
+    @Test
+    void asyncString() {
+        CompletableFuture<String> future = MySwiftLibrary.asyncString("hey");
+        assertEquals("hey", future.join());
+    }
 }

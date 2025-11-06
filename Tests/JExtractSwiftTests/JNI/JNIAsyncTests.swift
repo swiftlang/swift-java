@@ -353,4 +353,65 @@ struct JNIAsyncTests {
       ]
     )
   }
+
+  @Test("Import: (String) async -> String (Java, CompletableFuture)")
+  func completableFuture_asyncStringToString_java() throws {
+    try assertOutput(
+      input: """
+      public func async(s: String) async -> String
+      """,
+      .jni, .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func async(s: String) async -> String
+         * }
+         */
+        public static java.util.concurrent.CompletableFuture<java.lang.String> async(java.lang.String s) {
+          java.util.concurrent.CompletableFuture<java.lang.String> $future = new java.util.concurrent.CompletableFuture<java.lang.String>();
+          SwiftModule.$async(s, $future);
+          return $future.thenApply((futureResult$) -> {
+            return futureResult$;
+          }
+          );
+        }
+        """,
+        """
+        private static native void $async(java.lang.String s, java.util.concurrent.CompletableFuture<java.lang.String> result_future);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: (String) async -> String (Swift, CompletableFuture)")
+  func completableFuture_asyncStringToString_swift() throws {
+    try assertOutput(
+      input: """
+      public func async(s: String) async -> String
+      """,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_future: jobject?) {
+          let s = environment.interface.NewGlobalRef(environment, s)
+          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          ...
+          defer {
+            let deferEnvironment = try! JavaVirtualMachine.shared().environment()
+            environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+            environment.interface.DeleteGlobalRef(deferEnvironment, s)
+          }
+          ...
+          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: swiftResult$.getJNIValue(in: environment))])
+          ...
+        }
+        """
+      ]
+    )
+  }
 }

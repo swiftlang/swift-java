@@ -137,4 +137,13 @@ extension JavaType {
       return self
     }
   }
+
+  var requiresBoxing: Bool {
+    switch self {
+    case .boolean, .byte, .char, .short, .int, .long, .float, .double:
+      true
+    default:
+      false
+    }
+  }
 }

@@ -570,10 +570,8 @@ extension JNISwift2JavaGenerator {
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
     indirect case asyncCompleteFuture(
-      NativeSwiftConversionStep,
       swiftFunctionResultType: SwiftType,
-      nativeReturnType: JavaType,
-      outParameters: [JavaParameter],
+      nativeFunctionSignature: NativeFunctionSignature,
       isThrowing: Bool
     )
 
@@ -806,15 +804,22 @@ extension JNISwift2JavaGenerator {
         return unwrappedName
 
       case .asyncCompleteFuture(
-        let inner,
         let swiftFunctionResultType,
-        let nativeReturnType,
-        let outParameters,
+        let nativeFunctionSignature,
         let isThrowing
       ):
+        var globalRefs: [String] = ["globalFuture"]
+
         // Global ref all indirect returns
-        for outParameter in outParameters {
+        for outParameter in nativeFunctionSignature.result.outParameters {
           printer.print("let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))")
+          globalRefs.append(outParameter.name)
+        }
+
+        // We also need to global ref any objects passed in
+        for parameter in nativeFunctionSignature.parameters.flatMap(\.parameters) where !parameter.type.isPrimitive {
+          printer.print("let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
+          globalRefs.append(parameter.name)
         }
 
         printer.print(
@@ -826,16 +831,19 @@ extension JNISwift2JavaGenerator {
         func printDo(printer: inout CodePrinter) {
           printer.print("let swiftResult$ = await \(placeholder)")
           printer.print("environment = try! JavaVirtualMachine.shared().environment()")
-          let inner = inner.render(&printer, "swiftResult$")
+          let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
             printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
           } else {
-            printer.print(
-              """
-              let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)
-              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
-              """
-            )
+            let result: String
+            if nativeFunctionSignature.result.javaType.requiresBoxing {
+              printer.print("let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)")
+              result = "boxedResult$"
+            } else {
+              result = inner
+            }
+
+            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: \(result))])")
           }
         }
 
@@ -843,9 +851,8 @@ extension JNISwift2JavaGenerator {
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.
             printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
-            printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)")
-            for outParameter in outParameters {
-              printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, \(outParameter.name))")
+            for globalRef in globalRefs {
+              printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, \(globalRef))")
             }
           }
           if isThrowing {

@@ -35,6 +35,15 @@ struct JavaParameter {
       }
     }
 
+    var isPrimitive: Bool {
+      switch self {
+      case .concrete(let javaType):
+        javaType.isPrimitive
+      case .generic(let name, let extends):
+        false
+      }
+    }
+
     var jniTypeName: String {
       switch self {
       case .concrete(let type): type.jniTypeName

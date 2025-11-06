@@ -514,14 +514,12 @@ extension JNISwift2JavaGenerator {
         )
 
         // Update native function
-        nativeFunctionSignature.result.javaType = .void
         nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
-          nativeFunctionSignature.result.conversion,
           swiftFunctionResultType: originalFunctionSignature.result.type,
-          nativeReturnType: nativeFunctionSignature.result.javaType,
-          outParameters: nativeFunctionSignature.result.outParameters,
+          nativeFunctionSignature: nativeFunctionSignature,
           isThrowing: originalFunctionSignature.isThrowing
         )
+        nativeFunctionSignature.result.javaType = .void
         nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
       }
     }
