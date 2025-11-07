@@ -86,7 +86,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Subscripts: `subscript()`                                                            | ❌        | ❌   |
 | Equatable                                                                            | ❌        | ❌   |
 | Pointers: `UnsafeRawPointer`, UnsafeBufferPointer (?)                                | 🟡       | ❌   |
-| Nested types: `struct Hello { struct World {} }`                                     | ❌        | ❌   |
+| Nested types: `struct Hello { struct World {} }`                                     | ❌        | ✅   |
 | Inheritance: `class Caplin: Capybara`                                                | ❌        | ❌   |
 | Non-escaping `Void` closures: `func callMe(maybe: () -> ())`                                      | ✅        | ✅   |
 | Non-escaping closures with primitive arguments/results: `func callMe(maybe: (Int) -> (Double))`   | ✅        | ✅   |
