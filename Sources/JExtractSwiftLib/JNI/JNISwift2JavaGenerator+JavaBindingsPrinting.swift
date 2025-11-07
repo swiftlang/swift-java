@@ -40,7 +40,9 @@ extension JNISwift2JavaGenerator {
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
     let importedTypes = analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key })
 
-    for (_, ty) in importedTypes {
+    // Each parent type goes into its own file
+    // any nested types are printed inside the body as `static class`
+    for (_, ty) in importedTypes.filter({ _, type in type.parent == nil }) {
       let filename = "\(ty.swiftNominal.name).java"
       logger.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
@@ -144,6 +146,15 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
+
+      let nestedTypes = self.analysis.importedTypes.filter { _, type in
+        type.parent == decl.swiftNominal
+      }
+
+      for nestedType in nestedTypes {
+        printConcreteType(&printer, nestedType.value)
+        printer.println()
+      }
 
       printer.print(
         """
@@ -255,13 +266,18 @@ extension JNISwift2JavaGenerator {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
     }
+    var modifiers = ["public"]
+    if decl.parent != nil {
+      modifiers.append("static")
+    }
+    modifiers.append(contentsOf: ["final", "class"])
     var implements = ["JNISwiftInstance"]
     implements += decl.inheritedTypes
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
+    printer.printBraceBlock("\(modifiers.joined(separator: " ")) \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
       body(&printer)
     }
   }

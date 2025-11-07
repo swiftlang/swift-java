@@ -307,9 +307,7 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> [TranslatedParameter] {
-      try parameters.enumerated().map {
-        idx,
-        param in
+      try parameters.enumerated().map { idx, param in
         let parameterName = param.name ?? "arg\(idx)"
         return try translateParameter(
           swiftType: param.type,
@@ -373,7 +371,7 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.name
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           switch knownType {

@@ -41,12 +41,14 @@ package final class ImportedNominalType: ImportedDecl {
   package var variables: [ImportedFunc] = []
   package var cases: [ImportedEnumCase] = []
   var inheritedTypes: [SwiftType]
+  package var parent: SwiftNominalTypeDeclaration?
 
   init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
     self.swiftNominal = swiftNominal
     self.inheritedTypes = swiftNominal.inheritanceTypes?.compactMap {
       try? SwiftType($0.type, lookupContext: lookupContext)
     } ?? []
+    self.parent = swiftNominal.parent
   }
 
   var swiftType: SwiftType {
