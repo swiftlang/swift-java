@@ -430,7 +430,7 @@ extension JNISwift2JavaGenerator {
     let cName =
       "Java_"
       + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName.escapedJNIIdentifier)_"
+      + "_\(parentName.replacingOccurrences(of: ".", with: "$").escapedJNIIdentifier)_"
       + javaMethodName.escapedJNIIdentifier
       + "__"
       + jniSignature.escapedJNIIdentifier
@@ -474,7 +474,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: "$typeMetadataAddressDowncall",
-      parentName: type.swiftNominal.name,
+      parentName: type.swiftNominal.qualifiedName,
       parameters: [],
       resultType: .long
     ) { printer in
@@ -493,7 +493,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: "$destroy",
-      parentName: type.swiftNominal.name,
+      parentName: type.swiftNominal.qualifiedName,
       parameters: [
         selfPointerParam
       ],

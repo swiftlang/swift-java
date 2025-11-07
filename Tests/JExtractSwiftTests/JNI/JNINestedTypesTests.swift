@@ -17,22 +17,24 @@ import Testing
 
 @Suite
 struct JNINestedTypesTests {
-  @Test("Import: class and struct A.B.C")
+  let source1 = """
+  public class A {
+    public class B {
+      public func g(c: C) {}
+
+      public struct C {
+        public func h(b: B) {}
+      }
+    }
+  }
+
+  public func f(a: A, b: A.B, c: A.B.C) {}
+  """
+
+  @Test("Import: class and struct A.B.C (Java)")
   func nestedClassesAndStructs_java() throws {
     try assertOutput(
-      input: """
-      public class A {
-        public class B {
-          public func g(c: B) {}
-      
-          public struct C {
-      
-          }
-        }
-      }
-      
-      public func f(a: A, b: A.B, c: A.B.C) {}
-      """,
+      input: source1,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -42,17 +44,55 @@ struct JNINestedTypesTests {
           public static final class B implements JNISwiftInstance {
             ...
             public static final class C implements JNISwiftInstance {
-            ...
+              ...
+              public void h(A.B b) {
+              ...
             }
             ...
-            public static void g(A.B.C c) {
+            public void g(A.B.C c) {
             ...
           }
-        ...
+          ...
         }
         """,
         """
         public static void f(A a, A.B b, A.B.C c) {
+          ...
+        }
+        ...
+        """
+      ]
+    )
+  }
+
+  @Test("Import: class and struct A.B.C (Swift)")
+  func nestedClassesAndStructs_swift() throws {
+    try assertOutput(
+      input: source1,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_A__00024destroy__J")
+        func Java_com_example_swift_A__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+          ...
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_A_00024B__00024destroy__J")
+        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+          ...
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_A_00024B__00024destroy__J")
+        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+          ...
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_A_00024B_00024C__00024h__JJ")
+        func Java_com_example_swift_A_00024B_00024C__00024h__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jlong, self: jlong) {
           ...
         }
         """
