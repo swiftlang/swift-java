@@ -119,7 +119,15 @@ class SwiftTypeLookupContext {
 
   /// Create a nominal type declaration instance for the specified syntax node.
   private func nominalTypeDeclaration(for node: NominalTypeDeclSyntaxNode, sourceFilePath: String) throws -> SwiftNominalTypeDeclaration {
-    SwiftNominalTypeDeclaration(
+
+    if let symbolTableDeclaration = self.symbolTable.lookupType(
+      node.name.text,
+      parent: try parentTypeDecl(for: node)
+    ) {
+      return symbolTableDeclaration
+    }
+
+    return SwiftNominalTypeDeclaration(
       sourceFilePath: sourceFilePath,
       moduleName: self.symbolTable.moduleName,
       parent: try parentTypeDecl(for: node),
