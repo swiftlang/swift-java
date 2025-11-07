@@ -24,7 +24,6 @@ struct JNINestedTypesTests {
     public class B {
       public func g(c: C) {}
 
-    extension MyNamespace { 
       public struct C {
         public func h(b: B) {}
       }

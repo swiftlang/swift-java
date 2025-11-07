@@ -19,11 +19,11 @@ import SwiftJavaShared
 import JavaNet
 import SwiftJavaConfigurationShared
 import _Subprocess
-import Testing // import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
-final class WrapJavaTests {
+final class WrapJavaTests: XCTestCase {
 
-  @Test
+  // @Test
   func testWrapJavaFromCompiledJavaSource() async throws {
     let classpathURL = try await compileJava(
       """
@@ -50,7 +50,7 @@ final class WrapJavaTests {
     )
   }
 
-  @Test
+  // @Test
   func testWrapJavaGenericMethod_singleGeneric() async throws {
     let classpathURL = try await compileJava(
       """
@@ -98,7 +98,7 @@ final class WrapJavaTests {
   }
 
   // This is just a warning in Java, but a hard error in Swift, so we must 'prune' generic params
-  @Test
+  // @Test
   func testWrapJavaGenericMethod_pruneNotUsedGenericParam() async throws {
     let classpathURL = try await compileJava(
       """
@@ -136,7 +136,7 @@ final class WrapJavaTests {
     )
   }
   
-  @Test
+  // @Test
   func testWrapJavaGenericMethod_multipleGenerics() async throws {
     let classpathURL = try await compileJava(
       """
@@ -204,7 +204,7 @@ final class WrapJavaTests {
  7 |   @JavaMethod
  8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
   */
-  @Test
+  // @Test
   func testGenericSuperclass() async throws {
     return  // FIXME: we need this 
 

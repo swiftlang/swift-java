@@ -19,7 +19,7 @@ import JavaNet
 import SwiftJavaShared
 import SwiftJavaConfigurationShared
 import _Subprocess
-import Testing // import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 import Foundation
 
 fileprivate func createTemporaryDirectory(in directory: Foundation.URL) throws -> Foundation.URL {
@@ -164,7 +164,7 @@ let failureMessage = "Expected chunk: \n" +
       "\n" + 
       "not found in:\n" +
       "\(swiftCompleteOutputText)"
-    #expect(checkAgainstText.contains(checkAgainstExpectedChunk), 
+    XCTAssertTrue(checkAgainstText.contains(checkAgainstExpectedChunk), 
       "\(failureMessage)")
   }
 }

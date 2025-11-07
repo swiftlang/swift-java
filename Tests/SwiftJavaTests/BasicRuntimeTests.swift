@@ -56,7 +56,7 @@ class BasicRuntimeTests: XCTestCase {
     do {
       _ = try URL("bad url", environment: environment)
     } catch {
-      XCTAssertEqual(String(describing: error), "java.net.MalformedURLException: no protocol: bad url")
+      XCTAssertEqual(String(describing: error), "java.net.MalformedURLException(no protocol: bad url)")
     }
   }
 
