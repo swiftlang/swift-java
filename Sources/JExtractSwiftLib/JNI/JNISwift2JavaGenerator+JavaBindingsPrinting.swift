@@ -270,14 +270,14 @@ extension JNISwift2JavaGenerator {
     if decl.parent != nil {
       modifiers.append("static")
     }
-    modifiers.append(contentsOf: ["final", "class"])
+    modifiers.append("final")
     var implements = ["JNISwiftInstance"]
     implements += decl.inheritedTypes
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
-    printer.printBraceBlock("\(modifiers.joined(separator: " ")) \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
+    printer.printBraceBlock("\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
       body(&printer)
     }
   }
