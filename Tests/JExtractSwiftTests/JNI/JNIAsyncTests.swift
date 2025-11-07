@@ -364,12 +364,6 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public func async(s: String) async -> String
-         * }
-         */
         public static java.util.concurrent.CompletableFuture<java.lang.String> async(java.lang.String s) {
           java.util.concurrent.CompletableFuture<java.lang.String> $future = new java.util.concurrent.CompletableFuture<java.lang.String>();
           SwiftModule.$async(s, $future);
