@@ -20,6 +20,7 @@ import SwiftJava
 import JavaUtilJar
 import JavaNet
 import SwiftSyntax
+import Logging
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 
@@ -43,7 +44,7 @@ extension SwiftJava {
     var inputSwift: String? = nil
 
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
-    var logLevel: Logger.Level = .info
+    var logLevel: JExtractSwiftLib.Logger.Level = .info
   }
 
   struct CommonJVMOptions: ParsableArguments {
@@ -78,46 +79,46 @@ extension HasCommonJVMOptions {
   /// swift-java.classpath files as configured.
   /// Parameters:
   ///   - searchDirs: search directories where we can find swift.java.classpath files to include in the configuration
-  func configureCommandJVMClasspath(searchDirs: [Foundation.URL], config: Configuration) -> [String] {
+  func configureCommandJVMClasspath(searchDirs: [Foundation.URL], config: Configuration, log: Logging.Logger) -> [String] {
     // Form a class path from all of our input sources:
     //   * Command-line option --classpath
     let classpathOptionEntries: [String] = self.classpathEntries
     let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
-    print("[debug][swift-java] Base classpath from CLASSPATH environment: \(classpathFromEnv)")
+    log.debug("Base classpath from CLASSPATH environment: \(classpathFromEnv)")
     let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
-    print("[debug][swift-java] Base classpath from config: \(classpathFromConfig)")
+    log.debug("Base classpath from config: \(classpathFromConfig)")
 
     var classpathEntries: [String] = classpathFromConfig
 
     for searchDir in searchDirs {
       let classPathFilesSearchDirectory = searchDir.path
-      print("[debug][swift-java] Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
+      log.debug("Search *.swift-java.classpath in: \(classPathFilesSearchDirectory)")
       let foundSwiftJavaClasspath = findSwiftJavaClasspaths(in: classPathFilesSearchDirectory)
 
-      print("[debug][swift-java] Classpath from *.swift-java.classpath files: \(foundSwiftJavaClasspath)")
+      log.debug("Classpath from *.swift-java.classpath files: \(foundSwiftJavaClasspath)")
       classpathEntries += foundSwiftJavaClasspath
     }
 
     if !classpathOptionEntries.isEmpty {
-      print("[debug][swift-java] Classpath from options: \(classpathOptionEntries)")
+      log.debug("Classpath from options: \(classpathOptionEntries)")
       classpathEntries += classpathOptionEntries
     } else {
       // * Base classpath from CLASSPATH env variable
-      print("[debug][swift-java] Classpath from environment: \(classpathFromEnv)")
+      log.debug("Classpath from environment: \(classpathFromEnv)")
       classpathEntries += classpathFromEnv
     }
 
     let extraClasspath = self.commonJVMOptions.classpath
     let extraClasspathEntries = extraClasspath.split(separator: ":").map(String.init)
-    print("[debug][swift-java] Extra classpath: \(extraClasspathEntries)")
+    log.debug("Extra classpath: \(extraClasspathEntries)")
     classpathEntries += extraClasspathEntries
 
     // Bring up the Java VM when necessary
 
-    // if logLevel >= .debug {
+    if log.logLevel >= .debug {
       let classpathString = classpathEntries.joined(separator: ":")
-      print("[debug][swift-java] Initialize JVM with classpath: \(classpathString)")
-    // }
+      log.debug("Initialize JVM with classpath: \(classpathString)")
+    }
 
     return classpathEntries
   }

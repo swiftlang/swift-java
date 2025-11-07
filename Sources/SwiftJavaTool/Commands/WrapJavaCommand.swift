@@ -14,15 +14,18 @@
 
 import Foundation
 import ArgumentParser
+import Logging
 import SwiftJavaToolLib
 import SwiftJava
 import JavaUtilJar
-import SwiftJavaToolLib
 import SwiftJavaConfigurationShared
 
 extension SwiftJava {
 
   struct WrapJavaCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
+
+    static let log: Logging.Logger = .init(label: "swift-java:\(configuration.commandName!)")
+
     static let configuration = CommandConfiguration(
       commandName: "wrap-java",
       abstract: "Wrap Java classes with corresponding Swift bindings.")
@@ -74,7 +77,7 @@ extension SwiftJava.WrapJavaCommand {
     print("[trace][swift-java] INPUT: \(input)")
 
     var classpathEntries = self.configureCommandJVMClasspath(
-        searchDirs: classpathSearchDirs, config: config)
+        searchDirs: classpathSearchDirs, config: config, log: Self.log)
 
     // Load all of the dependent configurations and associate them with Swift modules.
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in

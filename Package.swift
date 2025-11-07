@@ -205,6 +205,7 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
+    .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
 
 //    // FIXME: swift-subprocess stopped supporting 6.0 when it moved into a package;
 //    //        we'll need to drop 6.0 as well, but currently blocked on doing so by swiftpm plugin pending design questions
@@ -395,6 +396,7 @@ let package = Package(
     .target(
       name: "SwiftJavaToolLib",
       dependencies: [
+        .product(name: "Logging", package: "swift-log"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
@@ -418,6 +420,7 @@ let package = Package(
     .executableTarget(
       name: "SwiftJavaTool",
       dependencies: [
+        .product(name: "Logging", package: "swift-log"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
