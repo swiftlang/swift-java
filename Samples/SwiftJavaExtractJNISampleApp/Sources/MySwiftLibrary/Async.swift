@@ -36,3 +36,7 @@ public func asyncOptional(i: Int64) async throws -> Int64? {
 public func asyncThrows() async throws {
   throw MySwiftError.swiftError
 }
+
+public func asyncString(input: String) async -> String {
+  return input
+}
