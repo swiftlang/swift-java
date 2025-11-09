@@ -16,6 +16,25 @@ import JavaTypes
 import SwiftJavaConfigurationShared
 
 extension JNISwift2JavaGenerator {
+  var javaTranslator: JavaTranslation {
+    JavaTranslation(
+      config: config,
+      swiftModuleName: swiftModuleName,
+      javaPackage: self.javaPackage,
+      javaClassLookupTable: self.javaClassLookupTable,
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    )
+  }
+
+  var nativeTranslator: NativeJavaTranslation {
+    NativeJavaTranslation(
+      config: self.config,
+      javaPackage: self.javaPackage,
+      javaClassLookupTable: self.javaClassLookupTable,
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    )
+  }
+
   func translatedDecl(
     for decl: ImportedFunc
   ) -> TranslatedFunctionDecl? {
@@ -25,14 +44,7 @@ extension JNISwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(
-        config: config,
-        swiftModuleName: swiftModuleName,
-        javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
-      )
-      translated = try translation.translate(decl)
+      translated = try self.javaTranslator.translate(decl)
     } catch {
       self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
       translated = nil
@@ -570,14 +582,14 @@ extension JNISwift2JavaGenerator {
         }
       }
 
-      // We assume this is a JExtract class.
+      // We just pass down the jobject
       return TranslatedParameter(
         parameter: JavaParameter(
           name: parameterName,
           type: .generic(name: javaGenericName, extends: javaProtocolTypes),
           annotations: []
         ),
-        conversion: .commaSeparated([.valueMemoryAddress(.placeholder), .typeMetadataAddress(.placeholder)])
+        conversion: .placeholder
       )
     }
 

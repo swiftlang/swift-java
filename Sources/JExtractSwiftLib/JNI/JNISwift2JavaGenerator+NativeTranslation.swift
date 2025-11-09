@@ -235,12 +235,10 @@ extension JNISwift2JavaGenerator {
     ) throws -> NativeParameter {
       return NativeParameter(
         parameters: [
-          JavaParameter(name: parameterName, type: .long),
-          JavaParameter(name: "\(parameterName)_typeMetadataAddress", type: .long)
+          JavaParameter(name: parameterName, type: .javaLangObject)
         ],
-        conversion: .extractSwiftProtocolValue(
+        conversion: .interfaceToSwiftObject(
           .placeholder,
-          typeMetadataVariableName: .combinedName(component: "typeMetadataAddress"),
           protocolNames: protocolNames
         )
       )
@@ -645,6 +643,11 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(from: value, in: environment)`
     indirect case initFromJNI(NativeSwiftConversionStep, swiftType: SwiftType)
 
+    indirect case interfaceToSwiftObject(
+      NativeSwiftConversionStep,
+      protocolNames: [String]
+    )
+
     indirect case extractSwiftProtocolValue(
       NativeSwiftConversionStep,
       typeMetadataVariableName: NativeSwiftConversionStep,
@@ -720,6 +723,36 @@ extension JNISwift2JavaGenerator {
       case .initFromJNI(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment)"
+
+      case .interfaceToSwiftObject(let inner, let protocolNames):
+        let inner = inner.render(&printer, placeholder)
+        let variableName = "\(inner)swiftObject$"
+        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
+        printer.print("let \(variableName): \(compositeProtocolName)")
+
+        printer.printBraceBlock(
+          "if environment.interface.IsInstanceOf(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.class) != 0"
+        ) { printer in
+          let pointerVariableName = "\(inner)pointer$"
+          let typeMetadataVariableName = "\(inner)typeMetadata$"
+          printer.print(
+            """
+            let \(pointerVariableName) = environment.interface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
+            let \(typeMetadataVariableName) = environment.interface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
+            """
+          )
+          let existentialName = NativeSwiftConversionStep.extractSwiftProtocolValue(
+            .constant(pointerVariableName),
+            typeMetadataVariableName: .constant(typeMetadataVariableName),
+            protocolNames: protocolNames
+          ).render(&printer, placeholder)
+
+          printer.print("\(variableName) = \(existentialName)")
+        }
+        printer.printBraceBlock("else") { printer in
+          printer.print("fatalError()")
+        }
+        return variableName
 
       case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
         let inner = inner.render(&printer, placeholder)

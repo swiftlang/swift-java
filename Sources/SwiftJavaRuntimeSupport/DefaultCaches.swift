@@ -64,4 +64,34 @@ extension _JNIMethodIDCache {
       cache.methods[messageConstructor]!
     }
   }
+
+  public enum JNISwiftInstance {
+    private static let memoryAddressMethod = Method(
+      name: "$memoryAddress",
+      signature: "()J"
+    )
+
+    private static let typeMetadataAddressMethod = Method(
+      name: "$typeMetadataAddress",
+      signature: "()J"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      environment: try! JavaVirtualMachine.shared().environment(),
+      className: "org/swift/swiftkit/core/JNISwiftInstance",
+      methods: [memoryAddressMethod, typeMetadataAddressMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var memoryAddress: jmethodID {
+      cache.methods[memoryAddressMethod]!
+    }
+
+    public static var typeMetadataAddress: jmethodID {
+      cache.methods[typeMetadataAddressMethod]!
+    }
+  }
 }

@@ -113,8 +113,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    let extends = ["JNISwiftInstance"]
-    printer.printBraceBlock("public interface \(decl.swiftNominal.name) extends \(extends.joined(separator: ", "))") { printer in
+    printer.printBraceBlock("public interface \(decl.swiftNominal.name)") { printer in
       for initializer in decl.initializers {
         printFunctionDowncallMethods(&printer, initializer, signaturesOnly: true)
         printer.println()
