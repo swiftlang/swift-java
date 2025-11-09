@@ -113,6 +113,59 @@ extension JNISwift2JavaGenerator {
         guard let translatedCase = translatedEnumCase(for: enumCase) else { continue }
         printer.print("static let \(JNICaching.cacheMemberName(for: enumCase)) = \(renderEnumCaseCacheInit(translatedCase))")
       }
+
+      if type.swiftNominal.kind == .protocol {
+//        let methodSignatures = type.methods.map {
+//          MethodSignature(resultType: <#T##JavaType#>, parameterTypes: <#T##[JavaType]#>)
+//        }
+//        printer.print("static let cache = \(renderJNICacheInit(className: type.qualifiedName, methods: []))")
+      }
+    }
+  }
+
+  /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
+  private func printSwiftInterfaceWrapperExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
+    try printer.printBraceBlock("extension JNIJavaInterfaceSwiftWrapper where Self: \(type.qualifiedName)") { printer in
+      for method in type.methods {
+        guard let translatedDecl = translatedDecl(for: method) else {
+          // Failed to translate. Skip.
+          // TODO: Notify the user that we cannot support this protocol.
+          continue
+        }
+
+        try printer.printBraceBlock(method.swiftDecl.signatureString) { printer in
+          printer.print(
+            """
+            let environment = try! JavaVirtualMachine.shared().environment()
+            let methodID$: jmethodID!
+            """
+          )
+
+          // Passing down Swift parameters to Java basically means
+          // that we are returning these values to Java,
+          // we therefore take all the Swift parameters and translate them
+          // as if they were results.
+          let upcallValues = try method.functionSignature.parameters.map { parameter in
+            let result = try self.nativeTranslator.translate(
+              swiftResult: SwiftResult(
+                convention: .direct,
+                type: parameter.type
+              )
+            )
+            return result.conversion.render(&printer, parameter.parameterName!)
+          }
+
+          let javaResultType = translatedDecl.nativeFunctionSignature.result.javaType
+          // TODO: Convert arguments to jvalue
+          printer.print(
+            """
+            let javaResult$ = environment.interface.\(javaResultType.jniCallMethodAName)(environment, self.objectHolder.object, methodID$, [\(upcallValues.joined(separator: ", "))])
+            """
+          )
+        }
+
+        printer.println()
+      }
     }
   }
 
@@ -140,7 +193,7 @@ extension JNISwift2JavaGenerator {
     case .actor, .class, .enum, .struct:
       printConcreteTypeThunks(&printer, type)
     case .protocol:
-      printProtocolThunks(&printer, type)
+      try printProtocolThunks(&printer, type)
     }
   }
 
@@ -175,8 +228,8 @@ extension JNISwift2JavaGenerator {
     printDestroyFunctionThunk(&printer, type)
   }
 
-  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let protocolName = type.swiftNominal.name
+  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
+    try printSwiftInterfaceWrapperExtension(&printer, type)
   }
 
 
@@ -220,9 +273,17 @@ extension JNISwift2JavaGenerator {
   private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
       let nativeParametersClassName = "\(javaPackagePath)/\(enumCase.enumName)$\(enumCase.name)$$NativeParameters"
       let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
-      let methods = #"[.init(name: "<init>", signature: "\#(methodSignature.mangledName)")]"#
 
-      return #"_JNIMethodIDCache(environment: try! JavaVirtualMachine.shared().environment(), className: "\#(nativeParametersClassName)", methods: \#(methods))"#
+      return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
+  }
+
+  private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
+      let fullClassName = "\(javaPackagePath)/\(className)"
+      let methods = methods.map { name, signature in
+          #".init(name: "\#(name)", signature: "\#(signature.mangledName)")"#
+      }.joined(separator: ",\n")
+
+      return #"_JNIMethodIDCache(environment: try! JavaVirtualMachine.shared().environment(), className: "\#(fullClassName)", methods: [\#(methods)])"#
   }
 
   private func printEnumGetAsCaseThunk(

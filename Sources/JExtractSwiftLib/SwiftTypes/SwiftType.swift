@@ -213,6 +213,10 @@ extension SwiftNominalType {
   var isJavaKitWrapper: Bool {
     nominalTypeDecl.name.hasPrefix("Java")
   }
+
+  var isProtocol: Bool {
+    nominalTypeDecl.kind == .protocol
+  }
 }
 
 extension SwiftType {
