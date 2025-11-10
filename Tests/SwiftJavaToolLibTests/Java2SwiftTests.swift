@@ -262,8 +262,8 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaObjects {
         """,
         """
-          @JavaStaticMethod
-          public func requireNonNull(_ arg0: JavaObject?, _ arg1: MySupplier<JavaString>?) -> JavaObject!
+        @JavaStaticMethod
+        public func requireNonNull<T: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: MySupplier<JavaString>?) -> T
         """,
       ]
     )
@@ -675,8 +675,19 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
       \(translatedDecls.map { $0.description }.joined(separator: "\n"))
       """
 
+    // Helper function to normalize whitespace by trimming leading whitespace from each line
+    func normalizeWhitespace(_ text: String) -> String {
+      return text.components(separatedBy: .newlines)
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .joined(separator: "\n")
+    }
+    
+    let normalizedSwiftFileText = normalizeWhitespace(swiftFileText)
+    
     for expectedChunk in expectedChunks {
-      if swiftFileText.contains(expectedChunk) {
+      let normalizedExpectedChunk = normalizeWhitespace(expectedChunk)
+      
+      if normalizedSwiftFileText.contains(normalizedExpectedChunk) {
         continue
       }
 

@@ -356,10 +356,10 @@ extension JavaClassTranslator {
     // Compute the "extends" clause for the superclass (of the struct
     // formulation) or the inheritance clause (for the class
     // formulation).
-    let extends: String
+    let extendsClause: String
     let inheritanceClause: String
     if translateAsClass {
-      extends = ""
+      extendsClause = ""
       inheritanceClause = 
         if let swiftSuperclass, swiftSuperclass.typeArguments.isEmpty {
            ": \(swiftSuperclass.name)" 
@@ -369,7 +369,12 @@ extension JavaClassTranslator {
           "" 
         }
     } else {
-      extends = swiftSuperclass.map { ", extends: \($0).self" } ?? ""
+      extendsClause = 
+        if let swiftSuperclass {
+          ", extends: \(swiftSuperclass.render()).self" 
+        } else {
+          ""
+        }
       inheritanceClause = ""
     }
 
@@ -394,7 +399,7 @@ extension JavaClassTranslator {
     let introducer = translateAsClass ? "open class" : "public struct"
     var classDecl: DeclSyntax =
       """
-      @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extends)\(raw: interfacesStr))
+      @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
       \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }

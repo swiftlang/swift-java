@@ -25,4 +25,14 @@ struct SwiftJavaParameterizedType {
     self.name = name
     self.typeArguments = typeArguments
   }
+
+  func render() -> String {
+    if typeArguments.isEmpty {
+      name
+    } else {
+      "\(name)<\(typeArguments.joined(separator: ", "))>"
+    }
+  }
+
+
 }
