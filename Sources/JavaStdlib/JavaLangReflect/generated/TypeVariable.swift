@@ -6,7 +6,7 @@ import CSwiftJavaJNI
 public struct TypeVariable<D: AnyJavaObject> {
   @JavaMethod
   public func getGenericDeclaration() -> GenericDeclaration!
-
+  
   @JavaMethod
   public func getAnnotatedBounds() -> [AnnotatedType?]
 

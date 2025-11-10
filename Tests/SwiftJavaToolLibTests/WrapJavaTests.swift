@@ -23,7 +23,6 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 
 final class WrapJavaTests: XCTestCase {
 
-  // @Test
   func testWrapJavaFromCompiledJavaSource() async throws {
     let classpathURL = try await compileJava(
       """
@@ -98,7 +97,6 @@ final class WrapJavaTests: XCTestCase {
   }
 
   // This is just a warning in Java, but a hard error in Swift, so we must 'prune' generic params
-  // @Test
   func testWrapJavaGenericMethod_pruneNotUsedGenericParam() async throws {
     let classpathURL = try await compileJava(
       """
@@ -136,7 +134,6 @@ final class WrapJavaTests: XCTestCase {
     )
   }
   
-  // @Test
   func testWrapJavaGenericMethod_multipleGenerics() async throws {
     let classpathURL = try await compileJava(
       """
@@ -187,6 +184,49 @@ final class WrapJavaTests: XCTestCase {
     )
   }
 
+  func test_Java2Swift_returnType_generic() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      final class List<T> {}
+      final class Map<T, U> {}
+
+      class GenericClass<T> {
+        public T getClassGeneric() { return null; }
+        
+        public <M> M getMethodGeneric() { return null; }
+
+        public <M> Map<T, M> getMixedGeneric() { return null; }
+        
+        public String getNonGeneric() { return null; }
+
+        public List<T> getParameterizedClassGeneric() { return null; }
+        
+        public List<? extends Number> getWildcard() { return null; }
+        
+        public T[] getGenericArray() { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.GenericClass",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func getClassGeneric() -> T
+        """,
+        """
+        @JavaMethod
+        open func getNonGeneric() -> String
+        """,
+      ]
+    )
+  }
+
   /*
   /Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/CompressingStore.swift:6:30: error: reference to generic type 'AbstractStore' requires arguments in <...>
  4 |
@@ -204,7 +244,6 @@ final class WrapJavaTests: XCTestCase {
  7 |   @JavaMethod
  8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
   */
-  // @Test
   func testGenericSuperclass() async throws {
     return  // FIXME: we need this 
 

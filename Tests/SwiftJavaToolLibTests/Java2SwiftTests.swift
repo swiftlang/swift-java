@@ -49,12 +49,12 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaObject {
         """,
         """
-          @JavaMethod
-          public func toString() -> String
+        @JavaMethod
+        public func toString() -> String
         """,
         """
-          @JavaMethod
-          public func wait() throws
+        @JavaMethod
+        public func wait() throws
         """
       ]
     )
@@ -74,8 +74,8 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaClass<T: AnyJavaObject> {
         """,
         """
-          @JavaStaticMethod
-          public func forName<T: AnyJavaObject>(_ arg0: String) throws -> MyJavaClass<JavaObject>! where ObjectType == MyJavaClass<T>
+        @JavaStaticMethod
+        public func forName<T: AnyJavaObject>(_ arg0: String) throws -> MyJavaClass<JavaObject>! where ObjectType == MyJavaClass<T>
         """,
       ]
     )
@@ -105,8 +105,8 @@ class Java2SwiftTests: XCTestCase {
                 }
         """,
         """
-          @JavaStaticField(isFinal: true)
-          public var APRIL: Month!
+        @JavaStaticField(isFinal: true)
+        public var APRIL: Month!
         """
       ])
   }
@@ -123,12 +123,12 @@ class Java2SwiftTests: XCTestCase {
       ],
       expectedChunks: [
         """
-          @JavaMethod
-          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>!
+        @JavaMethod
+        public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<E>!
         """,
         """
-          @JavaMethod
-          public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [JavaObject?]
+        @JavaMethod
+        public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [JavaObject?]
         """
       ]
     )
@@ -144,8 +144,8 @@ class Java2SwiftTests: XCTestCase {
       ],
       expectedChunks: [
         """
-          @JavaMethod
-          public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<JavaObject>!
+        @JavaMethod
+        public func subList(_ arg0: Int32, _ arg1: Int32) -> JavaList<E>!
         """
       ]
     )
@@ -167,8 +167,8 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         "import SwiftJava",
         """
-          @JavaMethod
-          public func redirectInput() -> ProcessBuilder.Redirect!
+        @JavaMethod
+        public func redirectInput() -> ProcessBuilder.Redirect!
         """,
         """
         extension ProcessBuilder {
@@ -184,8 +184,8 @@ class Java2SwiftTests: XCTestCase {
           public struct Type {
         """,
         """
-          @JavaMethod
-          public func type() -> ProcessBuilder.Redirect.`Type`!
+        @JavaMethod
+        public func type() -> ProcessBuilder.Redirect.`Type`!
         """,
       ]
     )
@@ -207,8 +207,8 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         "import SwiftJava",
         """
-          @JavaMethod
-          public func redirectInput() -> ProcessBuilder.PBRedirect!
+        @JavaMethod
+        public func redirectInput() -> ProcessBuilder.PBRedirect!
         """,
         """
         extension ProcessBuilder {
@@ -224,8 +224,8 @@ class Java2SwiftTests: XCTestCase {
           public struct JavaType {
         """,
         """
-          @JavaMethod
-          public func type() -> ProcessBuilder.PBRedirect.JavaType!
+        @JavaMethod
+        public func type() -> ProcessBuilder.PBRedirect.JavaType!
         """
       ]
     )
@@ -263,7 +263,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaStaticMethod
-        public func requireNonNull<T: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: MySupplier<JavaString>?) -> T
+        public func requireNonNull<T: AnyJavaObject>(_ arg0: T?, _ arg1: MySupplier<JavaString>?) -> T
         """,
       ]
     )
@@ -281,20 +281,20 @@ class Java2SwiftTests: XCTestCase {
         open class JavaObject {
         """,
         """
-          @JavaMethod
-          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+        @JavaMethod
+        @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
         """,
         """
-          @JavaMethod
-          open func toString() -> String
+        @JavaMethod
+        open func toString() -> String
         """,
         """
-          @JavaMethod
-          open func wait() throws
+        @JavaMethod
+        open func wait() throws
         """,
         """
-          @JavaMethod
-          open func clone() throws -> JavaObject!
+        @JavaMethod
+        open func clone() throws -> JavaObject!
         """,
       ]
     )
@@ -315,24 +315,24 @@ class Java2SwiftTests: XCTestCase {
         open class JavaString: JavaObject {
         """,
         """
-          @JavaMethod
-          @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+        @JavaMethod
+        @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
         """,
         """
-          @JavaMethod
-          open override func toString() -> String
+        @JavaMethod
+        open override func toString() -> String
         """,
         """
-          @JavaMethod
-          open override func equals(_ arg0: JavaObject?) -> Bool
+        @JavaMethod
+        open override func equals(_ arg0: JavaObject?) -> Bool
         """,
         """
-          @JavaMethod
-          open func intern() -> String
+        @JavaMethod
+        open func intern() -> String
         """,
         """
-          @JavaStaticMethod
-          public func valueOf(_ arg0: Int64) -> String
+        @JavaStaticMethod
+        public func valueOf(_ arg0: Int64) -> String
         """,
       ]
     )
@@ -366,8 +366,8 @@ class Java2SwiftTests: XCTestCase {
                 }
         """,
         """
-          @JavaStaticField(isFinal: true)
-          public var APRIL: Month!
+        @JavaStaticField(isFinal: true)
+        public var APRIL: Month!
         """
       ])
   }
@@ -392,12 +392,12 @@ class Java2SwiftTests: XCTestCase {
         open class URLClassLoader: ClassLoader {
         """,
         """
-          @JavaMethod
-          open func close() throws
+        @JavaMethod
+        open func close() throws
         """,
         """
-          @JavaMethod
-          open override func findResource(_ arg0: String) -> URL!
+        @JavaMethod
+        open override func findResource(_ arg0: String) -> URL!
         """,
       ]
     )
@@ -422,12 +422,12 @@ class Java2SwiftTests: XCTestCase {
         open class URLClassLoader: JavaObject {
         """,
         """
-          @JavaMethod
-          open func close() throws
+        @JavaMethod
+        open func close() throws
         """,
         """
-          @JavaMethod
-          open func findResource(_ arg0: String) -> URL!
+        @JavaMethod
+        open func findResource(_ arg0: String) -> URL!
         """,
       ]
     )
@@ -452,8 +452,8 @@ class Java2SwiftTests: XCTestCase {
         open class JavaByte: JavaNumber {
         """,
         """
-          @JavaMethod
-          open override func equals(_ arg0: JavaObject?) -> Bool
+        @JavaMethod
+        open override func equals(_ arg0: JavaObject?) -> Bool
         """,
       ]
     )
@@ -475,8 +475,8 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaIntFunction<R: AnyJavaObject> {
         """,
         """
-          @JavaMethod
-          public func apply(_ arg0: Int32) -> JavaObject!
+        @JavaMethod
+        public func apply(_ arg0: Int32) -> R!
         """,
       ]
     )
@@ -501,16 +501,16 @@ class Java2SwiftTests: XCTestCase {
         open class Method: Executable {
         """,
         """
-          @JavaMethod
-          open func getTypeParameters() -> [TypeVariable<Method>?]
+        @JavaMethod
+        open func getTypeParameters() -> [TypeVariable<Method>?]
         """,
         """
-          @JavaMethod
-          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        @JavaMethod
+        open override func getParameterTypes() -> [JavaClass<JavaObject>?]
         """,
         """
-          @JavaMethod
-          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        @JavaMethod
+        open override func getDeclaringClass() -> JavaClass<JavaObject>!
         """,
       ]
     )
@@ -535,16 +535,16 @@ class Java2SwiftTests: XCTestCase {
         open class Constructor<T: AnyJavaObject>: Executable {
         """,
         """
-          @JavaMethod
-          open func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
+        @JavaMethod
+        open func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
         """,
         """
-          @JavaMethod
-          open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+        @JavaMethod
+        open override func getParameterTypes() -> [JavaClass<JavaObject>?]
         """,
         """
-          @JavaMethod
-          open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        @JavaMethod
+        open override func getDeclaringClass() -> JavaClass<JavaObject>!
         """,
       ]
     )
@@ -675,7 +675,6 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
       \(translatedDecls.map { $0.description }.joined(separator: "\n"))
       """
 
-    // Helper function to normalize whitespace by trimming leading whitespace from each line
     func normalizeWhitespace(_ text: String) -> String {
       return text.components(separatedBy: .newlines)
         .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -691,7 +690,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
         continue
       }
 
-      XCTFail("Expected chunk '\(expectedChunk)' not found in '\(swiftFileText)'", file: file, line: line)
+      XCTFail("Expected chunk:\n---\n\(expectedChunk.yellow)\n---\nnot found in:\n===\n\(swiftFileText)\n===", file: file, line: line)
     }
   }
 }

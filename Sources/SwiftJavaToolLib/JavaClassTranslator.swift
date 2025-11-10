@@ -879,7 +879,6 @@ extension JavaClassTranslator {
   /// method.
   func isOverride(_ method: Method) -> Bool {
     var currentSuperclass = effectiveJavaSuperclass
-    print("currentSuperclass = \(currentSuperclass)")
     while let currentSuperclassNonOpt = currentSuperclass {
       // Set the loop up for the next run.
       defer {
