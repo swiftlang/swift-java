@@ -147,47 +147,12 @@ extension JavaTranslator {
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
-
-    //   if let method,
-    //      let parameterizedType = javaType.as(ParameterizedType.self) {
-    //     if method.getGenericParameterTypes().contains(where: {$0?.getTypeName() == javaType.getTypeName()}) {
-    //       fatalError("java type = \(javaType.as(ParameterizedType.self))")
-    //       return javaType.getTypeName()
-    //     }
-    //  }
-
-    if isGenericJavaType(javaType) {
-      if let method {
-        print("[swift] generic method! \(method.getDeclaringClass().getName()).\(method.getName())")
-        let genericOriginInfos = getGenericJavaTypeOriginInfo(javaType, from: method)
-        print("genericOriginInfos = \(genericOriginInfos)")
-      }
-    }
-
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
       let bound = typeVariable.getBounds()[0]
     {
-      print("[swift] was type var: \(typeVariable)")
-      print("[swift] was type var: \(typeVariable.toString())")
-      print("[swift] was type var: \(typeVariable.getClass().getName())")
-      print("[swift] was type var bound: \(bound)")
-      // let typeName = try getSwiftTypeNameAsString(
-      //   bound,
-      //   preferValueTypes: preferValueTypes,
-      //   outerOptional: outerOptional
-      // )
-      // print("[swift] was type var: \(typeVariable.toString()) ----> \(typeName)")
       return outerOptional.adjustTypeName(typeVariable.getName())
-    }
-
-    if let paramType = javaType.as(ParameterizedType.self) { 
-      print("[swift] paramType = \(paramType)")
-      let typeArgs: [Type?] = paramType.getActualTypeArguments()
-      for typeArg in typeArgs {
-        print("Type arg = \(typeArg)")
-      }
     }
 
     // Replace wildcards with their upper bound.
@@ -195,7 +160,6 @@ extension JavaTranslator {
       wildcardType.getUpperBounds().count == 1,
       let bound = wildcardType.getUpperBounds()[0]
     {
-      print("[swift] was wildcard")
       // Replace a wildcard type with its first bound.
       return try getSwiftTypeNameAsString(
         bound,
@@ -206,7 +170,6 @@ extension JavaTranslator {
 
     // Handle array types by recursing into the component type.
     if let arrayType = javaType.as(GenericArrayType.self) {
-      print("[swift] was array")
       if preferValueTypes {
         let elementType = try getSwiftTypeNameAsString(
           arrayType.getGenericComponentType()!,
@@ -264,24 +227,18 @@ extension JavaTranslator {
       }
     }
 
-    print("[swift][swift-java][debug] Convert direct \(javaType)")
-
     // Handle direct references to Java classes.
     guard let javaClass = javaType.as(JavaClass<JavaObject>.self) else {
       throw TranslationError.unhandledJavaType(javaType)
     }
 
-    print("[swift][swift-java][debug] Java class \(javaClass) | \(javaClass.toString())")
-    if isGenericJavaType(javaType) {
-      print("[swift][swift-java][debug] is generic \(javaClass.toString())")
-    }
-
-
     let (swiftName, isOptional) = try getSwiftTypeName(javaClass, preferValueTypes: preferValueTypes)
-    var resultString = swiftName
-    if isOptional {
-      resultString = outerOptional.adjustTypeName(resultString)
-    }
+    let resultString =
+      if isOptional {
+         outerOptional.adjustTypeName(swiftName)
+      } else {
+        swiftName
+      }
     return resultString
   }
 

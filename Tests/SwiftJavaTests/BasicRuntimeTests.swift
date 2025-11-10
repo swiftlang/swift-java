@@ -73,7 +73,7 @@ class BasicRuntimeTests: XCTestCase {
     do {
       _ = try JavaClass<Nonexistent>(environment: environment)
     } catch {
-      XCTAssertEqual(String(describing: error), "java.lang.NoClassDefFoundError: org/swift/javakit/Nonexistent")
+      XCTAssertEqual(String(describing: error), "java.lang.NoClassDefFoundError(org/swift/javakit/Nonexistent)")
     }
   }
 

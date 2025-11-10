@@ -227,23 +227,6 @@ final class WrapJavaTests: XCTestCase {
     )
   }
 
-  /*
-  /Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/CompressingStore.swift:6:30: error: reference to generic type 'AbstractStore' requires arguments in <...>
- 4 |
- 5 | @JavaClass("voldemort.store.compress.CompressingStore")
- 6 | open class CompressingStore: AbstractStore {
-   |                              `- error: reference to generic type 'AbstractStore' requires arguments in <...>
- 7 |   @JavaMethod
- 8 |   open override func getCapability(_ arg0: StoreCapabilityType?) -> JavaObject!
-
-/Users/ktoso/code/voldemort-swift-java/.build/plugins/outputs/voldemort-swift-java/VoldemortSwiftJava/destination/SwiftJavaPlugin/generated/AbstractStore.swift:6:12: note: generic type 'AbstractStore' declared here
- 4 |
- 5 | @JavaClass("voldemort.store.AbstractStore", implements: Store<JavaObject, JavaObject, JavaObject>.self)
- 6 | open class AbstractStore<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject>: JavaObject {
-   |            `- note: generic type 'AbstractStore' declared here
- 7 |   @JavaMethod
- 8 |   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
-  */
   func testGenericSuperclass() async throws {
     return  // FIXME: we need this 
 

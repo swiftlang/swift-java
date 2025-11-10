@@ -13,13 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
 struct JNINestedTypesTests {
   let source1 = """
-    """
   public class A {
     public class B {
       public func g(c: C) {}
@@ -28,14 +26,7 @@ struct JNINestedTypesTests {
         public func h(b: B) {}
       }
     }
-    """
-
   }
-  func test_nested_in_extension() throws {
-    var config = Configuration()
-    config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
-    st.log.logLevel = .error
 
   public func f(a: A, b: A.B, c: A.B.C) {}
   """

@@ -128,7 +128,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [JavaObject?]
+        public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [T?]
         """
       ]
     )
@@ -536,7 +536,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        open func getTypeParameters() -> [TypeVariable<Constructor<JavaObject>>?]
+        open func getTypeParameters() -> [TypeVariable<Constructor<T>>?]
         """,
         """
         @JavaMethod
@@ -544,7 +544,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        open override func getDeclaringClass() -> JavaClass<JavaObject>!
+        open override func getDeclaringClass() -> JavaClass<T>!
         """,
       ]
     )
