@@ -30,6 +30,18 @@ protocol HasCommonOptions {
   var commonOptions: SwiftJava.CommonOptions { get set }
 }
 extension HasCommonOptions {
+  func configure<T>(_ setting: inout T?, overrideWith value: T?) {
+    if let value {
+      setting = value
+    }
+  }
+  
+  func configure<T>(_ setting: inout [T]?, append value: [T]?) {
+    if let value {
+      setting?.append(contentsOf: value)
+    }
+  }
+
   var outputDirectory: String? {
     self.commonOptions.outputDirectory
   }
@@ -45,6 +57,12 @@ extension SwiftJava {
 
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
     var logLevel: JExtractSwiftLib.Logger.Level = .info
+
+    @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
+    var filterInclude: [String] = []
+
+    @Option(name: .long, help: "While scanning a classpath, skip types which match the filter prefix")
+    var filterExclude: [String] = []
   }
 
   struct CommonJVMOptions: ParsableArguments {
@@ -53,9 +71,6 @@ extension SwiftJava {
       help: "Class search path of directories and zip/jar files from which Java classes can be loaded."
     )
     var classpath: [String] = []
-
-    @Option(name: .shortAndLong, help: "While scanning a classpath, inspect only types included in this package")
-    var filterJavaPackage: String? = nil
   }
 }
 

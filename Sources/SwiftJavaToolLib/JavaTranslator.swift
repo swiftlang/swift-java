@@ -20,11 +20,14 @@ import SwiftSyntax
 import SwiftJavaConfigurationShared
 import SwiftSyntaxBuilder
 import Foundation
+import Logging
 
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
 package class JavaTranslator {
   let config: Configuration
+
+  let log: Logger
 
   /// The name of the Swift module that we are translating into.
   let swiftModuleName: String
@@ -81,6 +84,10 @@ package class JavaTranslator {
     self.environment = environment
     self.translateAsClass = translateAsClass
     self.format = format
+    
+    var l = Logger(label: "swift-java")
+    l.logLevel = .init(rawValue: (config.logLevel ?? .info).rawValue)!
+    self.log = l
   }
 
   /// Clear out any per-file state when we want to start a new file.
@@ -120,7 +127,6 @@ extension JavaTranslator {
 
 // MARK: Type translation
 extension JavaTranslator {
-
 
   func getSwiftReturnTypeNameAsString(
     method: JavaLangReflect.Method,

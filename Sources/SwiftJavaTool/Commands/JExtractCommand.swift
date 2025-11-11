@@ -86,9 +86,7 @@ extension SwiftJava {
 
 extension SwiftJava.JExtractCommand {
   func runSwiftJavaCommand(config: inout Configuration) async throws {
-    if let javaPackage {
-      config.javaPackage = javaPackage
-    }
+    configure(&config.javaPackage, overrideWith: self.javaPackage)
     configure(&config.mode, overrideWith: self.mode)
     config.swiftModule = self.effectiveSwiftModule
     config.outputJavaDirectory = outputJava
@@ -134,12 +132,6 @@ extension SwiftJava.JExtractCommand {
       guard config.effectiveMemoryManagementMode == .explicit else {
         throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
       }
-    }
-  }
-
-  func configure<T>(_ setting: inout T?, overrideWith value: T?) {
-    if let value {
-      setting = value
     }
   }
 }

@@ -103,17 +103,16 @@ extension SwiftJava.ConfigureCommand {
     var log = Self.log
     log.logLevel = .init(rawValue: self.logLevel.rawValue)!
 
-
     log.info("Run: emit configuration...")
     var (amendExistingConfig, configuration) = try getBaseConfigurationForWrite()
 
-    if let filterJavaPackage = self.commonJVMOptions.filterJavaPackage {
-      log.debug("Generate Java->Swift type mappings. Active filter: \(filterJavaPackage)")
-    } else if let filterJavaPackage = configuration.filterJavaPackage { 
+    if !self.commonOptions.filterInclude.isEmpty {
+      log.debug("Generate Java->Swift type mappings. Active include filters: \(self.commonOptions.filterInclude)")
+    } else if let filters = configuration.filterInclude, !filters.isEmpty { 
       // take the package filter from the configuration file
-      self.commonJVMOptions.filterJavaPackage = filterJavaPackage
+      self.commonOptions.filterInclude = filters
     } else {
-      log.debug("Generate Java->Swift type mappings. No package filter applied.")
+      log.debug("Generate Java->Swift type mappings. No package include filter applied.")
     }
     log.debug("Classpath: \(classpathEntries)")
 
@@ -195,10 +194,8 @@ extension SwiftJava.ConfigureCommand {
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
         .dropLast(".class".count))
 
-
-      if let filterJavaPackage = self.commonJVMOptions.filterJavaPackage,
-         !javaCanonicalName.hasPrefix(filterJavaPackage) {
-        // Skip classes which don't match our expected prefix
+      guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
+        log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")
         continue
       }
 

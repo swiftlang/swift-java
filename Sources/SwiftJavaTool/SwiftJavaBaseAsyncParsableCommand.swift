@@ -81,7 +81,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
     // If we haven't tried to create the output directory yet, do so now before
     // we write any files to it.
-    // if !createdOutputDirectory { // FIXME: do we need this
+    // if !createdOutputDirectory {
     try FileManager.default.createDirectory(
       at: outputDir,
       withIntermediateDirectories: true
@@ -124,6 +124,8 @@ extension SwiftJavaBaseAsyncParsableCommand {
       if outputDirectory == "-" {
         return nil
       }
+//      print("[debug][swift-java] Module base directory based on outputDirectory!")
+//      return URL(fileURLWithPath: outputDirectory)
     }
 
     // Put the result into Sources/\(swiftModule).

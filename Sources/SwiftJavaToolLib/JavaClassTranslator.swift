@@ -16,6 +16,7 @@ import SwiftJava
 import JavaLangReflect
 import SwiftSyntax
 import SwiftJavaConfigurationShared
+import Logging
 
 /// Utility type that translates a single Java class into its corresponding
 /// Swift type and any additional helper types or functions.
@@ -23,6 +24,10 @@ struct JavaClassTranslator {
   /// The translator we are working with, which provides global knowledge
   /// needed for translation.
   let translator: JavaTranslator
+
+  var log: Logger { 
+    translator.log
+  }
 
   /// The Java class (or interface) being translated.
   let javaClass: JavaClass<JavaObject>
@@ -785,7 +790,7 @@ extension JavaClassTranslator {
                   ? "self.init(javaHolder: \($0.getName()).javaHolder)"
                   : "self = \($0.getName())")
             } else {
-              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run Java2Swift on the most updated Java class") 
+              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run swift-java on the most updated Java class") 
             }
       """
     }.joined(separator: "\n"))
@@ -957,7 +962,11 @@ extension Type {
 
   /// Determine whether this type is equivalent to or a subtype of the other
   /// type.
-  func isEqualTo(_ other: Type) -> Bool {
+  func isEqualTo(_ other: Type, file: String = #file, line: Int = #line, function: String = #function) -> Bool {
+    if self.javaHolder.object == other.javaHolder.object {
+      return true
+    }
+
     // First, adjust types to their bounds, if we need to.
     var anyAdjusted: Bool = false
     let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)

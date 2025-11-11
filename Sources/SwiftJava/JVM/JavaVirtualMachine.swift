@@ -94,6 +94,10 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       allVMOptions.append("-Djava.class.path=\(pathSeparatedClassPath)")
     }
     allVMOptions.append(contentsOf: vmOptions)
+    
+    // Append VM options from Environment
+    allVMOptions.append(contentsOf: vmOptions)
+    allVMOptions.append(contentsOf: Self.getSwiftJavaJVMEnvOptions())
 
     // Convert the options
     let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(capacity: allVMOptions.count)
@@ -420,6 +424,24 @@ extension JavaVirtualMachine {
       sharedJVMPointer.jvm = nil
       sharedJVMPointer.classpath = []
     }
+  }
+
+  /// Parse JVM options from the SWIFT_JAVA_JVM_OPTIONS environment variable.
+  /// 
+  /// For example, to enable verbose JNI logging you can do: 
+  /// ```
+  /// export JAVA_OPTS="-verbose:jni"
+  /// ```
+  public static func getSwiftJavaJVMEnvOptions() -> [String] {
+    guard let optionsString = ProcessInfo.processInfo.environment["JAVA_OPTS"],
+          !optionsString.isEmpty else {
+      return []
+    }
+    
+    return optionsString
+      .split(separator: ",")
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .filter { !$0.isEmpty }
   }
 }
 

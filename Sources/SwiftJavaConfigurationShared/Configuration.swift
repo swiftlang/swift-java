@@ -86,8 +86,10 @@ public struct Configuration: Codable {
   public var targetCompatibility: JavaVersion?
 
   /// Filter input Java types by their package prefix if set.
-  /// Can be overriden by `--filter-java-package`.
-  public var filterJavaPackage: String?
+  public var filterInclude: [String]?
+
+  /// Exclude input Java types by their package prefix or exact match.
+  public var filterExclude: [String]?
 
   // ==== dependencies ---------------------------------------------------------
 

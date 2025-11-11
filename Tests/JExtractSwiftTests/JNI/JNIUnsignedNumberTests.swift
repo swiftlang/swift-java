@@ -47,7 +47,6 @@ final class JNIUnsignedNumberTests {
   func jni_unsignedInt_annotate() throws {
     var config = Configuration()
     config.unsignedNumbersMode = .annotate
-    config.logLevel = .trace
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
