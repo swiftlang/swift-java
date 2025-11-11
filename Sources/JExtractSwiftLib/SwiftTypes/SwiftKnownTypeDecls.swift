@@ -40,6 +40,7 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case optional = "Swift.Optional"
   case void = "Swift.Void"
   case string = "Swift.String"
+  case array = "Swift.Array"
 
   // Foundation
   case foundationDataProtocol = "Foundation.DataProtocol"

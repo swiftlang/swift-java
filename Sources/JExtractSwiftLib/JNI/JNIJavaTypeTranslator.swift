@@ -45,12 +45,13 @@ enum JNIJavaTypeTranslator {
     case .void: return .void
 
     case .string: return .javaLangString
+
     case .int, .uint, // FIXME: why not supported int/uint?
         .unsafeRawPointer, .unsafeMutableRawPointer,
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
-        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol:
+        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array:
       return nil
     }
   }

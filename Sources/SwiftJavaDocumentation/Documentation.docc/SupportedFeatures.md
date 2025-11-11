@@ -58,7 +58,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Stored properties: `var`, `let` (with `willSet`, `didSet`)                           | ✅        | ✅   |
 | Computed properties: `var` (incl. `throws`)                                          | ✅ / TODO | ✅   |
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
-| Arrays: `[UInt8]`, `[T]`                                                             | ❌        | ❌   |
+| Arrays: `[UInt8]`, `[MyType]`, `Array<Int64>` etc                                    | ❌        | ✅   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |

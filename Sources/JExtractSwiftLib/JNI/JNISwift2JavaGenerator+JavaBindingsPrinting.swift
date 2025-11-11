@@ -25,7 +25,7 @@ extension JNISwift2JavaGenerator {
     "java.util.concurrent.atomic.AtomicBoolean",
 
     // NonNull, Unsigned and friends
-    "org.swift.swiftkit.core.annotations.*",
+    "org.swift.swiftkit.core.annotations.*"
   ]
 }
 
