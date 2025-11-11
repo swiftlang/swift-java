@@ -94,4 +94,12 @@ public class ArraysTest {
         double[] input = new double[] { 10, 20, 30, 40 };
         assertArrayEquals(input, MySwiftLibrary.doubleArray(input));
     }
+
+    @Test
+    void objectArray() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass[] input = new MySwiftClass[]{MySwiftClass.init(arena), MySwiftClass.init(arena), MySwiftClass.init(arena) };
+            assertEquals(3, MySwiftLibrary.objectArray(input, arena).length);
+        }
+    }
 }

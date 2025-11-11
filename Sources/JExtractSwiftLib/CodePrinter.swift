@@ -86,12 +86,17 @@ public struct CodePrinter {
 
   public mutating func printBraceBlock(
     _ header: Any,
+    postHeaderBracket: Any? = nil,
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
     body: (inout CodePrinter) throws -> ()
   ) rethrows {
-    print("\(header) {")
+    print("\(header) {", .space)
+    if let postHeaderBracket {
+      print(" \(postHeaderBracket)", .continue)
+    }
+    println()
     indent()
     try body(&self)
     outdent()
