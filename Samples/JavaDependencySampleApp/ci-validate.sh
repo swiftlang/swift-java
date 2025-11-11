@@ -4,7 +4,9 @@ set -e
 set -x
 
 # invoke resolve as part of a build run
-swift run --disable-sandbox
+swift run \
+  --disable-experimental-prebuilts \
+  --disable-sandbox
 
 # explicitly invoke resolve without explicit path or dependency
 # the dependencies should be uses from the --swift-module
