@@ -14,8 +14,8 @@ func findJavaHome() -> String {
     print("JAVA_HOME = \(home)")
     return home
   }
-  if let opts = ProcessInfo.processInfo.environment["JAVA_OPTS"] {
-    print("JAVA_OPTS = \(opts)")
+  if let opts = ProcessInfo.processInfo.environment["SWIFT_JAVA_JAVA_OPTS"] {
+    print("SWIFT_JAVA_JAVA_OPTS = \(opts)")
   }
 
   // This is a workaround for envs (some IDEs) which have trouble with

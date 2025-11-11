@@ -430,10 +430,10 @@ extension JavaVirtualMachine {
   /// 
   /// For example, to enable verbose JNI logging you can do: 
   /// ```
-  /// export JAVA_OPTS="-verbose:jni"
+  /// export SWIFT_JAVA_JAVA_OPTS="-verbose:jni"
   /// ```
   public static func getSwiftJavaJVMEnvOptions() -> [String] {
-    guard let optionsString = ProcessInfo.processInfo.environment["JAVA_OPTS"],
+    guard let optionsString = ProcessInfo.processInfo.environment["SWIFT_JAVA_JAVA_OPTS"],
           !optionsString.isEmpty else {
       return []
     }
