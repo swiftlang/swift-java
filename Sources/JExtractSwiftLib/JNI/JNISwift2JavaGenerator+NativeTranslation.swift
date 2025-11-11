@@ -852,7 +852,7 @@ extension JNISwift2JavaGenerator {
             // Defer might on any thread, so we need to attach environment.
             printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
             for globalRef in globalRefs {
-              printer.print("environment.interface.DeleteGlobalRef(deferEnvironment, \(globalRef))")
+              printer.print("deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, \(globalRef))")
             }
           }
           if isThrowing {
