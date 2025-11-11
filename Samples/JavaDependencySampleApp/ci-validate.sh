@@ -16,3 +16,4 @@ swift run \
   Sources/JavaCommonsCSV/swift-java.config \
   --swift-module JavaCommonsCSV \
   --output-directory .build/plugins/outputs/javadependencysampleapp/JavaCommonsCSV/destination/SwiftJavaPlugin/
+
