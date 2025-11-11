@@ -142,6 +142,8 @@ extension Swift2JavaTranslator {
         return types.contains(where: check)
       case .genericParameter:
         return false
+      case .array(let ty):
+        return check(ty)
       }
     }
 

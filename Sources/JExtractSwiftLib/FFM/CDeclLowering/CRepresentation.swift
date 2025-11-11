@@ -68,7 +68,7 @@ extension CType {
     case .optional(let wrapped) where wrapped.isPointer:
       try self.init(cdeclType: wrapped)
 
-    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite:
+    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite, .array:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
@@ -127,7 +127,7 @@ extension SwiftKnownTypeDeclKind {
     case .void: .void
     case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, 
       .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol, 
-      .essentialsData, .essentialsDataProtocol, .optional:
+      .essentialsData, .essentialsDataProtocol, .optional, .array:
        nil
     }
   }

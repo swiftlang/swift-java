@@ -347,6 +347,9 @@ struct CdeclLowering {
 
     case .composite:
       throw LoweringError.unhandledType(type)
+
+    case .array:
+      throw LoweringError.unhandledType(type)
     }
   }
 
@@ -415,7 +418,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
 
-    case .function, .metatype, .optional, .composite:
+    case .function, .metatype, .optional, .composite, .array:
       throw LoweringError.unhandledType(.optional(wrappedType))
     }
   }
@@ -516,7 +519,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -670,7 +673,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName)
       )
 
-    case .genericParameter, .function, .optional, .existential, .opaque, .composite:
+    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array:
       throw LoweringError.unhandledType(type)
     }
   }

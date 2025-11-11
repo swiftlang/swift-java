@@ -91,6 +91,12 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .array:
+            guard let elementType = nominalType.genericArguments?.first else {
+              throw JavaTranslationError.unsupportedSwiftType(type)
+            }
+            return try translateArrayParameter(elementType: elementType, parameterName: parameterName)
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
                   javaType.implementsJavaValue else {
@@ -187,6 +193,12 @@ extension JNISwift2JavaGenerator {
         }
 
         throw JavaTranslationError.unsupportedSwiftType(type)
+
+      case .array(let elementType):
+        return try translateArrayParameter(
+          elementType: elementType,
+          parameterName: parameterName
+        )
 
       case .metatype, .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
@@ -400,7 +412,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -429,7 +441,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -447,6 +459,12 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
             return try translateOptionalResult(wrappedType: genericArgs[0], resultName: resultName)
+
+          case .array:
+            guard let elementType = nominalType.genericArguments?.first else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+            }
+            return try translateArrayResult(elementType: elementType)
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
@@ -481,8 +499,88 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrapped):
         return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
 
+      case .array(let elementType):
+        return try translateArrayResult(elementType: elementType)
+
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+      }
+    }
+
+    func translateArrayResult(
+      elementType: SwiftType
+    ) throws -> NativeResult {
+      switch elementType {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+          }
+
+          return NativeResult(
+            javaType: .array(javaType),
+            conversion: .getJNIValue(.placeholder),
+            outParameters: []
+          )
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+        }
+
+        // Assume JExtract imported class
+        return NativeResult(
+          javaType: .array(.long),
+          conversion: .method(
+            .placeholder,
+            function: "map",
+            arguments: [
+              (nil, .getJNIValue(.allocateSwiftValue(name: resultName, swiftType: swiftResult.type)))
+            ]
+          ),
+          outParameters: []
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+      }
+    }
+
+    func translateArrayParameter(
+      elementType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      switch elementType {
+      case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                javaType.implementsJavaValue else {
+            throw JavaTranslationError.unsupportedSwiftType(elementType)
+          }
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: .array(javaType)),
+            ],
+            conversion: .initFromJNI(.placeholder, swiftType: .array(elementType))
+          )
+        }
+
+        guard !nominalType.isJavaKitWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+        }
+
+        // Assume JExtract wrapped class
+        return NativeParameter(
+          parameters: [JavaParameter(name: parameterName, type: .array(.long))],
+          conversion: .placeholder
+        )
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(elementType)
       }
     }
   }
@@ -574,6 +672,8 @@ extension JNISwift2JavaGenerator {
       nativeFunctionSignature: NativeFunctionSignature,
       isThrowing: Bool
     )
+
+    indirect case allocateSwiftValueArray(NativeSwiftConversionStep)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -894,6 +994,19 @@ extension JNISwift2JavaGenerator {
         }
 
         return ""
+
+      case .allocateSwiftValueArray(let name, let swiftType):
+        let pointerName = "\(name)$"
+        let bitsName = "\(name)Bits$"
+        printer.print(
+          """
+          let objectArray$ = \(placeholder)
+          let \(pointerName) = UnsafeMutablePointer<\(swiftType)>.allocate(capacity: objectArray$.count)
+          \(pointerName).initialize(from: $objectArray, count: objectArray$.count)
+          let \(name)Pointers = Int64(Int(bitPattern: \(pointerName)))
+          """
+        )
+        return bitsName
       }
     }
   }

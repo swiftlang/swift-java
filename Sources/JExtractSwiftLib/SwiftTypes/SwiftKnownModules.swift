@@ -94,6 +94,8 @@ private let swiftSourceFile: SourceFileSyntax = """
   
   public struct Optional<Wrapped> {}
   
+  public struct Array<Element> {}
+  
   // FIXME: Support 'typealias Void = ()'
   public struct Void {}
   
