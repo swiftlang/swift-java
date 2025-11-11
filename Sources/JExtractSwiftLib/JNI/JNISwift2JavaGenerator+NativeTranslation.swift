@@ -1018,7 +1018,7 @@ extension JNISwift2JavaGenerator {
 
       case .closure(let args, let body):
         var printer = CodePrinter()
-        printer.printBraceBlock("", postHeaderBracket: "(\(args.joined(separator: ", "))) in") { printer in
+        printer.printBraceBlock("", parameters: args) { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {
             printer.print("return \(body)")
