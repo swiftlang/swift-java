@@ -104,8 +104,8 @@ extension SwiftJava.ResolveCommand {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
 
-    let workDir = URL(fileURLWithPath: self.commonOptions.outputDirectory!)
-      .appending(path: "resolver-dir")
+    let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+      .appendingPathComponent(".build")
 
     let dependenciesClasspath = await resolveDependencies(workDir: workDir, dependencies: dependencies)
     let classpathEntries = dependenciesClasspath.split(separator: ":")

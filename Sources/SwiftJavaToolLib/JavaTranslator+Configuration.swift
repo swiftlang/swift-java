@@ -25,7 +25,6 @@ extension JavaTranslator {
     }
   
     for (javaClassName, swiftName) in classes {
-      print("SET = \(javaClassName)") // XXX
       translatedClasses[javaClassName] = SwiftTypeName(module: swiftModule, name: swiftName)
     }
   }
