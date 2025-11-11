@@ -15,7 +15,7 @@
 // Translate all Java Throwable instances in a Swift error.
 extension Throwable: Error, CustomStringConvertible {
   public var description: String {
-    "\(getClass().getCanonicalName())(\(getMessage()))"
+    return toString()
   }
 }
 

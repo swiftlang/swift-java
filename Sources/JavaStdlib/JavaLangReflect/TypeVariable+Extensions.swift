@@ -55,3 +55,9 @@ extension TypeVariable: Hashable {
   }
 
 }
+
+extension TypeVariable {
+  public var description: String { 
+    toString()
+  }
+}

@@ -4,7 +4,7 @@ import CSwiftJavaJNI
 @JavaClass("java.util.Optional")
 open class JavaOptional<T: AnyJavaObject>: JavaObject {
   @JavaMethod
-  open func get() -> JavaObject!
+  open func get() -> T!
 
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool

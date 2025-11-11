@@ -31,12 +31,6 @@ struct GenericJavaTypeOriginInfo {
   var type: Type
 }
 
-private func collectTypeVariables(_ type: Type) -> Set<TypeVariable<JavaObject>> {
-  var result: Set<TypeVariable<JavaObject>> = []
-
-  return result
-}
-
 /// if the type (that is used by the Method) is generic, return if the use originates from the method, or a surrounding class.
 func getGenericJavaTypeOriginInfo(_ type: Type?, from method: Method) -> [GenericJavaTypeOriginInfo] {
   guard let type else {

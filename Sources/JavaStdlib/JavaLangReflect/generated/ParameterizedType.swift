@@ -16,3 +16,24 @@ public struct ParameterizedType {
   @JavaMethod
   public func getTypeName() -> String
 }
+
+extension ParameterizedType {  
+
+  @JavaMethod
+  public func toString() -> String
+  
+  @JavaMethod
+  public func getClass() -> JavaClass<JavaObject>!
+
+  @JavaMethod
+  public func equals(_ arg0: JavaObject?) -> Bool
+
+  @JavaMethod
+  public func hashCode() -> Int32
+}
+
+extension ParameterizedType: CustomStringConvertible { 
+  public var description: String { 
+    toString()
+  }
+}

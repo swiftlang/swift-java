@@ -61,7 +61,7 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   open func getClassLoader() -> JavaClassLoader!
 
   @JavaMethod
-  open func newInstance() throws -> JavaObject!
+  open func newInstance() throws -> T!
 
   @JavaMethod
   open func isMemberClass() -> Bool
