@@ -4,7 +4,7 @@ import CSwiftJavaJNI
 @JavaClass("java.util.Optional")
 open class JavaOptional<T: AnyJavaObject>: JavaObject {
   @JavaMethod
-  open func get() -> T!
+  open func get() -> JavaObject! // FIXME: Currently we do generate -> T https://github.com/swiftlang/swift-java/issues/439
 
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
