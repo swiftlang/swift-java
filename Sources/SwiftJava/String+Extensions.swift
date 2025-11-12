@@ -13,10 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-// import SwiftJavaToolLib
-// import SwiftJava
-// import JavaUtilJar
-// import SwiftJavaConfigurationShared
 
 extension String {
   /// For a String that's of the form java.util.Vector, return the "Vector"

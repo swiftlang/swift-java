@@ -79,3 +79,17 @@ public extension Optional where Wrapped == Int64 {
     }
   }
 }
+
+extension JavaOptional {
+  public func empty(environment: JNIEnvironment? = nil) -> JavaOptional<T>! {
+    guard let env = try? environment ?? JavaVirtualMachine.shared().environment() else {
+      return nil
+    }
+
+    guard let opt = try? JavaClass<JavaOptional<T>>(environment: env).empty() else {
+      return nil
+    }
+
+    return opt.as(JavaOptional<T>.self)
+  }
+}
