@@ -39,22 +39,21 @@ public final class JavaVirtualMachine: @unchecked Sendable {
 
   /// Thread-local storage to detach from thread on exit
   private static let destroyTLS = ThreadLocalStorage { _ in
-    debug("Run destroyThreadLocalStorage; call JVM.shared() detach current thread")
     try? JavaVirtualMachine.shared().detachCurrentThread()
   }
 
   /// The Java virtual machine instance.
   private let jvm: JavaVMPointer
 
-  let classpath: [String]?
+  let classpath: [String]
 
   /// Whether to destroy the JVM on deinit.
   private let destroyOnDeinit: LockedState<Bool> // FIXME: we should require macOS 15 and then use Synchronization
 
   /// Adopt an existing JVM pointer.
-  public init(adoptingJVM jvm: JavaVMPointer, classpath: [String]? = nil) {
+  public init(adoptingJVM jvm: JavaVMPointer) {
     self.jvm = jvm
-    self.classpath = nil
+    self.classpath = [] // FIXME: bad...
     self.destroyOnDeinit = .init(initialState: false)
   }
 
@@ -87,17 +86,13 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       for path in classpath {
         if !fileManager.fileExists(atPath: path) {
           // FIXME: this should be configurable, a classpath missing a directory isn't reason to blow up
-          debug("[warning] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)") // TODO: stderr
+          print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)") // TODO: stderr
         }
       }
       let pathSeparatedClassPath = classpath.joined(separator: FileManager.pathSeparator)
       allVMOptions.append("-Djava.class.path=\(pathSeparatedClassPath)")
     }
     allVMOptions.append(contentsOf: vmOptions)
-    
-    // Append VM options from Environment
-    allVMOptions.append(contentsOf: vmOptions)
-    allVMOptions.append(contentsOf: Self.getSwiftJavaJVMEnvOptions())
 
     // Convert the options
     let optionsBuffer = UnsafeMutableBufferPointer<JavaVMOption>.allocate(capacity: allVMOptions.count)
@@ -121,10 +116,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
     vmArgs.options = optionsBuffer.baseAddress
     vmArgs.nOptions = jint(optionsBuffer.count)
 
-    debug("Create JVM instance. Options:\(allVMOptions)")
-    debug("Create JVM instance. jvm:\(jvm)")
-    debug("Create JVM instance. environment:\(environment)")
-    debug("Create JVM instance. vmArgs:\(vmArgs)")
+    // Create the JVM instance.
     if let createError = VMError(fromJNIError: JNI_CreateJavaVM(&jvm, &environment, &vmArgs)) {
       throw createError
     }
@@ -134,10 +126,8 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   }
 
   public func destroyJVM() throws {
-    debug("Destroy jvm (jvm:\(jvm))")
     try self.detachCurrentThread()
-    let destroyResult = jvm.pointee!.pointee.DestroyJavaVM(jvm)
-    if let error = VMError(fromJNIError: destroyResult) {
+    if let error = VMError(fromJNIError: jvm.pointee!.pointee.DestroyJavaVM(jvm)) {
       throw error
     }
 
@@ -161,24 +151,6 @@ extension JavaVirtualMachine: CustomStringConvertible {
   }
 }
 
-let SwiftJavaVerboseLogging = {
-  if let str = ProcessInfo.processInfo.environment["SWIFT_JAVA_VERBOSE"] {
-    switch str.lowercased() {
-    case "true", "yes", "1": true
-    case "false", "no", "0": false
-    default: false
-    }
-  } else {
-    false
-  }
-}()
-
-fileprivate func debug(_ message: String, file: String = #fileID, line: Int = #line, function: String = #function) {
-  if SwiftJavaVerboseLogging {
-    print("[swift-java-jvm][\(file):\(line)](\(function)) \(message)")
-  }
-}
-
 // ==== ------------------------------------------------------------------------
 // MARK: Java thread management.
 
@@ -190,7 +162,6 @@ extension JavaVirtualMachine {
   ///   - asDaemon: Whether this thread should be treated as a daemon
   ///     thread in the Java Virtual Machine.
   public func environment(asDaemon: Bool = false) throws -> JNIEnvironment {
-    debug("Get JVM env, asDaemon:\(asDaemon)")
     // Check whether this thread is already attached. If so, return the
     // corresponding environment.
     var environment: UnsafeMutableRawPointer? = nil
@@ -219,7 +190,8 @@ extension JavaVirtualMachine {
 
     // If we failed to attach, report that.
     if let attachError = VMError(fromJNIError: attachResult) {
-      fatalError("JVM attach error: \(attachError)")
+      // throw attachError
+      fatalError("JVM Error: \(attachError)")
     }
 
     JavaVirtualMachine.destroyTLS.set(jniEnv!)
@@ -234,7 +206,6 @@ extension JavaVirtualMachine {
   /// Detach the current thread from the Java Virtual Machine. All Java
   /// threads waiting for this thread to die are notified.
   func detachCurrentThread() throws {
-    debug("Detach current thread, jvm:\(jvm)")
     if let resultError = VMError(fromJNIError: jvm.pointee!.pointee.DetachCurrentThread(jvm)) {
       throw resultError
     }
@@ -244,29 +215,12 @@ extension JavaVirtualMachine {
 // MARK: Shared Java Virtual Machine management.
 
 extension JavaVirtualMachine {
-
-  struct JVMState {
-    var jvm: JavaVirtualMachine?
-    var classpath: [String]
-  }
-
   /// The globally shared JavaVirtualMachine instance, behind a lock.
   ///
   /// TODO: If the use of the lock itself ends up being slow, we could
   /// use an atomic here instead because our access pattern is fairly
   /// simple.
-  private static let sharedJVM: LockedState<JVMState> = .init(initialState: .init(jvm: nil, classpath: []))
-
-  public static func destroySharedJVM() throws {
-    debug("Destroy shared JVM")
-    return try sharedJVM.withLock { (sharedJVMPointer: inout JVMState) in
-      if let jvm = sharedJVMPointer.jvm {
-        try jvm.destroyJVM()
-      }
-      sharedJVMPointer.jvm = nil
-      sharedJVMPointer.classpath = []
-    }
-  }
+  private static let sharedJVM: LockedState<JavaVirtualMachine?> = .init(initialState: nil)
 
   /// Access the shared Java Virtual Machine instance.
   ///
@@ -289,126 +243,60 @@ extension JavaVirtualMachine {
     classpath: [String] = [],
     vmOptions: [String] = [],
     ignoreUnrecognized: Bool = false,
-    replace: Bool = false,
-    file: String = #fileID, line: Int = #line
+    replace: Bool = false
   ) throws -> JavaVirtualMachine {
     precondition(!classpath.contains(where: { $0.contains(FileManager.pathSeparator) }), "Classpath element must not contain `\(FileManager.pathSeparator)`! Split the path into elements! Was: \(classpath)")
-    debug("Get shared JVM at \(file):\(line): Classpath = \(classpath.joined(separator: FileManager.pathSeparator))")
 
-    return try sharedJVM.withLock { (sharedJVMPointer: inout JVMState) in
+    return try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
       // If we already have a JavaVirtualMachine instance, return it.
       if replace {
-        debug("Replace JVM instance")
-        if let jvm = sharedJVMPointer.jvm {
-          debug("destroyJVM instance!")
-          try jvm.destroyJVM()
-          debug("destroyJVM instance, done.")
-        }
-        sharedJVMPointer.jvm = nil
-        sharedJVMPointer.classpath = []
+        print("[swift-java] Replace JVM instance!")
+        try sharedJVMPointer?.destroyJVM()
+        sharedJVMPointer = nil
       } else {
-        if let existingInstance = sharedJVMPointer.jvm {
-          if classpath == [] { 
-            debug("Return existing JVM instance, no classpath requirement.")
-            return existingInstance
-          } else if classpath != sharedJVMPointer.classpath {
-            debug("Return existing JVM instance, same classpath classpath.")
-            return existingInstance
-          } else {
-            fatalError(
-              """
-              Requested JVM with differnet classpath than stored as shared(), without passing 'replace: true'!
-              Was: \(sharedJVMPointer.classpath)
-              Requested: \(sharedJVMPointer.classpath)
-              """)
-          }
+        if let existingInstance = sharedJVMPointer {
+          // FIXME: this isn't ideal; we silently ignored that we may have requested a different classpath or options
+          return existingInstance
         }
       }
 
-      var remainingRetries = 8
       while true {
-        remainingRetries -= 1 
-        guard remainingRetries > 0 else {
-          fatalError("Unable to find or create JVM")
-        }
-
         var wasExistingVM: Bool = false
         while true {
-          remainingRetries -= 1 
-          guard remainingRetries > 0 else {
-            fatalError("Unable to find or create JVM")
-          }
-
           // Query the JVM itself to determine whether there is a JVM
-          // instance that we don't yet know about.©
+          // instance that we don't yet know about.
+          var jvm: UnsafeMutablePointer<JavaVM?>? = nil
           var numJVMs: jsize = 0
-          if JNI_GetCreatedJavaVMs(nil, 0, &numJVMs) == JNI_OK, numJVMs == 0 {
-            debug("Found JVMs: \(numJVMs), create new one")
-          } else {
-            debug("Found JVMs: \(numJVMs), get existing one...")
+          if JNI_GetCreatedJavaVMs(&jvm, 1, &numJVMs) == JNI_OK, numJVMs >= 1 {
+            // Adopt this JVM into a new instance of the JavaVirtualMachine
+            // wrapper.
+            let javaVirtualMachine = JavaVirtualMachine(adoptingJVM: jvm!)
+            sharedJVMPointer = javaVirtualMachine
+            return javaVirtualMachine
           }
 
-          // Allocate buffer to retrieve existing JVM instances
-          // Only allocate if we actually have JVMs to query
-          if numJVMs > 0 {
-            let bufferCapacity = Int(numJVMs)
-            let jvmInstancesBuffer = UnsafeMutableBufferPointer<JavaVM?>.allocate(capacity: bufferCapacity)
-            defer {
-              jvmInstancesBuffer.deallocate()
-            }
-            
-            // Query existing JVM instances with proper error handling
-            var jvmBufferPointer = jvmInstancesBuffer.baseAddress
-            let jvmQueryResult = JNI_GetCreatedJavaVMs(&jvmBufferPointer, numJVMs, &numJVMs)
-            
-            // Handle query result with comprehensive error checking
-            guard jvmQueryResult == JNI_OK else {
-              if let queryError = VMError(fromJNIError: jvmQueryResult) {
-                debug("Failed to query existing JVMs: \(queryError)")
-                throw queryError
-              }
-              fatalError("Unknown error querying JVMs, result code: \(jvmQueryResult)")
-            }
-
-            if numJVMs >= 1 {
-              debug("Found JVMs: \(numJVMs), try to adopt existing one")
-              // Adopt this JVM into a new instance of the JavaVirtualMachine wrapper.
-              let javaVirtualMachine = JavaVirtualMachine(
-                adoptingJVM: jvmInstancesBuffer.baseAddress!,
-                classpath: classpath
-              )
-              sharedJVMPointer.jvm = javaVirtualMachine
-              sharedJVMPointer.classpath = classpath
-              return javaVirtualMachine
-            }
-
-            precondition(
-              !wasExistingVM,
-              "JVM reports that an instance of the JVM was already created, but we didn't see it."
-            )
-          }
+          precondition(
+            !wasExistingVM,
+            "JVM reports that an instance of the JVM was already created, but we didn't see it."
+          )
 
           // Create a new instance of the JVM.
-          debug("Create JVM, classpath: \(classpath.joined(separator: FileManager.pathSeparator))")
           let javaVirtualMachine: JavaVirtualMachine
           do {
             javaVirtualMachine = try JavaVirtualMachine(
               classpath: classpath,
-              vmOptions: vmOptions, // + ["-verbose:jni"],
+              vmOptions: vmOptions,
               ignoreUnrecognized: ignoreUnrecognized
             )
           } catch VMError.existingVM {
             // We raced with code outside of this JavaVirtualMachine instance
             // that created a VM while we were trying to do the same. Go
             // through the loop again to pick up the underlying JVM pointer.
-            debug("Failed to create JVM, Existing VM!")
             wasExistingVM = true
             continue
           }
 
-          debug("Created JVM: \(javaVirtualMachine)")
-          sharedJVMPointer.jvm = javaVirtualMachine
-          sharedJVMPointer.classpath = classpath
+          sharedJVMPointer = javaVirtualMachine
           return javaVirtualMachine
         }
       }
@@ -419,29 +307,9 @@ extension JavaVirtualMachine {
   ///
   /// This will allow the shared JavaVirtualMachine instance to be deallocated.
   public static func forgetShared() {
-    debug("forget shared JVM, without destroying it")
     sharedJVM.withLock { sharedJVMPointer in
-      sharedJVMPointer.jvm = nil
-      sharedJVMPointer.classpath = []
+      sharedJVMPointer = nil
     }
-  }
-
-  /// Parse JVM options from the SWIFT_JAVA_JVM_OPTIONS environment variable.
-  /// 
-  /// For example, to enable verbose JNI logging you can do: 
-  /// ```
-  /// export SWIFT_JAVA_JAVA_OPTS="-verbose:jni"
-  /// ```
-  public static func getSwiftJavaJVMEnvOptions() -> [String] {
-    guard let optionsString = ProcessInfo.processInfo.environment["SWIFT_JAVA_JAVA_OPTS"],
-          !optionsString.isEmpty else {
-      return []
-    }
-    
-    return optionsString
-      .split(separator: ",")
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .filter { !$0.isEmpty }
   }
 }
 

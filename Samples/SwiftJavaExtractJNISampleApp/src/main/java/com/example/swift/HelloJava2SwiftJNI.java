@@ -16,8 +16,6 @@ package com.example.swift;
 
 // Import swift-extract generated sources
 
-// Import javakit/swiftkit support libraries
-
 import org.swift.swiftkit.core.SwiftArena;
 import org.swift.swiftkit.core.SwiftLibraries;
 
