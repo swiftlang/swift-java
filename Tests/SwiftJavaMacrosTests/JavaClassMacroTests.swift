@@ -296,5 +296,39 @@ class JavaKitMacroTests: XCTestCase {
       macros: Self.javaKitMacros
     )
   }
+
+  func testJavaOptionalGenericGet() throws {
+    assertMacroExpansion("""
+        @JavaClass("java.lang.Optional")
+        open class JavaOptional<T: AnyJavaObject>: JavaObject {
+          @JavaMethod(genericResult: "T")
+          open func get() -> T!
+        }
+      """,
+      expandedSource: """
+
+        open class JavaOptional<T: AnyJavaObject>: JavaObject {
+          open func get() -> T! {
+              /* convert erased return value to T */
+              if let result$ = try! dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self) {
+                return T(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
+              } else {
+                return nil
+              }
+          }
+
+            /// The full Java class name for this Swift type.
+            open override class var fullJavaClassName: String {
+                "java.lang.Optional"
+            }
+
+            public required init(javaHolder: JavaObjectHolder) {
+                super.init(javaHolder: javaHolder)
+            }
+        }
+      """,
+      macros: Self.javaKitMacros
+    )
+  }
 }
 

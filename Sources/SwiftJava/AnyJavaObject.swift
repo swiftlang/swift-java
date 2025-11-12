@@ -59,7 +59,11 @@ public protocol AnyJavaObjectWithCustomClassLoader: AnyJavaObject {
 extension AnyJavaObject {
   /// Retrieve the underlying Java object.
   public var javaThis: jobject {
-    javaHolder.object!
+    javaHolder.object! // FIXME: this is a bad idea, can be null
+  }
+  
+  public var javaThisOptional: jobject? {
+    javaHolder.object
   }
 
   /// Retrieve the environment in which this Java object resides.

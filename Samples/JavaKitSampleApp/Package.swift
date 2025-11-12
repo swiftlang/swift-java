@@ -78,5 +78,16 @@ let package = Package(
         .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),
+    
+    .testTarget(
+      name: "JavaKitExampleTests",
+      dependencies: [
+        "JavaKitExample"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5),
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ]
+    ),
   ]
 )

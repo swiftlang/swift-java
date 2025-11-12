@@ -23,13 +23,27 @@ import java.util.OptionalDouble;
 public class ThreadSafeHelperClass {
     public ThreadSafeHelperClass() { }
 
-    public Optional<String> text = Optional.of("");
+    public Optional<String> text = Optional.of("cool string");
 
     public final OptionalDouble val = OptionalDouble.of(2);
 
     public String getValue(Optional<String> name) {
         return name.orElse("");
     }
+
+
+    public String getOrElse(Optional<String> name) {
+        return name.orElse("or else value");
+    }
+
+    public Optional<String> getNil() {
+        return Optional.empty();
+    }
+
+    // @NonNull
+    // public Optional<String> getNil() {
+    //     return Optional.empty();
+    // }
 
     public Optional<String> getText() {
         return text;

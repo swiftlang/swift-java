@@ -47,17 +47,40 @@ extension JavaMethodMacro: BodyMacro {
     }
 
     guard let funcDecl = declaration.as(FunctionDeclSyntax.self) else {
-      fatalError("not a function")
+      fatalError("not a function: \(declaration)")
     }
 
     let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
     let funcName = funcDecl.name.text
     let params = funcDecl.signature.parameterClause.parameters
-    let resultType: String =
-      funcDecl.signature.returnClause.map { result in
-        ", resultType: \(result.type.typeReferenceString).self"
-      } ?? ""
     let paramNames = params.map { param in param.parameterName?.text ?? "" }.joined(separator: ", ")
+
+    let genericResultType: String? =
+      if case let .argumentList(arguments) = node.arguments,
+        let firstElement = arguments.first,
+        let stringLiteral = firstElement.expression
+          .as(StringLiteralExprSyntax.self),
+        stringLiteral.segments.count == 1,
+        case let .stringSegment(wrapperName)? = stringLiteral.segments.first {
+          "\(wrapperName)"
+      } else {
+        nil
+      }
+
+    // Determine the result type
+    let resultType: String =
+      if let returnClause = funcDecl.signature.returnClause {
+        if let genericResultType {
+          // we need to type-erase the signature, because on JVM level generics are erased and we'd otherwise
+          // form a signature with the "concrete" type, which would not match the real byte-code level signature 
+          // of the method we're trying to call -- which would result in a MethodNotFound exception.
+          ", resultType: /*type-erased:\(genericResultType)*/JavaObject?.self"
+        } else {
+          ", resultType: \(returnClause.type.typeReferenceString).self"
+        }
+      } else {
+        ""
+      }
 
     let parametersAsArgs: String
     if paramNames.isEmpty {
@@ -70,8 +93,25 @@ extension JavaMethodMacro: BodyMacro {
       funcDecl.signature.effectSpecifiers?.throwsClause != nil
       ? "try" : "try!"
 
+    let resultSyntax: CodeBlockItemSyntax =
+      "\(raw: tryKeyword) dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
+
+    if let genericResultType {
+      return [
+        """
+        /* convert erased return value to \(raw: genericResultType) */
+        if let result$ = \(resultSyntax) {
+          return \(raw: genericResultType)(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
+        } else {
+          return nil
+        }
+        """
+      ]
+    }
+
+    // no return type conversions
     return [
-      "return \(raw: tryKeyword) dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
+      "return \(resultSyntax)"
     ]
   }
 
