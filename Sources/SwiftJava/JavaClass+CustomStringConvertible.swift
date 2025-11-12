@@ -12,19 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaToolLib
-import SwiftJavaShared
 import CSwiftJavaJNI
-import SwiftJava
 
-// FIXME: do we need this here or can we rely on the generated one?
-@JavaClass("java.lang.ClassLoader")
-public struct ClassLoader {
-  @JavaMethod
-  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
-}
-
-extension JavaClass<ClassLoader> {
-  @JavaStaticMethod
-  public func getSystemClassLoader() -> ClassLoader?
+extension JavaClass: CustomStringConvertible {
+  public var description: String {
+    toString()
+  }
 }

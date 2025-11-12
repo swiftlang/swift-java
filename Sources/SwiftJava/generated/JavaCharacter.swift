@@ -1557,985 +1557,985 @@ extension JavaCharacter {
         if let COMMON = classObj.COMMON {
           self.init(javaHolder: COMMON.javaHolder)
         } else {
-          fatalError("Enum value COMMON was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value COMMON was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LATIN:
         if let LATIN = classObj.LATIN {
           self.init(javaHolder: LATIN.javaHolder)
         } else {
-          fatalError("Enum value LATIN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LATIN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GREEK:
         if let GREEK = classObj.GREEK {
           self.init(javaHolder: GREEK.javaHolder)
         } else {
-          fatalError("Enum value GREEK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GREEK was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CYRILLIC:
         if let CYRILLIC = classObj.CYRILLIC {
           self.init(javaHolder: CYRILLIC.javaHolder)
         } else {
-          fatalError("Enum value CYRILLIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CYRILLIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ARMENIAN:
         if let ARMENIAN = classObj.ARMENIAN {
           self.init(javaHolder: ARMENIAN.javaHolder)
         } else {
-          fatalError("Enum value ARMENIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ARMENIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HEBREW:
         if let HEBREW = classObj.HEBREW {
           self.init(javaHolder: HEBREW.javaHolder)
         } else {
-          fatalError("Enum value HEBREW was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HEBREW was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ARABIC:
         if let ARABIC = classObj.ARABIC {
           self.init(javaHolder: ARABIC.javaHolder)
         } else {
-          fatalError("Enum value ARABIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ARABIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SYRIAC:
         if let SYRIAC = classObj.SYRIAC {
           self.init(javaHolder: SYRIAC.javaHolder)
         } else {
-          fatalError("Enum value SYRIAC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SYRIAC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .THAANA:
         if let THAANA = classObj.THAANA {
           self.init(javaHolder: THAANA.javaHolder)
         } else {
-          fatalError("Enum value THAANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value THAANA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .DEVANAGARI:
         if let DEVANAGARI = classObj.DEVANAGARI {
           self.init(javaHolder: DEVANAGARI.javaHolder)
         } else {
-          fatalError("Enum value DEVANAGARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value DEVANAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BENGALI:
         if let BENGALI = classObj.BENGALI {
           self.init(javaHolder: BENGALI.javaHolder)
         } else {
-          fatalError("Enum value BENGALI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BENGALI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GURMUKHI:
         if let GURMUKHI = classObj.GURMUKHI {
           self.init(javaHolder: GURMUKHI.javaHolder)
         } else {
-          fatalError("Enum value GURMUKHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GURMUKHI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GUJARATI:
         if let GUJARATI = classObj.GUJARATI {
           self.init(javaHolder: GUJARATI.javaHolder)
         } else {
-          fatalError("Enum value GUJARATI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GUJARATI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ORIYA:
         if let ORIYA = classObj.ORIYA {
           self.init(javaHolder: ORIYA.javaHolder)
         } else {
-          fatalError("Enum value ORIYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ORIYA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAMIL:
         if let TAMIL = classObj.TAMIL {
           self.init(javaHolder: TAMIL.javaHolder)
         } else {
-          fatalError("Enum value TAMIL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAMIL was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TELUGU:
         if let TELUGU = classObj.TELUGU {
           self.init(javaHolder: TELUGU.javaHolder)
         } else {
-          fatalError("Enum value TELUGU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TELUGU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KANNADA:
         if let KANNADA = classObj.KANNADA {
           self.init(javaHolder: KANNADA.javaHolder)
         } else {
-          fatalError("Enum value KANNADA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KANNADA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MALAYALAM:
         if let MALAYALAM = classObj.MALAYALAM {
           self.init(javaHolder: MALAYALAM.javaHolder)
         } else {
-          fatalError("Enum value MALAYALAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MALAYALAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SINHALA:
         if let SINHALA = classObj.SINHALA {
           self.init(javaHolder: SINHALA.javaHolder)
         } else {
-          fatalError("Enum value SINHALA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SINHALA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .THAI:
         if let THAI = classObj.THAI {
           self.init(javaHolder: THAI.javaHolder)
         } else {
-          fatalError("Enum value THAI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value THAI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LAO:
         if let LAO = classObj.LAO {
           self.init(javaHolder: LAO.javaHolder)
         } else {
-          fatalError("Enum value LAO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LAO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TIBETAN:
         if let TIBETAN = classObj.TIBETAN {
           self.init(javaHolder: TIBETAN.javaHolder)
         } else {
-          fatalError("Enum value TIBETAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TIBETAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MYANMAR:
         if let MYANMAR = classObj.MYANMAR {
           self.init(javaHolder: MYANMAR.javaHolder)
         } else {
-          fatalError("Enum value MYANMAR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MYANMAR was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GEORGIAN:
         if let GEORGIAN = classObj.GEORGIAN {
           self.init(javaHolder: GEORGIAN.javaHolder)
         } else {
-          fatalError("Enum value GEORGIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GEORGIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HANGUL:
         if let HANGUL = classObj.HANGUL {
           self.init(javaHolder: HANGUL.javaHolder)
         } else {
-          fatalError("Enum value HANGUL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HANGUL was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ETHIOPIC:
         if let ETHIOPIC = classObj.ETHIOPIC {
           self.init(javaHolder: ETHIOPIC.javaHolder)
         } else {
-          fatalError("Enum value ETHIOPIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ETHIOPIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CHEROKEE:
         if let CHEROKEE = classObj.CHEROKEE {
           self.init(javaHolder: CHEROKEE.javaHolder)
         } else {
-          fatalError("Enum value CHEROKEE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CHEROKEE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CANADIAN_ABORIGINAL:
         if let CANADIAN_ABORIGINAL = classObj.CANADIAN_ABORIGINAL {
           self.init(javaHolder: CANADIAN_ABORIGINAL.javaHolder)
         } else {
-          fatalError("Enum value CANADIAN_ABORIGINAL was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CANADIAN_ABORIGINAL was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OGHAM:
         if let OGHAM = classObj.OGHAM {
           self.init(javaHolder: OGHAM.javaHolder)
         } else {
-          fatalError("Enum value OGHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OGHAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .RUNIC:
         if let RUNIC = classObj.RUNIC {
           self.init(javaHolder: RUNIC.javaHolder)
         } else {
-          fatalError("Enum value RUNIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value RUNIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KHMER:
         if let KHMER = classObj.KHMER {
           self.init(javaHolder: KHMER.javaHolder)
         } else {
-          fatalError("Enum value KHMER was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KHMER was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MONGOLIAN:
         if let MONGOLIAN = classObj.MONGOLIAN {
           self.init(javaHolder: MONGOLIAN.javaHolder)
         } else {
-          fatalError("Enum value MONGOLIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MONGOLIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HIRAGANA:
         if let HIRAGANA = classObj.HIRAGANA {
           self.init(javaHolder: HIRAGANA.javaHolder)
         } else {
-          fatalError("Enum value HIRAGANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HIRAGANA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KATAKANA:
         if let KATAKANA = classObj.KATAKANA {
           self.init(javaHolder: KATAKANA.javaHolder)
         } else {
-          fatalError("Enum value KATAKANA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KATAKANA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BOPOMOFO:
         if let BOPOMOFO = classObj.BOPOMOFO {
           self.init(javaHolder: BOPOMOFO.javaHolder)
         } else {
-          fatalError("Enum value BOPOMOFO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BOPOMOFO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HAN:
         if let HAN = classObj.HAN {
           self.init(javaHolder: HAN.javaHolder)
         } else {
-          fatalError("Enum value HAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .YI:
         if let YI = classObj.YI {
           self.init(javaHolder: YI.javaHolder)
         } else {
-          fatalError("Enum value YI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value YI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_ITALIC:
         if let OLD_ITALIC = classObj.OLD_ITALIC {
           self.init(javaHolder: OLD_ITALIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_ITALIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_ITALIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GOTHIC:
         if let GOTHIC = classObj.GOTHIC {
           self.init(javaHolder: GOTHIC.javaHolder)
         } else {
-          fatalError("Enum value GOTHIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GOTHIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .DESERET:
         if let DESERET = classObj.DESERET {
           self.init(javaHolder: DESERET.javaHolder)
         } else {
-          fatalError("Enum value DESERET was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value DESERET was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .INHERITED:
         if let INHERITED = classObj.INHERITED {
           self.init(javaHolder: INHERITED.javaHolder)
         } else {
-          fatalError("Enum value INHERITED was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value INHERITED was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAGALOG:
         if let TAGALOG = classObj.TAGALOG {
           self.init(javaHolder: TAGALOG.javaHolder)
         } else {
-          fatalError("Enum value TAGALOG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAGALOG was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HANUNOO:
         if let HANUNOO = classObj.HANUNOO {
           self.init(javaHolder: HANUNOO.javaHolder)
         } else {
-          fatalError("Enum value HANUNOO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HANUNOO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BUHID:
         if let BUHID = classObj.BUHID {
           self.init(javaHolder: BUHID.javaHolder)
         } else {
-          fatalError("Enum value BUHID was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BUHID was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAGBANWA:
         if let TAGBANWA = classObj.TAGBANWA {
           self.init(javaHolder: TAGBANWA.javaHolder)
         } else {
-          fatalError("Enum value TAGBANWA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAGBANWA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LIMBU:
         if let LIMBU = classObj.LIMBU {
           self.init(javaHolder: LIMBU.javaHolder)
         } else {
-          fatalError("Enum value LIMBU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LIMBU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAI_LE:
         if let TAI_LE = classObj.TAI_LE {
           self.init(javaHolder: TAI_LE.javaHolder)
         } else {
-          fatalError("Enum value TAI_LE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAI_LE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LINEAR_B:
         if let LINEAR_B = classObj.LINEAR_B {
           self.init(javaHolder: LINEAR_B.javaHolder)
         } else {
-          fatalError("Enum value LINEAR_B was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LINEAR_B was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .UGARITIC:
         if let UGARITIC = classObj.UGARITIC {
           self.init(javaHolder: UGARITIC.javaHolder)
         } else {
-          fatalError("Enum value UGARITIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value UGARITIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SHAVIAN:
         if let SHAVIAN = classObj.SHAVIAN {
           self.init(javaHolder: SHAVIAN.javaHolder)
         } else {
-          fatalError("Enum value SHAVIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SHAVIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OSMANYA:
         if let OSMANYA = classObj.OSMANYA {
           self.init(javaHolder: OSMANYA.javaHolder)
         } else {
-          fatalError("Enum value OSMANYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OSMANYA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CYPRIOT:
         if let CYPRIOT = classObj.CYPRIOT {
           self.init(javaHolder: CYPRIOT.javaHolder)
         } else {
-          fatalError("Enum value CYPRIOT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CYPRIOT was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BRAILLE:
         if let BRAILLE = classObj.BRAILLE {
           self.init(javaHolder: BRAILLE.javaHolder)
         } else {
-          fatalError("Enum value BRAILLE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BRAILLE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BUGINESE:
         if let BUGINESE = classObj.BUGINESE {
           self.init(javaHolder: BUGINESE.javaHolder)
         } else {
-          fatalError("Enum value BUGINESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BUGINESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .COPTIC:
         if let COPTIC = classObj.COPTIC {
           self.init(javaHolder: COPTIC.javaHolder)
         } else {
-          fatalError("Enum value COPTIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value COPTIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NEW_TAI_LUE:
         if let NEW_TAI_LUE = classObj.NEW_TAI_LUE {
           self.init(javaHolder: NEW_TAI_LUE.javaHolder)
         } else {
-          fatalError("Enum value NEW_TAI_LUE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NEW_TAI_LUE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GLAGOLITIC:
         if let GLAGOLITIC = classObj.GLAGOLITIC {
           self.init(javaHolder: GLAGOLITIC.javaHolder)
         } else {
-          fatalError("Enum value GLAGOLITIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GLAGOLITIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TIFINAGH:
         if let TIFINAGH = classObj.TIFINAGH {
           self.init(javaHolder: TIFINAGH.javaHolder)
         } else {
-          fatalError("Enum value TIFINAGH was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TIFINAGH was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SYLOTI_NAGRI:
         if let SYLOTI_NAGRI = classObj.SYLOTI_NAGRI {
           self.init(javaHolder: SYLOTI_NAGRI.javaHolder)
         } else {
-          fatalError("Enum value SYLOTI_NAGRI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SYLOTI_NAGRI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_PERSIAN:
         if let OLD_PERSIAN = classObj.OLD_PERSIAN {
           self.init(javaHolder: OLD_PERSIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_PERSIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_PERSIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KHAROSHTHI:
         if let KHAROSHTHI = classObj.KHAROSHTHI {
           self.init(javaHolder: KHAROSHTHI.javaHolder)
         } else {
-          fatalError("Enum value KHAROSHTHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KHAROSHTHI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BALINESE:
         if let BALINESE = classObj.BALINESE {
           self.init(javaHolder: BALINESE.javaHolder)
         } else {
-          fatalError("Enum value BALINESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BALINESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CUNEIFORM:
         if let CUNEIFORM = classObj.CUNEIFORM {
           self.init(javaHolder: CUNEIFORM.javaHolder)
         } else {
-          fatalError("Enum value CUNEIFORM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CUNEIFORM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PHOENICIAN:
         if let PHOENICIAN = classObj.PHOENICIAN {
           self.init(javaHolder: PHOENICIAN.javaHolder)
         } else {
-          fatalError("Enum value PHOENICIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PHOENICIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PHAGS_PA:
         if let PHAGS_PA = classObj.PHAGS_PA {
           self.init(javaHolder: PHAGS_PA.javaHolder)
         } else {
-          fatalError("Enum value PHAGS_PA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PHAGS_PA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NKO:
         if let NKO = classObj.NKO {
           self.init(javaHolder: NKO.javaHolder)
         } else {
-          fatalError("Enum value NKO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NKO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SUNDANESE:
         if let SUNDANESE = classObj.SUNDANESE {
           self.init(javaHolder: SUNDANESE.javaHolder)
         } else {
-          fatalError("Enum value SUNDANESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SUNDANESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BATAK:
         if let BATAK = classObj.BATAK {
           self.init(javaHolder: BATAK.javaHolder)
         } else {
-          fatalError("Enum value BATAK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BATAK was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LEPCHA:
         if let LEPCHA = classObj.LEPCHA {
           self.init(javaHolder: LEPCHA.javaHolder)
         } else {
-          fatalError("Enum value LEPCHA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LEPCHA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OL_CHIKI:
         if let OL_CHIKI = classObj.OL_CHIKI {
           self.init(javaHolder: OL_CHIKI.javaHolder)
         } else {
-          fatalError("Enum value OL_CHIKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OL_CHIKI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .VAI:
         if let VAI = classObj.VAI {
           self.init(javaHolder: VAI.javaHolder)
         } else {
-          fatalError("Enum value VAI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value VAI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SAURASHTRA:
         if let SAURASHTRA = classObj.SAURASHTRA {
           self.init(javaHolder: SAURASHTRA.javaHolder)
         } else {
-          fatalError("Enum value SAURASHTRA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SAURASHTRA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KAYAH_LI:
         if let KAYAH_LI = classObj.KAYAH_LI {
           self.init(javaHolder: KAYAH_LI.javaHolder)
         } else {
-          fatalError("Enum value KAYAH_LI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KAYAH_LI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .REJANG:
         if let REJANG = classObj.REJANG {
           self.init(javaHolder: REJANG.javaHolder)
         } else {
-          fatalError("Enum value REJANG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value REJANG was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LYCIAN:
         if let LYCIAN = classObj.LYCIAN {
           self.init(javaHolder: LYCIAN.javaHolder)
         } else {
-          fatalError("Enum value LYCIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LYCIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CARIAN:
         if let CARIAN = classObj.CARIAN {
           self.init(javaHolder: CARIAN.javaHolder)
         } else {
-          fatalError("Enum value CARIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CARIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LYDIAN:
         if let LYDIAN = classObj.LYDIAN {
           self.init(javaHolder: LYDIAN.javaHolder)
         } else {
-          fatalError("Enum value LYDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LYDIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CHAM:
         if let CHAM = classObj.CHAM {
           self.init(javaHolder: CHAM.javaHolder)
         } else {
-          fatalError("Enum value CHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CHAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAI_THAM:
         if let TAI_THAM = classObj.TAI_THAM {
           self.init(javaHolder: TAI_THAM.javaHolder)
         } else {
-          fatalError("Enum value TAI_THAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAI_THAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAI_VIET:
         if let TAI_VIET = classObj.TAI_VIET {
           self.init(javaHolder: TAI_VIET.javaHolder)
         } else {
-          fatalError("Enum value TAI_VIET was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAI_VIET was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .AVESTAN:
         if let AVESTAN = classObj.AVESTAN {
           self.init(javaHolder: AVESTAN.javaHolder)
         } else {
-          fatalError("Enum value AVESTAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value AVESTAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .EGYPTIAN_HIEROGLYPHS:
         if let EGYPTIAN_HIEROGLYPHS = classObj.EGYPTIAN_HIEROGLYPHS {
           self.init(javaHolder: EGYPTIAN_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value EGYPTIAN_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value EGYPTIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SAMARITAN:
         if let SAMARITAN = classObj.SAMARITAN {
           self.init(javaHolder: SAMARITAN.javaHolder)
         } else {
-          fatalError("Enum value SAMARITAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SAMARITAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MANDAIC:
         if let MANDAIC = classObj.MANDAIC {
           self.init(javaHolder: MANDAIC.javaHolder)
         } else {
-          fatalError("Enum value MANDAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MANDAIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LISU:
         if let LISU = classObj.LISU {
           self.init(javaHolder: LISU.javaHolder)
         } else {
-          fatalError("Enum value LISU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LISU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BAMUM:
         if let BAMUM = classObj.BAMUM {
           self.init(javaHolder: BAMUM.javaHolder)
         } else {
-          fatalError("Enum value BAMUM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BAMUM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .JAVANESE:
         if let JAVANESE = classObj.JAVANESE {
           self.init(javaHolder: JAVANESE.javaHolder)
         } else {
-          fatalError("Enum value JAVANESE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value JAVANESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MEETEI_MAYEK:
         if let MEETEI_MAYEK = classObj.MEETEI_MAYEK {
           self.init(javaHolder: MEETEI_MAYEK.javaHolder)
         } else {
-          fatalError("Enum value MEETEI_MAYEK was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MEETEI_MAYEK was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .IMPERIAL_ARAMAIC:
         if let IMPERIAL_ARAMAIC = classObj.IMPERIAL_ARAMAIC {
           self.init(javaHolder: IMPERIAL_ARAMAIC.javaHolder)
         } else {
-          fatalError("Enum value IMPERIAL_ARAMAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value IMPERIAL_ARAMAIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_SOUTH_ARABIAN:
         if let OLD_SOUTH_ARABIAN = classObj.OLD_SOUTH_ARABIAN {
           self.init(javaHolder: OLD_SOUTH_ARABIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_SOUTH_ARABIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_SOUTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .INSCRIPTIONAL_PARTHIAN:
         if let INSCRIPTIONAL_PARTHIAN = classObj.INSCRIPTIONAL_PARTHIAN {
           self.init(javaHolder: INSCRIPTIONAL_PARTHIAN.javaHolder)
         } else {
-          fatalError("Enum value INSCRIPTIONAL_PARTHIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value INSCRIPTIONAL_PARTHIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .INSCRIPTIONAL_PAHLAVI:
         if let INSCRIPTIONAL_PAHLAVI = classObj.INSCRIPTIONAL_PAHLAVI {
           self.init(javaHolder: INSCRIPTIONAL_PAHLAVI.javaHolder)
         } else {
-          fatalError("Enum value INSCRIPTIONAL_PAHLAVI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value INSCRIPTIONAL_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_TURKIC:
         if let OLD_TURKIC = classObj.OLD_TURKIC {
           self.init(javaHolder: OLD_TURKIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_TURKIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_TURKIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BRAHMI:
         if let BRAHMI = classObj.BRAHMI {
           self.init(javaHolder: BRAHMI.javaHolder)
         } else {
-          fatalError("Enum value BRAHMI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BRAHMI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KAITHI:
         if let KAITHI = classObj.KAITHI {
           self.init(javaHolder: KAITHI.javaHolder)
         } else {
-          fatalError("Enum value KAITHI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KAITHI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MEROITIC_HIEROGLYPHS:
         if let MEROITIC_HIEROGLYPHS = classObj.MEROITIC_HIEROGLYPHS {
           self.init(javaHolder: MEROITIC_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value MEROITIC_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MEROITIC_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MEROITIC_CURSIVE:
         if let MEROITIC_CURSIVE = classObj.MEROITIC_CURSIVE {
           self.init(javaHolder: MEROITIC_CURSIVE.javaHolder)
         } else {
-          fatalError("Enum value MEROITIC_CURSIVE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MEROITIC_CURSIVE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SORA_SOMPENG:
         if let SORA_SOMPENG = classObj.SORA_SOMPENG {
           self.init(javaHolder: SORA_SOMPENG.javaHolder)
         } else {
-          fatalError("Enum value SORA_SOMPENG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SORA_SOMPENG was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CHAKMA:
         if let CHAKMA = classObj.CHAKMA {
           self.init(javaHolder: CHAKMA.javaHolder)
         } else {
-          fatalError("Enum value CHAKMA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CHAKMA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SHARADA:
         if let SHARADA = classObj.SHARADA {
           self.init(javaHolder: SHARADA.javaHolder)
         } else {
-          fatalError("Enum value SHARADA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SHARADA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TAKRI:
         if let TAKRI = classObj.TAKRI {
           self.init(javaHolder: TAKRI.javaHolder)
         } else {
-          fatalError("Enum value TAKRI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TAKRI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MIAO:
         if let MIAO = classObj.MIAO {
           self.init(javaHolder: MIAO.javaHolder)
         } else {
-          fatalError("Enum value MIAO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MIAO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CAUCASIAN_ALBANIAN:
         if let CAUCASIAN_ALBANIAN = classObj.CAUCASIAN_ALBANIAN {
           self.init(javaHolder: CAUCASIAN_ALBANIAN.javaHolder)
         } else {
-          fatalError("Enum value CAUCASIAN_ALBANIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CAUCASIAN_ALBANIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BASSA_VAH:
         if let BASSA_VAH = classObj.BASSA_VAH {
           self.init(javaHolder: BASSA_VAH.javaHolder)
         } else {
-          fatalError("Enum value BASSA_VAH was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BASSA_VAH was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .DUPLOYAN:
         if let DUPLOYAN = classObj.DUPLOYAN {
           self.init(javaHolder: DUPLOYAN.javaHolder)
         } else {
-          fatalError("Enum value DUPLOYAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value DUPLOYAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ELBASAN:
         if let ELBASAN = classObj.ELBASAN {
           self.init(javaHolder: ELBASAN.javaHolder)
         } else {
-          fatalError("Enum value ELBASAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ELBASAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GRANTHA:
         if let GRANTHA = classObj.GRANTHA {
           self.init(javaHolder: GRANTHA.javaHolder)
         } else {
-          fatalError("Enum value GRANTHA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GRANTHA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PAHAWH_HMONG:
         if let PAHAWH_HMONG = classObj.PAHAWH_HMONG {
           self.init(javaHolder: PAHAWH_HMONG.javaHolder)
         } else {
-          fatalError("Enum value PAHAWH_HMONG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PAHAWH_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KHOJKI:
         if let KHOJKI = classObj.KHOJKI {
           self.init(javaHolder: KHOJKI.javaHolder)
         } else {
-          fatalError("Enum value KHOJKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KHOJKI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .LINEAR_A:
         if let LINEAR_A = classObj.LINEAR_A {
           self.init(javaHolder: LINEAR_A.javaHolder)
         } else {
-          fatalError("Enum value LINEAR_A was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value LINEAR_A was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MAHAJANI:
         if let MAHAJANI = classObj.MAHAJANI {
           self.init(javaHolder: MAHAJANI.javaHolder)
         } else {
-          fatalError("Enum value MAHAJANI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MAHAJANI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MANICHAEAN:
         if let MANICHAEAN = classObj.MANICHAEAN {
           self.init(javaHolder: MANICHAEAN.javaHolder)
         } else {
-          fatalError("Enum value MANICHAEAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MANICHAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MENDE_KIKAKUI:
         if let MENDE_KIKAKUI = classObj.MENDE_KIKAKUI {
           self.init(javaHolder: MENDE_KIKAKUI.javaHolder)
         } else {
-          fatalError("Enum value MENDE_KIKAKUI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MENDE_KIKAKUI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MODI:
         if let MODI = classObj.MODI {
           self.init(javaHolder: MODI.javaHolder)
         } else {
-          fatalError("Enum value MODI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MODI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MRO:
         if let MRO = classObj.MRO {
           self.init(javaHolder: MRO.javaHolder)
         } else {
-          fatalError("Enum value MRO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MRO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_NORTH_ARABIAN:
         if let OLD_NORTH_ARABIAN = classObj.OLD_NORTH_ARABIAN {
           self.init(javaHolder: OLD_NORTH_ARABIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_NORTH_ARABIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_NORTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NABATAEAN:
         if let NABATAEAN = classObj.NABATAEAN {
           self.init(javaHolder: NABATAEAN.javaHolder)
         } else {
-          fatalError("Enum value NABATAEAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NABATAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PALMYRENE:
         if let PALMYRENE = classObj.PALMYRENE {
           self.init(javaHolder: PALMYRENE.javaHolder)
         } else {
-          fatalError("Enum value PALMYRENE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PALMYRENE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PAU_CIN_HAU:
         if let PAU_CIN_HAU = classObj.PAU_CIN_HAU {
           self.init(javaHolder: PAU_CIN_HAU.javaHolder)
         } else {
-          fatalError("Enum value PAU_CIN_HAU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PAU_CIN_HAU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_PERMIC:
         if let OLD_PERMIC = classObj.OLD_PERMIC {
           self.init(javaHolder: OLD_PERMIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_PERMIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_PERMIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .PSALTER_PAHLAVI:
         if let PSALTER_PAHLAVI = classObj.PSALTER_PAHLAVI {
           self.init(javaHolder: PSALTER_PAHLAVI.javaHolder)
         } else {
-          fatalError("Enum value PSALTER_PAHLAVI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value PSALTER_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SIDDHAM:
         if let SIDDHAM = classObj.SIDDHAM {
           self.init(javaHolder: SIDDHAM.javaHolder)
         } else {
-          fatalError("Enum value SIDDHAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SIDDHAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KHUDAWADI:
         if let KHUDAWADI = classObj.KHUDAWADI {
           self.init(javaHolder: KHUDAWADI.javaHolder)
         } else {
-          fatalError("Enum value KHUDAWADI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KHUDAWADI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TIRHUTA:
         if let TIRHUTA = classObj.TIRHUTA {
           self.init(javaHolder: TIRHUTA.javaHolder)
         } else {
-          fatalError("Enum value TIRHUTA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TIRHUTA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .WARANG_CITI:
         if let WARANG_CITI = classObj.WARANG_CITI {
           self.init(javaHolder: WARANG_CITI.javaHolder)
         } else {
-          fatalError("Enum value WARANG_CITI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value WARANG_CITI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .AHOM:
         if let AHOM = classObj.AHOM {
           self.init(javaHolder: AHOM.javaHolder)
         } else {
-          fatalError("Enum value AHOM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value AHOM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ANATOLIAN_HIEROGLYPHS:
         if let ANATOLIAN_HIEROGLYPHS = classObj.ANATOLIAN_HIEROGLYPHS {
           self.init(javaHolder: ANATOLIAN_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value ANATOLIAN_HIEROGLYPHS was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ANATOLIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HATRAN:
         if let HATRAN = classObj.HATRAN {
           self.init(javaHolder: HATRAN.javaHolder)
         } else {
-          fatalError("Enum value HATRAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HATRAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MULTANI:
         if let MULTANI = classObj.MULTANI {
           self.init(javaHolder: MULTANI.javaHolder)
         } else {
-          fatalError("Enum value MULTANI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MULTANI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_HUNGARIAN:
         if let OLD_HUNGARIAN = classObj.OLD_HUNGARIAN {
           self.init(javaHolder: OLD_HUNGARIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_HUNGARIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_HUNGARIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SIGNWRITING:
         if let SIGNWRITING = classObj.SIGNWRITING {
           self.init(javaHolder: SIGNWRITING.javaHolder)
         } else {
-          fatalError("Enum value SIGNWRITING was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SIGNWRITING was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ADLAM:
         if let ADLAM = classObj.ADLAM {
           self.init(javaHolder: ADLAM.javaHolder)
         } else {
-          fatalError("Enum value ADLAM was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ADLAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .BHAIKSUKI:
         if let BHAIKSUKI = classObj.BHAIKSUKI {
           self.init(javaHolder: BHAIKSUKI.javaHolder)
         } else {
-          fatalError("Enum value BHAIKSUKI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value BHAIKSUKI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MARCHEN:
         if let MARCHEN = classObj.MARCHEN {
           self.init(javaHolder: MARCHEN.javaHolder)
         } else {
-          fatalError("Enum value MARCHEN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MARCHEN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NEWA:
         if let NEWA = classObj.NEWA {
           self.init(javaHolder: NEWA.javaHolder)
         } else {
-          fatalError("Enum value NEWA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NEWA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OSAGE:
         if let OSAGE = classObj.OSAGE {
           self.init(javaHolder: OSAGE.javaHolder)
         } else {
-          fatalError("Enum value OSAGE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OSAGE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TANGUT:
         if let TANGUT = classObj.TANGUT {
           self.init(javaHolder: TANGUT.javaHolder)
         } else {
-          fatalError("Enum value TANGUT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TANGUT was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MASARAM_GONDI:
         if let MASARAM_GONDI = classObj.MASARAM_GONDI {
           self.init(javaHolder: MASARAM_GONDI.javaHolder)
         } else {
-          fatalError("Enum value MASARAM_GONDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MASARAM_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NUSHU:
         if let NUSHU = classObj.NUSHU {
           self.init(javaHolder: NUSHU.javaHolder)
         } else {
-          fatalError("Enum value NUSHU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NUSHU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SOYOMBO:
         if let SOYOMBO = classObj.SOYOMBO {
           self.init(javaHolder: SOYOMBO.javaHolder)
         } else {
-          fatalError("Enum value SOYOMBO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SOYOMBO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ZANABAZAR_SQUARE:
         if let ZANABAZAR_SQUARE = classObj.ZANABAZAR_SQUARE {
           self.init(javaHolder: ZANABAZAR_SQUARE.javaHolder)
         } else {
-          fatalError("Enum value ZANABAZAR_SQUARE was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ZANABAZAR_SQUARE was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .HANIFI_ROHINGYA:
         if let HANIFI_ROHINGYA = classObj.HANIFI_ROHINGYA {
           self.init(javaHolder: HANIFI_ROHINGYA.javaHolder)
         } else {
-          fatalError("Enum value HANIFI_ROHINGYA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value HANIFI_ROHINGYA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_SOGDIAN:
         if let OLD_SOGDIAN = classObj.OLD_SOGDIAN {
           self.init(javaHolder: OLD_SOGDIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_SOGDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_SOGDIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .SOGDIAN:
         if let SOGDIAN = classObj.SOGDIAN {
           self.init(javaHolder: SOGDIAN.javaHolder)
         } else {
-          fatalError("Enum value SOGDIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value SOGDIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .DOGRA:
         if let DOGRA = classObj.DOGRA {
           self.init(javaHolder: DOGRA.javaHolder)
         } else {
-          fatalError("Enum value DOGRA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value DOGRA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .GUNJALA_GONDI:
         if let GUNJALA_GONDI = classObj.GUNJALA_GONDI {
           self.init(javaHolder: GUNJALA_GONDI.javaHolder)
         } else {
-          fatalError("Enum value GUNJALA_GONDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value GUNJALA_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MAKASAR:
         if let MAKASAR = classObj.MAKASAR {
           self.init(javaHolder: MAKASAR.javaHolder)
         } else {
-          fatalError("Enum value MAKASAR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MAKASAR was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .MEDEFAIDRIN:
         if let MEDEFAIDRIN = classObj.MEDEFAIDRIN {
           self.init(javaHolder: MEDEFAIDRIN.javaHolder)
         } else {
-          fatalError("Enum value MEDEFAIDRIN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value MEDEFAIDRIN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .ELYMAIC:
         if let ELYMAIC = classObj.ELYMAIC {
           self.init(javaHolder: ELYMAIC.javaHolder)
         } else {
-          fatalError("Enum value ELYMAIC was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value ELYMAIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NANDINAGARI:
         if let NANDINAGARI = classObj.NANDINAGARI {
           self.init(javaHolder: NANDINAGARI.javaHolder)
         } else {
-          fatalError("Enum value NANDINAGARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NANDINAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NYIAKENG_PUACHUE_HMONG:
         if let NYIAKENG_PUACHUE_HMONG = classObj.NYIAKENG_PUACHUE_HMONG {
           self.init(javaHolder: NYIAKENG_PUACHUE_HMONG.javaHolder)
         } else {
-          fatalError("Enum value NYIAKENG_PUACHUE_HMONG was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NYIAKENG_PUACHUE_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .WANCHO:
         if let WANCHO = classObj.WANCHO {
           self.init(javaHolder: WANCHO.javaHolder)
         } else {
-          fatalError("Enum value WANCHO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value WANCHO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .YEZIDI:
         if let YEZIDI = classObj.YEZIDI {
           self.init(javaHolder: YEZIDI.javaHolder)
         } else {
-          fatalError("Enum value YEZIDI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value YEZIDI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CHORASMIAN:
         if let CHORASMIAN = classObj.CHORASMIAN {
           self.init(javaHolder: CHORASMIAN.javaHolder)
         } else {
-          fatalError("Enum value CHORASMIAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CHORASMIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .DIVES_AKURU:
         if let DIVES_AKURU = classObj.DIVES_AKURU {
           self.init(javaHolder: DIVES_AKURU.javaHolder)
         } else {
-          fatalError("Enum value DIVES_AKURU was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value DIVES_AKURU was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KHITAN_SMALL_SCRIPT:
         if let KHITAN_SMALL_SCRIPT = classObj.KHITAN_SMALL_SCRIPT {
           self.init(javaHolder: KHITAN_SMALL_SCRIPT.javaHolder)
         } else {
-          fatalError("Enum value KHITAN_SMALL_SCRIPT was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KHITAN_SMALL_SCRIPT was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .VITHKUQI:
         if let VITHKUQI = classObj.VITHKUQI {
           self.init(javaHolder: VITHKUQI.javaHolder)
         } else {
-          fatalError("Enum value VITHKUQI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value VITHKUQI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .OLD_UYGHUR:
         if let OLD_UYGHUR = classObj.OLD_UYGHUR {
           self.init(javaHolder: OLD_UYGHUR.javaHolder)
         } else {
-          fatalError("Enum value OLD_UYGHUR was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value OLD_UYGHUR was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .CYPRO_MINOAN:
         if let CYPRO_MINOAN = classObj.CYPRO_MINOAN {
           self.init(javaHolder: CYPRO_MINOAN.javaHolder)
         } else {
-          fatalError("Enum value CYPRO_MINOAN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value CYPRO_MINOAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TANGSA:
         if let TANGSA = classObj.TANGSA {
           self.init(javaHolder: TANGSA.javaHolder)
         } else {
-          fatalError("Enum value TANGSA was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TANGSA was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .TOTO:
         if let TOTO = classObj.TOTO {
           self.init(javaHolder: TOTO.javaHolder)
         } else {
-          fatalError("Enum value TOTO was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value TOTO was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .KAWI:
         if let KAWI = classObj.KAWI {
           self.init(javaHolder: KAWI.javaHolder)
         } else {
-          fatalError("Enum value KAWI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value KAWI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .NAG_MUNDARI:
         if let NAG_MUNDARI = classObj.NAG_MUNDARI {
           self.init(javaHolder: NAG_MUNDARI.javaHolder)
         } else {
-          fatalError("Enum value NAG_MUNDARI was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value NAG_MUNDARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
       case .UNKNOWN:
         if let UNKNOWN = classObj.UNKNOWN {
           self.init(javaHolder: UNKNOWN.javaHolder)
         } else {
-          fatalError("Enum value UNKNOWN was unexpectedly nil, please re-run Java2Swift on the most updated Java class")
+          fatalError("Enum value UNKNOWN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
     }
   }

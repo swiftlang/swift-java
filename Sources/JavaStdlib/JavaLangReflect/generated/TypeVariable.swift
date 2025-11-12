@@ -3,10 +3,10 @@ import SwiftJava
 import CSwiftJavaJNI
 
 @JavaInterface("java.lang.reflect.TypeVariable", extends: Type.self)
-public struct TypeVariable<D: AnyJavaObject> {
+public struct TypeVariable<D: AnyJavaObject>: CustomStringConvertible {
   @JavaMethod
   public func getGenericDeclaration() -> GenericDeclaration!
-
+  
   @JavaMethod
   public func getAnnotatedBounds() -> [AnnotatedType?]
 

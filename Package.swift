@@ -14,6 +14,9 @@ func findJavaHome() -> String {
     print("JAVA_HOME = \(home)")
     return home
   }
+  if let opts = ProcessInfo.processInfo.environment["SWIFT_JAVA_JAVA_OPTS"] {
+    print("SWIFT_JAVA_JAVA_OPTS = \(opts)")
+  }
 
   // This is a workaround for envs (some IDEs) which have trouble with
   // picking up env variables during the build process
@@ -420,7 +423,6 @@ let package = Package(
     .executableTarget(
       name: "SwiftJavaTool",
       dependencies: [
-        .product(name: "Logging", package: "swift-log"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),

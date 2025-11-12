@@ -7,10 +7,10 @@ open class JavaClassLoader: JavaObject {
   open func getName() -> String
 
   @JavaMethod
-  open func loadClass(_ arg0: String, _ arg1: Bool) throws -> JavaClass<JavaObject>!
+  open func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
-  open func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+  open func loadClass(_ arg0: String, _ arg1: Bool) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
   open func setSigners(_ arg0: JavaClass<JavaObject>?, _ arg1: [JavaObject?])
@@ -22,10 +22,10 @@ open class JavaClassLoader: JavaObject {
   open func findLoadedClass(_ arg0: String) -> JavaClass<JavaObject>!
 
   @JavaMethod
-  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+  open func findClass(_ arg0: String, _ arg1: String) -> JavaClass<JavaObject>!
 
   @JavaMethod
-  open func findClass(_ arg0: String, _ arg1: String) -> JavaClass<JavaObject>!
+  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
   @JavaMethod
   open func resolveClass(_ arg0: JavaClass<JavaObject>?)

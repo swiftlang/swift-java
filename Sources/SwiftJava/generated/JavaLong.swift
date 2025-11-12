@@ -126,10 +126,10 @@ extension JavaClass<JavaLong> {
   public func compare(_ arg0: Int64, _ arg1: Int64) -> Int32
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: String) throws -> JavaLong!
+  public func valueOf(_ arg0: Int64) -> JavaLong!
 
   @JavaStaticMethod
-  public func valueOf(_ arg0: Int64) -> JavaLong!
+  public func valueOf(_ arg0: String) throws -> JavaLong!
 
   @JavaStaticMethod
   public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaLong!
@@ -139,6 +139,9 @@ extension JavaClass<JavaLong> {
 
   @JavaStaticMethod
   public func decode(_ arg0: String) throws -> JavaLong!
+
+  @JavaStaticMethod
+  public func highestOneBit(_ arg0: Int64) -> Int64
 
   @JavaStaticMethod
   public func sum(_ arg0: Int64, _ arg1: Int64) -> Int64
@@ -156,9 +159,6 @@ extension JavaClass<JavaLong> {
   public func toBinaryString(_ arg0: Int64) -> String
 
   @JavaStaticMethod
-  public func highestOneBit(_ arg0: Int64) -> Int64
-
-  @JavaStaticMethod
   public func lowestOneBit(_ arg0: Int64) -> Int64
 
   @JavaStaticMethod
@@ -168,20 +168,20 @@ extension JavaClass<JavaLong> {
   public func rotateRight(_ arg0: Int64, _ arg1: Int32) -> Int64
 
   @JavaStaticMethod
-  public func parseLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
+  public func parseLong(_ arg0: String) throws -> Int64
 
   @JavaStaticMethod
   public func parseLong(_ arg0: String, _ arg1: Int32) throws -> Int64
 
   @JavaStaticMethod
-  public func parseLong(_ arg0: String) throws -> Int64
+  public func parseLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
 
   @JavaStaticMethod
-  public func parseUnsignedLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
+  public func parseUnsignedLong(_ arg0: String) throws -> Int64
 
   @JavaStaticMethod
   public func parseUnsignedLong(_ arg0: String, _ arg1: Int32) throws -> Int64
 
   @JavaStaticMethod
-  public func parseUnsignedLong(_ arg0: String) throws -> Int64
+  public func parseUnsignedLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
 }

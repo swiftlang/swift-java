@@ -66,6 +66,9 @@ extension SwiftJava {
 extension SwiftJava.WrapJavaCommand {
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
+    configure(&config.filterInclude, append: self.commonOptions.filterInclude)
+    configure(&config.filterExclude, append: self.commonOptions.filterExclude)
+
     // Get base classpath configuration for this target and configuration
     var classpathSearchDirs = [self.effectiveSwiftModuleURL]
     if let cacheDir = self.cacheDirectory {
@@ -113,15 +116,18 @@ extension SwiftJava.WrapJavaCommand {
 extension SwiftJava.WrapJavaCommand {
   mutating func generateWrappers(
     config: Configuration,
-    // classpathEntries: [String],
     dependentConfigs: [(String, Configuration)],
     environment: JNIEnvironment
   ) throws {
     let translator = JavaTranslator(
+      config: config,
       swiftModuleName: effectiveSwiftModule,
       environment: environment,
       translateAsClass: true
     )
+
+    log.info("Active include filters: \(config.filterInclude ?? [])")
+    log.info("Active exclude filters: \(config.filterExclude ?? [])")
 
     // Keep track of all of the Java classes that will have
     // Swift-native implementations.
@@ -139,12 +145,30 @@ extension SwiftJava.WrapJavaCommand {
     translator.addConfiguration(config, forSwiftModule: effectiveSwiftModule)
 
     // Load all of the explicitly-requested classes.
-    let classLoader = try JavaClass<ClassLoader>(environment: environment)
+    let classLoader = try! JavaClass<ClassLoader>(environment: environment)
       .getSystemClassLoader()!
     var javaClasses: [JavaClass<JavaObject>] = []
-    for (javaClassName, _) in config.classes ?? [:] {
+    eachClass: for (javaClassName, _) in config.classes ?? [:] {
+
+      // If we have an inclusive filter, import only types from it
+      for include in config.filterInclude ?? [] {
+        guard javaClassName.starts(with: include) else {
+          log.info("Skip Java type: \(javaClassName) (does not match filter)")
+          continue
+        }
+      }
+      // If we have an exclude filter, check for it as well
+      for exclude in config.filterExclude ?? [] { 
+        if javaClassName.starts(with: exclude) {
+          log.info("Skip Java type: \(javaClassName) (does match exclude filter: \(exclude))")
+          continue eachClass
+        }
+      }
+
+      log.info("Wrapping java type: \(javaClassName)")
+
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
-        print("warning: could not find Java class '\(javaClassName)'")
+        log.warning("Could not load Java class '\(javaClassName)', skipping.")
         continue
       }
 
@@ -178,8 +202,23 @@ extension SwiftJava.WrapJavaCommand {
           return nil
         }
 
+        // If we have an inclusive filter, import only types from it
+        for include in config.filterInclude ?? [] {
+          guard javaClassName.starts(with: include) else {
+            log.info("Skip Java type: \(javaClassName) (does not match filter)")
+            return nil
+          }
+        }
+        // If we have an exclude filter, check for it as well
+        for exclude in config.filterExclude ?? [] { 
+          if javaClassName.starts(with: exclude) {
+            log.info("Skip Java type: \(javaClassName) (does match exclude filter: \(exclude))")
+            return nil
+          }
+        }
+
         // If this class has been explicitly mentioned, we're done.
-        if translator.translatedClasses[javaClassName] != nil {
+        guard translator.translatedClasses[javaClassName] == nil else {
           return nil
         }
 
@@ -187,9 +226,8 @@ extension SwiftJava.WrapJavaCommand {
         let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
           .defaultSwiftNameForJavaClass
 
-
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
-        translator.translatedClasses[javaClassName] = (swiftName, nil)
+        translator.translatedClasses[javaClassName] = SwiftTypeName(module: nil, name: swiftName)
         return nestedClass
       }
 

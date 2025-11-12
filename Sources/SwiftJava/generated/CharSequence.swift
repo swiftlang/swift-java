@@ -10,6 +10,9 @@ public struct CharSequence {
   public func toString() -> String
 
   @JavaMethod
+  public func getChars(_ arg0: Int32, _ arg1: Int32, _ arg2: [UInt16], _ arg3: Int32)
+
+  @JavaMethod
   public func charAt(_ arg0: Int32) -> UInt16
 
   @JavaMethod

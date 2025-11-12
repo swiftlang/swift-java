@@ -14,15 +14,16 @@
 
 import SwiftJavaToolLib
 import XCTest
+import SwiftJavaConfigurationShared
 
 final class JavaTranslatorValidationTests: XCTestCase {
   func testValidationError() throws {
-    let translator = try JavaTranslator(swiftModuleName: "SwiftModule", environment: jvm.environment())
+    let translator = try JavaTranslator(config: Configuration(), swiftModuleName: "SwiftModule", environment: jvm.environment())
     translator.translatedClasses = [
-      "TestClass": ("Class1", "Module1"),
-      "TestClass2": ("Class1", "Module2"),
-      "TestClass3": ("Class1", "Module1"),
-      "TestClass4": ("Class1", nil)
+      "TestClass": SwiftTypeName(module: "Module1", name: "Class1"),
+      "TestClass2": SwiftTypeName(module: "Module2", name: "Class1"),
+      "TestClass3": SwiftTypeName(module: "Module1", name: "Class1"),
+      "TestClass4": SwiftTypeName(module: nil, name: "Class1")
     ]
 
     XCTAssertThrowsError(try translator.validateClassConfiguration()) { error in
@@ -31,7 +32,7 @@ final class JavaTranslatorValidationTests: XCTestCase {
       switch validationError {
       case .multipleClassesMappedToSameName(let swiftToJavaMapping):
         XCTAssertEqual(swiftToJavaMapping, [
-          JavaTranslator.SwiftToJavaMapping(swiftType: .init(swiftType: "Class1", swiftModule: "Module1"),
+          JavaTranslator.SwiftToJavaMapping(swiftType: .init(module: "Module1", name: "Class1"),
                                             javaTypes: ["TestClass", "TestClass3"])
         ])
       }

@@ -104,7 +104,10 @@ extension SwiftJava.ResolveCommand {
     let deps = dependencies.map { $0.descriptionGradleStyle }
     print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
 
-    let dependenciesClasspath = await resolveDependencies(dependencies: dependencies)
+    let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+      .appendingPathComponent(".build")
+
+    let dependenciesClasspath = await resolveDependencies(workDir: workDir, dependencies: dependencies)
     let classpathEntries = dependenciesClasspath.split(separator: ":")
 
     print("[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ", terminator: "")
@@ -122,10 +125,15 @@ extension SwiftJava.ResolveCommand {
   /// 
   /// - Parameter dependencies: maven-style dependencies to resolve
   /// - Returns: Colon-separated classpath
-  func resolveDependencies(dependencies: [JavaDependencyDescriptor]) async -> String {
-    let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-      .appendingPathComponent(".build")
-    let resolverDir = try! createTemporaryDirectory(in: workDir)
+  func resolveDependencies(workDir: URL, dependencies: [JavaDependencyDescriptor]) async -> String {
+    print("Create directory: \(workDir.absoluteString)")
+    
+    let resolverDir: URL
+    do {
+      resolverDir = try createTemporaryDirectory(in: workDir)
+    } catch {
+      fatalError("Unable to create temp directory at: \(workDir.absoluteString)! \(error)")
+    }
     defer {
       try? FileManager.default.removeItem(at: resolverDir)
     }
@@ -162,7 +170,9 @@ extension SwiftJava.ResolveCommand {
       } else {
         let suggestDisablingSandbox = "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
         fatalError("Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n" +
-          "Output was:<<<\(outString)>>>; Err was:<<<\(errString ?? "<empty>")>>>")
+          "Command was: \(CommandLine.arguments.joined(separator: " ").bold)\n" + 
+          "Output was: <<<\(outString)>>>;\n" +
+          "Err was: <<<\(errString)>>>")
       }
 
       return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))

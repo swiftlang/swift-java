@@ -72,7 +72,7 @@ extension SwiftJava.ConfigureCommand {
     let jvm =
       try self.makeJVM(classpathEntries: classpathEntries)
 
-    try emitConfiguration(classpath: self.commonJVMOptions.classpath, environment: jvm.environment())
+    try emitConfiguration(classpathEntries: classpathEntries, environment: jvm.environment())
   }
 
   /// Get base configuration, depending on if we are to 'amend' or 'overwrite' the existing configuration.
@@ -97,32 +97,41 @@ extension SwiftJava.ConfigureCommand {
 
   // TODO: make this perhaps "emit type mappings"
   mutating func emitConfiguration(
-    classpath: [String],
+    classpathEntries: [String],
     environment: JNIEnvironment
   ) throws {
-    if let filterJavaPackage = self.commonJVMOptions.filterJavaPackage {
-      print("[java-swift][debug] Generate Java->Swift type mappings. Active filter: \(filterJavaPackage)")
-    }
-    print("[java-swift][debug] Classpath: \(classpath)")
+    var log = Self.log
+    log.logLevel = .init(rawValue: self.logLevel.rawValue)!
 
-    if classpath.isEmpty {
-      print("[java-swift][warning] Classpath is empty!")
+    log.info("Run: emit configuration...")
+    var (amendExistingConfig, configuration) = try getBaseConfigurationForWrite()
+
+    if !self.commonOptions.filterInclude.isEmpty {
+      log.debug("Generate Java->Swift type mappings. Active include filters: \(self.commonOptions.filterInclude)")
+    } else if let filters = configuration.filterInclude, !filters.isEmpty { 
+      // take the package filter from the configuration file
+      self.commonOptions.filterInclude = filters
+    } else {
+      log.debug("Generate Java->Swift type mappings. No package include filter applied.")
+    }
+    log.debug("Classpath: \(classpathEntries)")
+
+    if classpathEntries.isEmpty {
+      log.warning("Classpath is empty!")
     }
 
     // Get a fresh or existing configuration we'll amend
-    var (amendExistingConfig, configuration) = try getBaseConfigurationForWrite()
     if amendExistingConfig {
-      print("[swift-java] Amend existing swift-java.config file...")
+      log.info("Amend existing swift-java.config file...")
     }
-    configuration.classpath = classpath.joined(separator: ":") // TODO: is this correct?
+    configuration.classpath = classpathEntries.joined(separator: ":") // TODO: is this correct?
 
     // Import types from all the classpath entries;
     // Note that we use the package level filtering, so users have some control over what gets imported.
-    let classpathEntries = classpath.split(separator: ":").map(String.init)
     for entry in classpathEntries {
       guard fileOrDirectoryExists(at: entry) else {
         // We only log specific jars missing, as paths may be empty directories that won't hurt not existing.
-        print("[debug][swift-java] Classpath entry does not exist: \(entry)")
+        log.debug("Classpath entry does not exist: \(entry)")
         continue
       }
 
@@ -135,9 +144,9 @@ extension SwiftJava.ConfigureCommand {
           environment: environment
         )
       } else if FileManager.default.fileExists(atPath: entry) {
-        print("[warning][swift-java] Currently unable handle directory classpath entries for config generation! Skipping: \(entry)")
+        log.warning("Currently unable handle directory classpath entries for config generation! Skipping: \(entry)")
       } else {
-        print("[warning][swift-java] Classpath entry does not exist, skipping: \(entry)")
+        log.warning("Classpath entry does not exist, skipping: \(entry)")
       }
     }
 
@@ -158,6 +167,8 @@ extension SwiftJava.ConfigureCommand {
     forJar jarFile: JarFile,
     environment: JNIEnvironment
   ) throws {
+    let log = Self.log
+
     for entry in jarFile.entries()! {
       // We only look at class files in the Jar file.
       guard entry.getName().hasSuffix(".class") else {
@@ -183,9 +194,8 @@ extension SwiftJava.ConfigureCommand {
       let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
         .dropLast(".class".count))
 
-      if let filterJavaPackage = self.commonJVMOptions.filterJavaPackage,
-         !javaCanonicalName.hasPrefix(filterJavaPackage) {
-        // Skip classes which don't match our expected prefix
+      guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
+        log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")
         continue
       }
 
@@ -195,7 +205,17 @@ extension SwiftJava.ConfigureCommand {
         continue
       }
 
-      configuration.classes?[javaCanonicalName] =
+      if configuration.classes == nil {
+        configuration.classes = [:]
+      }
+
+      if let configuredSwiftName = configuration.classes![javaCanonicalName] {
+        log.info("Java type '\(javaCanonicalName)' already configured as '\(configuredSwiftName)' Swift type.")
+      } else {
+        log.info("Configure Java type '\(javaCanonicalName)' as '\(javaCanonicalName.defaultSwiftNameForJavaClass.bold)' Swift type.")
+      }
+
+      configuration.classes![javaCanonicalName] =
         javaCanonicalName.defaultSwiftNameForJavaClass
     }
   }

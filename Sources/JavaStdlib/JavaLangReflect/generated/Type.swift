@@ -6,4 +6,13 @@ import CSwiftJavaJNI
 public struct Type {
   @JavaMethod
   public func getTypeName() -> String
+
+  @JavaMethod
+  public func toString() -> String
+}
+
+extension Type: CustomStringConvertible { 
+  public var description: String {
+    "JavaLangReflect.Type(\(self.toString()))"
+  }
 }

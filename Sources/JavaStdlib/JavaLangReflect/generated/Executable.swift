@@ -12,9 +12,6 @@ open class Executable: AccessibleObject {
   open func getModifiers() -> Int32
 
   @JavaMethod
-  open func getTypeParameters() -> [TypeVariable<JavaObject>?]
-
-  @JavaMethod
   open func getParameterTypes() -> [JavaClass<JavaObject>?]
 
   @JavaMethod

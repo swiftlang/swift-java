@@ -65,7 +65,7 @@ public struct Configuration: Codable {
     asyncFuncMode ?? .default
   }
 
-  // ==== java 2 swift ---------------------------------------------------------
+  // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
   public var classpath: String? = nil
@@ -84,6 +84,12 @@ public struct Configuration: Codable {
 
   // Generate class files suitable for the specified Java SE release.
   public var targetCompatibility: JavaVersion?
+
+  /// Filter input Java types by their package prefix if set.
+  public var filterInclude: [String]?
+
+  /// Exclude input Java types by their package prefix or exact match.
+  public var filterExclude: [String]?
 
   // ==== dependencies ---------------------------------------------------------
 

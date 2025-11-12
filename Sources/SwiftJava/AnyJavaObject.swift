@@ -52,7 +52,7 @@ public protocol AnyJavaObject {
 /// Protocol that allows Swift types to specify a custom Java class loader on
 /// initialization. This is useful for platforms (e.g. Android) where the default
 /// class loader does not make all application classes visible.
-public protocol CustomJavaClassLoader: AnyJavaObject {
+public protocol AnyJavaObjectWithCustomClassLoader: AnyJavaObject {
   static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader!
 }
 
@@ -118,8 +118,8 @@ extension AnyJavaObject {
     in environment: JNIEnvironment,
     _ body: (jclass) throws -> Result
   ) throws -> Result {
-    if let customJavaClassLoader = self as? CustomJavaClassLoader.Type,
-       let customClassLoader = try customJavaClassLoader.getJavaClassLoader(in: environment) {
+    if let AnyJavaObjectWithCustomClassLoader = self as? AnyJavaObjectWithCustomClassLoader.Type,
+       let customClassLoader = try AnyJavaObjectWithCustomClassLoader.getJavaClassLoader(in: environment) {
       try _withJNIClassFromCustomClassLoader(customClassLoader, in: environment, body)
     } else {
       try _withJNIClassFromDefaultClassLoader(in: environment, body)

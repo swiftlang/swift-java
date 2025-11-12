@@ -12,19 +12,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaToolLib
-import SwiftJavaShared
-import CSwiftJavaJNI
-import SwiftJava
+// E.g. `Another<Bites, The, Dust>`
+struct SwiftJavaParameterizedType {
+  let name: String
+  let typeArguments: [String]
 
-// FIXME: do we need this here or can we rely on the generated one?
-@JavaClass("java.lang.ClassLoader")
-public struct ClassLoader {
-  @JavaMethod
-  public func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>?
-}
+  init?(name: String?, typeArguments: [String]) {
+    guard let name else {
+      return nil
+    }
 
-extension JavaClass<ClassLoader> {
-  @JavaStaticMethod
-  public func getSystemClassLoader() -> ClassLoader?
+    self.name = name
+    self.typeArguments = typeArguments
+  }
+
+  func render() -> String {
+    if typeArguments.isEmpty {
+      name
+    } else {
+      "\(name)<\(typeArguments.joined(separator: ", "))>"
+    }
+  }
+
+
 }
