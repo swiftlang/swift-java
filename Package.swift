@@ -474,7 +474,7 @@ let package = Package(
     .testTarget(
       name: "SwiftJavaTests",
       dependencies: [
-        "SwiftJava", 
+        "SwiftJava",
         "JavaNet"
       ],
       swiftSettings: [
@@ -508,6 +508,9 @@ let package = Package(
       name: "SwiftJavaToolLibTests",
       dependencies: [
         "SwiftJavaToolLib"
+      ],
+      exclude: [
+        "SimpleJavaProject",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
