@@ -87,3 +87,25 @@ func isGenericJavaType(_ type: Type?) -> Bool {
 
   return false
 }
+
+/// Check if a type is type-erased att runtime.
+/// 
+/// E.g. in a method returning a generic `T` the T is type erased and must 
+/// be represented as a `java.lang.Object` instead.
+func isTypeErased(_ type: Type?) -> Bool {
+  guard let type else {
+    return false
+  }
+
+  // Check if it's a type variable (e.g., T, E, etc.)
+  if type.as(TypeVariable<JavaObject>.self) != nil {
+    return true
+  }
+
+  // Check if it's a wildcard type (e.g., ? extends Number, ? super String)
+  if type.as(WildcardType.self) != nil {
+    return true
+  }
+
+  return false
+}

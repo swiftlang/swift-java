@@ -133,7 +133,6 @@ extension JavaTranslator {
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
-    // let returnType = method.getReturnType()
     let genericReturnType = method.getGenericReturnType()
 
     // Special handle the case when the return type is the generic type of the method: `<T> T foo()`
