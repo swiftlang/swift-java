@@ -50,8 +50,19 @@ extension JavaMethodMacro: BodyMacro {
       fatalError("not a function: \(declaration)")
     }
 
+    let funcName =
+      if case .argumentList(let arguments) = node.arguments,
+        let wrapperTypeNameExpr = arguments.first?.expression,
+        let stringLiteral = wrapperTypeNameExpr.as(StringLiteralExprSyntax.self),
+        stringLiteral.segments.count == 1,
+        case let .stringSegment(funcNameSegment)? = stringLiteral.segments.first
+      {
+        funcNameSegment.content.text
+      } else {
+        funcDecl.name.text
+      }
+
     let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
-    let funcName = funcDecl.name.text
     let params = funcDecl.signature.parameterClause.parameters
     let paramNames = params.map { param in param.parameterName?.text ?? "" }.joined(separator: ", ")
 
