@@ -141,9 +141,6 @@ extension JavaClass<JavaLong> {
   public func decode(_ arg0: String) throws -> JavaLong!
 
   @JavaStaticMethod
-  public func highestOneBit(_ arg0: Int64) -> Int64
-
-  @JavaStaticMethod
   public func sum(_ arg0: Int64, _ arg1: Int64) -> Int64
 
   @JavaStaticMethod
@@ -157,6 +154,9 @@ extension JavaClass<JavaLong> {
 
   @JavaStaticMethod
   public func toBinaryString(_ arg0: Int64) -> String
+
+  @JavaStaticMethod
+  public func highestOneBit(_ arg0: Int64) -> Int64
 
   @JavaStaticMethod
   public func lowestOneBit(_ arg0: Int64) -> Int64
