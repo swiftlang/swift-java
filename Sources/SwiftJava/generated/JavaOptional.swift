@@ -3,7 +3,7 @@ import CSwiftJavaJNI
 
 @JavaClass("java.util.Optional")
 open class JavaOptional<T: AnyJavaObject>: JavaObject {
-  @JavaMethod(genericResult: "T")
+  @JavaMethod(typeErasedResult: "T")
   open func get() -> T!
 
   @JavaMethod

@@ -683,7 +683,7 @@ extension JavaClassTranslator {
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
         if hasTypeEraseGenericResultType {
-          parameters.append("genericResult: \"\(resultType)\"")
+          parameters.append("typeErasedResult: \"\(resultType)\"")
         }
         // TODO: generic parameters?
         
