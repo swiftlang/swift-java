@@ -301,7 +301,7 @@ class JavaKitMacroTests: XCTestCase {
     assertMacroExpansion("""
         @JavaClass("java.lang.Optional")
         open class JavaOptional<T: AnyJavaObject>: JavaObject {
-          @JavaMethod(genericResult: "T")
+          @JavaMethod(typeErasedResult: "T")
           open func get() -> T!
         }
       """,

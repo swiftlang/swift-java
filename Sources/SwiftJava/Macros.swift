@@ -134,14 +134,14 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 /// In order to mark a generic return type you must indicate it to the @JavaMethod macro like this:
 /// ```swift
 /// // Java: class Test<T> { public <T> get(); }
-/// @JavaMethod(genericResult: "T!")
+/// @JavaMethod(typeErasedResult: "T!")
 /// func get() -> T!
 /// ```
 /// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object` 
 /// returning method signature, and then, convert the result to the expected `T` type on the Swift side.
 @attached(body)
 public macro JavaMethod(
-  genericResult: String? = nil
+  typeErasedResult: String? = nil
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Attached macro that turns a Swift method on JavaClass into one that wraps
@@ -155,7 +155,7 @@ public macro JavaMethod(
 /// ```
 @attached(body)
 public macro JavaStaticMethod(
-  genericResult: String? = nil
+  typeErasedResult: String? = nil
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Macro that marks extensions to specify that all of the @JavaMethod

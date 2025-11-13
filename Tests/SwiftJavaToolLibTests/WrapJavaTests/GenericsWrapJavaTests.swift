@@ -62,7 +62,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class ExampleSimpleClass: JavaObject {
         """,
         """
-        @JavaMethod(genericResult: "KeyType!")
+        @JavaMethod(typeErasedResult: "KeyType!")
         open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType!
         """,
       ]
@@ -100,7 +100,7 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(genericResult: "KeyType!")
+        @JavaMethod(typeErasedResult: "KeyType!")
         open func getGeneric<KeyType: AnyJavaObject>() -> KeyType!
         """,
       ]
@@ -194,11 +194,11 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(genericResult: "T!")
+        @JavaMethod(typeErasedResult: "T!")
         open func getClassGeneric() -> T!
         """,
         """
-        @JavaMethod(genericResult: "M!")
+        @JavaMethod(typeErasedResult: "M!")
         open func getMethodGeneric<M: AnyJavaObject>() -> M!
         """,
         """
@@ -292,7 +292,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.Kappa")
         open class Kappa<T: AnyJavaObject>: JavaObject {
-          @JavaMethod(genericResult: "T!")
+          @JavaMethod(typeErasedResult: "T!")
           open func get() -> T!
         }
         """
@@ -331,9 +331,41 @@ final class GenericsWrapJavaTests: XCTestCase {
         }
         """,
         """
-        @JavaStaticMethod(genericResult: "T!")
+        @JavaStaticMethod(typeErasedResult: "T!")
         public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
         """
+      ]
+    )
+  }
+
+  // TODO: this should be improved some more, we need to generated a `: Map` on the Swift side
+  func test_wrapJava_genericMethodTypeErasure_genericExtendsMap() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      
+      final class Map<T, U> {}
+      
+      final class Something {
+        public <M extends Map<String, String>> M putIn(M map) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Map",
+        "com.example.Something",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaClass("com.example.Something")
+        open class Something: JavaObject {
+        """,
+        """
+        @JavaMethod(typeErasedResult: "M!")
+        open func putIn<M: AnyJavaObject>(_ arg0: M?) -> M!
+        """,
       ]
     )
   }

@@ -62,7 +62,15 @@ extension JavaMethodMacro: BodyMacro {
           .as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(wrapperName)? = stringLiteral.segments.first {
-          "\(wrapperName)"
+          // TODO: Improve this unwrapping a bit;
+          // Trim the trailing ! and ? from the type for purposes 
+          // of initializing the type wrapper in the method body
+          if "\(wrapperName)".hasSuffix("!") ||
+             "\(wrapperName)".hasSuffix("?") {
+            String("\(wrapperName)".dropLast())
+          } else {
+            "\(wrapperName)"
+          }
       } else {
         nil
       }
