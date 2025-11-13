@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import JavaTypes
 
 // MARK: Defaults
@@ -40,6 +41,8 @@ extension JNISwift2JavaGenerator {
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
     let importedTypes = analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key })
 
+    var exportedFileNames: Set<String> = []
+
     // Each parent type goes into its own file
     // any nested types are printed inside the body as `static class`
     for (_, ty) in importedTypes.filter({ _, type in type.parent == nil }) {
@@ -52,6 +55,7 @@ extension JNISwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
+        exportedFileNames.insert(outputFile.path(percentEncoded: false))
         logger.info("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
       }
     }
@@ -65,9 +69,23 @@ extension JNISwift2JavaGenerator {
       javaPackagePath: javaPackagePath,
       filename: filename
     ) {
+      exportedFileNames.insert(outputFile.path(percentEncoded: false))
       logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
     }
+
+    // Write sources.txt file
+    if !exportedFileNames.isEmpty {
+      let outputPath = URL(fileURLWithPath: javaOutputDirectory).appending(path: "sources.txt")
+      try exportedFileNames.joined(separator: "\n").write(
+        to: outputPath,
+        atomically: true,
+        encoding: .utf8
+      )
+      logger.info("Generated file at \(outputPath)")
+    }
   }
+
+
 
   private func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)

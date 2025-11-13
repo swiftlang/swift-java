@@ -25,8 +25,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
     let toolURL = try context.tool(named: "SwiftJavaTool").url
-    
+
+    // The URL of the compiled Java sources
+    let javaClassFileURL = context.pluginWorkDirectoryURL
+      .appending(path: "compiled-java-output")
+
+    var commands: [Command] = []
+
     guard let sourceModule = target.sourceModule else { return [] }
+
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
@@ -123,15 +130,71 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     print("[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))")
 
-    return [
+    // Extract list of all sources
+    let javaSourcesFile = outputJavaDirectory.appending(path: "sources.txt")
+
+    commands += [
       .buildCommand(
         displayName: "Generate Java wrappers for Swift types",
         executable: toolURL,
         arguments: arguments,
         inputFiles: [ configFile ] + swiftFiles,
-        outputFiles: outputSwiftFiles
+        outputFiles: outputSwiftFiles + [javaSourcesFile]
       )
     ]
+
+    // Build SwiftKitCore and get the classpath
+    // as the jextracted sources will depend on that
+
+    guard let swiftJavaDirectory = findSwiftJavaDirectory(for: target) else {
+      // FIXME: Error
+      fatalError()
+    }
+    log("Found swift-java at \(swiftJavaDirectory)")
+
+    commands += [
+      .buildCommand(
+        displayName: "Build SwiftKitCore",
+        executable: swiftJavaDirectory.appending(path: "gradlew"),
+        arguments: [
+          ":SwiftKitCore:build",
+          "-p", swiftJavaDirectory.path(percentEncoded: false),
+          "--configure-on-demand",
+          "--no-daemon"
+        ],
+        environment: [:],
+        inputFiles: [swiftJavaDirectory],
+        outputFiles: []
+      )
+    ]
+
+    let swiftKitCoreClassPath = swiftJavaDirectory.appending(path: "SwiftKitCore/build/classes/java/main")
+
+    // Compile the jextracted sources
+    let javaHome = URL(filePath: findJavaHome())
+  #if os(Windows)
+    let javac = "javac.exe"
+  #else
+    let javac = "javac"
+  #endif
+    commands += [
+      .buildCommand(
+        displayName: "Build extracted Java sources",
+        executable: javaHome
+          .appending(path: "bin")
+          .appending(path: javac),
+        arguments: [
+          "@\(javaSourcesFile.path(percentEncoded: false))",
+          "-d", javaClassFileURL.path,
+          "-parameters",
+          "-classpath", swiftKitCoreClassPath.path(percentEncoded: false)
+        ],
+        inputFiles: [javaSourcesFile],
+        outputFiles: []
+      )
+    ]
+
+    return commands
   }
 
   /// Find the manifest files from other swift-java executions in any targets
@@ -180,6 +243,28 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     return dependentConfigFiles
+  }
+
+  private func findSwiftJavaDirectory(for target: any Target) -> URL? {
+    for dependency in target.dependencies {
+      switch dependency {
+      case .target(let target):
+        continue
+
+      case .product(let product):
+        guard let swiftJava = product.sourceModules.first(where: { $0.name == "SwiftJava" }) else {
+          return nil
+        }
+
+        // We are inside Sources/SwiftJava
+        return swiftJava.directoryURL.deletingLastPathComponent().deletingLastPathComponent()
+
+      @unknown default:
+        continue
+      }
+    }
+
+    return nil
   }
 }
 
