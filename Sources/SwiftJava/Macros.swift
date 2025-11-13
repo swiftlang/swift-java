@@ -150,11 +150,13 @@ public macro JavaMethod(
 /// The macro must be used within a specific JavaClass instance.
 ///
 /// ```swift
-/// @JavaMethod
+/// @JavaStaticMethod
 /// func sayHelloBack(_ i: Int32) -> Double
 /// ```
 @attached(body)
-public macro JavaStaticMethod() = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
+public macro JavaStaticMethod(
+  genericResult: String? = nil
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Macro that marks extensions to specify that all of the @JavaMethod
 /// methods are implementations of Java methods spelled as `native`.

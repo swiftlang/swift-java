@@ -15,6 +15,7 @@
 import SwiftJava
 import JavaLangReflect
 import SwiftSyntax
+import OrderedCollections
 import SwiftJavaConfigurationShared
 import Logging
 
@@ -606,6 +607,26 @@ extension JavaClassTranslator {
     return false
   }
 
+  // TODO: make it more precise with the "origin" of the generic parameter (outer class etc)
+  func collectMethodGenericParameters(
+    genericParameters: [String],
+    method javaMethod: Method
+  ) -> OrderedSet<String> {
+    var allGenericParameters = OrderedSet(genericParameters)
+    let typeParameters = javaMethod.getTypeParameters()
+    if typeParameters.contains(where: {$0 != nil }) {
+      allGenericParameters.appending(contentsOf: typeParameters.compactMap { typeParam in 
+        guard let typeParam else { return nil }
+        guard genericParameterIsUsedInSignature(typeParam, in: javaMethod) else {
+          return nil
+        }
+        return "\(typeParam.getTypeName()): AnyJavaObject"
+      })
+    }
+
+    return allGenericParameters
+  }
+
   /// Translates the given Java method into a Swift declaration.
   package func renderMethod(
     _ javaMethod: Method,
@@ -614,17 +635,7 @@ extension JavaClassTranslator {
     whereClause: String = ""
   ) throws -> DeclSyntax {
     // Map the generic params on the method.
-    var allGenericParameters = genericParameters
-    let typeParameters = javaMethod.getTypeParameters()
-    if typeParameters.contains(where: {$0 != nil }) {
-      allGenericParameters += typeParameters.compactMap { typeParam in 
-        guard let typeParam else { return nil }
-        guard genericParameterIsUsedInSignature(typeParam, in: javaMethod) else {
-          return nil
-        }
-        return "\(typeParam.getTypeName()): AnyJavaObject"
-      }
-    }
+    let allGenericParameters = collectMethodGenericParameters(genericParameters: genericParameters, method: javaMethod)
     let genericParameterClauseStr = 
       if allGenericParameters.isEmpty {
         ""
@@ -657,7 +668,7 @@ extension JavaClassTranslator {
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
     
-    // Compute the '@...JavaMethod(...)' details
+    // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
       if implementedInSwift {
         methodAttribute = ""
@@ -674,6 +685,7 @@ extension JavaClassTranslator {
           parameters.append("genericResult: \"\(resultType)\"")
         }
         // TODO: generic parameters?
+        
         if !parameters.isEmpty {
           methodAttributeStr += "("
           methodAttributeStr.append(parameters.joined(separator: ", "))
@@ -690,6 +702,7 @@ extension JavaClassTranslator {
       ? "override "
       : ""
 
+    // FIXME: refactor this so we don't have to duplicate the method signatures
     if resultType.optionalWrappedType() != nil || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil }) {
       let parameters = parameters.map { param -> (clause: FunctionParameterSyntax, passedArg: String) in
         let name = param.secondName!.trimmedDescription
@@ -711,7 +724,8 @@ extension JavaClassTranslator {
         }
 
 
-      return """
+      return 
+        """
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
@@ -719,7 +733,8 @@ extension JavaClassTranslator {
         }
         """
     } else {
-      return """
+      return 
+        """
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }
@@ -900,6 +915,7 @@ struct MethodCollector {
 }
 
 // MARK: Utility functions
+
 extension JavaClassTranslator {
   /// Determine whether this method is an override of another Java
   /// method.
@@ -935,7 +951,7 @@ extension JavaClassTranslator {
           return true
         }
       } catch {
-        // FIXME: logging
+        log.warning("Failed to determine if method '\(method)' is an override, error: \(error)")
       }
     }
 

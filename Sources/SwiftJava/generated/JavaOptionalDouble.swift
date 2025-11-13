@@ -16,10 +16,10 @@ open class JavaOptionalDouble: JavaObject {
   open func isEmpty() -> Bool
 
   @JavaMethod
-  open func isPresent() -> Bool
+  open func orElse(_ arg0: Double) -> Double
 
   @JavaMethod
-  open func orElse(_ arg0: Double) -> Double
+  open func isPresent() -> Bool
 
   @JavaMethod
   open func orElseThrow() -> Double

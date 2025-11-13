@@ -138,12 +138,11 @@ extension JavaTranslator {
 
     // Special handle the case when the return type is the generic type of the method: `<T> T foo()`
 
-    // if isGenericJavaType(genericReturnType) {
-    //   print("[swift] generic method! \(method.getDeclaringClass().getName()).\(method.getName())")
-    //   getGenericJavaTypeOriginInfo(genericReturnType, from: method)
-    // }
-
-    return try getSwiftTypeNameAsString(method: method, genericReturnType!, preferValueTypes: preferValueTypes, outerOptional: outerOptional)
+    return try getSwiftTypeNameAsString(
+      method: method,
+      genericReturnType!, 
+      preferValueTypes: preferValueTypes, 
+      outerOptional: outerOptional)
   }
 
   /// Turn a Java type into a string.

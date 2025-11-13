@@ -21,35 +21,8 @@ import SwiftJavaConfigurationShared
 import _Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
-final class WrapJavaTests: XCTestCase {
+final class GenericsWrapJavaTests: XCTestCase {
 
-  func testWrapJavaFromCompiledJavaSource() async throws {
-    let classpathURL = try await compileJava(
-      """
-      package com.example;
-
-      class ExampleSimpleClass {}
-      """)
-
-    try assertWrapJavaOutput(
-      javaClassNames: [
-        "com.example.ExampleSimpleClass"
-      ],
-      classpath: [classpathURL],
-      expectedChunks: [
-        """
-        import CSwiftJavaJNI
-        import SwiftJava
-        """,
-        """
-        @JavaClass("com.example.ExampleSimpleClass")
-        open class ExampleSimpleClass: JavaObject {
-        """
-      ]
-    )
-  }
-
-  // @Test
   func testWrapJavaGenericMethod_singleGeneric() async throws {
     let classpathURL = try await compileJava(
       """
@@ -271,7 +244,7 @@ final class WrapJavaTests: XCTestCase {
     )
   }
 
-  func testWrapJavaGenericMethodTypeErasure_returnType() async throws {
+  func test_wrapJava_genericMethodTypeErasure_returnType() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -301,4 +274,37 @@ final class WrapJavaTests: XCTestCase {
       ]
     )
   }
+  
+  func test_wrapJava_genericMethodTypeErasure_ofNullableOptional() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      final class Optional<T> {
+        public static <T> Optional<T> ofNullable(T value) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Optional"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaClass("com.example.Optional")
+        open class Optional<T: AnyJavaObject>: JavaObject {
+
+        }
+        """,
+        """
+        extension JavaClass {
+          @JavaStaticMethod(genericResult: "Optional<T>!")
+          public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
+        }
+        """
+      ]
+    )
+  }
+  
 }

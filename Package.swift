@@ -209,6 +209,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
+    .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")), // primarily for ordered collections
 
 //    // FIXME: swift-subprocess stopped supporting 6.0 when it moved into a package;
 //    //        we'll need to drop 6.0 as well, but currently blocked on doing so by swiftpm plugin pending design questions
@@ -400,6 +401,7 @@ let package = Package(
       name: "SwiftJavaToolLib",
       dependencies: [
         .product(name: "Logging", package: "swift-log"),
+        .product(name: "OrderedCollections", package: "swift-collections"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
