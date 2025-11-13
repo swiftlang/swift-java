@@ -610,18 +610,19 @@ extension JavaClassTranslator {
   // TODO: make it more precise with the "origin" of the generic parameter (outer class etc)
   func collectMethodGenericParameters(
     genericParameters: [String],
-    method javaMethod: Method
+    method: Method
   ) -> OrderedSet<String> {
     var allGenericParameters = OrderedSet(genericParameters)
-    let typeParameters = javaMethod.getTypeParameters()
-    if typeParameters.contains(where: {$0 != nil }) {
-      allGenericParameters.appending(contentsOf: typeParameters.compactMap { typeParam in 
-        guard let typeParam else { return nil }
-        guard genericParameterIsUsedInSignature(typeParam, in: javaMethod) else {
-          return nil
-        }
-        return "\(typeParam.getTypeName()): AnyJavaObject"
-      })
+    
+    let typeParameters = method.getTypeParameters()
+    for typeParameter in typeParameters {
+      guard let typeParameter else { continue }
+      
+      guard genericParameterIsUsedInSignature(typeParameter, in: method) else {
+        continue
+      }
+
+      allGenericParameters.append("\(typeParameter.getTypeName()): AnyJavaObject")
     }
 
     return allGenericParameters
@@ -654,8 +655,8 @@ extension JavaClassTranslator {
       preferValueTypes: true, 
       outerOptional: .implicitlyUnwrappedOptional
     )
-    let typeEraseGenericResultType: Bool = 
-      isGenericJavaType(javaMethod.getGenericReturnType())
+    let hasTypeEraseGenericResultType: Bool = 
+      isTypeErased(javaMethod.getGenericReturnType())
 
     // FIXME: cleanup the checking here
     if resultType != "Void" && resultType != "Swift.Void" {
@@ -681,7 +682,7 @@ extension JavaClassTranslator {
           }
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
-        if typeEraseGenericResultType {
+        if hasTypeEraseGenericResultType {
           parameters.append("genericResult: \"\(resultType)\"")
         }
         // TODO: generic parameters?
@@ -951,7 +952,7 @@ extension JavaClassTranslator {
           return true
         }
       } catch {
-        log.warning("Failed to determine if method '\(method)' is an override, error: \(error)")
+        log.debug("Failed to determine if method '\(method)' is an override, error: \(error)")
       }
     }
 

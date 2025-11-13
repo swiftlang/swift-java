@@ -62,8 +62,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class ExampleSimpleClass: JavaObject {
         """,
         """
-        @JavaMethod
-        open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType
+        @JavaMethod(genericResult: "KeyType!")
+        open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType!
         """,
       ]
     )
@@ -100,8 +100,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod
-        open func getGeneric<KeyType: AnyJavaObject>() -> KeyType
+        @JavaMethod(genericResult: "KeyType!")
+        open func getGeneric<KeyType: AnyJavaObject>() -> KeyType!
         """,
       ]
     )
@@ -162,8 +162,10 @@ final class GenericsWrapJavaTests: XCTestCase {
       """
       package com.example;
 
+      // Mini decls in order to avoid warnings about some funcs we're not yet importing cleanly
       final class List<T> {}
       final class Map<T, U> {}
+      final class Number {}
 
       class GenericClass<T> {
         public T getClassGeneric() { return null; }
@@ -184,17 +186,40 @@ final class GenericsWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
+        "com.example.Map",
+        "com.example.List",
+        "com.example.Number",
         "com.example.GenericClass",
       ],
       classpath: [classpathURL],
       expectedChunks: [
         """
+        @JavaMethod(genericResult: "T!")
+        open func getClassGeneric() -> T!
+        """,
+        """
+        @JavaMethod(genericResult: "M!")
+        open func getMethodGeneric<M: AnyJavaObject>() -> M!
+        """,
+        """
         @JavaMethod
-        open func getClassGeneric() -> T
+        open func getMixedGeneric<M: AnyJavaObject>() -> Map<T, M>!
         """,
         """
         @JavaMethod
         open func getNonGeneric() -> String
+        """,
+        """
+        @JavaMethod
+        open func getParameterizedClassGeneric() -> List<T>!
+        """,
+        """
+        @JavaMethod
+        open func getWildcard() -> List<Number>!
+        """,
+        """
+        @JavaMethod
+        open func getGenericArray() -> [T?]
         """,
       ]
     )
@@ -275,13 +300,15 @@ final class GenericsWrapJavaTests: XCTestCase {
     )
   }
   
-  func test_wrapJava_genericMethodTypeErasure_ofNullableOptional() async throws {
+  func test_wrapJava_genericMethodTypeErasure_ofNullableOptional_staticMethods() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
 
       final class Optional<T> {
         public static <T> Optional<T> ofNullable(T value) { return null; }
+        
+        public static <T> T nonNull(T value) { return null; }
       }
       """)
 
@@ -294,14 +321,18 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.Optional")
         open class Optional<T: AnyJavaObject>: JavaObject {
-
-        }
         """,
         """
         extension JavaClass {
-          @JavaStaticMethod(genericResult: "Optional<T>!")
-          public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
+        """,
+        """
+        @JavaStaticMethod
+        public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
         }
+        """,
+        """
+        @JavaStaticMethod(genericResult: "T!")
+        public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
         """
       ]
     )
