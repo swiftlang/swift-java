@@ -124,48 +124,114 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
-  private func printSwiftInterfaceWrapperExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-    try printer.printBraceBlock("extension JNIJavaInterfaceSwiftWrapper where Self: \(type.qualifiedName)") { printer in
-      for method in type.methods {
-        guard let translatedDecl = translatedDecl(for: method) else {
-          // Failed to translate. Skip.
-          // TODO: Notify the user that we cannot support this protocol.
-          continue
+  private func printSwiftInterfaceWrapper(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
+    let safeProtocolName = type.qualifiedName.replacingOccurrences(of: ".", with: "_")
+    let wrapperName = "SwiftJava\(safeProtocolName)Wrapper"
+
+    try printer.printBraceBlock("final class \(wrapperName): \(type.qualifiedName)") { printer in
+      let javaInterfaceVariableName = "javaInterface"
+      let swiftJavaInterfaceName = "Java\(safeProtocolName)"
+
+      printer.print(
+        """
+        let \(javaInterfaceVariableName): \(swiftJavaInterfaceName)
+        
+        init(javaInterface: \(swiftJavaInterfaceName)) {
+          self.\(javaInterfaceVariableName) = javaInterface
         }
+        """
+      )
+      printer.println()
 
+      for method in type.methods {
         try printer.printBraceBlock(method.swiftDecl.signatureString) { printer in
-          printer.print(
-            """
-            let environment = try! JavaVirtualMachine.shared().environment()
-            let methodID$: jmethodID!
-            """
-          )
+          let methodName = method.name
 
-          // Passing down Swift parameters to Java basically means
-          // that we are returning these values to Java,
-          // we therefore take all the Swift parameters and translate them
-          // as if they were results.
-          let upcallValues = try method.functionSignature.parameters.map { parameter in
-            let result = try self.nativeTranslator.translate(
-              swiftResult: SwiftResult(
-                convention: .direct,
-                type: parameter.type
-              )
+          let parameters = method.functionSignature.parameters.map { parameter in
+            let parameterName = parameter.parameterName!
+
+            guard let importedNominalType = self.asImportedNominalTypeDecl(parameter.type) else {
+              return parameterName
+            }
+
+            // We are passing in an imported nominal type to Java
+            // so we must create a JavaWrapper type
+            printer.print(
+              """
+              let \(parameterName)Class = try! JavaClass<\(importedNominalType.generatedJavaClassMacroName)>(environment: JavaVirtualMachine.shared().environment())
+              let \(parameterName)Pointer = UnsafeMutablePointer<\(importedNominalType.qualifiedName)>.allocate(capacity: 1)
+              \(parameterName)Pointer.initialize(to: \(parameterName))
+              """
             )
-            return result.conversion.render(&printer, parameter.parameterName!)
+
+            return "\(parameterName)Class.wrapMemoryAddressUnsafe(selfPointer: Int64(Int(bitPattern: pointer)))"
           }
 
-          let javaResultType = translatedDecl.nativeFunctionSignature.result.javaType
-          // TODO: Convert arguments to jvalue
-          printer.print(
-            """
-            let javaResult$ = environment.interface.\(javaResultType.jniCallMethodAName)(environment, self.objectHolder.object, methodID$, [\(upcallValues.joined(separator: ", "))])
-            """
-          )
+          let javaUpcall = "\(javaInterfaceVariableName).\(methodName)(\(parameters.joined(separator: ", ")))"
+
+          if !method.functionSignature.result.type.isVoid {
+            guard let importedNominalType = self.asImportedNominalTypeDecl(type.swiftType) else {
+              printer.print("return \(javaUpcall)")
+              return
+            }
+
+            // We are returning an imported nominal type to Swift
+            // so we must extract the memory address
+            let resultName = "_upcallResult"
+            printer.print(
+              """
+              let \(resultName) = \(javaUpcall)
+              let memoryAddress$ = \(resultName).as(JavaJNISwiftInstance.self)!.memoryAddress()
+              let pointer = UnsafeMutablePointer<StorageItem>(bitPattern: Int(memoryAddress$))!
+              return pointer.pointee
+              """
+            )
+          } else {
+            printer.print(javaUpcall)
+          }
         }
+//
+//        try printer.printBraceBlock(method.swiftDecl.signatureString) { printer in
+//          printer.print(
+//            """
+//            let environment = try! JavaVirtualMachine.shared().environment()
+//            let methodID$: jmethodID!
+//            """
+//          )
+//
+//          // Passing down Swift parameters to Java basically means
+//          // that we are returning these values to Java,
+//          // we therefore take all the Swift parameters and translate them
+//          // as if they were results.
+//          let upcallValues = try method.functionSignature.parameters.map { parameter in
+//            let result = try self.nativeTranslator.translate(
+//              swiftResult: SwiftResult(
+//                convention: .direct,
+//                type: parameter.type
+//              )
+//            )
+//            return result.conversion.render(&printer, parameter.parameterName!)
+//          }
+//
+//          let javaResultType = translatedDecl.nativeFunctionSignature.result.javaType
+//          // TODO: Convert arguments to jvalue
+//          printer.print(
+//            """
+//            let javaResult$ = environment.interface.\(javaResultType.jniCallMethodAName)(environment, self.objectHolder.object, methodID$, [\(upcallValues.joined(separator: ", "))])
+//            """
+//          )
+//        }
 
         printer.println()
       }
+    }
+  }
+
+  private func asImportedNominalTypeDecl(_ type: SwiftType) -> ImportedNominalType? {
+    self.analysis.importedTypes.first(where: ( { name, nominalType in
+      nominalType.swiftType == type
+    })).map {
+      $0.value
     }
   }
 
@@ -223,13 +289,31 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    printJavaMacroBindings(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
     printDestroyFunctionThunk(&printer, type)
   }
 
+  private func printJavaMacroBindings(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    // TODO: Nested subclasses here is wrong.
+    let javaTypeName = type.swiftNominal.qualifiedName
+
+    printer.print(
+      """
+      @JavaClass("\(javaPackage).\(javaTypeName)")
+      open class \(type.generatedJavaClassMacroName): JavaObject {}
+
+      extension JavaClass<\(type.generatedJavaClassMacroName)> {
+        @JavaStaticMethod
+        public func wrapMemoryAddressUnsafe(selfPointer: Int64) -> \(type.generatedJavaClassMacroName)!
+      }
+      """
+    )
+  }
+
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-//    try printSwiftInterfaceWrapperExtension(&printer, type)
+    try printSwiftInterfaceWrapper(&printer, type)
   }
 
 
@@ -595,5 +679,11 @@ extension JNISwift2JavaGenerator {
       """
     )
     return newSelfParamName
+  }
+}
+
+extension ImportedNominalType {
+  var generatedJavaClassMacroName: String {
+    "Java\(self.swiftNominal.qualifiedName.replacingOccurrences(of: ".", with: "_"))"
   }
 }

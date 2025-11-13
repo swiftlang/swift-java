@@ -35,6 +35,8 @@ public func loadWithStorage(s: any Storage) -> StorageItem {
   return s.load();
 }
 
+
+
 final class StorageJavaWrapper: Storage {
   let javaStorage: JavaStorage
 
@@ -62,6 +64,10 @@ final class StorageJavaWrapper: Storage {
     let javaStorageItem = javaStorageItemClass.wrapMemoryAddressUnsafe(selfPointer: Int64(Int(bitPattern: pointer)))
     javaStorage.save(item: javaStorageItem);
   }
+
+  func load() -> Int64 {
+    
+  }
 }
 
 @JavaInterface("org.swift.swiftkit.core.JNISwiftInstance")
@@ -77,9 +83,6 @@ extension JavaClass<JavaStorageItem> {
   @JavaStaticMethod
   public func wrapMemoryAddressUnsafe(selfPointer: Int64) -> JavaStorageItem!
 }
-
-@JavaInterface("org.swift.swiftkit.core.SwiftArena")
-struct JavaSwiftArena {}
 
 @JavaInterface("com.example.swift.Storage")
 struct JavaStorage {
