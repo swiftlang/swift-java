@@ -123,6 +123,22 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 /// ```
 ///
 /// corresponds to the Java constructor `HelloSwift(String name)`.
+/// 
+/// ### Generics and type-erasure
+/// Swift and Java differ in how they represent generics at runtime.
+/// In Java, generics are type-erased and the JVM representation of generic types is erased to `java.lang.Object`.
+/// Swift on the other hand, reifies types which means a `Test<T>` in practice will be a specific type with 
+/// the generic substituted `Test<String>`. This means that at runtime, calling a generic @JavaMethod needs to know
+/// which of the parameters (or result type) must be subjected to type-erasure as we form the call into the Java function.
+/// 
+/// In order to mark a generic return type you must indicate it to the @JavaMethod macro like this:
+/// ```swift
+/// // Java: class Test<T> { public <T> get(); }
+/// @JavaMethod(genericResult: "T!")
+/// func get() -> T!
+/// ```
+/// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object` 
+/// returning method signature, and then, convert the result to the expected `T` type on the Swift side.
 @attached(body)
 public macro JavaMethod(
   genericResult: String? = nil
