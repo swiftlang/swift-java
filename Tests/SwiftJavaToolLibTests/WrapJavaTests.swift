@@ -227,7 +227,7 @@ final class WrapJavaTests: XCTestCase {
     )
   }
 
-  func testGenericSuperclass() async throws {
+  func testWrapJavaGenericSuperclass() async throws {
     return  // FIXME: we need this 
 
     let classpathURL = try await compileJava(
@@ -266,6 +266,37 @@ final class WrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.CompressingStore")
         open class CompressingStore: AbstractStore<ByteArray, [UInt8], [UInt8]> {
+        """
+      ]
+    )
+  }
+
+  func testWrapJavaGenericMethodTypeErasure_returnType() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      final class Kappa<T> { 
+        public T get() { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Kappa",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+        @JavaClass("com.example.Kappa")
+        open class Kappa<T: AnyJavaObject>: JavaObject {
+          @JavaMethod(genericResult: "T!")
+          open func get() -> T!
+        }
         """
       ]
     )

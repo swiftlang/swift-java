@@ -643,11 +643,8 @@ extension JavaClassTranslator {
       preferValueTypes: true, 
       outerOptional: .implicitlyUnwrappedOptional
     )
-    // let resultType = try translator.getSwiftTypeNameAsString(
-    //   javaMethod.getGenericReturnType()!,
-    //   preferValueTypes: true,
-    //   outerOptional: .implicitlyUnwrappedOptional
-    // )
+    let typeEraseGenericResultType: Bool = 
+      isGenericJavaType(javaMethod.getGenericReturnType())
 
     // FIXME: cleanup the checking here
     if resultType != "Void" && resultType != "Swift.Void" {
@@ -659,9 +656,33 @@ extension JavaClassTranslator {
     // --- Handle other effects
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
-    let methodAttribute: AttributeSyntax = implementedInSwift
-      ? ""
-      : javaMethod.isStatic ? "@JavaStaticMethod\n" : "@JavaMethod\n";
+    
+    // Compute the '@...JavaMethod(...)' details
+    let methodAttribute: AttributeSyntax
+      if implementedInSwift {
+        methodAttribute = ""
+      } else {
+        var methodAttributeStr =
+          if javaMethod.isStatic {
+            "@JavaStaticMethod"
+          } else {
+            "@JavaMethod"
+          }
+        // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
+        var parameters: [String] = []
+        if typeEraseGenericResultType {
+          parameters.append("genericResult: \"\(resultType)\"")
+        }
+        // TODO: generic parameters?
+        if !parameters.isEmpty {
+          methodAttributeStr += "("
+          methodAttributeStr.append(parameters.joined(separator: ", "))
+          methodAttributeStr += ")"
+        }
+        methodAttributeStr += "\n"
+        methodAttribute = "\(raw: methodAttributeStr)"
+      }
+
     let accessModifier = implementedInSwift ? ""
       : (javaMethod.isStatic || !translateAsClass) ? "public "
       : "open "
