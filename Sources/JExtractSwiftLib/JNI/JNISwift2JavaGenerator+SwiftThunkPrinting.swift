@@ -229,7 +229,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-    try printSwiftInterfaceWrapperExtension(&printer, type)
+//    try printSwiftInterfaceWrapperExtension(&printer, type)
   }
 
 

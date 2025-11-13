@@ -74,36 +74,32 @@ public class ProtocolTest {
     }
 
     static class JavaStorage implements Storage {
-        long value;
+        StorageItem item;
 
-        JavaStorage(long value) {
-            this.value = value;
+        JavaStorage(StorageItem item) {
+            this.item = item;
         }
 
         @Override
-        public long load() {
-            return value;
+        public StorageItem load() {
+            return item;
         }
 
         @Override
-        public void save(long integer) {
-            value = integer;
-        }
-
-        @Override
-        public String getName() {
-            return "JavaStorage";
+        public void save(StorageItem item) {
+            this.item = item;
         }
     }
 
     @Test
     void useStorage() {
         try (var arena = SwiftArena.ofConfined()) {
-            JavaStorage storage = new JavaStorage(9);
-            MySwiftLibrary.saveWithStorage(2, storage);
-            assertEquals(2, storage.load());
-            MySwiftLibrary.saveWithStorage(9, storage);
-            assertEquals(9, MySwiftLibrary.loadWithStorage(storage));
+            JavaStorage storage = new JavaStorage(null);
+            MySwiftLibrary.saveWithStorage(StorageItem.init(10, arena), storage);
+            assertEquals(10, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
+            MySwiftLibrary.saveWithStorage(StorageItem.init(7, arena), storage);
+            MySwiftLibrary.saveWithStorage(StorageItem.init(5, arena), storage);
+            assertEquals(5, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
         }
     }
 }

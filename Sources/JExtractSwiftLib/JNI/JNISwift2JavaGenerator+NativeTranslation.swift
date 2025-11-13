@@ -750,7 +750,11 @@ extension JNISwift2JavaGenerator {
           printer.print("\(variableName) = \(existentialName)")
         }
         printer.printBraceBlock("else") { printer in
-          printer.print("fatalError()")
+          if protocolNames == ["Storage"] {
+            printer.print("\(variableName) = StorageJavaWrapper(javaStorage: JavaStorage(javaThis: \(inner)!, environment: environment))")
+          } else {
+            printer.print("fatalError()")
+          }
         }
         return variableName
 

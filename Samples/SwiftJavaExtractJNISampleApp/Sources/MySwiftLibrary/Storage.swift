@@ -12,17 +12,80 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJava
+
+public class StorageItem {
+  public let value: Int64
+
+  public init(value: Int64) {
+    self.value = value
+  }
+}
+
 public protocol Storage {
-  var name: String { get }
-
-  func load() -> Int64
-  func save(_ integer: Int64)
+  func load() -> StorageItem
+  func save(_ item: StorageItem)
 }
 
-public func saveWithStorage(_ integer: Int64, s: any Storage) {
-  s.save(integer);
+public func saveWithStorage(_ item: StorageItem, s: any Storage) {
+  s.save(item);
 }
 
-public func loadWithStorage(s: any Storage) -> Int64 {
+public func loadWithStorage(s: any Storage) -> StorageItem {
   return s.load();
+}
+
+final class StorageJavaWrapper: Storage {
+  let javaStorage: JavaStorage
+
+  init(javaStorage: JavaStorage) {
+    self.javaStorage = javaStorage
+  }
+
+  func load() -> StorageItem {
+    let javaStorageItem = javaStorage.load()!
+    // Convert JavaStorageItem to (Swift) StorageItem
+    // First we get the memory address
+    let memoryAddress = javaStorageItem.as(JavaJNISwiftInstance.self)!.memoryAddress()
+    let pointer = UnsafeMutablePointer<StorageItem>(bitPattern: Int(memoryAddress))!
+    return pointer.pointee
+  }
+
+  func save(_ item: StorageItem) {
+    // convert SwiftPerson to Java Person
+    // here we can use `wrapMemoryAddressUnsafe`
+    // and pass in a global arena that we somehow
+    // access from Swift
+    let javaStorageItemClass = try! JavaClass<JavaStorageItem>(environment: JavaVirtualMachine.shared().environment())
+    let pointer = UnsafeMutablePointer<StorageItem>.allocate(capacity: 1)
+    pointer.initialize(to: item)
+    let javaStorageItem = javaStorageItemClass.wrapMemoryAddressUnsafe(selfPointer: Int64(Int(bitPattern: pointer)))
+    javaStorage.save(item: javaStorageItem);
+  }
+}
+
+@JavaInterface("org.swift.swiftkit.core.JNISwiftInstance")
+struct JavaJNISwiftInstance {
+  @JavaMethod("$memoryAddress")
+  public func memoryAddress() -> Int64
+}
+
+@JavaClass("com.example.swift.StorageItem", implements: JavaJNISwiftInstance.self)
+open class JavaStorageItem: JavaObject {}
+
+extension JavaClass<JavaStorageItem> {
+  @JavaStaticMethod
+  public func wrapMemoryAddressUnsafe(selfPointer: Int64) -> JavaStorageItem!
+}
+
+@JavaInterface("org.swift.swiftkit.core.SwiftArena")
+struct JavaSwiftArena {}
+
+@JavaInterface("com.example.swift.Storage")
+struct JavaStorage {
+    @JavaMethod
+    func load() -> JavaStorageItem!
+
+    @JavaMethod
+    func save(item: JavaStorageItem!)
 }

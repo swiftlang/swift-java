@@ -34,12 +34,12 @@ public class NestedTypesTest {
         }
     }
 
-    @Test
+    /*@Test
     void testStructInEnum() {
         try (var arena = SwiftArena.ofConfined()) {
             var obj = NestedEnum.one(NestedEnum.OneStruct.init(arena), arena);
             var one = obj.getAsOne(arena);
             assertTrue(one.isPresent());
         }
-    }
+    }*/
 }

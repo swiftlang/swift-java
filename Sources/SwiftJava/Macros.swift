@@ -124,7 +124,7 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 ///
 /// corresponds to the Java constructor `HelloSwift(String name)`.
 @attached(body)
-public macro JavaMethod() = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
+public macro JavaMethod(_ javaMethodName: String? = nil) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Attached macro that turns a Swift method on JavaClass into one that wraps
 /// a Java static method on the underlying Java class object.
@@ -136,7 +136,7 @@ public macro JavaMethod() = #externalMacro(module: "SwiftJavaMacros", type: "Jav
 /// func sayHelloBack(_ i: Int32) -> Double
 /// ```
 @attached(body)
-public macro JavaStaticMethod() = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
+public macro JavaStaticMethod(_ javaMethodName: String? = nil) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Macro that marks extensions to specify that all of the @JavaMethod
 /// methods are implementations of Java methods spelled as `native`.
