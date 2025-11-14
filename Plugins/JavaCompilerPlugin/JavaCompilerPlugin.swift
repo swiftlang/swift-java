@@ -38,7 +38,9 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     let config: Configuration?
 
     if let configData = try? Data(contentsOf: configFile) {
-      config = try? JSONDecoder().decode(Configuration.self, from: configData)
+      let decoder = JSONDecoder()
+      decoder.allowsJSON5 = true
+      config = try? decoder.decode(Configuration.self, from: configData)
     } else {
       config = nil
     }
