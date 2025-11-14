@@ -58,10 +58,10 @@ package extension JavaTranslator {
     package var description: String {
       switch self {
       case .multipleClassesMappedToSameName(let swiftToJavaMapping):
-              """
-              The following Java classes were mapped to the same Swift type name:
-                \(swiftToJavaMapping.map(mappingDescription(mapping:)).joined(separator: "\n"))
-              """
+        """
+        The following Java classes were mapped to the same Swift type name:
+          \(swiftToJavaMapping.map(mappingDescription(mapping:)).joined(separator: "\n"))
+        """
       }
     }
 
@@ -72,10 +72,6 @@ package extension JavaTranslator {
     }
   }
   func validateClassConfiguration() throws(ValidationError) {
-    // for a in translatedClasses {
-    //   print("MAPPING = \(a.key) -> \(a.value.swiftModule?.escapedSwiftName ?? "").\(a.value.swiftType.escapedSwiftName)")
-    // }
-
     // Group all classes by swift name
     let groupedDictionary: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = Dictionary(grouping: translatedClasses, by: { 
       // SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule) 

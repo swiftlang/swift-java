@@ -180,25 +180,36 @@ extension SwiftJava.WrapJavaCommand {
     // of classes to be translated if they were already specified.
     var allClassesToVisit = javaClasses
     var currentClassIndex: Int = 0
-    while currentClassIndex < allClassesToVisit.count {
+    outerClassLoop: while currentClassIndex < allClassesToVisit.count {
       defer {
         currentClassIndex += 1
       }
 
-      // The current class we're in.
+      // The current top-level class we're in.
       let currentClass = allClassesToVisit[currentClassIndex]
+      let currentClassName = currentClass.getName()
       guard let currentSwiftName = translator.translatedClasses[currentClass.getName()]?.swiftType else {
         continue
       }
 
-      // Find all of the nested classes that weren't explicitly translated
-      // already.
-      let nestedClasses: [JavaClass<JavaObject>] = currentClass.getClasses().compactMap { nestedClass in
-        guard let nestedClass else { return nil }
+      // Find all of the nested classes that weren't explicitly translated already.
+      let nestedAndSuperclassNestedClasses = currentClass.getClasses() // watch out, this includes nested types from superclasses
+      let nestedClasses: [JavaClass<JavaObject>] = nestedAndSuperclassNestedClasses.compactMap { nestedClass in
+        guard let nestedClass else { 
+          return nil 
+        }
 
         // If this is a local class, we're done.
         let javaClassName = nestedClass.getName()
         if javaClassName.isLocalJavaClass {
+          return nil
+        }
+
+        // We only want to visit and import types which are explicitly inside this decl,
+        // and NOT any of the types contained in the super classes. That would violate our "current class"
+        // nesting, because those are *actually* nested in the other class, not "the current one" (i.e. in a super class).
+        guard javaClassName.hasPrefix(currentClassName) else {
+          log.trace("Skip super-class nested class '\(javaClassName)', is not member of \(currentClassName). Will be visited independently.")
           return nil
         }
 
@@ -227,7 +238,9 @@ extension SwiftJava.WrapJavaCommand {
           .defaultSwiftNameForJavaClass
 
         let swiftName = "\(currentSwiftName).\(swiftUnqualifiedName)"
-        translator.translatedClasses[javaClassName] = SwiftTypeName(module: nil, name: swiftName)
+        let translatedSwiftName = SwiftTypeName(module: nil, name: swiftName)
+        translator.translatedClasses[javaClassName] = translatedSwiftName
+        log.debug("Record translated Java class '\(javaClassName)' -> \(translatedSwiftName)")
         return nestedClass
       }
 
