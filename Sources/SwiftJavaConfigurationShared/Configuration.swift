@@ -162,7 +162,11 @@ public func readConfiguration(sourceDir: String, file: String = #fileID, line: U
 /// Configuration is expected to be "JSON-with-comments".
 /// Specifically "//" comments are allowed and will be trimmed before passing the rest of the config into a standard JSON parser.
 public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
-  guard let configData = try? Data(contentsOf: configPath) else {
+  let configData: Data
+  do {
+    configData = try Data(contentsOf: configPath)
+  } catch {
+    print("Failed to read SwiftJava configuration at '\(configPath.absoluteURL)', error: \(error)")
     return nil
   }
 

@@ -67,6 +67,9 @@ extension SwiftJava {
 
     @Option(name: .long, help: "While scanning a classpath, skip types which match the filter prefix")
     var filterExclude: [String] = []
+
+    @Option(help: "A path to a custom swift-java.config to use")
+    var config: String? = nil
   }
 
   struct CommonJVMOptions: ParsableArguments {
