@@ -152,6 +152,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
     log("Found swift-java at \(swiftJavaDirectory)")
 
+    let swiftKitCoreClassPath = swiftJavaDirectory.appending(path: "SwiftKitCore/build/classes/java/main")
+
     commands += [
       .buildCommand(
         displayName: "Build SwiftKitCore",
@@ -164,19 +166,20 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         ],
         environment: [:],
         inputFiles: [swiftJavaDirectory],
-        outputFiles: []
+        outputFiles: [swiftKitCoreClassPath]
       )
     ]
-
-    let swiftKitCoreClassPath = swiftJavaDirectory.appending(path: "SwiftKitCore/build/classes/java/main")
 
     // Compile the jextracted sources
     let javaHome = URL(filePath: findJavaHome())
   #if os(Windows)
     let javac = "javac.exe"
+    let jar = "jar.exe"
   #else
     let javac = "javac"
+    let jar = "jar"
   #endif
+
     commands += [
       .buildCommand(
         displayName: "Build extracted Java sources",
@@ -185,12 +188,68 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           .appending(path: javac),
         arguments: [
           "@\(javaSourcesFile.path(percentEncoded: false))",
-          "-d", javaClassFileURL.path,
+          "-d", javaClassFileURL.path(percentEncoded: false),
           "-parameters",
           "-classpath", swiftKitCoreClassPath.path(percentEncoded: false)
         ],
-        inputFiles: [javaSourcesFile],
-        outputFiles: []
+        inputFiles: [javaSourcesFile, swiftKitCoreClassPath],
+        outputFiles: [javaClassFileURL]
+      )
+    ]
+
+    // Wrap into JAR that we can use `swift-java configure` on
+//    let jarFileURL = context.pluginWorkDirectoryURL.appending(path: "generated-sources.jar")
+//
+//    commands += [
+//      .buildCommand(
+//        displayName: "Wrap compiled Java sources into .jar",
+//        executable: javaHome
+//          .appending(path: "bin")
+//          .appending(path: jar),
+//        arguments: [
+//          "--create",
+//          "--file", jarFileURL.path(percentEncoded: false),
+//          "-C", javaClassFileURL.path(percentEncoded: false),
+//          "."
+//        ],
+//        inputFiles: [javaClassFileURL],
+//        outputFiles: [jarFileURL]
+//      )
+//    ]
+
+    // Run `configure` to extract a swift-java config to use for wrap-java
+    let swiftJavaConfigURL = context.pluginWorkDirectoryURL.appending(path: "swift-java.config")
+
+    commands += [
+      .buildCommand(
+        displayName: "Wrap compiled Java sources using wrap-java",
+        executable: toolURL,
+        arguments: [
+          "configure",
+          "--output-directory", context.pluginWorkDirectoryURL.path(percentEncoded: false),
+          "--cp", javaClassFileURL.path(percentEncoded: false),
+          "--swift-module", sourceModule.name,
+          "--swift-prefix", "Java"
+        ],
+        inputFiles: [javaClassFileURL],
+        outputFiles: [swiftJavaConfigURL]
+      )
+    ]
+
+    // In the end we can run wrap-java on the previous inputs
+    commands += [
+      .buildCommand(
+        displayName: "Wrap compiled Java sources using wrap-java",
+        executable: toolURL,
+        arguments: [
+          "wrap-java",
+          "--swift-module", sourceModule.name,
+          "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
+          "--config", swiftJavaConfigURL.path(percentEncoded: false),
+          "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
+        ],
+        inputFiles: [swiftJavaConfigURL, swiftKitCoreClassPath],
+        outputFiles: [outputSwiftDirectory.appending(path: "JavaStorage.swift")]
       )
     ]
 

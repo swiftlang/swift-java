@@ -227,6 +227,11 @@ struct JavaClassTranslator {
         continue
       }
 
+      guard method.getName().isValidSwiftFunctionName else {
+        // TODO: Tell the user?
+        continue
+      }
+
       addMethod(method, isNative: false)
     }
 

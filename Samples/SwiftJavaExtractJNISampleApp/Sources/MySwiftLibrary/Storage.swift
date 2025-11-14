@@ -75,20 +75,3 @@ struct JavaJNISwiftInstance {
   @JavaMethod("$memoryAddress")
   public func memoryAddress() -> Int64
 }
-
-@JavaClass("com.example.swift.StorageItem", implements: JavaJNISwiftInstance.self)
-open class JavaStorageItem: JavaObject {}
-
-extension JavaClass<JavaStorageItem> {
-  @JavaStaticMethod
-  public func wrapMemoryAddressUnsafe(selfPointer: Int64) -> JavaStorageItem!
-}
-
-@JavaInterface("com.example.swift.Storage")
-struct JavaStorage {
-    @JavaMethod
-    func load() -> JavaStorageItem!
-
-    @JavaMethod
-    func save(item: JavaStorageItem!)
-}

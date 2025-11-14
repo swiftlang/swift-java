@@ -163,14 +163,24 @@ extension SwiftJavaBaseAsyncParsableCommand {
 
   func readInitialConfiguration(command: some SwiftJavaBaseAsyncParsableCommand) throws -> Configuration {
     var earlyConfig: Configuration?
-    if let moduleBaseDir {
+    if let configPath = commonOptions.config {
+      let configURL = URL(filePath: configPath, directoryHint: .notDirectory)
+      print("[debug][swift-java] Load config from passed in path: \(configURL)")
+      earlyConfig = try readConfiguration(configPath: configURL)
+    } else if let moduleBaseDir {
       print("[debug][swift-java] Load config from module base directory: \(moduleBaseDir.path)")
       earlyConfig = try readConfiguration(sourceDir: moduleBaseDir.path)
     } else if let inputSwift = commonOptions.inputSwift {
       print("[debug][swift-java] Load config from module swift input directory: \(inputSwift)")
       earlyConfig = try readConfiguration(sourceDir: inputSwift)
     }
-    var config = earlyConfig ?? Configuration()
+    var config: Configuration
+    if let earlyConfig {
+      config = earlyConfig
+    } else {
+      log.warning("[swift-java] Failed to load initial configuration. Proceeding with empty configuration.")
+      config = Configuration()
+    }
     // override configuration with options from command line
     config.logLevel = command.logLevel
     return config
