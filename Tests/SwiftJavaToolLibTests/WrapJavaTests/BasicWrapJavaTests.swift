@@ -49,4 +49,43 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  func test_wrapJava_doNotDupeImportNestedClassesFromSuperclassAutomatically() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class SuperClass {
+        class SuperNested {} 
+      }
+
+      class ExampleSimpleClass {
+        class SimpleNested {} 
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.SuperClass",
+        "com.example.SuperClass$SuperNested",
+        "com.example.ExampleSimpleClass",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaClass("com.example.SuperClass")
+        open class SuperClass: JavaObject {
+        """,
+        // FIXME: the mapping configuration could be used to nest this properly but today we don't automatically?
+        """
+        @JavaClass("com.example.SuperClass$SuperNested")
+        open class SuperNested: JavaObject {
+        """,
+        """
+        @JavaClass("com.example.SuperClass")
+        open class SuperClass: JavaObject {
+        """,
+      ]
+    )
+  }
+
 }

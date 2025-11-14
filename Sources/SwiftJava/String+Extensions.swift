@@ -15,8 +15,7 @@
 import Foundation
 
 extension String {
-  /// For a String that's of the form java.util.Vector, return the "Vector"
-  /// part.
+  /// For a String that's of the form java.util.Vector, return the "Vector" part.
   package var defaultSwiftNameForJavaClass: String {
     if let dotLoc = lastIndex(of: ".") {
       let afterDot = index(after: dotLoc)
