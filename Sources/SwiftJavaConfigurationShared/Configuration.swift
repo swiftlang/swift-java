@@ -174,18 +174,14 @@ public func readConfiguration(configPath: URL, file: String = #fileID, line: UIn
 }
 
 public func readConfiguration(string: String, configPath: URL?, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
-  let cleanedConfigString = string
-    .split(separator: "\n")
-    .filter { line in 
-      !line.trimmingCharacters(in: .whitespaces).starts(with: "//")
-    }.joined(separator: "\n")
-
-  guard let configData = cleanedConfigString.data(using: .utf8) else {
+  guard let configData = string.data(using: .utf8) else {
     return nil
   }
 
   do {
-    return try JSONDecoder().decode(Configuration.self, from: configData)
+    let decoder = JSONDecoder()
+    decoder.allowsJSON5 = true
+    return try decoder.decode(Configuration.self, from: configData)
   } catch {
     throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)", error: error,
       file: file, line: line)
