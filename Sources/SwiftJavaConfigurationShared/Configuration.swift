@@ -157,15 +157,37 @@ public func readConfiguration(sourceDir: String, file: String = #fileID, line: U
   return try readConfiguration(configPath: configPath, file: file, line: line)
 }
 
+/// Read a swift-java.config file at the specified path.
+/// 
+/// Configuration is expected to be "JSON-with-comments".
+/// Specifically "//" comments are allowed and will be trimmed before passing the rest of the config into a standard JSON parser.
 public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
   guard let configData = try? Data(contentsOf: configPath) else {
+    return nil
+  }
+
+  guard let configString = String(data: configData, encoding: .utf8) else {
+    return nil
+  }
+
+  return try readConfiguration(string: configString, configPath: configPath)
+}
+
+public func readConfiguration(string: String, configPath: URL?, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
+  let cleanedConfigString = string
+    .split(separator: "\n")
+    .filter { line in 
+      !line.trimmingCharacters(in: .whitespaces).starts(with: "//")
+    }.joined(separator: "\n")
+
+  guard let configData = cleanedConfigString.data(using: .utf8) else {
     return nil
   }
 
   do {
     return try JSONDecoder().decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.absoluteURL)'! \(#fileID):\(#line)", error: error,
+    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)", error: error,
       file: file, line: line)
   }
 }
