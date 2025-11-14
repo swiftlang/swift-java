@@ -49,8 +49,6 @@ package extension JavaTranslator {
     package init(swiftType: SwiftTypeName, javaTypes: [JavaFullyQualifiedTypeName]) {
       self.swiftType = swiftType
       self.javaTypes = javaTypes
-      precondition(!javaTypes.contains("com.google.protobuf.AbstractMessage$Builder"), 
-        "\(swiftType) mapped as \(javaTypes)\n\(CommandLine.arguments.joined(separator: " "))") // XXX
     }
   }
 
