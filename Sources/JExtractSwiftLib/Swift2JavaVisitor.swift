@@ -287,19 +287,20 @@ final class Swift2JavaVisitor {
 
     let name = "subscript"
     let accessors = accessorBlock.supportedAccessorKinds()
+
     do {
       if accessors.contains(.get) {
         try importAccessor(
           from: DeclSyntax(node),
           in: typeContext,
-          kind: .getter,
+          kind: .subscriptGetter,
           name: name)
       }
       if accessors.contains(.set) {
         try importAccessor(
           from: DeclSyntax(node),
           in: typeContext,
-          kind: .setter,
+          kind: .subscriptSetter,
           name: name)
       }
     } catch {
@@ -325,7 +326,7 @@ final class Swift2JavaVisitor {
     case .subscriptDecl(let subscriptNode):
       signature = try SwiftFunctionSignature(
         subscriptNode,
-        isSet: kind == .setter,
+        isSet: kind == .subscriptSetter,
         enclosingType: typeContext?.swiftType,
         lookupContext: translator.lookupContext)
     default:

@@ -325,8 +325,11 @@ extension SwiftFunctionSignature {
       enclosingType: enclosingType,
       isSet: isSet)
 
-    let valueType = try SwiftType(subscriptNode.returnClause.type, lookupContext: lookupContext)
-
+    let valueType: SwiftType = try SwiftType(subscriptNode.returnClause.type, lookupContext: lookupContext)
+    var nodeParameters = try subscriptNode.parameterClause.parameters.map { param in
+      try SwiftParameter(param, lookupContext: lookupContext)
+    }
+    
     var effectSpecifiers: [SwiftEffectSpecifier]? = nil
     switch subscriptNode.accessorBlock?.accessors {
     case .getter(let getter):
@@ -344,14 +347,13 @@ extension SwiftFunctionSignature {
     self.effectSpecifiers = effectSpecifiers ?? []
 
     if isSet {
-      self.parameters = [
-        SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType)
-      ]
+      nodeParameters.append(SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType))
       self.result = .void
     } else {
-      self.parameters = []
       self.result = .init(convention: .direct, type: valueType)
     }
+
+    self.parameters = nodeParameters
     self.genericParameters = []
     self.genericRequirements = []
   }
