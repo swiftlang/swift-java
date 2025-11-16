@@ -271,31 +271,10 @@ extension SwiftFunctionSignature {
     lookupContext: SwiftTypeLookupContext
   ) throws {
 
-    // If this is a member of a type, so we will have a self parameter. Figure out the
-    // type and convention for the self parameter.
-    if let enclosingType {
-      var isStatic = false
-      for modifier in varNode.modifiers {
-        switch modifier.name.tokenKind {
-        case .keyword(.static): isStatic = true
-        case .keyword(.class): throw SwiftFunctionTranslationError.classMethod(modifier.name)
-        default: break
-        }
-      }
-
-      if isStatic {
-        self.selfParameter = .staticMethod(enclosingType)
-      } else {
-        self.selfParameter = .instance(
-          SwiftParameter(
-            convention: isSet && !enclosingType.isReferenceType ? .inout : .byValue,
-            type: enclosingType
-          )
-        )
-      }
-    } else {
-      self.selfParameter = nil
-    }
+    self.selfParameter = try Self.variableSelfParameter(
+      for: DeclSyntax(varNode),
+      enclosingType: enclosingType,
+      isSet: isSet)
 
     guard let binding = varNode.bindings.first, varNode.bindings.count == 1 else {
       throw SwiftFunctionTranslationError.multipleBindings(varNode)
@@ -323,7 +302,51 @@ extension SwiftFunctionSignature {
     self.effectSpecifiers = effectSpecifiers ?? []
 
     if isSet {
-      self.parameters = [SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType)]
+      self.parameters = [
+        SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType)
+      ]
+      self.result = .void
+    } else {
+      self.parameters = []
+      self.result = .init(convention: .direct, type: valueType)
+    }
+    self.genericParameters = []
+    self.genericRequirements = []
+  }
+
+  init(
+    _ subscriptNode: SubscriptDeclSyntax,
+    isSet: Bool,
+    enclosingType: SwiftType?,
+    lookupContext: SwiftTypeLookupContext
+  ) throws {
+    self.selfParameter = try Self.variableSelfParameter(
+      for: DeclSyntax(subscriptNode),
+      enclosingType: enclosingType,
+      isSet: isSet)
+
+    let valueType = try SwiftType(subscriptNode.returnClause.type, lookupContext: lookupContext)
+
+    var effectSpecifiers: [SwiftEffectSpecifier]? = nil
+    switch subscriptNode.accessorBlock?.accessors {
+    case .getter(let getter):
+      if let getter = getter.as(AccessorDeclSyntax.self) {
+        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+      }
+    case .accessors(let accessors):
+      if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+      }
+    default:
+      break
+    }
+
+    self.effectSpecifiers = effectSpecifiers ?? []
+
+    if isSet {
+      self.parameters = [
+        SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType)
+      ]
       self.result = .void
     } else {
       self.parameters = []
@@ -343,9 +366,70 @@ extension SwiftFunctionSignature {
     }
     return effectSpecifiers
   }
+
+  private static func variableSelfParameter(
+    for decl: DeclSyntax,
+    enclosingType: SwiftType?,
+    isSet: Bool
+  ) throws -> SwiftSelfParameter? {
+    let modifiers: DeclModifierListSyntax? =
+      switch decl.as(DeclSyntaxEnum.self) {
+      case .variableDecl(let varDecl): varDecl.modifiers
+      case .subscriptDecl(let subscriptDecl): subscriptDecl.modifiers
+      default: nil
+      }
+
+    guard let modifiers else {
+      return nil
+    }
+
+    // If this is a member of a type, so we will have a self parameter. Figure out the
+    // type and convention for the self parameter.
+    if let enclosingType {
+      var isStatic = false
+      for modifier in modifiers {
+        switch modifier.name.tokenKind {
+        case .keyword(.static): isStatic = true
+        case .keyword(.class): throw SwiftFunctionTranslationError.classMethod(modifier.name)
+        default: break
+        }
+      }
+
+      if isStatic {
+        return .staticMethod(enclosingType)
+      } else {
+        return .instance(
+          SwiftParameter(
+            convention: isSet && !enclosingType.isReferenceType ? .inout : .byValue,
+            type: enclosingType
+          )
+        )
+      }
+    } else {
+      return nil
+    }
+  }
 }
 
 extension VariableDeclSyntax {
+  /// Determine what operations (i.e. get and/or set) supported in this `VariableDeclSyntax`
+  ///
+  /// - Parameters:
+  ///   - binding the pattern binding in this declaration.
+  func supportedAccessorKinds(binding: PatternBindingSyntax) -> AccessorBlockSyntax.SupportedAccessorKinds {
+    if self.bindingSpecifier.tokenKind == .keyword(.let) {
+      return [.get]
+    }
+
+    if let accessorBlock = binding.accessorBlock {
+      return accessorBlock.supportedAccessorKinds()
+    }
+
+    return [.get, .set]
+  }
+}
+
+extension AccessorBlockSyntax {
   struct SupportedAccessorKinds: OptionSet {
     var rawValue: UInt8
 
@@ -353,17 +437,9 @@ extension VariableDeclSyntax {
     static var set: Self = .init(rawValue: 1 << 1)
   }
 
-  /// Determine what operations (i.e. get and/or set) supported in this `VariableDeclSyntax`
-  ///
-  /// - Parameters:
-  ///   - binding the pattern binding in this declaration.
-  func supportedAccessorKinds(binding: PatternBindingSyntax) -> SupportedAccessorKinds {
-    if self.bindingSpecifier.tokenKind == .keyword(.let) {
-      return [.get]
-    }
-
-    if let accessorBlock = binding.accessorBlock {
-      switch accessorBlock.accessors {
+  /// Determine what operations (i.e. get and/or set) supported in this `AccessorBlockSyntax`
+  func supportedAccessorKinds() -> SupportedAccessorKinds {
+    switch self.accessors {
       case .getter:
         return [.get]
       case .accessors(let accessors):
@@ -379,9 +455,6 @@ extension VariableDeclSyntax {
         }
         return [.get]
       }
-    }
-
-    return [.get, .set]
   }
 }
 
