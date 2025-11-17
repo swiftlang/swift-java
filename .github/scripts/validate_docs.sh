@@ -3,11 +3,17 @@
 set -e
 set -x
 
-cat <<EOF >> Package.swift
+DEPENDENCY='.package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0")'
+
+if grep -q "$DEPENDENCY" Package.swift; then
+  echo "Package.swift already contains 'swift-docc-plugin"
+else
+  cat <<EOF >> Package.swift
 
 package.dependencies.append(
-  .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0")
+  $DEPENDENCY
 )
 EOF
+fi
 
 swift package --disable-sandbox plugin generate-documentation --target "SwiftJavaDocumentation" --warnings-as-errors --analyze
