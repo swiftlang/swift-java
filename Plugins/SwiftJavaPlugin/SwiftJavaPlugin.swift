@@ -98,7 +98,11 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     /// Determine the set of Swift files that will be emitted by the swift-java tool.
     // TODO: this is not precise and won't work with more advanced Java files, e.g. lambdas etc.
     let outputDirectoryGenerated = self.outputDirectory(context: context, generated: true)
-    let outputSwiftFiles = classes.map { (javaClassName, swiftName) in
+    let outputSwiftFiles = classes.compactMap { (javaClassName, swiftName) -> URL? in
+      guard shouldImportJavaClass(javaClassName, config: config) else {
+        return nil
+      }
+
       let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
       return outputDirectoryGenerated.appending(path: "\(swiftNestedName).swift")
     }
@@ -168,7 +172,9 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // Add all the core Java stdlib modules as --depends-on
     let javaStdlibModules = getExtractedJavaStdlibModules()
     log("Include Java standard library SwiftJava modules: \(javaStdlibModules)")
-    arguments += javaStdlibModules.flatMap { ["--depends-on", $0] }
+    let dependsOnArguments = javaStdlibModules.flatMap { ["--depends-on", $0] }
+    // TODO: make the dependsOnArguments unique, and preserve the ordering. We cannot use external dependencies. Make an extension on Array to achieve this
+    arguments += dependsOnArguments
 
     if !outputSwiftFiles.isEmpty {
       arguments += [ configFile.path(percentEncoded: false) ]
@@ -192,6 +198,39 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     return commands
+  }
+}
+
+extension SwiftJavaBuildToolPlugin {
+  private func shouldImportJavaClass(_ javaClassName: String, config: Configuration) -> Bool {
+    // If we have an inclusive filter, import only types from it
+    if let includes = config.filterInclude, !includes.isEmpty {
+      let anyIncludeFilterMatched = includes.contains { include in
+        if javaClassName.starts(with: include) {
+          // TODO: lower to trace level
+          log("Skip Java type: \(javaClassName) (does not match any include filter)")
+          return true
+        }
+
+        return false
+      }
+
+      guard anyIncludeFilterMatched else {
+        log("Skip Java type: \(javaClassName) (does not match any include filter)")
+        return false
+      }
+    }
+
+    // If we have an exclude filter, check for it as well
+    for exclude in config.filterExclude ?? [] {
+      if javaClassName.starts(with: exclude) {
+        log("Skip Java type: \(javaClassName) (does match exclude filter: \(exclude))")
+        return false
+      }
+    }
+
+    // The class matches import filters, if any, and was not excluded.
+    return true
   }
 }
 
