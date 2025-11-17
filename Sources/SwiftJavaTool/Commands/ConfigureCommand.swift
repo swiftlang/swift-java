@@ -104,11 +104,11 @@ extension SwiftJava.ConfigureCommand {
     log.logLevel = .init(rawValue: self.logLevel.rawValue)!
 
     log.info("Run: emit configuration...")
-    var (amendExistingConfig, configuration) = try getBaseConfigurationForWrite()
+    var (amendExistingConfig, config) = try getBaseConfigurationForWrite()
 
     if !self.commonOptions.filterInclude.isEmpty {
       log.debug("Generate Java->Swift type mappings. Active include filters: \(self.commonOptions.filterInclude)")
-    } else if let filters = configuration.filterInclude, !filters.isEmpty { 
+    } else if let filters = config.filterInclude, !filters.isEmpty { 
       // take the package filter from the configuration file
       self.commonOptions.filterInclude = filters
     } else {
@@ -124,7 +124,7 @@ extension SwiftJava.ConfigureCommand {
     if amendExistingConfig {
       log.info("Amend existing swift-java.config file...")
     }
-    configuration.classpath = classpathEntries.joined(separator: ":") // TODO: is this correct?
+    config.classpath = classpathEntries.joined(separator: ":") // TODO: is this correct?
 
     // Import types from all the classpath entries;
     // Note that we use the package level filtering, so users have some control over what gets imported.
@@ -139,7 +139,7 @@ extension SwiftJava.ConfigureCommand {
       if entry.hasSuffix(".jar") {
         let jarFile = try JarFile(entry, false, environment: environment)
         try addJavaToSwiftMappings(
-          to: &configuration,
+          to: &config,
           forJar: jarFile,
           environment: environment
         )
@@ -151,7 +151,7 @@ extension SwiftJava.ConfigureCommand {
     }
 
     // Encode the configuration.
-    let contents = try configuration.renderJSON()
+    let contents = try config.renderJSON()
 
     // Write the file.
     try writeContents(
