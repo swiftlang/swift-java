@@ -267,9 +267,19 @@ extension SwiftJava.WrapJavaCommand {
 
   private func shouldImportJavaClass(_ javaClassName: String, config: Configuration) -> Bool {
     // If we have an inclusive filter, import only types from it
-    for include in config.filterInclude ?? [] {
-      guard javaClassName.starts(with: include) else {
-        log.info("Skip Java type: \(javaClassName) (does not match include filter: \(include))")
+    if let includes = config.filterInclude, !includes.isEmpty {
+      let anyIncludeFilterMatched = includes.contains { include in
+        if javaClassName.starts(with: include) {
+          // TODO: lower to trace level
+          log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
+          return true
+        }
+
+        return false
+      }
+
+      guard anyIncludeFilterMatched else {
+        log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
         return false
       }
     }
