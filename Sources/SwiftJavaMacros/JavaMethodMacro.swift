@@ -52,8 +52,9 @@ extension JavaMethodMacro: BodyMacro {
 
     let funcName =
       if case .argumentList(let arguments) = node.arguments,
-        let wrapperTypeNameExpr = arguments.first?.expression,
-        let stringLiteral = wrapperTypeNameExpr.as(StringLiteralExprSyntax.self),
+        let argument = arguments.first,
+        argument.label?.text != "typeErasedResult",
+        let stringLiteral = argument.expression.as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(funcNameSegment)? = stringLiteral.segments.first
       {
@@ -68,8 +69,8 @@ extension JavaMethodMacro: BodyMacro {
 
     let genericResultType: String? =
       if case let .argumentList(arguments) = node.arguments,
-        let firstElement = arguments.first,
-        let stringLiteral = firstElement.expression
+        let element = arguments.first(where: { $0.label?.text == "typeErasedResult" }),
+        let stringLiteral = element.expression
           .as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(wrapperName)? = stringLiteral.segments.first {

@@ -962,7 +962,7 @@ extension JNISwift2JavaGenerator {
 
     /// Function signature of the native function that will be implemented by Swift
     let nativeFunctionSignature: NativeFunctionSignature
-
+    
     /// Annotations to include on the Java function declaration
     var annotations: [JavaAnnotation] {
       self.translatedFunctionSignature.annotations

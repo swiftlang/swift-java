@@ -147,7 +147,7 @@ extension SwiftJava.ConfigureCommand {
       } else if FileManager.default.fileExists(atPath: entry), let entryURL = URL(string: entry) {
         print("[debug][swift-java] Importing classpath as directory: \(entryURL)")
         try addJavaToSwiftMappings(
-          to: &configuration,
+          to: &config,
           forDirectory: entryURL
         )
       } else {

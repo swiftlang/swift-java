@@ -236,6 +236,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       )
     ]
 
+    let singleSwiftFileOutputName = "WrapJavaGenerated.swift"
+
     // In the end we can run wrap-java on the previous inputs
     commands += [
       .buildCommand(
@@ -247,9 +249,10 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
           "--config", swiftJavaConfigURL.path(percentEncoded: false),
           "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
+          "--single-swift-file-output", singleSwiftFileOutputName,
         ],
         inputFiles: [swiftJavaConfigURL, swiftKitCoreClassPath],
-        outputFiles: [outputSwiftDirectory.appending(path: "JavaStorage.swift")]
+        outputFiles: [outputSwiftDirectory.appending(path: singleSwiftFileOutputName)]
       )
     ]
 

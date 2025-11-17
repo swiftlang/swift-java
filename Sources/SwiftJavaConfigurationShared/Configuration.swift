@@ -91,6 +91,8 @@ public struct Configuration: Codable {
   /// Exclude input Java types by their package prefix or exact match.
   public var filterExclude: [String]?
 
+  public var singleSwiftFileOutput: String?
+
   // ==== dependencies ---------------------------------------------------------
 
   // Java dependencies we need to fetch for this target.
