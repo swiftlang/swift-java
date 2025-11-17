@@ -38,7 +38,11 @@ extension HasCommonOptions {
   
   func configure<T>(_ setting: inout [T]?, append value: [T]?) {
     if let value {
-      setting?.append(contentsOf: value)
+      if setting == nil {
+        setting = value
+      } else {
+        setting?.append(contentsOf: value)
+      }
     }
   }
 
