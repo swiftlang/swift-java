@@ -259,7 +259,7 @@ public final class SomeModule ... {
 
 Many of the tools–as well as SwiftPM plugin's–behaviors can be configured using the `swift-java.config` file.
 
-You can refer to the ``SwiftJavaSharedConfiguration/Configuration`` struct to learn about the supported options.
+You can refer to the `SwiftJavaConfigurationShared/Configuration` struct to learn about the supported options.
 
 Configuration from the config files may be overriden or augmented by explicit command line parameters,
 please refer to the options documentation for details on their behavior.
