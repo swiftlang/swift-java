@@ -609,6 +609,15 @@ extension JavaClassTranslator {
       }
     }
 
+    // --- Parameter types
+    for parameter in method.getParameters() {
+      if let parameterizedType = parameter?.getParameterizedType() {
+        if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
+          return true
+        }
+      }
+    }
+
     return false
   }
 

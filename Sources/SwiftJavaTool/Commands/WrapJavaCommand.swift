@@ -151,24 +151,32 @@ extension SwiftJava.WrapJavaCommand {
       .getSystemClassLoader()!
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, _) in config.classes ?? [:] {
+      func remove() {
+        translator.translatedClasses.removeValue(forKey: javaClassName)
+      }
+
       guard shouldImportJavaClass(javaClassName, config: config) else {
+        remove()
         continue
       }
 
       guard let javaClass = try classLoader.loadClass(javaClassName) else {
         log.warning("Could not load Java class '\(javaClassName)', skipping.")
+        remove()
         continue
       }
 
       guard self.shouldExtract(javaClass: javaClass, config: config) else {
         log.info("Skip Java type: \(javaClassName) (does not match minimum access level)")
+        remove()
         continue
       }
 
-//      guard !javaClass.isEnum() else {
-//        log.info("Skip Java type: \(javaClassName) (enums do not currently work)")
-//        continue
-//      }
+      guard !javaClass.isEnum() else {
+        log.info("Skip Java type: \(javaClassName) (enums do not currently work)")
+        remove()
+        continue
+      }
 
       log.info("Wrapping java type: \(javaClassName)")
 
@@ -226,6 +234,11 @@ extension SwiftJava.WrapJavaCommand {
 
         guard self.shouldExtract(javaClass: nestedClass, config: config) else {
           log.info("Skip Java type: \(javaClassName) (does not match minimum access level)")
+          return nil
+        }
+
+        guard !nestedClass.isEnum() else {
+          log.info("Skip Java type: \(javaClassName) (enums do not currently work)")
           return nil
         }
 
