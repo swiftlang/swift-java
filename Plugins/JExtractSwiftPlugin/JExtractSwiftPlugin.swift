@@ -87,7 +87,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       let (moduleName, configFile) = moduleAndConfigFile
       return [
         "--depends-on",
-        "\(configFile.path(percentEncoded: false))"
+        "\(moduleName)=\(configFile.path(percentEncoded: false))"
       ]
     }
     arguments += dependentConfigFilesArguments
@@ -239,18 +239,23 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let singleSwiftFileOutputName = "WrapJavaGenerated.swift"
 
     // In the end we can run wrap-java on the previous inputs
+    var wrapJavaArguments = [
+      "wrap-java",
+      "--swift-module", sourceModule.name,
+      "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
+      "--config", swiftJavaConfigURL.path(percentEncoded: false),
+      "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
+      "--single-swift-file-output", singleSwiftFileOutputName
+    ]
+
+    // Add any dependent config files as arguments
+    wrapJavaArguments += dependentConfigFilesArguments
+
     commands += [
       .buildCommand(
         displayName: "Wrap compiled Java sources using wrap-java",
         executable: toolURL,
-        arguments: [
-          "wrap-java",
-          "--swift-module", sourceModule.name,
-          "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
-          "--config", swiftJavaConfigURL.path(percentEncoded: false),
-          "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
-          "--single-swift-file-output", singleSwiftFileOutputName,
-        ],
+        arguments: wrapJavaArguments,
         inputFiles: [swiftJavaConfigURL, swiftKitCoreClassPath],
         outputFiles: [outputSwiftDirectory.appending(path: singleSwiftFileOutputName)]
       )

@@ -65,4 +65,13 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
       return false
     }
   }
+
+  var isDirectlyTranslatedToWrapJava: Bool {
+    switch self {
+    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:
+      return true
+    default:
+      return false
+    }
+  }
 }

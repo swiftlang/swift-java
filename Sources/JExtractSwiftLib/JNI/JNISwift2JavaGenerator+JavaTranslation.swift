@@ -22,16 +22,8 @@ extension JNISwift2JavaGenerator {
       swiftModuleName: swiftModuleName,
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
-      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
-    )
-  }
-
-  var nativeTranslator: NativeJavaTranslation {
-    NativeJavaTranslation(
-      config: self.config,
-      javaPackage: self.javaPackage,
-      javaClassLookupTable: self.javaClassLookupTable,
-      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+      protocolWrappers: self.protocolWrappers
     )
   }
 
@@ -68,7 +60,8 @@ extension JNISwift2JavaGenerator {
         swiftModuleName: swiftModuleName,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+        protocolWrappers: self.protocolWrappers
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -86,13 +79,15 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
+    let protocolWrappers: [ImportedNominalType: JavaInterfaceProtocolWrapper]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
         config: self.config,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes
+        knownTypes: self.knownTypes,
+        protocolWrappers: self.protocolWrappers
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -180,7 +175,8 @@ extension JNISwift2JavaGenerator {
         config: self.config,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes
+        knownTypes: self.knownTypes,
+        protocolWrappers: self.protocolWrappers
       )
 
       // Types with no parent will be outputted inside a "module" class.

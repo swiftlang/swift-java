@@ -22,6 +22,7 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
+    let protocolWrappers: [ImportedNominalType: JavaInterfaceProtocolWrapper]
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -240,6 +241,12 @@ extension JNISwift2JavaGenerator {
       parameterName: String,
       parentName: String?
     ) throws -> NativeParameter {
+      // We allow Java implementations if we are able to generate the needed
+      // Swift wrappers for all the protocol types.
+      let allowsJavaImplementations = protocolTypes.allSatisfy { protocolType in
+        self.protocolWrappers.contains(where: { $0.value.protocolType == protocolType })
+      }
+
       return NativeParameter(
         parameters: [
           JavaParameter(name: parameterName, type: .javaLangObject)
@@ -251,7 +258,8 @@ extension JNISwift2JavaGenerator {
             parameterName: parameterName,
             parentName: parentName
           ),
-          protocolTypes: protocolTypes
+          protocolTypes: protocolTypes,
+          allowsJavaImplementations: allowsJavaImplementations
         )
       )
     }
@@ -658,7 +666,8 @@ extension JNISwift2JavaGenerator {
     indirect case interfaceToSwiftObject(
       NativeSwiftConversionStep,
       swiftWrapperClassName: String,
-      protocolTypes: [SwiftNominalType]
+      protocolTypes: [SwiftNominalType],
+      allowsJavaImplementations: Bool
     )
 
     indirect case extractSwiftProtocolValue(
@@ -737,7 +746,12 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment)"
 
-      case .interfaceToSwiftObject(let inner, let swiftWrapperClassName, let protocolTypes):
+      case .interfaceToSwiftObject(
+        let inner,
+        let swiftWrapperClassName,
+        let protocolTypes,
+        let allowsJavaImplementations
+      ):
         let protocolNames = protocolTypes.map { $0.nominalTypeDecl.qualifiedName }
 
         let inner = inner.render(&printer, placeholder)
@@ -745,9 +759,7 @@ extension JNISwift2JavaGenerator {
         let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
         printer.print("let \(variableName): \(compositeProtocolName)")
 
-        printer.printBraceBlock(
-          "if environment.interface.IsInstanceOf(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.class) != 0"
-        ) { printer in
+        func printStandardJExtractBlock(_  printer: inout CodePrinter) {
           let pointerVariableName = "\(inner)pointer$"
           let typeMetadataVariableName = "\(inner)typeMetadata$"
           printer.print(
@@ -764,13 +776,28 @@ extension JNISwift2JavaGenerator {
 
           printer.print("\(variableName) = \(existentialName)")
         }
-        printer.printBraceBlock("else") { printer in
-          let arguments = protocolTypes.map { protocolType in
-            let nominalTypeDecl = protocolType.nominalTypeDecl
-            return "\(nominalTypeDecl.javaInterfaceVariableName): \(nominalTypeDecl.javaInterfaceName)(javaThis: \(inner)!, environment: environment)"
+
+        // If this protocol type supports being implemented by the user
+        // then we will check whether it is a JNI SwiftInstance type
+        // or if its a custom class implementing the interface.
+        if allowsJavaImplementations {
+          printer.printBraceBlock(
+            "if environment.interface.IsInstanceOf(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.class) != 0"
+          ) { printer in
+            printStandardJExtractBlock(&printer)
           }
-          printer.print("\(variableName) = \(swiftWrapperClassName)(\(arguments.joined(separator: ", ")))")
+          printer.printBraceBlock("else") { printer in
+            let arguments = protocolTypes.map { protocolType in
+              let nominalTypeDecl = protocolType.nominalTypeDecl
+              return "\(nominalTypeDecl.javaInterfaceVariableName): \(nominalTypeDecl.javaInterfaceName)(javaThis: \(inner)!, environment: environment)"
+            }
+            printer.print("\(variableName) = \(swiftWrapperClassName)(\(arguments.joined(separator: ", ")))")
+          }
+        } else {
+          printStandardJExtractBlock(&printer)
         }
+
+
         return variableName
 
       case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):

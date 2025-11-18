@@ -124,39 +124,22 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
-  private func printSwiftInterfaceWrapper(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-    let swiftNominal = type.swiftNominal
-    let wrapperName = swiftNominal.javaInterfaceSwiftProtocolWrapperName
-    let javaInterfaceVariableName = swiftNominal.javaInterfaceVariableName
-
-    printer.printBraceBlock("protocol \(wrapperName): \(type.qualifiedName)") { printer in
-      printer.print("var \(javaInterfaceVariableName): \(swiftNominal.javaInterfaceName) { get }")
+  private func printSwiftInterfaceWrapper(
+    _ printer: inout CodePrinter,
+    _ translatedWrapper: JavaInterfaceProtocolWrapper
+  ) throws {
+    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(translatedWrapper.swiftName)") { printer in
+      printer.print("var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }")
     }
     printer.println()
-    printer.printBraceBlock("extension \(wrapperName)") { printer in
-      let groupedVariables = Dictionary(grouping: type.variables, by: { $0.swiftDecl.id })
-      for (id, variable) in groupedVariables {
-        guard let getter = variable.first(where: { $0.apiKind == .getter }) else {
-          fatalError("getter not found for \(id)")
-        }
-        let setter = variable.first(where: { $0.apiKind == .setter })
-
-        printer.printBraceBlock(getter.swiftDecl.signatureString) { printer in
-          printer.printBraceBlock("get") { printer in
-            printer.print("fatalError()")
-          }
-
-          if let setter {
-            printer.printBraceBlock("set") { printer in
-              printer.print("fatalError()")
-            }
-          }
-        }
+    printer.printBraceBlock("extension \(translatedWrapper.wrapperName)") { printer in
+      for function in translatedWrapper.functions {
+        printInterfaceWrapperFunctionImpl(&printer, function, inside: translatedWrapper)
         printer.println()
       }
 
-      for method in type.methods {
-        printInterfaceWrapperFunctionImpl(&printer, method, javaInterfaceVariableName: javaInterfaceVariableName)
+      for variable in translatedWrapper.variables {
+        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
         printer.println()
       }
     }
@@ -164,67 +147,45 @@ extension JNISwift2JavaGenerator {
 
   private func printInterfaceWrapperFunctionImpl(
     _ printer: inout CodePrinter,
-    _ method: ImportedFunc,
-    javaInterfaceVariableName: String
+    _ function: JavaInterfaceProtocolWrapper.Function,
+    inside wrapper: JavaInterfaceProtocolWrapper
   ) {
-    printer.printBraceBlock(method.swiftDecl.signatureString) { printer in
-      let methodName = method.name
-
-      let parameters = method.functionSignature.parameters.map { parameter in
-        let parameterName = parameter.parameterName!
-
-        guard let importedNominalType = self.asImportedNominalTypeDecl(parameter.type) else {
-          return parameterName
-        }
-
-        // We are passing in an imported nominal type to Java
-        // so we must create a JavaWrapper type
-        printer.print(
-          """
-          let \(parameterName)Class = try! JavaClass<\(importedNominalType.swiftNominal.generatedJavaClassMacroName)>(environment: JavaVirtualMachine.shared().environment())
-          let \(parameterName)Pointer = UnsafeMutablePointer<\(importedNominalType.qualifiedName)>.allocate(capacity: 1)
-          \(parameterName)Pointer.initialize(to: \(parameterName))
-          """
-        )
-
-        return "\(parameterName)Class.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: \(parameterName)Pointer)))"
+    printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
+      let upcallArguments = zip(
+        function.originalFunctionSignature.parameters,
+        function.parameterConversions
+      ).map { param, conversion in
+        // Wrap-java does not extract parameter names, so no labels
+        conversion.render(&printer, param.parameterName!)
       }
 
-      let javaUpcall = "\(javaInterfaceVariableName).\(methodName)(\(parameters.joined(separator: ", ")))"
+      let javaUpcall = "\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
 
-      let resultType = method.functionSignature.result.type
-      if !method.functionSignature.result.type.isVoid {
-        guard let importedNominalType = self.asImportedNominalTypeDecl(resultType),
-              importedNominalType.swiftNominal.knownTypeKind == nil
-        else {
-          printer.print("return \(javaUpcall)")
-          return
-        }
-
-        // We are returning an imported nominal type to Swift
-        // so we must extract the memory address
-        let resultName = "_upcallResult"
-        printer.print(
-          """
-          guard let \(resultName) = \(javaUpcall) else {
-            fatalError("Upcall to \(methodName) unexpectedly returned nil")
-          }
-          let memoryAddress$ = \(resultName).as(JavaJNISwiftInstance.self)!.memoryAddress()
-          let pointer = UnsafeMutablePointer<StorageItem>(bitPattern: Int(memoryAddress$))!
-          return pointer.pointee
-          """
-        )
+      let resultType = function.originalFunctionSignature.result.type
+      let result = function.resultConversion.render(&printer, javaUpcall)
+      if resultType.isVoid {
+        printer.print(result)
       } else {
-        printer.print(javaUpcall)
+        printer.print("return \(result)")
       }
     }
   }
 
-  private func asImportedNominalTypeDecl(_ type: SwiftType) -> ImportedNominalType? {
-    self.analysis.importedTypes.first(where: ( { name, nominalType in
-      nominalType.swiftType == type
-    })).map {
-      $0.value
+  private func printerInterfaceWrapperVariable(
+    _ printer: inout CodePrinter,
+    _ variable: JavaInterfaceProtocolWrapper.Variable,
+    inside wrapper: JavaInterfaceProtocolWrapper
+  ) {
+    printer.printBraceBlock(variable.swiftDecl.signatureString) { printer in
+      printer.printBraceBlock("get") { printer in
+        printer.print("fatalError()")
+      }
+
+      if let setter = variable.setter {
+        printer.printBraceBlock("set") { printer in
+          printer.print("fatalError()")
+        }
+      }
     }
   }
 
@@ -289,7 +250,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-    try printSwiftInterfaceWrapper(&printer, type)
+    guard let protocolWrapper = self.protocolWrappers[type] else {
+      return
+    }
+
+    try printSwiftInterfaceWrapper(&printer, protocolWrapper)
   }
 
 
@@ -439,6 +404,23 @@ extension JNISwift2JavaGenerator {
     // For each parameter that is a generic or a protocol,
     // we generate a Swift class that conforms to all of those.
     for (parameter, protocolTypes) in protocolParameters {
+      let protocolWrappers: [JavaInterfaceProtocolWrapper] = protocolTypes.compactMap { protocolType in
+        guard let importedType = self.asImportedNominalTypeDecl(protocolType),
+              let wrapper = self.protocolWrappers[importedType]
+        else {
+          return nil
+        }
+        return wrapper
+      }
+
+      // Make sure we can generate wrappers for all the protocols
+      // that the parameter requires
+      guard protocolWrappers.count == protocolTypes.count else {
+        // We cannot extract a wrapper for this class
+        // so it must only be passed in by JExtract instances
+        continue
+      }
+
       guard let parameterName = parameter.parameterName else {
         // TODO: Throw
         fatalError()
@@ -448,16 +430,11 @@ extension JNISwift2JavaGenerator {
         parameterName: parameterName,
         parentName: decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
       )
-      let implementingProtocols = protocolTypes.compactMap {
-        $0.asNominalTypeDeclaration?.javaInterfaceSwiftProtocolWrapperName
-      }.joined(separator: ", ")
+      let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: ", ")
 
       printer.printBraceBlock("final class \(swiftClassName): \(implementingProtocols)") { printer in
-        let variables: [(String, String)] = protocolTypes.compactMap { protocolType in
-          guard let nominalType = protocolType.asNominalTypeDeclaration else {
-            return nil
-          }
-          return (nominalType.javaInterfaceVariableName, nominalType.javaInterfaceName)
+        let variables: [(String, String)] = protocolWrappers.map { wrapper in
+          return (wrapper.javaInterfaceVariableName, wrapper.javaInterfaceName)
         }
         for (name, type) in variables {
           printer.print("let \(name): \(type)")
@@ -473,6 +450,14 @@ extension JNISwift2JavaGenerator {
       }
     }
   }
+
+  private func asImportedNominalTypeDecl(_ type: SwiftType) -> ImportedNominalType? {
+      self.analysis.importedTypes.first(where: ( { name, nominalType in
+        nominalType.swiftType == type
+      })).map {
+        $0.value
+      }
+    }
 
   private func printFunctionDowncall(
     _ printer: inout CodePrinter,

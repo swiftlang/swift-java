@@ -260,3 +260,12 @@ extension ImportedFunc {
     }
   }
 }
+
+extension ImportedNominalType: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  public static func == (lhs: ImportedNominalType, rhs: ImportedNominalType) -> Bool {
+    return lhs === rhs
+  }
+}
