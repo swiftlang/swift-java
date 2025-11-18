@@ -468,7 +468,7 @@ extension JNISwift2JavaGenerator {
         return try translateProtocolParameter(
           protocolType: proto,
           parameterName: parameterName,
-          javaGenericName: "$T\(parameterPosition)"
+          javaGenericName: "_T\(parameterPosition)"
         )
 
       case .genericParameter(let generic):

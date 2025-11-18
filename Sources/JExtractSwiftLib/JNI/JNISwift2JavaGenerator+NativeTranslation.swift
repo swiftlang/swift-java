@@ -181,14 +181,18 @@ extension JNISwift2JavaGenerator {
       case .opaque(let proto), .existential(let proto):
         return try translateProtocolParameter(
           protocolType: proto,
-          parameterName: parameterName
+          methodName: methodName,
+          parameterName: parameterName,
+          parentName: parentName
         )
 
       case .genericParameter:
         if let concreteTy = type.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
           return try translateProtocolParameter(
             protocolType: concreteTy,
-            parameterName: parameterName
+            methodName: methodName,
+            parameterName: parameterName,
+            parentName: parentName
           )
         }
 
@@ -207,22 +211,23 @@ extension JNISwift2JavaGenerator {
 
     func translateProtocolParameter(
       protocolType: SwiftType,
-      parameterName: String
+      methodName: String,
+      parameterName: String,
+      parentName: String?
     ) throws -> NativeParameter {
       switch protocolType {
       case .nominal(let nominalType):
-        let protocolName = nominalType.nominalTypeDecl.qualifiedName
-        return try translateProtocolParameter(protocolNames: [protocolName], parameterName: parameterName)
+        return try translateProtocolParameter(protocolTypes: [nominalType], methodName: methodName, parameterName: parameterName, parentName: parentName)
 
       case .composite(let types):
-        let protocolNames = try types.map {
-          guard let nominalTypeName = $0.asNominalType?.nominalTypeDecl.qualifiedName else {
+        let protocolTypes = try types.map {
+          guard let nominalTypeName = $0.asNominalType else {
             throw JavaTranslationError.unsupportedSwiftType($0)
           }
           return nominalTypeName
         }
 
-        return try translateProtocolParameter(protocolNames: protocolNames, parameterName: parameterName)
+        return try translateProtocolParameter(protocolTypes: protocolTypes, methodName: methodName, parameterName: parameterName, parentName: parentName)
 
       default:
         throw JavaTranslationError.unsupportedSwiftType(protocolType)
@@ -230,8 +235,10 @@ extension JNISwift2JavaGenerator {
     }
 
     private func translateProtocolParameter(
-      protocolNames: [String],
-      parameterName: String
+      protocolTypes: [SwiftNominalType],
+      methodName: String,
+      parameterName: String,
+      parentName: String?
     ) throws -> NativeParameter {
       return NativeParameter(
         parameters: [
@@ -239,7 +246,12 @@ extension JNISwift2JavaGenerator {
         ],
         conversion: .interfaceToSwiftObject(
           .placeholder,
-          protocolNames: protocolNames
+          swiftWrapperClassName: JNISwift2JavaGenerator.protocolParameterWrapperClassName(
+            methodName: methodName,
+            parameterName: parameterName,
+            parentName: parentName
+          ),
+          protocolTypes: protocolTypes
         )
       )
     }
@@ -645,7 +657,8 @@ extension JNISwift2JavaGenerator {
 
     indirect case interfaceToSwiftObject(
       NativeSwiftConversionStep,
-      protocolNames: [String]
+      swiftWrapperClassName: String,
+      protocolTypes: [SwiftNominalType]
     )
 
     indirect case extractSwiftProtocolValue(
@@ -724,7 +737,9 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(fromJNI: \(inner), in: environment)"
 
-      case .interfaceToSwiftObject(let inner, let protocolNames):
+      case .interfaceToSwiftObject(let inner, let swiftWrapperClassName, let protocolTypes):
+        let protocolNames = protocolTypes.map { $0.nominalTypeDecl.qualifiedName }
+
         let inner = inner.render(&printer, placeholder)
         let variableName = "\(inner)swiftObject$"
         let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
@@ -750,11 +765,11 @@ extension JNISwift2JavaGenerator {
           printer.print("\(variableName) = \(existentialName)")
         }
         printer.printBraceBlock("else") { printer in
-          if protocolNames == ["Storage"] {
-            printer.print("\(variableName) = StorageJavaWrapper(javaStorage: JavaStorage(javaThis: \(inner)!, environment: environment))")
-          } else {
-            printer.print("fatalError()")
+          let arguments = protocolTypes.map { protocolType in
+            let nominalTypeDecl = protocolType.nominalTypeDecl
+            return "\(nominalTypeDecl.javaInterfaceVariableName): \(nominalTypeDecl.javaInterfaceName)(javaThis: \(inner)!, environment: environment)"
           }
+          printer.print("\(variableName) = \(swiftWrapperClassName)(\(arguments.joined(separator: ", ")))")
         }
         return variableName
 
