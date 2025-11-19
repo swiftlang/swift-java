@@ -250,7 +250,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
-    guard let protocolWrapper = self.protocolWrappers[type] else {
+    guard let protocolWrapper = self.interfaceProtocolWrappers[type] else {
       return
     }
 
@@ -406,7 +406,7 @@ extension JNISwift2JavaGenerator {
     for (parameter, protocolTypes) in protocolParameters {
       let protocolWrappers: [JavaInterfaceSwiftWrapper] = protocolTypes.compactMap { protocolType in
         guard let importedType = self.asImportedNominalTypeDecl(protocolType),
-              let wrapper = self.protocolWrappers[importedType]
+              let wrapper = self.interfaceProtocolWrappers[importedType]
         else {
           return nil
         }

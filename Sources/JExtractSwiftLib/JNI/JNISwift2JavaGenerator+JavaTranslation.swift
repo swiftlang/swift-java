@@ -23,7 +23,7 @@ extension JNISwift2JavaGenerator {
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-      protocolWrappers: self.protocolWrappers
+      protocolWrappers: self.interfaceProtocolWrappers
     )
   }
 
@@ -61,7 +61,7 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-        protocolWrappers: self.protocolWrappers
+        protocolWrappers: self.interfaceProtocolWrappers
       )
       translated = try translation.translate(enumCase: decl)
     } catch {

@@ -136,7 +136,7 @@ extension JNISwift2JavaGenerator {
     // If we cannot generate Swift wrappers
     // that allows the user to implement the wrapped interface in Java
     // then we require only JExtracted types can conform to this.
-    if !self.protocolWrappers.keys.contains(decl) {
+    if !self.interfaceProtocolWrappers.keys.contains(decl) {
       extends.append("JNISwiftInstance")
     }
 
