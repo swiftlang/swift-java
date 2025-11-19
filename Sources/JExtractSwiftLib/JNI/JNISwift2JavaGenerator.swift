@@ -80,10 +80,12 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       self.expectedOutputSwiftFiles = []
     }
 
-    // We translate all the protocol wrappers
-    // as we need them to know what protocols we can allow the user to implement themselves
-    // in Java.
-    self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.importedTypes.values))
+    if translator.config.enableJavaCallbacks ?? false {
+      // We translate all the protocol wrappers
+      // as we need them to know what protocols we can allow the user to implement themselves
+      // in Java.
+      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.importedTypes.values))
+    }
   }
 
   func generate() throws {

@@ -65,6 +65,8 @@ public struct Configuration: Codable {
     asyncFuncMode ?? .default
   }
 
+  public var enableJavaCallbacks: Bool? // FIXME: default it to false, but that plays not nice with Codable
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.

@@ -12,11 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJavaConfigurationShared
 import JExtractSwiftLib
 import Testing
 
 @Suite
 struct JNIProtocolTests {
+  var config: Configuration {
+    var config = Configuration()
+    config.enableJavaCallbacks = true
+    return config
+  }
+
   let source = """
     public protocol SomeProtocol {
       public func method() {}
@@ -36,6 +43,7 @@ struct JNIProtocolTests {
   func generatesJavaInterface() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -64,6 +72,7 @@ struct JNIProtocolTests {
   func generatesJavaClassWithExtends() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -77,6 +86,7 @@ struct JNIProtocolTests {
   func takeProtocol_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -95,6 +105,7 @@ struct JNIProtocolTests {
   func takeProtocol_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -148,6 +159,7 @@ struct JNIProtocolTests {
   func takeGeneric_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -166,6 +178,7 @@ struct JNIProtocolTests {
   func takeGeneric_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -199,6 +212,7 @@ struct JNIProtocolTests {
   func takeComposite_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -217,6 +231,7 @@ struct JNIProtocolTests {
   func takeComposite_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -268,6 +283,7 @@ struct JNIProtocolTests {
   func generatesProtocolWrappers() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [

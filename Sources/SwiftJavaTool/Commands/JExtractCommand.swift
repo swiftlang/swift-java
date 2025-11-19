@@ -81,6 +81,9 @@ extension SwiftJava {
 
     @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
     var asyncFuncMode: JExtractAsyncFuncMode?
+
+    @Flag(help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the sandbox mode in SwiftPM.")
+    var enableJavaCallbacks: Bool = false
   }
 }
 
@@ -95,6 +98,9 @@ extension SwiftJava.JExtractCommand {
     // @Flag does not support optional, so we check ourself if it is passed
     let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
     configure(&config.writeEmptyFiles, overrideWith: writeEmptyFiles)
+
+    let enableJavaCallbacks = CommandLine.arguments.contains("--enable-java-callbacks") ? true : nil
+    configure(&config.enableJavaCallbacks, overrideWith: enableJavaCallbacks)
 
     configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
