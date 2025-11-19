@@ -131,7 +131,18 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.printBraceBlock("public interface \(decl.swiftNominal.name)") { printer in
+    var extends = [String]()
+
+    // If we cannot generate Swift wrappers
+    // that allows the user to implement the wrapped interface in Java
+    // then we require only JExtracted types can conform to this.
+    if !self.protocolWrappers.keys.contains(decl) {
+      extends.append("JNISwiftInstance")
+    }
+
+    var extendsString = extends.isEmpty ? "" : ": \(extends.joined(separator: ", "))"
+
+    printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
       for initializer in decl.initializers {
         printFunctionDowncallMethods(&printer, initializer, signaturesOnly: true, ignoresArenas: true)
         printer.println()
