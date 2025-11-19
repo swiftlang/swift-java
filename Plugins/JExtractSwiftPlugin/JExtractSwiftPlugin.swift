@@ -126,13 +126,19 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     print("[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))")
 
+    var jextractOutputFiles = outputSwiftFiles
+
+    let runJavaCallbacksPhases = configuration?.enableJavaCallbacks ?? false && configuration?.effectiveMode == .jni
+
     // Extract list of all sources
     let javaSourcesListFileName = "jextract-generated-sources.txt"
     let javaSourcesFile = outputJavaDirectory.appending(path: javaSourcesListFileName)
-
-    arguments += [
-      "--generated-java-sources-list-file-output", javaSourcesListFileName
-    ]
+    if runJavaCallbacksPhases {
+      arguments += [
+        "--generated-java-sources-list-file-output", javaSourcesListFileName
+      ]
+      jextractOutputFiles += [javaSourcesFile]
+    }
 
     commands += [
       .buildCommand(
@@ -140,12 +146,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         executable: toolURL,
         arguments: arguments,
         inputFiles: [ configFile ] + swiftFiles,
-        outputFiles: outputSwiftFiles + [javaSourcesFile]
+        outputFiles: jextractOutputFiles
       )
     ]
 
     // If we do not need Java callbacks, we can skip the remaining steps.
-    guard configuration?.enableJavaCallbacks ?? false else {
+    guard runJavaCallbacksPhases else {
       return commands
     }
 
