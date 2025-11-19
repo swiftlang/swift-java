@@ -218,7 +218,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           "--output-directory", context.pluginWorkDirectoryURL.path(percentEncoded: false),
           "--cp", javaClassFileURL.path(percentEncoded: false),
           "--swift-module", sourceModule.name,
-          "--swift-prefix", "Java"
+          "--swift-type-prefix", "Java"
         ],
         inputFiles: [javaClassFileURL],
         outputFiles: [swiftJavaConfigURL]

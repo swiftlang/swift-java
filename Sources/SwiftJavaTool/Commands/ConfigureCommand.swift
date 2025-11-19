@@ -60,7 +60,7 @@ extension SwiftJava {
     }
 
     @Option(help: "A prefix that will be added to the names of the Swift types")
-    var swiftPrefix: String?
+    var swiftTypePrefix: String?
   }
 }
 
@@ -232,8 +232,8 @@ extension SwiftJava.ConfigureCommand {
     }
 
     var swiftName = javaCanonicalName.defaultSwiftNameForJavaClass
-    if let swiftPrefix {
-      swiftName = "\(swiftPrefix)\(swiftName)"
+    if let swiftTypePrefix {
+      swiftName = "\(swiftTypePrefix)\(swiftName)"
     }
 
     if let configuredSwiftName = configuration.classes![javaCanonicalName] {
