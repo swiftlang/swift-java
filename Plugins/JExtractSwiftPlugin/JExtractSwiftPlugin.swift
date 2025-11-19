@@ -131,7 +131,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     print("[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))")
 
     // Extract list of all sources
-    let javaSourcesFile = outputJavaDirectory.appending(path: "sources.txt")
+    let javaSourcesListFileName = "jextract-generated-sources.txt"
+    let javaSourcesFile = outputJavaDirectory.appending(path: javaSourcesListFileName)
+
+    arguments += [
+      "--generated-java-sources-list-file-output", javaSourcesListFileName
+    ]
 
     commands += [
       .buildCommand(
@@ -156,7 +161,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     commands += [
       .buildCommand(
-        displayName: "Build SwiftKitCore",
+        displayName: "Build SwiftKitCore using Gradle (Java)",
         executable: swiftJavaDirectory.appending(path: "gradlew"),
         arguments: [
           ":SwiftKitCore:build",
@@ -172,20 +177,13 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // Compile the jextracted sources
     let javaHome = URL(filePath: findJavaHome())
-  #if os(Windows)
-    let javac = "javac.exe"
-    let jar = "jar.exe"
-  #else
-    let javac = "javac"
-    let jar = "jar"
-  #endif
 
     commands += [
       .buildCommand(
         displayName: "Build extracted Java sources",
         executable: javaHome
           .appending(path: "bin")
-          .appending(path: javac),
+          .appending(path: self.javacName),
         arguments: [
           "@\(javaSourcesFile.path(percentEncoded: false))",
           "-d", javaClassFileURL.path(percentEncoded: false),
@@ -197,32 +195,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       )
     ]
 
-    // Wrap into JAR that we can use `swift-java configure` on
-//    let jarFileURL = context.pluginWorkDirectoryURL.appending(path: "generated-sources.jar")
-//
-//    commands += [
-//      .buildCommand(
-//        displayName: "Wrap compiled Java sources into .jar",
-//        executable: javaHome
-//          .appending(path: "bin")
-//          .appending(path: jar),
-//        arguments: [
-//          "--create",
-//          "--file", jarFileURL.path(percentEncoded: false),
-//          "-C", javaClassFileURL.path(percentEncoded: false),
-//          "."
-//        ],
-//        inputFiles: [javaClassFileURL],
-//        outputFiles: [jarFileURL]
-//      )
-//    ]
-
     // Run `configure` to extract a swift-java config to use for wrap-java
     let swiftJavaConfigURL = context.pluginWorkDirectoryURL.appending(path: "swift-java.config")
 
     commands += [
       .buildCommand(
-        displayName: "Wrap compiled Java sources using wrap-java",
+        displayName: "Output swift-java.config that contains all extracted Java sources",
         executable: toolURL,
         arguments: [
           "configure",
@@ -262,6 +240,14 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     ]
 
     return commands
+  }
+
+  var javacName: String {
+#if os(Windows)
+    "javac.exe"
+#else
+    "javac"
+#endif
   }
 
   /// Find the manifest files from other swift-java executions in any targets

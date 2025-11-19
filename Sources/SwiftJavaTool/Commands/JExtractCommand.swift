@@ -84,6 +84,9 @@ extension SwiftJava {
 
     @Flag(help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the sandbox mode in SwiftPM.")
     var enableJavaCallbacks: Bool = false
+
+    @Option(help: "If specified, JExtract will output to this file a list of paths to all generated Java source files")
+    var generatedJavaSourcesListFileOutput: String?
   }
 }
 
@@ -106,6 +109,7 @@ extension SwiftJava.JExtractCommand {
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
     configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
+    configure(&config.generatedJavaSourcesListFileOutput, overrideWith: self.generatedJavaSourcesListFileOutput)
 
     try checkModeCompatibility(config: config)
 

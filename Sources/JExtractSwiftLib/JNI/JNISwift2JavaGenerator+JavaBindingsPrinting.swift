@@ -73,9 +73,9 @@ extension JNISwift2JavaGenerator {
       logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
     }
 
-    // Write sources.txt file
-    if !exportedFileNames.isEmpty {
-      let outputPath = URL(fileURLWithPath: javaOutputDirectory).appending(path: "sources.txt")
+    // Write java sources list file
+    if let generatedJavaSourcesListFileOutput = config.generatedJavaSourcesListFileOutput, !exportedFileNames.isEmpty {
+      let outputPath = URL(fileURLWithPath: javaOutputDirectory).appending(path: generatedJavaSourcesListFileOutput)
       try exportedFileNames.joined(separator: "\n").write(
         to: outputPath,
         atomically: true,

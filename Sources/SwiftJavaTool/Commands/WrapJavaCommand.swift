@@ -58,7 +58,7 @@ extension SwiftJava {
     @Option(help: "Match java package directory structure with generated Swift files")
     var swiftMatchPackageDirectoryStructure: Bool = false
 
-    @Option
+    @Option(help: "If specified, a single Swift file will be generated containing all the generated code")
     var singleSwiftFileOutput: String?
   }
 }

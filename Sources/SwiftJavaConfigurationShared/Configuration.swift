@@ -67,6 +67,8 @@ public struct Configuration: Codable {
 
   public var enableJavaCallbacks: Bool? // FIXME: default it to false, but that plays not nice with Codable
 
+  public var generatedJavaSourcesListFileOutput: String?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
