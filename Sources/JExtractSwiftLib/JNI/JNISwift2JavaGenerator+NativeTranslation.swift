@@ -22,7 +22,7 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
-    let protocolWrappers: [ImportedNominalType: JavaInterfaceProtocolWrapper]
+    let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -114,8 +114,8 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(type)
           }
 
@@ -123,7 +123,7 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: javaType)
             ],
-            conversion: .initializeJavaKitWrapper(
+            conversion: .initializeSwiftJavaWrapper(
               .unwrapOptional(
                 .placeholder,
                 name: parameterName,
@@ -294,8 +294,8 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
@@ -303,7 +303,7 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: javaType)
             ],
-            conversion: .optionalMap(.initializeJavaKitWrapper(.placeholder, wrapperName: nominalTypeName))
+            conversion: .optionalMap(.initializeSwiftJavaWrapper(.placeholder, wrapperName: nominalTypeName))
           )
         }
 
@@ -377,7 +377,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           // TODO: Should be the same as above
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
@@ -497,7 +497,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
+        if nominalType.isSwiftJavaWrapper {
           throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
         }
 
@@ -544,7 +544,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
         }
 
@@ -592,7 +592,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
         }
 
@@ -693,7 +693,7 @@ extension JNISwift2JavaGenerator {
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
-    indirect case initializeJavaKitWrapper(NativeSwiftConversionStep, wrapperName: String)
+    indirect case initializeSwiftJavaWrapper(NativeSwiftConversionStep, wrapperName: String)
 
     indirect case optionalLowering(NativeSwiftConversionStep, discriminatorName: String, valueName: String)
 
@@ -916,7 +916,7 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
 
-      case .initializeJavaKitWrapper(let inner, let wrapperName):
+      case .initializeSwiftJavaWrapper(let inner, let wrapperName):
         let inner = inner.render(&printer, placeholder)
         return "\(wrapperName)(javaThis: \(inner), environment: environment)"
 

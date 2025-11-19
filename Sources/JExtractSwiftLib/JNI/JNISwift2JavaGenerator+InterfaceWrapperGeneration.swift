@@ -18,24 +18,27 @@ import SwiftSyntax
 
 extension JNISwift2JavaGenerator {
 
-  func translateProtocolWrappers(
+  func generateInterfaceWrappers(
     _ types: [ImportedNominalType]
-  ) -> [ImportedNominalType: JavaInterfaceProtocolWrapper] {
-    var wrappers = [ImportedNominalType: JavaInterfaceProtocolWrapper]()
+  ) -> [ImportedNominalType: JavaInterfaceSwiftWrapper] {
+    var wrappers = [ImportedNominalType: JavaInterfaceSwiftWrapper]()
 
     for type in types {
       do {
-        let translator = JavaInterfaceProtocolTranslator()
-        wrappers[type] = try translator.translate(type)
+        let translator = JavaInterfaceProtocolWrapperGenerator()
+        wrappers[type] = try translator.generate(for: type)
       } catch {
-        self.logger.debug("Failed to generate protocol wrapper for: '\(type.swiftNominal.qualifiedName)'; \(error)")
+        self.logger.warning("Failed to generate protocol wrapper for: '\(type.swiftNominal.qualifiedName)'; \(error)")
       }
     }
 
     return wrappers
   }
 
-  struct JavaInterfaceProtocolWrapper {
+  /// A type that describes a Swift protocol
+  /// that uses an underlying wrap-java `@JavaInterface`
+  /// to make callbacks to Java from Swift using protocols.
+  struct JavaInterfaceSwiftWrapper {
     let protocolType: SwiftNominalType
     let functions: [Function]
     let variables: [Variable]
@@ -72,8 +75,8 @@ extension JNISwift2JavaGenerator {
   }
 
 
-  struct JavaInterfaceProtocolTranslator {
-    func translate(_ type: ImportedNominalType) throws -> JavaInterfaceProtocolWrapper {
+  struct JavaInterfaceProtocolWrapperGenerator {
+    func generate(for type: ImportedNominalType) throws -> JavaInterfaceSwiftWrapper {
       let functions = try type.methods.map { method in
         try translate(function: method)
       }
@@ -88,21 +91,21 @@ extension JNISwift2JavaGenerator {
         return try self.translateVariable(getter: getter, setter: setter)
       }
 
-      return JavaInterfaceProtocolWrapper(
+      return JavaInterfaceSwiftWrapper(
         protocolType: SwiftNominalType(nominalTypeDecl: type.swiftNominal),
         functions: functions,
         variables: variables
       )
     }
 
-    func translate(function: ImportedFunc) throws -> JavaInterfaceProtocolWrapper.Function {
+    private func translate(function: ImportedFunc) throws -> JavaInterfaceSwiftWrapper.Function {
       let parameters = try function.functionSignature.parameters.map {
         try self.translateParameter($0)
       }
 
       let result = try translateResult(function.functionSignature.result, methodName: function.name)
 
-      return JavaInterfaceProtocolWrapper.Function(
+      return JavaInterfaceSwiftWrapper.Function(
         swiftFunctionName: function.name,
         originalFunctionSignature: function.functionSignature,
         swiftDecl: function.swiftDecl,
@@ -111,8 +114,8 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    func translateVariable(getter: ImportedFunc, setter: ImportedFunc?) throws -> JavaInterfaceProtocolWrapper.Variable {
-      return try JavaInterfaceProtocolWrapper.Variable(
+    private func translateVariable(getter: ImportedFunc, setter: ImportedFunc?) throws -> JavaInterfaceSwiftWrapper.Variable {
+      return try JavaInterfaceSwiftWrapper.Variable(
         swiftDecl: getter.swiftDecl, // they should be the same
         getter: translate(function: getter),
         setter: setter.map { try self.translate(function: $0) }
@@ -239,7 +242,6 @@ extension JNISwift2JavaGenerator {
 
   /// Describes how to convert values from and to wrap-java types
   enum UpcallConversionStep {
-    /// The value being converted
     case placeholder
 
     case constant(String)

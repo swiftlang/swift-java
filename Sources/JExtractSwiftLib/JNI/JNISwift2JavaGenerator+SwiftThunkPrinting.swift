@@ -126,7 +126,7 @@ extension JNISwift2JavaGenerator {
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
   private func printSwiftInterfaceWrapper(
     _ printer: inout CodePrinter,
-    _ translatedWrapper: JavaInterfaceProtocolWrapper
+    _ translatedWrapper: JavaInterfaceSwiftWrapper
   ) throws {
     printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(translatedWrapper.swiftName)") { printer in
       printer.print("var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }")
@@ -147,8 +147,8 @@ extension JNISwift2JavaGenerator {
 
   private func printInterfaceWrapperFunctionImpl(
     _ printer: inout CodePrinter,
-    _ function: JavaInterfaceProtocolWrapper.Function,
-    inside wrapper: JavaInterfaceProtocolWrapper
+    _ function: JavaInterfaceSwiftWrapper.Function,
+    inside wrapper: JavaInterfaceSwiftWrapper
   ) {
     printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
       let upcallArguments = zip(
@@ -173,8 +173,8 @@ extension JNISwift2JavaGenerator {
 
   private func printerInterfaceWrapperVariable(
     _ printer: inout CodePrinter,
-    _ variable: JavaInterfaceProtocolWrapper.Variable,
-    inside wrapper: JavaInterfaceProtocolWrapper
+    _ variable: JavaInterfaceSwiftWrapper.Variable,
+    inside wrapper: JavaInterfaceSwiftWrapper
   ) {
     printer.printBraceBlock(variable.swiftDecl.signatureString) { printer in
       printer.printBraceBlock("get") { printer in
@@ -296,7 +296,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-      let nativeParametersClassName = "\(javaPackagePath)/\(enumCase.enumName)$\(enumCase.name)$$NativeParameters"
+      let nativeParametersClassName = "\(enumCase.enumName)$\(enumCase.name)$_NativeParameters"
       let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
 
       return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
@@ -404,7 +404,7 @@ extension JNISwift2JavaGenerator {
     // For each parameter that is a generic or a protocol,
     // we generate a Swift class that conforms to all of those.
     for (parameter, protocolTypes) in protocolParameters {
-      let protocolWrappers: [JavaInterfaceProtocolWrapper] = protocolTypes.compactMap { protocolType in
+      let protocolWrappers: [JavaInterfaceSwiftWrapper] = protocolTypes.compactMap { protocolType in
         guard let importedType = self.asImportedNominalTypeDecl(protocolType),
               let wrapper = self.protocolWrappers[importedType]
         else {

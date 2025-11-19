@@ -20,7 +20,7 @@ Reasons why you might want to reach for Swift and Java interoperability include,
 - Reuse existing libraries which exist in one ecosystem, but don't have a direct equivalent in the other
 
 SwiftJava is offering several core libraries which support language interoperability:
-- `JavaKit` (Swift -> Java) - JNI-based support library and Swift macros
+- `SwiftJava` (Swift -> Java) - JNI-based support library and Swift macros
 - `SwiftKit` (Java -> Swift) - Support library for Java calling Swift code (either using JNI or FFM)
 - `swift-java` - command line tool; Supports source generation and also dependency management operations
 - Build tool integration - SwiftPM Plugin

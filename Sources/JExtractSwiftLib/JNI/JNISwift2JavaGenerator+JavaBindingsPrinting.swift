@@ -391,7 +391,7 @@ extension JNISwift2JavaGenerator {
           ["\(conversion.native.javaType) \(value.parameter.name)"]
         }
 
-        printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
+        printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
       self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, signaturesOnly: false, ignoresArenas: false)

@@ -79,7 +79,7 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
-    let protocolWrappers: [ImportedNominalType: JavaInterfaceProtocolWrapper]
+    let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
@@ -112,7 +112,7 @@ extension JNISwift2JavaGenerator {
 
       let caseName = enumCase.name.firstCharacterUppercased
       let enumName = enumCase.enumType.nominalTypeDecl.name
-      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName).$NativeParameters")
+      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName)._NativeParameters")
       let getAsCaseName = "getAs\(caseName)"
       // If the case has no parameters, we can skip the native call.
       let constructRecordConversion = JavaNativeConversionStep.method(.constant("Optional"), function: "of", arguments: [
@@ -413,8 +413,8 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
@@ -621,8 +621,8 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
@@ -696,7 +696,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
+        if nominalType.isSwiftJavaWrapper {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
@@ -782,7 +782,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
@@ -829,7 +829,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 
@@ -878,7 +878,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 

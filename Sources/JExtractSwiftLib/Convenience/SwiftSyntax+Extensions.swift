@@ -128,7 +128,7 @@ extension WithModifiersSyntax {
 }
 
 extension AttributeListSyntax.Element {
-  /// Whether this node has `JavaKit` attributes.
+  /// Whether this node has `SwiftJava` attributes.
   var isJava: Bool {
     guard case let .attribute(attr) = self else {
       // FIXME: Handle #if.

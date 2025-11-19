@@ -41,7 +41,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl] = [:]
   var translatedEnumCases: [ImportedEnumCase: TranslatedEnumCase] = [:]
-  var protocolWrappers: [ImportedNominalType: JavaInterfaceProtocolWrapper] = [:]
+  var protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper] = [:]
 
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
@@ -85,7 +85,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     // First we translate all the protocol wrappers
     // as we need them to know what protocols we can allow the user to implement themselves
     // in Java.
-    self.protocolWrappers = self.translateProtocolWrappers(Array(self.analysis.importedTypes.values))
+    self.protocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.importedTypes.values))
 
     try writeSwiftThunkSources()
     try writeExportedJavaSources()
