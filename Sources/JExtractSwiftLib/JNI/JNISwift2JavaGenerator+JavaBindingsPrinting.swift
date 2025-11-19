@@ -139,8 +139,7 @@ extension JNISwift2JavaGenerator {
     if !self.interfaceProtocolWrappers.keys.contains(decl) {
       extends.append("JNISwiftInstance")
     }
-
-    var extendsString = extends.isEmpty ? "" : ": \(extends.joined(separator: ", "))"
+    let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: ", "))"
 
     printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
       for initializer in decl.initializers {

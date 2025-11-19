@@ -1325,5 +1325,7 @@ extension JNISwift2JavaGenerator {
     /// The user has not supplied a mapping from `SwiftType` to
     /// a java class.
     case wrappedJavaClassTranslationNotProvided(SwiftType)
+
+    case protocolVariablesNotSupported
   }
 }

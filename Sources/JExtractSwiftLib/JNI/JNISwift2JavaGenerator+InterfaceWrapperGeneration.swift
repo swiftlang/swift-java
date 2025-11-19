@@ -81,6 +81,11 @@ extension JNISwift2JavaGenerator {
         try translate(function: method)
       }
 
+      // FIXME: Finish support for variables
+      if !type.variables.isEmpty {
+        throw JavaTranslationError.protocolVariablesNotSupported
+      }
+
       let variables = try Dictionary(grouping: type.variables, by: { $0.swiftDecl.id }).map { (id, funcs) in
         assert(funcs.count > 0 && funcs.count <= 2, "Variables must contain a getter and optionally a setter")
         guard let getter = funcs.first(where: { $0.apiKind == .getter }) else {

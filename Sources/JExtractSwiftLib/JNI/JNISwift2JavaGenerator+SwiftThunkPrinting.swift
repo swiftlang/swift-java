@@ -138,10 +138,11 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
-      for variable in translatedWrapper.variables {
-        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
-        printer.println()
-      }
+      // FIXME: Add support for protocol variables
+//      for variable in translatedWrapper.variables {
+//        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
+//        printer.println()
+//      }
     }
   }
 
@@ -176,6 +177,8 @@ extension JNISwift2JavaGenerator {
     _ variable: JavaInterfaceSwiftWrapper.Variable,
     inside wrapper: JavaInterfaceSwiftWrapper
   ) {
+    // FIXME: Add support for variables. This won't get printed yet
+    // so we no need to worry about fatalErrors.
     printer.printBraceBlock(variable.swiftDecl.signatureString) { printer in
       printer.printBraceBlock("get") { printer in
         printer.print("fatalError()")
