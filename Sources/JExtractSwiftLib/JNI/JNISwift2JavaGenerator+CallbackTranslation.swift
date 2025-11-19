@@ -120,16 +120,31 @@ extension JNISwift2JavaGenerator {
     }
 
     private func translateParameter(_ parameter: SwiftParameter) throws -> UpcallConversionStep {
-      let parameterName = parameter.parameterName!
+      try self.translateParameter(parameterName: parameter.parameterName!, type: parameter.type)
+    }
 
-      switch parameter.type {
+    private func translateParameter(parameterName: String, type: SwiftType) throws -> UpcallConversionStep {
+
+      switch type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard knownType.isDirectlyTranslatedToWrapJava else {
-            throw JavaTranslationError.unsupportedSwiftType(parameter.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(type)
+            }
+            return try translateOptionalParameter(
+              name: parameterName,
+              wrappedType: genericArgs[0]
+            )
 
-          return .placeholder
+          default:
+            guard knownType.isDirectlyTranslatedToWrapJava else {
+              throw JavaTranslationError.unsupportedSwiftType(type)
+            }
+
+            return .placeholder
+          }
         }
 
         // We assume this is then a JExtracted Swift class
@@ -142,25 +157,59 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array:
-        throw JavaTranslationError.unsupportedSwiftType(parameter.type)
+      case .optional(let wrappedType):
+        return try translateOptionalParameter(
+          name: parameterName,
+          wrappedType: wrappedType
+        )
+
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .array:
+        throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
 
+    private func translateOptionalParameter(name: String, wrappedType: SwiftType) throws -> UpcallConversionStep {
+      let wrappedConversion = try translateParameter(parameterName: name, type: wrappedType)
+      return .toJavaOptional(.map(.placeholder, body: wrappedConversion))
+    }
+
     private func translateResult(_ result: SwiftResult, methodName: String) throws -> UpcallConversionStep {
-      switch result.type {
+      try self.translateResult(type: result.type, methodName: methodName)
+    }
+
+    private func translateResult(
+      type: SwiftType,
+      methodName: String,
+      allowNilForObjects: Bool = false
+    ) throws -> UpcallConversionStep {
+      switch type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard knownType.isDirectlyTranslatedToWrapJava else {
-            throw JavaTranslationError.unsupportedSwiftType(result.type)
-          }
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(type)
+            }
+            return try self.translateOptionalResult(
+              wrappedType: genericArgs[0],
+              methodName: methodName
+            )
 
-          return .placeholder
+          default:
+            guard knownType.isDirectlyTranslatedToWrapJava else {
+              throw JavaTranslationError.unsupportedSwiftType(type)
+            }
+            return .placeholder
+          }
         }
+
+        let inner: UpcallConversionStep = !allowNilForObjects ?
+          .unwrapOptional(.placeholder, message: "Upcall to \(methodName) unexpectedly returned nil")
+          : .placeholder
 
         // We assume this is then a JExtracted Swift class
         return .toSwiftClass(
-          .unwrapOptional(.placeholder, message: "Upcall to \(methodName) unexpectedly returned nil"),
+          inner,
           name: "result$",
           nominalType: nominalType
         )
@@ -168,9 +217,22 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array:
-        throw JavaTranslationError.unsupportedSwiftType(result.type)
+      case .optional(let wrappedType):
+        return try self.translateOptionalResult(wrappedType: wrappedType, methodName: methodName)
+
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .array:
+        throw JavaTranslationError.unsupportedSwiftType(type)
       }
+    }
+
+    private func translateOptionalResult(wrappedType: SwiftType, methodName: String) throws -> UpcallConversionStep {
+      // The `fromJavaOptional` will handle the nullability
+      let wrappedConversion = try translateResult(
+        type: wrappedType,
+        methodName: methodName,
+        allowNilForObjects: true
+      )
+      return .map(.fromJavaOptional(.placeholder), body: wrappedConversion)
     }
   }
 }
@@ -198,6 +260,12 @@ extension JNISwift2JavaGenerator {
       UpcallConversionStep,
       message: String
     )
+
+    indirect case toJavaOptional(UpcallConversionStep)
+
+    indirect case fromJavaOptional(UpcallConversionStep)
+
+    indirect case map(UpcallConversionStep, body: UpcallConversionStep)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -245,6 +313,23 @@ extension JNISwift2JavaGenerator {
         )
 
         return "unwrapped$"
+
+      case .toJavaOptional(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).toJavaOptional()"
+
+      case .fromJavaOptional(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "Optional(javaOptional: \(inner))"
+
+      case .map(let inner, let body):
+        let inner = inner.render(&printer, placeholder)
+        var printer = CodePrinter()
+        printer.printBraceBlock("\(inner).map") { printer in
+          let body = body.render(&printer, "$0")
+          printer.print("return \(body)")
+        }
+        return printer.finalize()
       }
     }
 }

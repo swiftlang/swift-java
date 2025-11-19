@@ -19,9 +19,9 @@ import org.swift.swiftkit.core.SwiftArena;
 import org.swift.swiftkit.core.annotations.Unsigned;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProtocolCallbacksTest {
     static class JavaCallbacks implements CallbackProtocol {
@@ -79,6 +79,11 @@ public class ProtocolCallbacksTest {
         }
 
         @Override
+        public OptionalLong withOptionalInt64(OptionalLong input) {
+            return input;
+        }
+
+        @Override
         public Optional<MySwiftClass> withOptionalObject(Optional<MySwiftClass> input) {
             return input;
         }
@@ -90,7 +95,7 @@ public class ProtocolCallbacksTest {
             JavaCallbacks callbacks = new JavaCallbacks();
             var object = MySwiftClass.init(5, 3, arena);
             var optionalObject = Optional.of(MySwiftClass.init(10, 10, arena));
-            var output = MySwiftLibrary.outputCallbacks(callbacks, true, (byte) 1, (char) 16, (short) 16, (int) 32, 64L, 1.34f, 1.34, "Hello from Java!", object, optionalObject, arena);
+            var output = MySwiftLibrary.outputCallbacks(callbacks, true, (byte) 1, (char) 16, (short) 16, (int) 32, 64L, 1.34f, 1.34, "Hello from Java!", object, OptionalLong.empty(), optionalObject, arena);
 
             assertEquals(1, output.getInt8());
             assertEquals(16, output.getUint16());
@@ -100,6 +105,7 @@ public class ProtocolCallbacksTest {
             assertEquals(1.34f, output.get_float());
             assertEquals(1.34, output.get_double());
             assertEquals("Hello from Java!", output.getString());
+            assertFalse(output.getOptionalInt64().isPresent());
             assertEquals(5, output.getObject(arena).getX());
             assertEquals(3, output.getObject(arena).getY());
 

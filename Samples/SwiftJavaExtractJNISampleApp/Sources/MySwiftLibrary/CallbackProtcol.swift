@@ -26,6 +26,7 @@ public protocol CallbackProtocol {
   func withString(_ input: String) -> String
   func withVoid()
   func withObject(_ input: MySwiftClass) -> MySwiftClass
+  func withOptionalInt64(_ input: Int64?) -> Int64?
   func withOptionalObject(_ input: MySwiftClass?) -> Optional<MySwiftClass>
 }
 
@@ -40,6 +41,7 @@ public struct CallbackOutput {
   public let _double: Double
   public let string: String
   public let object: MySwiftClass
+  public let optionalInt64: Int64?
   public let optionalObject: MySwiftClass?
 }
 
@@ -55,6 +57,7 @@ public func outputCallbacks(
   _double: Double,
   string: String,
   object: MySwiftClass,
+  optionalInt64: Int64?,
   optionalObject: MySwiftClass?
 ) -> CallbackOutput {
   return CallbackOutput(
@@ -68,6 +71,7 @@ public func outputCallbacks(
     _double: callbacks.withDouble(_double),
     string: callbacks.withString(string),
     object: callbacks.withObject(object),
+    optionalInt64: callbacks.withOptionalInt64(optionalInt64),
     optionalObject: callbacks.withOptionalObject(optionalObject)
   )
 }
