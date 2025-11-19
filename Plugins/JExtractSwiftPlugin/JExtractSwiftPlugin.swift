@@ -26,10 +26,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
     let toolURL = try context.tool(named: "SwiftJavaTool").url
 
-    // The URL of the compiled Java sources
-    let javaClassFileURL = context.pluginWorkDirectoryURL
-      .appending(path: "compiled-java-output")
-
     var commands: [Command] = []
 
     guard let sourceModule = target.sourceModule else { return [] }
@@ -147,6 +143,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         outputFiles: outputSwiftFiles + [javaSourcesFile]
       )
     ]
+
+    // If we do not need Java callbacks, we can skip the remaining steps.
+    guard configuration?.enableJavaCallbacks ?? false else {
+      return commands
+    }
+
+    // The URL of the compiled Java sources
+    let javaClassFileURL = context.pluginWorkDirectoryURL
+      .appending(path: "compiled-java-output")
 
     // Build SwiftKitCore and get the classpath
     // as the jextracted sources will depend on that
