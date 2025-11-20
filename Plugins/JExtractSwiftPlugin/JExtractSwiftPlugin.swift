@@ -63,6 +63,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
+
       "--swift-module", sourceModule.name,
       "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
@@ -75,6 +76,16 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
+
+    if let mode = configuration?.mode {
+      arguments.append("--mode")
+      arguments.append(mode.rawValue)
+    }
+
+    if let logLevel = configuration?.logLevel {
+      arguments.append("--log-level")
+      arguments.append(logLevel.rawValue)
+    }
 
     let dependentConfigFilesArguments = dependentConfigFiles.flatMap { moduleAndConfigFile in
       let (moduleName, configFile) = moduleAndConfigFile
