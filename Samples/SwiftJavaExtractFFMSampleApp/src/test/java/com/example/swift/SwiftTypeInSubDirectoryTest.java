@@ -24,47 +24,14 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MySwiftClassTest {
-
-    void checkPaths(Throwable throwable) {
-        var paths = SwiftLibraries.getJavaLibraryPath().split(":");
-        for (var path : paths) {
-            Stream.of(new File(path).listFiles())
-                    .filter(file -> !file.isDirectory())
-                    .forEach((file) -> {
-                        System.out.println("  - " + file.getPath());
-                    });
-        }
-
-        throw new RuntimeException(throwable);
-    }
+public class SwiftTypeInSubDirectoryTest {
 
     @Test
     void test_MySwiftClass_voidMethod() {
-        try(var arena = AllocatingSwiftArena.ofConfined()) {
-            MySwiftClass o = MySwiftClass.init(12, 42, arena);
-            o.voidMethod();
-        } catch (Throwable throwable) {
-            checkPaths(throwable);
-        }
-    }
-
-    @Test
-    void test_MySwiftClass_makeIntMethod() {
-        try(var arena = AllocatingSwiftArena.ofConfined()) {
-            MySwiftClass o = MySwiftClass.init(12, 42, arena);
-            var got = o.makeIntMethod();
-            assertEquals(12, got);
-        }
-    }
-
-    @Test
-    @Disabled // TODO: Need var mangled names in interfaces
-    void test_MySwiftClass_property_len() {
-        try(var arena = AllocatingSwiftArena.ofConfined()) {
-            MySwiftClass o = MySwiftClass.init(12, 42, arena);
-            var got = o.getLen();
-            assertEquals(12, got);
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            SwiftTypeInSubDirectory o = SwiftTypeInSubDirectory.init(arena);
+            var num = o.hello();
+            assertEquals(12, num);
         }
     }
 

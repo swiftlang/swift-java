@@ -14,7 +14,11 @@
 
 import Foundation
 
-let PATH_SEPARATOR = "/"  // TODO: Windows
+#if os(Windows)
+let PATH_SEPARATOR = "\\"
+#else
+let PATH_SEPARATOR = "/"
+#endif
 
 public struct CodePrinter {
   var contents: String = ""

@@ -93,7 +93,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       $0.pathExtension == "swift"
     }
 
-    // Output Swift files are just Java filename based converted to Swift files one-to-one
+    // Output files are flattened filenames of the inputs, with the appended +SwiftJava suffix.
     var outputSwiftFiles: [URL] = swiftFiles.compactMap { sourceFileURL in
       guard sourceFileURL.isFileURL else {
         return nil as URL?
@@ -104,7 +104,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         fatalError("Could not get relative path for source file \(sourceFilePath)")
       }
       let outputURL = outputSwiftDirectory
-        .appending(path: String(sourceFilePath.dropFirst(sourceDir.count).dropLast(sourceFileURL.lastPathComponent.count + 1)))
 
       let inputFileName = sourceFileURL.deletingPathExtension().lastPathComponent
       return outputURL.appending(path: "\(inputFileName)+SwiftJava.swift")
