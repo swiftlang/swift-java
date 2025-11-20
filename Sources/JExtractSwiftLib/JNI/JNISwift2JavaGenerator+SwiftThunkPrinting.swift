@@ -113,13 +113,6 @@ extension JNISwift2JavaGenerator {
         guard let translatedCase = translatedEnumCase(for: enumCase) else { continue }
         printer.print("static let \(JNICaching.cacheMemberName(for: enumCase)) = \(renderEnumCaseCacheInit(translatedCase))")
       }
-
-      if type.swiftNominal.kind == .protocol {
-//        let methodSignatures = type.methods.map {
-//          MethodSignature(resultType: <#T##JavaType#>, parameterTypes: <#T##[JavaType]#>)
-//        }
-//        printer.print("static let cache = \(renderJNICacheInit(className: type.qualifiedName, methods: []))")
-      }
     }
   }
 

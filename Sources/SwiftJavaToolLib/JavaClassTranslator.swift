@@ -229,7 +229,7 @@ struct JavaClassTranslator {
       }
 
       guard method.getName().isValidSwiftFunctionName else {
-        // TODO: Tell the user?
+        log.warning("Skipping method \(method.getName()) because it is not a valid Swift function name")
         continue
       }
 

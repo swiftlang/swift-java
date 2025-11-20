@@ -128,12 +128,19 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     var jextractOutputFiles = outputSwiftFiles
 
-    let runJavaCallbacksPhases = configuration?.enableJavaCallbacks ?? false && configuration?.effectiveMode == .jni
+    // If the developer has enabled java callbacks in the configuration (default is false)
+    // and we are running in JNI mode, we will run additional phases in this build plugin
+    // to generate Swift wrappers using wrap-java that can be used to callback to Java.
+    let shouldRunJavaCallbacksPhases = if let configuration, configuration.enableJavaCallbacks ?? false, configuration.effectiveMode == .jni {
+      true
+    } else {
+      false
+    }
 
     // Extract list of all sources
     let javaSourcesListFileName = "jextract-generated-sources.txt"
     let javaSourcesFile = outputJavaDirectory.appending(path: javaSourcesListFileName)
-    if runJavaCallbacksPhases {
+    if shouldRunJavaCallbacksPhases {
       arguments += [
         "--generated-java-sources-list-file-output", javaSourcesListFileName
       ]
@@ -151,20 +158,19 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     ]
 
     // If we do not need Java callbacks, we can skip the remaining steps.
-    guard runJavaCallbacksPhases else {
+    guard shouldRunJavaCallbacksPhases else {
       return commands
     }
 
     // The URL of the compiled Java sources
-    let javaClassFileURL = context.pluginWorkDirectoryURL
+    let javaCompiledClassesURL = context.pluginWorkDirectoryURL
       .appending(path: "compiled-java-output")
 
     // Build SwiftKitCore and get the classpath
     // as the jextracted sources will depend on that
 
     guard let swiftJavaDirectory = findSwiftJavaDirectory(for: target) else {
-      // FIXME: Error
-      fatalError()
+      fatalError("Unable to find the path to the swift-java sources, please file an issue.")
     }
     log("Found swift-java at \(swiftJavaDirectory)")
 
@@ -204,12 +210,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           .appending(path: self.javacName),
         arguments: [
           "@\(javaSourcesFile.path(percentEncoded: false))",
-          "-d", javaClassFileURL.path(percentEncoded: false),
+          "-d", javaCompiledClassesURL.path(percentEncoded: false),
           "-parameters",
           "-classpath", swiftKitCoreClassPath.path(percentEncoded: false)
         ],
         inputFiles: [javaSourcesFile, swiftKitCoreClassPath],
-        outputFiles: [javaClassFileURL]
+        outputFiles: [javaCompiledClassesURL]
       )
     ]
 
@@ -223,11 +229,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         arguments: [
           "configure",
           "--output-directory", context.pluginWorkDirectoryURL.path(percentEncoded: false),
-          "--cp", javaClassFileURL.path(percentEncoded: false),
+          "--cp", javaCompiledClassesURL.path(percentEncoded: false),
           "--swift-module", sourceModule.name,
           "--swift-type-prefix", "Java"
         ],
-        inputFiles: [javaClassFileURL],
+        inputFiles: [javaCompiledClassesURL],
         outputFiles: [swiftJavaConfigURL]
       )
     ]

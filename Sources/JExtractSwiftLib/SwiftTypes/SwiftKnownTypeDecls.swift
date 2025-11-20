@@ -66,6 +66,11 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
     }
   }
 
+  /// Indicates whether this known type is translated by `wrap-java`
+  /// into the same type as `jextract`.
+  ///
+  /// This means we do not have to perform any mapping when passing
+  /// this type between jextract and wrap-java
   var isDirectlyTranslatedToWrapJava: Bool {
     switch self {
     case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:

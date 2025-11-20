@@ -242,7 +242,7 @@ struct JNIProtocolTests {
           init(_javaSomeProtocolInterface: JavaSomeProtocol, _javaBInterface: JavaB) {
             self._javaSomeProtocolInterface = _javaSomeProtocolInterface
             self._javaBInterface = _javaBInterface
-          } // printSwiftFunctionHelperClasses(_:_:) @ JExtractSwiftLib/JNISwift2JavaGenerator+SwiftThunkPrinting.swift:448
+          }
         }
         """,
         """

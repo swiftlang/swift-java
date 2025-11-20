@@ -87,9 +87,9 @@ extension JNISwift2JavaGenerator {
       }
 
       let variables = try Dictionary(grouping: type.variables, by: { $0.swiftDecl.id }).map { (id, funcs) in
-        assert(funcs.count > 0 && funcs.count <= 2, "Variables must contain a getter and optionally a setter")
+        precondition(funcs.count > 0 && funcs.count <= 2, "Variables must contain a getter and optionally a setter")
         guard let getter = funcs.first(where: { $0.apiKind == .getter }) else {
-          fatalError("")
+          fatalError("Getter not found for variable with imported funcs: \(funcs)")
         }
         let setter = funcs.first(where: { $0.apiKind == .setter })
 

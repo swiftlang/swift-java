@@ -1326,6 +1326,7 @@ extension JNISwift2JavaGenerator {
     /// a java class.
     case wrappedJavaClassTranslationNotProvided(SwiftType)
 
+    // FIXME: Remove once we support protocol variables
     case protocolVariablesNotSupported
   }
 }
