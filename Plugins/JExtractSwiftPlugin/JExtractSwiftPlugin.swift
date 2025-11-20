@@ -170,6 +170,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     let swiftKitCoreClassPath = swiftJavaDirectory.appending(path: "SwiftKitCore/build/classes/java/main")
 
+    // We need to use a different gradle home, because
+    // this plugin might be run from inside another gradle task
+    // and that would cause conflicts.
+    let gradleUserHome = context.pluginWorkDirectoryURL.appending(path: "gradle-user-home")
+
     commands += [
       .buildCommand(
         displayName: "Build SwiftKitCore using Gradle (Java)",
@@ -180,7 +185,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           "--configure-on-demand",
           "--no-daemon"
         ],
-        environment: [:],
+        environment: [
+          "GRADLE_USER_HOME": gradleUserHome.path(percentEncoded: false)
+        ],
         inputFiles: [swiftJavaDirectory],
         outputFiles: [swiftKitCoreClassPath]
       )
