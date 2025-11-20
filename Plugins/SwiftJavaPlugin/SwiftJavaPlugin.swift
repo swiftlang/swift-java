@@ -175,6 +175,10 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
       let displayName = "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'"
       log("Prepared: \(displayName)")
+
+      for f in outputSwiftFiles {
+        log("Swift output file: \(f)")
+      }
       commands += [
         .buildCommand(
           displayName: displayName,
