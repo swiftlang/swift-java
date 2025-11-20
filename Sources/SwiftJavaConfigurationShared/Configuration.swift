@@ -183,7 +183,10 @@ public func readConfiguration(string: String, configPath: URL?, file: String = #
     decoder.allowsJSON5 = true
     return try decoder.decode(Configuration.self, from: configData)
   } catch {
-    throw ConfigurationError(message: "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)", error: error,
+    throw ConfigurationError(
+      message: "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)", 
+      error: error,
+      text: string,
       file: file, line: line)
   }
 }
@@ -276,19 +279,21 @@ extension Configuration {
 public struct ConfigurationError: Error {
   let message: String
   let error: any Error
+  let text: String?
 
   let file: String
   let line: UInt
 
-  init(message: String, error: any Error, file: String = #fileID, line: UInt = #line) {
+  init(message: String, error: any Error, text: String?, file: String = #fileID, line: UInt = #line) {
     self.message = message
     self.error = error
+    self.text = text
     self.file = file
     self.line = line
   }
 }
 
-public enum LogLevel: String, Codable, Hashable {
+public enum LogLevel: String, ExpressibleByStringLiteral, Codable, Hashable {
   case trace = "trace"
   case debug = "debug"
   case info = "info"
@@ -296,11 +301,15 @@ public enum LogLevel: String, Codable, Hashable {
   case warning = "warning"
   case error = "error"
   case critical = "critical"
+  
+  public init(stringLiteral value: String) {
+    self = LogLevel(rawValue: value) ?? .info
+  }
 }
 
 extension LogLevel {
   public init(from decoder: any Decoder) throws {
-    var container = try decoder.unkeyedContainer()
+    var container = try decoder.singleValueContainer()
     let string = try container.decode(String.self)
     switch string {
     case "trace": self = .trace
