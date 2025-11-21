@@ -50,15 +50,27 @@ extension JavaMethodMacro: BodyMacro {
       fatalError("not a function: \(declaration)")
     }
 
+    let funcName =
+      if case .argumentList(let arguments) = node.arguments,
+        let argument = arguments.first,
+        argument.label?.text != "typeErasedResult",
+        let stringLiteral = argument.expression.as(StringLiteralExprSyntax.self),
+        stringLiteral.segments.count == 1,
+        case let .stringSegment(funcNameSegment)? = stringLiteral.segments.first
+      {
+        funcNameSegment.content.text
+      } else {
+        funcDecl.name.text
+      }
+
     let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
-    let funcName = funcDecl.name.text
     let params = funcDecl.signature.parameterClause.parameters
     let paramNames = params.map { param in param.parameterName?.text ?? "" }.joined(separator: ", ")
 
     let genericResultType: String? =
       if case let .argumentList(arguments) = node.arguments,
-        let firstElement = arguments.first,
-        let stringLiteral = firstElement.expression
+        let element = arguments.first(where: { $0.label?.text == "typeErasedResult" }),
+        let stringLiteral = element.expression
           .as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(wrapperName)? = stringLiteral.segments.first {

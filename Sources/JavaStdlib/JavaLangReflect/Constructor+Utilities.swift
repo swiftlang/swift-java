@@ -13,11 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 extension Constructor {
-  /// Whether this is a 'public' constructor.
-  public var isPublic: Bool {
-    return (getModifiers() & 1) != 0
-  }
-
   /// Whether this is a 'native' constructor.
   public var isNative: Bool {
     return (getModifiers() & 256) != 0

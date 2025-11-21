@@ -68,7 +68,7 @@ extension String {
 
   /// Looks up self as a SwiftJava wrapped class name and converts it
   /// into a `JavaType.class` if it exists in `lookupTable`.
-  func parseJavaClassFromJavaKitName(in lookupTable: [String: String]) -> JavaType? {
+  func parseJavaClassFromSwiftJavaName(in lookupTable: [String: String]) -> JavaType? {
     guard let canonicalJavaName = lookupTable[self] else {
       return nil
     }

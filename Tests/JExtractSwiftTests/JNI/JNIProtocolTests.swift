@@ -12,16 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJavaConfigurationShared
 import JExtractSwiftLib
 import Testing
 
 @Suite
 struct JNIProtocolTests {
+  var config: Configuration {
+    var config = Configuration()
+    config.enableJavaCallbacks = true
+    return config
+  }
+
   let source = """
     public protocol SomeProtocol {
-      var x: Int64 { get set }
-    
       public func method() {}
+      public func withObject(c: SomeClass) -> SomeClass {}
     }
   
     public protocol B {}
@@ -37,6 +43,7 @@ struct JNIProtocolTests {
   func generatesJavaInterface() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -50,18 +57,13 @@ struct JNIProtocolTests {
         import org.swift.swiftkit.core.util.*;
         """,
         """
-        public interface SomeProtocol extends JNISwiftInstance {
-        ...
+        public interface SomeProtocol {
+          ...
+          public void method();
+          ...
+          public SomeClass withObject(SomeClass c);
+          ...
         }
-        """,
-        """
-        public long getX();
-        """,
-        """
-        public void setX(long newValue);
-        """,
-        """
-        public void method();
         """
       ])
   }
@@ -70,6 +72,7 @@ struct JNIProtocolTests {
   func generatesJavaClassWithExtends() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
@@ -83,16 +86,17 @@ struct JNIProtocolTests {
   func takeProtocol_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static <$T0 extends SomeProtocol, $T1 extends SomeProtocol> void takeProtocol($T0 x, $T1 y) {
-          SwiftModule.$takeProtocol(x.$memoryAddress(), x.$typeMetadataAddress(), y.$memoryAddress(), y.$typeMetadataAddress());
+        public static <_T0 extends SomeProtocol, _T1 extends SomeProtocol> void takeProtocol(_T0 x, _T1 y) {
+          SwiftModule.$takeProtocol(x, y);
         }
         """,
         """
-        private static native void $takeProtocol(long x, long x_typeMetadataAddress, long y, long y_typeMetadataAddress);
+        private static native void $takeProtocol(java.lang.Object x, java.lang.Object y);
         """
       ])
   }
@@ -101,43 +105,50 @@ struct JNIProtocolTests {
   func takeProtocol_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ")
-        func Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong, y: jlong, y_typeMetadataAddress: jlong) {
-          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
-            fatalError("x_typeMetadataAddress memory address was null")
+        final class _SwiftModule_takeGeneric_s_Wrapper: SwiftJavaSomeProtocolWrapper {
+          let _javaSomeProtocolInterface: JavaSomeProtocol
+          init(_javaSomeProtocolInterface: JavaSomeProtocol) {
+            self._javaSomeProtocolInterface = _javaSomeProtocolInterface
           }
-          let xDynamicType$: Any.Type = unsafeBitCast(xTypeMetadataPointer$, to: Any.Type.self)
-          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment))) else {
-            fatalError("x memory address was null")
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2")
+        func Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?, y: jobject?) {
+          let xswiftObject$: (SomeProtocol)
+          if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
+            ...
+            let xpointer$DynamicType$: Any.Type = unsafeBitCast(xpointer$TypeMetadataPointer$, to: Any.Type.self)
+            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
+              fatalError("xpointer$ memory address was null")
+            }
+            #if hasFeature(ImplicitOpenExistentials)
+            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! any (SomeProtocol)
+            #else
+            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol) {
+              xpointer$RawPointer$.load(as: ty) as! any (SomeProtocol)
+            }
+            let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
+            #endif
+            xswiftObject$ = xpointer$Existential$
           }
-          #if hasFeature(ImplicitOpenExistentials)
-          let xExistential$ = xRawPointer$.load(as: xDynamicType$) as! any (SomeProtocol)
-          #else
-          func xDoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol) {
-            xRawPointer$.load(as: ty) as! any (SomeProtocol)
+          else {
+            xswiftObject$ = _SwiftModule_takeProtocol_x_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment))
           }
-          let xExistential$ = _openExistential(xDynamicType$, do: xDoLoad)
-          #endif
-          guard let yTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: y_typeMetadataAddress, in: environment))) else {
-            fatalError("y_typeMetadataAddress memory address was null")
+          let yswiftObject$: (SomeProtocol)
+          if environment.interface.IsInstanceOf(environment, y, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
+            ...
+            yswiftObject$ = ypointer$Existential$
           }
-          let yDynamicType$: Any.Type = unsafeBitCast(yTypeMetadataPointer$, to: Any.Type.self)
-          guard let yRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: y, in: environment))) else {
-            fatalError("y memory address was null")
+          else {
+            yswiftObject$ = _SwiftModule_takeProtocol_y_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: y!, environment: environment))
           }
-          #if hasFeature(ImplicitOpenExistentials)
-          let yExistential$ = yRawPointer$.load(as: yDynamicType$) as! any (SomeProtocol)
-          #else
-          func yDoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol) {
-            yRawPointer$.load(as: ty) as! any (SomeProtocol)
-          }
-          let yExistential$ = _openExistential(yDynamicType$, do: yDoLoad)
-          #endif
-          SwiftModule.takeProtocol(x: xExistential$, y: yExistential$)
+          SwiftModule.takeProtocol(x: xswiftObject$, y: yswiftObject$)
         }
         """
       ]
@@ -148,16 +159,17 @@ struct JNIProtocolTests {
   func takeGeneric_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public static <S extends SomeProtocol> void takeGeneric(S s) {
-          SwiftModule.$takeGeneric(s.$memoryAddress(), s.$typeMetadataAddress());
+          SwiftModule.$takeGeneric(s);
         }
         """,
         """
-        private static native void $takeGeneric(long s, long s_typeMetadataAddress);
+        private static native void $takeGeneric(java.lang.Object s);
         """
       ])
   }
@@ -166,28 +178,30 @@ struct JNIProtocolTests {
   func takeGeneric_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__JJ")
-        func Java_com_example_swift_SwiftModule__00024takeGeneric__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jlong, s_typeMetadataAddress: jlong) {
-          guard let sTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: s_typeMetadataAddress, in: environment))) else {
-            fatalError("s_typeMetadataAddress memory address was null")
+        final class _SwiftModule_takeGeneric_s_Wrapper: SwiftJavaSomeProtocolWrapper {
+          let _javaSomeProtocolInterface: JavaSomeProtocol
+          init(_javaSomeProtocolInterface: JavaSomeProtocol) {
+            self._javaSomeProtocolInterface = _javaSomeProtocolInterface
           }
-          let sDynamicType$: Any.Type = unsafeBitCast(sTypeMetadataPointer$, to: Any.Type.self)
-          guard let sRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: s, in: environment))) else {
-            fatalError("s memory address was null")
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2")
+        func Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jobject?) {
+          let sswiftObject$: (SomeProtocol)
+          if environment.interface.IsInstanceOf(environment, s, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
+            ...
+            sswiftObject$ = spointer$Existential$
           }
-          #if hasFeature(ImplicitOpenExistentials)
-          let sExistential$ = sRawPointer$.load(as: sDynamicType$) as! any (SomeProtocol)
-          #else
-          func sDoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol) {
-            sRawPointer$.load(as: ty) as! any (SomeProtocol)
+          else {
+            sswiftObject$ = _SwiftModule_takeGeneric_s_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: s!, environment: environment))
           }
-          let sExistential$ = _openExistential(sDynamicType$, do: sDoLoad)
-          #endif
-          SwiftModule.takeGeneric(s: sExistential$)
+          SwiftModule.takeGeneric(s: sswiftObject$)
         }
         """
       ]
@@ -198,16 +212,17 @@ struct JNIProtocolTests {
   func takeComposite_java() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static <$T0 extends SomeProtocol & B> void takeComposite($T0 x) {
-          SwiftModule.$takeComposite(x.$memoryAddress(), x.$typeMetadataAddress());
+        public static <_T0 extends SomeProtocol & B> void takeComposite(_T0 x) {
+          SwiftModule.$takeComposite(x);
         }
         """,
         """
-        private static native void $takeComposite(long x, long x_typeMetadataAddress);
+        private static native void $takeComposite(java.lang.Object x);
         """
       ])
   }
@@ -216,28 +231,92 @@ struct JNIProtocolTests {
   func takeComposite_swift() throws {
     try assertOutput(
       input: source,
+      config: config,
       .jni, .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__JJ")
-        func Java_com_example_swift_SwiftModule__00024takeComposite__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong) {
-          guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
-            fatalError("x_typeMetadataAddress memory address was null")
+        final class _SwiftModule_takeComposite_x_Wrapper: SwiftJavaSomeProtocolWrapper, SwiftJavaBWrapper {
+          let _javaSomeProtocolInterface: JavaSomeProtocol
+          let _javaBInterface: JavaB
+          init(_javaSomeProtocolInterface: JavaSomeProtocol, _javaBInterface: JavaB) {
+            self._javaSomeProtocolInterface = _javaSomeProtocolInterface
+            self._javaBInterface = _javaBInterface
           }
-          let xDynamicType$: Any.Type = unsafeBitCast(xTypeMetadataPointer$, to: Any.Type.self)
-          guard let xRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: x, in: environment))) else {
-            fatalError("x memory address was null")
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2")
+        func Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?) {
+          let xswiftObject$: (SomeProtocol & B)
+          if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
+            let xpointer$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
+            let xtypeMetadata$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
+            guard let xpointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: xtypeMetadata$, in: environment))) else {
+              fatalError("xtypeMetadata$ memory address was null")
+            }
+            let xpointer$DynamicType$: Any.Type = unsafeBitCast(xpointer$TypeMetadataPointer$, to: Any.Type.self)
+            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
+              fatalError("xpointer$ memory address was null")
+            }
+            #if hasFeature(ImplicitOpenExistentials)
+            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! any (SomeProtocol & B)
+            #else
+            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol & B) {
+              xpointer$RawPointer$.load(as: ty) as! any (SomeProtocol & B)
+            }
+            let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
+            #endif
+            xswiftObject$ = xpointer$Existential$
           }
-          #if hasFeature(ImplicitOpenExistentials)
-          let xExistential$ = xRawPointer$.load(as: xDynamicType$) as! any (SomeProtocol & B)
-          #else
-          func xDoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol & B) {
-            xRawPointer$.load(as: ty) as! any (SomeProtocol & B)
+          else {
+            xswiftObject$ = _SwiftModule_takeComposite_x_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment), _javaBInterface: JavaB(javaThis: x!, environment: environment))
           }
-          let xExistential$ = _openExistential(xDynamicType$, do: xDoLoad)
-          #endif
-          SwiftModule.takeComposite(x: xExistential$)
+          SwiftModule.takeComposite(x: xswiftObject$)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func generatesProtocolWrappers() throws {
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        protocol SwiftJavaSomeProtocolWrapper: SomeProtocol {
+          var _javaSomeProtocolInterface: JavaSomeProtocol { get }
+        }
+        """,
+        """
+        extension SwiftJavaSomeProtocolWrapper {
+          public func method() {
+            _javaSomeProtocolInterface.method()
+          }        
+          public func withObject(c: SomeClass) -> SomeClass {
+            let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
+            let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
+            cPointer.initialize(to: c)
+            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer)))) else {
+              fatalError("Upcall to withObject unexpectedly returned nil")
+            }
+            let result$MemoryAddress$ = unwrapped$.as(JavaJNISwiftInstance.self)!.memoryAddress()
+            let result$Pointer = UnsafeMutablePointer<SomeClass>(bitPattern: Int(result$MemoryAddress$))!
+            return result$Pointer.pointee
+          }
+        }
+        """,
+        """
+        protocol SwiftJavaBWrapper: B {
+          var _javaBInterface: JavaB { get }
+        }
+        """,
+        """
+        extension SwiftJavaBWrapper {
         }
         """
       ]

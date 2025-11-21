@@ -338,6 +338,45 @@ final class GenericsWrapJavaTests: XCTestCase {
     )
   }
 
+  func test_wrapJava_genericMethodTypeErasure_customInterface_staticMethods() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      
+      interface MyInterface {}
+
+      final class Public {
+        public static <T extends MyInterface> void useInterface(T myInterface) {  }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyInterface",
+        "com.example.Public"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.MyInterface")
+        public struct MyInterface {
+        """,
+        """
+        @JavaClass("com.example.Public")
+        open class Public: JavaObject {
+        """,
+        """
+        extension JavaClass<Public> {
+        """,
+        """
+        @JavaStaticMethod
+        public func useInterface<T: AnyJavaObject>(_ arg0: T?)
+        }
+        """
+      ]
+    )
+  }
+
   // TODO: this should be improved some more, we need to generated a `: Map` on the Swift side
   func test_wrapJava_genericMethodTypeErasure_genericExtendsMap() async throws {
     let classpathURL = try await compileJava(

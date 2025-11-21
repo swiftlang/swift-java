@@ -27,10 +27,14 @@ extension String {
 }
 
 extension String {
-  /// Replace all of the $'s for nested names with "." to turn a Java class
-  /// name into a Java canonical class name,
+  /// Convert a Java class name to its canonical name.
+  /// Replaces `$` with `.` for nested classes but preserves `$` at the start of identifiers.
   package var javaClassNameToCanonicalName: String {
-    return replacing("$", with: ".")
+    self.replacingOccurrences(
+      of: #"(?<=\w)\$"#,
+      with: ".",
+      options: .regularExpression
+    )
   }
 
   /// Whether this is the name of an anonymous class.

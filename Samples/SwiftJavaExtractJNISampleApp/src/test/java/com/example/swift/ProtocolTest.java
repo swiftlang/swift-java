@@ -72,4 +72,34 @@ public class ProtocolTest {
             assertEquals("ConcreteProtocolAB", proto1.name());
         }
     }
+
+    static class JavaStorage implements Storage {
+        StorageItem item;
+
+        JavaStorage(StorageItem item) {
+            this.item = item;
+        }
+
+        @Override
+        public StorageItem load() {
+            return item;
+        }
+
+        @Override
+        public void save(StorageItem item) {
+            this.item = item;
+        }
+    }
+
+    @Test
+    void useStorage() {
+        try (var arena = SwiftArena.ofConfined()) {
+            JavaStorage storage = new JavaStorage(null);
+            MySwiftLibrary.saveWithStorage(StorageItem.init(10, arena), storage);
+            assertEquals(10, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
+            MySwiftLibrary.saveWithStorage(StorageItem.init(7, arena), storage);
+            MySwiftLibrary.saveWithStorage(StorageItem.init(5, arena), storage);
+            assertEquals(5, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
+        }
+    }
 }
