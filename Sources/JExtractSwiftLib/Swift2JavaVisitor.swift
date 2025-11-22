@@ -330,6 +330,7 @@ final class Swift2JavaVisitor {
         enclosingType: typeContext?.swiftType,
         lookupContext: translator.lookupContext)
     default:
+      log.warning("Not supported declaration type \(node.kind) while calling importAccessor!")
       return
     }
 
