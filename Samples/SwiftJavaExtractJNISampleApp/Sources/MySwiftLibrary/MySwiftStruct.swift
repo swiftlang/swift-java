@@ -38,4 +38,9 @@ public struct MySwiftStruct {
     self.cap += value
     return self.cap
   }
+
+  public subscript() -> Int64 {
+    get { return len }
+    set { len = newValue }
+  }
 }

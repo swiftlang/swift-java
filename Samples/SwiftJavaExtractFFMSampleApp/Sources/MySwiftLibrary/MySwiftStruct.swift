@@ -61,4 +61,9 @@ public struct MySwiftStruct {
   public func makeRandomIntMethod() -> Int {
     return Int.random(in: 1..<256)
   }
+
+  public subscript() -> Int {
+    get { return len }
+    set { len = newValue }
+  }
 }

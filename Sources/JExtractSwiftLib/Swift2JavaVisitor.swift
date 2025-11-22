@@ -342,7 +342,7 @@ final class Swift2JavaVisitor {
     )
 
     log.debug(
-      "Record imported variable accessor \(kind == .getter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
+      "Record imported variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
     )
     if let typeContext {
       typeContext.variables.append(imported)
