@@ -37,7 +37,7 @@ $ export JAVA_HOME="$(sdk home java current)"
 E.g sdkman install command:
 
 ```bash
-sdk install java 25.0.1-amz
+sdk install java 25.0.1-amzn
 ```
 
 ## Self-publish supporting Java libraries
