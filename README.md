@@ -34,6 +34,12 @@ Alternatively, you can use a JDK manager like [sdkman](https://sdkman.io/install
 $ export JAVA_HOME="$(sdk home java current)"
 ```
 
+E.g sdkman install command:
+
+```bash
+sdk install java 25.0.1-amz
+```
+
 ## Self-publish supporting Java libraries
 
 Swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
