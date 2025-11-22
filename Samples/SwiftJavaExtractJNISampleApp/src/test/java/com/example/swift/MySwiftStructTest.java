@@ -61,4 +61,15 @@ public class MySwiftStructTest {
             assertEquals(1347, s.getCapacity());
         }
     }
+
+    @Test
+    void testSubscript() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
+            long currentValue = s.getSubscript();
+            s.setSubscript(66);
+            assertEquals(42, currentValue);
+            assertEquals(66, s.getLen());
+        }
+    }
 }

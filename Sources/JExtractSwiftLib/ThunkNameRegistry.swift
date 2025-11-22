@@ -32,9 +32,9 @@ package struct ThunkNameRegistry {
 
     let suffix: String
     switch decl.apiKind {
-    case .getter:
+    case .getter, .subscriptGetter:
       suffix = "$get"
-    case .setter:
+    case .setter, .subscriptSetter:
       suffix = "$set"
     default:
       suffix = decl.functionSignature.parameters
