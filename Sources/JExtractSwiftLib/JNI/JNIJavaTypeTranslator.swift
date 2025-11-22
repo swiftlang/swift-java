@@ -40,14 +40,20 @@ enum JNIJavaTypeTranslator {
     case .int64: return .long
     case .uint64: return .long
 
+    // FIXME: 32 bit consideration.
+    // The 'FunctionDescriptor' uses 'SWIFT_INT' which relies on the running
+    // machine arch. That means users can't pass Java 'long' values to the
+    // function without casting. But how do we generate code that runs both
+    // 32 and 64 bit machine?
+    case .int, .uint: return .long
+
     case .float: return .float
     case .double: return .double
     case .void: return .void
 
     case .string: return .javaLangString
 
-    case .int, .uint, // FIXME: why not supported int/uint?
-        .unsafeRawPointer, .unsafeMutableRawPointer,
+    case .unsafeRawPointer, .unsafeMutableRawPointer,
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
