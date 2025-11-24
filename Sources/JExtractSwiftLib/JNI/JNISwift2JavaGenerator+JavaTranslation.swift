@@ -114,6 +114,12 @@ extension JNISwift2JavaGenerator {
           .class(package: nil,name: caseName)
         )
       ])
+      var exceptions: [JavaException] = []
+
+      if enumCase.parameters.contains(where: \.type.isArchDependingInteger) {
+        exceptions.append(.integerOverflow)
+      }
+
       let getAsCaseFunction = TranslatedFunctionDecl(
         name: getAsCaseName,
         isStatic: false,
@@ -137,12 +143,15 @@ extension JNISwift2JavaGenerator {
             javaType: .class(package: nil, name: "Optional<\(caseName)>"),
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty ? constructRecordConversion : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion])
-          )
+          ),
+          exceptions: exceptions
         ),
         nativeFunctionSignature: NativeFunctionSignature(
           selfParameter: NativeParameter(
             parameters: [JavaParameter(name: "self", type: .long)],
-            conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false)
+            conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
+            indirectConversion: nil,
+            conversionCheck: nil
           ),
           parameters: [],
           result: NativeResult(
@@ -291,12 +300,19 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
+      var exceptions: [JavaException] = []
+
+      if functionSignature.parameters.contains(where: \.type.isArchDependingInteger) {
+        exceptions.append(.integerOverflow)
+      }
+
       let resultType = try translate(swiftResult: functionSignature.result)
 
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
-        resultType: resultType
+        resultType: resultType,
+        exceptions: exceptions
       )
     }
 
@@ -955,12 +971,22 @@ extension JNISwift2JavaGenerator {
     var annotations: [JavaAnnotation] {
       self.translatedFunctionSignature.annotations
     }
+
+    func throwsClause() -> String {
+      guard !translatedFunctionSignature.exceptions.isEmpty else {
+        return isThrowing && !isAsync ? " throws Exception" : ""
+      }
+
+      let signatureExceptions = translatedFunctionSignature.exceptions.compactMap(\.type.className).joined(separator: ", ")
+      return " throws \(signatureExceptions)\(isThrowing ? ", Exception" : "")"
+    }
   }
 
   struct TranslatedFunctionSignature {
     var selfParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var resultType: TranslatedResult
+    var exceptions: [JavaException]
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from

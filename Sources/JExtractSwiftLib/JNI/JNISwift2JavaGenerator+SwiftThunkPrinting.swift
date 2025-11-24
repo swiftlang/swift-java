@@ -293,11 +293,43 @@ extension JNISwift2JavaGenerator {
     let tryClause: String = decl.isThrowing ? "try " : ""
 
     // Regular parameters.
-    var arguments = [String]()
+    var arguments: [String] = [String]()
+    var indirectVariables: [(name: String, lowered: String)] = []
+    var int32OverflowChecks: [String] = []
+
     for (idx, parameter) in nativeSignature.parameters.enumerated() {
       let javaParameterName = translatedDecl.translatedFunctionSignature.parameters[idx].parameter.name
       let lowered = parameter.conversion.render(&printer, javaParameterName)
       arguments.append(lowered)
+
+      parameter.indirectConversion.flatMap {
+        indirectVariables.append((javaParameterName, $0.render(&printer, javaParameterName)))
+      }
+
+      switch parameter.conversionCheck {
+        case .check32BitIntOverflow:
+          int32OverflowChecks.append(parameter.conversionCheck!.render(&printer, "indirect_\(javaParameterName)"))
+        case nil:
+          break
+      }
+    }
+
+    // Make indirect variables
+    for (name, lowered) in indirectVariables {
+      printer.print("let indirect_\(name) = \(lowered)")
+    }
+
+    if !int32OverflowChecks.isEmpty {
+      printer.print("#if _pointerBitWidth(_32)")
+
+      for check in int32OverflowChecks {
+        printer.printBraceBlock("guard \(check) else") { printer in 
+          let dummyReturn = dummyReturn(for: nativeSignature)
+          printer.print("environment.throwJavaException(javaException: .integerOverflow)")
+          printer.print(dummyReturn)
+        }
+      }
+      printer.print("#endif")
     }
 
     // Callee
@@ -362,14 +394,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if decl.isThrowing, !decl.isAsync {
-      let dummyReturn: String
-
-      if nativeSignature.result.javaType.isVoid {
-        dummyReturn = ""
-      } else {
-        // We assume it is something that implements JavaValue
-        dummyReturn = "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
-      }
+      let dummyReturn = dummyReturn(for: nativeSignature)
 
       printer.print("do {")
       printer.indent()
@@ -388,6 +413,15 @@ extension JNISwift2JavaGenerator {
     } else {
       printer.print(innerBody(in: &printer))
     }
+  }
+
+  private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
+      return if nativeSignature.result.javaType.isVoid {
+        "return"
+      } else {
+        // We assume it is something that implements JavaValue
+        "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
+      }
   }
 
   private func printCDecl(

@@ -39,12 +39,7 @@ enum JNIJavaTypeTranslator {
 
     case .int64: return .long
     case .uint64: return .long
-
-    // FIXME: 32 bit consideration.
-    // The 'FunctionDescriptor' uses 'SWIFT_INT' which relies on the running
-    // machine arch. That means users can't pass Java 'long' values to the
-    // function without casting. But how do we generate code that runs both
-    // 32 and 64 bit machine?
+    
     case .int, .uint: return .long
 
     case .float: return .float
@@ -59,6 +54,40 @@ enum JNIJavaTypeTranslator {
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
         .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array:
       return nil
+    }
+  }
+
+  static func indirectConversionSetepSwiftType(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> SwiftType? {
+    switch knownKind {
+    case .int: knownTypes.int64
+    case .uint: knownTypes.uint64
+
+    case .bool, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64,
+      .float, .double, .void, .string,
+      .unsafeRawPointer, .unsafeMutableRawPointer,
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer,
+      .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
+      .array:
+      nil
+    }
+  }
+
+  static func checkStep(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> JNISwift2JavaGenerator.NativeSwiftConversionCheck? {
+    switch knownKind {
+    case .int: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.int32)
+    case .uint: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.uint32)
+
+    case .bool, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64,
+      .float, .double, .void, .string,
+      .unsafeRawPointer, .unsafeMutableRawPointer,
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer,
+      .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
+      .array:
+      nil
     }
   }
 }
