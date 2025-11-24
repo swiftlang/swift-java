@@ -501,40 +501,55 @@ extension JNISwift2JavaGenerator {
       originalFunctionSignature: SwiftFunctionSignature,
       mode: JExtractAsyncFuncMode
     ) {
+      // Update translated function
+      let nativeFutureType: JavaType
+      let translatedFutureType: JavaType
+      let completeMethodID: String
+      let completeExceptionallyMethodID: String
+
       switch mode {
       case .completableFuture:
-        // Update translated function
+        nativeFutureType = .completableFuture(nativeFunctionSignature.result.javaType)
+        translatedFutureType = .completableFuture(translatedFunctionSignature.resultType.javaType)
+        completeMethodID = "_JNIMethodIDCache.CompletableFuture.complete"
+        completeExceptionallyMethodID = "_JNIMethodIDCache.CompletableFuture.completeExceptionally"
 
-        let nativeFutureType = JavaType.completableFuture(nativeFunctionSignature.result.javaType)
-
-        let futureOutParameter = OutParameter(
-          name: "$future",
-          type: nativeFutureType,
-          allocation: .new
-        )
-
-        let result = translatedFunctionSignature.resultType
-        translatedFunctionSignature.resultType = TranslatedResult(
-          javaType: .completableFuture(translatedFunctionSignature.resultType.javaType),
-          annotations: result.annotations,
-          outParameters: result.outParameters + [futureOutParameter],
-          conversion: .aggregate(variable: nil, [
-            .print(.placeholder), // Make the downcall
-            .method(.constant("$future"), function: "thenApply", arguments: [
-             .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
-           ])
-          ])
-        )
-
-        // Update native function
-        nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
-          swiftFunctionResultType: originalFunctionSignature.result.type,
-          nativeFunctionSignature: nativeFunctionSignature,
-          isThrowing: originalFunctionSignature.isThrowing
-        )
-        nativeFunctionSignature.result.javaType = .void
-        nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
+      case .legacyFuture:
+        nativeFutureType = .swiftLegacyFuture(nativeFunctionSignature.result.javaType)
+        translatedFutureType = .future(translatedFunctionSignature.resultType.javaType)
+        completeMethodID = "_JNIMethodIDCache.SwiftLegacyFuture.complete"
+        completeExceptionallyMethodID = "_JNIMethodIDCache.SwiftLegacyFuture.completeExceptionally"
       }
+
+      let futureOutParameter = OutParameter(
+        name: "$future",
+        type: nativeFutureType,
+        allocation: .new
+      )
+
+      let result = translatedFunctionSignature.resultType
+      translatedFunctionSignature.resultType = TranslatedResult(
+        javaType: translatedFutureType,
+        annotations: result.annotations,
+        outParameters: result.outParameters + [futureOutParameter],
+        conversion: .aggregate(variable: nil, [
+          .print(.placeholder), // Make the downcall
+          .method(.constant("$future"), function: "thenApply", arguments: [
+            .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
+          ])
+        ])
+      )
+
+      // Update native function
+      nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
+        swiftFunctionResultType: originalFunctionSignature.result.type,
+        nativeFunctionSignature: nativeFunctionSignature,
+        isThrowing: originalFunctionSignature.isThrowing,
+        completeMethodID: completeMethodID,
+        completeExceptionallyMethodID: completeExceptionallyMethodID
+      )
+      nativeFunctionSignature.result.javaType = .void
+      nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
     }
 
     func translateProtocolParameter(

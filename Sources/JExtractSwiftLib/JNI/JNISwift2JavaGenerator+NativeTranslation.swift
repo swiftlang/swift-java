@@ -689,7 +689,9 @@ extension JNISwift2JavaGenerator {
     indirect case asyncCompleteFuture(
       swiftFunctionResultType: SwiftType,
       nativeFunctionSignature: NativeFunctionSignature,
-      isThrowing: Bool
+      isThrowing: Bool,
+      completeMethodID: String,
+      completeExceptionallyMethodID: String
     )
 
     /// `{ (args) -> return body }`
@@ -927,7 +929,9 @@ extension JNISwift2JavaGenerator {
       case .asyncCompleteFuture(
         let swiftFunctionResultType,
         let nativeFunctionSignature,
-        let isThrowing
+        let isThrowing,
+        let completeMethodID,
+        let completeExceptionallyMethodID
       ):
         var globalRefs: [String] = ["globalFuture"]
 
@@ -954,7 +958,7 @@ extension JNISwift2JavaGenerator {
           printer.print("environment = try! JavaVirtualMachine.shared().environment()")
           let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
-            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])")
+            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: nil)])")
           } else {
             let result: String
             if nativeFunctionSignature.result.javaType.requiresBoxing {
@@ -964,7 +968,7 @@ extension JNISwift2JavaGenerator {
               result = inner
             }
 
-            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: \(result))])")
+            printer.print("environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: \(result))])")
           }
         }
 
@@ -986,7 +990,7 @@ extension JNISwift2JavaGenerator {
               """
               let catchEnvironment = try! JavaVirtualMachine.shared().environment()
               let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
-              catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+              catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, \(completeExceptionallyMethodID), [jvalue(l: exception)])
               """
               )
             }

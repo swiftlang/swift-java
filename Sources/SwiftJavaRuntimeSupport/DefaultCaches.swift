@@ -47,6 +47,36 @@ extension _JNIMethodIDCache {
     }
   }
 
+  public enum SwiftLegacyFuture {
+    private static let completeMethod = Method(
+      name: "complete",
+      signature: "(Ljava/lang/Object;)Z"
+    )
+
+    private static let completeExceptionallyMethod = Method(
+      name: "completeExceptionally",
+      signature: "(Ljava/lang/Throwable;)Z"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      environment: try! JavaVirtualMachine.shared().environment(),
+      className: "org/swift/swiftkit/core/SwiftLegacyFuture",
+      methods: [completeMethod, completeExceptionallyMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var complete: jmethodID {
+      cache.methods[completeMethod]!
+    }
+
+    public static var completeExceptionally: jmethodID {
+      cache.methods[completeExceptionallyMethod]!
+    }
+  }
+
   public enum Exception {
     private static let messageConstructor = Method(name: "<init>", signature: "(Ljava/lang/String;)V")
 
