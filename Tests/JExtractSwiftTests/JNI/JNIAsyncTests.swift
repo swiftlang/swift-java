@@ -14,6 +14,7 @@
 
 import JExtractSwiftLib
 import Testing
+import SwiftJavaConfigurationShared
 
 @Suite
 struct JNIAsyncTests {
@@ -408,4 +409,66 @@ struct JNIAsyncTests {
       ]
     )
   }
+
+  @Test("Import: (MyClass) async -> MyClass (Java, LegacyFuture)")
+  func legacyFuture_asyncMyClassToMyClass_java() throws {
+    var config = Configuration()
+    config.asyncFuncMode = .legacyFuture
+
+    try assertOutput(
+      input: """
+      class MyClass { }
+      
+      public func async(c: MyClass) async -> MyClass
+      """,
+      config: config,
+      .jni, .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena$) {
+          org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> $future = new org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long>();
+          SwiftModule.$async(c.$memoryAddress(), $future);
+          return $future.thenApply((futureResult$) -> {
+            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
+          }
+          );
+        }
+        """,
+        """
+        private static native void $async(long c, org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> result_future);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: (MyClass) async -> MyClass (Swift, LegacyFuture)")
+  func legacyFuture_asyncMyClassToMyClass_swift() throws {
+    var config = Configuration()
+    config.asyncFuncMode = .legacyFuture
+
+    try assertOutput(
+      input: """
+      class MyClass { }
+      
+      public func async(c: MyClass) async -> MyClass
+      """,
+      config: config,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftLegacyFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftLegacyFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
+          ...
+          var task: Task<Void, Never>? = nil
+          ...
+          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SwiftLegacyFuture.complete, [jvalue(l: boxedResult$)])
+          ... 
+        }
+        """
+      ]
+    )
+  }
+
 }
