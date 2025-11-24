@@ -470,5 +470,4 @@ struct JNIAsyncTests {
       ]
     )
   }
-
 }
