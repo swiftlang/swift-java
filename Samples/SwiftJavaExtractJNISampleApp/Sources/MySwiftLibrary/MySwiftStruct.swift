@@ -15,10 +15,14 @@
 public struct MySwiftStruct {
   private var cap: Int64
   public var len: Int64
+  private var subscriptValue: Int64
+  private var subscriptArray: [Int64]
 
   public init(cap: Int64, len: Int64) {
     self.cap = cap
     self.len = len
+    self.subscriptValue = 0
+    self.subscriptArray = [10, 20, 15, 75]
   }
 
   public init?(doInit: Bool) {
@@ -39,8 +43,21 @@ public struct MySwiftStruct {
     return self.cap
   }
 
+  public func getSubscriptValue() -> Int64 {
+    return self.subscriptValue
+  }
+
+  public func getSubscriptArrayValue(index: Int64) -> Int64 {
+    return self.subscriptArray[Int(index)]
+  }
+
   public subscript() -> Int64 {
-    get { return len }
-    set { len = newValue }
+    get { return subscriptValue }
+    set { subscriptValue = newValue }
+  }
+
+  public subscript(index: Int64) -> Int64 {
+    get { return subscriptArray[Int(index)] }
+    set { subscriptArray[Int(index)] = newValue }
   }
 }
