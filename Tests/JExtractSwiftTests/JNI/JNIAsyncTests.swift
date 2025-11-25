@@ -34,9 +34,9 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> asyncVoid() {
-          java.util.concurrent.CompletableFuture<java.lang.Void> $future = new java.util.concurrent.CompletableFuture<java.lang.Void>();
-          SwiftModule.$asyncVoid($future);
-          return $future.thenApply((futureResult$) -> {
+          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          SwiftModule.$asyncVoid(future$);
+          return future$.thenApply((futureResult$) -> {
             return futureResult$;
           }
           );
@@ -108,9 +108,9 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> async() {
-          java.util.concurrent.CompletableFuture<java.lang.Void> $future = new java.util.concurrent.CompletableFuture<java.lang.Void>();
-          SwiftModule.$async($future);
-          return $future.thenApply((futureResult$) -> {
+          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          SwiftModule.$async(future$);
+          return future$.thenApply((futureResult$) -> {
             return futureResult$;
           }
           );
@@ -196,9 +196,9 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Long> async(long i) {
-          java.util.concurrent.CompletableFuture<java.lang.Long> $future = new java.util.concurrent.CompletableFuture<java.lang.Long>();
-          SwiftModule.$async(i, $future);
-          return $future.thenApply((futureResult$) -> {
+          java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
+          SwiftModule.$async(i, future$);
+          return future$.thenApply((futureResult$) -> {
             return futureResult$;
           }
           );
@@ -277,9 +277,9 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<MyClass> async(MyClass c, SwiftArena swiftArena$) {
-          java.util.concurrent.CompletableFuture<java.lang.Long> $future = new java.util.concurrent.CompletableFuture<java.lang.Long>();
-          SwiftModule.$async(c.$memoryAddress(), $future);
-          return $future.thenApply((futureResult$) -> {
+          java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
+          SwiftModule.$async(c.$memoryAddress(), future$);
+          return future$.thenApply((futureResult$) -> {
             return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
           }
           );
@@ -366,9 +366,9 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         public static java.util.concurrent.CompletableFuture<java.lang.String> async(java.lang.String s) {
-          java.util.concurrent.CompletableFuture<java.lang.String> $future = new java.util.concurrent.CompletableFuture<java.lang.String>();
-          SwiftModule.$async(s, $future);
-          return $future.thenApply((futureResult$) -> {
+          java.util.concurrent.CompletableFuture<java.lang.String> future$ = new java.util.concurrent.CompletableFuture<java.lang.String>();
+          SwiftModule.$async(s, future$);
+          return future$.thenApply((futureResult$) -> {
             return futureResult$;
           }
           );
@@ -427,9 +427,9 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena$) {
-          org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> $future = new org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long>();
-          SwiftModule.$async(c.$memoryAddress(), $future);
-          return $future.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> future$ = new org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long>();
+          SwiftModule.$async(c.$memoryAddress(), future$);
+          return future$.thenApply((futureResult$) -> {
             return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
           }
           );

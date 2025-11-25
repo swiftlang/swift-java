@@ -522,7 +522,7 @@ extension JNISwift2JavaGenerator {
       }
 
       let futureOutParameter = OutParameter(
-        name: "$future",
+        name: "future$",
         type: nativeFutureType,
         allocation: .new
       )
@@ -534,7 +534,7 @@ extension JNISwift2JavaGenerator {
         outParameters: result.outParameters + [futureOutParameter],
         conversion: .aggregate(variable: nil, [
           .print(.placeholder), // Make the downcall
-          .method(.constant("$future"), function: "thenApply", arguments: [
+          .method(.constant("future$"), function: "thenApply", arguments: [
             .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
           ])
         ])
