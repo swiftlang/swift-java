@@ -427,7 +427,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena$) {
-          org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> future$ = new org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long>();
+          org.swift.swiftkit.core.SimpleCompletableFuture<java.lang.Long> future$ = new org.swift.swiftkit.core.SimpleCompletableFuture<java.lang.Long>();
           SwiftModule.$async(c.$memoryAddress(), future$);
           return future$.thenApply((futureResult$) -> {
             return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
@@ -436,7 +436,7 @@ struct JNIAsyncTests {
         }
         """,
         """
-        private static native void $async(long c, org.swift.swiftkit.core.SwiftLegacyFuture<java.lang.Long> result_future);
+        private static native void $async(long c, org.swift.swiftkit.core.SimpleCompletableFuture<java.lang.Long> result_future);
         """,
       ]
     )
@@ -458,12 +458,12 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftLegacyFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftLegacyFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2")
+        func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
           ...
           var task: Task<Void, Never>? = nil
           ...
-          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SwiftLegacyFuture.complete, [jvalue(l: boxedResult$)])
+          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.complete, [jvalue(l: boxedResult$)])
           ... 
         }
         """

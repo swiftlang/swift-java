@@ -515,10 +515,10 @@ extension JNISwift2JavaGenerator {
         completeExceptionallyMethodID = "_JNIMethodIDCache.CompletableFuture.completeExceptionally"
 
       case .legacyFuture:
-        nativeFutureType = .swiftLegacyFuture(nativeFunctionSignature.result.javaType)
+        nativeFutureType = .simpleCompletableFuture(nativeFunctionSignature.result.javaType)
         translatedFutureType = .future(translatedFunctionSignature.resultType.javaType)
-        completeMethodID = "_JNIMethodIDCache.SwiftLegacyFuture.complete"
-        completeExceptionallyMethodID = "_JNIMethodIDCache.SwiftLegacyFuture.completeExceptionally"
+        completeMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.complete"
+        completeExceptionallyMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.completeExceptionally"
       }
 
       let futureOutParameter = OutParameter(

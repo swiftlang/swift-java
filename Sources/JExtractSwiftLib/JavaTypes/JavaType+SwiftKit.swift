@@ -85,9 +85,9 @@ extension JavaType {
     }
   }
 
-  /// The description of the type org.swift.swiftkit.core.SwiftLegacyFuture<T>
-  static func swiftLegacyFuture(_ T: JavaType) -> JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "SwiftLegacyFuture", typeParameters: [T.boxedType])
+  /// The description of the type org.swift.swiftkit.core.SimpleCompletableFuture<T>
+  static func simpleCompletableFuture(_ T: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SimpleCompletableFuture", typeParameters: [T.boxedType])
   }
 
 }

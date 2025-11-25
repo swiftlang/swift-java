@@ -47,7 +47,7 @@ extension _JNIMethodIDCache {
     }
   }
 
-  public enum SwiftLegacyFuture {
+  public enum SimpleCompletableFuture {
     private static let completeMethod = Method(
       name: "complete",
       signature: "(Ljava/lang/Object;)Z"
@@ -60,7 +60,7 @@ extension _JNIMethodIDCache {
 
     private static let cache = _JNIMethodIDCache(
       environment: try! JavaVirtualMachine.shared().environment(),
-      className: "org/swift/swiftkit/core/SwiftLegacyFuture",
+      className: "org/swift/swiftkit/core/SimpleCompletableFuture",
       methods: [completeMethod, completeExceptionallyMethod]
     )
 
