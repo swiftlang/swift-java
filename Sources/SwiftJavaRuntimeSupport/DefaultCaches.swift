@@ -27,7 +27,6 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "java/util/concurrent/CompletableFuture",
       methods: [completeMethod, completeExceptionallyMethod],
       isSystemClass: true
@@ -52,7 +51,6 @@ extension _JNIMethodIDCache {
     private static let messageConstructor = Method(name: "<init>", signature: "(Ljava/lang/String;)V")
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "java/lang/Exception",
       methods: [messageConstructor],
       isSystemClass: true
