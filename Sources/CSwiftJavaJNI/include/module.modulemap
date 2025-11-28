@@ -1,4 +1,8 @@
-module CSwiftJavaJNI {
+module CSwiftJavaJNI [no_undeclared_includes] {
     umbrella header "CSwiftJavaJNI.h"
+    // Force C-mode JNI type definitions to ensure compatibility with
+    // Swift modules that have C++ interoperability enabled.
+    // See: https://github.com/swiftlang/swift-java/issues/391
+    requires !cplusplus
     export *
 }
