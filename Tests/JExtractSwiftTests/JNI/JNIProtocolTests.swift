@@ -106,7 +106,7 @@ struct JNIProtocolTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ")
-        func Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong, y: jlong, y_typeMetadataAddress: jlong) {
+        func Java_com_example_swift_SwiftModule__00024takeProtocol__JJJJ(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong, y: jlong, y_typeMetadataAddress: jlong) {
           guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
             fatalError("x_typeMetadataAddress memory address was null")
           }
@@ -171,7 +171,7 @@ struct JNIProtocolTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__JJ")
-        func Java_com_example_swift_SwiftModule__00024takeGeneric__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jlong, s_typeMetadataAddress: jlong) {
+        func Java_com_example_swift_SwiftModule__00024takeGeneric__JJ(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, s: jlong, s_typeMetadataAddress: jlong) {
           guard let sTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: s_typeMetadataAddress, in: environment))) else {
             fatalError("s_typeMetadataAddress memory address was null")
           }
@@ -221,7 +221,7 @@ struct JNIProtocolTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__JJ")
-        func Java_com_example_swift_SwiftModule__00024takeComposite__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong) {
+        func Java_com_example_swift_SwiftModule__00024takeComposite__JJ(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, x: jlong, x_typeMetadataAddress: jlong) {
           guard let xTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: x_typeMetadataAddress, in: environment))) else {
             fatalError("x_typeMetadataAddress memory address was null")
           }

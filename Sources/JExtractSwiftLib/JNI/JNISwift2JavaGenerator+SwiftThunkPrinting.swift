@@ -354,7 +354,9 @@ extension JNISwift2JavaGenerator {
     func innerBody(in printer: inout CodePrinter) -> String {
       let loweredResult = nativeSignature.result.conversion.render(&printer, result)
 
-      if !decl.functionSignature.result.type.isVoid {
+      // For async functions, loweredResult is empty as they handle return internally
+      // via CompletableFuture. Only apply unsafeBitCast for non-void, non-async functions.
+      if !decl.functionSignature.result.type.isVoid && !loweredResult.isEmpty {
         let resultType = nativeSignature.result.javaType.jniTypeName
         // Use unsafeBitCast for C++ interoperability compatibility.
         // SwiftJava uses JNI types (jstring, jobject, etc.) internally,

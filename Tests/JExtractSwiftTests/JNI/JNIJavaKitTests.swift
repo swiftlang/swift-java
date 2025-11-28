@@ -64,7 +64,7 @@ struct JNIJavaKitTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J")
-        func Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, javaLong: jobject?, javaInteger: jobject?, int: jlong) {
+        func Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, javaLong: Cjobject?, javaInteger: Cjobject?, int: jlong) {
           guard let javaLong_unwrapped$ = javaLong else {
             fatalError("javaLong was null in call to \\(#function), but Swift requires non-optional!")
           }

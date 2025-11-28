@@ -57,7 +57,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, result_future: Cjobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
@@ -131,7 +131,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, result_future: Cjobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
@@ -219,7 +219,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, i: jlong, result_future: Cjobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
@@ -250,7 +250,6 @@ struct JNIAsyncTests {
               environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
-          return 
         }
         """
       ]
@@ -304,7 +303,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, c: jlong, result_future: Cjobject?) {
           assert(c != 0, "c memory address was null")
           let cBits$ = Int(Int64(fromJNI: c, in: environment))
           let c$ = UnsafeMutablePointer<MyClass>(bitPattern: cBits$)
@@ -347,7 +346,6 @@ struct JNIAsyncTests {
               environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
-          return 
         }
         """
       ]
@@ -391,7 +389,7 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, s: Cjstring?, result_future: Cjobject?) {
           let s = environment.interface.NewGlobalRef(environment, s)
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           ...
