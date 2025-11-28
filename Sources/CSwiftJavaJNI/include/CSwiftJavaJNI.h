@@ -15,6 +15,24 @@
 #ifndef CSwiftJavaJNI_h
 #define CSwiftJavaJNI_h
 
+// Force C-mode JNI type definitions to ensure compatibility with
+// Swift modules that have C++ interoperability enabled.
+// In C++ mode, jni.h defines JNIEnv as a struct (JNIEnv_), but in C mode
+// it's defined as a pointer (const struct JNINativeInterface_*).
+// This inconsistency causes type mismatches when mixing modules with
+// different interoperability settings.
+// See: https://github.com/swiftlang/swift-java/issues/391
+#ifdef __cplusplus
+#pragma push_macro("__cplusplus")
+#undef __cplusplus
+#define CSWIFTJAVAJNI_RESTORE_CPLUSPLUS
+#endif
+
 #include <jni.h>
+
+#ifdef CSWIFTJAVAJNI_RESTORE_CPLUSPLUS
+#pragma pop_macro("__cplusplus")
+#undef CSWIFTJAVAJNI_RESTORE_CPLUSPLUS
+#endif
 
 #endif /* CSwiftJavaJNI_h */
