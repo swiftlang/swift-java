@@ -355,7 +355,13 @@ extension JNISwift2JavaGenerator {
       let loweredResult = nativeSignature.result.conversion.render(&printer, result)
 
       if !decl.functionSignature.result.type.isVoid {
-        return "return \(loweredResult)"
+        let resultType = nativeSignature.result.javaType.jniTypeName
+        // Use unsafeBitCast for C++ interoperability compatibility.
+        // SwiftJava uses JNI types (jstring, jobject, etc.) internally,
+        // but generated thunks use C-compatible types (Cjstring, Cjobject, etc.)
+        // to ensure compatibility with modules that have C++ interop enabled.
+        // See: https://github.com/swiftlang/swift-java/issues/391
+        return "return unsafeBitCast(\(loweredResult), to: \(resultType).self)"
       } else {
         return loweredResult
       }
@@ -441,7 +447,9 @@ extension JNISwift2JavaGenerator {
 
     let thunkParameters =
       [
-        "environment: UnsafeMutablePointer<JNIEnv?>!",
+        // Use CJNIEnv for C++ interoperability compatibility.
+        // See: https://github.com/swiftlang/swift-java/issues/391
+        "environment: UnsafeMutablePointer<CJNIEnv?>!",
         "thisClass: jclass"
       ] + translatedParameters
     let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""

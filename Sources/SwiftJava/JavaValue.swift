@@ -93,7 +93,9 @@ public protocol JavaValue: ~Copyable {
 }
 
 /// The JNI environment.
-public typealias JNIEnvironment = UnsafeMutablePointer<JNIEnv?>
+/// Uses CJNIEnv for C++ interoperability compatibility.
+/// See: https://github.com/swiftlang/swift-java/issues/391
+public typealias JNIEnvironment = UnsafeMutablePointer<CJNIEnv?>
 
 /// Type of an operation that performs a JNI method call.
 public typealias JNIMethodCall<Result> = (JNIEnvironment, jobject, jmethodID, UnsafePointer<jvalue>?) -> Result

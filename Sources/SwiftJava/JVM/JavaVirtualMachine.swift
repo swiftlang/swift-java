@@ -19,8 +19,10 @@ import Foundation
 #endif
 
 public typealias JavaVMPointer = UnsafeMutablePointer<JavaVM?>
+// Use CJNIEnv for C++ interoperability compatibility.
+// See: https://github.com/swiftlang/swift-java/issues/391
 #if canImport(Android)
-typealias JNIEnvPointer = UnsafeMutablePointer<JNIEnv?>
+typealias JNIEnvPointer = UnsafeMutablePointer<CJNIEnv?>
 #else
 typealias JNIEnvPointer = UnsafeMutableRawPointer
 #endif

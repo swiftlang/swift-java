@@ -18,6 +18,8 @@ import CSwiftJavaJNI
 public typealias JNINativeInterface_ = JNINativeInterface
 #endif
 
-extension UnsafeMutablePointer<JNIEnv?> {
+// Extension on CJNIEnv for C++ interoperability compatibility.
+// See: https://github.com/swiftlang/swift-java/issues/391
+extension UnsafeMutablePointer<CJNIEnv?> {
   public var interface: JNINativeInterface_ { self.pointee!.pointee }
 }

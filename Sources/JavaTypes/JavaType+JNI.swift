@@ -14,6 +14,8 @@
 
 extension JavaType {
   /// Map this Java type to the appropriate JNI type name.
+  /// Uses C-compatible types (Cjobject, Cjstring, etc.) for C++ interoperability.
+  /// See: https://github.com/swiftlang/swift-java/issues/391
   package var jniTypeName: String {
     switch self {
     case .boolean: "jboolean"
@@ -25,19 +27,19 @@ extension JavaType {
     case .int: "jint"
     case .long: "jlong"
     case .void: "void"
-    case .array(.boolean): "jbooleanArray?"
-    case .array(.byte): "jbyteArray?"
-    case .array(.char): "jcharArray?"
-    case .array(.short): "jshortArray?"
-    case .array(.int): "jintArray?"
-    case .array(.long): "jlongArray?"
-    case .array(.float): "jfloatArray?"
-    case .array(.double): "jdoubleArray?"
-    case .array: "jobjectArray?"
-    case .class(package: "java.lang", name: "String", _): "jstring?"
-    case .class(package: "java.lang", name: "Class", _): "jclass?"
-    case .class(package: "java.lang", name: "Throwable", _): "jthrowable?"
-    case .class: "jobject?"
+    case .array(.boolean): "CjbooleanArray?"
+    case .array(.byte): "CjbyteArray?"
+    case .array(.char): "CjcharArray?"
+    case .array(.short): "CjshortArray?"
+    case .array(.int): "CjintArray?"
+    case .array(.long): "CjlongArray?"
+    case .array(.float): "CjfloatArray?"
+    case .array(.double): "CjdoubleArray?"
+    case .array: "CjobjectArray?"
+    case .class(package: "java.lang", name: "String", _): "Cjstring?"
+    case .class(package: "java.lang", name: "Class", _): "Cjclass?"
+    case .class(package: "java.lang", name: "Throwable", _): "Cjthrowable?"
+    case .class: "Cjobject?"
     }
   }
 

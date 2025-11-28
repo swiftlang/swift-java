@@ -47,7 +47,8 @@ struct JavaParameter {
     var jniTypeName: String {
       switch self {
       case .concrete(let type): type.jniTypeName
-      case .generic: "jobject?"
+      // Use C-compatible type for C++ interoperability
+      case .generic: "Cjobject?"
       }
     }
 
