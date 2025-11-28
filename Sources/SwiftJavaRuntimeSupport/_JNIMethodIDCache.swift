@@ -50,8 +50,8 @@ public final class _JNIMethodIDCache: Sendable {
     let clazz: jobject
     if isSystemClass {
       guard let jniClass = environment.interface.FindClass(environment, className) else {
-            fatalError("Class \(className) could not be found!")
-          }
+        fatalError("Class \(className) could not be found!")
+      }
       clazz = environment.interface.NewGlobalRef(environment, jniClass)!
       self.javaObjectHolder = nil
     } else {
