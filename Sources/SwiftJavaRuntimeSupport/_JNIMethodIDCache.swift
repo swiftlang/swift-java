@@ -39,11 +39,27 @@ public final class _JNIMethodIDCache: Sendable {
     self._class!
   }
 
-  public init(environment: UnsafeMutablePointer<JNIEnv?>!, className: String, methods: [Method]) {
-    guard let clazz = environment.interface.FindClass(environment, className) else {
-      fatalError("Class \(className) could not be found!")
+  /// An optional reference to a java object holder
+  /// if we cached this class through the class loader
+  /// This is to make sure that the underlying reference remains valid
+  nonisolated(unsafe) private let javaObjectHolder: JavaObjectHolder?
+
+  public init(environment: UnsafeMutablePointer<JNIEnv?>!, className: String, methods: [Method], isSystemClass: Bool) {
+    let clazz: jobject
+    if isSystemClass {
+      guard let jniClass = environment.interface.FindClass(environment, className) else {
+            fatalError("Class \(className) could not be found!")
+          }
+      clazz = jniClass
+      self.javaObjectHolder = nil
+    } else {
+      guard let javaClass = try? JNI.shared.applicationClassLoader.loadClass(className.replacingOccurrences(of: "/", with: ".")) else {
+        fatalError("Non-system class \(className) could not be found!")
+      }
+      clazz = javaClass.javaThis
+      self.javaObjectHolder = javaClass.javaHolder
     }
-    self._class = environment.interface.NewGlobalRef(environment, clazz)!
+    self._class = clazz
     self.methods = methods.reduce(into: [:]) { (result, method) in
       if method.isStatic {
         if let methodID = environment.interface.GetStaticMethodID(environment, clazz, method.name, method.signature) {
@@ -60,7 +76,6 @@ public final class _JNIMethodIDCache: Sendable {
       }
     }
   }
-
 
   public subscript(_ method: Method) -> jmethodID? {
     methods[method]

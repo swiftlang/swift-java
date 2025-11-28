@@ -82,9 +82,6 @@ open class JavaThread: JavaObject {
   open func getId() -> Int64
 
   @JavaMethod
-  open func getState() -> JavaThread.State!
-
-  @JavaMethod
   open func setUncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?)
 }
 extension JavaThread {
@@ -170,110 +167,6 @@ extension JavaThread.Builder {
   @JavaMethod
   public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
-}
-extension JavaThread {
-  @JavaClass("java.lang.Thread$State")
-  open class State: JavaObject<JavaThread.State> {
-    public enum StateCases: Equatable {
-      case NEW
-  case RUNNABLE
-  case BLOCKED
-  case WAITING
-  case TIMED_WAITING
-  case TERMINATED
-    }
-
-    public var enumValue: StateCases! {
-      let classObj = self.javaClass
-      if self.equals(classObj.NEW?.as(JavaObject.self)) {
-        return StateCases.NEW
-  } else if self.equals(classObj.RUNNABLE?.as(JavaObject.self)) {
-        return StateCases.RUNNABLE
-  } else if self.equals(classObj.BLOCKED?.as(JavaObject.self)) {
-        return StateCases.BLOCKED
-  } else if self.equals(classObj.WAITING?.as(JavaObject.self)) {
-        return StateCases.WAITING
-  } else if self.equals(classObj.TIMED_WAITING?.as(JavaObject.self)) {
-        return StateCases.TIMED_WAITING
-  } else if self.equals(classObj.TERMINATED?.as(JavaObject.self)) {
-        return StateCases.TERMINATED
-  } else {
-        return nil
-      }
-    }
-
-  public convenience init(_ enumValue: StateCases, environment: JNIEnvironment? = nil) {
-    let _environment = if let environment {
-      environment
-    } else {
-      try! JavaVirtualMachine.shared().environment()
-    }
-    let classObj = try! JavaClass<State>(environment: _environment)
-    switch enumValue {
-      case .NEW:
-        if let NEW = classObj.NEW {
-          self.init(javaHolder: NEW.javaHolder)
-        } else {
-          fatalError("Enum value NEW was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-      case .RUNNABLE:
-        if let RUNNABLE = classObj.RUNNABLE {
-          self.init(javaHolder: RUNNABLE.javaHolder)
-        } else {
-          fatalError("Enum value RUNNABLE was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-      case .BLOCKED:
-        if let BLOCKED = classObj.BLOCKED {
-          self.init(javaHolder: BLOCKED.javaHolder)
-        } else {
-          fatalError("Enum value BLOCKED was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-      case .WAITING:
-        if let WAITING = classObj.WAITING {
-          self.init(javaHolder: WAITING.javaHolder)
-        } else {
-          fatalError("Enum value WAITING was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-      case .TIMED_WAITING:
-        if let TIMED_WAITING = classObj.TIMED_WAITING {
-          self.init(javaHolder: TIMED_WAITING.javaHolder)
-        } else {
-          fatalError("Enum value TIMED_WAITING was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-      case .TERMINATED:
-        if let TERMINATED = classObj.TERMINATED {
-          self.init(javaHolder: TERMINATED.javaHolder)
-        } else {
-          fatalError("Enum value TERMINATED was unexpectedly nil, please re-run swift-java on the most updated Java class")
-        }
-    }
-  }
-  }
-}
-extension JavaClass<JavaThread.State> {
-  @JavaStaticField(isFinal: true)
-  public var NEW: JavaThread.State!
-
-  @JavaStaticField(isFinal: true)
-  public var RUNNABLE: JavaThread.State!
-
-  @JavaStaticField(isFinal: true)
-  public var BLOCKED: JavaThread.State!
-
-  @JavaStaticField(isFinal: true)
-  public var WAITING: JavaThread.State!
-
-  @JavaStaticField(isFinal: true)
-  public var TIMED_WAITING: JavaThread.State!
-
-  @JavaStaticField(isFinal: true)
-  public var TERMINATED: JavaThread.State!
-
-  @JavaStaticMethod
-  public func values() -> [JavaThread.State?]
-
-  @JavaStaticMethod
-  public func valueOf(_ arg0: String) -> JavaThread.State!
 }
 extension JavaThread {
   @JavaInterface("java.lang.Thread$UncaughtExceptionHandler")

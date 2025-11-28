@@ -28,47 +28,55 @@ public enum _JNIBoxedConversions {
   private static let booleanCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Boolean",
-    methods: [booleanMethod]
+    methods: [booleanMethod],
+    isSystemClass: true
   )
 
   private static let byteCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Byte",
-    methods: [byteMethod]
+    methods: [byteMethod],
+    isSystemClass: true
   )
   private static let charCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Character",
-    methods: [charMethod]
+    methods: [charMethod],
+    isSystemClass: true
   )
 
   private static let shortCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Short",
-    methods: [shortMethod]
+    methods: [shortMethod],
+    isSystemClass: true
   )
   private static let intCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Integer",
-    methods: [intMethod]
+    methods: [intMethod],
+    isSystemClass: true
   )
 
   private static let longCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Long",
-    methods: [longMethod]
+    methods: [longMethod],
+    isSystemClass: true
   )
 
   private static let floatCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Float",
-    methods: [floatMethod]
+    methods: [floatMethod],
+    isSystemClass: true
   )
 
   private static let doubleCache = _JNIMethodIDCache(
     environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Double",
-    methods: [doubleMethod]
+    methods: [doubleMethod],
+    isSystemClass: true
   )
 
   public static func box(_ value: jboolean, in env: JNIEnvironment) -> jobject {
