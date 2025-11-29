@@ -1062,7 +1062,7 @@ extension JNISwift2JavaGenerator {
         }
         return printer.finalize()
       case .labelessAssignmentOfVariable(let name, let swiftType):
-        return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder)))"
+        return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder))))"
       }
     }
   }
