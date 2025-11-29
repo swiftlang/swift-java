@@ -308,7 +308,9 @@ extension JNISwift2JavaGenerator {
 
       switch parameter.conversionCheck {
         case .check32BitIntOverflow:
-          int32OverflowChecks.append(parameter.conversionCheck!.render(&printer, "indirect_\(javaParameterName)"))
+        int32OverflowChecks.append(
+          parameter.conversionCheck!.render(
+            &printer, JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName)))
         case nil:
           break
       }
@@ -316,7 +318,7 @@ extension JNISwift2JavaGenerator {
 
     // Make indirect variables
     for (name, lowered) in indirectVariables {
-      printer.print("let indirect_\(name) = \(lowered)")
+      printer.print("let \(JNISwift2JavaGenerator.indirectVariableName(for: name)) = \(lowered)")
     }
 
     if !int32OverflowChecks.isEmpty {
@@ -324,9 +326,8 @@ extension JNISwift2JavaGenerator {
 
       for check in int32OverflowChecks {
         printer.printBraceBlock("guard \(check) else") { printer in 
-          let dummyReturn = dummyReturn(for: nativeSignature)
           printer.print("environment.throwJavaException(javaException: .integerOverflow)")
-          printer.print(dummyReturn)
+          printer.print(dummyReturn(for: nativeSignature))
         }
       }
       printer.print("#endif")
@@ -394,8 +395,6 @@ extension JNISwift2JavaGenerator {
     }
 
     if decl.isThrowing, !decl.isAsync {
-      let dummyReturn = dummyReturn(for: nativeSignature)
-
       printer.print("do {")
       printer.indent()
       printer.print(innerBody(in: &printer))
@@ -405,7 +404,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         environment.throwAsException(error)
-        \(dummyReturn)
+        \(dummyReturn(for: nativeSignature))
         """
       )
       printer.outdent()

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Describes a Java exception class (e.g. `SwiftIntegerOverflowException`)
-public struct JavaException: Equatable, Hashable {
+public struct JavaExceptionType: Equatable, Hashable {
   public let type: JavaType
   public let message: String?
 
@@ -23,8 +23,8 @@ public struct JavaException: Equatable, Hashable {
   }
 }
 
-extension JavaException {
-  public static var integerOverflow: JavaException {
-    JavaException(className: "org.swift.swiftkit.core.SwiftIntegerOverflowException")
+extension JavaExceptionType {
+  public static var integerOverflow: JavaExceptionType {
+    JavaExceptionType(className: "org.swift.swiftkit.core.SwiftIntegerOverflowException")
   }
 }

@@ -57,7 +57,7 @@ enum JNIJavaTypeTranslator {
     }
   }
 
-  static func indirectConversionSetepSwiftType(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> SwiftType? {
+  static func indirectConversionStepSwiftType(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> SwiftType? {
     switch knownKind {
     case .int: knownTypes.int64
     case .uint: knownTypes.uint64

@@ -114,7 +114,7 @@ extension JNISwift2JavaGenerator {
           .class(package: nil,name: caseName)
         )
       ])
-      var exceptions: [JavaException] = []
+      var exceptions: [JavaExceptionType] = []
 
       if enumCase.parameters.contains(where: \.type.isArchDependingInteger) {
         exceptions.append(.integerOverflow)
@@ -300,7 +300,7 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
-      var exceptions: [JavaException] = []
+      var exceptions: [JavaExceptionType] = []
 
       if functionSignature.parameters.contains(where: \.type.isArchDependingInteger) {
         exceptions.append(.integerOverflow)
@@ -986,7 +986,7 @@ extension JNISwift2JavaGenerator {
     var selfParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var resultType: TranslatedResult
-    var exceptions: [JavaException]
+    var exceptions: [JavaExceptionType]
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from

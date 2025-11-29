@@ -103,7 +103,7 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
 
-            let indirectStepType = JNIJavaTypeTranslator.indirectConversionSetepSwiftType(for: knownType, from: knownTypes)
+            let indirectStepType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(for: knownType, from: knownTypes)
             let indirectCheck = JNIJavaTypeTranslator.checkStep(for: knownType, from: knownTypes)
 
             return NativeParameter(
@@ -644,7 +644,8 @@ extension JNISwift2JavaGenerator {
     /// Represents how to convert the JNI parameter to a Swift parameter
     let conversion: NativeSwiftConversionStep
 
-    /// Represents swift type for indirect variable used in required checks, e.g Int64 for Int overflow check on 32-bit platforms
+    /// Represents swift type for conversion checks. This will introduce a new name$indirect variable used in required checks.
+    /// e.g Int64 for Int overflow check on 32-bit platforms
     let indirectConversion: NativeSwiftConversionStep?
 
     /// Represents check operations executed in if/guard conditional block for check during conversion
@@ -1061,7 +1062,7 @@ extension JNISwift2JavaGenerator {
         }
         return printer.finalize()
       case .labelessAssignmentOfVariable(let name, let swiftType):
-        return "\(swiftType)(indirect_\(name.render(&printer, placeholder)))"
+        return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder)))"
       }
     }
   }
