@@ -28,8 +28,7 @@ extension _JNIMethodIDCache {
 
     private static let cache = _JNIMethodIDCache(
       className: "java/util/concurrent/CompletableFuture",
-      methods: [completeMethod, completeExceptionallyMethod],
-      isSystemClass: true
+      methods: [completeMethod, completeExceptionallyMethod]
     )
 
     public static var `class`: jclass {
@@ -52,8 +51,7 @@ extension _JNIMethodIDCache {
 
     private static let cache = _JNIMethodIDCache(
       className: "java/lang/Exception",
-      methods: [messageConstructor],
-      isSystemClass: true
+      methods: [messageConstructor]
     )
 
     public static var `class`: jclass {

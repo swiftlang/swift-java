@@ -236,7 +236,7 @@ extension JNISwift2JavaGenerator {
       let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
       let methods = #"[.init(name: "<init>", signature: "\#(methodSignature.mangledName)")]"#
 
-      return #"_JNIMethodIDCache(className: "\#(nativeParametersClassName)", methods: \#(methods), isSystemClass: false)"#
+      return #"_JNIMethodIDCache(className: "\#(nativeParametersClassName)", methods: \#(methods))"#
   }
 
   private func printEnumGetAsCaseThunk(

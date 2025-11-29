@@ -27,48 +27,40 @@ public enum _JNIBoxedConversions {
 
   private static let booleanCache = _JNIMethodIDCache(
     className: "java/lang/Boolean",
-    methods: [booleanMethod],
-    isSystemClass: true
+    methods: [booleanMethod]
   )
 
   private static let byteCache = _JNIMethodIDCache(
     className: "java/lang/Byte",
-    methods: [byteMethod],
-    isSystemClass: true
+    methods: [byteMethod]
   )
   private static let charCache = _JNIMethodIDCache(
     className: "java/lang/Character",
-    methods: [charMethod],
-    isSystemClass: true
+    methods: [charMethod]
   )
 
   private static let shortCache = _JNIMethodIDCache(
     className: "java/lang/Short",
-    methods: [shortMethod],
-    isSystemClass: true
+    methods: [shortMethod]
   )
   private static let intCache = _JNIMethodIDCache(
     className: "java/lang/Integer",
-    methods: [intMethod],
-    isSystemClass: true
+    methods: [intMethod]
   )
 
   private static let longCache = _JNIMethodIDCache(
     className: "java/lang/Long",
-    methods: [longMethod],
-    isSystemClass: true
+    methods: [longMethod]
   )
 
   private static let floatCache = _JNIMethodIDCache(
     className: "java/lang/Float",
-    methods: [floatMethod],
-    isSystemClass: true
+    methods: [floatMethod]
   )
 
   private static let doubleCache = _JNIMethodIDCache(
     className: "java/lang/Double",
-    methods: [doubleMethod],
-    isSystemClass: true
+    methods: [doubleMethod]
   )
 
   public static func box(_ value: jboolean, in env: JNIEnvironment) -> jobject {

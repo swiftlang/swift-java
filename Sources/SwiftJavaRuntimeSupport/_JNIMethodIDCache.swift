@@ -44,23 +44,22 @@ public final class _JNIMethodIDCache: Sendable {
   /// This is to make sure that the underlying reference remains valid
   nonisolated(unsafe) private let javaObjectHolder: JavaObjectHolder?
 
-  public init(className: String, methods: [Method], isSystemClass: Bool) {
+  public init(className: String, methods: [Method]) {
     let environment = try! JavaVirtualMachine.shared().environment()
 
     let clazz: jobject
-    if isSystemClass {
-      guard let jniClass = environment.interface.FindClass(environment, className) else {
-        fatalError("Class \(className) could not be found!")
-      }
+    if let jniClass = environment.interface.FindClass(environment, className) {
       clazz = environment.interface.NewGlobalRef(environment, jniClass)!
       self.javaObjectHolder = nil
-    } else {
-      guard let javaClass = try? JNI.shared.applicationClassLoader.loadClass(className.replacingOccurrences(of: "/", with: ".")) else {
-        fatalError("Non-system class \(className) could not be found!")
-      }
+    } else if let javaClass = try? JNI.shared.applicationClassLoader.loadClass(
+      className.replacingOccurrences(of: "/", with: ".")
+    ) {
       clazz = javaClass.javaThis
       self.javaObjectHolder = javaClass.javaHolder
+    } else {
+      fatalError("Class \(className) could not be found!")
     }
+
     self._class = clazz
     self.methods = methods.reduce(into: [:]) { (result, method) in
       if method.isStatic {
