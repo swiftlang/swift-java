@@ -424,7 +424,11 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-  private func printJavaBindingWrapperMethod(_ printer: inout CodePrinter, _ decl: ImportedFunc, signaturesOnly: Bool) {
+  private func printJavaBindingWrapperMethod(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc,
+    signaturesOnly: Bool
+  ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
@@ -470,6 +474,13 @@ extension JNISwift2JavaGenerator {
       if let importedFunc {
         printDeclDocumentation(&printer, importedFunc)
       }
+      var modifiers = modifiers
+
+      // If we are a protocol, we emit this as default method
+      if importedFunc?.parentType?.asNominalTypeDeclaration?.kind == .protocol {
+        modifiers.insert("default", at: 1)
+      }
+
       printer.printBraceBlock("\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)") { printer in
         let globalArenaName = "SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]

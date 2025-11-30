@@ -74,4 +74,31 @@ struct MemoryManagementModeTests {
       ]
     )
   }
+
+  @Test
+  func allowGlobalAutomatic_protocol() throws {
+    var config = Configuration()
+    config.memoryManagementMode = .allowGlobalAutomatic
+
+    try assertOutput(
+      input:
+        """
+        public class MyClass {}
+        
+        public protocol MyProtocol {
+          public func f() -> MyClass
+        }
+        """,
+      config: config,
+      .jni, .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public default MyClass f() {
+          return f(SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
+        }
+        """
+      ]
+    )
+  }
 }
