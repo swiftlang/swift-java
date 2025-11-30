@@ -97,6 +97,9 @@ struct MemoryManagementModeTests {
         public default MyClass f() {
           return f(SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
         }
+        """,
+        """
+        public MyClass f(SwiftArena swiftArena$);
         """
       ]
     )
