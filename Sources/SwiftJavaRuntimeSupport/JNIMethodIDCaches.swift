@@ -58,7 +58,6 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "org/swift/swiftkit/core/SimpleCompletableFuture",
       methods: [completeMethod, completeExceptionallyMethod]
     )
