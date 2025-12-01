@@ -33,4 +33,26 @@ public class MySwiftStructTest {
             assertEquals(len, struct.getLength());
         }
     }
+
+    @Test
+    void testSubscript() {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
+            long currentValue = s.getSubscript();
+            s.setSubscript(66);
+            assertEquals(0, currentValue);
+            assertEquals(66, s.getSubscriptValue());
+        }
+    }
+
+    @Test
+    void testSubscriptWithParams() {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
+            long currentValue = s.getSubscript(1);
+            s.setSubscript(1, 66);
+            assertEquals(20, currentValue);
+            assertEquals(66, s.getSubscriptArrayValue(1));
+        }
+    }
 }

@@ -32,6 +32,8 @@ public final class JavaObjectHolder {
   /// in Swift and the Java virtual machine is free to move or deallocate it.
   func forget() {
     if let object {
+      let environment = try! JavaVirtualMachine.shared().environment()
+
       environment.interface.DeleteGlobalRef(environment, object)
       self.object = nil
     }

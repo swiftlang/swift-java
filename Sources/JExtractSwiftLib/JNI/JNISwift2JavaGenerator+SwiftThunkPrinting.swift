@@ -362,6 +362,19 @@ extension JNISwift2JavaGenerator {
       }
 
       result = "\(callee).\(decl.name) = \(newValueArgument)"
+    case .subscriptGetter:
+      let parameters = arguments.joined(separator: ", ")
+      result = "\(callee)[\(parameters)]"
+    case .subscriptSetter:
+      guard let newValueArgument = arguments.last else {
+        fatalError("Setter did not contain newValue parameter: \(decl)")
+      }
+
+      var argumentsWithoutNewValue = arguments
+      argumentsWithoutNewValue.removeLast()
+
+      let parameters = argumentsWithoutNewValue.joined(separator: ", ")
+      result = "\(callee)[\(parameters)] = \(newValueArgument)"
     }
 
     // Lower the result.

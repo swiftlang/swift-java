@@ -165,10 +165,10 @@ public class MySwiftClassTest {
     }
 
     @Test
-    void getAsyncVariable() {
+    void getAsyncVariable() throws Exception {
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
-            assertEquals(42, c1.getGetAsync().join());
+            assertEquals(42, c1.getGetAsync().get());
         }
     }
 }

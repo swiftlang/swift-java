@@ -23,7 +23,7 @@ public enum JExtractAsyncFuncMode: String, Codable {
   /// Android 23 and below.
   ///
   /// - Note: Prefer using the `completableFuture` mode instead, if possible.
-//  case future
+  case legacyFuture
 }
 
 extension JExtractAsyncFuncMode {
