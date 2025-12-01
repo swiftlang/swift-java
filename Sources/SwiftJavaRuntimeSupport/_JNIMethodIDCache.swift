@@ -51,13 +51,18 @@ public final class _JNIMethodIDCache: Sendable {
     if let jniClass = environment.interface.FindClass(environment, className) {
       clazz = environment.interface.NewGlobalRef(environment, jniClass)!
       self.javaObjectHolder = nil
-    } else if let javaClass = try? JNI.shared.applicationClassLoader.loadClass(
-      className.replacingOccurrences(of: "/", with: ".")
-    ) {
-      clazz = javaClass.javaThis
-      self.javaObjectHolder = javaClass.javaHolder
     } else {
-      fatalError("Class \(className) could not be found!")
+      // Clear any ClassNotFound exceptions from FindClass
+      environment.interface.ExceptionClear(environment)
+
+      if let javaClass = try? JNI.shared.applicationClassLoader.loadClass(
+        className.replacingOccurrences(of: "/", with: ".")
+      ) {
+        clazz = javaClass.javaThis
+        self.javaObjectHolder = javaClass.javaHolder
+      } else {
+        fatalError("Class \(className) could not be found!")
+      }
     }
 
     self._class = clazz
