@@ -386,6 +386,9 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"], .when(platforms: [.macOS, .linux, .windows]))
+      ],
+      linkerSettings: [
+        .linkedLibrary("log", .when(platforms: [.android]))
       ]
     ),
 
