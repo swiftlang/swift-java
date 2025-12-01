@@ -227,7 +227,7 @@ jobs:
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.1'
+          gradle-version: '9.2.1'
       - name: "Verify sample: ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
