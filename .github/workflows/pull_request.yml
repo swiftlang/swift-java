@@ -176,6 +176,48 @@ jobs:
       - name: Swift Test
         run: "swift test"
 
+  test-swift-cxx-interop:
+    name: Test (Swift, C++ Interop) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: ['6.2', 'nightly']
+        os_version: ['jammy']
+        jdk_vendor: ['corretto']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      SWIFT_JAVA_VERBOSE: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Swift Build with C++ Interoperability
+        run: swift build --build-tests --disable-sandbox --disable-experimental-prebuilts -Xswiftc -cxx-interoperability-mode=default
+      - name: Swift Test with C++ Interoperability
+        run: swift test --disable-experimental-prebuilts -Xswiftc -cxx-interoperability-mode=default
+
+  test-swift-cxx-interop-macos:
+    name: Test (Swift, C++ Interop) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    runs-on: [self-hosted, macos, sequoia, ARM64]
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: ['6.2']
+        os_version: ['macos']
+        jdk_vendor: ['corretto']
+    env:
+      SWIFT_JAVA_VERBOSE: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Swift Build with C++ Interoperability
+        run: swift build --build-tests --disable-sandbox -Xswiftc -cxx-interoperability-mode=default
+      - name: Swift Test with C++ Interoperability
+        run: swift test -Xswiftc -cxx-interoperability-mode=default
+
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
     runs-on: ubuntu-latest
