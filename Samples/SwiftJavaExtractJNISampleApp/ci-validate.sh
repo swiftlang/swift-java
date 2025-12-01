@@ -4,6 +4,7 @@ set -x
 set -e
 
 # FIXME: debugging CI issue; test gradle command by itself
+pwd
 ls /Users/runner/actions-runner/_work/swift-java/
 ls /Users/runner/actions-runner/_work/swift-java/swift-java
 
