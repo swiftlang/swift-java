@@ -39,6 +39,12 @@ let javaIncludePath = "\(javaHome)/include"
   #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
 #endif
 
+// Support C++ interoperability mode via CXX_INTEROP environment variable.
+// This is used to test that swift-java's public API is compatible with projects
+// that enable C++ interoperability mode.
+// See: https://github.com/swiftlang/swift-java/issues/391
+let cxxInteropEnabled = ProcessInfo.processInfo.environment["CXX_INTEROP"] == "1"
+
 let package = Package(
     name: "JavaSieve",
     platforms: [
@@ -59,7 +65,8 @@ let package = Package(
             ],
             exclude: ["swift-java.config"],
             swiftSettings: [
-              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+              .interoperabilityMode(.Cxx, .when(platforms: cxxInteropEnabled ? [.macOS, .linux] : [])),
             ],
             plugins: [
               .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
@@ -77,7 +84,8 @@ let package = Package(
             ],
             exclude: ["swift-java.config"],
             swiftSettings: [
-              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
+              .interoperabilityMode(.Cxx, .when(platforms: cxxInteropEnabled ? [.macOS, .linux] : [])),
             ],
             plugins: [
               .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
