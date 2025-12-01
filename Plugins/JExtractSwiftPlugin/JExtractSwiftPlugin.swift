@@ -181,6 +181,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // and that would cause conflicts.
     let gradleUserHome = context.pluginWorkDirectoryURL.appending(path: "gradle-user-home")
 
+    let GradleUserHome = "GRADLE_USER_HOME"
+    let gradleUserHomePath = gradleUserHome.path(percentEncoded: false)
+    log("Prepare command: :SwiftKitCore:build in \(GradleUserHome)=\(gradleUserHomePath)")
+    var gradlewEnvironment = ProcessInfo.processInfo.environment
+    gradlewEnvironment[GradleUserHome] = gradleUserHomePath
+    log("Forward environment: \(gradlewEnvironment)")
     commands += [
       .buildCommand(
         displayName: "Build SwiftKitCore using Gradle (Java)",
@@ -191,9 +197,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           "--configure-on-demand",
           "--no-daemon"
         ],
-        environment: [
-          "GRADLE_USER_HOME": gradleUserHome.path(percentEncoded: false)
-        ],
+        environment: gradlewEnvironment,
         inputFiles: [swiftJavaDirectory],
         outputFiles: [swiftKitCoreClassPath]
       )
