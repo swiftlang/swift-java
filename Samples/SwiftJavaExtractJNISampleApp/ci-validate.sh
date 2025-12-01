@@ -4,7 +4,9 @@ set -x
 set -e
 
 # GitHub Actions workaround; We seem to be hitting gradle wrapper download issues, and this attempts to workaround them
-export GRADLE_USER_HOME="$(pwd)/.build/plugins/outputs/swiftjavaextractjnisampleapp/MySwiftLibrary/destination/JExtractSwiftPlugin/gradle-user-home"
+./gradlew -h
+
+GRADLE_USER_HOME="$(pwd)/.build/plugins/outputs/swiftjavaextractjnisampleapp/MySwiftLibrary/destination/JExtractSwiftPlugin/gradle-user-home"
 if [ -d "$HOME/.gradle" ] ; then
   echo "COPY $HOME/.gradle to $GRADLE_USER_HOME"
   mkdir -p "$GRADLE_USER_HOME"
