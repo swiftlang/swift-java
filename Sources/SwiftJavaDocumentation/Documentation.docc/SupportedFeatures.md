@@ -83,7 +83,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Ownership modifiers: `inout`, `borrowing`, `consuming`                               | ❌        | ❌   |
 | Default parameter values: `func p(name: String = "")`                                | ❌        | ❌   |
 | Operators: `+`, `-`, user defined                                                    | ❌        | ❌   |
-| Subscripts: `subscript()`                                                            | ❌        | ❌   |
+| Subscripts: `subscript()`                                                            | ✅        | ✅   |
 | Equatable                                                                            | ❌        | ❌   |
 | Pointers: `UnsafeRawPointer`, UnsafeBufferPointer (?)                                | 🟡       | ❌   |
 | Nested types: `struct Hello { struct World {} }`                                     | ❌        | ✅   |
