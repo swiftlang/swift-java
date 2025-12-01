@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
-import SwiftJavaConfigurationShared
 
 final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator
@@ -53,9 +53,9 @@ final class Swift2JavaVisitor {
     case .extensionDecl(let node):
       self.visit(extensionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .typeAliasDecl:
-      break // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
+      break  // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
     case .associatedTypeDecl:
-      break // TODO: Implement associated types
+      break  // TODO: Implement associated types
 
     case .initializerDecl(let node):
       self.visit(initializerDecl: node, in: parent)
@@ -63,9 +63,8 @@ final class Swift2JavaVisitor {
       self.visit(functionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .variableDecl(let node):
       self.visit(variableDecl: node, in: parent, sourceFilePath: sourceFilePath)
-    case .subscriptDecl:
-      // TODO: Implement subscripts
-      break
+    case .subscriptDecl(let node):
+      self.visit(subscriptDecl: node, in: parent)
     case .enumCaseDecl(let node):
       self.visit(enumCaseDecl: node, in: parent)
 
@@ -75,7 +74,8 @@ final class Swift2JavaVisitor {
   }
 
   func visit(
-    nominalDecl node: some DeclSyntaxProtocol & DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax,
+    nominalDecl node: some DeclSyntaxProtocol & DeclGroupSyntax & NamedDeclSyntax
+      & WithAttributesSyntax & WithModifiersSyntax,
     in parent: ImportedNominalType?,
     sourceFilePath: String
   ) {
@@ -115,7 +115,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(
-    functionDecl node: FunctionDeclSyntax, 
+    functionDecl node: FunctionDeclSyntax,
     in typeContext: ImportedNominalType?,
     sourceFilePath: String
   ) {
@@ -154,7 +154,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(
-    enumCaseDecl node: EnumCaseDeclSyntax, 
+    enumCaseDecl node: EnumCaseDeclSyntax,
     in typeContext: ImportedNominalType?
   ) {
     guard let typeContext else {
@@ -200,7 +200,7 @@ final class Swift2JavaVisitor {
   }
 
   func visit(
-    variableDecl node: VariableDeclSyntax, 
+    variableDecl node: VariableDeclSyntax,
     in typeContext: ImportedNominalType?,
     sourceFilePath: String
   ) {
@@ -216,37 +216,21 @@ final class Swift2JavaVisitor {
 
     self.log.debug("Import variable: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
-    func importAccessor(kind: SwiftAPIKind) throws {
-      let signature = try SwiftFunctionSignature(
-        node,
-        isSet: kind == .setter,
-        enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext
-      )
-
-      let imported = ImportedFunc(
-        module: translator.swiftModuleName,
-        swiftDecl: node,
-        name: varName,
-        apiKind: kind,
-        functionSignature: signature
-      )
-
-      log.debug("Record imported variable accessor \(kind == .getter ? "getter" : "setter"):\(node.qualifiedNameForDebug)")
-      if let typeContext {
-        typeContext.variables.append(imported)
-      } else {
-        translator.importedGlobalVariables.append(imported)
-      }
-    }
-
     do {
       let supportedAccessors = node.supportedAccessorKinds(binding: binding)
       if supportedAccessors.contains(.get) {
-        try importAccessor(kind: .getter)
+        try importAccessor(
+          from: DeclSyntax(node),
+          in: typeContext,
+          kind: .getter,
+          name: varName)
       }
       if supportedAccessors.contains(.set) {
-        try importAccessor(kind: .setter)
+        try importAccessor(
+          from: DeclSyntax(node),
+          in: typeContext,
+          kind: .setter,
+          name: varName)
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
@@ -289,10 +273,89 @@ final class Swift2JavaVisitor {
     typeContext.initializers.append(imported)
   }
 
+  private func visit(
+    subscriptDecl node: SubscriptDeclSyntax,
+    in typeContext: ImportedNominalType?,
+  ) {
+    guard node.shouldExtract(config: config, log: log, in: typeContext) else {
+      return
+    }
+
+    guard let accessorBlock = node.accessorBlock else {
+      return
+    }
+
+    let name = "subscript"
+    let accessors = accessorBlock.supportedAccessorKinds()
+
+    do {
+      if accessors.contains(.get) {
+        try importAccessor(
+          from: DeclSyntax(node),
+          in: typeContext,
+          kind: .subscriptGetter,
+          name: name)
+      }
+      if accessors.contains(.set) {
+        try importAccessor(
+          from: DeclSyntax(node),
+          in: typeContext,
+          kind: .subscriptSetter,
+          name: name)
+      }
+    } catch {
+      self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
+    }
+  }
+
+  private func importAccessor(
+    from node: DeclSyntax,
+    in typeContext: ImportedNominalType?,
+    kind: SwiftAPIKind,
+    name: String
+  ) throws {
+    let signature: SwiftFunctionSignature
+
+    switch node.as(DeclSyntaxEnum.self) {
+    case .variableDecl(let varNode):
+      signature = try SwiftFunctionSignature(
+        varNode,
+        isSet: kind == .setter,
+        enclosingType: typeContext?.swiftType,
+        lookupContext: translator.lookupContext)
+    case .subscriptDecl(let subscriptNode):
+      signature = try SwiftFunctionSignature(
+        subscriptNode,
+        isSet: kind == .subscriptSetter,
+        enclosingType: typeContext?.swiftType,
+        lookupContext: translator.lookupContext)
+    default:
+      log.warning("Not supported declaration type \(node.kind) while calling importAccessor!")
+      return
+    }
+
+    let imported = ImportedFunc(
+      module: translator.swiftModuleName,
+      swiftDecl: node,
+      name: name,
+      apiKind: kind,
+      functionSignature: signature
+    )
+
+    log.debug(
+      "Record imported variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
+    )
+    if let typeContext {
+      typeContext.variables.append(imported)
+    } else {
+      translator.importedGlobalVariables.append(imported)
+    }
+  }
+
   private func synthesizeRawRepresentableConformance(
     enumDecl node: EnumDeclSyntax,
     in parent: ImportedNominalType?
-    ) {
+  ) {
     guard let imported = translator.importedNominalType(node, parent: parent) else {
       return
     }
@@ -304,7 +367,9 @@ final class Swift2JavaVisitor {
       ),
       inheritanceType.isRawTypeCompatible
     {
-      if !imported.variables.contains(where: { $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType }) {
+      if !imported.variables.contains(where: {
+        $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType
+      }) {
         let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
@@ -312,7 +377,11 @@ final class Swift2JavaVisitor {
       // FIXME: why is this un-used
       imported.variables.first?.signatureString
 
-      if !imported.initializers.contains(where: { $0.functionSignature.parameters.count == 1 && $0.functionSignature.parameters.first?.parameterName == "rawValue" && $0.functionSignature.parameters.first?.type == inheritanceType }) {
+      if !imported.initializers.contains(where: {
+        $0.functionSignature.parameters.count == 1
+          && $0.functionSignature.parameters.first?.parameterName == "rawValue"
+          && $0.functionSignature.parameters.first?.type == inheritanceType
+      }) {
         let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
@@ -330,7 +399,9 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
       }
 
     guard meetsRequiredAccessLevel else {
-      log.debug("Skip import '\(self.qualifiedNameForDebug)': not at least \(config.effectiveMinimumInputAccessLevelMode)")
+      log.debug(
+        "Skip import '\(self.qualifiedNameForDebug)': not at least \(config.effectiveMinimumInputAccessLevelMode)"
+      )
       return false
     }
     guard !attributes.contains(where: { $0.isJava }) else {
