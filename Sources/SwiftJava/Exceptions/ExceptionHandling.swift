@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import struct JavaTypes.JavaExceptionType
+
 extension JNIEnvironment {
   /// Execute a JNI call and check for an exception at the end. Translate
   /// any Java exception into an error.
@@ -42,5 +44,17 @@ extension JNIEnvironment {
     _ = try! Exception.withJNIClass(in: self) { exceptionClass in
       interface.ThrowNew(self, exceptionClass, String(describing: error))
     }
+  }
+
+  public func throwJavaException(javaException: JavaExceptionType) {
+    guard let exceptionClass = self.interface.FindClass(self, javaException.type.className!) else {
+      // Otherwise, create a exception with a message.
+      _ = try! Exception.withJNIClass(in: self) { exceptionClass in
+        interface.ThrowNew(self, exceptionClass, "An exception(\(String(describing: javaException))) occured!")
+      }
+      return
+    }
+
+    _ = interface.ThrowNew(self, exceptionClass, javaException.message ?? "")
   }
 }
