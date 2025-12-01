@@ -104,7 +104,8 @@ extension AnyJavaObject {
     resultType: Result.Type
   ) throws -> jmethodID {
     // Retrieve the Java class instance from the object.
-    let environment = javaEnvironment
+    let environment = try JavaVirtualMachine.shared().environment()
+
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
@@ -115,7 +116,7 @@ extension AnyJavaObject {
         methodName: methodName,
         parameterTypes: repeat each parameterTypes,
         resultType: Result.javaType,
-        in: javaEnvironment
+        in: environment
       )
     }
   }
@@ -126,7 +127,8 @@ extension AnyJavaObject {
     parameterTypes: repeat (each Param).Type
   ) throws -> jmethodID {
     // Retrieve the Java class instance from the object.
-    let environment = javaEnvironment
+    let environment = try JavaVirtualMachine.shared().environment()
+
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
@@ -137,7 +139,7 @@ extension AnyJavaObject {
         methodName: methodName,
         parameterTypes: repeat each parameterTypes,
         resultType: .void,
-        in: javaEnvironment
+        in: environment
       )
     }
   }
@@ -167,8 +169,10 @@ extension AnyJavaObject {
     method: jmethodID,
     args: repeat each Param
   ) throws -> Result {
+    let environment = try JavaVirtualMachine.shared().environment()
+
     return try Self.javaMethodCall(
-      in: javaEnvironment,
+      in: environment,
       this: javaThis,
       method: method,
       args: repeat each args
@@ -229,8 +233,10 @@ extension AnyJavaObject {
     method: jmethodID,
     args: repeat each Param
   ) throws {
+    let environment = try JavaVirtualMachine.shared().environment()
+
     try Self.javaMethodCall(
-      in: javaEnvironment,
+      in: environment,
       this: javaThis,
       method: method,
       args: repeat each args
@@ -276,7 +282,7 @@ extension AnyJavaObject {
   private func getJNIFieldID<FieldType: JavaValue>(_ fieldName: String, fieldType: FieldType.Type) -> jfieldID?
   where FieldType: ~Copyable {
     let this = javaThis
-    let environment = javaEnvironment
+    let environment = try! JavaVirtualMachine.shared().environment()
 
     // Retrieve the Java class instance from the object.
     let thisClass = environment.interface.GetObjectClass(environment, this)!
@@ -289,15 +295,19 @@ extension AnyJavaObject {
     fieldType fieldType: FieldType.Type
   ) -> FieldType where FieldType: ~Copyable {
     get {
+      let environment = try! JavaVirtualMachine.shared().environment()
+
       let fieldID = getJNIFieldID(fieldName, fieldType: fieldType)!
-      let jniMethod = FieldType.jniFieldGet(in: javaEnvironment)
-      return FieldType(fromJNI: jniMethod(javaEnvironment, javaThis, fieldID), in: javaEnvironment)
+      let jniMethod = FieldType.jniFieldGet(in: environment)
+      return FieldType(fromJNI: jniMethod(environment, javaThis, fieldID), in: environment)
     }
 
     nonmutating set {
+      let environment = try! JavaVirtualMachine.shared().environment()
+
       let fieldID = getJNIFieldID(fieldName, fieldType: fieldType)!
-      let jniMethod = FieldType.jniFieldSet(in: javaEnvironment)
-      jniMethod(javaEnvironment, javaThis, fieldID, newValue.getJNIValue(in: javaEnvironment))
+      let jniMethod = FieldType.jniFieldSet(in: environment)
+      jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
     }
   }
 }
@@ -311,7 +321,7 @@ extension JavaClass {
     resultType: Result.Type
   ) throws -> Result {
     let thisClass = javaThis
-    let environment = javaEnvironment
+    let environment = try! JavaVirtualMachine.shared().environment()
 
     // Compute the method signature so we can find the right method, then look up the
     // method within the class.
@@ -345,7 +355,7 @@ extension JavaClass {
     arguments: repeat each Param
   ) throws {
     let thisClass = javaThis
-    let environment = javaEnvironment
+    let environment = try JavaVirtualMachine.shared().environment()
 
     // Compute the method signature so we can find the right method, then look up the
     // method within the class.
@@ -372,7 +382,7 @@ extension JavaClass {
 
   /// Retrieve the JNI field ID for a field with the given name and type.
   private func getJNIStaticFieldID<FieldType: JavaValue>(_ fieldName: String, fieldType: FieldType.Type) -> jfieldID? {
-    let environment = javaEnvironment
+    let environment = try! JavaVirtualMachine.shared().environment()
 
     return environment.interface.GetStaticFieldID(environment, javaThis, fieldName, FieldType.jniMangling)
   }
@@ -382,15 +392,19 @@ extension JavaClass {
     fieldType fieldType: FieldType.Type
   ) -> FieldType {
     get {
+      let environment = try! JavaVirtualMachine.shared().environment()
+
       let fieldID = getJNIStaticFieldID(fieldName, fieldType: fieldType)!
-      let jniMethod = FieldType.jniStaticFieldGet(in: javaEnvironment)
-      return FieldType(fromJNI: jniMethod(javaEnvironment, javaThis, fieldID), in: javaEnvironment)
+      let jniMethod = FieldType.jniStaticFieldGet(in: environment)
+      return FieldType(fromJNI: jniMethod(environment, javaThis, fieldID), in: environment)
     }
 
     set {
+      let environment = try! JavaVirtualMachine.shared().environment()
+
       let fieldID = getJNIStaticFieldID(fieldName, fieldType: fieldType)!
-      let jniMethod = FieldType.jniStaticFieldSet(in: javaEnvironment)
-      jniMethod(javaEnvironment, javaThis, fieldID, newValue.getJNIValue(in: javaEnvironment))
+      let jniMethod = FieldType.jniStaticFieldSet(in: environment)
+      jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
     }
   }
 }
