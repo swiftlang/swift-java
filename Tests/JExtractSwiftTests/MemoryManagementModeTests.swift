@@ -99,7 +99,7 @@ struct MemoryManagementModeTests {
         }
         """,
         """
-        public MyClass f(SwiftArena swiftArena$);
+        public MyClass f();
         """
       ]
     )
