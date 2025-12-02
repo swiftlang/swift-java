@@ -27,7 +27,6 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "java/util/concurrent/CompletableFuture",
       methods: [completeMethod, completeExceptionallyMethod]
     )
@@ -59,7 +58,6 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "org/swift/swiftkit/core/SimpleCompletableFuture",
       methods: [completeMethod, completeExceptionallyMethod]
     )
@@ -81,7 +79,6 @@ extension _JNIMethodIDCache {
     private static let messageConstructor = Method(name: "<init>", signature: "(Ljava/lang/String;)V")
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "java/lang/Exception",
       methods: [messageConstructor]
     )
@@ -107,7 +104,6 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      environment: try! JavaVirtualMachine.shared().environment(),
       className: "org/swift/swiftkit/core/JNISwiftInstance",
       methods: [memoryAddressMethod, typeMetadataAddressMethod]
     )

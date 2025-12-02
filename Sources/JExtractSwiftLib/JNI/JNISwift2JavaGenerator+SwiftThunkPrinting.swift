@@ -188,6 +188,8 @@ extension JNISwift2JavaGenerator {
   private func printGlobalSwiftThunkSources(_ printer: inout CodePrinter) throws {
     printHeader(&printer)
 
+    printJNIOnLoad(&printer)
+
     for decl in analysis.importedGlobalFuncs {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
@@ -197,6 +199,18 @@ extension JNISwift2JavaGenerator {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
+  }
+
+  private func printJNIOnLoad(_ printer: inout CodePrinter) {
+    printer.print(
+      """
+      @_cdecl("JNI_OnLoad")
+      func JNI_OnLoad(javaVM: JavaVMPointer, reserved: UnsafeMutableRawPointer) -> jint {
+        SwiftJavaRuntimeSupport._JNI_OnLoad(javaVM, reserved)
+        return JNI_VERSION_1_6
+      }
+      """
+    )
   }
 
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
