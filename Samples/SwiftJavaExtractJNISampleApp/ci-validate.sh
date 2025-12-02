@@ -3,6 +3,13 @@
 set -x
 set -e
 
+# WORKAROUND: prebuilts broken on Swift 6.2.1 and Linux and tests using macros https://github.com/swiftlang/swift-java/issues/418
+if [[ "$(uname)" == "Darwin" ]]; then
+  DISABLE_EXPERIMENTAL_PREBUILTS=''
+else
+  DISABLE_EXPERIMENTAL_PREBUILTS='--disable-experimental-prebuilts'
+fi
+
 if [[ "$(uname)" == "Darwin" && -n "$GITHUB_ACTION" ]]; then
   # WORKAROUND: GitHub Actions on macOS issue with downloading gradle wrapper
   # We seem to be hitting a problem when the swiftpm plugin, needs to execute gradle wrapper in a new gradle_user_home.
@@ -33,7 +40,7 @@ if [[ "$(uname)" == "Darwin" && -n "$GITHUB_ACTION" ]]; then
 fi
 
 # FIXME: disable prebuilts until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
-swift build --disable-experimental-prebuilts --disable-sandbox  
+swift build $DISABLE_EXPERIMENTAL_PREBUILTS --disable-sandbox  
 
 ./gradlew run
 ./gradlew test
