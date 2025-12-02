@@ -109,6 +109,12 @@ final class Swift2JavaVisitor {
     guard let importedNominalType = translator.importedNominalType(node.extendedType) else {
       return
     }
+
+    // Add any conforming protocols in the extension
+    importedNominalType.inheritedTypes += node.inheritanceClause?.inheritedTypes.compactMap {
+      try? SwiftType($0.type, lookupContext: translator.lookupContext)
+    } ?? []
+
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
@@ -373,9 +379,6 @@ final class Swift2JavaVisitor {
         let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
-
-      // FIXME: why is this un-used
-      imported.variables.first?.signatureString
 
       if !imported.initializers.contains(where: {
         $0.functionSignature.parameters.count == 1

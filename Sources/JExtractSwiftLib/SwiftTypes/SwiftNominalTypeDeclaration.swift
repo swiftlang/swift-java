@@ -131,6 +131,21 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     return false
   }()
 
+  /// Returns true if this type conforms to `CustomStringConvertible`
+  lazy var isCustomStringConvertible: Bool = {
+    guard let inheritanceClause = self.syntax?.inheritanceClause else {
+      return false
+    }
+
+    for inheritedType in inheritanceClause.inheritedTypes {
+      if inheritedType.type.trimmedDescription == "CustomStringConvertible" {
+        return true
+      }
+    }
+
+    return false
+  }()
+
   /// Determine the known standard library type for this nominal type
   /// declaration.
   private func computeKnownStandardLibraryType() -> SwiftKnownTypeDeclKind? {

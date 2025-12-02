@@ -228,10 +228,30 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
+      printToStringMethod(&printer, decl)
+      printer.println()
+
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
       printDestroyFunction(&printer, decl)
     }
+  }
+
+
+  private func printToStringMethod(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    // We assume that we are implementing `CustomStringConvertible`
+    // and therefore have a `description` property.
+    guard let descriptionVariable = decl.variables.first(where: { $0.name == "description" }) else {
+      return
+    }
+
+    printer.print(
+      """
+      public String toString() {
+        return this.\(descriptionVariable.javaGetterName)();
+      }
+      """
+    )
   }
 
   private func printHeader(_ printer: inout CodePrinter) {
