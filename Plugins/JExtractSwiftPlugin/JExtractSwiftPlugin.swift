@@ -131,11 +131,14 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // If the developer has enabled java callbacks in the configuration (default is false)
     // and we are running in JNI mode, we will run additional phases in this build plugin
     // to generate Swift wrappers using wrap-java that can be used to callback to Java.
-    let shouldRunJavaCallbacksPhases = if let configuration, configuration.enableJavaCallbacks ?? false, configuration.effectiveMode == .jni {
-      true
-    } else {
-      false
-    }
+    let shouldRunJavaCallbacksPhases = 
+      if let configuration, 
+         configuration.enableJavaCallbacks == true,
+         configuration.effectiveMode == .jni {
+        true
+      } else {
+        false
+      }
 
     // Extract list of all sources
     let javaSourcesListFileName = "jextract-generated-sources.txt"
