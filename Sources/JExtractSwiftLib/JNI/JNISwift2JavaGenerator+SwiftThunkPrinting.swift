@@ -131,7 +131,7 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
-      // FIXME: Add support for protocol variables
+      // FIXME: Add support for protocol variables https://github.com/swiftlang/swift-java/issues/457
 //      for variable in translatedWrapper.variables {
 //        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
 //        printer.println()
