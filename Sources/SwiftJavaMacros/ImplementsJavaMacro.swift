@@ -128,8 +128,13 @@ extension JavaImplementationMacro: PeerMacro {
             return \(raw: tryClause)\(raw: swiftTypeName).\(raw: swiftName)(\(raw: swiftArguments.map { $0.description }.joined(separator: ", ")))\(raw: getJNIValue)
           """
       } else {
+        // Use unsafeBitCast to convert thisObj to OpaquePointer for C++ interoperability.
+        // In C++ mode, jobject is UnsafeMutablePointer<_jobject>, but the library
+        // (compiled without C++ interop) expects jobject as OpaquePointer.
+        // The bitcast ensures compatibility in both modes since both have the same
+        // memory representation (a pointer).
         innerBody = """
-            let obj = \(raw: swiftTypeName)(javaThis: thisObj, environment: environment!)
+            let obj = \(raw: swiftTypeName)(javaThis: unsafeBitCast(thisObj, to: OpaquePointer.self), environment: environment!)
             return \(raw: tryClause)obj.\(raw: swiftName)(\(raw: swiftArguments.map { $0.description }.joined(separator: ", ")))\(raw: getJNIValue)
           """
       }
