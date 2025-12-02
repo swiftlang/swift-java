@@ -187,10 +187,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     var gradlewEnvironment = ProcessInfo.processInfo.environment
     gradlewEnvironment[GradleUserHome] = gradleUserHomePath
     log("Forward environment: \(gradlewEnvironment)")
+
+    let gradleExecutable = findExecutable(name: "gradle") ?? // try using installed 'gradle' if available in PATH
+      swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
+    log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
+
     commands += [
       .buildCommand(
         displayName: "Build SwiftKitCore using Gradle (Java)",
-        executable: swiftJavaDirectory.appending(path: "gradlew"),
+        executable: gradleExecutable,
         arguments: [
           ":SwiftKitCore:build",
           "-p", swiftJavaDirectory.path(percentEncoded: false),
@@ -349,3 +354,19 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   }
 }
 
+func findExecutable(name: String) -> URL? {
+  let fileManager = FileManager.default
+
+  guard let path = ProcessInfo.processInfo.environment["PATH"] else {
+    return nil
+  }
+
+  for path in path.split(separator: ":") {
+    let fullURL = URL(fileURLWithPath: String(path)).appendingPathComponent(name)
+    if fileManager.isExecutableFile(atPath: fullURL.path) {
+      return fullURL
+    }
+  }
+
+  return nil
+}
