@@ -457,12 +457,12 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2")
-        func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
+        func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, c: jlong, result_future: Cjobject?) {
           ...
           var task: Task<Void, Never>? = nil
           ...
           environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.complete, [jvalue(l: boxedResult$)])
-          ... 
+          ...
         }
         """
       ]

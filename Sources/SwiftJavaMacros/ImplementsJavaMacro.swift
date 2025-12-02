@@ -77,9 +77,11 @@ extension JavaImplementationMacro: PeerMacro {
       }
 
       // Map the parameters.
+      // Use CJNIEnv for C++ interoperability compatibility.
+      // See: https://github.com/swiftlang/swift-java/issues/391
       let cParameters: [FunctionParameterSyntax] =
         [
-          "environment: UnsafeMutablePointer<JNIEnv?>!",
+          "environment: UnsafeMutablePointer<CJNIEnv?>!",
           isStatic ? "thisClass: jclass" : "thisObj: jobject",
         ]
         + parametersClause.parameters.map { param in
