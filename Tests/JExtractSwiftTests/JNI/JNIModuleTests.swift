@@ -123,19 +123,19 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024helloWorld__")
-        func Java_com_example_swift_SwiftModule__00024helloWorld__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        func Java_com_example_swift_SwiftModule__00024helloWorld__(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass) {
           SwiftModule.helloWorld()
         }
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ")
-        func Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
-          return SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment), i2: Int16(fromJNI: i2, in: environment), i3: Int32(fromJNI: i3, in: environment), i4: Int64(fromJNI: i4, in: environment)).getJNIValue(in: environment)
+        func Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
+          return unsafeBitCast(SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment), i2: Int16(fromJNI: i2, in: environment), i3: Int32(fromJNI: i3, in: environment), i4: Int64(fromJNI: i4, in: environment)).getJNIValue(in: environment), to: jchar.self)
         }        
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD")
-        func Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jboolean, f: jfloat, d: jdouble) {
+        func Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, b: jboolean, f: jfloat, d: jdouble) {
           SwiftModule.otherPrimitives(b: Bool(fromJNI: b, in: environment), f: Float(fromJNI: f, in: environment), d: Double(fromJNI: d, in: environment))
         }
         """
@@ -178,8 +178,8 @@ struct JNIModuleTests {
       expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2")
-          func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
-            return SwiftModule.copy(String(fromJNI: string, in: environment)).getJNIValue(in: environment)
+          func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, string: Cjstring?) -> Cjstring? {
+            return unsafeBitCast(SwiftModule.copy(String(fromJNI: string, in: environment)).getJNIValue(in: environment), to: Cjstring?.self)
           }
           """,
       ]
@@ -235,7 +235,7 @@ struct JNIModuleTests {
       expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024methodA__")
-          func Java_com_example_swift_SwiftModule__00024methodA__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+          func Java_com_example_swift_SwiftModule__00024methodA__(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass) {
             do {
               try SwiftModule.methodA()
             } catch {
@@ -245,9 +245,9 @@ struct JNIModuleTests {
           """,
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024methodB__")
-          func Java_com_example_swift_SwiftModule__00024methodB__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+          func Java_com_example_swift_SwiftModule__00024methodB__(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass) -> jlong {
             do {
-              return try SwiftModule.methodB().getJNIValue(in: environment)
+              return unsafeBitCast(try SwiftModule.methodB().getJNIValue(in: environment), to: jlong.self)
             } catch {
               environment.throwAsException(error)
               return Int64.jniPlaceholderValue

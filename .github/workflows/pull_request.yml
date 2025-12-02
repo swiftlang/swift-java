@@ -176,6 +176,72 @@ jobs:
       - name: Swift Test
         run: "swift test"
 
+  # Test that projects depending on swift-java can build with C++ interoperability enabled.
+  # This is important because users may enable -cxx-interoperability-mode=default in their
+  # own projects, and swift-java's public API must be compatible with that mode.
+  # See: https://github.com/swiftlang/swift-java/issues/391
+  verify-samples-cxx-interop:
+    name: Sample ${{ matrix.sample_app }} (C++ Interop) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: ['6.2']
+        os_version: ['jammy']
+        jdk_vendor: ['corretto']
+        sample_app: [
+          'JavaDependencySampleApp',
+          'JavaKitSampleApp',
+          'JavaProbablyPrime',
+          'JavaSieve',
+          'SwiftAndJavaJarSampleLib',
+          'SwiftJavaExtractFFMSampleApp',
+          'SwiftJavaExtractJNISampleApp',
+        ]
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+    env:
+      CXX_INTEROP: '1'
+      SWIFT_JAVA_VERBOSE: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: "Verify sample with C++ Interop: ${{ matrix.sample_app }}"
+        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+
+  verify-samples-cxx-interop-macos:
+    name: Sample ${{ matrix.sample_app }} (C++ Interop) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+    runs-on: [self-hosted, macos, sequoia, ARM64]
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version: ['6.2']
+        os_version: ['macos']
+        jdk_vendor: ['corretto']
+        sample_app: [
+          'JavaDependencySampleApp',
+          'JavaKitSampleApp',
+          'JavaProbablyPrime',
+          'JavaSieve',
+          'SwiftAndJavaJarSampleLib',
+          'SwiftJavaExtractFFMSampleApp',
+          'SwiftJavaExtractJNISampleApp',
+        ]
+    env:
+      CXX_INTEROP: '1'
+      SWIFT_JAVA_VERBOSE: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Install Swiftly
+        run: ./.github/scripts/install_swiftly.sh
+        env:
+          SWIFT_VERSION: "${{ matrix.swift_version }}"
+      - name: "Verify sample with C++ Interop: ${{ matrix.sample_app }}"
+        run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
     runs-on: ubuntu-latest

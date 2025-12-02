@@ -74,25 +74,25 @@ struct JNINestedTypesTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_A__00024destroy__J")
-        func Java_com_example_swift_A__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+        func Java_com_example_swift_A__00024destroy__J(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
           ...
         }
         """,
         """
         @_cdecl("Java_com_example_swift_A_00024B__00024destroy__J")
-        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
           ...
         }
         """,
         """
         @_cdecl("Java_com_example_swift_A_00024B__00024destroy__J")
-        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+        func Java_com_example_swift_A_00024B__00024destroy__J(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
           ...
         }
         """,
         """
         @_cdecl("Java_com_example_swift_A_00024B_00024C__00024h__JJ")
-        func Java_com_example_swift_A_00024B_00024C__00024h__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jlong, self: jlong) {
+        func Java_com_example_swift_A_00024B_00024C__00024h__JJ(environment: UnsafeMutablePointer<CJNIEnv?>!, thisClass: jclass, b: jlong, self: jlong) {
           ...
         }
         """
