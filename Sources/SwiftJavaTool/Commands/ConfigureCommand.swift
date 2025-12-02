@@ -59,8 +59,8 @@ extension SwiftJava {
       swiftModule
     }
 
-    @Argument(help: "The input file, which is either a swift-java configuration file or (if '-jar' was specified) a Jar file.")
-    var input: String?
+    @Option(help: "A prefix that will be added to the names of the Swift types")
+    var swiftTypePrefix: String?
   }
 }
 
@@ -137,14 +137,19 @@ extension SwiftJava.ConfigureCommand {
 
       print("[debug][swift-java] Importing classpath entry: \(entry)")
       if entry.hasSuffix(".jar") {
+        print("[debug][swift-java] Importing classpath as JAR file: \(entry)")
         let jarFile = try JarFile(entry, false, environment: environment)
         try addJavaToSwiftMappings(
           to: &config,
           forJar: jarFile,
           environment: environment
         )
-      } else if FileManager.default.fileExists(atPath: entry) {
-        log.warning("Currently unable handle directory classpath entries for config generation! Skipping: \(entry)")
+      } else if FileManager.default.fileExists(atPath: entry), let entryURL = URL(string: entry) {
+        print("[debug][swift-java] Importing classpath as directory: \(entryURL)")
+        try addJavaToSwiftMappings(
+          to: &config,
+          forDirectory: entryURL
+        )
       } else {
         log.warning("Classpath entry does not exist, skipping: \(entry)")
       }
@@ -164,60 +169,80 @@ extension SwiftJava.ConfigureCommand {
 
   mutating func addJavaToSwiftMappings(
     to configuration: inout Configuration,
+    forDirectory url: Foundation.URL
+  ) throws {
+    let enumerator = FileManager.default.enumerator(atPath: url.path())
+
+    while let filePath = enumerator?.nextObject() as? String {
+      try addJavaToSwiftMappings(to: &configuration, fileName: filePath)
+    }
+  }
+
+  mutating func addJavaToSwiftMappings(
+    to configuration: inout Configuration,
     forJar jarFile: JarFile,
     environment: JNIEnvironment
   ) throws {
-    let log = Self.log
-
     for entry in jarFile.entries()! {
-      // We only look at class files in the Jar file.
-      guard entry.getName().hasSuffix(".class") else {
-        continue
-      }
-
-      // Skip some "common" files we know that would be duplicated in every jar
-      guard !entry.getName().hasPrefix("META-INF") else {
-        continue
-      }
-      guard !entry.getName().hasSuffix("package-info") else {
-        continue
-      }
-      guard !entry.getName().hasSuffix("package-info.class") else {
-        continue
-      }
-
-      // If this is a local class, it cannot be mapped into Swift.
-      if entry.getName().isLocalJavaClass {
-        continue
-      }
-
-      let javaCanonicalName = String(entry.getName().replacing("/", with: ".")
-        .dropLast(".class".count))
-
-      guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
-        log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")
-        continue
-      }
-
-      if configuration.classes?[javaCanonicalName] != nil {
-        // We never overwrite an existing class mapping configuration.
-        // E.g. the user may have configured a custom name for a type.
-        continue
-      }
-
-      if configuration.classes == nil {
-        configuration.classes = [:]
-      }
-
-      if let configuredSwiftName = configuration.classes![javaCanonicalName] {
-        log.info("Java type '\(javaCanonicalName)' already configured as '\(configuredSwiftName)' Swift type.")
-      } else {
-        log.info("Configure Java type '\(javaCanonicalName)' as '\(javaCanonicalName.defaultSwiftNameForJavaClass.bold)' Swift type.")
-      }
-
-      configuration.classes![javaCanonicalName] =
-        javaCanonicalName.defaultSwiftNameForJavaClass
+      try addJavaToSwiftMappings(to: &configuration, fileName: entry.getName())
     }
+  }
+
+  mutating func addJavaToSwiftMappings(
+    to configuration: inout Configuration,
+    fileName: String
+  ) throws {
+    // We only look at class files
+    guard fileName.hasSuffix(".class") else {
+      return
+    }
+
+    // Skip some "common" files we know that would be duplicated in every jar
+    guard !fileName.hasPrefix("META-INF") else {
+      return
+    }
+    guard !fileName.hasSuffix("package-info") else {
+      return
+    }
+    guard !fileName.hasSuffix("package-info.class") else {
+      return
+    }
+
+    // If this is a local class, it cannot be mapped into Swift.
+    if fileName.isLocalJavaClass {
+      return
+    }
+
+    let javaCanonicalName = String(fileName.replacing("/", with: ".")
+      .dropLast(".class".count))
+
+    guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
+      log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")
+      return
+    }
+
+    if configuration.classes?[javaCanonicalName] != nil {
+      // We never overwrite an existing class mapping configuration.
+      // E.g. the user may have configured a custom name for a type.
+      return
+    }
+
+    if configuration.classes == nil {
+      configuration.classes = [:]
+    }
+
+    var swiftName = javaCanonicalName.defaultSwiftNameForJavaClass
+    if let swiftTypePrefix {
+      swiftName = "\(swiftTypePrefix)\(swiftName)"
+    }
+
+    if let configuredSwiftName = configuration.classes![javaCanonicalName] {
+      log.info("Java type '\(javaCanonicalName)' already configured as '\(configuredSwiftName)' Swift type.")
+    } else {
+      log.info("Configure Java type '\(javaCanonicalName)' as '\(swiftName.bold)' Swift type.")
+    }
+
+    configuration.classes![javaCanonicalName] = swiftName
   }
 }
 

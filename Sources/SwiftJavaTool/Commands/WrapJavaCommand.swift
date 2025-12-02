@@ -58,8 +58,8 @@ extension SwiftJava {
     @Option(help: "Match java package directory structure with generated Swift files")
     var swiftMatchPackageDirectoryStructure: Bool = false
 
-    @Argument(help: "Path to .jar file whose Java classes should be wrapped using Swift bindings")
-    var input: String
+    @Option(help: "If specified, a single Swift file will be generated containing all the generated code")
+    var singleSwiftFileOutput: String?
   }
 }
 
@@ -69,6 +69,7 @@ extension SwiftJava.WrapJavaCommand {
     print("self.commonOptions.filterInclude = \(self.commonOptions.filterInclude)")
     configure(&config.filterInclude, append: self.commonOptions.filterInclude)
     configure(&config.filterExclude, append: self.commonOptions.filterExclude)
+    configure(&config.singleSwiftFileOutput, overrideWith: self.singleSwiftFileOutput)
 
     // Get base classpath configuration for this target and configuration
     var classpathSearchDirs = [self.effectiveSwiftModuleURL]
@@ -78,7 +79,6 @@ extension SwiftJava.WrapJavaCommand {
     } else {
       print("[trace][swift-java] Cache directory: none")
     }
-    print("[trace][swift-java] INPUT: \(input)")
 
     var classpathEntries = self.configureCommandJVMClasspath(
         searchDirs: classpathSearchDirs, config: config, log: Self.log)
@@ -151,20 +151,40 @@ extension SwiftJava.WrapJavaCommand {
       .getSystemClassLoader()!
     var javaClasses: [JavaClass<JavaObject>] = []
     for (javaClassName, _) in config.classes ?? [:] {
+      func remove() {
+        translator.translatedClasses.removeValue(forKey: javaClassName)
+      }
+
       guard shouldImportJavaClass(javaClassName, config: config) else {
+        remove()
+        continue
+      }
+
+      guard let javaClass = try classLoader.loadClass(javaClassName) else {
+        log.warning("Could not load Java class '\(javaClassName)', skipping.")
+        remove()
+        continue
+      }
+
+      guard self.shouldExtract(javaClass: javaClass, config: config) else {
+        log.info("Skip Java type: \(javaClassName) (does not match minimum access level)")
+        remove()
+        continue
+      }
+
+      guard !javaClass.isEnum() else {
+        log.info("Skip Java type: \(javaClassName) (enums do not currently work)")
+        remove()
         continue
       }
 
       log.info("Wrapping java type: \(javaClassName)")
 
-      guard let javaClass = try classLoader.loadClass(javaClassName) else {
-        log.warning("Could not load Java class '\(javaClassName)', skipping.")
-        continue
-      }
-
       // Add this class to the list of classes we'll translate.
       javaClasses.append(javaClass)
     }
+
+    log.info("OK now we go to nested classes")
 
     // Find all of the nested classes for each class, adding them to the list
     // of classes to be translated if they were already specified.
@@ -212,6 +232,16 @@ extension SwiftJava.WrapJavaCommand {
           return nil
         }
 
+        guard self.shouldExtract(javaClass: nestedClass, config: config) else {
+          log.info("Skip Java type: \(javaClassName) (does not match minimum access level)")
+          return nil
+        }
+
+        guard !nestedClass.isEnum() else {
+          log.info("Skip Java type: \(javaClassName) (enums do not currently work)")
+          return nil
+        }
+
         // Record this as a translated class.
         let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
           .defaultSwiftNameForJavaClass
@@ -237,9 +267,13 @@ extension SwiftJava.WrapJavaCommand {
     try translator.validateClassConfiguration()
 
     // Translate all of the Java classes into Swift classes.
-    for javaClass in javaClasses {
+
+    if let singleSwiftFileOutput = config.singleSwiftFileOutput {
       translator.startNewFile()
-      let swiftClassDecls = try translator.translateClass(javaClass)
+
+      let swiftClassDecls = try javaClasses.flatMap {
+        try translator.translateClass($0)
+      }
       let importDecls = translator.getImportDecls()
 
       let swiftFileText = """
@@ -249,19 +283,53 @@ extension SwiftJava.WrapJavaCommand {
 
                           """
 
-      var generatedFileOutputDir = self.actualOutputDirectory
-      if self.swiftMatchPackageDirectoryStructure {
-        generatedFileOutputDir?.append(path: javaClass.getPackageName().replacing(".", with: "/"))
-      }
-
-      let swiftFileName = try! translator.getSwiftTypeName(javaClass, preferValueTypes: false)
-        .swiftName.replacing(".", with: "+") + ".swift"
       try writeContents(
         swiftFileText,
-        outputDirectory: generatedFileOutputDir,
-        to: swiftFileName,
-        description: "Java class '\(javaClass.getName())' translation"
+        outputDirectory: self.actualOutputDirectory,
+        to: singleSwiftFileOutput,
+        description: "Java class translation"
       )
+    } else {
+      for javaClass in javaClasses {
+        translator.startNewFile()
+
+        let swiftClassDecls = try translator.translateClass(javaClass)
+        let importDecls = translator.getImportDecls()
+
+        let swiftFileText = """
+                            // Auto-generated by Java-to-Swift wrapper generator.
+                            \(importDecls.map { $0.description }.joined())
+                            \(swiftClassDecls.map { $0.description }.joined(separator: "\n"))
+
+                            """
+
+        var generatedFileOutputDir = self.actualOutputDirectory
+        if self.swiftMatchPackageDirectoryStructure {
+          generatedFileOutputDir?.append(path: javaClass.getPackageName().replacing(".", with: "/"))
+        }
+
+        let swiftFileName = try translator.getSwiftTypeName(javaClass, preferValueTypes: false)
+          .swiftName.replacing(".", with: "+") + ".swift"
+        try writeContents(
+          swiftFileText,
+          outputDirectory: generatedFileOutputDir,
+          to: swiftFileName,
+          description: "Java class '\(javaClass.getName())' translation"
+        )
+      }
+    }
+  }
+
+  /// Determines whether a method should be extracted for translation.
+  /// Only look at public and protected methods here.
+  private func shouldExtract<T>(javaClass: JavaClass<T>, config: Configuration) -> Bool {
+    switch config.effectiveMinimumInputAccessLevelMode {
+      case .internal:
+        return javaClass.isPublic || javaClass.isProtected || javaClass.isPackage
+      case .package:
+        return javaClass.isPublic || javaClass.isProtected || javaClass.isPackage
+      case .public:
+        return javaClass.isPublic || javaClass.isProtected
     }
   }
 

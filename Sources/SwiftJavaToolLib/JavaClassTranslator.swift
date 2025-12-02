@@ -228,6 +228,11 @@ struct JavaClassTranslator {
         continue
       }
 
+      guard method.getName().isValidSwiftFunctionName else {
+        log.warning("Skipping method \(method.getName()) because it is not a valid Swift function name")
+        continue
+      }
+
       addMethod(method, isNative: false)
     }
 
@@ -599,6 +604,15 @@ extension JavaClassTranslator {
       for actualTypeParam in parameterizedReturnType.getActualTypeArguments() {
         guard let actualTypeParam else { continue }
         if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+          return true
+        }
+      }
+    }
+
+    // --- Parameter types
+    for parameter in method.getParameters() {
+      if let parameterizedType = parameter?.getParameterizedType() {
+        if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
           return true
         }
       }
