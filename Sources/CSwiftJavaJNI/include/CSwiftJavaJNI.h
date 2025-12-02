@@ -27,12 +27,7 @@
 // regardless of the C++ interoperability mode.
 // See: https://github.com/swiftlang/swift-java/issues/391
 #ifdef __cplusplus
-// Android NDK uses JNINativeInterface instead of JNINativeInterface_
-#ifdef __ANDROID__
-typedef const JNINativeInterface *CJNIEnv;
-#else
-typedef const JNINativeInterface_ *CJNIEnv;
-#endif
+typedef const struct JNINativeInterface_ *CJNIEnv;
 typedef _jobject *Cjobject;
 typedef _jclass *Cjclass;
 typedef _jstring *Cjstring;
