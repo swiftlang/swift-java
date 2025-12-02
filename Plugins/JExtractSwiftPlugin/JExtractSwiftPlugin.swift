@@ -198,7 +198,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         executable: gradleExecutable,
         arguments: [
           ":SwiftKitCore:build",
-          "-p", swiftJavaDirectory.path(percentEncoded: false),
+          "--project-dir", swiftJavaDirectory.path(percentEncoded: false),
+          "--gradle-user-home", gradleUserHomePath, 
           "--configure-on-demand",
           "--no-daemon"
         ],
