@@ -318,7 +318,7 @@ extension JNISwift2JavaGenerator {
           #".init(name: "\#(name)", signature: "\#(signature.mangledName)")"#
       }.joined(separator: ",\n")
 
-      return #"_JNIMethodIDCache(environment: try! JavaVirtualMachine.shared().environment(), className: "\#(fullClassName)", methods: [\#(methods)])"#
+      return #"_JNIMethodIDCache(className: "\#(fullClassName)", methods: [\#(methods)])"#
   }
 
   private func printEnumGetAsCaseThunk(

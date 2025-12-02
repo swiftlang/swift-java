@@ -209,3 +209,11 @@ jmh {
         "-Djextract.trace.downcalls=false"
     ]
 }
+
+task printGradleHome {
+    doLast {
+        println "Gradle Home: ${gradle.gradleHomeDir}"
+        println "Gradle Version: ${gradle.gradleVersion}"
+        println "Gradle User Home: ${gradle.gradleUserHomeDir}"
+    }
+}
