@@ -52,9 +52,7 @@ public class HelloJava2Swift {
 
         CallTraces.trace("getGlobalBuffer().byteSize()=" + MySwiftLibrary.getGlobalBuffer().byteSize());
 
-        MySwiftLibrary.withBuffer((buf) -> {
-            CallTraces.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
-        });
+
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
