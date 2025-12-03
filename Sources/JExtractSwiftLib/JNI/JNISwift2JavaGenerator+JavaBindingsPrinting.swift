@@ -528,9 +528,9 @@ extension JNISwift2JavaGenerator {
     let parametersStr = parameters.joined(separator: ", ")
 
     // Print default global arena variation
-    // If we have enabled Java callbacks, we do not want to emit these
-    // for protocols as we already disable arenas for these methods,
-    // which would then lead to duplicate methods.
+    // If we have enabled javaCallbacks we must emit default
+    // arena methods for protocols, as this is what
+    // Swift will call into, when you call a interface from Swift.
     let shouldGenerateGlobalArenaVariation: Bool
     let isParentProtocol = importedFunc?.parentType?.asNominalType?.isProtocol ?? false
 
