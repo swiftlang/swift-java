@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Determines which source generation mode JExtract should be using: JNI or Foreign Function and Memory.
-public enum JExtractGenerationMode: String, Codable {
+public enum JExtractGenerationMode: String, Sendable, Codable {
   /// Foreign Value and Memory API
   case ffm
 
