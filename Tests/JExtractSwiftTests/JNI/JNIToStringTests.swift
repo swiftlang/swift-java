@@ -18,53 +18,78 @@ import SwiftJavaConfigurationShared
 
 @Suite
 struct JNIToStringTests {
+  let source =
+    """
+    public struct MyType {}
+    """
 
-  @Test("Import: CustomStringConvertible in type decl")
-  func customStringConvertible_typeDecl() throws {
+  @Test("JNI toString (Java)")
+  func toString_java() throws {
     try assertOutput(
-      input:
-        """
-        public struct MyType: CustomStringConvertible {
-          public var description: String { get }
-        }
-        """,
+      input: source,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public java.lang.String getDescription() {
+        public String toString() {
+          return $toString(this.$memoryAddress());
+        }
         """,
         """
-        public String toString() {
-          return this.getDescription();
-        }
+        private static native java.lang.String $toString(long selfPointer);
         """
       ]
     )
   }
 
-  @Test("Import: CustomStringConvertible in extension decl")
-  func customStringConvertible_extension() throws {
+  @Test("JNI toString (Swift)")
+  func toString_swift() throws {
     try assertOutput(
-      input:
+      input: source,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
         """
-        public struct MyType {}
-        
-        extension MyType: CustomStringConvertible {
-          public var description: String { get }
+        @_cdecl("Java_com_example_swift_MyType__00024toString__J")
+        func Java_com_example_swift_MyType__00024toString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
+          ...
+          return String(describing: self$.pointee).getJNIValue(in: environment)
         }
         """,
+      ]
+    )
+  }
+
+  @Test("JNI toDebugString (Java)")
+  func toDebugString_java() throws {
+    try assertOutput(
+      input: source,
       .jni, .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public java.lang.String getDescription() {
-        """,
-        """
-        public String toString() {
-          return this.getDescription();
+        public String toDebugString() {
+          return $toDebugString(this.$memoryAddress());
         }
+        """,
+      ]
+    )
+  }
+
+  @Test("JNI toDebugString (Swift)")
+  func toDebugString_swift() throws {
+    try assertOutput(
+      input: source,
+      .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
         """
+        @_cdecl("Java_com_example_swift_MyType__00024toDebugString__J")
+        func Java_com_example_swift_MyType__00024toDebugString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
+          ...
+          return String(reflecting: self$.pointee).getJNIValue(in: environment)
+        }
+        """,
       ]
     )
   }

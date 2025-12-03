@@ -154,7 +154,7 @@ extension JNISwift2JavaGenerator {
     case .actor, .class, .enum, .struct:
       printConcreteTypeThunks(&printer, type)
     case .protocol:
-      printProtocolThunks(&printer, type)
+      break
     }
   }
 
@@ -184,15 +184,54 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    printToStringMethods(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
     printDestroyFunctionThunk(&printer, type)
   }
 
-  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let protocolName = type.swiftNominal.name
-  }
+  private func printToStringMethods(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    let parentName = type.qualifiedName
 
+    printCDecl(
+      &printer,
+      javaMethodName: "$toString",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .javaLangString
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        return String(describing: \(selfVar).pointee).getJNIValue(in: environment)
+        """
+      )
+    }
+
+    printer.println()
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$toDebugString",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .javaLangString
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)
+        """
+      )
+    }
+  }
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)

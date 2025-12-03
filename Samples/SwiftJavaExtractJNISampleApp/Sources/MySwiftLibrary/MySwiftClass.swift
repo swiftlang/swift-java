@@ -105,3 +105,9 @@ extension MySwiftClass: CustomStringConvertible {
     "MySwiftClass(x: \(x), y: \(y))"
   }
 }
+
+extension MySwiftClass: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    "debug: MySwiftClass(x: \(x), y: \(y))"
+  }
+}
