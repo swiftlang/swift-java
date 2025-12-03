@@ -469,9 +469,17 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return false
     case .constructSwiftValue, .wrapMemoryAddressUnsafe:
       return true
+    case .temporaryArena:
+      return true
 
-    case .call(let inner, _, _), .cast(let inner, _), .construct(let inner, _),
-        .method(let inner, _, _, _), .swiftValueSelfSegment(let inner):
+    case .call(let inner, let base, _, _):
+      return inner.requiresSwiftArena || (base?.requiresSwiftArena == true)
+
+    case .cast(let inner, _), 
+         .construct(let inner, _),
+         .method(let inner, _, _, _), 
+         .property(let inner, _), 
+         .swiftValueSelfSegment(let inner):
       return inner.requiresSwiftArena
 
     case .commaSeparated(let list):
@@ -484,6 +492,8 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     switch self {
     case .placeholder, .explodedName, .constant:
       return false
+    case .temporaryArena:
+      return true
     case .readMemorySegment:
       return true
     case .cast(let inner, _), 
@@ -492,10 +502,12 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
          .swiftValueSelfSegment(let inner),
          .wrapMemoryAddressUnsafe(let inner, _):
       return inner.requiresSwiftArena
-    case .call(let inner, _, let withArena):
-      return withArena || inner.requiresTemporaryArena
+    case .call(let inner, let base, _, let withArena):
+      return withArena || (base?.requiresTemporaryArena == true) || inner.requiresTemporaryArena
     case .method(let inner, _, let args, let withArena):
       return withArena || inner.requiresTemporaryArena || args.contains(where: { $0.requiresTemporaryArena })
+    case .property(let inner, _):
+      return inner.requiresTemporaryArena
     case .commaSeparated(let list):
       return list.contains(where: { $0.requiresTemporaryArena })
     }
@@ -514,17 +526,30 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     case .swiftValueSelfSegment:
       return "\(placeholder).$memorySegment()"
+    
+    case .temporaryArena:
+      return "arena$"
 
-    case .call(let inner, let function, let withArena):
+    case .call(let inner, let base, let function, let withArena):
       let inner = inner.render(&printer, placeholder)
       let arenaArg = withArena ? ", arena$" : ""
-      return "\(function)(\(inner)\(arenaArg))"
+      let baseStr : String = 
+        if let base {
+          base.render(&printer, placeholder) + "."
+        } else {
+          ""
+        }
+      return "\(baseStr)\(function)(\(inner)\(arenaArg))"
 
     case .method(let inner, let methodName, let arguments, let withArena):
       let inner = inner.render(&printer, placeholder)
       let args = arguments.map { $0.render(&printer, placeholder) }
       let argsStr = (args + (withArena ? ["arena$"] : [])).joined(separator: " ,")
       return "\(inner).\(methodName)(\(argsStr))"
+
+    case .property(let inner, let propertyName):
+      let inner = inner.render(&printer, placeholder)
+      return "\(inner).\(propertyName)"
 
     case .constructSwiftValue(let inner, let javaType):
       let inner = inner.render(&printer, placeholder)

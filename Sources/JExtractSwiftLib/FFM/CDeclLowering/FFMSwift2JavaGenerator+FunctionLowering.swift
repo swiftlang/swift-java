@@ -348,6 +348,55 @@ struct CdeclLowering {
     case .composite:
       throw LoweringError.unhandledType(type)
 
+    case .array(.nominal(let nominal)):
+      // Lower an array as 'address' raw pointer and 'count' integer
+      var parameters: [SwiftParameter] = [
+        
+      ]
+      
+      // Create parameter names with consistent naming convention
+      let pointerParameterName = "\(parameterName)_pointer"
+      let countParameterName = "\(parameterName)_count"
+      
+      // Build C declaration parameters for pointer and count
+      let cdeclParameters = [
+        SwiftParameter(
+          convention: .byValue,
+          parameterName: pointerParameterName,
+          type: knownTypes.unsafeRawPointer
+        ),
+        SwiftParameter(
+          convention: .byValue,
+          parameterName: countParameterName,
+          type: knownTypes.int
+        ),
+      ]
+      
+      // Initialize a UnsafeRawBufferPointer using the 'address' and 'count'
+      let bufferPointerInit = ConversionStep.initialize(
+        knownTypes.unsafeRawBufferPointer,
+        arguments: [
+          LabeledArgument(
+            label: "start",
+            argument: .explodedComponent(.placeholder, component: "pointer")
+          ),
+          LabeledArgument(
+            label: "count",
+            argument: .explodedComponent(.placeholder, component: "count")
+          ),
+        ]
+      )
+      
+      let arrayInit = ConversionStep.initialize(
+        type,
+        arguments: [LabeledArgument(argument: bufferPointerInit)]
+      )
+      
+      return LoweredParameter(
+        cdeclParameters: cdeclParameters,
+        conversion: arrayInit
+      )
+
     case .array:
       throw LoweringError.unhandledType(type)
     }

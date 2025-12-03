@@ -476,7 +476,24 @@ extension FFMSwift2JavaGenerator {
       case .composite:
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .array(let elementType):
+      case .array(let wrapped) where wrapped == knownTypes.uint8:
+        return TranslatedParameter(
+          javaParameters: [
+            JavaParameter(name: parameterName, type: .array(.byte)),
+          ],
+          conversion: 
+            .commaSeparated([
+              .call(
+                .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]), 
+                base: .temporaryArena,
+                function: "allocateFrom", 
+                withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
+            ),
+            .property(.placeholder, propertyName: "length"),
+          ])
+        )
+
+      case .array:
         throw JavaTranslationError.unhandledType(swiftType)
       }
     }
@@ -715,42 +732,57 @@ extension FFMSwift2JavaGenerator {
 
   /// Describes how to convert values between Java types and FFM types.
   enum JavaConversionStep {
-    // The input
+    /// The input
     case placeholder
 
-    // The input exploded into components.
+    /// The temporary `arena$` that is necessary to complete the conversion steps.
+    case temporaryArena
+
+    /// The input exploded into components.
     case explodedName(component: String)
 
-    // A fixed value
+    /// A fixed value
     case constant(String)
 
-    // 'value.$memorySegment()'
+    /// 'value.$memorySegment()'
     indirect case swiftValueSelfSegment(JavaConversionStep)
 
-    // call specified function using the placeholder as arguments.
-    // If `withArena` is true, `arena$` argument is added.
-    indirect case call(JavaConversionStep, function: String, withArena: Bool)
+    /// Call specified function using the placeholder as arguments.
+    /// 
+    /// The 'base' is if the call should be performed as 'base.function',
+    /// otherwise the function is assumed to be a free function.
+    /// 
+    /// If `withArena` is true, `arena$` argument is added.
+    indirect case call(JavaConversionStep, base: JavaConversionStep?, function: String, withArena: Bool)
+    
+    static func call(_ step: JavaConversionStep, function: String, withArena: Bool) -> Self {
+      .call(step, base: nil, function: function, withArena: withArena)
+    }
 
-    // Apply a method on the placeholder.
-    // If `withArena` is true, `arena$` argument is added.
+    /// Apply a method on the placeholder.
+    /// If `withArena` is true, `arena$` argument is added.
     indirect case method(JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)
+    
+    /// Fetch a property from the placeholder.
+    /// Similar to 'method', however for a property i.e. without adding the '()' after the name
+    indirect case property(JavaConversionStep, propertyName: String)
 
-    // Call 'new \(Type)(\(placeholder), swiftArena$)'.
+    /// Call 'new \(Type)(\(placeholder), swiftArena$)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
     /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
     indirect case wrapMemoryAddressUnsafe(JavaConversionStep, JavaType)
 
-    // Construct the type using the placeholder as arguments.
+    /// Construct the type using the placeholder as arguments.
     indirect case construct(JavaConversionStep, JavaType)
 
-    // Casting the placeholder to the certain type.
+    /// Casting the placeholder to the certain type.
     indirect case cast(JavaConversionStep, JavaType)
 
-    // Convert the results of the inner steps to a comma separated list.
+    /// Convert the results of the inner steps to a comma separated list.
     indirect case commaSeparated([JavaConversionStep])
 
-    // Refer an exploded argument suffixed with `_\(name)`.
+    /// Refer an exploded argument suffixed with `_\(name)`.
     indirect case readMemorySegment(JavaConversionStep, as: JavaType)
 
     var isPlaceholder: Bool {

@@ -33,6 +33,7 @@ struct SwiftKnownTypes {
   var float: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.float])) }
   var double: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.double])) }
   var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawPointer])) }
+  var unsafeRawBufferPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawBufferPointer])) }
   var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeMutableRawPointer])) }
 
   var foundationDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationDataProtocol])) }
