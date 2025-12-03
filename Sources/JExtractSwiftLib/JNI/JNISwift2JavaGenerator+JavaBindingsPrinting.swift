@@ -549,7 +549,7 @@ extension JNISwift2JavaGenerator {
       var modifiers = modifiers
 
       // If we are a protocol, we emit this as default method
-      if importedFunc?.parentType?.asNominalType?.isProtocol ?? false {
+      if isParentProtocol {
         modifiers.insert("default", at: 1)
       }
 
