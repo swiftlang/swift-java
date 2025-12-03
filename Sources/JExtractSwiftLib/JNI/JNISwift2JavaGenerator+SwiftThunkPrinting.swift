@@ -265,6 +265,8 @@ extension JNISwift2JavaGenerator {
     }
 
     try printSwiftInterfaceWrapper(&printer, protocolWrapper)
+  }
+
   private func printToStringMethods(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     let parentName = type.qualifiedName
