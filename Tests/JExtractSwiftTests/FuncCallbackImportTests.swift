@@ -318,8 +318,8 @@ final class FuncCallbackImportTests {
             long apply(java.lang.foreign.MemorySegment _0);
           }
           private static MemorySegment $toUpcallStub(body fi, Arena arena) {
-            return swiftjava___FakeModule_withBuffer_body.$body.toUpcallStub((_0$pointer, _0$count) -> {
-              return fi.apply(_0$pointer.reinterpret(_0$count));
+            return swiftjava___FakeModule_withBuffer_body.$body.toUpcallStub((_0_pointer, _0_count) -> {
+              return fi.apply(_0_pointer.reinterpret(_0_count));
             }, arena);
           }
         }

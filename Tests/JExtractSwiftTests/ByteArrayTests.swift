@@ -17,11 +17,6 @@ import SwiftJavaConfigurationShared
 import Testing
 
 final class ByteArrayTests {
-  let text =
-    """
-    public func acceptArray(array: [UInt8])
-    """
-
 
   @Test(
     "Import: accept [UInt8] array",
@@ -34,13 +29,13 @@ final class ByteArrayTests {
           """
           /**
            * {@snippet lang=c :
-           * void swiftjava_SwiftModule_acceptArray_array(const void *array$pointer, ptrdiff_t array$count)
+           * void swiftjava_SwiftModule_acceptArray_array(const void *array_pointer, ptrdiff_t array_count)
            * }
            */
           private static class swiftjava_SwiftModule_acceptArray_array {
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-              /* array$pointer: */SwiftValueLayout.SWIFT_POINTER,
-              /* array$count: */SwiftValueLayout.SWIFT_INT
+              /* array_pointer: */SwiftValueLayout.SWIFT_POINTER,
+              /* array_count: */SwiftValueLayout.SWIFT_INT
             );
           """,
           """
@@ -61,8 +56,8 @@ final class ByteArrayTests {
         [
           """
           @_cdecl("swiftjava_SwiftModule_acceptArray_array")
-          public func swiftjava_SwiftModule_acceptArray_array(_ array$pointer: UnsafeRawPointer, _ array$count: Int) {
-            acceptArray(array: [UInt8](UnsafeRawBufferPointer(start: array$pointer, count: array$count)))
+          public func swiftjava_SwiftModule_acceptArray_array(_ array_pointer: UnsafeRawPointer, _ array_count: Int) {
+            acceptArray(array: [UInt8](UnsafeRawBufferPointer(start: array_pointer, count: array_count)))
           }
           """
         ]
@@ -70,6 +65,11 @@ final class ByteArrayTests {
     ]
   )
   func func_accept_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+    let text = 
+      """
+      public func acceptArray(array: [UInt8])
+      """
+
     try assertOutput(
       input: text, 
       mode, .java,
@@ -79,5 +79,50 @@ final class ByteArrayTests {
       input: text, 
       mode, .swift,
       expectedChunks: expectedSwiftChunks)
-  }
+  }  
+  
+  // @Test(
+  //   "Import: return [UInt8] array",
+  //   arguments: [
+  //     // TODO: implement JNI mode here
+  //     (
+  //       JExtractGenerationMode.ffm,
+  //       /* expected Java chunks */
+  //       [
+  //         """
+  //         NEIN
+  //         NEIN
+  //         NEIN
+  //         NEIN
+  //         """
+  //       ],
+  //       /* expected Swift chunks */
+  //       [
+  //         """
+  //         NEIN 
+  //         NEIN 
+  //         NEIN 
+  //         NEIN 
+  //         NEIN 
+  //         """
+  //       ]
+  //     )
+  //   ]
+  // )
+  // func func_return_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+  //   let text = 
+  //     """
+  //     public func acceptArray() -> [UInt8]
+  //     """
+
+  //   try assertOutput(
+  //     input: text, 
+  //     mode, .java,
+  //     expectedChunks: expectedJavaChunks)
+      
+  //     try assertOutput(
+  //     input: text, 
+  //     mode, .swift,
+  //     expectedChunks: expectedSwiftChunks)
+  // }
 }

@@ -208,11 +208,11 @@ struct CdeclLowering {
           return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)$pointer",
+                convention: .byValue, parameterName: "\(parameterName)_pointer",
                 type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
               ),
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)$count",
+                convention: .byValue, parameterName: "\(parameterName)_count",
                 type: knownTypes.int
               ),
             ], conversion: .initialize(
@@ -237,11 +237,11 @@ struct CdeclLowering {
             cdeclParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)$pointer",
+                parameterName: "\(parameterName)_pointer",
                 type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)$count",
+                convention: .byValue, parameterName: "\(parameterName)_count",
                 type: knownTypes.int
               )
             ],
@@ -348,26 +348,17 @@ struct CdeclLowering {
     case .composite:
       throw LoweringError.unhandledType(type)
 
-    case .array(.nominal(let nominal)):
+    case .array(let wrapped) where wrapped == knownTypes.uint8:
       // Lower an array as 'address' raw pointer and 'count' integer
-      var parameters: [SwiftParameter] = [
-        
-      ]
-      
-      // Create parameter names with consistent naming convention
-      let pointerParameterName = "\(parameterName)$pointer"
-      let countParameterName = "\(parameterName)$count"
-      
-      // Build C declaration parameters for pointer and count
       let cdeclParameters = [
         SwiftParameter(
           convention: .byValue,
-          parameterName: pointerParameterName,
+          parameterName: "\(parameterName)_pointer",
           type: knownTypes.unsafeRawPointer
         ),
         SwiftParameter(
           convention: .byValue,
-          parameterName: countParameterName,
+          parameterName: "\(parameterName)_count",
           type: knownTypes.int
         ),
       ]
@@ -542,12 +533,12 @@ struct CdeclLowering {
             cdeclParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)$pointer",
+                parameterName: "\(parameterName)_pointer",
                 type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)$count",
+                parameterName: "\(parameterName)_count",
                 type: knownTypes.int
               ),
             ],
@@ -632,24 +623,24 @@ struct CdeclLowering {
             cdeclOutParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(outParameterName)$pointer",
+                parameterName: "\(outParameterName)_pointer",
                 type: knownTypes.unsafeMutablePointer(
                   .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
                 )
               ),
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(outParameterName)$count",
+                parameterName: "\(outParameterName)_count",
                 type: knownTypes.unsafeMutablePointer(knownTypes.int)
               ),
             ],
             conversion: .aggregate([
               .populatePointer(
-                name: "\(outParameterName)$pointer",
+                name: "\(outParameterName)_pointer",
                 to: .member(.placeholder, member: "baseAddress")
               ),
               .populatePointer(
-                name: "\(outParameterName)$count",
+                name: "\(outParameterName)_count",
                 to: .member(.placeholder, member: "count")
               )
             ], name: outParameterName)
