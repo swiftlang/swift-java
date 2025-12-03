@@ -144,17 +144,17 @@ extension JNISwift2JavaGenerator {
 
     printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
       for initializer in decl.initializers {
-        printFunctionDowncallMethods(&printer, initializer, skipMethodBody: true, skipArenas: true)
+        printFunctionDowncallMethods(&printer, initializer, skipMethodBody: true)
         printer.println()
       }
 
       for method in decl.methods {
-        printFunctionDowncallMethods(&printer, method, skipMethodBody: true, skipArenas: true)
+        printFunctionDowncallMethods(&printer, method, skipMethodBody: true)
         printer.println()
       }
 
       for variable in decl.variables {
-        printFunctionDowncallMethods(&printer, variable, skipMethodBody: true, skipArenas: true)
+        printFunctionDowncallMethods(&printer, variable, skipMethodBody: true)
         printer.println()
       }
     }
@@ -420,7 +420,7 @@ extension JNISwift2JavaGenerator {
         printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
-      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, skipMethodBody: false, skipArenas: false)
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, skipMethodBody: false)
       printer.println()
     }
   }
@@ -428,8 +428,7 @@ extension JNISwift2JavaGenerator {
   private func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    skipMethodBody: Bool = false,
-    skipArenas: Bool = false
+    skipMethodBody: Bool = false
   ) {
     guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
@@ -440,7 +439,7 @@ extension JNISwift2JavaGenerator {
 
     printJavaBindingWrapperHelperClass(&printer, decl)
 
-    printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody, skipArenas: skipArenas)
+    printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -486,21 +485,19 @@ extension JNISwift2JavaGenerator {
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    skipMethodBody: Bool,
-    skipArenas: Bool
+    skipMethodBody: Bool
   ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
-    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, skipMethodBody: skipMethodBody, skipArenas: skipArenas)
+    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, skipMethodBody: skipMethodBody)
   }
 
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
     importedFunc: ImportedFunc? = nil,
-    skipMethodBody: Bool,
-    skipArenas: Bool
+    skipMethodBody: Bool
   ) {
     var modifiers = ["public"]
     if translatedDecl.isStatic {
@@ -531,14 +528,28 @@ extension JNISwift2JavaGenerator {
     let parametersStr = parameters.joined(separator: ", ")
 
     // Print default global arena variation
+    // If we have enabled javaCallbacks we must emit default
+    // arena methods for protocols, as this is what
+    // Swift will call into, when you call a interface from Swift.
+    let shouldGenerateGlobalArenaVariation: Bool
+    let isParentProtocol = importedFunc?.parentType?.asNominalType?.isProtocol ?? false
+
     if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
+      shouldGenerateGlobalArenaVariation = true
+    } else if isParentProtocol, translatedSignature.requiresSwiftArena, config.effectiveEnableJavaCallbacks {
+      shouldGenerateGlobalArenaVariation = true
+    } else {
+      shouldGenerateGlobalArenaVariation = false
+    }
+
+    if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
         printDeclDocumentation(&printer, importedFunc)
       }
       var modifiers = modifiers
 
       // If we are a protocol, we emit this as default method
-      if importedFunc?.parentType?.asNominalTypeDeclaration?.kind == .protocol {
+      if isParentProtocol {
         modifiers.insert("default", at: 1)
       }
 
@@ -555,7 +566,7 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    if translatedSignature.requiresSwiftArena, !skipArenas {
+    if translatedSignature.requiresSwiftArena {
       parameters.append("SwiftArena swiftArena$")
     }
     if let importedFunc {

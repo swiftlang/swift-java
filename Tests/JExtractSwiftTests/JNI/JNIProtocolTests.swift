@@ -32,7 +32,9 @@ struct JNIProtocolTests {
   
     public protocol B {}
   
-    public class SomeClass: SomeProtocol {}
+    public class SomeClass: SomeProtocol {
+      public func makeClass() -> SomeClass {}
+    }
   
     public func takeProtocol(x: some SomeProtocol, y: any SomeProtocol)
     public func takeGeneric<S: SomeProtocol>(s: S)
@@ -61,7 +63,29 @@ struct JNIProtocolTests {
           ...
           public void method();
           ...
-          public SomeClass withObject(SomeClass c);
+          public SomeClass withObject(SomeClass c, SwiftArena swiftArena$);
+          ...
+        }
+        """
+      ])
+  }
+
+  @Test
+  func emitsDefault() throws {
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni, .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public interface SomeProtocol {
+          ...
+          public default SomeClass withObject(SomeClass c) {
+            return withObject(c, SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
+          }
+          ...
+          public SomeClass withObject(SomeClass c, SwiftArena swiftArena$);
           ...
         }
         """
@@ -78,7 +102,11 @@ struct JNIProtocolTests {
       expectedChunks: [
         """
         public final class SomeClass implements JNISwiftInstance, SomeProtocol {
-        """
+          ...
+          public SomeClass makeClass(SwiftArena swiftArena$) {
+          ...
+        }
+        """,
       ])
   }
 
