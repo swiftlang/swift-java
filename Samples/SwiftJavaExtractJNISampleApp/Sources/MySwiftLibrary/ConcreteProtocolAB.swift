@@ -21,6 +21,10 @@ public class ConcreteProtocolAB: ProtocolA, ProtocolB {
     return "ConcreteProtocolAB"
   }
 
+  public func makeClass() -> MySwiftClass {
+    return MySwiftClass(x: 10, y: 50)
+  }
+
   public init(constantA: Int64, constantB: Int64) {
     self.constantA = constantA
     self.constantB = constantB

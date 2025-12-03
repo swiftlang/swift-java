@@ -73,6 +73,14 @@ public class ProtocolTest {
         }
     }
 
+    @Test
+    void protocolClassMethod() {
+        try (var arena = SwiftArena.ofConfined()) {
+            ProtocolA proto1 = ConcreteProtocolAB.init(10, 5, arena);
+            assertEquals(10, proto1.makeClass().getX());
+        }
+    }
+
     static class JavaStorage implements Storage {
         StorageItem item;
 
@@ -81,7 +89,7 @@ public class ProtocolTest {
         }
 
         @Override
-        public StorageItem load() {
+        public StorageItem load(SwiftArena swiftArena$) {
             return item;
         }
 

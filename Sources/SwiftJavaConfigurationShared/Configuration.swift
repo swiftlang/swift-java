@@ -65,7 +65,10 @@ public struct Configuration: Codable {
     asyncFuncMode ?? .default
   }
 
-  public var enableJavaCallbacks: Bool? // FIXME: default it to false, but that plays not nice with Codable
+  public var enableJavaCallbacks: Bool?
+  public var effectiveEnableJavaCallbacks: Bool {
+    enableJavaCallbacks ?? false
+  }
 
   public var generatedJavaSourcesListFileOutput: String?
 
