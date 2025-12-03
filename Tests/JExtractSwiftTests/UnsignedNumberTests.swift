@@ -18,251 +18,392 @@ import Testing
 
 final class UnsignedNumberTests {
 
-  @Test("Import: UInt16 (char)")
-  func unsignedChar() throws {
+  @Test(
+    "Import: UInt16 (char)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_unsignedChar__(uint16_t arg)
+           * }
+           */
+          private static class swiftjava_SwiftModule_unsignedChar__ {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* arg: */SwiftValueLayout.SWIFT_UINT16
+          );
+          """,
+          """
+          public static void unsignedChar(@Unsigned char arg) {
+            swiftjava_SwiftModule_unsignedChar__.call(arg);
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          public static void unsignedChar(@Unsigned char arg) {
+            SwiftModule.$unsignedChar(arg);
+          }
+          private static native void $unsignedChar(char arg);
+          """,
+        ]
+      )
+    ])
+  func unsignedChar(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     try assertOutput(
       input: "public func unsignedChar(_ arg: UInt16)",
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_unsignedChar__(uint16_t arg)
-         * }
-         */
-        private static class swiftjava_SwiftModule_unsignedChar__ {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          /* arg: */SwiftValueLayout.SWIFT_UINT16
-        );
-        """,
-        """
-        public static void unsignedChar(@Unsigned char arg) {
-          swiftjava_SwiftModule_unsignedChar__.call(arg);
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: UInt32 (wrap)")
-  func unsignedInt() throws {
+  @Test(
+    "Import: UInt32 (wrap)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_unsignedInt__(uint32_t arg)
+           * }
+           */
+          private static class swiftjava_SwiftModule_unsignedInt__ {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* arg: */SwiftValueLayout.SWIFT_UINT32
+          );
+          """,
+          """
+          public static void unsignedInt(com.google.common.primitives.UnsignedInteger arg) {
+            swiftjava_SwiftModule_unsignedInt__.call(UnsignedNumbers.toPrimitive(arg));
+          }
+          """,
+        ]
+      ),
+      // JNI mode does not support the "wrap" mode
+    ])
+  func unsignedInt_wrap(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .wrapGuava
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_unsignedInt__(uint32_t arg)
-         * }
-         */
-        private static class swiftjava_SwiftModule_unsignedInt__ {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          /* arg: */SwiftValueLayout.SWIFT_UINT32
-        );
-        """,
-        """
-        public static void unsignedInt(com.google.common.primitives.UnsignedInteger arg) {
-          swiftjava_SwiftModule_unsignedInt__.call(UnsignedNumbers.toPrimitive(arg));
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: UInt32 (annotate)")
-  func unsignedIntAnnotate() throws {
+  @Test(
+    "Import: UInt32 (annotate)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_unsignedInt__(uint32_t arg)
+           * }
+           */
+          private static class swiftjava_SwiftModule_unsignedInt__ {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* arg: */SwiftValueLayout.SWIFT_UINT32
+          );
+          """,
+          """
+          public static void unsignedInt(@Unsigned int arg) {
+            swiftjava_SwiftModule_unsignedInt__.call(arg);
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          public static void unsignedInt(@Unsigned int arg) {
+            SwiftModule.$unsignedInt(arg);
+          }
+          private static native void $unsignedInt(int arg);
+          """,
+        ]
+      )
+    ])
+  func unsignedIntAnnotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_unsignedInt__(uint32_t arg)
-         * }
-         */
-        private static class swiftjava_SwiftModule_unsignedInt__ {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          /* arg: */SwiftValueLayout.SWIFT_UINT32
-        );
-        """,
-        """
-        public static void unsignedInt(@Unsigned int arg) {
-          swiftjava_SwiftModule_unsignedInt__.call(arg);
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: return UInt32 (default)")
-  func returnUnsignedIntDefault() throws {
+  @Test(
+    "Import: return UInt32 (default)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * uint32_t swiftjava_SwiftModule_returnUnsignedInt(void)
+           * }
+           */
+          private static class swiftjava_SwiftModule_returnUnsignedInt {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_UINT32
+          );
+          """,
+          """
+          @Unsigned
+          public static int returnUnsignedInt() {
+            return swiftjava_SwiftModule_returnUnsignedInt.call();
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          @Unsigned
+          public static int returnUnsignedInt() {
+            return SwiftModule.$returnUnsignedInt();
+          }
+          private static native int $returnUnsignedInt();
+          """,
+        ]
+      )
+    ])
+  func returnUnsignedIntDefault(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     let config = Configuration()
 
     try assertOutput(
       input: "public func returnUnsignedInt() -> UInt32",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * uint32_t swiftjava_SwiftModule_returnUnsignedInt(void)
-         * }
-         */
-        private static class swiftjava_SwiftModule_returnUnsignedInt {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-          /* -> */SwiftValueLayout.SWIFT_UINT32
-        );
-        """,
-        """
-        @Unsigned
-        public static int returnUnsignedInt() {
-          return swiftjava_SwiftModule_returnUnsignedInt.call();
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: return UInt64 (wrap)")
-  func return_unsignedLongWrap() throws {
+  @Test(
+    "Import: return UInt64 (wrap)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * uint64_t swiftjava_SwiftModule_returnUnsignedLong(void)
+           * }
+           */
+          private static class swiftjava_SwiftModule_returnUnsignedLong {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_UINT64
+          );
+          """,
+          """
+          public static com.google.common.primitives.UnsignedLong returnUnsignedLong() {
+            return com.google.common.primitives.UnsignedLong.fromLongBits(swiftjava_SwiftModule_returnUnsignedLong.call());
+          }
+          """,
+        ]
+      ),
+      // JNI mode does not support "wrap" mode
+    ])
+  func return_unsignedLongWrap(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .wrapGuava
 
     try assertOutput(
       input: "public func returnUnsignedLong() -> UInt64",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * uint64_t swiftjava_SwiftModule_returnUnsignedLong(void)
-         * }
-         */
-        private static class swiftjava_SwiftModule_returnUnsignedLong {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-          /* -> */SwiftValueLayout.SWIFT_UINT64
-        );
-        """,
-        """
-        public static com.google.common.primitives.UnsignedLong returnUnsignedLong() {
-          return com.google.common.primitives.UnsignedLong.fromLongBits(swiftjava_SwiftModule_returnUnsignedLong.call());
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: return UInt64 (annotate)")
-  func return_unsignedLong_annotate() throws {
+  @Test(
+    "Import: return UInt64 (annotate)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * uint64_t swiftjava_SwiftModule_returnUnsignedLong(void)
+           * }
+           */
+          private static class swiftjava_SwiftModule_returnUnsignedLong {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_UINT64
+          );
+          """,
+          """
+          @Unsigned
+          public static long returnUnsignedLong() {
+            return swiftjava_SwiftModule_returnUnsignedLong.call();
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          @Unsigned
+          public static long returnUnsignedLong() {
+            return SwiftModule.$returnUnsignedLong();
+          }
+          private static native long $returnUnsignedLong();
+          """,
+        ]
+      )
+    ])
+  func return_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func returnUnsignedLong() -> UInt64",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * uint64_t swiftjava_SwiftModule_returnUnsignedLong(void)
-         * }
-         */
-        private static class swiftjava_SwiftModule_returnUnsignedLong {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-          /* -> */SwiftValueLayout.SWIFT_UINT64
-        );
-        """,
-        """
-        @Unsigned
-        public static long returnUnsignedLong() {
-          return swiftjava_SwiftModule_returnUnsignedLong.call();
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: take UInt64 (annotate)")
-  func take_unsignedLong_annotate() throws {
+  @Test(
+    "Import: take UInt64 (annotate)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * void swiftjava_SwiftModule_takeUnsignedLong_arg(uint64_t arg)
+           * }
+           */
+          private static class swiftjava_SwiftModule_takeUnsignedLong_arg {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* arg: */SwiftValueLayout.SWIFT_UINT64
+          );
+          """,
+          """
+          public static void takeUnsignedLong(@Unsigned long arg) {
+            swiftjava_SwiftModule_takeUnsignedLong_arg.call(arg);
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          public static void takeUnsignedLong(@Unsigned long arg) {
+            SwiftModule.$takeUnsignedLong(arg);
+          }
+          private static native void $takeUnsignedLong(long arg);
+          """,
+        ]
+      )
+    ])
+  func take_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func takeUnsignedLong(arg: UInt64)",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_takeUnsignedLong_arg(uint64_t arg)
-         * }
-         */
-        private static class swiftjava_SwiftModule_takeUnsignedLong_arg {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          /* arg: */SwiftValueLayout.SWIFT_UINT64
-        );
-        """,
-        """
-        public static void takeUnsignedLong(@Unsigned long arg) {
-          swiftjava_SwiftModule_takeUnsignedLong_arg.call(arg);
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 
-  @Test("Import: take UInt64 return UInt32 (annotate)")
-  func echo_unsignedLong_annotate() throws {
+  @Test(
+    "Import: take UInt64 return UInt32 (annotate)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * uint32_t swiftjava_SwiftModule_unsignedLong_first_second(uint64_t first, uint32_t second)
+           * }
+           */
+          private static class swiftjava_SwiftModule_unsignedLong_first_second {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_UINT32
+            /* first: */SwiftValueLayout.SWIFT_UINT64
+            /* second: */SwiftValueLayout.SWIFT_UINT32
+          );
+          """,
+          """
+          @Unsigned
+          public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
+            return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          @Unsigned
+          public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
+            return SwiftModule.$unsignedLong(first, second);
+          }
+          private static native int $unsignedLong(long first, int second);
+          """,
+        ]
+      ),
+    ])
+  func echo_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
     config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func unsignedLong(first: UInt64, second: UInt32) -> UInt32",
       config: config,
-      .ffm, .java,
+      mode, .java,
       detectChunkByInitialLines: 2,
-      expectedChunks: [
-        """
-        /**
-         * {@snippet lang=c :
-         * uint32_t swiftjava_SwiftModule_unsignedLong_first_second(uint64_t first, uint32_t second)
-         * }
-         */
-        private static class swiftjava_SwiftModule_unsignedLong_first_second {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-          /* -> */SwiftValueLayout.SWIFT_UINT32
-          /* first: */SwiftValueLayout.SWIFT_UINT64
-          /* second: */SwiftValueLayout.SWIFT_UINT32
-        );
-        """,
-        """
-        @Unsigned
-        public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
-          return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
-        }
-        """,
-      ]
+      expectedChunks: expectedChunks
     )
   }
 }
