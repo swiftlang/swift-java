@@ -99,7 +99,7 @@ enum ConversionStep: Equatable {
       return "\(raw: placeholder)"
 
     case .explodedComponent(let step, component: let component):
-      return step.asExprSyntax(placeholder: "\(placeholder)_\(component)", bodyItems: &bodyItems)
+      return step.asExprSyntax(placeholder: "\(placeholder)$\(component)", bodyItems: &bodyItems)
 
     case .unsafeCastPointer(let step, swiftType: let swiftType):
       let untypedExpr = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)

@@ -345,8 +345,8 @@ final class DataImportTests {
             void apply(java.lang.foreign.MemorySegment _0);
           }
           private static MemorySegment $toUpcallStub(body fi, Arena arena) {
-            return swiftjava_SwiftModule_Data_withUnsafeBytes__.$body.toUpcallStub((_0_pointer, _0_count) -> {
-              fi.apply(_0_pointer.reinterpret(_0_count));
+            return swiftjava_SwiftModule_Data_withUnsafeBytes__.$body.toUpcallStub((_0$pointer, _0$count) -> {
+              fi.apply(_0$pointer.reinterpret(_0$count));
             }, arena);
           }
         }

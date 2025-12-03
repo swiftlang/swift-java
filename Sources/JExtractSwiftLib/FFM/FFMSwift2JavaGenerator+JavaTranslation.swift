@@ -479,7 +479,7 @@ extension FFMSwift2JavaGenerator {
       case .array(let wrapped) where wrapped == knownTypes.uint8:
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(name: parameterName, type: .array(.byte)),
+            JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations),
           ],
           conversion: 
             .commaSeparated([

@@ -208,11 +208,11 @@ struct CdeclLowering {
           return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)_pointer",
+                convention: .byValue, parameterName: "\(parameterName)$pointer",
                 type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
               ),
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)_count",
+                convention: .byValue, parameterName: "\(parameterName)$count",
                 type: knownTypes.int
               ),
             ], conversion: .initialize(
@@ -237,11 +237,11 @@ struct CdeclLowering {
             cdeclParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)_pointer",
+                parameterName: "\(parameterName)$pointer",
                 type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
-                convention: .byValue, parameterName: "\(parameterName)_count",
+                convention: .byValue, parameterName: "\(parameterName)$count",
                 type: knownTypes.int
               )
             ],
@@ -355,8 +355,8 @@ struct CdeclLowering {
       ]
       
       // Create parameter names with consistent naming convention
-      let pointerParameterName = "\(parameterName)_pointer"
-      let countParameterName = "\(parameterName)_count"
+      let pointerParameterName = "\(parameterName)$pointer"
+      let countParameterName = "\(parameterName)$count"
       
       // Build C declaration parameters for pointer and count
       let cdeclParameters = [
@@ -542,12 +542,12 @@ struct CdeclLowering {
             cdeclParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)_pointer",
+                parameterName: "\(parameterName)$pointer",
                 type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(parameterName)_count",
+                parameterName: "\(parameterName)$count",
                 type: knownTypes.int
               ),
             ],
@@ -632,24 +632,24 @@ struct CdeclLowering {
             cdeclOutParameters: [
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(outParameterName)_pointer",
+                parameterName: "\(outParameterName)$pointer",
                 type: knownTypes.unsafeMutablePointer(
                   .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
                 )
               ),
               SwiftParameter(
                 convention: .byValue,
-                parameterName: "\(outParameterName)_count",
+                parameterName: "\(outParameterName)$count",
                 type: knownTypes.unsafeMutablePointer(knownTypes.int)
               ),
             ],
             conversion: .aggregate([
               .populatePointer(
-                name: "\(outParameterName)_pointer",
+                name: "\(outParameterName)$pointer",
                 to: .member(.placeholder, member: "baseAddress")
               ),
               .populatePointer(
-                name: "\(outParameterName)_count",
+                name: "\(outParameterName)$count",
                 to: .member(.placeholder, member: "count")
               )
             ], name: outParameterName)

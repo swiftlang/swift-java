@@ -34,13 +34,13 @@ final class ByteArrayTests {
           """
           /**
            * {@snippet lang=c :
-           * void swiftjava_SwiftModule_acceptArray_array(const void *array_pointer, ptrdiff_t array_count)
+           * void swiftjava_SwiftModule_acceptArray_array(const void *array$pointer, ptrdiff_t array$count)
            * }
            */
           private static class swiftjava_SwiftModule_acceptArray_array {
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-              /* array_pointer: */SwiftValueLayout.SWIFT_POINTER,
-              /* array_count: */SwiftValueLayout.SWIFT_INT
+              /* array$pointer: */SwiftValueLayout.SWIFT_POINTER,
+              /* array$count: */SwiftValueLayout.SWIFT_INT
             );
           """,
           """
@@ -50,7 +50,7 @@ final class ByteArrayTests {
              * public func acceptArray(array: [UInt8])
              * }
              */
-            public static void acceptArray(byte[] array) {
+            public static void acceptArray(@Unsigned byte[] array) {
               try(var arena$ = Arena.ofConfined()) {
                 swiftjava_SwiftModule_acceptArray_array.call(arena$.allocateFrom(ValueLayout.JAVA_BYTE, array), array.length);
               }
@@ -61,8 +61,8 @@ final class ByteArrayTests {
         [
           """
           @_cdecl("swiftjava_SwiftModule_acceptArray_array")
-          public func swiftjava_SwiftModule_acceptArray_array(_ array_pointer: UnsafeRawPointer, _ array_count: Int) {
-            acceptArray(array: [UInt8](UnsafeRawBufferPointer(start: array_pointer, count: array_count)))
+          public func swiftjava_SwiftModule_acceptArray_array(_ array$pointer: UnsafeRawPointer, _ array$count: Int) {
+            acceptArray(array: [UInt8](UnsafeRawBufferPointer(start: array$pointer, count: array$count)))
           }
           """
         ]

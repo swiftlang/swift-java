@@ -25,11 +25,11 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_f")
-      public func c_f(_ x: Int, _ y: Float, _ z_pointer: UnsafeRawPointer, _ z_count: Int) {
-        f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z_pointer.assumingMemoryBound(to: Bool.self), count: z_count))
+      public func c_f(_ x: Int, _ y: Float, _ z$pointer: UnsafeRawPointer, _ z$count: Int) {
+        f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z$pointer.assumingMemoryBound(to: Bool.self), count: z$count))
       }
       """,
-      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z_pointer, ptrdiff_t z_count)"
+      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z$pointer, ptrdiff_t z$count)"
     )
   }
 
@@ -323,13 +323,13 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
       @_cdecl("c_swapRawBufferPointer")
-      public func c_swapRawBufferPointer(_ buffer_pointer: UnsafeRawPointer?, _ buffer_count: Int, _ _result_pointer: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ _result_count: UnsafeMutablePointer<Int>) {
-        let _result = swapRawBufferPointer(buffer: UnsafeRawBufferPointer(start: buffer_pointer, count: buffer_count))
-        _result_pointer.initialize(to: _result.baseAddress)
-        _result_count.initialize(to: _result.count)
+      public func c_swapRawBufferPointer(_ buffer$pointer: UnsafeRawPointer?, _ buffer$count: Int, _ _result$pointer: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ _result$count: UnsafeMutablePointer<Int>) {
+        let _result = swapRawBufferPointer(buffer: UnsafeRawBufferPointer(start: buffer$pointer, count: buffer$count))
+        _result$pointer.initialize(to: _result.baseAddress)
+        _result$count.initialize(to: _result.count)
       }
       """,
-      expectedCFunction: "void c_swapRawBufferPointer(const void *buffer_pointer, ptrdiff_t buffer_count, void **_result_pointer, ptrdiff_t *_result_count)"
+      expectedCFunction: "void c_swapRawBufferPointer(const void *buffer$pointer, ptrdiff_t buffer$count, void **_result$pointer, ptrdiff_t *_result$count)"
     )
   }
 
