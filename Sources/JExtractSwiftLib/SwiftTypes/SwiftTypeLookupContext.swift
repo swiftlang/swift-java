@@ -105,6 +105,17 @@ class SwiftTypeLookupContext {
       typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .protocolDecl(let node):
       typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
+    case .extensionDecl(let node):
+      // For extensions, we have to perform a unqualified lookup,
+      // as the extentedType is just the identifier of the type.
+
+      guard case .identifierType(let id) = Syntax(node.extendedType).as(SyntaxEnum.self),
+            let lookupResult = try unqualifiedLookup(name: Identifier(id.name)!, from: node)
+      else {
+        throw TypeLookupError.notType(Syntax(node))
+      }
+
+      typeDecl = lookupResult
     case .typeAliasDecl:
       fatalError("typealias not implemented")
     case .associatedTypeDecl:

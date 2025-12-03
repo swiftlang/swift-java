@@ -171,4 +171,20 @@ public class MySwiftClassTest {
             assertEquals(42, c1.getGetAsync().get());
         }
     }
+
+    @Test
+    void toStringTest() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            assertEquals("MySwiftClass(x: 20, y: 10)", c1.toString());
+        }
+    }
+
+    @Test
+    void toDebugStringTest() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            assertEquals("debug: MySwiftClass(x: 20, y: 10)", c1.toDebugString());
+        }
+    }
 }
