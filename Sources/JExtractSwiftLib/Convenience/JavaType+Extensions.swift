@@ -102,7 +102,7 @@ extension JavaType {
     }
   }
 
-  /// Returns whether this type returns `JavaValue` from JavaKit
+  /// Returns whether this type returns `JavaValue` from SwiftJava
   var implementsJavaValue: Bool {
     return switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString:

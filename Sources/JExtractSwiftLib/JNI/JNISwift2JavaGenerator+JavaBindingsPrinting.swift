@@ -12,7 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import JavaTypes
+import OrderedCollections
 
 // MARK: Defaults
 
@@ -40,6 +42,8 @@ extension JNISwift2JavaGenerator {
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
     let importedTypes = analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key })
 
+    var exportedFileNames: OrderedSet<String> = []
+
     // Each parent type goes into its own file
     // any nested types are printed inside the body as `static class`
     for (_, ty) in importedTypes.filter({ _, type in type.parent == nil }) {
@@ -52,6 +56,7 @@ extension JNISwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
+        exportedFileNames.append(outputFile.path(percentEncoded: false))
         logger.info("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
       }
     }
@@ -65,9 +70,23 @@ extension JNISwift2JavaGenerator {
       javaPackagePath: javaPackagePath,
       filename: filename
     ) {
+      exportedFileNames.append(outputFile.path(percentEncoded: false))
       logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
     }
+
+    // Write java sources list file
+    if let generatedJavaSourcesListFileOutput = config.generatedJavaSourcesListFileOutput, !exportedFileNames.isEmpty {
+      let outputPath = URL(fileURLWithPath: javaOutputDirectory).appending(path: generatedJavaSourcesListFileOutput)
+      try exportedFileNames.joined(separator: "\n").write(
+        to: outputPath,
+        atomically: true,
+        encoding: .utf8
+      )
+      logger.info("Generated file at \(outputPath)")
+    }
   }
+
+
 
   private func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)
@@ -113,20 +132,29 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    let extends = ["JNISwiftInstance"]
-    printer.printBraceBlock("public interface \(decl.swiftNominal.name) extends \(extends.joined(separator: ", "))") { printer in
+    var extends = [String]()
+
+    // If we cannot generate Swift wrappers
+    // that allows the user to implement the wrapped interface in Java
+    // then we require only JExtracted types can conform to this.
+    if !self.interfaceProtocolWrappers.keys.contains(decl) {
+      extends.append("JNISwiftInstance")
+    }
+    let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: ", "))"
+
+    printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
       for initializer in decl.initializers {
-        printFunctionDowncallMethods(&printer, initializer, signaturesOnly: true)
+        printFunctionDowncallMethods(&printer, initializer, skipMethodBody: true, skipArenas: true)
         printer.println()
       }
 
       for method in decl.methods {
-        printFunctionDowncallMethods(&printer, method, signaturesOnly: true)
+        printFunctionDowncallMethods(&printer, method, skipMethodBody: true, skipArenas: true)
         printer.println()
       }
 
       for variable in decl.variables {
-        printFunctionDowncallMethods(&printer, variable, signaturesOnly: true)
+        printFunctionDowncallMethods(&printer, variable, skipMethodBody: true, skipArenas: true)
         printer.println()
       }
     }
@@ -183,6 +211,10 @@ extension JNISwift2JavaGenerator {
          */
         public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
           return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
+        }
+        
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer) {
+          return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
         }
         """
       )
@@ -385,10 +417,10 @@ extension JNISwift2JavaGenerator {
           ["\(conversion.native.javaType) \(value.parameter.name)"]
         }
 
-        printer.print("record $NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
+        printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
-      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, signaturesOnly: false)
+      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, skipMethodBody: false, skipArenas: false)
       printer.println()
     }
   }
@@ -396,7 +428,8 @@ extension JNISwift2JavaGenerator {
   private func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    signaturesOnly: Bool = false
+    skipMethodBody: Bool = false,
+    skipArenas: Bool = false
   ) {
     guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
@@ -407,7 +440,7 @@ extension JNISwift2JavaGenerator {
 
     printJavaBindingWrapperHelperClass(&printer, decl)
 
-    printJavaBindingWrapperMethod(&printer, decl, signaturesOnly: signaturesOnly)
+    printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody, skipArenas: skipArenas)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -453,19 +486,21 @@ extension JNISwift2JavaGenerator {
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    signaturesOnly: Bool
+    skipMethodBody: Bool,
+    skipArenas: Bool
   ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
     }
-    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, signaturesOnly: signaturesOnly)
+    printJavaBindingWrapperMethod(&printer, translatedDecl, importedFunc: decl, skipMethodBody: skipMethodBody, skipArenas: skipArenas)
   }
 
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
     importedFunc: ImportedFunc? = nil,
-    signaturesOnly: Bool
+    skipMethodBody: Bool,
+    skipArenas: Bool
   ) {
     var modifiers = ["public"]
     if translatedDecl.isStatic {
@@ -520,14 +555,14 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    if translatedSignature.requiresSwiftArena {
+    if translatedSignature.requiresSwiftArena, !skipArenas {
       parameters.append("SwiftArena swiftArena$")
     }
     if let importedFunc {
       printDeclDocumentation(&printer, importedFunc)
     }
     let signature = "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
-    if signaturesOnly {
+    if skipMethodBody {
       printer.print("\(signature);")
     } else {
       printer.printBraceBlock(signature) { printer in

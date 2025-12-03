@@ -12,15 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Determines which source generation mode JExtract should be using: JNI or Foreign Function and Memory.
-public enum JExtractGenerationMode: String, Sendable, Codable {
-  /// Foreign Value and Memory API
-  case ffm
+import SwiftJava
 
-  /// Java Native Interface
-  case jni
+public class StorageItem {
+  public let value: Int64
 
-  public static var `default`: JExtractGenerationMode {
-    .ffm
+  public init(value: Int64) {
+    self.value = value
   }
+}
+
+public protocol Storage {
+  func load() -> StorageItem
+  func save(_ item: StorageItem)
+}
+
+public func saveWithStorage(_ item: StorageItem, s: any Storage) {
+  s.save(item);
+}
+
+public func loadWithStorage(s: any Storage) -> StorageItem {
+  return s.load();
 }
