@@ -542,30 +542,6 @@ extension JNISwift2JavaGenerator {
       shouldGenerateGlobalArenaVariation = false
     }
 
-//    let importedProtocolType = self.analysis.importedTypes.first { _, type in
-//      guard let parentType = importedFunc?.parentType?.asNominalTypeDeclaration else {
-//        return false
-//      }
-//      return type.swiftNominal == parentType && (parentType.kind == .protocol)
-//    }?.value
-//
-//    if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
-//      if let importedProtocolType {
-//        // If this is a method from a protocol we are implementing
-//        // we must generate
-//        // the auto arena version, since that is what the wrappers from Swift
-//        // will use.
-//        let isProtocolMethodOrVariable = importedProtocolType.methods.contains {
-//          $0.name == importedFunc?.name && $0.functionSignature == importedFunc?.functionSignature
-//        }
-//        shouldGenerateGlobalArenaVariation = isProtocolMethodOrVariable
-//      } else {
-//        shouldGenerateGlobalArenaVariation = false
-//      }
-//    } else {
-//      shouldGenerateGlobalArenaVariation = false
-//    }
-
     if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
         printDeclDocumentation(&printer, importedFunc)
