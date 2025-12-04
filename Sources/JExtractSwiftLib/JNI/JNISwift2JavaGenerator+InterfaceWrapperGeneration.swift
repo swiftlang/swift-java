@@ -133,6 +133,10 @@ extension JNISwift2JavaGenerator {
 
     private func translateParameter(parameterName: String, type: SwiftType) throws -> UpcallConversionStep {
 
+      if type.isDirectlyTranslatedToWrapJava {
+        return .placeholder
+      }
+
       switch type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -146,12 +150,17 @@ extension JNISwift2JavaGenerator {
               wrappedType: genericArgs[0]
             )
 
-          default:
-            guard knownType.isDirectlyTranslatedToWrapJava else {
+          case .array:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
+            return try translateArrayParameter(
+              name: parameterName,
+              elementType: genericArgs[0]
+            )
 
-            return .placeholder
+          default:
+            throw JavaTranslationError.unsupportedSwiftType(type)
           }
         }
 
@@ -171,8 +180,29 @@ extension JNISwift2JavaGenerator {
           wrappedType: wrappedType
         )
 
-      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .array:
+      case .array(let elementType):
+        return try translateArrayParameter(name: parameterName, elementType: elementType)
+
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
+      }
+    }
+
+    private func translateArrayParameter(name: String, elementType: SwiftType) throws -> UpcallConversionStep {
+      switch elementType {
+      case .nominal(let nominalType):
+        // We assume this is a JExtracted type
+        return .map(
+          .placeholder,
+          body: .toJavaWrapper(
+            .placeholder,
+            name: "arrayElement",
+            nominalType: nominalType
+          )
+        )
+
+      case .array, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
+        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
       }
     }
 
@@ -190,6 +220,10 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       allowNilForObjects: Bool = false
     ) throws -> UpcallConversionStep {
+      if type.isDirectlyTranslatedToWrapJava {
+        return .placeholder
+      }
+
       switch type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -203,11 +237,14 @@ extension JNISwift2JavaGenerator {
               methodName: methodName
             )
 
-          default:
-            guard knownType.isDirectlyTranslatedToWrapJava else {
+          case .array:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
-            return .placeholder
+            return try self.translateArrayResult(elementType: genericArgs[0])
+
+          default:
+            throw JavaTranslationError.unsupportedSwiftType(type)
           }
         }
 
@@ -228,8 +265,29 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrappedType):
         return try self.translateOptionalResult(wrappedType: wrappedType, methodName: methodName)
 
-      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .array:
+      case .array(let elementType):
+        return try self.translateArrayResult(elementType: elementType)
+
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
+      }
+    }
+
+    private func translateArrayResult(elementType: SwiftType) throws -> UpcallConversionStep {
+      switch elementType {
+      case .nominal(let nominalType):
+        // We assume this is a JExtracted type
+        return .map(
+          .placeholder,
+          body: .toSwiftClass(
+            .unwrapOptional(.placeholder, message: "Element of array was nil"),
+            name: "arrayElement",
+            nominalType: nominalType
+          )
+        )
+
+      case .array, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
+        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
       }
     }
 
@@ -339,4 +397,32 @@ extension JNISwift2JavaGenerator {
         return printer.finalize()
       }
     }
+}
+
+extension SwiftType {
+  /// Indicates whether this type is translated by `wrap-java`
+  /// into the same type as `jextract`.
+  ///
+  /// This means we do not have to perform any mapping when passing
+  /// this type between jextract and wrap-java
+  var isDirectlyTranslatedToWrapJava: Bool {
+    switch self {
+    case .nominal(let swiftNominalType):
+      guard let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind else {
+        return false
+      }
+      switch knownType {
+      case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:
+        return true
+      default:
+        return false
+      }
+
+    case .array(let elementType):
+      return elementType.isDirectlyTranslatedToWrapJava
+
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite:
+      return false
+    }
+  }
 }

@@ -87,6 +87,21 @@ public class ProtocolCallbacksTest {
         public Optional<MySwiftClass> withOptionalObject(Optional<MySwiftClass> input, SwiftArena swiftArena$) {
             return input;
         }
+
+        @Override
+        public long[] withInt64Array(long[] input) {
+            return input;
+        }
+
+        @Override
+        public String[] withStringArray(String[] input) {
+            return input;
+        }
+
+        @Override
+        public MySwiftClass[] withObjectArray(MySwiftClass[] input, SwiftArena swiftArena$) {
+            return input;
+        }
     }
 
     @Test
@@ -95,7 +110,28 @@ public class ProtocolCallbacksTest {
             JavaCallbacks callbacks = new JavaCallbacks();
             var object = MySwiftClass.init(5, 3, arena);
             var optionalObject = Optional.of(MySwiftClass.init(10, 10, arena));
-            var output = MySwiftLibrary.outputCallbacks(callbacks, true, (byte) 1, (char) 16, (short) 16, (int) 32, 64L, 1.34f, 1.34, "Hello from Java!", object, OptionalLong.empty(), optionalObject, arena);
+            var int64Array = new long[]{1, 2, 3};
+            var stringArray = new String[]{"Hey", "there"};
+            var objectArray = new MySwiftClass[]{MySwiftClass.init(1, 1, arena), MySwiftClass.init(2, 2, arena)};
+            var output = MySwiftLibrary.outputCallbacks(
+                    callbacks,
+                    true,
+                    (byte) 1,
+                    (char) 16,
+                    (short) 16,
+                    (int) 32,
+                    64L,
+                    1.34f,
+                    1.34,
+                    "Hello from Java!",
+                    object,
+                    OptionalLong.empty(),
+                    optionalObject,
+                    int64Array,
+                    stringArray,
+                    objectArray,
+                    arena
+            );
 
             assertEquals(1, output.getInt8());
             assertEquals(16, output.getUint16());
@@ -112,6 +148,14 @@ public class ProtocolCallbacksTest {
             var optionalObjectOutput = output.getOptionalObject(arena);
             assertTrue(optionalObjectOutput.isPresent());
             assertEquals(10, optionalObjectOutput.get().getX());
+
+            assertArrayEquals(new long[]{1, 2,3}, output.getInt64Array());
+            assertArrayEquals(new String[]{"Hey", "there"}, output.getStringArray());
+
+            var objectArrayOutput = output.getObjectArray(arena);
+            assertEquals(2, objectArrayOutput.length);
+            assertEquals(1, objectArrayOutput[0].getX());
+            assertEquals(2, objectArrayOutput[1].getX());
         }
     }
 }
