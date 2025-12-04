@@ -343,7 +343,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
       case .product(let product):
         guard let swiftJava = product.sourceModules.first(where: { $0.name == "SwiftJava" }) else {
-          return nil
+          continue
         }
 
         // We are inside Sources/SwiftJava
