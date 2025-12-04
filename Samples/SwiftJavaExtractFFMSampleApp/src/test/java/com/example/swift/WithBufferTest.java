@@ -20,12 +20,31 @@ import org.swift.swiftkit.ffm.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 public class WithBufferTest {
+
+    public static byte[] returnArray() {
+        try (var arena$ = Arena.ofConfined()) {
+            MemorySegment _result_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegment _result_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            // swiftjava_SwiftModule_returnArray.call(_result_pointer, _result_count);
+//            return _result_pointer
+//                    .get(SwiftValueLayout.SWIFT_POINTER, 0)
+//                    .reinterpret(_result_count.get(SwiftValueLayout.SWIFT_INT64, 0));
+            MemorySegment memorySegment = _result_pointer
+                    .get(SwiftValueLayout.SWIFT_POINTER, 0);
+            long newSize = _result_count.get(SwiftValueLayout.SWIFT_INT64, 0);
+            MemorySegment arraySegment = memorySegment.reinterpret(newSize);
+            return arraySegment.toArray(ValueLayout.JAVA_BYTE);
+        }
+    }
+
     @Test
     void test_withBuffer() {
         AtomicLong bufferSize = new AtomicLong();

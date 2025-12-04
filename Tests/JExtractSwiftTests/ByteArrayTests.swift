@@ -81,48 +81,111 @@ final class ByteArrayTests {
       expectedChunks: expectedSwiftChunks)
   }  
   
-  // @Test(
-  //   "Import: return [UInt8] array",
-  //   arguments: [
-  //     // TODO: implement JNI mode here
-  //     (
-  //       JExtractGenerationMode.ffm,
-  //       /* expected Java chunks */
-  //       [
-  //         """
-  //         NEIN
-  //         NEIN
-  //         NEIN
-  //         NEIN
-  //         """
-  //       ],
-  //       /* expected Swift chunks */
-  //       [
-  //         """
-  //         NEIN 
-  //         NEIN 
-  //         NEIN 
-  //         NEIN 
-  //         NEIN 
-  //         """
-  //       ]
-  //     )
-  //   ]
-  // )
-  // func func_return_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
-  //   let text = 
-  //     """
-  //     public func acceptArray() -> [UInt8]
-  //     """
+  @Test(
+    "Import: return [UInt8] array",
+    arguments: [
+      // TODO: implement JNI mode here
+      (
+        JExtractGenerationMode.ffm,
+        /* expected Java chunks */
+        [
+          // """
+          // /**
+          //  * {snippet lang=c :
+          //  * void (*)(void)
+          //  * }
+          //  */
+          // private static class $callback {
+          //   @FunctionalInterface
+          //   public interface Function {
+          //     void apply();
+          //   }
+          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
+          //   private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
+          //   private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+          //     return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+          //   }
+          // }
+          // """,
+          // """
+          // public static class _result_initialize {
+          //   @FunctionalInterface
+          //   public interface callback extends swiftjava___FakeModule_callMe_callback.$callback.Function {}
+          //   private static MemorySegment $toUpcallStub(callback fi, Arena arena) {
+          //     return swiftjava___FakeModule_callMe_callback.$callback.toUpcallStub(fi, arena);
+          //   }
+          // }
+          // """,
+          """
+          /**
+           * Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func returnArray() -> [UInt8]
+           * }
+           */
+          @Unsigned
+          public static byte[] returnArray() {
+            try(var arena$ = Arena.ofConfined()) {
+              _result_initialize callback = (buf, count) -> {
 
-  //   try assertOutput(
-  //     input: text, 
-  //     mode, .java,
-  //     expectedChunks: expectedJavaChunks)
+              };
+              swiftjava___FakeModule_returnArray.call(_result_initialize.$toUpcallStub(callback, arena$));
+              swiftjava_SwiftModule_returnArray.call(_result_pointer, _result_count);
+            }
+          }
+          """
+        ],
+        // [
+        //   """
+        //   /**
+        //    * Downcall to Swift:
+        //    * {@snippet lang=swift :
+        //    * public func returnArray() -> [UInt8]
+        //    * }
+        //    */
+        //   @Unsigned
+        //   public static byte[] returnArray() {
+        //     try(var arena$ = Arena.ofConfined()) {
+        //       MemorySegment _result_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
+        //       MemorySegment _result_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+        //       swiftjava_SwiftModule_returnArray.call(_result_pointer, _result_count);
+        //       return _result_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(_result_count.get(SwiftValueLayout.SWIFT_INT64, 0)).toArray(ValueLayout.JAVA_BYTE);
+        //     }
+        //   }
+        //   """
+        // ],
+        /* expected Swift chunks */
+        [
+          """
+          @_cdecl("swiftjava_SwiftModule_returnArray")
+          public func swiftjava_SwiftModule_returnArray(_ _result_initialize: @convention(c) (UnsafeRawPointer, Int) -> ()) {
+            let _result = returnArray()
+            _result.withUnsafeBufferPointer({ (_0) in
+              return _result_initialize(_0.baseAddress, _0.count)
+            })
+          }
+          """
+        ]
+      )
+    ]
+  )
+  func func_return_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+    let text = 
+      """
+      public func returnArray() -> [UInt8]
+      """
+    
+    var config = Configuration()
+    config.logLevel = .trace
+    
+    try assertOutput(
+      input: text, 
+      mode, .java,
+      expectedChunks: expectedJavaChunks)
       
-  //     try assertOutput(
-  //     input: text, 
-  //     mode, .swift,
-  //     expectedChunks: expectedSwiftChunks)
-  // }
+      try assertOutput(
+      input: text, 
+      mode, .swift,
+      expectedChunks: expectedSwiftChunks)
+  }
 }

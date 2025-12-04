@@ -714,6 +714,33 @@ extension FFMSwift2JavaGenerator {
         // TODO: Implement.
         throw JavaTranslationError.unhandledType(swiftType)
 
+      case .array(let wrapped) where wrapped == knownTypes.uint8:
+        return TranslatedResult(
+          javaResultType: 
+            .array(.byte), 
+            annotations: [.unsigned], 
+            outParameters: [
+              JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+              JavaParameter(name: "count", type: .long),
+            ], 
+            conversion: 
+              .method(
+                .method(
+                  .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
+                  methodName: "reinterpret",
+                  arguments: [
+                    .readMemorySegment(.explodedName(component: "count"), as: .long)
+                  ],
+                  withArena: false
+                ),
+                methodName: "toArray",
+                arguments: [
+                  .constant("ValueLayout.JAVA_BYTE")
+                ],
+                withArena: false
+              )
+        )
+
       case .genericParameter, .optional, .function, .existential, .opaque, .composite, .array:
         throw JavaTranslationError.unhandledType(swiftType)
       }

@@ -21,6 +21,9 @@ import SwiftSyntaxBuilder
 enum ConversionStep: Equatable {
   /// The value being lowered.
   case placeholder
+  
+  /// FIXME: Workaround for picking a specific placeholder value; We should resolve how method() works with lowered closures instead
+  case constant(String)
 
   /// A reference to a component in a value that has been exploded, such as
   /// a tuple element or part of a buffer pointer.
@@ -60,7 +63,11 @@ enum ConversionStep: Equatable {
 
   indirect case closureLowering(parameters: [ConversionStep], result: ConversionStep)
 
+  /// Access a member of the target, e.g. `<target>.member`
   indirect case member(ConversionStep, member: String)
+
+  /// Call a method with provided parameters.
+  indirect case method(base: String?, methodName: String?, arguments: [LabeledArgument<ConversionStep>])
 
   indirect case optionalChain(ConversionStep)
 
@@ -77,8 +84,12 @@ enum ConversionStep: Equatable {
       inner.placeholderCount
     case .initialize(_, arguments: let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
+    case .method(_, _, let arguments):
+      arguments.reduce(0) { $0 + $1.argument.placeholderCount }
     case .placeholder, .tupleExplode, .closureLowering:
       1
+    case .constant:
+      0
     case .tuplify(let elements), .aggregate(let elements, _):
       elements.reduce(0) { $0 + $1.placeholderCount }
     }
@@ -97,6 +108,9 @@ enum ConversionStep: Equatable {
     switch self {
     case .placeholder:
       return "\(raw: placeholder)"
+
+    case .constant(let name):
+      return "\(raw: name)"
 
     case .explodedComponent(let step, component: let component):
       return step.asExprSyntax(placeholder: "\(placeholder)_\(component)", bodyItems: &bodyItems)
@@ -161,6 +175,29 @@ enum ConversionStep: Equatable {
     case .member(let step, let member):
       let inner = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
       return "\(inner).\(raw: member)"
+
+    case .method(let base, let methodName, let arguments):
+      // TODO: this is duplicated, try to dedupe it a bit 
+      let renderedArguments: [String] = arguments.map { labeledArgument in
+        let argExpr = labeledArgument.argument.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
+        return LabeledExprSyntax(label: labeledArgument.label, expression: argExpr!).description
+      }
+
+      // FIXME: Should be able to use structured initializers here instead of splatting out text.
+      let renderedArgumentList = renderedArguments.joined(separator: ", ")
+
+      let methodApply: String =
+        if let methodName {
+          ".\(methodName)"
+        } else {
+          "" // this is equivalent to calling `base(...)`
+        }
+
+      if let base {
+        return "\(raw: base)\(raw: methodApply)(\(raw: renderedArgumentList))"
+      } else {
+        return "\(raw: methodApply)(\(raw: renderedArgumentList))"
+      }
 
     case .aggregate(let steps, let name):
       let toExplode: String

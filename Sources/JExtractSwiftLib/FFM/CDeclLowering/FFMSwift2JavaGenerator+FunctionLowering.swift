@@ -363,7 +363,6 @@ struct CdeclLowering {
         ),
       ]
       
-      // Initialize a UnsafeRawBufferPointer using the 'address' and 'count'
       let bufferPointerInit = ConversionStep.initialize(
         knownTypes.unsafeRawBufferPointer,
         arguments: [
@@ -565,6 +564,24 @@ struct CdeclLowering {
     }
   }
 
+  /// Create "out" parameter names when we're returning an array-like result.
+  fileprivate func makeBufferIndirectReturnParameters(_ outParameterName: String, isMutable: Bool) -> [SwiftParameter] {
+    [
+      SwiftParameter(
+        convention: .byValue,
+        parameterName: "\(outParameterName)_pointer",
+        type: knownTypes.unsafeMutablePointer(
+          .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+        )
+      ),
+      SwiftParameter(
+        convention: .byValue,
+        parameterName: "\(outParameterName)_count",
+        type: knownTypes.unsafeMutablePointer(knownTypes.int)
+      ),
+    ]
+  }
+
   /// Lower a Swift result type to cdecl out parameters and return type.
   ///
   /// - Parameters:
@@ -620,20 +637,7 @@ struct CdeclLowering {
           let isMutable = knownType == .unsafeMutableRawBufferPointer
           return LoweredResult(
             cdeclResultType: .void,
-            cdeclOutParameters: [
-              SwiftParameter(
-                convention: .byValue,
-                parameterName: "\(outParameterName)_pointer",
-                type: knownTypes.unsafeMutablePointer(
-                  .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
-                )
-              ),
-              SwiftParameter(
-                convention: .byValue,
-                parameterName: "\(outParameterName)_count",
-                type: knownTypes.unsafeMutablePointer(knownTypes.int)
-              ),
-            ],
+            cdeclOutParameters: makeBufferIndirectReturnParameters(outParameterName, isMutable: isMutable),
             conversion: .aggregate([
               .populatePointer(
                 name: "\(outParameterName)_pointer",
@@ -711,6 +715,41 @@ struct CdeclLowering {
         cdeclResultType: .void,
         cdeclOutParameters: parameters,
         conversion: .tupleExplode(conversions, name: outParameterName)
+      )
+    
+    case .array(let wrapped) where wrapped == knownTypes.uint8:
+      let resultName = "_result"
+
+      return LoweredResult(
+        cdeclResultType: .void, // we call into the _result_initialize instead
+        cdeclOutParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: "\(outParameterName)_initialize",
+            type: knownTypes.functionInitializeByteBuffer
+          )
+        ], 
+        conversion: .aggregate([
+          .method(base: resultName, methodName: "withUnsafeBufferPointer", arguments: [
+            .init(argument: 
+              .closureLowering(
+                parameters: [.placeholder],
+                 result: .method(
+                  base: "\(outParameterName)_initialize", 
+                  methodName: nil, // just `(...)` apply the closure
+                  arguments: [
+                    .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress")),
+                    .init(label: nil, argument: .member(.constant("_0"), member: "count")),
+                  ]
+                  // arguments: [
+                  //   .init(label: nil, argument: .member(.placeholder, member: "baseAddress")),
+                  //   .init(label: nil, argument: .member(.placeholder, member: "count")),
+                  // ]
+                )
+              )
+            )
+          ])
+        ], name: resultName)
       )
 
     case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array:
