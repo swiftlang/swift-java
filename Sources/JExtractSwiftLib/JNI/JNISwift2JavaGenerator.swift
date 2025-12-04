@@ -71,10 +71,6 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
     if translator.config.writeEmptyFiles ?? false {
       self.expectedOutputSwiftFileNames = Set(translator.inputs.compactMap { (input) -> String? in
-        // guard let filePathPart = input.path.split(separator: "/\(translator.swiftModuleName)/").last else {
-        //   return nil
-        // }
-        // return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
         guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
           return nil
         }

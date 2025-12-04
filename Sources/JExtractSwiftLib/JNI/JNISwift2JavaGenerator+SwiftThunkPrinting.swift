@@ -36,7 +36,6 @@ extension JNISwift2JavaGenerator {
     for expectedFileName in self.expectedOutputSwiftFileNames {
       logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
-
       var printer = CodePrinter()
       printer.print("// Empty file generated on purpose")
       _ = try printer.writeContents(

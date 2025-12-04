@@ -50,9 +50,6 @@ public struct SwiftToJava {
     log.info("Input paths = \(inputPaths)")
 
     let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
-    for f in allFiles {
-      log.warning("INPUT FILE: \(f) ->>>")
-    }
 
     // Register files to the translator.
     let fileManager = FileManager.default

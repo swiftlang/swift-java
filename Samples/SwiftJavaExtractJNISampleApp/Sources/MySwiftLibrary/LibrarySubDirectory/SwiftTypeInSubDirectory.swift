@@ -15,7 +15,7 @@
 public final class SwiftTypeInSubDirectory {
   public init() {}
 
-  public func hello() -> Int {
+  public func hello() -> Int64 {
     12
   }
 }

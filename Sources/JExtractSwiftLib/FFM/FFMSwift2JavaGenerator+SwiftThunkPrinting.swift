@@ -92,8 +92,6 @@ extension FFMSwift2JavaGenerator {
           javaPackagePath: nil,
           filename: filename) {
           log.info("Done writing Swift thunks to: \(outputFile.absoluteString)")
-          // log.info("REMOVE FROM: \(expectedOutputSwiftFileNames)")
-          // log.info("REMOVE FROM THE: \(filename)")
           self.expectedOutputSwiftFileNames.remove(filename)
         }
       } catch {
