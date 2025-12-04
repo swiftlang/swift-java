@@ -322,7 +322,7 @@ public enum LogLevel: String, ExpressibleByStringLiteral, Codable, Hashable {
 
 extension LogLevel {
   public init(from decoder: any Decoder) throws {
-    var container = try decoder.singleValueContainer()
+    let container = try decoder.singleValueContainer()
     let string = try container.decode(String.self)
     switch string {
     case "trace": self = .trace

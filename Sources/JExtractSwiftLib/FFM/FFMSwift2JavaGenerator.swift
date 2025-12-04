@@ -39,7 +39,10 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
-  var expectedOutputSwiftFiles: Set<String>
+  /// 
+  /// Since Swift files in SwiftPM builds needs to be unique, we use this fact to flatten paths into plain names here.
+  /// For uniqueness checking "did we write this file already", just checking the name should be sufficient.
+  var expectedOutputSwiftFileNames: Set<String>
 
   package init(
     config: Configuration,
@@ -57,19 +60,22 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     self.javaOutputDirectory = javaOutputDirectory
     self.lookupContext = translator.lookupContext
 
-    // If we are forced to write empty files, construct the expected outputs
+    // If we are forced to write empty files, construct the expected outputs.
+    // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
     if translator.config.writeEmptyFiles ?? false {
-      self.expectedOutputSwiftFiles = Set(translator.inputs.compactMap { (input) -> String? in
-        guard let filePathPart = input.path.split(separator: "/\(translator.swiftModuleName)/").last else {
+      self.expectedOutputSwiftFileNames = Set(translator.inputs.compactMap { (input) -> String? in
+        guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
           return nil
         }
-
-        return String(filePathPart.replacing(".swift", with: "+SwiftJava.swift"))
+        guard fileName.hasSuffix(".swift") else {
+          return nil
+        }
+        return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
       })
-      self.expectedOutputSwiftFiles.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
-      self.expectedOutputSwiftFiles.insert("Foundation+SwiftJava.swift")
+      self.expectedOutputSwiftFileNames.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
+      self.expectedOutputSwiftFileNames.insert("Foundation+SwiftJava.swift")
     } else {
-      self.expectedOutputSwiftFiles = []
+      self.expectedOutputSwiftFileNames = []
     }
   }
 

@@ -26,16 +26,15 @@ extension JNISwift2JavaGenerator {
   }
 
   package func writeSwiftExpectedEmptySources() throws {
-    let pendingFileCount = self.expectedOutputSwiftFiles.count
+    let pendingFileCount = self.expectedOutputSwiftFileNames.count
     guard pendingFileCount > 0 else {
       return // no need to write any empty files, yay
     }
-    
-    print("[swift-java] Write empty [\(self.expectedOutputSwiftFiles.count)] 'expected' files in: \(swiftOutputDirectory)/")
-    
-    for expectedFileName in self.expectedOutputSwiftFiles {
-      logger.debug("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
+    logger.info("[swift-java] Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
+
+    for expectedFileName in self.expectedOutputSwiftFileNames {
+      logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
       var printer = CodePrinter()
       printer.print("// Empty file generated on purpose")
@@ -61,7 +60,7 @@ extension JNISwift2JavaGenerator {
         filename: moduleFilename
       ) {
         logger.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
-        self.expectedOutputSwiftFiles.remove(moduleFilename)
+        self.expectedOutputSwiftFileNames.remove(moduleFilename)
       }
 
       // === All types
@@ -96,7 +95,7 @@ extension JNISwift2JavaGenerator {
             javaPackagePath: nil,
             filename: filename) {
             logger.info("Done writing Swift thunks to: \(outputFile.absoluteString)")
-            self.expectedOutputSwiftFiles.remove(filename)
+            self.expectedOutputSwiftFileNames.remove(filename)
           }
         } catch {
           logger.warning("Failed to write to Swift thunks: \(filename), error: \(error)")
