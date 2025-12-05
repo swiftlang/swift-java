@@ -63,12 +63,25 @@ extension FFMSwift2JavaGenerator {
     /// 'JavaParameter.name' is the suffix for the receiver variable names. For example
     ///
     ///   var _result_pointer = MemorySegment.allocate(...)
-    ///   var _result_count = MemroySegment.allocate(...)
+    ///   var _result_count = MemorySegment.allocate(...)
     ///   downCall(_result_pointer, _result_count)
     ///   return constructResult(_result_pointer, _result_count)
     ///
     /// This case, there're two out parameter, named '_pointer' and '_count'.
     var outParameters: [JavaParameter]
+
+    /// Similar to out parameters, but instead of parameters we "fill in" in native,
+    /// we create an upcall handle before the downcall and pass it to the downcall.
+    /// Swift then invokes the upcall in order to populate some data in Java (our callback).
+    /// 
+    /// After the call is made, we may need to further extact the result from the called-back-into
+    /// Java function class, for example:
+    /// 
+    ///   var _result_initialize = new $result_initialize.Function();
+    ///   downCall($result_initialize.toUpcallHandle(_result_initialize, arena))
+    ///   return _result_initialize.result
+    /// 
+    var outCallback: OutCallback?
 
     /// Describes how to construct the Java result from the foreign function return
     /// value and/or the out parameters.
@@ -298,7 +311,7 @@ extension FFMSwift2JavaGenerator {
         }
 
       // Result.
-      let result = try self.translate(
+      let result = try self.translateResult(
         swiftResult: swiftSignature.result,
         loweredResult: loweredFunctionSignature.result
       )
@@ -612,7 +625,7 @@ extension FFMSwift2JavaGenerator {
     }
 
     /// Translate a Swift API result to the user-facing Java API result.
-    func translate(
+    func translateResult(
       swiftResult: SwiftResult,
       loweredResult: LoweredResult
     ) throws -> TranslatedResult {
@@ -719,26 +732,31 @@ extension FFMSwift2JavaGenerator {
           javaResultType: 
             .array(.byte), 
             annotations: [.unsigned], 
-            outParameters: [
-              JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
-              JavaParameter(name: "count", type: .long),
-            ], 
-            conversion: 
-              .method(
-                .method(
-                  .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
-                  methodName: "reinterpret",
-                  arguments: [
-                    .readMemorySegment(.explodedName(component: "count"), as: .long)
-                  ],
-                  withArena: false
-                ),
-                methodName: "toArray",
-                arguments: [
-                  .constant("ValueLayout.JAVA_BYTE")
-                ],
-                withArena: false
-              )
+            outParameters: [], // no out parameters, but we do an "out" callback
+            outCallback: OutCallback(
+              name: "$_result_initialize",
+              members: [
+                "byte[] result = null"
+              ],
+              parameters: [
+                JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+                JavaParameter(name: "count", type: .long),
+              ],
+              cFunc: CFunction(
+                resultType: .void,
+                name: "apply", 
+                parameters: [
+                  CParameter(type: .pointer(.void)),
+                  CParameter(type: .integral(.size_t)),
+                ], 
+                isVariadic: false),
+              body: "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
+            ),
+            conversion: .initializeResultWithUpcall([
+              .constant("var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function()"),
+              .placeholderForDowncall, // perform the downcall here
+            ],
+            extractResult: .property(.constant("_result_initialize"), propertyName: "result"))
         )
 
       case .genericParameter, .optional, .function, .existential, .opaque, .composite, .array:
@@ -761,6 +779,10 @@ extension FFMSwift2JavaGenerator {
   enum JavaConversionStep {
     /// The input
     case placeholder
+    
+    /// The "downcall", e.g. `swiftjava_SwiftModule_returnArray.call(...)`.
+    /// This can be used in combination with aggregate conversion steps to prepare a setup and processing of the downcall.
+    case placeholderForDowncall
 
     /// The temporary `arena$` that is necessary to complete the conversion steps.
     case temporaryArena
@@ -770,6 +792,12 @@ extension FFMSwift2JavaGenerator {
 
     /// A fixed value
     case constant(String)
+
+    /// The result of the function will be initialized with a callback to Java (an upcall).
+    /// 
+    /// The `extractResult` is used for the actual `return ...` statement, because we need to extract 
+    /// the return value from the called back into class, e.g. `return _result_initialize.result`.
+    indirect case initializeResultWithUpcall([JavaConversionStep], extractResult: JavaConversionStep)
 
     /// 'value.$memorySegment()'
     indirect case swiftValueSelfSegment(JavaConversionStep)
@@ -786,6 +814,7 @@ extension FFMSwift2JavaGenerator {
       .call(step, base: nil, function: function, withArena: withArena)
     }
 
+    // TODO: just use call instead?
     /// Apply a method on the placeholder.
     /// If `withArena` is true, `arena$` argument is added.
     indirect case method(JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)

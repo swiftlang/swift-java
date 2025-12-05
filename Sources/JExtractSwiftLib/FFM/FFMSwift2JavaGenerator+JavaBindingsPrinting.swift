@@ -63,7 +63,11 @@ extension FFMSwift2JavaGenerator {
         """
       )
       printJavaBindingDowncallMethod(&printer, cFunc)
-      printParameterDescriptorClasses(&printer, cFunc)
+      if let outCallback = translated.translatedSignature.result.outCallback {
+        printUpcallParameterDescriptorClasses(&printer, outCallback)
+      } else { // FIXME: not an "else"
+        printParameterDescriptorClasses(&printer, cFunc)
+      }
     }
   }
 
@@ -147,11 +151,19 @@ extension FFMSwift2JavaGenerator {
       switch param.type {
       case .pointer(.function):
         let name = "$\(param.name!)"
-        printFunctionPointerParameterDescriptorClass(&printer, name, param.type)
+        printFunctionPointerParameterDescriptorClass(&printer, name, param.type, impl: nil)
       default:
         continue
       }
     }
+  }  
+  
+  func printUpcallParameterDescriptorClasses(
+    _ printer: inout CodePrinter,
+    _ outCallback: OutCallback
+  ) {
+    let name = outCallback.name
+    printFunctionPointerParameterDescriptorClass(&printer, name, outCallback.cFunc.functionType, impl: outCallback)
   }
 
   /// Print a class describing a function pointer parameter type.
@@ -169,13 +181,25 @@ extension FFMSwift2JavaGenerator {
   ///     }
   ///   }
   ///   ```
+  /// 
+  /// If a `functionBody` is provided the `Function` becomes a `final static class`,
+  /// with the specified implementation as the implementation of the `apply` method.
   func printFunctionPointerParameterDescriptorClass(
     _ printer: inout CodePrinter,
     _ name: String,
-    _ cType: CType
+    _ cType: CType,
+    impl: OutCallback?
   ) {
-    guard case .pointer(.function(let cResultType, let cParameterTypes, variadic: false)) = cType else {
-      preconditionFailure("must be a C function pointer type; name=\(name), cType=\(cType)")
+    let cResultType: CType
+    let cParameterTypes: [CType]
+    if case .pointer(.function(let _cResultType, let _cParameterTypes, variadic: false)) = cType {
+      cResultType = _cResultType 
+      cParameterTypes = _cParameterTypes
+    } else if case .function(let _cResultType, let _cParameterTypes, variadic: false) = cType {
+      cResultType = _cResultType 
+      cParameterTypes = _cParameterTypes
+    } else {
+      fatalError("must be a C function (pointer) type; name=\(name), cType=\(cType)")
     }
 
     let cParams = cParameterTypes.enumerated().map { i, ty in
@@ -193,14 +217,27 @@ extension FFMSwift2JavaGenerator {
       private static class \(name)
       """
     ) { printer in
-      printer.print(
-        """
-        @FunctionalInterface
-        public interface Function {
-          \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
-        }
-        """
-      )
+      if let impl {
+        printer.print(
+          """
+          public final static class Function {
+            \(impl.members.joinedJavaStatements(indent: 2))
+            \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", "))) {
+              \(impl.body)
+            }
+          }
+          """
+        )
+      } else {
+        printer.print(
+          """
+          @FunctionalInterface
+          public interface Function {
+            \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
+          }
+          """
+        )
+      }
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
       printer.print(
         """
@@ -425,20 +462,37 @@ extension FFMSwift2JavaGenerator {
 
     //=== Part 4: Convert the return value.
     if translatedSignature.result.javaResultType == .void {
+      // Trivial downcall with no conversion needed, no callback either
       printer.print("\(downCall);")
     } else {
       let placeholder: String
-      if translatedSignature.result.outParameters.isEmpty {
+      let placeholderForDowncall: String?
+      
+      if let outCallback = translatedSignature.result.outCallback {
+        print("[swift] has out callback")
+        placeholder = "\(outCallback.name)" // the result will be read out from the _result_initialize java class
+        placeholderForDowncall = "\(downCall)"
+        print("[swift] has out callback = placeholder \(placeholder)")
+        print("[swift] has out callback = placeholderForDowncall \(placeholderForDowncall)")
+      } else if translatedSignature.result.outParameters.isEmpty {
         placeholder = downCall
+        placeholderForDowncall = nil
       } else {
         // FIXME: Support cdecl thunk returning a value while populating the out parameters.
         printer.print("\(downCall);")
+        placeholderForDowncall = nil
         placeholder = "_result"
       }
-      let result = translatedSignature.result.conversion.render(&printer, placeholder)
+      let result = translatedSignature.result.conversion.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
 
       if translatedSignature.result.javaResultType != .void {
-        printer.print("return \(result);")
+        switch translatedSignature.result.conversion {
+        case .initializeResultWithUpcall(_, let extractResult):
+          printer.print("\(result);") // the result in the callback situation is a series of setup steps
+          printer.print("return \(extractResult.render(&printer, placeholder));") // extract the actual result
+        default:
+          printer.print("return \(result);")
+        }
       } else {
         printer.print("\(result);")
       }
@@ -465,12 +519,15 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {
-    case .placeholder, .explodedName, .constant, .readMemorySegment:
+    case .placeholder, .placeholderForDowncall, .explodedName, .constant, .readMemorySegment:
       return false
     case .constructSwiftValue, .wrapMemoryAddressUnsafe:
       return true
     case .temporaryArena:
       return true
+
+    case .initializeResultWithUpcall(let steps, let result):
+      return steps.contains { $0.requiresSwiftArena } || result.requiresSwiftArena
 
     case .call(let inner, let base, _, _):
       return inner.requiresSwiftArena || (base?.requiresSwiftArena == true)
@@ -490,11 +547,13 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   /// Whether the conversion uses temporary Arena.
   var requiresTemporaryArena: Bool {
     switch self {
-    case .placeholder, .explodedName, .constant:
+    case .placeholder, .placeholderForDowncall, .explodedName, .constant:
       return false
     case .temporaryArena:
       return true
     case .readMemorySegment:
+      return true
+    case .initializeResultWithUpcall:
       return true
     case .cast(let inner, _), 
          .construct(let inner, _), 
@@ -514,12 +573,20 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   }
 
   /// Returns the conversion string applied to the placeholder.
-  func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+  func render(_ printer: inout CodePrinter, _ placeholder: String, placeholderForDowncall: String? = nil) -> String {
+    print("render: \(self)")
     // NOTE: 'printer' is used if the conversion wants to cause side-effects.
     // E.g. storing a temporary values into a variable.
     switch self {
     case .placeholder:
       return placeholder
+
+    case .placeholderForDowncall:
+      if let placeholderForDowncall {
+        return "\(placeholderForDowncall)"
+      } else {
+        return "/*placeholderForDowncall undefined!*/"
+      }
 
     case .explodedName(let component):
       return "\(placeholder)_\(component)"
@@ -529,6 +596,15 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     
     case .temporaryArena:
       return "arena$"
+
+    case .initializeResultWithUpcall(let steps, _):
+      return steps.map { step in 
+        var printer = CodePrinter()
+        var out = ""
+        out += step.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
+        out += printer.contents
+        return out 
+      }.joined(separator: ";\n")
 
     case .call(let inner, let base, let function, let withArena):
       let inner = inner.render(&printer, placeholder)
@@ -541,6 +617,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
         }
       return "\(baseStr)\(function)(\(inner)\(arenaArg))"
 
+    // TODO: deduplicate with 'method'
     case .method(let inner, let methodName, let arguments, let withArena):
       let inner = inner.render(&printer, placeholder)
       let args = arguments.map { $0.render(&printer, placeholder) }

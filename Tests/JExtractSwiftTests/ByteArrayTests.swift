@@ -91,69 +91,68 @@ final class ByteArrayTests {
         [
           // """
           // /**
-          //  * {snippet lang=c :
-          //  * void (*)(void)
+          //  * {@snippet lang=c :
+          //  * void swiftjava_SwiftModule_returnArray(void (*_result_initialize)(const void *, ptrdiff_t))
           //  * }
           //  */
-          // private static class $callback {
-          //   @FunctionalInterface
-          //   public interface Function {
-          //     void apply();
+          // private static class swiftjava_SwiftModule_returnArray {
+          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+          //     /* _result_initialize: */SwiftValueLayout.SWIFT_POINTER
+          //   );
+          //   private static final MemorySegment ADDR =
+          //     SwiftModule.findOrThrow("swiftjava_SwiftModule_returnArray");
+          //   private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          //   public static void call(java.lang.foreign.MemorySegment _result_initialize) {
+          //     try {
+          //       if (CallTraces.TRACE_DOWNCALLS) {
+          //         CallTraces.traceDowncall(_result_initialize);
+          //       }
+          //       HANDLE.invokeExact(_result_initialize);
+          //     } catch (Throwable ex$) {
+          //       throw new AssertionError("should not reach here", ex$);
+          //     }
           //   }
-          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
+          // }
+          // """,
+          // """
+          // /**
+          //  * {snippet lang=c :
+          //   * void (*)(const void *, ptrdiff_t)
+          //   * }
+          //   */
+          // private static class $_result_initialize {
+          //   final static class Function {
+          //     byte[] result;
+          //     void apply(java.lang.foreign.MemorySegment _0, long _1) {
+          //       this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE);
+          //     }
+          //   }
+          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+          //     /* _0: */SwiftValueLayout.SWIFT_POINTER,
+          //     /* _1: */SwiftValueLayout.SWIFT_INT
+          //   );
           //   private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
           //   private static MemorySegment toUpcallStub(Function fi, Arena arena) {
           //     return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
           //   }
           // }
           // """,
-          // """
-          // public static class _result_initialize {
-          //   @FunctionalInterface
-          //   public interface callback extends swiftjava___FakeModule_callMe_callback.$callback.Function {}
-          //   private static MemorySegment $toUpcallStub(callback fi, Arena arena) {
-          //     return swiftjava___FakeModule_callMe_callback.$callback.toUpcallStub(fi, arena);
-          //   }
-          // }
-          // """,
           """
           /**
            * Downcall to Swift:
-           * {@snippet lang=swift :
+           * {@snippet lang = swift:
            * public func returnArray() -> [UInt8]
-           * }
+           *}
            */
-          @Unsigned
           public static byte[] returnArray() {
-            try(var arena$ = Arena.ofConfined()) {
-              _result_initialize callback = (buf, count) -> {
-
-              };
-              swiftjava___FakeModule_returnArray.call(_result_initialize.$toUpcallStub(callback, arena$));
-              swiftjava_SwiftModule_returnArray.call(_result_pointer, _result_count);
+            try (var arena$ = Arena.ofAuto()) {
+              var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function();
+              swiftjava_SwiftModule_returnArray.call(swiftjava_SwiftModule_returnArray.$_result_initialize.toUpcallStub(_result_initialize, arena$));
+              return _result_initialize.result;
             }
           }
           """
         ],
-        // [
-        //   """
-        //   /**
-        //    * Downcall to Swift:
-        //    * {@snippet lang=swift :
-        //    * public func returnArray() -> [UInt8]
-        //    * }
-        //    */
-        //   @Unsigned
-        //   public static byte[] returnArray() {
-        //     try(var arena$ = Arena.ofConfined()) {
-        //       MemorySegment _result_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
-        //       MemorySegment _result_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
-        //       swiftjava_SwiftModule_returnArray.call(_result_pointer, _result_count);
-        //       return _result_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(_result_count.get(SwiftValueLayout.SWIFT_INT64, 0)).toArray(ValueLayout.JAVA_BYTE);
-        //     }
-        //   }
-        //   """
-        // ],
         /* expected Swift chunks */
         [
           """
