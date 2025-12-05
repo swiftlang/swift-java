@@ -28,6 +28,11 @@ public protocol CallbackProtocol {
   func withObject(_ input: MySwiftClass) -> MySwiftClass
   func withOptionalInt64(_ input: Int64?) -> Int64?
   func withOptionalObject(_ input: MySwiftClass?) -> Optional<MySwiftClass>
+  func withInt64Array(_ input: [Int64]) -> [Int64]
+  func withStringArray(_ input: [String]) -> [String]
+  func withObjectArray(_ input: [MySwiftClass]) -> [MySwiftClass]
+  func successfulThrowingFunction() throws
+  func throwingFunction() throws
 }
 
 public struct CallbackOutput {
@@ -43,6 +48,21 @@ public struct CallbackOutput {
   public let object: MySwiftClass
   public let optionalInt64: Int64?
   public let optionalObject: MySwiftClass?
+  public let int64Array: [Int64]
+  public let stringArray: [String]
+  public let objectArray: [MySwiftClass]
+}
+
+public func callProtocolVoid(_ callbacks: some CallbackProtocol) {
+  callbacks.withVoid();
+}
+
+public func callProtocolWithFailedThrowingFunction(_ callbacks: some CallbackProtocol) throws {
+  try callbacks.throwingFunction();
+}
+
+public func callProtocolWithSuccessfulThrowingFunction(_ callbacks: some CallbackProtocol) throws {
+  try callbacks.successfulThrowingFunction();
 }
 
 public func outputCallbacks(
@@ -58,7 +78,10 @@ public func outputCallbacks(
   string: String,
   object: MySwiftClass,
   optionalInt64: Int64?,
-  optionalObject: MySwiftClass?
+  optionalObject: MySwiftClass?,
+  int64Array: [Int64],
+  stringArray: [String],
+  objectArray: [MySwiftClass]
 ) -> CallbackOutput {
   return CallbackOutput(
     bool: callbacks.withBool(bool),
@@ -72,6 +95,9 @@ public func outputCallbacks(
     string: callbacks.withString(string),
     object: callbacks.withObject(object),
     optionalInt64: callbacks.withOptionalInt64(optionalInt64),
-    optionalObject: callbacks.withOptionalObject(optionalObject)
+    optionalObject: callbacks.withOptionalObject(optionalObject),
+    int64Array: callbacks.withInt64Array(int64Array),
+    stringArray: callbacks.withStringArray(stringArray),
+    objectArray: callbacks.withObjectArray(objectArray)
   )
 }

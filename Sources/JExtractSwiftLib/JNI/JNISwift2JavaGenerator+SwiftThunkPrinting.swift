@@ -152,7 +152,8 @@ extension JNISwift2JavaGenerator {
         conversion.render(&printer, param.parameterName!)
       }
 
-      let javaUpcall = "\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+      let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
+      let javaUpcall = "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
 
       let resultType = function.originalFunctionSignature.result.type
       let result = function.resultConversion.render(&printer, javaUpcall)
