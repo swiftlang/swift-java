@@ -182,8 +182,7 @@ extension FFMSwift2JavaGenerator {
   ///   }
   ///   ```
   /// 
-  /// If a `functionBody` is provided the `Function` becomes a `final static class`,
-  /// with the specified implementation as the implementation of the `apply` method.
+  /// If a `functionBody` is provided, a `Function$Impl` class will be emitted as well.
   func printFunctionPointerParameterDescriptorClass(
     _ printer: inout CodePrinter,
     _ name: String,
@@ -217,27 +216,28 @@ extension FFMSwift2JavaGenerator {
       private static class \(name)
       """
     ) { printer in
+      printer.print(
+        """
+        @FunctionalInterface
+        public interface Function {
+          \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
+        }
+        """
+      )
+      
       if let impl {
         printer.print(
           """
-          public final static class Function {
+          public final static class Function$Impl implements Function {
             \(impl.members.joinedJavaStatements(indent: 2))
-            \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", "))) {
+            public \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", "))) {
               \(impl.body)
             }
           }
           """
         )
-      } else {
-        printer.print(
-          """
-          @FunctionalInterface
-          public interface Function {
-            \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
-          }
-          """
-        )
-      }
+      } 
+
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
       printer.print(
         """
@@ -456,19 +456,20 @@ extension FFMSwift2JavaGenerator {
       downCallArguments.append(varName)
     }
 
+    let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
+    
     if let outCallback = translatedSignature.result.outCallback {
       let funcName = outCallback.name
       assert(funcName.first == "$", "OutCallback names must start with $")
       let varName = funcName.dropFirst()
       downCallArguments.append(
         """
-        swiftjava_SwiftModule_returnArray.\(outCallback.name).toUpcallStub(\(varName), arena$)
+        \(thunkName).\(outCallback.name).toUpcallStub(\(varName), arena$)
         """
       )
     }
 
     //=== Part 3: Downcall.
-    let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
@@ -527,7 +528,9 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   /// Whether the conversion uses SwiftArena.
   var requiresSwiftArena: Bool {
     switch self {
-    case .placeholder, .placeholderForDowncall, .explodedName, .constant, .readMemorySegment:
+    case .placeholder, .placeholderForDowncall, .placeholderForSwiftThunkName:
+      return false
+    case .explodedName, .constant, .readMemorySegment, .javaNew:
       return false
     case .constructSwiftValue, .wrapMemoryAddressUnsafe:
       return true
@@ -536,6 +539,8 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     case .initializeResultWithUpcall(let steps, let result):
       return steps.contains { $0.requiresSwiftArena } || result.requiresSwiftArena
+    case .introduceVariable(_, let value):
+      return value.requiresSwiftArena
 
     case .call(let inner, let base, _, _):
       return inner.requiresSwiftArena || (base?.requiresSwiftArena == true)
@@ -547,7 +552,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
          .swiftValueSelfSegment(let inner):
       return inner.requiresSwiftArena
 
-    case .commaSeparated(let list):
+    case .commaSeparated(let list, _):
       return list.contains(where: { $0.requiresSwiftArena })
     }
   }
@@ -555,7 +560,9 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   /// Whether the conversion uses temporary Arena.
   var requiresTemporaryArena: Bool {
     switch self {
-    case .placeholder, .placeholderForDowncall, .explodedName, .constant:
+    case .placeholder, .placeholderForDowncall, .placeholderForSwiftThunkName:
+      return false
+    case .explodedName, .constant, .javaNew:
       return false
     case .temporaryArena:
       return true
@@ -563,6 +570,8 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return true
     case .initializeResultWithUpcall:
       return true
+    case .introduceVariable(_, let value):
+      return value.requiresTemporaryArena
     case .cast(let inner, _), 
          .construct(let inner, _), 
          .constructSwiftValue(let inner, _), 
@@ -575,7 +584,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return withArena || inner.requiresTemporaryArena || args.contains(where: { $0.requiresTemporaryArena })
     case .property(let inner, _):
       return inner.requiresTemporaryArena
-    case .commaSeparated(let list):
+    case .commaSeparated(let list, _):
       return list.contains(where: { $0.requiresTemporaryArena })
     }
   }
@@ -594,6 +603,16 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       } else {
         return "/*placeholderForDowncall undefined!*/"
       }
+    case .placeholderForSwiftThunkName:
+      if let placeholderForDowncall {
+        let downcall = "\(placeholderForDowncall)"
+        return String(downcall[..<(downcall.firstIndex(of: ".") ?? downcall.endIndex)]) // . separates thunk name from the `.call`
+      } else {
+        return "/*placeholderForDowncall undefined!*/"
+      }
+
+    case .temporaryArena:
+      return "arena$"
 
     case .explodedName(let component):
       return "\(placeholder)_\(component)"
@@ -601,10 +620,11 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     case .swiftValueSelfSegment:
       return "\(placeholder).$memorySegment()"
     
-    case .temporaryArena:
-      return "arena$"
+    case .javaNew(let value):
+      return "new \(value.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall))"
 
     case .initializeResultWithUpcall(let steps, _):
+      // TODO: could we use the printing to introduce the upcall handle instead?
       return steps.map { step in 
         var printer = CodePrinter()
         var out = ""
@@ -626,33 +646,39 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     // TODO: deduplicate with 'method'
     case .method(let inner, let methodName, let arguments, let withArena):
-      let inner = inner.render(&printer, placeholder)
-      let args = arguments.map { $0.render(&printer, placeholder) }
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
+      let args = arguments.map { $0.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall) }
       let argsStr = (args + (withArena ? ["arena$"] : [])).joined(separator: " ,")
       return "\(inner).\(methodName)(\(argsStr))"
 
     case .property(let inner, let propertyName):
-      let inner = inner.render(&printer, placeholder)
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
       return "\(inner).\(propertyName)"
 
     case .constructSwiftValue(let inner, let javaType):
-      let inner = inner.render(&printer, placeholder)
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
       return "new \(javaType.className!)(\(inner), swiftArena$)"
 
     case .wrapMemoryAddressUnsafe(let inner, let javaType):
-      let inner = inner.render(&printer, placeholder)
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
       return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
 
     case .construct(let inner, let javaType):
-      let inner = inner.render(&printer, placeholder)
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
       return "new \(javaType)(\(inner))"
+    
+    case .introduceVariable(let name, let value):
+      let value = value.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
+      return "var \(name) = \(value);"
 
     case .cast(let inner, let javaType):
-      let inner = inner.render(&printer, placeholder)
+      let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
       return "(\(javaType)) \(inner)"
 
-    case .commaSeparated(let list):
-      return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
+    case .commaSeparated(let list, let separator):
+      return list.map({ 
+        $0.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall) 
+      }).joined(separator: separator)
 
     case .constant(let value):
       return value

@@ -41,8 +41,6 @@ public class FFMArraysTest {
             var bytesCopy = arena.allocateFrom(ValueLayout.JAVA_BYTE, bytes);
             var swiftSideSum = MySwiftLibrary.sumAllByteArrayElements(bytesCopy, bytes.length);
 
-            System.out.println("swiftSideSum = " + swiftSideSum);
-
             int javaSideSum = IntStream.range(0, bytes.length).map(i -> bytes[i]).sum();
             assertEquals(javaSideSum, swiftSideSum);
         }
@@ -55,9 +53,15 @@ public class FFMArraysTest {
 
         var swiftSideSum = MySwiftLibrary.sumAllByteArrayElements(bytes);
 
-        System.out.println("swiftSideSum = " + swiftSideSum);
-
         int javaSideSum = IntStream.range(0, bytes.length).map(i -> bytes[i]).sum();
         assertEquals(javaSideSum, swiftSideSum);
+    }
+
+    @Test
+    void test_getArray() {
+        AtomicLong bufferSize = new AtomicLong();
+        byte[] javaBytes = MySwiftLibrary.getArray(); // automatically converted [UInt8] to byte[]
+
+        assertArrayEquals(new byte[]{1, 2, 3}, javaBytes);
     }
 }

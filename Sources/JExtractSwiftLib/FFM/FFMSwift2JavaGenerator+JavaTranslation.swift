@@ -753,7 +753,15 @@ extension FFMSwift2JavaGenerator {
               body: "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
             ),
             conversion: .initializeResultWithUpcall([
-              .constant("var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function()"),
+              .introduceVariable(
+                name: "_result_initialize", 
+                initializeWith: .javaNew(.commaSeparated([
+                  // We need to refer to the nested class that is created for this function.
+                  // The class that contains all the related functional interfaces is called the same
+                  // as the downcall function, so we use the thunk name to find this class/
+                  .placeholderForSwiftThunkName, .constant("$_result_initialize.Function$Impl()")
+                ], separator: "."))),
+              // .constant("var  = new \(.placeholderForDowncallThunkName).."),
               .placeholderForDowncall, // perform the downcall here
             ],
             extractResult: .property(.constant("_result_initialize"), propertyName: "result"))
@@ -783,8 +791,16 @@ extension FFMSwift2JavaGenerator {
     /// The "downcall", e.g. `swiftjava_SwiftModule_returnArray.call(...)`.
     /// This can be used in combination with aggregate conversion steps to prepare a setup and processing of the downcall.
     case placeholderForDowncall
+    
+    /// Placeholder for Swift thunk name, e.g. "swiftjava_SwiftModule_returnArray".
+    /// 
+    /// This is derived from the placeholderForDowncall substitution - could be done more cleanly, 
+    /// however this has the benefit of not needing to pass the name substituion separately.
+    case placeholderForSwiftThunkName
 
     /// The temporary `arena$` that is necessary to complete the conversion steps.
+    /// 
+    /// This is distinct from just a constant 'arena$' string, since it forces the creation of a temporary arena.
     case temporaryArena
 
     /// The input exploded into components.
@@ -814,7 +830,7 @@ extension FFMSwift2JavaGenerator {
       .call(step, base: nil, function: function, withArena: withArena)
     }
 
-    // TODO: just use call instead?
+    // TODO: just use make call more powerful and use it instead?
     /// Apply a method on the placeholder.
     /// If `withArena` is true, `arena$` argument is added.
     indirect case method(JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)
@@ -826,17 +842,27 @@ extension FFMSwift2JavaGenerator {
     /// Call 'new \(Type)(\(placeholder), swiftArena$)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
+    /// Construct the type using the placeholder as arguments.
+    indirect case construct(JavaConversionStep, JavaType)
+    
     /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
     indirect case wrapMemoryAddressUnsafe(JavaConversionStep, JavaType)
 
-    /// Construct the type using the placeholder as arguments.
-    indirect case construct(JavaConversionStep, JavaType)
+    /// Introduce a local variable, e.g. `var result = new Something()`
+    indirect case introduceVariable(name: String, initializeWith: JavaConversionStep)
 
     /// Casting the placeholder to the certain type.
     indirect case cast(JavaConversionStep, JavaType)
+    
+    /// Prefix the conversion step with a java `new`.
+    /// 
+    /// This is useful if constructing the value is complex and we use
+    /// a combination of separated values and constants to do so; Generally prefer using `construct`
+    /// if you only want to construct a "wrapper" for the current `.placeholder`.
+    indirect case javaNew(JavaConversionStep)
 
     /// Convert the results of the inner steps to a comma separated list.
-    indirect case commaSeparated([JavaConversionStep])
+    indirect case commaSeparated([JavaConversionStep], separator: String = ", ")
 
     /// Refer an exploded argument suffixed with `_\(name)`.
     indirect case readMemorySegment(JavaConversionStep, as: JavaType)

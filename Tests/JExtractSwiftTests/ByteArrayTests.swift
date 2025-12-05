@@ -96,9 +96,13 @@ final class ByteArrayTests {
            * }
            */
           private static class $_result_initialize {
-            public final static class Function {
+            @FunctionalInterface
+            public interface Function {
+              void apply(java.lang.foreign.MemorySegment _0, long _1);
+            }
+            public final static class Function$Impl implements Function {
               byte[] result = null;
-              void apply(java.lang.foreign.MemorySegment _0, long _1) {
+              public void apply(java.lang.foreign.MemorySegment _0, long _1) {
                 this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE);
               }
             }
@@ -122,7 +126,7 @@ final class ByteArrayTests {
           @Unsigned
           public static byte[] returnArray() {
             try(var arena$ = Arena.ofConfined()) {
-              var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function();
+              var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function$Impl();
               swiftjava_SwiftModule_returnArray.call(swiftjava_SwiftModule_returnArray.$_result_initialize.toUpcallStub(_result_initialize, arena$));
               return _result_initialize.result;
             }
@@ -136,7 +140,7 @@ final class ByteArrayTests {
           public func swiftjava_SwiftModule_returnArray(_ _result_initialize: @convention(c) (UnsafeRawPointer, Int) -> ()) {
             let _result = returnArray()
             _result.withUnsafeBufferPointer({ (_0) in
-              return _result_initialize(_0.baseAddress, _0.count)
+              return _result_initialize(_0.baseAddress!, _0.count)
             })
           }
           """

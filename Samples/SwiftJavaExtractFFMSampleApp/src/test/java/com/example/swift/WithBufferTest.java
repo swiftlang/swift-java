@@ -39,11 +39,4 @@ public class WithBufferTest {
         assertEquals(124, bufferSize.get());
     }
 
-    @Test
-    void test_getArray() {
-        AtomicLong bufferSize = new AtomicLong();
-        byte[] javaBytes = MySwiftLibrary.getArray()
-
-        assertEquals({1, 2, 3}, bufferSize.get());
-    }
 }
