@@ -582,7 +582,6 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
   /// Returns the conversion string applied to the placeholder.
   func render(_ printer: inout CodePrinter, _ placeholder: String, placeholderForDowncall: String? = nil) -> String {
-    print("render: \(self)")
     // NOTE: 'printer' is used if the conversion wants to cause side-effects.
     // E.g. storing a temporary values into a variable.
     switch self {

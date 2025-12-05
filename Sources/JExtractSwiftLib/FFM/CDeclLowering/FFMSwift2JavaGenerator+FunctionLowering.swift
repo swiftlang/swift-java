@@ -738,13 +738,9 @@ struct CdeclLowering {
                   base: "\(outParameterName)_initialize", 
                   methodName: nil, // just `(...)` apply the closure
                   arguments: [
-                    .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress")),
+                    .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
                     .init(label: nil, argument: .member(.constant("_0"), member: "count")),
                   ]
-                  // arguments: [
-                  //   .init(label: nil, argument: .member(.placeholder, member: "baseAddress")),
-                  //   .init(label: nil, argument: .member(.placeholder, member: "count")),
-                  // ]
                 )
               )
             )
