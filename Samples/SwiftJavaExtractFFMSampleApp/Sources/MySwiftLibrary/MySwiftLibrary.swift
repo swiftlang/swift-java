@@ -80,13 +80,6 @@ public func returnSwiftArray() -> [UInt8] {
   return [1, 2, 3, 4]
 }
 
-// public func swiftjava_MySwiftLibrary_getArray(_ _result_initialize: (UnsafeMutablePointer<UnsafeRawPointer?>, UnsafeMutablePointer<Int>) -> ()) {
-//   let _result = returnSwiftArray()
-//   _result.withUnsafeBufferPointer { buf in
-//     _result_initialize(buf.baseAddress, buf.count)
-//   }
-// }
-
 public func withArray(body: ([UInt8]) -> Void) {
   body([1, 2, 3])
 }

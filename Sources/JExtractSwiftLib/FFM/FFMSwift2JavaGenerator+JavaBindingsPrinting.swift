@@ -456,6 +456,17 @@ extension FFMSwift2JavaGenerator {
       downCallArguments.append(varName)
     }
 
+    if let outCallback = translatedSignature.result.outCallback {
+      let funcName = outCallback.name
+      assert(funcName.first == "$", "OutCallback names must start with $")
+      let varName = funcName.dropFirst()
+      downCallArguments.append(
+        """
+        swiftjava_SwiftModule_returnArray.\(outCallback.name).toUpcallStub(\(varName), arena$)
+        """
+      )
+    }
+
     //=== Part 3: Downcall.
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
@@ -469,11 +480,8 @@ extension FFMSwift2JavaGenerator {
       let placeholderForDowncall: String?
       
       if let outCallback = translatedSignature.result.outCallback {
-        print("[swift] has out callback")
         placeholder = "\(outCallback.name)" // the result will be read out from the _result_initialize java class
         placeholderForDowncall = "\(downCall)"
-        print("[swift] has out callback = placeholder \(placeholder)")
-        print("[swift] has out callback = placeholderForDowncall \(placeholderForDowncall)")
       } else if translatedSignature.result.outParameters.isEmpty {
         placeholder = downCall
         placeholderForDowncall = nil

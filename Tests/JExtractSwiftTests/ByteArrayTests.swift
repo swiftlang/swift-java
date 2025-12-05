@@ -89,69 +89,45 @@ final class ByteArrayTests {
         JExtractGenerationMode.ffm,
         /* expected Java chunks */
         [
-          // """
-          // /**
-          //  * {@snippet lang=c :
-          //  * void swiftjava_SwiftModule_returnArray(void (*_result_initialize)(const void *, ptrdiff_t))
-          //  * }
-          //  */
-          // private static class swiftjava_SwiftModule_returnArray {
-          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          //     /* _result_initialize: */SwiftValueLayout.SWIFT_POINTER
-          //   );
-          //   private static final MemorySegment ADDR =
-          //     SwiftModule.findOrThrow("swiftjava_SwiftModule_returnArray");
-          //   private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          //   public static void call(java.lang.foreign.MemorySegment _result_initialize) {
-          //     try {
-          //       if (CallTraces.TRACE_DOWNCALLS) {
-          //         CallTraces.traceDowncall(_result_initialize);
-          //       }
-          //       HANDLE.invokeExact(_result_initialize);
-          //     } catch (Throwable ex$) {
-          //       throw new AssertionError("should not reach here", ex$);
-          //     }
-          //   }
-          // }
-          // """,
-          // """
-          // /**
-          //  * {snippet lang=c :
-          //   * void (*)(const void *, ptrdiff_t)
-          //   * }
-          //   */
-          // private static class $_result_initialize {
-          //   final static class Function {
-          //     byte[] result;
-          //     void apply(java.lang.foreign.MemorySegment _0, long _1) {
-          //       this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE);
-          //     }
-          //   }
-          //   private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          //     /* _0: */SwiftValueLayout.SWIFT_POINTER,
-          //     /* _1: */SwiftValueLayout.SWIFT_INT
-          //   );
-          //   private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-          //   private static MemorySegment toUpcallStub(Function fi, Arena arena) {
-          //     return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
-          //   }
-          // }
-          // """,
+          """
+          /**
+           * {snippet lang=c :
+           * void (void *, size_t)
+           * }
+           */
+          private static class $_result_initialize {
+            public final static class Function {
+              byte[] result = null;
+              void apply(java.lang.foreign.MemorySegment _0, long _1) {
+                this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE);
+              }
+            }
+            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+              /* _0: */SwiftValueLayout.SWIFT_POINTER,
+              /* _1: */SwiftValueLayout.SWIFT_INT
+            );
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
+            private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+              return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+            }
+          }
+          """,
           """
           /**
            * Downcall to Swift:
-           * {@snippet lang = swift:
+           * {@snippet lang=swift :
            * public func returnArray() -> [UInt8]
-           *}
+           * }
            */
+          @Unsigned
           public static byte[] returnArray() {
-            try (var arena$ = Arena.ofAuto()) {
+            try(var arena$ = Arena.ofConfined()) {
               var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function();
               swiftjava_SwiftModule_returnArray.call(swiftjava_SwiftModule_returnArray.$_result_initialize.toUpcallStub(_result_initialize, arena$));
               return _result_initialize.result;
             }
           }
-          """
+          """,
         ],
         /* expected Swift chunks */
         [
