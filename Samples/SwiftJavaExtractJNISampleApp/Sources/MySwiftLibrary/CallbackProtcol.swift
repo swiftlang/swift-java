@@ -31,6 +31,8 @@ public protocol CallbackProtocol {
   func withInt64Array(_ input: [Int64]) -> [Int64]
   func withStringArray(_ input: [String]) -> [String]
   func withObjectArray(_ input: [MySwiftClass]) -> [MySwiftClass]
+  func successfulThrowingFunction() throws
+  func throwingFunction() throws
 }
 
 public struct CallbackOutput {
@@ -49,6 +51,18 @@ public struct CallbackOutput {
   public let int64Array: [Int64]
   public let stringArray: [String]
   public let objectArray: [MySwiftClass]
+}
+
+public func callProtocolVoid(_ callbacks: some CallbackProtocol) {
+  callbacks.withVoid();
+}
+
+public func callProtocolWithFailedThrowingFunction(_ callbacks: some CallbackProtocol) throws {
+  try callbacks.throwingFunction();
+}
+
+public func callProtocolWithSuccessfulThrowingFunction(_ callbacks: some CallbackProtocol) throws {
+  try callbacks.successfulThrowingFunction();
 }
 
 public func outputCallbacks(

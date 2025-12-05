@@ -102,6 +102,35 @@ public class ProtocolCallbacksTest {
         public MySwiftClass[] withObjectArray(MySwiftClass[] input, SwiftArena swiftArena$) {
             return input;
         }
+
+        @Override
+        public void throwingFunction() throws Exception {
+            throw new Exception("Failed in Java");
+        }
+
+        @Override
+        public void successfulThrowingFunction() throws Exception {
+
+        }
+    }
+
+    @Test
+    void voidTest() {
+        JavaCallbacks callbacks = new JavaCallbacks();
+        MySwiftLibrary.callProtocolVoid(callbacks);
+    }
+
+    @Test
+    void throwingFunction_thatDoesNotThrow() {
+        JavaCallbacks callbacks = new JavaCallbacks();
+        assertDoesNotThrow(() -> MySwiftLibrary.callProtocolWithSuccessfulThrowingFunction(callbacks));
+    }
+
+    @Test
+    void throwingFunction_thatThrows() {
+        JavaCallbacks callbacks = new JavaCallbacks();
+        Exception exception = assertThrows(Exception.class, () -> MySwiftLibrary.callProtocolWithFailedThrowingFunction(callbacks));
+        assertEquals("Failed in Java", exception.getMessage());
     }
 
     @Test
