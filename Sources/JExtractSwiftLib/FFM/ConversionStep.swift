@@ -22,7 +22,6 @@ enum ConversionStep: Equatable {
   /// The value being lowered.
   case placeholder
   
-  /// FIXME: Workaround for picking a specific placeholder value; We should resolve how method() works with lowered closures instead
   case constant(String)
 
   /// A reference to a component in a value that has been exploded, such as
