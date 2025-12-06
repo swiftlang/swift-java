@@ -25,9 +25,10 @@ extension AnyJavaObject {
     guard let this: jobject = javaThisOptional else {
       return nil 
     }
+    let environment = try! JavaVirtualMachine.shared().environment()
 
-    return try? otherClass.withJNIClass(in: javaEnvironment) { otherJavaClass in
-      if javaEnvironment.interface.IsInstanceOf(javaEnvironment, this, otherJavaClass) == 0 { 
+    return try? otherClass.withJNIClass(in: environment) { otherJavaClass in
+      if environment.interface.IsInstanceOf(environment, this, otherJavaClass) == 0 {
         return nil
       }
 
