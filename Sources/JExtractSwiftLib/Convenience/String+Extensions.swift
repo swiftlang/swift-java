@@ -79,3 +79,13 @@ extension String {
     return .class(package: javaPackageName, name: javaClassName)
   }
 }
+
+extension Array where Element == String {
+  func joinedJavaStatements(indent: Int) -> String {
+    if self.count == 1 {
+      return "\(self.first!);"
+    }
+    let indentation = String(repeating: " ", count: indent)
+    return self.joined(separator: ";\n\(indentation)")
+  }
+}

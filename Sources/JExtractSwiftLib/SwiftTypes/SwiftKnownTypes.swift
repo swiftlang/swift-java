@@ -33,12 +33,26 @@ struct SwiftKnownTypes {
   var float: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.float])) }
   var double: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.double])) }
   var unsafeRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawPointer])) }
+  var unsafeRawBufferPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeRawBufferPointer])) }
   var unsafeMutableRawPointer: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.unsafeMutableRawPointer])) }
-
+  
   var foundationDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationDataProtocol])) }
   var foundationData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationData])) }
   var essentialsDataProtocol: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsDataProtocol])) }
   var essentialsData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsData])) }
+  
+  /// `(UnsafeRawPointer, Long) -> ()` function type.
+  /// 
+  /// Commonly used to initialize a buffer using the passed bytes and length.
+  var functionInitializeByteBuffer: SwiftType { 
+    .function(SwiftFunctionType(
+      convention: .c, 
+      parameters: [
+        SwiftParameter(convention: .byValue, parameterName: nil, type: self.unsafeRawPointer), // array base pointer
+        SwiftParameter(convention: .byValue, parameterName: nil, type: self.int), // array length
+      ], 
+      resultType: .void))
+  }
 
   func unsafePointer(_ pointeeType: SwiftType) -> SwiftType {
     .nominal(

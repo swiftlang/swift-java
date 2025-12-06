@@ -85,3 +85,19 @@ struct JavaParameter {
     return "\(annotationsStr) \(type) \(name)"
   }
 }
+
+struct OutCallback {
+  /// Name of the "function" that we'll use as the out callback / upcall, e.g. "$_upcall_initialize"
+  var name: String {
+    willSet {
+      precondition("\(newValue)".starts(with: "$"), "OutCallback class names should stat with $")
+    }
+  }
+  var members: [String
+  ]
+  var parameters: [JavaParameter]
+  // FIXME: compute this instead
+  var cFunc: CFunction
+  var body: String
+
+}

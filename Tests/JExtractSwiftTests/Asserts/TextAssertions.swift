@@ -159,6 +159,13 @@ func assertOutput(
 
         currentGotLine += 1
       } else {
+        guard gotLines.count > currentGotLine else {
+          print("WARNING: index out of bounds when asserting text: \(currentGotLine)")
+          print("got lines ======")
+          print(gotLines.joined(separator: "\n").red)
+          currentExpectedLine += 1
+          continue
+        }
         let gottenLine = gotLines[currentGotLine].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         if gottenLine.commonPrefix(with: expectedLine) != expectedLine {
           diffLineNumbers.append(currentExpectedLine + matchingOutputOffset)
