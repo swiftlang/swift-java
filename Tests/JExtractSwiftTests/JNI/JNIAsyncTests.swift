@@ -71,7 +71,7 @@ struct JNIAsyncTests {
                 }
                 let swiftResult$ = await SwiftModule.asyncVoid()
                 environment = try! JavaVirtualMachine.shared().environment()
-                environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
               }
             }
           #endif
@@ -84,7 +84,7 @@ struct JNIAsyncTests {
               }
               let swiftResult$ = await SwiftModule.asyncVoid()
               environment = try! JavaVirtualMachine.shared().environment()
-              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
             }
           }
         }
@@ -146,12 +146,12 @@ struct JNIAsyncTests {
                 do {
                   let swiftResult$ = await try SwiftModule.async()
                   environment = try! JavaVirtualMachine.shared().environment()
-                  environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                  _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
                 }
                 catch {
                   let catchEnvironment = try! JavaVirtualMachine.shared().environment()
                   let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
-                  catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                  _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
                 }
               }
             }
@@ -166,12 +166,12 @@ struct JNIAsyncTests {
               do {
                 let swiftResult$ = await try SwiftModule.async()
                 environment = try! JavaVirtualMachine.shared().environment()
-                environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
               }
               catch {
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
                 let exception = catchEnvironment.interface.NewObjectA(catchEnvironment, _JNIMethodIDCache.Exception.class, _JNIMethodIDCache.Exception.constructWithMessage, [String(describing: error).getJValue(in: catchEnvironment)])
-                catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
               }
             }
           }
@@ -234,7 +234,7 @@ struct JNIAsyncTests {
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try! JavaVirtualMachine.shared().environment()
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)
-              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           #endif // end of swift(>=6.2)
@@ -248,7 +248,7 @@ struct JNIAsyncTests {
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try! JavaVirtualMachine.shared().environment()
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNIValue(in: environment), in: environment)
-              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           return 
@@ -328,7 +328,7 @@ struct JNIAsyncTests {
                 result$.initialize(to: swiftResult$)
                 let resultBits$ = Int64(Int(bitPattern: result$))
                 let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)
-                environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
               }
             }
           #endif
@@ -345,7 +345,7 @@ struct JNIAsyncTests {
               result$.initialize(to: swiftResult$)
               let resultBits$ = Int64(Int(bitPattern: result$))
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNIValue(in: environment), in: environment)
-              environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }
           }
           return 
@@ -402,7 +402,7 @@ struct JNIAsyncTests {
             deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, s)
           }
           ...
-          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: swiftResult$.getJNIValue(in: environment))])
+          _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: swiftResult$.getJNIValue(in: environment))])
           ...
         }
         """
@@ -463,7 +463,7 @@ struct JNIAsyncTests {
           ...
           var task: Task<Void, Never>? = nil
           ...
-          environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.complete, [jvalue(l: boxedResult$)])
+          _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.complete, [jvalue(l: boxedResult$)])
           ... 
         }
         """
