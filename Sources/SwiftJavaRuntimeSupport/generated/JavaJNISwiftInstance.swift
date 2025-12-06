@@ -15,7 +15,11 @@
 import SwiftJava
 
 @JavaInterface("org.swift.swiftkit.core.JNISwiftInstance")
-public struct JavaJNISwiftInstance {
+public struct JavaJNISwiftInstance: AnyJavaObjectWithCustomClassLoader {
   @JavaMethod("$memoryAddress")
   public func memoryAddress() -> Int64
+
+  public static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader! {
+    JNI.shared.applicationClassLoader
+  }
 }
