@@ -45,11 +45,6 @@ public struct Configuration: Codable {
 
   public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
 
-  public var unsignedNumbersMode: JExtractUnsignedIntegerMode?
-  public var effectiveUnsignedNumbersMode: JExtractUnsignedIntegerMode {
-    unsignedNumbersMode ?? .default
-  }
-
   public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
   public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {
     minimumInputAccessLevelMode ?? .default

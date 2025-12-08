@@ -365,18 +365,6 @@ extension JNISwift2JavaGenerator {
       // If the result type should cause any annotations on the method, include them here.
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
-      // If we need to handle unsigned integers do so here
-      if config.effectiveUnsignedNumbersMode.needsConversion {
-        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) {
-          return TranslatedParameter(
-            parameter: JavaParameter(name: parameterName, type: unsignedWrapperType, annotations: parameterAnnotations),
-            conversion: unsignedResultConversion(
-                swiftType, to: unsignedWrapperType,
-                mode: self.config.effectiveUnsignedNumbersMode)
-          )
-        }
-      }
-
       switch swiftType {
       case .nominal(let nominalType):
         let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
@@ -486,20 +474,6 @@ extension JNISwift2JavaGenerator {
 
       case .metatype, .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
-      }
-    }
-
-    func unsignedResultConversion(
-      _ from: SwiftType,
-      to javaType: JavaType,
-      mode: JExtractUnsignedIntegerMode
-    ) -> JavaNativeConversionStep {
-      switch mode {
-      case .annotate:
-        return .placeholder // no conversions
-
-      case .wrapGuava:
-        fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
       }
     }
 

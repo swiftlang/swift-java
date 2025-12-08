@@ -61,9 +61,6 @@ extension SwiftJava {
     @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
     var writeEmptyFiles: Bool = false
 
-    @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrapGuava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
-    var unsignedNumbersMode: JExtractUnsignedIntegerMode?
-
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
     var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
 
@@ -105,7 +102,6 @@ extension SwiftJava.JExtractCommand {
     let enableJavaCallbacks = CommandLine.arguments.contains("--enable-java-callbacks") ? true : nil
     configure(&config.enableJavaCallbacks, overrideWith: enableJavaCallbacks)
 
-    configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
     configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
@@ -131,14 +127,7 @@ extension SwiftJava.JExtractCommand {
 
   /// Check if the configured modes are compatible, and fail if not
   func checkModeCompatibility(config: Configuration) throws {
-    if config.effectiveMode == .jni {
-      switch config.effectiveUnsignedNumbersMode {
-      case .annotate:
-        () // OK
-      case .wrapGuava:
-        throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage())")
-      }
-    } else if config.effectiveMode == .ffm {
+    if config.effectiveMode == .ffm {
       guard config.effectiveMemoryManagementMode == .explicit else {
         throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode ?? .default)' memory management mode! \(Self.helpMessage())")
       }
@@ -175,7 +164,6 @@ struct IllegalModeCombinationError: Error {
 }
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
-extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
 extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
 extension JExtractMemoryManagementMode: ExpressibleByArgument {}
 extension JExtractAsyncFuncMode: ExpressibleByArgument {}
