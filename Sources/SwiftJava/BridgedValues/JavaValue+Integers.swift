@@ -22,11 +22,11 @@ extension UInt8: JavaValue {
   public static var javaType: JavaType { .byte }
 
   /// Retrieve the JNI value.
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(bitPattern: self) }
 
   /// Initialize from a JNI value.
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = Self(value)
+    self = Self(bitPattern: value)
   }
 
   public static func jniMethodCall(
@@ -238,11 +238,11 @@ extension UInt32: JavaValue {
   public static var javaType: JavaType { .int }
 
   /// Retrieve the JNI value.
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(bitPattern: self) }
 
   /// Initialize from a JNI value.
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = Self(value)
+    self = Self(bitPattern: value)
   }
 
   public static func jniMethodCall(
@@ -353,10 +353,26 @@ extension UInt64: JavaValue {
 
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.j }
 
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
+    // On 32-bit, standard JDK jlong is defined as long long = Int64
+    // On 64-bit, standard JDK jlong is defined as long = Int
+    // On Android it's correctly marked as int64_t
+    #if os(Android) || _pointerBitWidth(_32)
+    return Int64(bitPattern: self)
+    #else
+    return Int(bitPattern: UInt(self))
+    #endif
+  }
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = UInt64(value)
+    // On 32-bit, standard JDK jlong is defined as long long = Int64
+    // On 64-bit, standard JDK jlong is defined as long = Int
+    // On Android it's correctly marked as int64_t
+    #if os(Android) || _pointerBitWidth(_32)
+    self = UInt64(bitPattern: value)
+    #else
+    self = UInt64(bitPattern: Int64(value))
+    #endif
   }
 
   public static var javaType: JavaType { .long }
