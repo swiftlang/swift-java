@@ -68,4 +68,14 @@ public class MySwiftLibraryTest {
         long l = 1200;
         assertEquals(1212, MySwiftLibrary.echoUnsignedInt(12, 1200));
     }
+
+    @Test
+    void returnUnsignedByte_negative() {
+        assertEquals(-50, MySwiftLibrary.returnUnsignedByte((byte) -50));
+    }
+
+    @Test
+    void returnLargestUnsignedByte() {
+        assertEquals(-1, MySwiftLibrary.returnLargestUnsignedByte());
+    }
 }

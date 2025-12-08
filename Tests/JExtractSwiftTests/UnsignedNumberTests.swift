@@ -66,46 +66,6 @@ final class UnsignedNumberTests {
   }
 
   @Test(
-    "Import: UInt32 (wrap)",
-    arguments: [
-      (
-        JExtractGenerationMode.ffm,
-        /* expected chunks */
-        [
-          """
-          /**
-           * {@snippet lang=c :
-           * void swiftjava_SwiftModule_unsignedInt__(uint32_t arg)
-           * }
-           */
-          private static class swiftjava_SwiftModule_unsignedInt__ {
-            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* arg: */SwiftValueLayout.SWIFT_UINT32
-          );
-          """,
-          """
-          public static void unsignedInt(com.google.common.primitives.UnsignedInteger arg) {
-            swiftjava_SwiftModule_unsignedInt__.call(UnsignedNumbers.toPrimitive(arg));
-          }
-          """,
-        ]
-      ),
-      // JNI mode does not support the "wrap" mode
-    ])
-  func unsignedInt_wrap(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
-    var config = Configuration()
-    config.unsignedNumbersMode = .wrapGuava
-
-    try assertOutput(
-      input: "public func unsignedInt(_ arg: UInt32)",
-      config: config,
-      mode, .java,
-      detectChunkByInitialLines: 2,
-      expectedChunks: expectedChunks
-    )
-  }
-
-  @Test(
     "Import: UInt32 (annotate)",
     arguments: [
       (
@@ -145,7 +105,6 @@ final class UnsignedNumberTests {
     ])
   func unsignedIntAnnotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
@@ -209,46 +168,6 @@ final class UnsignedNumberTests {
   }
 
   @Test(
-    "Import: return UInt64 (wrap)",
-    arguments: [
-      (
-        JExtractGenerationMode.ffm,
-        /* expected chunks */
-        [
-          """
-          /**
-           * {@snippet lang=c :
-           * uint64_t swiftjava_SwiftModule_returnUnsignedLong(void)
-           * }
-           */
-          private static class swiftjava_SwiftModule_returnUnsignedLong {
-            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            /* -> */SwiftValueLayout.SWIFT_UINT64
-          );
-          """,
-          """
-          public static com.google.common.primitives.UnsignedLong returnUnsignedLong() {
-            return com.google.common.primitives.UnsignedLong.fromLongBits(swiftjava_SwiftModule_returnUnsignedLong.call());
-          }
-          """,
-        ]
-      ),
-      // JNI mode does not support "wrap" mode
-    ])
-  func return_unsignedLongWrap(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
-    var config = Configuration()
-    config.unsignedNumbersMode = .wrapGuava
-
-    try assertOutput(
-      input: "public func returnUnsignedLong() -> UInt64",
-      config: config,
-      mode, .java,
-      detectChunkByInitialLines: 2,
-      expectedChunks: expectedChunks
-    )
-  }
-
-  @Test(
     "Import: return UInt64 (annotate)",
     arguments: [
       (
@@ -290,7 +209,6 @@ final class UnsignedNumberTests {
     ])
   func return_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func returnUnsignedLong() -> UInt64",
@@ -341,7 +259,6 @@ final class UnsignedNumberTests {
     ])
   func take_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func takeUnsignedLong(arg: UInt64)",
@@ -395,8 +312,7 @@ final class UnsignedNumberTests {
       ),
     ])
   func echo_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
-    var config = Configuration()
-    config.unsignedNumbersMode = .annotate
+    let config = Configuration()
 
     try assertOutput(
       input: "public func unsignedLong(first: UInt64, second: UInt32) -> UInt32",

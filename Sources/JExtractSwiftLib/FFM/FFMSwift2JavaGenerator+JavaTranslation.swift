@@ -336,16 +336,6 @@ extension FFMSwift2JavaGenerator {
       // If the result type should cause any annotations on the method, include them here.
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
-      // If we need to handle unsigned integers do so here
-      if config.effectiveUnsignedNumbersMode.needsConversion {
-        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) {
-          return TranslatedParameter(
-            javaParameters: [
-              JavaParameter(name: parameterName, type: unsignedWrapperType, annotations: parameterAnnotations)
-            ], conversion: .call(.placeholder, function: "UnsignedNumbers.toPrimitive", withArena: false))
-        }
-      }
-
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
@@ -593,57 +583,12 @@ extension FFMSwift2JavaGenerator {
       }
     }
 
-    func unsignedResultConversion(_ from: SwiftType, to javaType: JavaType,
-                                  mode: JExtractUnsignedIntegerMode) -> JavaConversionStep {
-      switch mode {
-      case .annotate:
-        return .placeholder // no conversions
-
-      case .wrapGuava:
-        guard let typeName = javaType.fullyQualifiedClassName else {
-          fatalError("Missing target class name for result conversion step from \(from) to \(javaType)")
-        }
-
-        switch from {
-        case .nominal(let nominal):
-         switch nominal.nominalTypeDecl.knownTypeKind {
-         case .uint8:
-           return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
-         case .uint16:
-           return .placeholder // no conversion, UInt16 can be returned as-is and will be seen as char by Java
-         case .uint32:
-           return .call(.placeholder, function: "\(typeName).fromIntBits", withArena: false)
-         case .uint64:
-           return .call(.placeholder, function: "\(typeName).fromLongBits", withArena: false)
-         default:
-           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
-         }
-         default:
-           fatalError("unsignedResultConversion: Unsupported conversion from \(from) to \(javaType)")
-        }
-      }
-    }
-
     /// Translate a Swift API result to the user-facing Java API result.
     func translateResult(
       swiftResult: SwiftResult,
       loweredResult: LoweredResult
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
-
-      // If we need to handle unsigned integers do so here
-      if config.effectiveUnsignedNumbersMode.needsConversion {
-        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) /* and we're in safe wrapper mode */ {
-          return TranslatedResult(
-            javaResultType: unsignedWrapperType,
-            outParameters: [],
-            conversion: unsignedResultConversion(
-                swiftType, to: unsignedWrapperType,
-                mode: self.config.effectiveUnsignedNumbersMode)
-          )
-        }
-      }
-
       // If the result type should cause any annotations on the method, include them here.
       let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
