@@ -15,9 +15,6 @@
 import JExtractSwiftLib
 import Testing
 
-import JExtractSwiftLib
-import Testing
-
 @Suite
 struct FFMSubscriptsTests {
   private let noParamsSubscriptSource = """

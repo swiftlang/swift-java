@@ -76,6 +76,9 @@ public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: In
 public func sumAllByteArrayElements(array: [UInt8]) -> Int {
   return Int(array.reduce(0, { partialResult, element in partialResult + element }))
 }
+public func returnSwiftArray() -> [UInt8] {
+  return [1, 2, 3, 4]
+}
 
 public func withArray(body: ([UInt8]) -> Void) {
   body([1, 2, 3])

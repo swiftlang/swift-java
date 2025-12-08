@@ -18,8 +18,15 @@ import SwiftJavaConfigurationShared
 /// Determine if the given type needs any extra annotations that should be included
 /// in Java sources when the corresponding Java type is rendered.
 func getTypeAnnotations(swiftType: SwiftType, config: Configuration) -> [JavaAnnotation] {
-  if swiftType.isUnsignedInteger, config.effectiveUnsignedNumbersMode == .annotate {
-    return [JavaAnnotation.unsigned]
+  if config.effectiveUnsignedNumbersMode == .annotate {
+    switch swiftType {
+      case .array(let wrapped) where wrapped.isUnsignedInteger:
+        return [JavaAnnotation.unsigned]
+      case _ where swiftType.isUnsignedInteger:
+        return [JavaAnnotation.unsigned]
+      default: 
+        break
+    }
   }
 
   return []
