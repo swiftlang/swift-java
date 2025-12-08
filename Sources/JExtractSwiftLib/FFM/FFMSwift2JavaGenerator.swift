@@ -368,7 +368,7 @@ extension FFMSwift2JavaGenerator {
   func printClassConstants(printer: inout CodePrinter) {
     printer.print(
       """
-      static final String LIB_NAME = "\(swiftModuleName)";
+      static final String LIB_NAME = "\(swiftModuleName)_Bridges";
       static final Arena LIBRARY_ARENA = Arena.ofAuto();
       """
     )

@@ -30,7 +30,7 @@ final class BuildUtils {
     }
 
     /// Find library paths for 'java.library.path' when running or testing projects inside this build.
-    static def javaLibraryPaths(File rootDir) {
+    static def javaLibraryPaths(java.io.File rootDir) {
         def osName = System.getProperty("os.name")
         def osArch = System.getProperty("os.arch")
         def isLinux = osName.toLowerCase(Locale.getDefault()).contains("linux")

@@ -14,6 +14,7 @@
 
 package com.example.swift;
 
+import com.example.swift.MySwiftLibrary.*;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 

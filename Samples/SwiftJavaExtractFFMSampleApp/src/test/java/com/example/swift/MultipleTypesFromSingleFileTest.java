@@ -24,6 +24,8 @@ import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class MultipleTypesFromSingleFileTest {
     
     @Test

@@ -21,10 +21,12 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class MySwiftLibraryTest {
 
     static {
-        System.loadLibrary(MySwiftLibrary.LIB_NAME);
+//        System.loadLibrary(MySwiftLibrary.LIB_NAME);
     }
 
     @Test
