@@ -354,9 +354,13 @@ extension UInt64: JavaValue {
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.j }
 
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
-    // On 32-bit, standard JDK jlong is defined as long long = Int64
-    // On 64-bit, standard JDK jlong is defined as long = Int
-    // On Android it's correctly marked as int64_t
+    // `jlong` is always 64-bit, no matter the system pointer size.
+    // Due to differences in JNI headers between Android, JDK and how Swift sees these type imports
+    // we have to handle this a bit differently.
+    //
+    // On 32-bit, the standard JDK jlong is defined in C as `long long`, which yields Swift `Int64`
+    // On 64-bit, the standard JDK jlong is defined in C as `long`, which yields Swift `Int`
+    // On Android it's correctly marked as int64_t, always yielding `Int64` in Swift.
     #if os(Android) || _pointerBitWidth(_32)
     return Int64(bitPattern: self)
     #else
@@ -365,12 +369,18 @@ extension UInt64: JavaValue {
   }
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    // On 32-bit, standard JDK jlong is defined as long long = Int64
-    // On 64-bit, standard JDK jlong is defined as long = Int
-    // On Android it's correctly marked as int64_t
+    // `jlong` is always 64-bit, no matter the system pointer size.
+    // Due to differences in JNI headers between Android, JDK and how Swift sees these type imports
+    // we have to handle this a bit differently.
+    //
+    // On 32-bit, the standard JDK jlong is defined in C as `long long`, which yields Swift `Int64`
+    // On 64-bit, the standard JDK jlong is defined in C as `long`, which yields Swift `Int`
+    // On Android it's correctly marked as int64_t, always yielding `Int64` in Swift.
     #if os(Android) || _pointerBitWidth(_32)
+    // In this case `jlong` is seen in Swift as `Int64`.
     self = UInt64(bitPattern: value)
     #else
+    // In this case `jlong` is since as just `Int`, which is always Int64
     self = UInt64(bitPattern: Int64(value))
     #endif
   }
