@@ -531,16 +531,8 @@ extension JNISwift2JavaGenerator {
     // If we have enabled javaCallbacks we must emit default
     // arena methods for protocols, as this is what
     // Swift will call into, when you call a interface from Swift.
-    let shouldGenerateGlobalArenaVariation: Bool
+    let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena
     let isParentProtocol = importedFunc?.parentType?.asNominalType?.isProtocol ?? false
-
-    if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
-      shouldGenerateGlobalArenaVariation = true
-    } else if isParentProtocol, translatedSignature.requiresSwiftArena, config.effectiveEnableJavaCallbacks {
-      shouldGenerateGlobalArenaVariation = true
-    } else {
-      shouldGenerateGlobalArenaVariation = false
-    }
 
     if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
