@@ -58,8 +58,8 @@ extension SwiftJava {
     @Option(help: "The directory where generated Java files should be written. Generally used with jextract mode.")
     var outputJava: String
 
-    @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
-    var writeEmptyFiles: Bool = false
+    @Flag(inversion: .prefixedNo, help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
+    var writeEmptyFiles: Bool?
 
     @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrapGuava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
     var unsignedNumbersMode: JExtractUnsignedIntegerMode?
@@ -82,8 +82,8 @@ extension SwiftJava {
     @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
     var asyncFuncMode: JExtractAsyncFuncMode?
 
-    @Flag(help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the sandbox mode in SwiftPM. This only works in the 'jni' mode.")
-    var enableJavaCallbacks: Bool = false
+    @Flag(inversion: .prefixedNo, help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode.")
+    var enableJavaCallbacks: Bool?
 
     @Option(help: "If specified, JExtract will output to this file a list of paths to all generated Java source files")
     var generatedJavaSourcesListFileOutput: String?
@@ -98,11 +98,7 @@ extension SwiftJava.JExtractCommand {
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
 
-    // @Flag does not support optional, so we check ourself if it is passed
-    let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
     configure(&config.writeEmptyFiles, overrideWith: writeEmptyFiles)
-
-    let enableJavaCallbacks = CommandLine.arguments.contains("--enable-java-callbacks") ? true : nil
     configure(&config.enableJavaCallbacks, overrideWith: enableJavaCallbacks)
 
     configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
