@@ -44,10 +44,3 @@ public final class JNI {
 public func _JNI_OnLoad(_ javaVM: JavaVMPointer, _ reserved: UnsafeMutableRawPointer) {
   JNI.shared = JNI(fromVM: JavaVirtualMachine(adoptingJVM: javaVM))
 }
-
-public protocol ApplicationClassLoadable: AnyJavaObjectWithCustomClassLoader {}
-extension ApplicationClassLoadable {
-  public static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader! {
-    JNI.shared.applicationClassLoader
-  }
-}
