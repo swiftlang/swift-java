@@ -210,10 +210,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
     .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")), // primarily for ordered collections
-
-//    // FIXME: swift-subprocess stopped supporting 6.0 when it moved into a package;
-//    //        we'll need to drop 6.0 as well, but currently blocked on doing so by swiftpm plugin pending design questions
-//    .package(url: "https://github.com/swiftlang/swift-subprocess.git", revision: "de15b67f7871c8a039ef7f4813eb39a8878f61a6"),
+    .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1"),
 
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
@@ -415,8 +412,7 @@ let package = Package(
         "JavaTypes",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
-        // .product(name: "Subprocess", package: "swift-subprocess")
-        "_Subprocess",
+        .product(name: "Subprocess", package: "swift-subprocess")
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -541,28 +537,6 @@ let package = Package(
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
-    ),
-    
-    // Experimental Foundation Subprocess Copy
-    .target(
-      name: "_SubprocessCShims",
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-    .target(
-      name: "_Subprocess",
-      dependencies: [
-        "_SubprocessCShims",
-        .product(name: "SystemPackage", package: "swift-system"),
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .define(
-          "SYSTEM_PACKAGE_DARWIN",
-          .when(platforms: [.macOS, .macCatalyst, .iOS, .watchOS, .tvOS, .visionOS])),
-        .define("SYSTEM_PACKAGE"),
-      ]
-    ),
+    )
   ]
 )

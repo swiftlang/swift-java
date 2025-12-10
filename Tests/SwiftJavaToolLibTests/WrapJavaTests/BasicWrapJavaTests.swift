@@ -18,7 +18,7 @@ import JavaUtilJar
 import SwiftJavaShared
 import JavaNet
 import SwiftJavaConfigurationShared
-import _Subprocess
+import Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class BasicWrapJavaTests: XCTestCase {
