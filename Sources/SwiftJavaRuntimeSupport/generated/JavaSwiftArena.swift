@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,8 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.core;
+import SwiftJava
 
-public class SwiftMemoryManagement {
-    public static final SwiftArena DEFAULT_SWIFT_JAVA_AUTO_ARENA = SwiftArena.ofAuto();
-}
+@JavaInterface("org.swift.swiftkit.core.SwiftArena")
+public struct JavaSwiftArena {}

@@ -15,13 +15,38 @@
 import SwiftJava
 import CSwiftJavaJNI
 
-final class JNI {
-  static var shared: JNI!
+/// A type that represents the shared JNI environment
+/// used to share any global JNI variables.
+///
+/// This is initialized when the `JNI_OnLoad` is triggered,
+/// which happens when you call `System.loadLibrary(...)`
+/// from Java.
+public final class JNI {
+  /// The shared JNI object, initialized by `JNI_OnLoad`
+  public fileprivate(set) static var shared: JNI!
 
-  let applicationClassLoader: JavaClassLoader
+  /// The default application class loader
+  public let applicationClassLoader: JavaClassLoader
+
+  /// The default auto arena of SwiftKitCore
+  public let defaultAutoArena: JavaSwiftArena
 
   init(fromVM javaVM: JavaVirtualMachine) {
-    self.applicationClassLoader = try! JavaClass<JavaThread>(environment: javaVM.environment()).currentThread().getContextClassLoader()
+    let environment = try! javaVM.environment()
+
+    self.applicationClassLoader = try! JavaClass<JavaThread>(environment: environment).currentThread().getContextClassLoader()
+
+    // Find global arena
+    let swiftMemoryClass = environment.interface.FindClass(environment, "org/swift/swiftkit/core/SwiftMemoryManagement")!
+    let arenaFieldID = environment.interface.GetStaticFieldID(
+        environment,
+        swiftMemoryClass,
+        "DEFAULT_SWIFT_JAVA_AUTO_ARENA",
+        JavaSwiftArena.mangledName
+    )
+    let localObject = environment.interface.GetStaticObjectField(environment, swiftMemoryClass, arenaFieldID)!
+    self.defaultAutoArena = JavaSwiftArena(javaThis: localObject, environment: environment)
+    environment.interface.DeleteLocalRef(environment, localObject)
   }
 }
 

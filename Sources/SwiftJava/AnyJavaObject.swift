@@ -77,6 +77,11 @@ extension AnyJavaObject {
     return String(seq)
   }
 
+  /// The mangled name for this java class
+  public static var mangledName: String {
+    "L\(fullJavaClassNameWithSlashes);"
+  }
+
   /// Initialize a Java object from its instance.
   public init(javaThis: jobject, environment: JNIEnvironment) {
     self.init(javaHolder: JavaObjectHolder(object: javaThis, environment: environment))

@@ -214,7 +214,7 @@ extension JNISwift2JavaGenerator {
         }
         
         public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer) {
-          return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
+          return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """
       )
@@ -531,16 +531,8 @@ extension JNISwift2JavaGenerator {
     // If we have enabled javaCallbacks we must emit default
     // arena methods for protocols, as this is what
     // Swift will call into, when you call a interface from Swift.
-    let shouldGenerateGlobalArenaVariation: Bool
+    let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena
     let isParentProtocol = importedFunc?.parentType?.asNominalType?.isProtocol ?? false
-
-    if config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena {
-      shouldGenerateGlobalArenaVariation = true
-    } else if isParentProtocol, translatedSignature.requiresSwiftArena, config.effectiveEnableJavaCallbacks {
-      shouldGenerateGlobalArenaVariation = true
-    } else {
-      shouldGenerateGlobalArenaVariation = false
-    }
 
     if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
@@ -554,7 +546,7 @@ extension JNISwift2JavaGenerator {
       }
 
       printer.printBraceBlock("\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)") { printer in
-        let globalArenaName = "SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA"
+        let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
         if translatedDecl.translatedFunctionSignature.resultType.javaType.isVoid {
