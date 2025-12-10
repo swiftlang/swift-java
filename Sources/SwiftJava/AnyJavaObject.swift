@@ -77,7 +77,7 @@ extension AnyJavaObject {
     return String(seq)
   }
 
-  /// The  mangled name for this java class
+  /// The mangled name for this java class
   public static var mangledName: String {
     "L\(fullJavaClassNameWithSlashes);"
   }
