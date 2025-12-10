@@ -100,6 +100,7 @@ let package = Package(
     // ==== SwiftJava (i.e. calling Java directly Swift utilities)
     .library(
       name: "SwiftJava",
+      type: .dynamic,
       targets: ["SwiftJava"]
     ),
 

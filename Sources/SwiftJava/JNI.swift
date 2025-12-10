@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import CSwiftJavaJNI
 
 /// A type that represents the shared JNI environment
@@ -21,36 +20,25 @@ import CSwiftJavaJNI
 /// This is initialized when the `JNI_OnLoad` is triggered,
 /// which happens when you call `System.loadLibrary(...)`
 /// from Java.
-public final class JNI {
+package final class JNI {
   /// The shared JNI object, initialized by `JNI_OnLoad`
-  public fileprivate(set) static var shared: JNI!
+  package fileprivate(set) static var shared: JNI!
 
   /// The default application class loader
-  public let applicationClassLoader: JavaClassLoader
-
-  /// The default auto arena of SwiftKitCore
-  public let defaultAutoArena: JavaSwiftArena
+  package let applicationClassLoader: JavaClassLoader
 
   init(fromVM javaVM: JavaVirtualMachine) {
+    // Update the global JavaVM
+    JavaVirtualMachine.sharedJVM.withLock {
+      $0 = javaVM
+    }
     let environment = try! javaVM.environment()
-
     self.applicationClassLoader = try! JavaClass<JavaThread>(environment: environment).currentThread().getContextClassLoader()
-
-    // Find global arena
-    let swiftMemoryClass = environment.interface.FindClass(environment, "org/swift/swiftkit/core/SwiftMemoryManagement")!
-    let arenaFieldID = environment.interface.GetStaticFieldID(
-        environment,
-        swiftMemoryClass,
-        "DEFAULT_SWIFT_JAVA_AUTO_ARENA",
-        JavaSwiftArena.mangledName
-    )
-    let localObject = environment.interface.GetStaticObjectField(environment, swiftMemoryClass, arenaFieldID)!
-    self.defaultAutoArena = JavaSwiftArena(javaThis: localObject, environment: environment)
-    environment.interface.DeleteLocalRef(environment, localObject)
   }
 }
 
-// Called by generated code, and not automatically by Java.
-public func _JNI_OnLoad(_ javaVM: JavaVMPointer, _ reserved: UnsafeMutableRawPointer) {
+@_cdecl("JNI_OnLoad")
+func SwiftJava_JNI_OnLoad(javaVM: JavaVMPointer, reserved: UnsafeMutableRawPointer) -> jint {
   JNI.shared = JNI(fromVM: JavaVirtualMachine(adoptingJVM: javaVM))
+  return JNI_VERSION_1_6
 }

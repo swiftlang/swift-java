@@ -220,7 +220,7 @@ extension JavaVirtualMachine {
   /// TODO: If the use of the lock itself ends up being slow, we could
   /// use an atomic here instead because our access pattern is fairly
   /// simple.
-  private static let sharedJVM: LockedState<JavaVirtualMachine?> = .init(initialState: nil)
+  static let sharedJVM: LockedState<JavaVirtualMachine?> = .init(initialState: nil)
 
   /// Access the shared Java Virtual Machine instance.
   ///
