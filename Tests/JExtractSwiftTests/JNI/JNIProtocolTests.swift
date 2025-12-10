@@ -71,28 +71,6 @@ struct JNIProtocolTests {
   }
 
   @Test
-  func emitsDefault() throws {
-    try assertOutput(
-      input: source,
-      config: config,
-      .jni, .java,
-      detectChunkByInitialLines: 1,
-      expectedChunks: [
-        """
-        public interface SomeProtocol {
-          ...
-          public default SomeClass withObject(SomeClass c) {
-            return withObject(c, SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
-          }
-          ...
-          public SomeClass withObject(SomeClass c, SwiftArena swiftArena$);
-          ...
-        }
-        """
-      ])
-  }
-
-  @Test
   func generatesJavaClassWithExtends() throws {
     try assertOutput(
       input: source,
@@ -329,7 +307,7 @@ struct JNIProtocolTests {
             let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
             let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
             cPointer.initialize(to: c)
-            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer)))) else {
+            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer))), JNI.shared.globalArena) else {
               fatalError("Upcall to withObject unexpectedly returned nil")
             }
             let result$MemoryAddress$ = unwrapped$.as(JavaJNISwiftInstance.self)!.memoryAddress()
