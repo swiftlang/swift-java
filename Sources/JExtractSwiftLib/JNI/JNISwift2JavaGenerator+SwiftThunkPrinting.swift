@@ -162,7 +162,7 @@ extension JNISwift2JavaGenerator {
       // If the underlying translated method requires
       // a SwiftArena, we pass in the global arena
       if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        upcallArguments.append("JNI.shared.globalArena")
+        upcallArguments.append("JNI.shared.defaultAutoArena")
       }
 
       let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""

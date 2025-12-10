@@ -63,7 +63,7 @@ struct MemoryManagementModeTests {
       expectedChunks: [
         """
         public static MyClass f() {
-          return f(SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
+          return f(SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """,
         """
@@ -95,7 +95,7 @@ struct MemoryManagementModeTests {
       expectedChunks: [
         """
         public default MyClass f() {
-          return f(SwiftMemoryManagement.GLOBAL_SWIFT_JAVA_ARENA);
+          return f(SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """,
         """
