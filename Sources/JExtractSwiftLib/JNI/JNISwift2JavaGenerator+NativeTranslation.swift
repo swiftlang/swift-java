@@ -151,6 +151,8 @@ extension JNISwift2JavaGenerator {
         )
 
       case .function(let fn):
+
+        // @Sendable is not supported yet as "environment" is later captured inside the closure.
         var parameters = [NativeParameter]()
         for (i, parameter) in fn.parameters.enumerated() {
           let parameterName = parameter.parameterName ?? "_\(i)"
@@ -163,15 +165,28 @@ extension JNISwift2JavaGenerator {
 
         let result = try translateClosureResult(fn.resultType)
 
-        return NativeParameter(
-          parameters: [
-            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
-          ],
-          conversion: .closureLowering(
-            parameters: parameters,
-            result: result
+        if fn.isEscaping {
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+            ],
+            conversion: .escapingClosureLowering(
+              parameters: parameters,
+              result: result,
+              closureName: parameterName
+            )
           )
-        )
+        } else {
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+            ],
+            conversion: .closureLowering(
+              parameters: parameters,
+              result: result
+            )
+          )
+        }
 
       case .optional(let wrapped):
         return try translateOptionalParameter(
@@ -407,6 +422,15 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+
+          if knownType == .void {
+            return NativeResult(
+              javaType: .void,
+              conversion: .placeholder,
+              outParameters: []
+            )
+          }
+
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
@@ -692,6 +716,8 @@ extension JNISwift2JavaGenerator {
     indirect case pointee(NativeSwiftConversionStep)
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
+    
+    indirect case escapingClosureLowering(parameters: [NativeParameter], result: NativeResult, closureName: String)
 
     indirect case initializeSwiftJavaWrapper(NativeSwiftConversionStep, wrapperName: String)
 
@@ -916,6 +942,60 @@ extension JNISwift2JavaGenerator {
         printer.outdent()
         printer.print("}")
 
+        return printer.finalize()
+      
+      case .escapingClosureLowering(let parameters, let nativeResult, let closureName):
+        var printer = CodePrinter()
+
+        let methodSignature = MethodSignature(
+          resultType: nativeResult.javaType,
+          parameterTypes: parameters.flatMap {
+            $0.parameters.map { parameter in
+              guard case .concrete(let type) = parameter.type else {
+                fatalError("Closures do not support Java generics")
+              }
+              return type
+            }
+          }
+        )
+
+        let arguments = parameters.map {
+          $0.conversion.render(&printer, $0.parameters.first!.name)
+        }
+
+        let closureParameters = parameters.flatMap { $0.parameters.map(\.name) }.joined(separator: ", ")
+
+        let upcall = "env$.interface.\(nativeResult.javaType.jniCallMethodAName)(env$, closureContext_\(closureName)$.object!, methodID$, arguments$)"
+        let result = nativeResult.conversion.render(&printer, upcall)
+        let returnResult = if nativeResult.javaType.isVoid { result } else { "return \(result)" }
+
+        printer.print(
+          """
+          {
+            guard let \(placeholder) else {
+              fatalError(\"\(placeholder) is null")
+            }
+
+            let closureContext_\(closureName)$ = JavaObjectHolder(object: \(placeholder), environment: environment)
+            return { \(parameters.isEmpty ? "" : "\(closureParameters) in")
+              guard let env$ = try? JavaVirtualMachine.shared().environment() else {
+                fatalError(\"Failed to get JNI environment for escaping closure call\")
+              }
+
+              // Call the Java closure
+              let class$ = env$.interface.GetObjectClass(env$, closureContext_\(closureName)$.object!)
+              guard let methodID$ = env$.interface.GetMethodID(env$, class$, \"apply\", \"\(methodSignature.mangledName)\") else {
+                fatalError(\"Failed to find apply method on closure\")
+              }
+
+              let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
+
+              \(returnResult)
+            }
+          }()
+          """
+        )
+        
         return printer.finalize()
 
       case .initializeSwiftJavaWrapper(let inner, let wrapperName):

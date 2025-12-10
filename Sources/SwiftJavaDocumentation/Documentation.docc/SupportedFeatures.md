@@ -91,7 +91,9 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Non-escaping `Void` closures: `func callMe(maybe: () -> ())`                                      | ✅        | ✅   |
 | Non-escaping closures with primitive arguments/results: `func callMe(maybe: (Int) -> (Double))`   | ✅        | ✅   |
 | Non-escaping closures with object arguments/results: `func callMe(maybe: (JavaObj) -> (JavaObj))` | ❌        | ❌   |
-| `@escaping` closures: `func callMe(_: @escaping () -> ())`                                        | ❌        | ❌   |
+| `@escaping` `Void` closures: `func callMe(_: @escaping () -> ())`                                 | ❌        | ✅   |
+| `@escaping` closures with primitive arguments/results: `func callMe(_: @escaping (String) -> (String))`       | ❌        | ✅   |
+| `@escaping` closures with custom arguments/results: `func callMe(_: @escaping (Obj) -> (Obj))`       | ❌        | ❌   |
 | Swift type extensions: `extension String { func uppercased() }`                      | ✅       | ✅  |
 | Swift macros (maybe)                                                                 | ❌        | ❌   |
 | Result builders                                                                      | ❌        | ❌   |

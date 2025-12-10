@@ -23,6 +23,7 @@ struct SwiftFunctionType: Equatable {
   var convention: Convention
   var parameters: [SwiftParameter]
   var resultType: SwiftType
+  var isEscaping: Bool = false
 }
 
 extension SwiftFunctionType: CustomStringConvertible {
@@ -32,7 +33,8 @@ extension SwiftFunctionType: CustomStringConvertible {
     case .c: "@convention(c) "
     case .swift: ""
     }
-    return  "\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
+    let escapingPrefix = isEscaping ? "@escaping " : ""
+    return  "\(escapingPrefix)\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
   }
 }
 
@@ -40,9 +42,11 @@ extension SwiftFunctionType {
   init(
     _ node: FunctionTypeSyntax,
     convention: Convention,
+    isEscaping: Bool = false,
     lookupContext: SwiftTypeLookupContext
   ) throws {
     self.convention = convention
+    self.isEscaping = isEscaping
     self.parameters = try node.parameters.map { param in
       let isInout = param.inoutKeyword != nil
       return SwiftParameter(
