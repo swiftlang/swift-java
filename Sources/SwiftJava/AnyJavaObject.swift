@@ -134,6 +134,8 @@ extension AnyJavaObject {
     _ body: (jclass) throws -> Result
   ) throws -> Result {
     let resolvedClass = try classLoader.findClass(fullJavaClassName)
+    // OK to force unwrap, as classLoader will throw ClassNotFoundException
+    // if the class cannot be found.
     return try body(resolvedClass!.javaThis)
   }
 
