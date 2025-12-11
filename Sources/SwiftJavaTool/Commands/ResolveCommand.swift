@@ -21,7 +21,7 @@ import JavaUtilJar
 import SwiftJavaToolLib
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
-import _Subprocess
+import Subprocess
 #if canImport(System)
 import System
 #else
@@ -146,7 +146,7 @@ extension SwiftJava.ResolveCommand {
     try! printGradleProject(directory: resolverDir, dependencies: dependencies)
 
     if #available(macOS 15, *) {
-      let process = try! await _Subprocess.run(
+      let process = try! await Subprocess.run(
         .path(FilePath(resolverDir.appendingPathComponent("gradlew").path)),
         arguments: [
           "--no-daemon",
