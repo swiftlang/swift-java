@@ -307,7 +307,7 @@ struct JNIProtocolTests {
             let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
             let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
             cPointer.initialize(to: c)
-            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer))), JNI.shared.defaultAutoArena) else {
+            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer))), JavaSwiftArena.defaultAutoArena) else {
               fatalError("Upcall to withObject unexpectedly returned nil")
             }
             let result$MemoryAddress$ = unwrapped$.as(JavaJNISwiftInstance.self)!.memoryAddress()

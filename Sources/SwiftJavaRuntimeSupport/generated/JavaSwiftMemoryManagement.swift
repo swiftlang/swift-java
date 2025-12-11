@@ -14,13 +14,10 @@
 
 import SwiftJava
 
-@JavaInterface("org.swift.swiftkit.core.SwiftArena")
-public struct JavaSwiftArena {}
+@JavaClass("org.swift.swiftkit.core.SwiftMemoryManagement")
+public class JavaSwiftMemoryManagement: JavaObject {}
 
-extension JavaSwiftArena {
-  /// A cache for the default auto arena found in SwiftKitCore
-  public static internal(set) var defaultAutoArena: JavaSwiftArena = {
-    let swiftMemoryClass = try! JavaClass<SwiftJavaRuntimeSupport.JavaSwiftMemoryManagement>()
-    return swiftMemoryClass.defaultSwiftJavaAutoArena
-  }()
+extension JavaClass<JavaSwiftMemoryManagement> {
+  @JavaStaticField("DEFAULT_SWIFT_JAVA_AUTO_ARENA", isFinal: true)
+  var defaultSwiftJavaAutoArena: JavaSwiftArena!
 }
