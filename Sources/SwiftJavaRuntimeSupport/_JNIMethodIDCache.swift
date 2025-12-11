@@ -55,7 +55,8 @@ public final class _JNIMethodIDCache: Sendable {
       // Clear any ClassNotFound exceptions from FindClass
       environment.interface.ExceptionClear(environment)
 
-      if let javaClass = try? JNI.shared.applicationClassLoader.loadClass(
+      // OK to force unwrap, we are in a jextract environment.
+      if let javaClass = try? JNI.shared!.applicationClassLoader.loadClass(
         className.replacingOccurrences(of: "/", with: ".")
       ) {
         clazz = javaClass.javaThis

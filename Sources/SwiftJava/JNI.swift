@@ -22,7 +22,10 @@ import CSwiftJavaJNI
 /// from Java.
 package final class JNI {
   /// The shared JNI object, initialized by `JNI_OnLoad`
-  package fileprivate(set) static var shared: JNI!
+  ///
+  /// This may be `nil` in the case where `SwiftJava` is not loaded as a dynamic lib
+  /// by the Java sources.
+  package fileprivate(set) static var shared: JNI?
 
   /// The default application class loader
   package let applicationClassLoader: JavaClassLoader
