@@ -49,7 +49,7 @@ public struct SwiftToJava {
     let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
     log.info("Input paths = \(inputPaths)")
 
-    let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
+    let allFiles = inputPaths // collectAllFiles(suffix: ".swiftinterface", in: inputPaths, log: translator.log)
 
     // Register files to the translator.
     let fileManager = FileManager.default

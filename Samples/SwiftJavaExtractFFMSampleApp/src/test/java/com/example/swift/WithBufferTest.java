@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class WithBufferTest {
 
     @Test

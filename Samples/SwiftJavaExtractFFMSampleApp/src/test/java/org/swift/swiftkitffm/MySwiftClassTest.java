@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import com.example.swift.MySwiftClass;
+import com.example.swift.MySwiftLibrary.MySwiftClass;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
 

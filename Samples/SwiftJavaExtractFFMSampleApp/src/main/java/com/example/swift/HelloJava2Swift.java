@@ -18,10 +18,13 @@ package com.example.swift;
 
 // Import javakit/swiftkit support libraries
 
+import com.example.swift.TargetWithAlgorithms.TargetWithAlgorithms;
 import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
+import com.example.swift.MySwiftLibrary.*;
+import com.example.swift.SwiftTarget.*;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -56,6 +59,15 @@ public class HelloJava2Swift {
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
+
+            SwiftApi objFromAnotherLibrary = SwiftApi.init(1, arena);
+            objFromAnotherLibrary.printFoo();
+
+            var data = TargetWithAlgorithms.randomSampleWrapper("hello world hello world hello world", 10, arena);
+            data.withUnsafeBytes((retBytes) -> {
+                var str = retBytes.getString(0);
+                CallTraces.trace("Use API with transitive Algorithms usage = " + str);
+            });
 
             // just checking retains/releases work
             CallTraces.trace("retainCount = " + SwiftRuntime.retainCount(obj));

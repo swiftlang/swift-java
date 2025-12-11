@@ -22,6 +22,8 @@ import java.util.OptionalLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class OptionalImportTest {
     @Test
     void test_Optional_receive() {

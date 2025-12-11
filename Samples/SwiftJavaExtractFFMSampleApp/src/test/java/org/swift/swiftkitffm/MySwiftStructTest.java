@@ -14,7 +14,7 @@
 
 package org.swift.swiftkitffm;
 
-import com.example.swift.MySwiftStruct;
+import com.example.swift.MySwiftLibrary.MySwiftStruct;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
