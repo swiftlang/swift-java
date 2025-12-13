@@ -99,6 +99,12 @@ public struct Configuration: Codable {
 
   // Java dependencies we need to fetch for this target.
   public var dependencies: [JavaDependencyDescriptor]?
+  /// Maven repositories for this target when fetching dependencies.
+  ///
+  /// `mavenCentral()` will always be used.
+  ///
+  /// Reference: [Repository Types](https://docs.gradle.org/current/userguide/supported_repository_types.html)
+  public var repositories: [JavaRepositoryDescriptor]?
 
   public init() {
   }
@@ -149,6 +155,82 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 
   struct JavaDependencyDescriptorError: Error {
     let message: String
+  }
+}
+
+/// Descriptor for [repositories](https://docs.gradle.org/current/userguide/supported_repository_types.html#sec:maven-repo)
+public enum JavaRepositoryDescriptor: Hashable, Codable, Equatable {
+
+  /// Haven't found a proper way to test credentials, packages that need to download from private repo can be downloaded by maven and then use local repo instead
+  /// 
+  /// References: 
+  ///   - [Maven repositories](https://docs.gradle.org/current/userguide/supported_repository_types.html#sec:maven-repo)
+  ///   - [Artifacts](https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.repositories.MavenArtifactRepository.html#:~:text=urls)-,Adds%20some%20additional%20URLs%20to%20use%20to%20find%20artifact%20files.%20Note%20that%20these%20URLs%20are%20not%20used%20to%20find%20POM%20files.,-The)
+  case maven(url: String, artifactUrls: [String]? = nil)
+  case mavenLocal(includeGroups: [String]? = nil)
+  case other(_ type: String)
+
+  enum CodingKeys: String, CodingKey { case type, url, artifactUrls, credentials, includeGroups }
+
+  public init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    let type = try c.decode(String.self, forKey: .type)
+    switch type {
+    case "maven":
+      self = try .maven(
+        url: c.decode(String.self, forKey: .url),
+        artifactUrls: try? c.decode([String].self, forKey: .artifactUrls),
+      )
+    case "mavenLocal":
+      self = .mavenLocal(includeGroups: try? c.decode([String].self, forKey: .includeGroups))
+    default:
+      self = .other(type)
+    }
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var c = encoder.container(keyedBy: CodingKeys.self)
+    switch self {
+    case let .maven(url, artifactUrls/*, creds*/):
+      try c.encode("maven", forKey: .type)
+      try c.encode(url, forKey: .url)
+      if let artifactUrls = artifactUrls {
+        try c.encode(artifactUrls, forKey: .artifactUrls)
+      }
+    case let .mavenLocal(includeGroups):
+      try c.encode("mavenLocal", forKey: .type)
+      if let gs = includeGroups {
+        try c.encode(gs, forKey: .includeGroups)
+      }
+    case let .other(type):
+      try c.encode("\(type)", forKey: .type)
+    }
+  }
+
+  public func renderGradleRepository() -> String? {
+    switch self {
+    case let .maven(url, artifactUrls):
+      return """
+        maven {
+          url = uri("\(url)")
+          \((artifactUrls ?? []).map({ "artifactUrls(\"\($0)\")" }).joined(separator: "\n"))
+        }
+        """
+    case let .mavenLocal(groups):
+      if let gs = groups {
+        return """
+          mavenLocal {
+            content {
+              \(gs.map({ "includeGroup(\"\($0)\")" }).joined(separator: "\n"))
+            }
+          }
+          """
+      } else {
+          return "mavenLocal()"
+      }
+    case let .other(type):
+      return "\(type)()"
+    }
   }
 }
 
