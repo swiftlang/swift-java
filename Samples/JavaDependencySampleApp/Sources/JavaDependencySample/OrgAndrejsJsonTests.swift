@@ -25,9 +25,10 @@ enum OrgAndrejsJsonTests {
         let json = Json(#"{"host": "localhost", "port": 80}"#)
 
         precondition(json.hasOwnProperty("port"))
+        let port: JavaInteger = json.get("port")!
 
-        print(json.get("port").toString())
-        precondition(json.get("port").as(JavaInteger.self)!.intValue() == 80)
+        precondition(port.toString() == "80")
+        precondition(port.intValue() == 80)
 
         print("Reading swift-java.config inside OrgAndrejsJson folder...")
 
