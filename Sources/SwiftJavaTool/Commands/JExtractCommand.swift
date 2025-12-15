@@ -58,11 +58,8 @@ extension SwiftJava {
     @Option(help: "The directory where generated Java files should be written. Generally used with jextract mode.")
     var outputJava: String
 
-    @Flag(help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
-    var writeEmptyFiles: Bool = false
-
-    @Option(help: "The mode of generation to use for the output files. Used with jextract mode. By default, unsigned Swift types are imported as their bit-width compatible signed Java counterparts, and annotated using the '@Unsigned' annotation. You may choose the 'wrapGuava' mode in order to import types as class wrapper types (`UnsignedInteger` et al) defined by the Google Guava library's `com.google.common.primitives' package. that ensure complete type-safety with regards to unsigned values, however they incur an allocation and performance overhead.")
-    var unsignedNumbersMode: JExtractUnsignedIntegerMode?
+    @Flag(inversion: .prefixedNo, help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
+    var writeEmptyFiles: Bool?
 
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
     var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
@@ -81,6 +78,12 @@ extension SwiftJava {
 
     @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
     var asyncFuncMode: JExtractAsyncFuncMode?
+
+    @Flag(inversion: .prefixedNo, help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode.")
+    var enableJavaCallbacks: Bool?
+
+    @Option(help: "If specified, JExtract will output to this file a list of paths to all generated Java source files")
+    var generatedJavaSourcesListFileOutput: String?
   }
 }
 
@@ -92,14 +95,13 @@ extension SwiftJava.JExtractCommand {
     config.outputJavaDirectory = outputJava
     config.outputSwiftDirectory = outputSwift
 
-    // @Flag does not support optional, so we check ourself if it is passed
-    let writeEmptyFiles = CommandLine.arguments.contains("--write-empty-files") ? true : nil
     configure(&config.writeEmptyFiles, overrideWith: writeEmptyFiles)
+    configure(&config.enableJavaCallbacks, overrideWith: enableJavaCallbacks)
 
-    configure(&config.unsignedNumbersMode, overrideWith: self.unsignedNumbersMode)
     configure(&config.minimumInputAccessLevelMode, overrideWith: self.minimumInputAccessLevelMode)
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
     configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
+    configure(&config.generatedJavaSourcesListFileOutput, overrideWith: self.generatedJavaSourcesListFileOutput)
 
     try checkModeCompatibility(config: config)
 
@@ -121,16 +123,13 @@ extension SwiftJava.JExtractCommand {
 
   /// Check if the configured modes are compatible, and fail if not
   func checkModeCompatibility(config: Configuration) throws {
-    if config.effectiveMode == .jni {
-      switch config.effectiveUnsignedNumbersMode {
-      case .annotate:
-        () // OK
-      case .wrapGuava:
-        throw IllegalModeCombinationError("JNI mode does not support '\(JExtractUnsignedIntegerMode.wrapGuava)' Unsigned integer mode! \(Self.helpMessage)")
-      }
-    } else if config.effectiveMode == .ffm {
+    if config.effectiveMode == .ffm {
       guard config.effectiveMemoryManagementMode == .explicit else {
-        throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode)' memory management mode! \(Self.helpMessage)")
+        throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode ?? .default)' memory management mode! \(Self.helpMessage())")
+      }
+
+      if let enableJavaCallbacks = config.enableJavaCallbacks, enableJavaCallbacks {
+        throw IllegalModeCombinationError("FFM mode does not support enabling Java callbacks! \(Self.helpMessage())")
       }
     }
   }
@@ -161,7 +160,6 @@ struct IllegalModeCombinationError: Error {
 }
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
-extension JExtractUnsignedIntegerMode: ExpressibleByArgument {}
 extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
 extension JExtractMemoryManagementMode: ExpressibleByArgument {}
 extension JExtractAsyncFuncMode: ExpressibleByArgument {}

@@ -13,19 +13,24 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJava
-import CSwiftJavaJNI
 
-final class JNI {
-  static var shared: JNI!
+public class StorageItem {
+  public let value: Int64
 
-  let applicationClassLoader: JavaClassLoader
-
-  init(fromVM javaVM: JavaVirtualMachine) {
-    self.applicationClassLoader = try! JavaClass<JavaThread>(environment: javaVM.environment()).currentThread().getContextClassLoader()
+  public init(value: Int64) {
+    self.value = value
   }
 }
 
-// Called by generated code, and not automatically by Java.
-public func _JNI_OnLoad(_ javaVM: JavaVMPointer, _ reserved: UnsafeMutableRawPointer) {
-  JNI.shared = JNI(fromVM: JavaVirtualMachine(adoptingJVM: javaVM))
+public protocol Storage {
+  func load() -> StorageItem
+  func save(_ item: StorageItem)
+}
+
+public func saveWithStorage(_ item: StorageItem, s: any Storage) {
+  s.save(item);
+}
+
+public func loadWithStorage(s: any Storage) -> StorageItem {
+  return s.load();
 }

@@ -99,3 +99,15 @@ public class MySwiftClass {
     return self.x + other.longValue()
   }
 }
+
+extension MySwiftClass: CustomStringConvertible {
+  public var description: String {
+    "MySwiftClass(x: \(x), y: \(y))"
+  }
+}
+
+extension MySwiftClass: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    "debug: MySwiftClass(x: \(x), y: \(y))"
+  }
+}

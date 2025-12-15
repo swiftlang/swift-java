@@ -101,7 +101,7 @@ def jextract = tasks.register("jextract", Exec) {
     }
 
     // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
-    def cmdArgs = ["build", "--disable-experimental-prebuilts"]
+    def cmdArgs = ["build", "--disable-experimental-prebuilts", "--disable-sandbox"]
 
     // Check if the 'swiftSdk' project property was passed
     if (project.hasProperty('swiftSdk')) {
@@ -208,4 +208,12 @@ jmh {
         // Enable tracing downcalls (to Swift)
         "-Djextract.trace.downcalls=false"
     ]
+}
+
+task printGradleHome {
+    doLast {
+        println "Gradle Home: ${gradle.gradleHomeDir}"
+        println "Gradle Version: ${gradle.gradleVersion}"
+        println "Gradle User Home: ${gradle.gradleUserHomeDir}"
+    }
 }

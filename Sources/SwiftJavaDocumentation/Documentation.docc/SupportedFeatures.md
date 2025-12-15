@@ -92,7 +92,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Non-escaping closures with primitive arguments/results: `func callMe(maybe: (Int) -> (Double))`   | ✅        | ✅   |
 | Non-escaping closures with object arguments/results: `func callMe(maybe: (JavaObj) -> (JavaObj))` | ❌        | ❌   |
 | `@escaping` closures: `func callMe(_: @escaping () -> ())`                                        | ❌        | ❌   |
-| Swift type extensions: `extension String { func uppercased() }`                      | 🟡       | 🟡  |
+| Swift type extensions: `extension String { func uppercased() }`                      | ✅       | ✅  |
 | Swift macros (maybe)                                                                 | ❌        | ❌   |
 | Result builders                                                                      | ❌        | ❌   |
 | Automatic Reference Counting of class types / lifetime safety                        | ✅        | ✅   |
@@ -116,8 +116,6 @@ as their bit-width equivalents. This is potentially dangerous because values lar
 *signed* type in Java, e.g. `200` stored in an `UInt8` in Swift, would be interpreted as a `byte` of value `-56`, 
 because Java's `byte` type is _signed_.
 
-#### Unsigned numbers mode: annotate (default)
-
 Because in many situations the data represented by such numbers is merely passed along, and not interpreted by Java,
 this may be safe to pass along. However, interpreting unsigned values incorrectly like this can lead to subtle mistakes
 on the Java side.
@@ -134,35 +132,6 @@ on the Java side.
 | `UInt64`   | `long` ⚠️ |
 | `Float`    | `float`   |
 | `Double`   | `double`  |
-
-#### Unsigned numbers mode: wrapGuava
-
-You can configure `jextract` (in FFM mode) to instead import unsigned values as their unsigned type-safe representations
-as offered by the Guava library: `UnsignedLong` or `UnsignedInt`.  To enable this mode pass the `--unsigned-numbers-mode wrapGuava`
-command line option, or set the corresponding configuration value in `swift-java.config` (TODO).
-
-This approach is type-safe, however it incurs a performance penalty for allocating a wrapper class for every 
-unsigned integer parameter passed to and from native Swift functions.
-
-SwiftJava _does not_ vendor or provide the Guava library as a dependency, and when using this mode
-you are expected to add a Guava dependency to your Java project.
-
-> You can read more about the unsigned integers support 
-
-| Swift type | Java type                                              |
-|------------|--------------------------------------------------------|
-| `Int8`     | `byte`                                                 |
-| `UInt8`    | `com.google.common.primitives.UnsignedInteger` (class) | 
-| `Int16`    | `short`                                                |
-| `UInt16`   | `char`                                                 |
-| `Int32`    | `int`                                                  |
-| `UInt32`   | `com.google.common.primitives.UnsignedInteger` (class)️ |
-| `Int64`    | `long`                                                 |
-| `UInt64`   | `com.google.common.primitives.UnsignedLong` (class)    |
-| `Float`    | `float`                                                |
-| `Double`   | `double`                                               |
-
-> Note: The `wrapGuava` mode is currently only available in FFM mode of jextract.
 
 ### Enums
 

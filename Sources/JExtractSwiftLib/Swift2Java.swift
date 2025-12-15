@@ -17,6 +17,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftJavaShared
 import SwiftJavaConfigurationShared
+import OrderedCollections
 
 public struct SwiftToJava {
   let config: Configuration
@@ -34,6 +35,7 @@ public struct SwiftToJava {
 
     let translator = Swift2JavaTranslator(config: config)
     translator.log.logLevel = config.logLevel ?? .info
+    let log = translator.log
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
       translator.log.warning("Configured java package is '', consider specifying concrete package for generated sources.")
@@ -43,28 +45,14 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-input' directory!")
     }
 
-    translator.log.info("Input swift = \(inputSwift)")
+    log.info("Input swift = \(inputSwift)")
     let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
-    translator.log.info("Input paths = \(inputPaths)")
+    log.info("Input paths = \(inputPaths)")
 
-    var allFiles: [URL] = []
-    let fileManager = FileManager.default
-    let log = translator.log
-
-    for path in inputPaths {
-      log.info("Input path: \(path)")
-      if isDirectory(url: path) {
-        if let enumerator = fileManager.enumerator(at: path, includingPropertiesForKeys: nil) {
-          for case let fileURL as URL in enumerator {
-            allFiles.append(fileURL)
-          }
-        }
-      } else if path.isFileURL {
-        allFiles.append(path)
-      }
-    }
+    let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
 
     // Register files to the translator.
+    let fileManager = FileManager.default
     for file in allFiles {
       guard canExtract(from: file) else {
         continue
@@ -137,8 +125,82 @@ public struct SwiftToJava {
 
 }
 
-func isDirectory(url: URL) -> Bool {
-  var isDirectory: ObjCBool = false
-  _ = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
-  return isDirectory.boolValue
+extension URL {
+  var isDirectory: Bool {
+    var isDir: ObjCBool = false
+    _ = FileManager.default.fileExists(atPath: self.path, isDirectory: &isDir)
+    return isDir.boolValue
+  }
+}
+
+/// Collect all files with given 'suffix', will explore directories recursively.
+public func collectAllFiles(suffix: String, in inputPaths: [URL], log: Logger) -> OrderedSet<URL> {
+  guard !inputPaths.isEmpty else {
+    return []
+  }
+
+  let fileManager = FileManager.default
+  var allFiles: OrderedSet<URL> = []
+  allFiles.reserveCapacity(32) // rough guesstimate
+  
+  let resourceKeys: [URLResourceKey] = [
+    .isRegularFileKey,
+    .isDirectoryKey,
+    .nameKey
+  ]
+  
+  for path in inputPaths {
+    do {
+      try collectFilesFromPath(
+        path,
+        suffix: suffix,
+        fileManager: fileManager,
+        resourceKeys: resourceKeys,
+        into: &allFiles,
+        log: log
+      )
+    } catch {
+      log.trace("Failed to collect paths in: \(path), skipping.")
+    }
+  }
+  
+  return allFiles 
+}
+
+private func collectFilesFromPath(
+  _ path: URL,
+  suffix: String,
+  fileManager: FileManager,
+  resourceKeys: [URLResourceKey],
+  into allFiles: inout OrderedSet<URL>,
+  log: Logger
+) throws {
+  guard fileManager.fileExists(atPath: path.path) else {
+    return
+  }
+  
+  if path.isDirectory {
+    let enumerator = fileManager.enumerator(
+      at: path,
+      includingPropertiesForKeys: resourceKeys,
+      options: [.skipsHiddenFiles],
+      errorHandler: { url, error in
+        return true
+      })
+    guard let enumerator else {
+      return
+    }
+    
+    for case let fileURL as URL in enumerator {
+      try? collectFilesFromPath(fileURL, suffix: suffix, fileManager: fileManager, resourceKeys: resourceKeys, into: &allFiles, log: log)
+    }
+  } 
+  
+  guard path.isFileURL else {
+    return
+  }
+  guard path.lastPathComponent.hasSuffix(suffix) else {
+    return
+  }
+  allFiles.append(path)
 }

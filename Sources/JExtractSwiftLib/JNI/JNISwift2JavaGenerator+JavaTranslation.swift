@@ -16,6 +16,17 @@ import JavaTypes
 import SwiftJavaConfigurationShared
 
 extension JNISwift2JavaGenerator {
+  var javaTranslator: JavaTranslation {
+    JavaTranslation(
+      config: config,
+      swiftModuleName: swiftModuleName,
+      javaPackage: self.javaPackage,
+      javaClassLookupTable: self.javaClassLookupTable,
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+      protocolWrappers: self.interfaceProtocolWrappers
+    )
+  }
+
   func translatedDecl(
     for decl: ImportedFunc
   ) -> TranslatedFunctionDecl? {
@@ -25,14 +36,7 @@ extension JNISwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(
-        config: config,
-        swiftModuleName: swiftModuleName,
-        javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
-      )
-      translated = try translation.translate(decl)
+      translated = try self.javaTranslator.translate(decl)
     } catch {
       self.logger.debug("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
       translated = nil
@@ -56,7 +60,8 @@ extension JNISwift2JavaGenerator {
         swiftModuleName: swiftModuleName,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+        protocolWrappers: self.interfaceProtocolWrappers
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -74,13 +79,15 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
+    let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
         config: self.config,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes
+        knownTypes: self.knownTypes,
+        protocolWrappers: self.protocolWrappers
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -105,7 +112,7 @@ extension JNISwift2JavaGenerator {
 
       let caseName = enumCase.name.firstCharacterUppercased
       let enumName = enumCase.enumType.nominalTypeDecl.name
-      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName).$NativeParameters")
+      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName)._NativeParameters")
       let getAsCaseName = "getAs\(caseName)"
       // If the case has no parameters, we can skip the native call.
       let constructRecordConversion = JavaNativeConversionStep.method(.constant("Optional"), function: "of", arguments: [
@@ -168,7 +175,8 @@ extension JNISwift2JavaGenerator {
         config: self.config,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes
+        knownTypes: self.knownTypes,
+        protocolWrappers: self.protocolWrappers
       )
 
       // Types with no parent will be outputted inside a "module" class.
@@ -357,18 +365,6 @@ extension JNISwift2JavaGenerator {
       // If the result type should cause any annotations on the method, include them here.
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
-      // If we need to handle unsigned integers do so here
-      if config.effectiveUnsignedNumbersMode.needsConversion {
-        if let unsignedWrapperType = JavaType.unsignedWrapper(for: swiftType) {
-          return TranslatedParameter(
-            parameter: JavaParameter(name: parameterName, type: unsignedWrapperType, annotations: parameterAnnotations),
-            conversion: unsignedResultConversion(
-                swiftType, to: unsignedWrapperType,
-                mode: self.config.effectiveUnsignedNumbersMode)
-          )
-        }
-      }
-
       switch swiftType {
       case .nominal(let nominalType):
         let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
@@ -405,8 +401,8 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
@@ -456,7 +452,7 @@ extension JNISwift2JavaGenerator {
         return try translateProtocolParameter(
           protocolType: proto,
           parameterName: parameterName,
-          javaGenericName: "$T\(parameterPosition)"
+          javaGenericName: "_T\(parameterPosition)"
         )
 
       case .genericParameter(let generic):
@@ -478,20 +474,6 @@ extension JNISwift2JavaGenerator {
 
       case .metatype, .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
-      }
-    }
-
-    func unsignedResultConversion(
-      _ from: SwiftType,
-      to javaType: JavaType,
-      mode: JExtractUnsignedIntegerMode
-    ) -> JavaNativeConversionStep {
-      switch mode {
-      case .annotate:
-        return .placeholder // no conversions
-
-      case .wrapGuava:
-        fatalError("JExtract in JNI mode does not support the \(JExtractUnsignedIntegerMode.wrapGuava) unsigned numerics mode")
       }
     }
 
@@ -585,14 +567,14 @@ extension JNISwift2JavaGenerator {
         }
       }
 
-      // We assume this is a JExtract class.
+      // We just pass down the jobject
       return TranslatedParameter(
         parameter: JavaParameter(
           name: parameterName,
           type: .generic(name: javaGenericName, extends: javaProtocolTypes),
           annotations: []
         ),
-        conversion: .commaSeparated([.valueMemoryAddress(.placeholder), .typeMetadataAddress(.placeholder)])
+        conversion: .placeholder
       )
     }
 
@@ -628,8 +610,8 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        if nominalType.isJavaKitWrapper {
-          guard let javaType = nominalTypeName.parseJavaClassFromJavaKitName(in: self.javaClassLookupTable) else {
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
@@ -703,7 +685,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        if nominalType.isJavaKitWrapper {
+        if nominalType.isSwiftJavaWrapper {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
@@ -789,7 +771,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
@@ -836,7 +818,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 
@@ -885,7 +867,7 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isJavaKitWrapper else {
+        guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 
@@ -965,7 +947,7 @@ extension JNISwift2JavaGenerator {
 
     /// Function signature of the native function that will be implemented by Swift
     let nativeFunctionSignature: NativeFunctionSignature
-
+    
     /// Annotations to include on the Java function declaration
     var annotations: [JavaAnnotation] {
       self.translatedFunctionSignature.annotations
@@ -1332,5 +1314,12 @@ extension JNISwift2JavaGenerator {
     /// The user has not supplied a mapping from `SwiftType` to
     /// a java class.
     case wrappedJavaClassTranslationNotProvided(SwiftType)
+
+    // FIXME: Remove once we support protocol variables
+    case protocolVariablesNotSupported
+
+    /// We cannot generate interface wrappers for
+    /// protocols that we unable to be jextracted.
+    case protocolWasNotExtracted
   }
 }

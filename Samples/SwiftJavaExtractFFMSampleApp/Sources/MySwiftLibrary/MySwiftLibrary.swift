@@ -63,6 +63,27 @@ public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
 }
 
+public func getArray() -> [UInt8] {
+  return [1, 2, 3]
+}
+
+public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: Int) -> Int {
+  let bufferPointer = UnsafeRawBufferPointer(start: actuallyAnArray, count: count)
+  let array = Array(bufferPointer)
+  return Int(array.reduce(0, { partialResult, element in partialResult + element }))
+}
+
+public func sumAllByteArrayElements(array: [UInt8]) -> Int {
+  return Int(array.reduce(0, { partialResult, element in partialResult + element }))
+}
+public func returnSwiftArray() -> [UInt8] {
+  return [1, 2, 3, 4]
+}
+
+public func withArray(body: ([UInt8]) -> Void) {
+  body([1, 2, 3])
+}
+
 public func globalReceiveSomeDataProtocol(data: some DataProtocol) -> Int {
   p(Array(data).description)
   return data.count

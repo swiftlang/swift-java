@@ -46,7 +46,6 @@ final class JNIUnsignedNumberTests {
   @Test("Import: UInt32 (annotate)")
   func jni_unsignedInt_annotate() throws {
     var config = Configuration()
-    config.unsignedNumbersMode = .annotate
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
@@ -97,36 +96,9 @@ final class JNIUnsignedNumberTests {
     )
   }
 
-  @Test("Import: return UInt64 (wrap, unsupported)")
-  func jni_return_unsignedLongWrap() throws {
-    var config = Configuration()
-    config.unsignedNumbersMode = .wrapGuava
-
-    try assertOutput(
-      input: "public func returnUnsignedLong() -> UInt64",
-      config: config,
-      .jni, .java,
-      detectChunkByInitialLines: 2,
-      expectedChunks: [
-        // we do not import in wrap mode
-        """
-        public final class SwiftModule {
-          static final String LIB_NAME = "SwiftModule";
-
-          static {
-            System.loadLibrary(LIB_NAME);
-          }
-
-        }
-        """,
-      ]
-    )
-  }
-
   @Test("Import: take UInt64 return UInt32 (annotate)")
   func jni_echo_unsignedLong_annotate() throws {
-    var config = Configuration()
-    config.unsignedNumbersMode = .annotate
+    let config = Configuration()
 
     try assertOutput(
       input: "public func unsignedLong(first: UInt64, second: UInt32) -> UInt32",

@@ -12,14 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaConfigurationShared
-import JavaTypes
+package com.example.swift;
 
-extension Configuration {
-  public var effectiveUnsignedNumericsMode: UnsignedNumericsMode {
-    switch effectiveUnsignedNumbersMode {
-    case .annotate: .ignoreSign
-    case .wrapGuava: .wrapUnsignedGuava
+import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.SwiftArena;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class SwiftTypeInSubDirectoryTest {
+
+    @Test
+    void test_SwiftTypeInSubDirectory_hello() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftTypeInSubDirectory o = SwiftTypeInSubDirectory.init(arena);
+            var num = o.hello();
+            assertEquals(12, num);
+        }
     }
-  }
+
 }
