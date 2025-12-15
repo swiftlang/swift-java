@@ -634,7 +634,32 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    printer.print(
+    if let documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
+      printer.print("/**")
+      if let summary = documentation.summary {
+        printer.print(" * \(summary)")
+      }
+
+      if let discussion = documentation.discussion {
+        let paragraphs = discussion.split(separator: "\n\n")
+        for paragraph in paragraphs {
+          printer.print(" * <p>")
+          printer.print(" * \(paragraph)")
+          printer.print(" * </p>")
+        }
+      }
+
+      // TODO: This might not match the name
+      for parameter in documentation.parameters {
+        printer.print(" * @param \(parameter.name) \(parameter.description)")
+      }
+
+      if let returns = documentation.returns {
+        printer.print(" * @return \(returns)")
+      }
+      printer.print(" */")
+    } else {
+      printer.print(
       """
       /**
        * Downcall to Swift:
@@ -643,7 +668,8 @@ extension JNISwift2JavaGenerator {
        * }
        */
       """
-    )
+      )
+    }
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
