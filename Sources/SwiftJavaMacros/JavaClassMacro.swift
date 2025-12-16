@@ -73,9 +73,9 @@ extension JavaClassMacro: MemberMacro {
     let superclass = specifiedSuperclass ?? "JavaObject"
 
     // Check that the class name is fully-qualified, as it should be.
-    let specifiedClassName = classNameSegment.content.text
-    if specifiedClassName.firstIndex(of: ".") == nil {
-      throw MacroErrors.classNameNotFullyQualified(specifiedClassName)
+    let className = classNameSegment.content.text
+    if className.firstIndex(of: ".") == nil {
+      throw MacroErrors.classNameNotFullyQualified(className)
     }
 
     var members: [DeclSyntax] = []
@@ -96,9 +96,9 @@ extension JavaClassMacro: MemberMacro {
       /// The full Java class name for this Swift type.
       \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String {
         #if os(Android)
-          AndroidSupport.androidDesugarClassNameConversion(for: "\(raw: specifiedClassName)")
+          AndroidSupport.androidDesugarClassNameConversion(for: "\(raw: className)")
         #else
-          "\(raw: specifiedClassName)"
+          "\(raw: className)"
         #endif
       }
       """
