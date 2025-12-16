@@ -30,6 +30,17 @@ struct SwiftDocumentationParsingTests {
           public static void f() {
           """
         ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary
+           */
+          public static void f() {
+          """
+        ]
       )
     ]
   )
@@ -52,6 +63,26 @@ struct SwiftDocumentationParsingTests {
     arguments: [
       (
         JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
+          """,
+          """
+          /**
+           * Simple summary
+           */
+          public static void g() {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
         [
           """
           /**
@@ -109,6 +140,18 @@ struct SwiftDocumentationParsingTests {
           public static MyClass f(SwiftArena swiftArena$) {
           """
         ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary
+           * @param swiftArena$ the arena that will manage the lifetime and allocation of Swift objects
+           */
+          public static MyClass f(AllocatingSwiftArena swiftArena$)
+          """
+        ]
       )
     ]
   )
@@ -133,6 +176,23 @@ struct SwiftDocumentationParsingTests {
     arguments: [
       (
         JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
         [
           """
           /**
@@ -177,6 +237,23 @@ struct SwiftDocumentationParsingTests {
     arguments: [
       (
         JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
         [
           """
           /**
@@ -242,6 +319,29 @@ struct SwiftDocumentationParsingTests {
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
         ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary, that we have broken across multiple lines
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * <p>
+           * Some more disucssion...
+           * </p>
+           * <p>
+           * And more...
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value across multiple lines
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
       )
     ]
   )
@@ -282,6 +382,22 @@ struct SwiftDocumentationParsingTests {
     arguments: [
       (
         JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * <p>
+           * Discussion?
+           * </p>
+           * @param arg0 this is arg0
+           * @param arg1 this is arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
         [
           """
           /**

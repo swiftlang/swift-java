@@ -370,7 +370,6 @@ extension FFMSwift2JavaGenerator {
       paramDecls.append("AllocatingSwiftArena swiftArena$")
     }
 
-    // TODO: we could copy the Swift method's documentation over here, that'd be great UX
     printDeclDocumentation(&printer, decl)
     printer.printBraceBlock(
       """
@@ -387,16 +386,29 @@ extension FFMSwift2JavaGenerator {
   }
 
   private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    printer.print(
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * \(decl.signatureString)
-       * }
-       */
-      """
-    )
+    if var documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
+      if let translatedDecl = translatedDecl(for: decl), translatedDecl.translatedSignature.requiresSwiftArena {
+        documentation.parameters.append(
+          SwiftDocumentation.Parameter(
+            name: "swiftArena$",
+            description: "the arena that will manage the lifetime and allocation of Swift objects"
+          )
+        )
+      }
+
+      documentation.print(in: &printer)
+    } else {
+      printer.print(
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * \(decl.signatureString)
+         * }
+         */
+        """
+      )
+    }
   }
 
   /// Print the actual downcall to the Swift API.

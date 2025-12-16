@@ -11,6 +11,31 @@ struct SwiftDocumentation: Equatable {
   var discussion: String?
   var parameters: [Parameter] = []
   var returns: String?
+
+  func print(in printer: inout CodePrinter) {
+    printer.print("/**")
+    if let summary = summary {
+      printer.print(" * \(summary)")
+    }
+
+    if let discussion = discussion {
+      let paragraphs = discussion.split(separator: "\n\n")
+      for paragraph in paragraphs {
+        printer.print(" * <p>")
+        printer.print(" * \(paragraph)")
+        printer.print(" * </p>")
+      }
+    }
+
+    for parameter in parameters {
+      printer.print(" * @param \(parameter.name) \(parameter.description)")
+    }
+
+    if let returns = returns {
+      printer.print(" * @return \(returns)")
+    }
+    printer.print(" */")
+  }
 }
 
 enum SwiftDocumentationParser {

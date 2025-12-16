@@ -634,33 +634,17 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    if let documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
-      printer.print("/**")
-      if let summary = documentation.summary {
-        printer.print(" * \(summary)")
-      }
-
-      if let discussion = documentation.discussion {
-        let paragraphs = discussion.split(separator: "\n\n")
-        for paragraph in paragraphs {
-          printer.print(" * <p>")
-          printer.print(" * \(paragraph)")
-          printer.print(" * </p>")
-        }
-      }
-
-      for parameter in documentation.parameters {
-        printer.print(" * @param \(parameter.name) \(parameter.description)")
-      }
-
+    if var documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
       if let translatedDecl = translatedDecl(for: decl), translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        printer.print(" * @param swiftArena$ the arena that the the returned object will be attached to")
+        documentation.parameters.append(
+          SwiftDocumentation.Parameter(
+            name: "swiftArena$",
+            description: "the arena that the the returned object will be attached to"
+          )
+        )
       }
 
-      if let returns = documentation.returns {
-        printer.print(" * @return \(returns)")
-      }
-      printer.print(" */")
+      documentation.print(in: &printer)
     } else {
       printer.print(
       """
