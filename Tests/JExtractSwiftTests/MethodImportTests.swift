@@ -91,10 +91,7 @@ final class MethodImportTests {
       expected:
         """
         /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public func helloWorld()
-         * }
+         * Hello World!
          */
         public static void helloWorld() {
             swiftjava___FakeModule_helloWorld.call();
