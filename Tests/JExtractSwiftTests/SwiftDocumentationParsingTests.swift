@@ -12,176 +12,307 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import JExtractSwiftLib
+import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 struct SwiftDocumentationParsingTests {
-  @Test
-  func simple() throws {
-    assert(
-      parsing:
-        """
-        /// Simple summary
-        """,
-      as: SwiftDocumentation(summary: "Simple summary")
-    )
-  }
-
-  @Test
-  func full_individualParameters() throws {
-    assert(
-      parsing:
-        """
-        /// Simple summary
-        /// 
-        /// Some information about this function
-        /// that will span multiple lines
-        /// 
-        /// - Parameter arg0: Description about arg0
-        /// - Parameter arg1: Description about arg1
-        /// 
-        /// - Returns: return value
-        """,
-      as: SwiftDocumentation(
-        summary: "Simple summary",
-        discussion: "Some information about this function that will span multiple lines",
-        parameters: [
-          .init(
-            name: "arg0",
-            description: "Description about arg0"
-          ),
-          .init(
-            name: "arg1",
-            description: "Description about arg1"
-          )
-        ],
-        returns: "return value"
-      )
-    )
-  }
-
-  @Test
-  func full_groupedParameters() throws {
-    assert(
-      parsing:
-        """
-        /// Simple summary
-        /// 
-        /// Some information about this function
-        /// that will span multiple lines
-        /// 
-        /// - Parameters:
-        ///   - arg0: Description about arg0
-        ///   - arg1: Description about arg1
-        /// 
-        /// - Returns: return value
-        """,
-      as: SwiftDocumentation(
-        summary: "Simple summary",
-        discussion: "Some information about this function that will span multiple lines",
-        parameters: [
-          .init(
-            name: "arg0",
-            description: "Description about arg0"
-          ),
-          .init(
-            name: "arg1",
-            description: "Description about arg1"
-          )
-        ],
-        returns: "return value"
-      )
-    )
-  }
-
-  @Test
-  func complex_groupedParameters() throws {
-    assert(
-      parsing:
-        """
-        /// Simple summary, that we have broken
-        /// across multiple lines
-        /// 
-        /// Some information about this function
-        /// that will span multiple lines
-        ///
-        /// Some more disucssion...
-        /// 
-        /// - Parameters:
-        ///   - arg0: Description about arg0
-        ///           that spans multiple lines
-        ///   - arg1: Description about arg1
-        ///           that spans multiple lines
-        ///           and even more?
-        ///
-        /// And more...
-        /// 
-        /// - Returns: return value
-        ///            across multiple lines
-        """,
-      as: SwiftDocumentation(
-        summary: "Simple summary, that we have broken across multiple lines",
-        discussion:
+  @Test(
+    "Simple Swift func documentation",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
           """
-          Some information about this function that will span multiple lines
-          
-          Some more disucssion...
-          
-          And more...
+          /**
+           * Simple summary
+           */
+          public static void f() {
+          """
+        ]
+      )
+    ]
+  )
+  func simple(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary
+      public func f() {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
+    "Swift file with lots of newlines",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
           """,
-        parameters: [
-          .init(
-            name: "arg0",
-            description: "Description about arg0 that spans multiple lines"
-          ),
-          .init(
-            name: "arg1",
-            description: "Description about arg1 that spans multiple lines and even more?"
-          )
-        ],
-        returns: "return value across multiple lines"
+          """
+          /**
+           * Simple summary
+           */
+          public static void g() {
+          """
+        ]
       )
+    ]
+  )
+  func swiftFileWithNewlines(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Random comment
+      
+      
+      
+      
+      public func f() {}
+      
+      /// Random comment 2
+      
+      /// Simple summary
+      public func g() {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
     )
   }
 
-  @Test
-  func randomly_placed() throws {
-    assert(
-      parsing:
-        """
-        /// - Parameter arg0: this is arg0
-        /// - Returns: return value
-        /// - Parameter arg1: this is arg1
-        ///
-        /// Discussion? 
-        """,
-      as: SwiftDocumentation(
-        summary: nil,
-        discussion: "Discussion?",
-        parameters: [
-          .init(
-            name: "arg0",
-            description: "this is arg0"
-          ),
-          .init(
-            name: "arg1",
-            description: "this is arg1"
-          )
-        ],
-        returns: "return value"
+  @Test(
+    "Swift arena parameter",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           * @param swiftArena$ the arena that the the returned object will be attached to
+           */
+          public static MyClass f(SwiftArena swiftArena$) {
+          """
+        ]
       )
+    ]
+  )
+  func swiftArenaParam(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      public class MyClass {}
+      
+      /// Simple summary
+      public func f() -> MyClass {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
     )
   }
 
-  private func assert(
-    parsing input: String,
-    as expectedOutput: SwiftDocumentation,
-    sourceLocation: SourceLocation = #_sourceLocation
-  ) {
-    let result = SwiftDocumentationParser.parse(input)
-    #expect(
-      result == expectedOutput,
-      sourceLocation: sourceLocation
+  @Test(
+    "Full Swift func docs with individual params",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      )
+    ]
+  )
+  func full_individualParams(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary
+      /// 
+      /// Some information about this function
+      /// that will span multiple lines
+      /// 
+      /// - Parameter arg0: Description about arg0
+      /// - Parameter arg1: Description about arg1
+      /// 
+      /// - Returns: return value
+      public func f(arg0: String, arg1: String) {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
+    "Full Swift func docs with grouped params",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      )
+    ]
+  )
+  func full_groupedParams(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary
+      /// 
+      /// Some information about this function
+      /// that will span multiple lines
+      /// 
+      /// - Parameters:
+      ///   - arg0: Description about arg0
+      ///   - arg1: Description about arg1
+      /// 
+      /// - Returns: return value
+      public func f(arg0: String, arg1: String) {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
+    "Complex Swift func docs",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary, that we have broken across multiple lines
+           * <p>
+           * Some information about this function that will span multiple lines
+           * </p>
+           * <p>
+           * Some more disucssion...
+           * </p>
+           * <p>
+           * And more...
+           * </p>
+           * @param arg0 Description about arg0
+           * @param arg1 Description about arg1
+           * @return return value across multiple lines
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      )
+    ]
+  )
+  func complex(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary, that we have broken
+      /// across multiple lines
+      /// 
+      /// Some information about this function
+      /// that will span multiple lines
+      ///
+      /// Some more disucssion...
+      /// 
+      /// - Parameters:
+      ///   - arg0: Description about arg0
+      ///           that spans multiple lines
+      ///   - arg1: Description about arg1
+      ///           that spans multiple lines
+      ///           and even more?
+      ///
+      /// And more...
+      /// 
+      /// - Returns: return value
+      ///            across multiple lines
+      public func f(arg0: String, arg1: String) {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
+    "Random order docs",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * <p>
+           * Discussion?
+           * </p>
+           * @param arg0 this is arg0
+           * @param arg1 this is arg1
+           * @return return value
+           */
+          public static void f(java.lang.String arg0, java.lang.String arg1) {
+          """
+        ]
+      )
+    ]
+  )
+  func randomOrder(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// - Parameter arg0: this is arg0
+      /// - Returns: return value
+      /// - Parameter arg1: this is arg1
+      ///
+      /// Discussion? 
+      public func f(arg0: String, arg1: String) {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode, .java,
+      expectedChunks: expectedJavaChunks
     )
   }
 }

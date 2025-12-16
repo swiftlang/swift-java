@@ -24,17 +24,28 @@ enum SwiftDocumentationParser {
   // Capture Groups: 1=Tag, 2=Arg(Optional), 3=Description
   private static let tagRegex = try! NSRegularExpression(pattern: "^-\\s*(\\w+)(?:\\s+([^:]+))?\\s*:\\s*(.*)$")
 
-  static func parse<Syntax: SyntaxProtocol>(_ syntax: Syntax) -> SwiftDocumentation? {
-    let documentationComment = syntax.leadingTrivia
-    return parse(documentationComment.description)
+  static func parse(_ syntax: some SyntaxProtocol) -> SwiftDocumentation? {
+    // We must have at least one docline and newline, for this to be valid
+    guard syntax.leadingTrivia.count >= 2 else { return nil }
+
+    var comments = [String]()
+    var pieces = syntax.leadingTrivia.pieces
+
+    // We always expect a newline follows a docline comment
+    while case .newlines(1) = pieces.popLast(), case .docLineComment(let text) = pieces.popLast() {
+      comments.append(text)
+    }
+
+    guard !comments.isEmpty else { return nil }
+
+    return parse(comments.reversed())
   }
 
-  static func parse(_ rawString: String) -> SwiftDocumentation? {
+  private static func parse(_ doclines: [String]) -> SwiftDocumentation? {
     var doc = SwiftDocumentation()
     var state: State = .summary
 
-    // Pre-process: Strip "///" and trim whitespace
-    let lines = rawString.components(separatedBy: .newlines).map { line -> String in
+    let lines = doclines.map { line -> String in
       let trimmed = line.trimmingCharacters(in: .whitespaces)
       return trimmed.hasPrefix("///") ? String(trimmed.dropFirst(3)).trimmingCharacters(in: .whitespaces) : trimmed
     }
@@ -132,7 +143,7 @@ enum SwiftDocumentationParser {
     let range = NSRange(location: 0, length: line.utf16.count)
     guard let match = Self.tagRegex.firstMatch(in: line, options: [], range: range) else { return nil }
 
-    // Group 1: Tag Name (Always present if match succeeds)
+    // Group 1: Tag Name
     guard let typeRange = Range(match.range(at: 1), in: line) else { return nil }
     let type = String(line[typeRange])
 
@@ -144,7 +155,6 @@ enum SwiftDocumentationParser {
     }
 
     // Group 3: Description (Always present, potentially empty)
-    // Regex ensures match even if empty because of (.*)
     guard let descRange = Range(match.range(at: 3), in: line) else { return nil }
     let description = String(line[descRange])
 

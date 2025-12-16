@@ -649,9 +649,12 @@ extension JNISwift2JavaGenerator {
         }
       }
 
-      // TODO: This might not match the name
       for parameter in documentation.parameters {
         printer.print(" * @param \(parameter.name) \(parameter.description)")
+      }
+
+      if let translatedDecl = translatedDecl(for: decl), translatedDecl.translatedFunctionSignature.requiresSwiftArena {
+        printer.print(" * @param swiftArena$ the arena that the the returned object will be attached to")
       }
 
       if let returns = documentation.returns {
