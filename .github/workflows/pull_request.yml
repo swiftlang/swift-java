@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        swift_version: ['6.2']
+        swift_version: ['6.2.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
     env:
@@ -162,7 +162,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.2']
+        swift_version: ['6.2.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
     env:
@@ -234,7 +234,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.2']  # no nightly testing on macOS
+        swift_version: ['6.2.2']  # no nightly testing on macOS
         os_version: ['macos']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
