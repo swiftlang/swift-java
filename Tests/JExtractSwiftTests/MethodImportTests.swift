@@ -91,7 +91,9 @@ final class MethodImportTests {
       expected:
         """
         /**
-         * Downcall to Swift:
+         * Hello World!
+         * 
+         * <p>Downcall to Swift:
          * {@snippet lang=swift :
          * public func helloWorld()
          * }
