@@ -370,7 +370,11 @@ extension FFMSwift2JavaGenerator {
       paramDecls.append("AllocatingSwiftArena swiftArena$")
     }
 
-    printDeclDocumentation(&printer, decl)
+    TranslatedDocumentation.printDocumentation(
+      importedFunc: decl,
+      translatedDecl: translated,
+      in: &printer
+    )
     printer.printBraceBlock(
       """
       \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
@@ -382,32 +386,6 @@ extension FFMSwift2JavaGenerator {
       }
 
       printDowncall(&printer, decl)
-    }
-  }
-
-  private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    if var documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
-      if let translatedDecl = translatedDecl(for: decl), translatedDecl.translatedSignature.requiresSwiftArena {
-        documentation.parameters.append(
-          SwiftDocumentation.Parameter(
-            name: "swiftArena$",
-            description: "the arena that will manage the lifetime and allocation of Swift objects"
-          )
-        )
-      }
-
-      documentation.print(in: &printer)
-    } else {
-      printer.print(
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * \(decl.signatureString)
-         * }
-         */
-        """
-      )
     }
   }
 

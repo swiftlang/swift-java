@@ -25,31 +25,6 @@ struct SwiftDocumentation: Equatable {
   var discussion: String?
   var parameters: [Parameter] = []
   var returns: String?
-
-  func print(in printer: inout CodePrinter) {
-    printer.print("/**")
-    if let summary = summary {
-      printer.print(" * \(summary)")
-    }
-
-    if let discussion = discussion {
-      let paragraphs = discussion.split(separator: "\n\n")
-      for paragraph in paragraphs {
-        printer.print(" * <p>")
-        printer.print(" * \(paragraph)")
-        printer.print(" * </p>")
-      }
-    }
-
-    for parameter in parameters {
-      printer.print(" * @param \(parameter.name) \(parameter.description)")
-    }
-
-    if let returns = returns {
-      printer.print(" * @return \(returns)")
-    }
-    printer.print(" */")
-  }
 }
 
 enum SwiftDocumentationParser {
@@ -60,6 +35,7 @@ enum SwiftDocumentationParser {
     case returns
   }
 
+  // TODO: Replace with Regex
   // Capture Groups: 1=Tag, 2=Arg(Optional), 3=Description
   private static let tagRegex = try! NSRegularExpression(pattern: "^-\\s*(\\w+)(?:\\s+([^:]+))?\\s*:\\s*(.*)$")
 
@@ -135,8 +111,8 @@ enum SwiftDocumentationParser {
         // Any blank lines will move us to discussion
         state = .discussion
         if let discussion = doc.discussion, !discussion.isEmpty {
-          if !discussion.hasSuffix("\n\n") {
-            doc.discussion?.append("\n\n")
+          if !discussion.hasSuffix("\n") {
+            doc.discussion?.append("\n")
           }
         }
       } else {
@@ -152,7 +128,6 @@ enum SwiftDocumentationParser {
     return doc
   }
 
-  /// This is a test
   private static func appendLineToState(_ state: State, line: String, doc: inout SwiftDocumentation) {
     switch state {
     case .summary: append(&doc.summary, line)
@@ -166,15 +141,13 @@ enum SwiftDocumentationParser {
   }
 
   private static func append(_ existing: inout String, _ new: String) {
-    let separator = existing.last == "\n" ? "" : " "
-    existing += separator + new
+    existing += "\n" + new
   }
 
   private static func append(_ existing: inout String?, _ new: String) {
     if existing == nil { existing = new }
     else {
-      let separator = existing?.last == "\n" ? "" : " "
-      existing! += separator + new
+      existing! += "\n" + new
     }
   }
 

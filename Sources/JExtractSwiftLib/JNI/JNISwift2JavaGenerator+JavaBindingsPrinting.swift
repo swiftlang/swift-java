@@ -538,7 +538,11 @@ extension JNISwift2JavaGenerator {
 
     if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
-        printDeclDocumentation(&printer, importedFunc)
+        TranslatedDocumentation.printDocumentation(
+          importedFunc: importedFunc,
+          translatedDecl: translatedDecl,
+          in: &printer
+        )
       }
       var modifiers = modifiers
 
@@ -564,7 +568,11 @@ extension JNISwift2JavaGenerator {
       parameters.append("SwiftArena swiftArena$")
     }
     if let importedFunc {
-      printDeclDocumentation(&printer, importedFunc)
+      TranslatedDocumentation.printDocumentation(
+        importedFunc: importedFunc,
+        translatedDecl: translatedDecl,
+        in: &printer
+      )
     }
     let signature = "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     if skipMethodBody {
@@ -630,32 +638,6 @@ extension JNISwift2JavaGenerator {
     } else {
       let result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
       printer.print("return \(result);")
-    }
-  }
-
-  private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    if var documentation = SwiftDocumentationParser.parse(decl.swiftDecl) {
-      if let translatedDecl = translatedDecl(for: decl), translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        documentation.parameters.append(
-          SwiftDocumentation.Parameter(
-            name: "swiftArena$",
-            description: "the arena that the the returned object will be attached to"
-          )
-        )
-      }
-
-      documentation.print(in: &printer)
-    } else {
-      printer.print(
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * \(decl.signatureString)
-       * }
-       */
-      """
-      )
     }
   }
 

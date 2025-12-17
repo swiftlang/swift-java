@@ -26,6 +26,11 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
            */
           public static void f() {
           """
@@ -37,6 +42,11 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
            */
           public static void f() {
           """
@@ -76,6 +86,11 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func g()
+           * }
            */
           public static void g() {
           """
@@ -96,6 +111,11 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func g()
+           * }
            */
           public static void g() {
           """
@@ -135,6 +155,12 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f() -> MyClass
+           * }
+           *
            * @param swiftArena$ the arena that the the returned object will be attached to
            */
           public static MyClass f(SwiftArena swiftArena$) {
@@ -147,6 +173,12 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f() -> MyClass
+           * }
+           *
            * @param swiftArena$ the arena that will manage the lifetime and allocation of Swift objects
            */
           public static MyClass f(AllocatingSwiftArena swiftArena$)
@@ -180,9 +212,15 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
+           *
+           * <p>Some information about this function
+           * that will span multiple lines
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 Description about arg0
            * @param arg1 Description about arg1
            * @return return value
@@ -197,9 +235,15 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
+           *
+           * <p>Some information about this function
+           * that will span multiple lines
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 Description about arg0
            * @param arg1 Description about arg1
            * @return return value
@@ -241,9 +285,15 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
+           *
+           * <p>Some information about this function
+           * that will span multiple lines
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 Description about arg0
            * @param arg1 Description about arg1
            * @return return value
@@ -258,9 +308,15 @@ struct SwiftDocumentationParsingTests {
           """
           /**
            * Simple summary
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
+           *
+           * <p>Some information about this function
+           * that will span multiple lines
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 Description about arg0
            * @param arg1 Description about arg1
            * @return return value
@@ -302,19 +358,28 @@ struct SwiftDocumentationParsingTests {
         [
           """
           /**
-           * Simple summary, that we have broken across multiple lines
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
-           * <p>
-           * Some more disucssion...
-           * </p>
-           * <p>
-           * And more...
-           * </p>
+           * Simple summary, that we have broken
+           * across multiple lines
+           * 
+           * <p>Some information about this function
+           * that will span multiple lines
+           * 
+           * <p>Some more disucssion...
+           * 
+           * <p>And more...
+           * 
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           * 
            * @param arg0 Description about arg0
+           * that spans multiple lines
            * @param arg1 Description about arg1
-           * @return return value across multiple lines
+           * that spans multiple lines
+           * and even more?
+           * @return return value
+           * across multiple lines
            */
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
@@ -325,19 +390,28 @@ struct SwiftDocumentationParsingTests {
         [
           """
           /**
-           * Simple summary, that we have broken across multiple lines
-           * <p>
-           * Some information about this function that will span multiple lines
-           * </p>
-           * <p>
-           * Some more disucssion...
-           * </p>
-           * <p>
-           * And more...
-           * </p>
+           * Simple summary, that we have broken
+           * across multiple lines
+           * 
+           * <p>Some information about this function
+           * that will span multiple lines
+           * 
+           * <p>Some more disucssion...
+           * 
+           * <p>And more...
+           * 
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           * 
            * @param arg0 Description about arg0
+           * that spans multiple lines
            * @param arg1 Description about arg1
-           * @return return value across multiple lines
+           * that spans multiple lines
+           * and even more?
+           * @return return value
+           * across multiple lines
            */
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
@@ -385,9 +459,13 @@ struct SwiftDocumentationParsingTests {
         [
           """
           /**
-           * <p>
-           * Discussion?
-           * </p>
+           * <p>Discussion?
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 this is arg0
            * @param arg1 this is arg1
            * @return return value
@@ -401,9 +479,13 @@ struct SwiftDocumentationParsingTests {
         [
           """
           /**
-           * <p>
-           * Discussion?
-           * </p>
+           * <p>Discussion?
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String, arg1: String)
+           * }
+           *
            * @param arg0 this is arg0
            * @param arg1 this is arg1
            * @return return value
