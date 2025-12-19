@@ -697,6 +697,11 @@ extension JavaClassTranslator {
           }
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
+        // If the method name is "init", we need to explicitly specify it in the annotation
+        // because "init" is a Swift keyword and will be escaped in the function name via `init`
+        if javaMethod.getName() == "init" {
+          parameters.append("\"init\"")
+        }
         if hasTypeEraseGenericResultType {
           parameters.append("typeErasedResult: \"\(resultType)\"")
         }
