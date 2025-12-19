@@ -124,9 +124,9 @@ extension JNISwift2JavaGenerator {
       printer.print("var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }")
     }
     printer.println()
-    try printer.printBraceBlock("extension \(translatedWrapper.wrapperName)") { printer in
+    printer.printBraceBlock("extension \(translatedWrapper.wrapperName)") { printer in
       for function in translatedWrapper.functions {
-        try printInterfaceWrapperFunctionImpl(&printer, function, inside: translatedWrapper)
+        printInterfaceWrapperFunctionImpl(&printer, function, inside: translatedWrapper)
         printer.println()
       }
 
@@ -142,27 +142,14 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ function: JavaInterfaceSwiftWrapper.Function,
     inside wrapper: JavaInterfaceSwiftWrapper
-  ) throws {
-    guard let protocolMethod = wrapper.importedType.methods.first(where: { $0.functionSignature == function.originalFunctionSignature }) else {
-      fatalError("Failed to find protocol method")
-    }
-    guard let translatedDecl = self.translatedDecl(for: protocolMethod) else {
-      throw JavaTranslationError.protocolWasNotExtracted
-    }
-
+  ) {
     printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
-      var upcallArguments = zip(
+      let upcallArguments = zip(
         function.originalFunctionSignature.parameters,
         function.parameterConversions
       ).map { param, conversion in
         // Wrap-java does not extract parameter names, so no labels
         conversion.render(&printer, param.parameterName!)
-      }
-
-      // If the underlying translated method requires
-      // a SwiftArena, we pass in the global arena
-      if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        upcallArguments.append("JNI.shared.defaultAutoArena")
       }
 
       let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
