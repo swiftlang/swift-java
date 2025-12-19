@@ -42,7 +42,6 @@ extension JNISwift2JavaGenerator {
     let protocolType: SwiftNominalType
     let functions: [Function]
     let variables: [Variable]
-    let importedType: ImportedNominalType
 
     var wrapperName: String {
       protocolType.nominalTypeDecl.javaInterfaceSwiftProtocolWrapperName
@@ -100,8 +99,7 @@ extension JNISwift2JavaGenerator {
       return JavaInterfaceSwiftWrapper(
         protocolType: SwiftNominalType(nominalTypeDecl: type.swiftNominal),
         functions: functions,
-        variables: variables,
-        importedType: type
+        variables: variables
       )
     }
 

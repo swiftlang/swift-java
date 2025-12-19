@@ -53,7 +53,6 @@ struct JNIModuleTests {
         static final String LIB_NAME = "SwiftModule";
       
         static {
-          System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
           System.loadLibrary(LIB_NAME);
         }
       """
