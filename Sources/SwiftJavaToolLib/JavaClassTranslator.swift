@@ -270,6 +270,13 @@ extension JavaClassTranslator {
 
   /// Add a field to the appropriate lists(s) for later translation.
   private mutating func addField(_ field: Field) {
+    // Don't include inherited fields when translating to a class.
+    // This applies to both instance and static fields to avoid duplicates
+    if translateAsClass &&
+        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
+      return
+    }
+
     // Static fields go into a separate list.
     if field.isStatic {
       staticFields.append(field)
@@ -280,12 +287,6 @@ extension JavaClassTranslator {
         enumConstants.append(field)
       }
 
-      return
-    }
-
-    // Don't include inherited fields when translating to a class.
-    if translateAsClass &&
-        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
 
