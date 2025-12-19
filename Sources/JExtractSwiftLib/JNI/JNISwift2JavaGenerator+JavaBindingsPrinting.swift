@@ -99,7 +99,6 @@ extension JNISwift2JavaGenerator {
         static final String LIB_NAME = "\(swiftModuleName)";
         
         static {
-          System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
           System.loadLibrary(LIB_NAME);
         }
         """
@@ -170,7 +169,6 @@ extension JNISwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
             System.loadLibrary(LIB_NAME);
             return true;
         }

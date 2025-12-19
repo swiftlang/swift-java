@@ -16,11 +16,3 @@ import SwiftJava
 
 @JavaInterface("org.swift.swiftkit.core.SwiftArena")
 public struct JavaSwiftArena {}
-
-extension JavaSwiftArena {
-  /// A cache for the default auto arena found in SwiftKitCore
-  public static internal(set) var defaultAutoArena: JavaSwiftArena = {
-    let swiftMemoryClass = try! JavaClass<SwiftJavaRuntimeSupport.JavaSwiftMemoryManagement>()
-    return swiftMemoryClass.defaultSwiftJavaAutoArena
-  }()
-}
