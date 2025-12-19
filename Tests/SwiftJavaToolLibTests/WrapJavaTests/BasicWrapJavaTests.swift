@@ -88,4 +88,36 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  // Test that Java methods named "init" get @JavaMethod("init") annotation.
+  // Since "init" is a Swift keyword and gets escaped with backticks in the function name,
+  // we explicitly specify the Java method name in the annotation.
+  // See KeyAgreement.init() methods as a real-world example.
+  func test_wrapJava_initMethodAnnotation() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class TestClass {
+        public void init(String arg) throws Exception {}
+        public void init() throws Exception {}
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.TestClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod("init")
+        open func `init`(_ arg0: String) throws
+        """,
+        """
+        @JavaMethod("init")
+        open func `init`() throws
+        """,
+      ]
+    )
+  }
 }
