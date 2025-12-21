@@ -214,105 +214,33 @@ The project is still very early days, however the general outline of using this 
 
 You can then use Swift libraries in Java just by calling the appropriate methods and initializers.
 
-#### Enable Java Callbacks Mode
+### Enable Java Callbacks Mode
 
-> **NOTE**: This feature requires disabling the SwiftPM Sandbox and is only supported in 'jni' mode.
+> **Note**
 
-The `enableJavaCallbacks` mode is an advanced feature that allows Java classes to implement Swift protocols. When enabled, JExtract generates additional Java interface wrappers that enable bidirectional interoperability - not only can Java code call Swift functions, but Java classes can also implement Swift protocols and be passed back to Swift.
+---
 
-**Key characteristics:**
-- **Mode restriction**: Only available in JNI mode (will throw an error if used with FFM mode)
-- **Sandbox requirement**: Requires disabling SwiftPM sandbox (`--disable-sandbox` or equivalent)
-- **Protocol implementation**: Enables Java classes to implement Swift protocols
-- **Bidirectional communication**: Allows callbacks from Swift back to Java implementations
+## Overview
 
-**How to enable:**
+One-line description of the feature.
 
-In your `swift-java.config` file:
+---
+
+## Requirements
+
+- Supported modes
+- Sandbox requirements
+
+---
+
+## How to Enable
+
+### Configuration file
 ```json
 {
   "enableJavaCallbacks": true,
   "mode": "jni"
 }
-```
-
-Or via command line:
-```bash
-swift-java jextract --enable-java-callbacks --mode jni ...
-```
-
-**How it works:**
-
-When `enableJavaCallbacks` is enabled, JExtract generates:
-1. **Interface wrappers**: Java interfaces that correspond to Swift protocols
-2. **Protocol implementations**: Generated Java classes that can be passed to Swift
-3. **Bridge code**: JNI bridge code that allows Swift to call back into Java implementations
-
-**Example usage:**
-
-```swift
-// Swift code defining a protocol
-public protocol MySwiftProtocol {
-    func handleData(_ data: String)
-    func processNumber(_ value: Int) -> Bool
-}
-
-// Swift code that uses the protocol
-public class SwiftProcessor {
-    private var delegate: MySwiftProtocol?
-    
-    public func setDelegate(_ delegate: MySwiftProtocol) {
-        self.delegate = delegate
-    }
-    
-    public func doWork() {
-        delegate?.handleData("Hello from Swift")
-        let result = delegate?.processNumber(42) ?? false
-        print("Result: \(result)")
-    }
-}
-```
-
-```java
-// Java code that implements the Swift protocol
-public class MyJavaImplementation implements MySwiftProtocol {
-    @Override
-    public void handleData(String data) {
-        System.out.println("Java received: " + data);
-    }
-    
-    @Override
-    public boolean processNumber(int value) {
-        System.out.println("Java processing: " + value);
-        return value > 0;
-    }
-}
-
-// Java usage
-public class Main {
-    public static void main(String[] args) {
-        MyJavaImplementation javaImpl = new MyJavaImplementation();
-        SwiftProcessor processor = new SwiftProcessor();
-        
-        // Pass Java implementation to Swift
-        processor.setDelegate(javaImpl);
-        processor.doWork();
-    }
-}
-```
-
-**Limitations:**
-- Only supported in JNI mode
-- Requires SwiftPM sandbox to be disabled
-- Performance overhead compared to direct JNI calls
-- Limited to protocol methods (not all Swift features)
-
-**When to use:**
-- When you need Java classes to implement Swift protocols
-- For event-driven architectures where Swift needs to call back into Java
-- When building hybrid applications that require tight integration between languages
-
-For a complete working example, see `Samples/SwiftJavaExtractJNISampleApp` which demonstrates this feature in action.
 
 ### Generating Java bindings for Swift libraries
 
