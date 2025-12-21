@@ -214,34 +214,6 @@ The project is still very early days, however the general outline of using this 
 
 You can then use Swift libraries in Java just by calling the appropriate methods and initializers.
 
-### Enable Java Callbacks Mode
-
-> **Note**
-
----
-
-## Overview
-
-One-line description of the feature.
-
----
-
-## Requirements
-
-- Supported modes
-- Sandbox requirements
-
----
-
-## How to Enable
-
-### Configuration file
-```json
-{
-  "enableJavaCallbacks": true,
-  "mode": "jni"
-}
-
 ### Generating Java bindings for Swift libraries
 
 This repository also includes the `jextract-swift` tool which is similar to the JDK's [`jextract`](https://github.com/openjdk/jextract/).
