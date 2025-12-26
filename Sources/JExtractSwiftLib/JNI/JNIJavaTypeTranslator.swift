@@ -44,7 +44,7 @@ enum JNIJavaTypeTranslator {
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
-        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array:
+        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array, .foundationDate, .essentialsDate:
       return nil
     }
   }

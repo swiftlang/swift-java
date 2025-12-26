@@ -111,7 +111,7 @@ extension FFMSwift2JavaGenerator {
 
       """)
 
-    printSwiftThunkImports(&printer)
+    self.lookupContext.symbolTable.printImportedModules(&printer)
 
     for thunk in stt.renderGlobalThunks() {
       printer.print(thunk)
@@ -140,66 +140,12 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    printSwiftThunkImports(&printer)
+    self.lookupContext.symbolTable.printImportedModules(&printer)
 
     for thunk in stt.renderThunks(forType: ty) {
       printer.print("\(thunk)")
       printer.print("")
     }
-  }
-
-  func printSwiftThunkImports(_ printer: inout CodePrinter) {
-    let mainSymbolSourceModules = Set(
-      self.lookupContext.symbolTable.importedModules.values.filter { $0.alternativeModules?.isMainSourceOfSymbols ?? false }.map(\.moduleName)
-    )
-    
-    for module in self.lookupContext.symbolTable.importedModules.keys.sorted() {
-      guard module != "Swift" else {
-        continue
-      }
-
-      guard let alternativeModules = self.lookupContext.symbolTable.importedModules[module]?.alternativeModules else {
-        printer.print("import \(module)")
-        continue
-      }
-
-      // Try to print only on main module from relation chain as it has every other module.
-      guard !mainSymbolSourceModules.isDisjoint(with: alternativeModules.moduleNames) || alternativeModules.isMainSourceOfSymbols else {
-        if !alternativeModules.isMainSourceOfSymbols {
-          printer.print("import \(module)")
-        }
-        continue
-      }
-      
-      var importGroups: [String: [String]] = [:]
-      for name in alternativeModules.moduleNames {
-        guard let otherModule = self.lookupContext.symbolTable.importedModules[name] else { continue }
-
-        let groupKey = otherModule.requiredAvailablityOfModuleWithName ?? otherModule.moduleName
-        importGroups[groupKey, default: []].append(otherModule.moduleName)
-      }
-
-      for (index, group) in importGroups.keys.sorted().enumerated() {
-        if index > 0  && importGroups.keys.count > 1 {
-          printer.print("#elseif canImport(\(group))")
-        } else {
-          printer.print("#if canImport(\(group))")
-        }
-        
-        for groupModule in importGroups[group] ?? [] {
-          printer.print("import \(groupModule)")
-        }
-      }
-
-      if (importGroups.keys.isEmpty) {
-        printer.print("import \(module)")
-      } else {
-        printer.print("#else")
-        printer.print("import \(module)")
-        printer.print("#endif")
-      }
-    }
-    printer.println()
   }
 }
 

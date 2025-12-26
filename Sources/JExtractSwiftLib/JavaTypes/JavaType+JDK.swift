@@ -55,4 +55,8 @@ extension JavaType {
   static func future(_ T: JavaType) -> JavaType {
     .class(package: "java.util.concurrent", name: "Future", typeParameters: [T.boxedType])
   }
+
+  static var javaTimeInstant: JavaType {
+    .class(package: "java.time", name: "Instant")
+  }
 }
