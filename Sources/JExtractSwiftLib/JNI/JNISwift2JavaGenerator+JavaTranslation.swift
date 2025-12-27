@@ -389,6 +389,12 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .foundationDate, .essentialsDate:
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: .javaTimeInstant, annotations: parameterAnnotations),
+              conversion: .instantToDouble
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -669,6 +675,14 @@ extension JNISwift2JavaGenerator {
             }
             return try translateArrayResult(
               elementType: elementType
+            )
+
+          case .foundationDate, .essentialsDate:
+            return TranslatedResult(
+              javaType: .javaTimeInstant,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .doubleToInstant
             )
 
           default:
@@ -1109,6 +1123,12 @@ extension JNISwift2JavaGenerator {
       .method(.constant("Arrays"), function: "stream", arguments: [argument])
     }
 
+    /// Convert a `java.time.Instant` to a seconds double
+    case instantToDouble
+
+    /// Convert a double to `java.time.Instant`
+    case doubleToInstant
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -1242,13 +1262,26 @@ extension JNISwift2JavaGenerator {
       case .requireNonNull(let inner, let message):
         let inner = inner.render(&printer, placeholder)
         return #"Objects.requireNonNull(\#(inner), "\#(message)")"#
+
+      case .instantToDouble:
+        return "(\(placeholder).getEpochSecond() + (\(placeholder).getNano() / 1_000_000_000.0))"
+
+      case .doubleToInstant:
+        printer.print(
+          """
+          double $instant = \(placeholder);
+          long $seconds = (long) $instant;
+          long $nanos = (long) (($instant - $seconds) * 1_000_000_000);
+          """
+        )
+        return "java.time.Instant.ofEpochSecond($seconds, $nanos)"
       }
     }
 
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent, .combinedName:
+      case .placeholder, .constant, .isOptionalPresent, .combinedName, .instantToDouble, .doubleToInstant:
         return false
 
       case .constructSwiftValue, .wrapMemoryAddressUnsafe:
