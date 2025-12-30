@@ -43,11 +43,20 @@ public class SwiftRuntime {
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
     public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
-        System.loadLibrary(STDLIB_DYLIB_NAME);
-        if (loadSwiftRuntimeFunctions) {
-            System.loadLibrary(SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME);
+        try {
+            System.loadLibrary(STDLIB_DYLIB_NAME);
+            if (loadSwiftRuntimeFunctions) {
+                System.loadLibrary(SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME);
+            }
+            return true;
+        } catch (UnsatisfiedLinkError e) {
+            // Libraries not on path - will be loaded later from JAR or other location
+            if (CallTraces.TRACE_DOWNCALLS) {
+                System.err.println("[swift-java] SwiftRuntime: Could not auto-load libraries from java.library.path: " + e.getMessage());
+                System.err.println("[swift-java] Libraries will need to be loaded explicitly or from JAR resources");
+            }
+            return false;
         }
-        return true;
     }
 
     static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
