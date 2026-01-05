@@ -100,8 +100,6 @@ public func getJavaHomeFromLibexecJavaHome() -> String? {
   }
 }
 
-// MARK: - Additional Java discovery fallbacks
-
 func getJavaHomeFromSDKMAN() -> String? {
   let home = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent(".sdkman/candidates/java/current")
