@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class MySwiftClassTest {
 
     void checkPaths(Throwable throwable) {

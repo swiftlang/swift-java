@@ -14,6 +14,7 @@
 
 pluginManagement {
     includeBuild("BuildLogic")
+    includeBuild("swiftPMImportPlugin")
 }
 
 rootProject.name = "swift-java"
@@ -23,7 +24,7 @@ include "SwiftKitFFM"
 
 // Include sample apps -- you can run them via `gradle Name:run`
 new File(rootDir, "Samples").listFiles().each {
-    if (it.directory && new File(it, 'build.gradle').exists()) {
+    if (it.directory && (new File(it, 'build.gradle').exists() || new File(it, 'build.gradle.kts').exists())) {
         include ":Samples:${it.name}"
     }
 }

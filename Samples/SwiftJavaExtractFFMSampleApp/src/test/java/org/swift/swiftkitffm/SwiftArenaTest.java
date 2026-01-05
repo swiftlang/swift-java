@@ -14,8 +14,8 @@
 
 package org.swift.swiftkitffm;
 
-import com.example.swift.MySwiftClass;
-import com.example.swift.MySwiftStruct;
+import com.example.swift.MySwiftLibrary.MySwiftClass;
+import com.example.swift.MySwiftLibrary.MySwiftStruct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 import org.swift.swiftkit.core.util.PlatformUtils;

@@ -17,6 +17,8 @@ package com.example.swift;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
+import com.example.swift.MySwiftLibrary.*;
+
 public class UnsignedNumbersTest {
     @Test
     void take_uint32() {
