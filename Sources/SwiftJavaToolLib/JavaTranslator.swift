@@ -97,7 +97,7 @@ package class JavaTranslator {
 
   /// Simplistic logging for all entities that couldn't be translated.
   func logUntranslated(_ message: String) {
-    print("[warning][jextract] \(message)")
+    print("[warning] \(message)")
   }
 }
 
