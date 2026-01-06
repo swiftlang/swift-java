@@ -18,7 +18,7 @@ import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftJavaToolLib
 import XCTest  // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
-import _Subprocess
+import Subprocess
 
 class JavaTranslatorTests: XCTestCase {
 
