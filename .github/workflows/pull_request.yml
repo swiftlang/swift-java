@@ -180,9 +180,9 @@ jobs:
       - name: Swift Build
         run: "swift build --build-tests --disable-sandbox"
       - name: Swift Test (swift-testing)
-        run: swift test --no-parallel --disable-xctest
+        run: swift test --disable-xctest
       - name: Swift Test (XCTest)
-        run: swift test --no-parallel --disable-experimental-swift-testing
+        run: swift test --disable-experimental-swift-testing
 
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
