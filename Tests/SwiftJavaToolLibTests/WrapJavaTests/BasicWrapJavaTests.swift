@@ -18,7 +18,7 @@ import JavaUtilJar
 import SwiftJavaShared
 import JavaNet
 import SwiftJavaConfigurationShared
-import _Subprocess
+import Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class BasicWrapJavaTests: XCTestCase {
@@ -87,7 +87,6 @@ final class BasicWrapJavaTests: XCTestCase {
       ]
     )
   }
-
 
   // Test that static fields from superclasses are not duplicated in generated code.
   // This prevents duplicate serialVersionUID declarations when both a class and its
