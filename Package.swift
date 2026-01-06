@@ -34,6 +34,14 @@ func findJavaHome() -> String {
     return home
   }
 
+  if let home = getJavaHomeFromSDKMAN() {
+    return home
+  }
+
+  if let home = getJavaHomeFromPath() {
+    return home
+  }
+
 
   if ProcessInfo.processInfo.environment["SPI_PROCESSING"] == "1" && ProcessInfo.processInfo.environment["SPI_BUILD"] == nil {
     // Just ignore that we're missing a JAVA_HOME when building in Swift Package Index during general processing where no Java is needed. However, do _not_ suppress the error during SPI's compatibility build stage where Java is required.
@@ -78,6 +86,46 @@ func getJavaHomeFromLibexecJavaHome() -> String? {
         print("Error running java_home: \(error)")
         return nil
     }
+}
+
+func getJavaHomeFromSDKMAN() -> String? {
+  let home = FileManager.default.homeDirectoryForCurrentUser
+    .appendingPathComponent(".sdkman/candidates/java/current")
+
+  let javaBin = home.appendingPathComponent("bin/java").path
+  if FileManager.default.isExecutableFile(atPath: javaBin) {
+    return home.path
+  }
+  return nil
+}
+
+func getJavaHomeFromPath() -> String? {
+  let task = Process()
+  task.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+  task.arguments = ["java"]
+
+  let pipe = Pipe()
+  task.standardOutput = pipe
+
+  do {
+    try task.run()
+    task.waitUntilExit()
+    guard task.terminationStatus == 0 else { return nil }
+
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    guard let javaPath = String(data: data, encoding: .utf8)?
+      .trimmingCharacters(in: .whitespacesAndNewlines),
+      !javaPath.isEmpty
+    else { return nil }
+
+    let resolved = URL(fileURLWithPath: javaPath).resolvingSymlinksInPath()
+    return resolved
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .path
+  } catch {
+    return nil
+  }
 }
 
 let javaHome = findJavaHome()
@@ -211,10 +259,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
     .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")), // primarily for ordered collections
-
-//    // FIXME: swift-subprocess stopped supporting 6.0 when it moved into a package;
-//    //        we'll need to drop 6.0 as well, but currently blocked on doing so by swiftpm plugin pending design questions
-//    .package(url: "https://github.com/swiftlang/swift-subprocess.git", revision: "de15b67f7871c8a039ef7f4813eb39a8878f61a6"),
+    .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1", traits: ["SubprocessFoundation"]),
 
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
@@ -416,8 +461,7 @@ let package = Package(
         "JavaTypes",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
-        // .product(name: "Subprocess", package: "swift-subprocess")
-        "_Subprocess",
+        .product(name: "Subprocess", package: "swift-subprocess")
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
@@ -542,28 +586,6 @@ let package = Package(
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
       ]
-    ),
-    
-    // Experimental Foundation Subprocess Copy
-    .target(
-      name: "_SubprocessCShims",
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
-    ),
-    .target(
-      name: "_Subprocess",
-      dependencies: [
-        "_SubprocessCShims",
-        .product(name: "SystemPackage", package: "swift-system"),
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5),
-        .define(
-          "SYSTEM_PACKAGE_DARWIN",
-          .when(platforms: [.macOS, .macCatalyst, .iOS, .watchOS, .tvOS, .visionOS])),
-        .define("SYSTEM_PACKAGE"),
-      ]
-    ),
+    )
   ]
 )

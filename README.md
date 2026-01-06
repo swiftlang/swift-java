@@ -167,6 +167,8 @@ Please always use the gradle wrapper (`./gradlew`) to make sure to use the appro
 
 Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
 
+Samples are build by default by Gradle. Building samples can be skipped by appending the flag `-PskipSamples=true` to a gradle command.
+
 #### SwiftJava (Swift -> Java)
 
 To run a simple app showcasing a Swift process calling into a Java library you can run: 
