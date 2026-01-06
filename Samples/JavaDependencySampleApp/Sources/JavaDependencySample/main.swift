@@ -52,4 +52,6 @@ for record in try CSVFormatClass.RFC4180.parse(reader)!.getRecords()! {
   }
 }
 
+try await OrgAndrejsJsonTests.run()
+
 print("Done.")
