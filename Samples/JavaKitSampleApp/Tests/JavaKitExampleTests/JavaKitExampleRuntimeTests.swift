@@ -19,16 +19,13 @@ import JavaUtilFunction
 import Testing
 
 @Suite
-struct ManglingTests {
+struct JavaKitExampleRuntimeTests {
+
+  let jvm = try JavaKitSampleJVM.shared
 
   @Test
   func methodMangling() throws {
-    let jvm = try! JavaVirtualMachine.shared(
-      classpath: [
-        ".build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java"
-      ]
-    )
-    let env = try! jvm.environment()
+    let env = try jvm.environment()
 
     let helper = ThreadSafeHelperClass(environment: env)
     
@@ -51,6 +48,16 @@ struct ManglingTests {
     
     let longOpt: Int64? = helper.fromOptional(21 as Int32?)
     #expect(#"Optional(21)"# == String(describing: longOpt))
+  }
+
+  @Test
+  func methodNamedInit() throws {
+    let env = try jvm.environment()
+
+    let hello = HelloSwift(environment: env)
+    
+    let reply = hello.`init`(128)
+    #expect(reply == 128)
   }
 
 }
