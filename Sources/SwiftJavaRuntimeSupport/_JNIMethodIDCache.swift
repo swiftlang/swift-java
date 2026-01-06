@@ -56,14 +56,17 @@ public final class _JNIMethodIDCache: Sendable {
       environment.interface.ExceptionClear(environment)
 
       // OK to force unwrap, we are in a jextract environment.
-      if let javaClass = try? JNI.shared!.applicationClassLoader.loadClass(
+      guard let jni = JNI.shared else {
+        fatalError("Cannot get JNI.shared, it should have been initialized by JNI_OnLoad when loading the library")
+      }
+      guard let javaClass = try? jni.applicationClassLoader?.loadClass(
         className.replacingOccurrences(of: "/", with: ".")
-      ) {
-        clazz = javaClass.javaThis
-        self.javaObjectHolder = javaClass.javaHolder
-      } else {
+      ) else {
         fatalError("Class \(className) could not be found!")
       }
+
+      clazz = javaClass.javaThis
+      self.javaObjectHolder = javaClass.javaHolder
     }
 
     self._class = clazz
