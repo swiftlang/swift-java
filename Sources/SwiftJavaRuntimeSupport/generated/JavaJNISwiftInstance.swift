@@ -20,6 +20,7 @@ public struct JavaJNISwiftInstance: AnyJavaObjectWithCustomClassLoader {
   public func memoryAddress() -> Int64
 
   public static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader! {
-    JNI.shared.applicationClassLoader
+    // OK to force unwrap, we are in a jextract environment.
+    JNI.shared!.applicationClassLoader
   }
 }

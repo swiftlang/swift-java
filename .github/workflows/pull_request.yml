@@ -153,8 +153,10 @@ jobs:
         uses: ./.github/actions/prepare_env
       - name: Swift Build
         run: swift build --build-tests --disable-sandbox --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
-      - name: Swift Test
-        run: swift test --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+      - name: Swift Test (XCTest)
+        run: swift test --disable-experimental-swift-testing --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+      - name: Swift Test (swift-testing)
+        run: swift test --disable-xctest --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
 
   test-swift-macos:
     name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
@@ -162,7 +164,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.2']
+        swift_version: ['6.2.3']
         os_version: ['macos']
         jdk_vendor: ['corretto']
     env:
@@ -171,10 +173,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Install Swiftly
+        run: ./.github/scripts/install_swiftly.sh
+        env:
+          SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: Swift Build
         run: "swift build --build-tests --disable-sandbox"
-      - name: Swift Test
-        run: "swift test"
+      - name: Swift Test (swift-testing)
+        run: swift test --no-parallel --disable-xctest
+      - name: Swift Test (XCTest)
+        run: swift test --no-parallel --disable-experimental-swift-testing
 
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})

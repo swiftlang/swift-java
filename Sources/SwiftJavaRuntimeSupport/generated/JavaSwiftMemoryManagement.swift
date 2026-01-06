@@ -12,21 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+import SwiftJava
 
-rootProject.name = "swift-java"
+@JavaClass("org.swift.swiftkit.core.SwiftMemoryManagement")
+public class JavaSwiftMemoryManagement: JavaObject {}
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-// Can be disabled with -PskipSamples=true
-if (!hasProperty('skipSamples') || skipSamples != 'true') {
-    new File(rootDir, "Samples").listFiles().each {
-        if (it.directory && new File(it, 'build.gradle').exists()) {
-            include ":Samples:${it.name}"
-        }
-    }
+extension JavaClass<JavaSwiftMemoryManagement> {
+  @JavaStaticField("DEFAULT_SWIFT_JAVA_AUTO_ARENA", isFinal: true)
+  var defaultSwiftJavaAutoArena: JavaSwiftArena!
 }

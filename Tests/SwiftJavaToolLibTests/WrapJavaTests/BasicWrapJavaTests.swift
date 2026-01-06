@@ -88,4 +88,44 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  // Test that static fields from superclasses are not duplicated in generated code.
+  // This prevents duplicate serialVersionUID declarations when both a class and its
+  // superclass declare the field. The subclass field "hides" the superclass field,
+  // similar to how static methods work in Java.
+  func test_wrapJava_noDuplicateStaticFieldsFromSuperclass() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class SuperClass {
+        public static final long serialVersionUID = 1L;
+      }
+
+      class SubClass extends SuperClass {
+        public static final long serialVersionUID = 2L;
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.SuperClass",
+        "com.example.SubClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        // SuperClass should have its static field
+        """
+        extension JavaClass<SuperClass> {
+        @JavaStaticField(isFinal: true)
+        public var serialVersionUID: Int64
+        """,
+        // SubClass should only have its own static field, not the superclass one
+        """
+        extension JavaClass<SubClass> {
+        @JavaStaticField(isFinal: true)
+        public var serialVersionUID: Int64
+        """,
+      ]
+    )
+  }
 }

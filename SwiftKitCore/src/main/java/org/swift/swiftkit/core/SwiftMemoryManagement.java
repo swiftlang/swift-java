@@ -15,5 +15,5 @@
 package org.swift.swiftkit.core;
 
 public class SwiftMemoryManagement {
-    public static final SwiftArena GLOBAL_SWIFT_JAVA_ARENA = SwiftArena.ofAuto();
+    public static final SwiftArena DEFAULT_SWIFT_JAVA_AUTO_ARENA = SwiftArena.ofAuto();
 }

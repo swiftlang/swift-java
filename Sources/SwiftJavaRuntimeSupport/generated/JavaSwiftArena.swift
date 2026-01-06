@@ -12,21 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-pluginManagement {
-    includeBuild("BuildLogic")
-}
+import SwiftJava
 
-rootProject.name = "swift-java"
+@JavaInterface("org.swift.swiftkit.core.SwiftArena")
+public struct JavaSwiftArena {}
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
-
-// Include sample apps -- you can run them via `gradle Name:run`
-// Can be disabled with -PskipSamples=true
-if (!hasProperty('skipSamples') || skipSamples != 'true') {
-    new File(rootDir, "Samples").listFiles().each {
-        if (it.directory && new File(it, 'build.gradle').exists()) {
-            include ":Samples:${it.name}"
-        }
-    }
+extension JavaSwiftArena {
+  /// A cache for the default auto arena found in SwiftKitCore
+  public static internal(set) var defaultAutoArena: JavaSwiftArena = {
+    let swiftMemoryClass = try! JavaClass<SwiftJavaRuntimeSupport.JavaSwiftMemoryManagement>()
+    return swiftMemoryClass.defaultSwiftJavaAutoArena
+  }()
 }

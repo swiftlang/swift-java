@@ -77,7 +77,7 @@ public class ProtocolTest {
     void protocolClassMethod() {
         try (var arena = SwiftArena.ofConfined()) {
             ProtocolA proto1 = ConcreteProtocolAB.init(10, 5, arena);
-            assertEquals(10, proto1.makeClass().getX());
+            assertEquals(10, proto1.makeClass(arena).getX());
         }
     }
 
