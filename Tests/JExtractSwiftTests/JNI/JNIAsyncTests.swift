@@ -144,7 +144,7 @@ struct JNIAsyncTests {
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
                 }
                 do {
-                  let swiftResult$ = await try SwiftModule.async()
+                  let swiftResult$ = try await SwiftModule.async()
                   environment = try! JavaVirtualMachine.shared().environment()
                   _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
                 }
@@ -164,7 +164,7 @@ struct JNIAsyncTests {
                 deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
               }
               do {
-                let swiftResult$ = await try SwiftModule.async()
+                let swiftResult$ = try await SwiftModule.async()
                 environment = try! JavaVirtualMachine.shared().environment()
                 _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
               }
