@@ -1033,15 +1033,21 @@ extension JNISwift2JavaGenerator {
         )
 
         func printDo(printer: inout CodePrinter) {
-          // Generate proper 'try await' order: if placeholder already has 'try', remove it and add 'try await', otherwise just add 'try await'
-          let modifiersAndPlaceholder: String
-          if placeholder.hasPrefix("try ") {
-            let placeholderWithoutTry = placeholder.replacingOccurrences(of: "^try ", with: "", options: .regularExpression)
-            modifiersAndPlaceholder = "try await \(placeholderWithoutTry)"
-          } else {
-            modifiersAndPlaceholder = "try await \(placeholder)"
-          }
-          printer.print("let swiftResult$ = \(modifiersAndPlaceholder)")
+          // Make sure try/await are printed when necessary and avoid duplicate, or wrong-order, keywords (which would cause warnings)
+          let placeholderWithoutTry = 
+            if placeholder.hasPrefix("try ") {
+              String(placeholder.dropFirst("try ".count))
+            } else {
+              placeholder
+            }
+
+          let tryAwaitString: String = 
+            if isThrowing {
+              "try await"
+            } else {
+              "await"
+            }
+          printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
           printer.print("environment = try! JavaVirtualMachine.shared().environment()")
           let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
