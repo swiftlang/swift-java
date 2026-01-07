@@ -45,16 +45,16 @@ public final class SwiftLibraries {
 
     public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
         try {
-            System.loadLibrary(LIB_NAME_SWIFT_CORE);
-            System.loadLibrary(LIB_NAME_SWIFT_JAVA);
+            loadLibraryWithFallbacks(LIB_NAME_SWIFT_CORE);
+            loadLibraryWithFallbacks(LIB_NAME_SWIFT_JAVA);
             if (loadSwiftRuntimeFunctions) {
-                System.loadLibrary(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+                loadLibraryWithFallbacks(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
             }
             return true;
-        } catch (UnsatisfiedLinkError e) {
-            // Libraries not on path - will be loaded later from JAR or other location
+        } catch (RuntimeException e) {
+            // Libraries could not be loaded
             if (CallTraces.TRACE_DOWNCALLS) {
-                System.err.println("[swift-java] Could not auto-load libraries from java.library.path: " + e.getMessage());
+                System.err.println("[swift-java] Could not load libraries: " + e.getMessage());
                 System.err.println("[swift-java] Libraries will need to be loaded explicitly or from JAR resources");
             }
             return false;
@@ -64,43 +64,115 @@ public final class SwiftLibraries {
     // ==== ------------------------------------------------------------------------------------------------------------
     // Loading libraries
 
-    // Cache of already-loaded libraries to prevent duplicate extraction
-    private static final java.util.Map<String, File> loadedLibraries = new java.util.HashMap<>();
+    /**
+     * Returns the platform-specific system path to the swiftCore library.
+     *
+     * @return Full path to swiftCore on the system, or null if platform is not macOS or Linux
+     */
+    public static String libSwiftCorePath() {
+        if (PlatformUtils.isMacOS()) {
+            return "/usr/lib/swift/libswiftCore.dylib";
+        } else if (PlatformUtils.isLinux()) {
+            return "/usr/lib/swift/linux/libswiftCore.so";
+        }
+        return null;
+    }
 
-    public static synchronized void loadResourceLibrary(String libname) {
-        // Check if already loaded
-        if (loadedLibraries.containsKey(libname)) {
+    /**
+     * Attempts to load a library using multiple fallback strategies with nice error reporting.
+     * Tries in order: java.library.path, JAR resources, system path (for swiftCore only).
+     *
+     * @param libname The library name to load
+     * @throws RuntimeException if all loading strategies fail
+     */
+    public static void loadLibraryWithFallbacks(String libname) {
+        // Try 1: Load from java.library.path
+        try {
+            System.loadLibrary(libname);
             if (CallTraces.TRACE_DOWNCALLS) {
-                System.out.println("[swift-java] Library already loaded from cache: " + libname);
+                System.out.println("[swift-java] Loaded " + libname + " from java.library.path");
             }
             return;
-        }
-
-        String resourceName = PlatformUtils.dynamicLibraryName(libname);
-        if (CallTraces.TRACE_DOWNCALLS) {
-            System.out.println("[swift-java] Loading resource library: " + resourceName);
-        }
-
-        try (InputStream libInputStream = SwiftLibraries.class.getResourceAsStream("/" + resourceName)) {
-            if (libInputStream == null) {
-                throw new RuntimeException("Expected library '" + libname + "' ('" + resourceName + "') was not found as resource!");
-            }
-
-            // Extract to temp file
-            File tempFile = File.createTempFile(libname, "");
-            tempFile.deleteOnExit();
-            Files.copy(libInputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            System.load(tempFile.getAbsolutePath());
-
-            // Cache the loaded library
-            loadedLibraries.put(libname, tempFile);
-
+        } catch (Throwable e) {
             if (CallTraces.TRACE_DOWNCALLS) {
-                System.out.println("[swift-java] Loaded and cached library: " + libname + " from " + tempFile.getAbsolutePath());
+                System.err.println("[swift-java] Failed to load " + libname + " from java.library.path: " + e.getMessage());
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load dynamic library '" + libname + "' ('" + resourceName + "') as resource!", e);
+        }
+
+        // Try 2: Load from JAR resources
+        try {
+            loadResourceLibrary(libname);
+            if (CallTraces.TRACE_DOWNCALLS) {
+                System.out.println("[swift-java] Loaded " + libname + " from JAR resources");
+            }
+            return;
+        } catch (Throwable e2) {
+            if (CallTraces.TRACE_DOWNCALLS) {
+                System.err.println("[swift-java] Failed to load " + libname + " from JAR: " + e2.getMessage());
+            }
+
+            // Try 3: For swiftCore only, try system path
+            if (libname.equals(LIB_NAME_SWIFT_CORE)) {
+                String systemPath = libSwiftCorePath();
+                if (systemPath != null) {
+                    try {
+                        System.load(systemPath);
+                        if (CallTraces.TRACE_DOWNCALLS) {
+                            System.out.println("[swift-java] Loaded " + libname + " from system path: " + systemPath);
+                        }
+                        return;
+                    } catch (Throwable e3) {
+                        throw new RuntimeException(
+                            "Failed to load " + libname + " from java.library.path, JAR resources, and system path (" + systemPath + ")",
+                            e3
+                        );
+                    }
+                } else {
+                    if (CallTraces.TRACE_DOWNCALLS) {
+                        System.err.println("[swift-java] System path not available on this platform");
+                    }
+                }
+            }
+
+            throw new RuntimeException("Failed to load " + libname + " from java.library.path and JAR resources", e2);
+        }
+    }
+
+    // Cache of already-loaded libraries to prevent duplicate extraction
+    private static final java.util.concurrent.ConcurrentHashMap<String, File> loadedLibraries = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void loadResourceLibrary(String libname) {
+        loadedLibraries.computeIfAbsent(libname, key -> {
+            String resourceName = PlatformUtils.dynamicLibraryName(key);
+            if (CallTraces.TRACE_DOWNCALLS) {
+                System.out.println("[swift-java] Loading resource library: " + resourceName);
+            }
+
+            try (InputStream libInputStream = SwiftLibraries.class.getResourceAsStream("/" + resourceName)) {
+                if (libInputStream == null) {
+                    throw new RuntimeException("Expected library '" + key + "' ('" + resourceName + "') was not found as resource!");
+                }
+
+                // TODO: we could do an in memory file system here
+                // Extract to temp file
+                File tempFile = File.createTempFile(key, "");
+                tempFile.deleteOnExit();
+                Files.copy(libInputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                System.load(tempFile.getAbsolutePath());
+
+                if (CallTraces.TRACE_DOWNCALLS) {
+                    System.out.println("[swift-java] Loaded and cached library: " + key + " from " + tempFile.getAbsolutePath());
+                }
+
+                return tempFile;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load dynamic library '" + key + "' ('" + resourceName + "') as resource!", e);
+            }
+        });
+
+        if (CallTraces.TRACE_DOWNCALLS) {
+            System.out.println("[swift-java] Library already loaded from cache: " + libname);
         }
     }
 

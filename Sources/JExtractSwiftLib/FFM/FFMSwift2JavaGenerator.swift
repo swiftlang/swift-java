@@ -194,46 +194,10 @@ extension FFMSwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            // Load swiftCore: try path, then JAR, then /usr/lib/swift on macOS
-            try {
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-            } catch (Throwable e) {
-                try {
-                    SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-                } catch (Throwable e2) {
-                    if (PlatformUtils.isMacOS()) {
-                        try {
-                            System.load("/usr/lib/swift/libswiftCore.dylib");
-                        } catch (Throwable e3) {
-                            throw new RuntimeException("Failed to load swiftCore from java.library.path, JAR, and /usr/lib/swift", e3);
-                        }
-                    } else {
-                        throw e2;
-                    }
-                }
-            }
-
-            // Load SwiftJava: try path, then JAR
-            try {
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            } catch (Throwable e) {
-                SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            }
-
-            // Load SwiftRuntimeFunctions: try path, then JAR
-            try {
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-            } catch (Throwable e) {
-                SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-            }
-
-            // Load module library: try path, then JAR
-            try {
-                System.loadLibrary(LIB_NAME);
-            } catch (Throwable e) {
-                SwiftLibraries.loadResourceLibrary(LIB_NAME);
-            }
-
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
             return true;
         }
 
@@ -381,45 +345,10 @@ extension FFMSwift2JavaGenerator {
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             if (SwiftLibraries.AUTO_LOAD_LIBS) {
-                // Load swiftCore: try path, then JAR, then /usr/lib/swift on macOS
-                try {
-                    System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-                } catch (Throwable e) {
-                    try {
-                        SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-                    } catch (Throwable e2) {
-                        if (PlatformUtils.isMacOS()) {
-                            try {
-                                System.load("/usr/lib/swift/libswiftCore.dylib");
-                            } catch (Throwable e3) {
-                                throw new RuntimeException("Failed to load swiftCore from java.library.path, JAR, and /usr/lib/swift", e);
-                            }
-                        } else {
-                            throw e2;
-                        }
-                    }
-                }
-
-                // Load SwiftJava: try path, then JAR
-                try {
-                    System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-                } catch (Throwable e) {
-                    SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-                }
-
-                // Load SwiftRuntimeFunctions: try path, then JAR
-                try {
-                    System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-                } catch (Throwable e) {
-                    SwiftLibraries.loadResourceLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-                }
-
-                // Load module library: try path, then JAR
-                try {
-                    System.loadLibrary(LIB_NAME);
-                } catch (Throwable e) {
-                    SwiftLibraries.loadResourceLibrary(LIB_NAME);
-                }
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+                SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
             }
 
             if (PlatformUtils.isMacOS()) {
