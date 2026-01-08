@@ -15,23 +15,13 @@
 package org.swift.swiftkit.core;
 
 /**
- * Exception thrown when a Swift runtime detects integer overflow,
+ * <p>Exception thrown when a Swift runtime detects integer overflow,
  * most likely caused by running a 32-bit application while using Swift's Int type.
- * <p>
- * This custom unchecked exception is intended to signal a platform incompatibility
+ * 
+ * <p> This custom unchecked exception is intended to signal a platform incompatibility
  * between Swift's Int expectations and the underlying Java runtime architecture. It is typically
  * thrown automatically by underlaying code for method.
- * </p>
  *
- * <p>
- * Inheritance hierarchy:
- * <ul>
- *   <li>{@link java.lang.RuntimeException}</li>
- *   <li>SwiftIntegerOverflowException</li>
- * </ul>
- * </p>
- *
- * @see java.lang.RuntimeException
  * @see <a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics#Int">Swift Int documentation</a>
  */
 public class SwiftIntegerOverflowException extends RuntimeException {
