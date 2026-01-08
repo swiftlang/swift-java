@@ -297,7 +297,6 @@ let package = Package(
         "CSwiftJavaJNI",
         "SwiftJavaMacros",
         "JavaTypes",
-        "SwiftJavaConfigurationShared", // for Configuration reading at runtime
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [

@@ -60,7 +60,7 @@ public final class _JNIMethodIDCache: Sendable {
         fatalError("Cannot get JNI.shared, it should have been initialized by JNI_OnLoad when loading the library")
       }
       guard let javaClass = try? jni.applicationClassLoader?.loadClass(
-        className.replacingOccurrences(of: "/", with: ".")
+        className.replacing("/", with: ".")
       ) else {
         fatalError("Class \(className) could not be found!")
       }

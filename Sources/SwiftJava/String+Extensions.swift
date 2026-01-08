@@ -12,7 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension String {
   /// For a String that's of the form java.util.Vector, return the "Vector" part.
@@ -30,11 +34,8 @@ extension String {
   /// Convert a Java class name to its canonical name.
   /// Replaces `$` with `.` for nested classes but preserves `$` at the start of identifiers.
   package var javaClassNameToCanonicalName: String {
-    self.replacingOccurrences(
-      of: #"(?<=\w)\$"#,
-      with: ".",
-      options: .regularExpression
-    )
+    let regex = try! Regex(#"(?<=\w)\$"#)
+    return self.replacing(regex, with: ".")
   }
 
   /// Whether this is the name of an anonymous class.
