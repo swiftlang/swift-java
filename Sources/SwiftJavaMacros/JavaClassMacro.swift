@@ -15,11 +15,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
+import Foundation // for e.g. replacingOccurrences
 
 package enum JavaClassMacro {}
 
