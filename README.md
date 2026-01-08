@@ -34,6 +34,12 @@ Alternatively, you can use a JDK manager like [sdkman](https://sdkman.io/install
 $ export JAVA_HOME="$(sdk home java current)"
 ```
 
+E.g sdkman install command:
+
+```bash
+sdk install java 25.0.1-amzn
+```
+
 ## Self-publish supporting Java libraries
 
 Swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
@@ -160,6 +166,8 @@ Please always use the gradle wrapper (`./gradlew`) to make sure to use the appro
 ### Sample apps & tests
 
 Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
+
+Samples are build by default by Gradle. Building samples can be skipped by appending the flag `-PskipSamples=true` to a gradle command.
 
 #### SwiftJava (Swift -> Java)
 

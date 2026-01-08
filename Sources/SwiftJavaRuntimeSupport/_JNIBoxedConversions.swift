@@ -26,47 +26,39 @@ public enum _JNIBoxedConversions {
   private static let doubleMethod = _JNIMethodIDCache.Method(name: "valueOf", signature: "(D)Ljava/lang/Double;", isStatic: true)
 
   private static let booleanCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Boolean",
     methods: [booleanMethod]
   )
 
   private static let byteCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Byte",
     methods: [byteMethod]
   )
   private static let charCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Character",
     methods: [charMethod]
   )
 
   private static let shortCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Short",
     methods: [shortMethod]
   )
   private static let intCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Integer",
     methods: [intMethod]
   )
 
   private static let longCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Long",
     methods: [longMethod]
   )
 
   private static let floatCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Float",
     methods: [floatMethod]
   )
 
   private static let doubleCache = _JNIMethodIDCache(
-    environment: try! JavaVirtualMachine.shared().environment(),
     className: "java/lang/Double",
     methods: [doubleMethod]
   )

@@ -28,6 +28,7 @@ public final class SwiftLibraries {
     public static final String LIB_NAME_SWIFT_CORE = "swiftCore";
     public static final String LIB_NAME_SWIFT_CONCURRENCY = "swift_Concurrency";
     public static final String LIB_NAME_SWIFT_RUNTIME_FUNCTIONS = "SwiftRuntimeFunctions";
+    public static final String LIB_NAME_SWIFT_JAVA = "SwiftJava";
 
     /** 
      * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
@@ -44,6 +45,7 @@ public final class SwiftLibraries {
 
     public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
         System.loadLibrary(LIB_NAME_SWIFT_CORE);
+        System.loadLibrary(LIB_NAME_SWIFT_JAVA);
         if (loadSwiftRuntimeFunctions) {
             System.loadLibrary(LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
         }

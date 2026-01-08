@@ -30,8 +30,8 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case float = "Swift.Float"
   case double = "Swift.Double"
   case unsafeRawPointer = "Swift.UnsafeRawPointer"
-  case unsafeMutableRawPointer = "Swift.UnsafeMutableRawPointer"
   case unsafeRawBufferPointer = "Swift.UnsafeRawBufferPointer"
+  case unsafeMutableRawPointer = "Swift.UnsafeMutableRawPointer"
   case unsafeMutableRawBufferPointer = "Swift.UnsafeMutableRawBufferPointer"
   case unsafePointer = "Swift.UnsafePointer"
   case unsafeMutablePointer = "Swift.UnsafeMutablePointer"
@@ -60,6 +60,20 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   var isPointer: Bool {
     switch self {
     case .unsafePointer, .unsafeMutablePointer, .unsafeRawPointer, .unsafeMutableRawPointer:
+      return true
+    default:
+      return false
+    }
+  }
+
+  /// Indicates whether this known type is translated by `wrap-java`
+  /// into the same type as `jextract`.
+  ///
+  /// This means we do not have to perform any mapping when passing
+  /// this type between jextract and wrap-java
+  var isDirectlyTranslatedToWrapJava: Bool {
+    switch self {
+    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:
       return true
     default:
       return false

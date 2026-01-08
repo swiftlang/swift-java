@@ -82,6 +82,17 @@ class BasicRuntimeTests: XCTestCase {
     let nullString = String(fromJNI: nil, in: environment)
     XCTAssertEqual(nullString, "")
   }
+
+  func testCrossThreadAccess() async throws {
+    let environment = try jvm.environment()
+    let url = try URL("https://swift.org", environment: environment)
+    let string = await Task.detached {
+      // This should be called on a different thread
+      url.toString()
+    }.value
+
+    XCTAssertEqual(string, "https://swift.org")
+  }
 }
 
 @JavaClass("org.swift.javakit.Nonexistent")

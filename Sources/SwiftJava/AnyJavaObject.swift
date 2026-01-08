@@ -66,7 +66,7 @@ extension AnyJavaObject {
     javaHolder.object
   }
 
-  /// Retrieve the environment in which this Java object resides.
+  /// Retrieve the environment in which this Java object was created.
   public var javaEnvironment: JNIEnvironment {
     javaHolder.environment
   }
@@ -75,6 +75,11 @@ extension AnyJavaObject {
   static var fullJavaClassNameWithSlashes: String {
     let seq = fullJavaClassName.map { $0 == "." ? "/" as Character : $0 }
     return String(seq)
+  }
+
+  /// The mangled name for this java class
+  public static var mangledName: String {
+    "L\(fullJavaClassNameWithSlashes);"
   }
 
   /// Initialize a Java object from its instance.
@@ -97,13 +102,29 @@ extension AnyJavaObject {
     in environment: JNIEnvironment,
     _ body: (jclass) throws -> Result
   ) throws -> Result {
-    let resolvedClass = try environment.translatingJNIExceptions {
-      environment.interface.FindClass(
-        environment,
-        fullJavaClassNameWithSlashes
-      )
-    }!
-    return try body(resolvedClass)
+    do {
+      let resolvedClass = try environment.translatingJNIExceptions {
+        environment.interface.FindClass(
+          environment,
+          fullJavaClassNameWithSlashes
+        )
+      }!
+      return try body(resolvedClass)
+    } catch {
+      // If we are in a Java environment where we have loaded
+      // SwiftJava dynamically, we have access to the application class loader
+      // so lets try that as as a fallback
+      if let applicationClassLoader = JNI.shared?.applicationClassLoader {
+        return try _withJNIClassFromCustomClassLoader(
+          applicationClassLoader,
+          in: environment
+        ) { applicationLoadedClass in
+          return try body(applicationLoadedClass)
+        }
+      } else {
+        throw error
+      }
+    }
   }
 
   /// Retrieve the Java class for this type using a specific class loader.
@@ -113,6 +134,8 @@ extension AnyJavaObject {
     _ body: (jclass) throws -> Result
   ) throws -> Result {
     let resolvedClass = try classLoader.findClass(fullJavaClassName)
+    // OK to force unwrap, as classLoader will throw ClassNotFoundException
+    // if the class cannot be found.
     return try body(resolvedClass!.javaThis)
   }
 
@@ -124,9 +147,15 @@ extension AnyJavaObject {
   ) throws -> Result {
     if let AnyJavaObjectWithCustomClassLoader = self as? AnyJavaObjectWithCustomClassLoader.Type,
        let customClassLoader = try AnyJavaObjectWithCustomClassLoader.getJavaClassLoader(in: environment) {
-      try _withJNIClassFromCustomClassLoader(customClassLoader, in: environment, body)
+      do {
+        return try _withJNIClassFromCustomClassLoader(customClassLoader, in: environment) { clazz in
+          return try body(clazz)
+        }
+      } catch {
+        return try _withJNIClassFromDefaultClassLoader(in: environment, body)
+      }
     } else {
-      try _withJNIClassFromDefaultClassLoader(in: environment, body)
+      return try _withJNIClassFromDefaultClassLoader(in: environment, body)
     }
   }
 }

@@ -45,11 +45,6 @@ public struct Configuration: Codable {
 
   public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
 
-  public var unsignedNumbersMode: JExtractUnsignedIntegerMode?
-  public var effectiveUnsignedNumbersMode: JExtractUnsignedIntegerMode {
-    unsignedNumbersMode ?? .default
-  }
-
   public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
   public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {
     minimumInputAccessLevelMode ?? .default
@@ -64,6 +59,13 @@ public struct Configuration: Codable {
   public var effectiveAsyncFuncMode: JExtractAsyncFuncMode {
     asyncFuncMode ?? .default
   }
+
+  public var enableJavaCallbacks: Bool?
+  public var effectiveEnableJavaCallbacks: Bool {
+    enableJavaCallbacks ?? false
+  }
+
+  public var generatedJavaSourcesListFileOutput: String?
 
   // ==== wrap-java ---------------------------------------------------------
 
@@ -90,6 +92,8 @@ public struct Configuration: Codable {
 
   /// Exclude input Java types by their package prefix or exact match.
   public var filterExclude: [String]?
+
+  public var singleSwiftFileOutput: String?
 
   // ==== dependencies ---------------------------------------------------------
 
@@ -162,7 +166,11 @@ public func readConfiguration(sourceDir: String, file: String = #fileID, line: U
 /// Configuration is expected to be "JSON-with-comments".
 /// Specifically "//" comments are allowed and will be trimmed before passing the rest of the config into a standard JSON parser.
 public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
-  guard let configData = try? Data(contentsOf: configPath) else {
+  let configData: Data
+  do {
+    configData = try Data(contentsOf: configPath)
+  } catch {
+    print("Failed to read SwiftJava configuration at '\(configPath.absoluteURL)', error: \(error)")
     return nil
   }
 
@@ -309,7 +317,7 @@ public enum LogLevel: String, ExpressibleByStringLiteral, Codable, Hashable {
 
 extension LogLevel {
   public init(from decoder: any Decoder) throws {
-    var container = try decoder.singleValueContainer()
+    let container = try decoder.singleValueContainer()
     let string = try container.decode(String.self)
     switch string {
     case "trace": self = .trace

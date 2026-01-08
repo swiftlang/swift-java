@@ -17,6 +17,7 @@ public protocol ProtocolA {
   var mutable: Int64 { get set }
 
   func name() -> String
+  func makeClass() -> MySwiftClass
 }
 
 public func takeProtocol(_ proto1: any ProtocolA, _ proto2: some ProtocolA) -> Int64 {

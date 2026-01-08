@@ -22,11 +22,11 @@ extension UInt8: JavaValue {
   public static var javaType: JavaType { .byte }
 
   /// Retrieve the JNI value.
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(bitPattern: self) }
 
   /// Initialize from a JNI value.
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = Self(value)
+    self = Self(bitPattern: value)
   }
 
   public static func jniMethodCall(
@@ -238,11 +238,11 @@ extension UInt32: JavaValue {
   public static var javaType: JavaType { .int }
 
   /// Retrieve the JNI value.
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(bitPattern: self) }
 
   /// Initialize from a JNI value.
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = Self(value)
+    self = Self(bitPattern: value)
   }
 
   public static func jniMethodCall(
@@ -353,10 +353,36 @@ extension UInt64: JavaValue {
 
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.j }
 
-  public func getJNIValue(in environment: JNIEnvironment) -> JNIType { JNIType(self) }
+  public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
+    // `jlong` is always 64-bit, no matter the system pointer size.
+    // Due to differences in JNI headers between Android, JDK and how Swift sees these type imports
+    // we have to handle this a bit differently.
+    //
+    // On 32-bit, the standard JDK jlong is defined in C as `long long`, which yields Swift `Int64`
+    // On 64-bit, the standard JDK jlong is defined in C as `long`, which yields Swift `Int`
+    // On Android it's correctly marked as int64_t, always yielding `Int64` in Swift.
+    #if os(Android) || _pointerBitWidth(_32)
+    return Int64(bitPattern: self)
+    #else
+    return Int(bitPattern: UInt(self))
+    #endif
+  }
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
-    self = UInt64(value)
+    // `jlong` is always 64-bit, no matter the system pointer size.
+    // Due to differences in JNI headers between Android, JDK and how Swift sees these type imports
+    // we have to handle this a bit differently.
+    //
+    // On 32-bit, the standard JDK jlong is defined in C as `long long`, which yields Swift `Int64`
+    // On 64-bit, the standard JDK jlong is defined in C as `long`, which yields Swift `Int`
+    // On Android it's correctly marked as int64_t, always yielding `Int64` in Swift.
+    #if os(Android) || _pointerBitWidth(_32)
+    // In this case `jlong` is seen in Swift as `Int64`.
+    self = UInt64(bitPattern: value)
+    #else
+    // In this case `jlong` is since as just `Int`, which is always Int64
+    self = UInt64(bitPattern: Int64(value))
+    #endif
   }
 
   public static var javaType: JavaType { .long }

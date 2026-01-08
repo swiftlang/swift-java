@@ -171,10 +171,12 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     arguments += javaStdlibModules.flatMap { ["--depends-on", $0] }
 
     if !outputSwiftFiles.isEmpty {
-      arguments += [ configFile.path(percentEncoded: false) ]
-
       let displayName = "Wrapping \(classes.count) Java classes in Swift target '\(sourceModule.name)'"
       log("Prepared: \(displayName)")
+
+      for f in outputSwiftFiles {
+        log("Swift output file: \(f)")
+      }
       commands += [
         .buildCommand(
           displayName: displayName,

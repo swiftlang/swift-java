@@ -18,13 +18,6 @@ import SwiftJavaConfigurationShared
 enum JNIJavaTypeTranslator {
 
   static func translate(knownType: SwiftKnownTypeDeclKind, config: Configuration) -> JavaType? {
-    let unsigned = config.effectiveUnsignedNumbersMode
-    guard unsigned == .annotate else {
-      // We do not support wrap mode in JNI mode currently;
-      // In the future this is where it would be interesting to implement Kotlin UInt support.
-      return nil
-    }
-
     switch knownType {
     case .bool: return .boolean
 

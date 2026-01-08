@@ -348,6 +348,45 @@ struct CdeclLowering {
     case .composite:
       throw LoweringError.unhandledType(type)
 
+    case .array(let wrapped) where wrapped == knownTypes.uint8:
+      // Lower an array as 'address' raw pointer and 'count' integer
+      let cdeclParameters = [
+        SwiftParameter(
+          convention: .byValue,
+          parameterName: "\(parameterName)_pointer",
+          type: knownTypes.unsafeRawPointer
+        ),
+        SwiftParameter(
+          convention: .byValue,
+          parameterName: "\(parameterName)_count",
+          type: knownTypes.int
+        ),
+      ]
+      
+      let bufferPointerInit = ConversionStep.initialize(
+        knownTypes.unsafeRawBufferPointer,
+        arguments: [
+          LabeledArgument(
+            label: "start",
+            argument: .explodedComponent(.placeholder, component: "pointer")
+          ),
+          LabeledArgument(
+            label: "count",
+            argument: .explodedComponent(.placeholder, component: "count")
+          ),
+        ]
+      )
+      
+      let arrayInit = ConversionStep.initialize(
+        type,
+        arguments: [LabeledArgument(argument: bufferPointerInit)]
+      )
+      
+      return LoweredParameter(
+        cdeclParameters: cdeclParameters,
+        conversion: arrayInit
+      )
+
     case .array:
       throw LoweringError.unhandledType(type)
     }
@@ -525,6 +564,24 @@ struct CdeclLowering {
     }
   }
 
+  /// Create "out" parameter names when we're returning an array-like result.
+  fileprivate func makeBufferIndirectReturnParameters(_ outParameterName: String, isMutable: Bool) -> [SwiftParameter] {
+    [
+      SwiftParameter(
+        convention: .byValue,
+        parameterName: "\(outParameterName)_pointer",
+        type: knownTypes.unsafeMutablePointer(
+          .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+        )
+      ),
+      SwiftParameter(
+        convention: .byValue,
+        parameterName: "\(outParameterName)_count",
+        type: knownTypes.unsafeMutablePointer(knownTypes.int)
+      ),
+    ]
+  }
+
   /// Lower a Swift result type to cdecl out parameters and return type.
   ///
   /// - Parameters:
@@ -580,20 +637,7 @@ struct CdeclLowering {
           let isMutable = knownType == .unsafeMutableRawBufferPointer
           return LoweredResult(
             cdeclResultType: .void,
-            cdeclOutParameters: [
-              SwiftParameter(
-                convention: .byValue,
-                parameterName: "\(outParameterName)_pointer",
-                type: knownTypes.unsafeMutablePointer(
-                  .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
-                )
-              ),
-              SwiftParameter(
-                convention: .byValue,
-                parameterName: "\(outParameterName)_count",
-                type: knownTypes.unsafeMutablePointer(knownTypes.int)
-              ),
-            ],
+            cdeclOutParameters: makeBufferIndirectReturnParameters(outParameterName, isMutable: isMutable),
             conversion: .aggregate([
               .populatePointer(
                 name: "\(outParameterName)_pointer",
@@ -671,6 +715,37 @@ struct CdeclLowering {
         cdeclResultType: .void,
         cdeclOutParameters: parameters,
         conversion: .tupleExplode(conversions, name: outParameterName)
+      )
+    
+    case .array(let wrapped) where wrapped == knownTypes.uint8:
+      let resultName = "_result"
+
+      return LoweredResult(
+        cdeclResultType: .void, // we call into the _result_initialize instead
+        cdeclOutParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: "\(outParameterName)_initialize",
+            type: knownTypes.functionInitializeByteBuffer
+          )
+        ], 
+        conversion: .aggregate([
+          .method(base: resultName, methodName: "withUnsafeBufferPointer", arguments: [
+            .init(argument: 
+              .closureLowering(
+                parameters: [.placeholder],
+                 result: .method(
+                  base: "\(outParameterName)_initialize", 
+                  methodName: nil, // just `(...)` apply the closure
+                  arguments: [
+                    .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
+                    .init(label: nil, argument: .member(.constant("_0"), member: "count")),
+                  ]
+                )
+              )
+            )
+          ])
+        ], name: resultName)
       )
 
     case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array:
@@ -812,11 +887,10 @@ extension LoweredFunctionSignature {
 
     // Build callee expression.
     let callee: ExprSyntax = if let selfExpr {
-      if case .initializer = apiKind {
+      switch apiKind {
         // Don't bother to create explicit ${Self}.init expression.
-        selfExpr
-      } else {
-        ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
+        case .initializer, .subscriptGetter, .subscriptSetter: selfExpr
+        default: ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
       }
     } else {
       ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(swiftAPIName)))
@@ -845,6 +919,18 @@ extension LoweredFunctionSignature {
     case .enumCase:
       // This should not be called, but let's fatalError.
       fatalError("Enum cases are not supported with FFM.")
+
+    case .subscriptGetter:
+      let parameters = paramExprs.map { $0.description }.joined(separator: ", ")
+      resultExpr = "\(callee)[\(raw: parameters)]"
+    case .subscriptSetter:
+      assert(paramExprs.count >= 1)
+
+      var argumentsWithoutNewValue = paramExprs
+      let newValueArgument = argumentsWithoutNewValue.removeLast()
+
+      let parameters = argumentsWithoutNewValue.map { $0.description }.joined(separator: ", ")
+      resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"
     }
 
     // Lower the result.

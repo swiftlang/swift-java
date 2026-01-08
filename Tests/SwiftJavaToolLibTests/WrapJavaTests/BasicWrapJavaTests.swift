@@ -18,7 +18,7 @@ import JavaUtilJar
 import SwiftJavaShared
 import JavaNet
 import SwiftJavaConfigurationShared
-import _Subprocess
+import Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class BasicWrapJavaTests: XCTestCase {
@@ -88,4 +88,78 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  // Test that static fields from superclasses are not duplicated in generated code.
+  // This prevents duplicate serialVersionUID declarations when both a class and its
+  // superclass declare the field. The subclass field "hides" the superclass field,
+  // similar to how static methods work in Java.
+  func test_wrapJava_noDuplicateStaticFieldsFromSuperclass() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class SuperClass {
+        public static final long serialVersionUID = 1L;
+        public void init() throws Exception {}
+      }
+
+      class SubClass extends SuperClass {
+        public static final long serialVersionUID = 2L;
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.SuperClass",
+        "com.example.SubClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        // SuperClass should have its static field
+        """
+        extension JavaClass<SuperClass> {
+        @JavaStaticField(isFinal: true)
+        public var serialVersionUID: Int64
+        """,
+        // SubClass should only have its own static field, not the superclass one
+        """
+        extension JavaClass<SubClass> {
+        @JavaStaticField(isFinal: true)
+        public var serialVersionUID: Int64
+        """,
+      ]
+    )
+  }
+
+  // Test that Java methods named "init" get @JavaMethod("init") annotation.
+  // Since "init" is a Swift keyword and gets escaped with backticks in the function name,
+  // we explicitly specify the Java method name in the annotation.
+  // See KeyAgreement.init() methods as a real-world example.
+  func test_wrapJava_initMethodAnnotation() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class TestClass {
+        public void init(String arg) throws Exception {}
+        public void init() throws Exception {}
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.TestClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod("init")
+        open func `init`(_ arg0: String) throws
+        """,
+        """
+        @JavaMethod("init")
+        open func `init`() throws
+        """,
+      ]
+    )
+  }
 }

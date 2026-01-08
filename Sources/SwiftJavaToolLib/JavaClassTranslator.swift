@@ -228,6 +228,11 @@ struct JavaClassTranslator {
         continue
       }
 
+      guard method.getName().isValidSwiftFunctionName else {
+        log.warning("Skipping method \(method.getName()) because it is not a valid Swift function name")
+        continue
+      }
+
       addMethod(method, isNative: false)
     }
 
@@ -265,6 +270,13 @@ extension JavaClassTranslator {
 
   /// Add a field to the appropriate lists(s) for later translation.
   private mutating func addField(_ field: Field) {
+    // Don't include inherited fields when translating to a class.
+    // This applies to both instance and static fields to avoid duplicates
+    if translateAsClass &&
+        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
+      return
+    }
+
     // Static fields go into a separate list.
     if field.isStatic {
       staticFields.append(field)
@@ -275,12 +287,6 @@ extension JavaClassTranslator {
         enumConstants.append(field)
       }
 
-      return
-    }
-
-    // Don't include inherited fields when translating to a class.
-    if translateAsClass &&
-        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
 
@@ -604,6 +610,15 @@ extension JavaClassTranslator {
       }
     }
 
+    // --- Parameter types
+    for parameter in method.getParameters() {
+      if let parameterizedType = parameter?.getParameterizedType() {
+        if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
+          return true
+        }
+      }
+    }
+
     return false
   }
 
@@ -668,7 +683,8 @@ extension JavaClassTranslator {
     // --- Handle other effects
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
     let swiftMethodName = javaMethod.getName().escapedSwiftName
-    
+    let swiftOptionalMethodName = "\(javaMethod.getName())Optional".escapedSwiftName
+
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
       if implementedInSwift {
@@ -682,6 +698,11 @@ extension JavaClassTranslator {
           }
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
+        // If the method name is "init", we need to explicitly specify it in the annotation
+        // because "init" is a Swift keyword and will be escaped in the function name via `init`
+        if javaMethod.getName() == "init" {
+          parameters.append("\"init\"")
+        }
         if hasTypeEraseGenericResultType {
           parameters.append("typeErasedResult: \"\(resultType)\"")
         }
@@ -729,7 +750,7 @@ extension JavaClassTranslator {
         """
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
-        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)Optional\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
+        \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
           \(body)
         }
         """

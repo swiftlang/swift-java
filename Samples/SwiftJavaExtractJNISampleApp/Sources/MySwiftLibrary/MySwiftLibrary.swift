@@ -52,6 +52,14 @@ public func echoUnsignedInt(i: UInt32, j: UInt64) -> UInt64 {
   return UInt64(i) + j
 }
 
+public func returnUnsignedByte(b: UInt8) -> UInt8 {
+  return b
+}
+
+public func returnLargestUnsignedByte() -> UInt8 {
+  return UInt8.max
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

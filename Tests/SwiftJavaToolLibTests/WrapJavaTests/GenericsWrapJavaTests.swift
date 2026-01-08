@@ -18,7 +18,7 @@ import JavaUtilJar
 import SwiftJavaShared
 import JavaNet
 import SwiftJavaConfigurationShared
-import _Subprocess
+import Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class GenericsWrapJavaTests: XCTestCase {
@@ -333,6 +333,45 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaStaticMethod(typeErasedResult: "T!")
         public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
+        """
+      ]
+    )
+  }
+
+  func test_wrapJava_genericMethodTypeErasure_customInterface_staticMethods() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      
+      interface MyInterface {}
+
+      final class Public {
+        public static <T extends MyInterface> void useInterface(T myInterface) {  }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyInterface",
+        "com.example.Public"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.MyInterface")
+        public struct MyInterface {
+        """,
+        """
+        @JavaClass("com.example.Public")
+        open class Public: JavaObject {
+        """,
+        """
+        extension JavaClass<Public> {
+        """,
+        """
+        @JavaStaticMethod
+        public func useInterface<T: AnyJavaObject>(_ arg0: T?)
+        }
         """
       ]
     )

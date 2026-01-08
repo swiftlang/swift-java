@@ -68,7 +68,7 @@ extension String {
 
   /// Looks up self as a SwiftJava wrapped class name and converts it
   /// into a `JavaType.class` if it exists in `lookupTable`.
-  func parseJavaClassFromJavaKitName(in lookupTable: [String: String]) -> JavaType? {
+  func parseJavaClassFromSwiftJavaName(in lookupTable: [String: String]) -> JavaType? {
     guard let canonicalJavaName = lookupTable[self] else {
       return nil
     }
@@ -77,5 +77,15 @@ extension String {
     let javaClassName = nameParts.last!
 
     return .class(package: javaPackageName, name: javaClassName)
+  }
+}
+
+extension Array where Element == String {
+  func joinedJavaStatements(indent: Int) -> String {
+    if self.count == 1 {
+      return "\(self.first!);"
+    }
+    let indentation = String(repeating: " ", count: indent)
+    return self.joined(separator: ";\n\(indentation)")
   }
 }

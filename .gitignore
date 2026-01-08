@@ -2,6 +2,7 @@
 .sdkmanrc
 
 .DS_Store
+.metals
 .build
 .idea
 .vscode

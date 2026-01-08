@@ -18,7 +18,7 @@ import JavaUtilJar
 import JavaNet
 import SwiftJavaShared
 import SwiftJavaConfigurationShared
-import _Subprocess
+import Subprocess
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 import Foundation
 
@@ -37,7 +37,7 @@ func compileJava(_ sourceText: String) async throws -> Foundation.URL {
   
   let classesDirectory = try createTemporaryDirectory(in: FileManager.default.temporaryDirectory)
   
-  let javacProcess = try await _Subprocess.run(
+  let javacProcess = try await Subprocess.run(
     .path(.init("\(javaHome)" + "/bin/javac")),
     arguments: [
       "-d", classesDirectory.path, // output directory for .class files
