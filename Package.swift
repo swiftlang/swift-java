@@ -158,6 +158,11 @@ let package = Package(
     ),
 
     .library(
+      name: "SwiftJavaConfigurationShared",
+      targets: ["SwiftJavaConfigurationShared"]
+    ),
+
+    .library(
       name: "JavaUtil",
       targets: ["JavaUtil"]
     ),
