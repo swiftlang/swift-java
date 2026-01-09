@@ -111,6 +111,7 @@ let package = Package(
       name: "JavaDependencySample",
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "SwiftJavaConfigurationShared", package: "swift-java"),
         .product(name: "CSwiftJavaJNI", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         "JavaCommonsCSV"
