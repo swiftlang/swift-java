@@ -322,4 +322,58 @@ final class UnsignedNumberTests {
       expectedChunks: expectedChunks
     )
   }
+  
+  @Test(
+    "Import: take UInt return UInt (annotate)",
+    arguments: [
+      (
+        JExtractGenerationMode.ffm,
+        /* expected chunks */
+        [
+          """
+          /**
+           * {@snippet lang=c :
+           * size_t swiftjava_SwiftModule_unsignedLong_first_second(size_t first, size_t second)
+           * }
+           */
+          private static class swiftjava_SwiftModule_unsignedLong_first_second {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_INT
+            /* first: */SwiftValueLayout.SWIFT_INT
+            /* second: */SwiftValueLayout.SWIFT_INT
+          );
+          """,
+          """
+          @Unsigned
+          public static long unsignedLong(@Unsigned long first, @Unsigned long second) {
+            return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+          }
+          """,
+        ]
+      ),
+      (
+        JExtractGenerationMode.jni,
+        /* expected chunks */
+        [
+          """
+          @Unsigned
+          public static long unsignedLong(@Unsigned long first, @Unsigned long second) throws SwiftIntegerOverflowException {
+            return SwiftModule.$unsignedLong(first, second);
+          }
+          private static native long $unsignedLong(long first, long second);
+          """,
+        ]
+      ),
+    ])
+  func echo_uint_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
+    let config = Configuration()
+
+    try assertOutput(
+      input: "public func unsignedLong(first: UInt, second: UInt) -> UInt",
+      config: config,
+      mode, .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: expectedChunks
+    )
+  }
 }

@@ -241,6 +241,7 @@ struct JNIModuleTests {
               try SwiftModule.methodA()
             } catch {
               environment.throwAsException(error)
+              return
             }
           }
           """,

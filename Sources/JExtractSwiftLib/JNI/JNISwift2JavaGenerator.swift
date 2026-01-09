@@ -105,3 +105,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     }
   }
 }
+
+extension JNISwift2JavaGenerator {
+  static func indirectVariableName(for parameterName: String) -> String {
+    "\(parameterName)$indirect"
+  }
+}
