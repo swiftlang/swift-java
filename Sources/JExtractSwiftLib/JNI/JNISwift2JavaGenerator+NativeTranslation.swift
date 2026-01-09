@@ -153,6 +153,28 @@ extension JNISwift2JavaGenerator {
       case .function(let fn):
 
         // @Sendable is not supported yet as "environment" is later captured inside the closure.
+        if fn.isEscaping {
+          // Use the protocol infrastructure for escaping closures.
+          // This provides full support for optionals, arrays, custom types, async, etc.
+          let wrapJavaInterfaceName = "Java\(parentName).\(methodName).\(parameterName)"
+          let generator = JavaInterfaceProtocolWrapperGenerator()
+          let syntheticFunction = try generator.generateSyntheticClosureFunction(
+            functionType: fn,
+            wrapJavaInterfaceName: wrapJavaInterfaceName
+          )
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+            ],
+            conversion: .escapingClosureLowering(
+              syntheticFunction: syntheticFunction,
+              closureName: parameterName
+            )
+          )
+        }
+
+        // Non-escaping closures use the legacy translation
         var parameters = [NativeParameter]()
         for (i, parameter) in fn.parameters.enumerated() {
           let closureParamName = parameter.parameterName ?? "_\(i)"
@@ -165,33 +187,15 @@ extension JNISwift2JavaGenerator {
 
         let result = try translateClosureResult(fn.resultType)
 
-        if fn.isEscaping {
-          // Use wrap-java interface for escaping closures
-          // Format: Java{ParentName}.{methodName}.{parameterName}
-          let wrapJavaInterfaceName = "Java\(parentName).\(methodName).\(parameterName)"
-
-          return NativeParameter(
-            parameters: [
-              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
-            ],
-            conversion: .escapingClosureLowering(
-              parameters: parameters,
-              result: result,
-              closureName: parameterName,
-              wrapJavaInterfaceName: wrapJavaInterfaceName
-            )
+        return NativeParameter(
+          parameters: [
+            JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+          ],
+          conversion: .closureLowering(
+            parameters: parameters,
+            result: result
           )
-        } else {
-          return NativeParameter(
-            parameters: [
-              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
-            ],
-            conversion: .closureLowering(
-              parameters: parameters,
-              result: result
-            )
-          )
-        }
+        )
 
       case .optional(let wrapped):
         return try translateOptionalParameter(
@@ -722,13 +726,11 @@ extension JNISwift2JavaGenerator {
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
     
-    /// Converts an escaping closure parameter using wrap-java interface for upcalls.
-    /// This reuses the protocol callback infrastructure for unified handling.
+    /// Escaping closure lowering using the protocol infrastructure.
+    /// This uses UpcallConversionStep for full support of optionals, arrays, custom types, etc.
     indirect case escapingClosureLowering(
-      parameters: [NativeParameter],
-      result: NativeResult,
-      closureName: String,
-      wrapJavaInterfaceName: String
+      syntheticFunction: SyntheticClosureFunction,
+      closureName: String
     )
 
     indirect case initializeSwiftJavaWrapper(NativeSwiftConversionStep, wrapperName: String)
@@ -956,14 +958,39 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
       
-      case .escapingClosureLowering(let parameters, let nativeResult, let closureName, let wrapJavaInterfaceName):
+      case .escapingClosureLowering(let syntheticFunction, let closureName):
         var printer = CodePrinter()
 
-        let closureParameters = parameters.flatMap { $0.parameters.map(\.name) }.joined(separator: ", ")
-        let parameterNames = parameters.flatMap { $0.parameters.map(\.name) }
-        let isVoid = nativeResult.javaType.isVoid
+        let fn = syntheticFunction.functionType
+        let parameterNames = fn.parameters.enumerated().map { idx, param in
+          param.parameterName ?? "_\(idx)"
+        }
+        let closureParameters = parameterNames.joined(separator: ", ")
+        let isVoid = fn.resultType == .tuple([])
 
-        // Use wrap-java interface for upcalls - this reuses the protocol callback infrastructure
+        // Build upcall arguments using UpcallConversionStep conversions
+        var upcallArguments: [String] = []
+        for (idx, conversion) in syntheticFunction.parameterConversions.enumerated() {
+          var argPrinter = CodePrinter()
+          let paramName = parameterNames[idx]
+          let converted = conversion.render(&argPrinter, paramName)
+          upcallArguments.append(converted)
+        }
+
+        // Build result conversion
+        // Note: The Java interface is synchronous even for async closures.
+        // The async nature is on the Swift side, inferred from the expected type.
+        var resultPrinter = CodePrinter()
+        let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: ", ")))"
+        let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
+        let resultPrefix = resultPrinter.finalize()
+
+        // Note: async is part of the closure TYPE, not the closure literal syntax.
+        // For closures without parameters, we can omit "in" entirely.
+        let closureHeader = fn.parameters.isEmpty
+          ? "{"
+          : "{ \(closureParameters) in"
+
         printer.print(
           """
           {
@@ -971,18 +998,15 @@ extension JNISwift2JavaGenerator {
               fatalError(\"\(placeholder) is null\")
             }
 
-            // Hold a reference to the Java object for the lifetime of the closure
             let closureContext_\(closureName)$ = JavaObjectHolder(object: \(placeholder), environment: environment)
             
-            return { \(parameters.isEmpty ? "" : "\(closureParameters) in")
+            return \(closureHeader)
               guard let env$ = try? JavaVirtualMachine.shared().environment() else {
                 fatalError(\"Failed to get JNI environment for escaping closure call\")
               }
 
-              // Create wrap-java interface instance and call apply method
-              // This leverages the same infrastructure as protocol callbacks
-              let javaInterface$ = \(wrapJavaInterfaceName)(javaThis: closureContext_\(closureName)$.object!, environment: env$)
-              \(isVoid ? "" : "return ")javaInterface$.apply(\(parameterNames.joined(separator: ", ")))
+              let javaInterface$ = \(syntheticFunction.wrapJavaInterfaceName)(javaThis: closureContext_\(closureName)$.object!, environment: env$)
+              \(resultPrefix)\(isVoid ? resultConverted : "return \(resultConverted)")
             }
           }()
           """
