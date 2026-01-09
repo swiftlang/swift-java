@@ -34,8 +34,10 @@ extension String {
   /// Convert a Java class name to its canonical name.
   /// Replaces `$` with `.` for nested classes but preserves `$` at the start of identifiers.
   package var javaClassNameToCanonicalName: String {
-    let regex = try! Regex(#"(?<=\w)\$"#)
-    return self.replacing(regex, with: ".")
+    let regex = try! Regex(#"(\w)\$"#, as: (Substring, Substring).self)
+    return self.replacing(regex) { match in
+        "\(match.output.1)."
+    }
   }
 
   /// Whether this is the name of an anonymous class.
