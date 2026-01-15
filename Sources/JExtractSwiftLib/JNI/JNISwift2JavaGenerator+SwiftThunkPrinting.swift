@@ -725,7 +725,7 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock(
       """
       @_cdecl("\(cName)")
-      func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
+      public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """
     ) { printer in
       body(&printer)
