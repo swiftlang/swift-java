@@ -59,7 +59,7 @@ struct JNIEnumTests {
         private MyEnum(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
-        
+
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
         }
@@ -136,7 +136,7 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getDiscriminator__J")
-        func Java_com_example_swift_MyEnum__00024getDiscriminator__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint {
+        public func Java_com_example_swift_MyEnum__00024getDiscriminator__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint {
           ...
           switch (self$.pointee) {
             case .first: return 0
@@ -221,7 +221,7 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024first__")
-        func Java_com_example_swift_MyEnum__00024first__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024first__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -230,7 +230,7 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2")
-        func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -239,7 +239,7 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024third__JI")
-        func Java_com_example_swift_MyEnum__00024third__JI(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024third__JI(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment), y: Int32(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -294,7 +294,7 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
-        func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
           ...
           guard case .second(let _0) = self$.pointee else {
             fatalError("Expected enum case 'second', but was '\\(self$.pointee)'!")
@@ -309,7 +309,7 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsThird__J")
-        func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
           ...
           guard case .third(let x, let y) = self$.pointee else {
             fatalError("Expected enum case 'third', but was '\\(self$.pointee)'!")

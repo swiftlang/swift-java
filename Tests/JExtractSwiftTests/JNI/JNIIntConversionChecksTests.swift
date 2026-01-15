@@ -59,7 +59,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: signedSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024init__J")
-      func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, normalInt: jlong) -> jlong {
+      public func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, normalInt: jlong) -> jlong {
         let normalInt$indirect = Int64(fromJNI: normalInt, in: environment)
         #if _pointerBitWidth(_32)
         guard normalInt$indirect >= Int32.min && normalInt$indirect <= Int32.max else {
@@ -80,7 +80,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: unsignedSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024init__J")
-      func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, unsignedInt: jlong) -> jlong {
+      public func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, unsignedInt: jlong) -> jlong {
         let unsignedInt$indirect = UInt64(fromJNI: unsignedInt, in: environment)
         #if _pointerBitWidth(_32)
         guard unsignedInt$indirect >= UInt32.min && unsignedInt$indirect <= UInt32.max else {
@@ -101,7 +101,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: unsignedSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ")
-      func Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
+      public func Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
         let newValue$indirect = UInt64(fromJNI: newValue, in: environment)
         #if _pointerBitWidth(_32)
           guard newValue$indirect >= UInt32.min && newValue$indirect <= UInt32.max else {
@@ -125,7 +125,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: unsignedSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024getUnsignedInt__J")
-      func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
+      public func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
         assert(self != 0, "self memory address was null")
         let selfBits$ = Int(Int64(fromJNI: self, in: environment))
         let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
@@ -141,7 +141,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: signedSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024setNormalInt__JJ")
-      func Java_com_example_swift_MyStruct__00024setNormalInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
+      public func Java_com_example_swift_MyStruct__00024setNormalInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
       let newValue$indirect = Int64(fromJNI: newValue, in: environment)
       #if _pointerBitWidth(_32)
       guard newValue$indirect >= Int32.min && newValue$indirect <= Int32.max else {
@@ -165,7 +165,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: signedFuncSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
-      func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
+      public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
         let arg$indirect = Int64(fromJNI: arg, in: environment)
         #if _pointerBitWidth(_32)
         guard arg$indirect >= Int32.min && arg$indirect <= Int32.max else {
@@ -189,7 +189,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: unsignedFuncSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
-      func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
+      public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
         let arg$indirect = UInt64(fromJNI: arg, in: environment)
         #if _pointerBitWidth(_32)
         guard arg$indirect >= UInt32.min && arg$indirect <= UInt32.max else {
@@ -212,7 +212,7 @@ struct JNIIntConversionChecksTests {
     try assertOutput(input: enumSource, .jni, .swift, expectedChunks: [
       """
       @_cdecl("Java_com_example_swift_MyEnum__00024secondCase__J")
-      func Java_com_example_swift_MyEnum__00024secondCase__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jlong) -> jlong {
+      public func Java_com_example_swift_MyEnum__00024secondCase__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jlong) -> jlong {
         let arg0$indirect = UInt64(fromJNI: arg0, in: environment)
         #if _pointerBitWidth(_32)
         guard arg0$indirect >= UInt32.min && arg0$indirect <= UInt32.max else {

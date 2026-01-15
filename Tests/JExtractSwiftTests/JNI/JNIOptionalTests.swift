@@ -20,7 +20,7 @@ struct JNIOptionalTests {
   let source =
     """
     class MyClass { }
-    
+
     public func optionalSugar(_ arg: Int64?) -> Int32?
     public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
     public func optionalClass(_ arg: MyClass?) -> MyClass?
@@ -71,7 +71,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__BJ")
-        func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
           let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment) : nil).map {
             Int64($0) << 32 | Int64(1)
           } ?? 0
@@ -121,10 +121,10 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B")
-        func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jstring?, result_discriminator$: jbyteArray?) -> jstring? {
+        public func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jstring?, result_discriminator$: jbyteArray?) -> jstring? {
           let result$: jstring?
           if let innerResult$ = SwiftModule.optionalExplicit(arg_discriminator == 1 ? String(fromJNI: arg_value, in: environment) : nil) {
-            result$ = innerResult$.getJNIValue(in: environment) 
+            result$ = innerResult$.getJNIValue(in: environment)
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
@@ -179,7 +179,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3B")
-        func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
           let argBits$ = Int(Int64(fromJNI: arg, in: environment))
           let arg$ = UnsafeMutablePointer<MyClass>(bitPattern: argBits$)
           let result$: jlong
@@ -187,7 +187,7 @@ struct JNIOptionalTests {
             let _result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
             _result$.initialize(to: innerResult$)
             let _resultBits$ = Int64(Int(bitPattern: _result$))
-            result$ = _resultBits$.getJNIValue(in: environment) 
+            result$ = _resultBits$.getJNIValue(in: environment)
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
@@ -240,7 +240,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2")
-        func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
           SwiftModule.optionalJavaKitClass(arg.map {
             return JavaLong(javaThis: $0, environment: environment)
           }
