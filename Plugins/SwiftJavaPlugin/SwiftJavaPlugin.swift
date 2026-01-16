@@ -264,6 +264,12 @@ extension SwiftJavaBuildToolPlugin {
     }
 
     return stdlibDirContents.compactMap { url in
+      let swiftJavaConfigURL = url.appending(path: "swift-java.config")
+      guard fileManager.fileExists(atPath: swiftJavaConfigURL.absoluteString) else {
+        warn("Expected JavaStdlib directory \(url) to contain swift-java.config but it was missing!")
+        return nil
+      }
+      
       guard let resourceValues = try? url.resourceValues(forKeys: [.isDirectoryKey]),
             let isDirectory = resourceValues.isDirectory,
             isDirectory else {

@@ -198,4 +198,46 @@ final class BasicWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+  func test_wrapJava_inheritFromBiFunction() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      import java.util.function.BiFunction;
+
+      interface CallMe<ValueType> extends BiFunction<ValueType, ValueType, ValueType> {
+        @Override
+        ValueType apply(
+            ValueType newest,
+            ValueType oldest
+        );
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "java.util.function.BiFunction",
+        "com.example.CallMe",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.CallMe", extends: BiFunction<ValueType, ValueType, ValueType>.self)
+        public struct CallMe<ValueType: AnyJavaObject> {
+          /**
+           * Java method `apply`.
+           *
+           * ### Java method signature
+           * ```java
+           * public abstract ValueType com.example.CallMe.apply(ValueType,ValueType)
+           * ```
+           */
+          @JavaMethod(typeErasedResult: "ValueType!")
+            public func apply(_ arg0: ValueType?, _ arg1: ValueType?) -> ValueType!
+          }
+        """,
+      ]
+    )
+  }
 }
