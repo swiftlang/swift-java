@@ -16,6 +16,7 @@ package org.swift.swiftkit.ffm;
 
 import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.CallTraces;
+import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.core.util.PlatformUtils;
 import org.swift.swiftkit.ffm.SwiftRuntime.swiftjava;
 
@@ -32,22 +33,26 @@ import static org.swift.swiftkit.core.util.StringUtils.stripSuffix;
 
 public class SwiftRuntime {
 
-    public static final String STDLIB_DYLIB_NAME = "swiftCore";
-    public static final String SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME = "SwiftRuntimeFunctions";
-
-    private static final String STDLIB_MACOS_DYLIB_PATH = "/usr/lib/swift/libswiftCore.dylib";
-
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
 
     @SuppressWarnings("unused")
     private static final boolean INITIALIZED_LIBS = loadLibraries(false);
 
     public static boolean loadLibraries(boolean loadSwiftRuntimeFunctions) {
-        System.loadLibrary(STDLIB_DYLIB_NAME);
-        if (loadSwiftRuntimeFunctions) {
-            System.loadLibrary(SWIFT_RUNTIME_FUNCTIONS_DYLIB_NAME);
+        try {
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+            if (loadSwiftRuntimeFunctions) {
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+            }
+            return true;
+        } catch (RuntimeException e) {
+            // Libraries could not be loaded
+            if (CallTraces.TRACE_DOWNCALLS) {
+                System.err.println("[swift-java] SwiftRuntime: Could not load libraries: " + e.getMessage());
+                System.err.println("[swift-java] Libraries will need to be loaded explicitly or from JAR resources");
+            }
+            return false;
         }
-        return true;
     }
 
     static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
@@ -55,7 +60,7 @@ public class SwiftRuntime {
     private static SymbolLookup getSymbolLookup() {
         if (PlatformUtils.isMacOS()) {
             // On Apple platforms we need to lookup using the complete path
-            return SymbolLookup.libraryLookup(STDLIB_MACOS_DYLIB_PATH, LIBRARY_ARENA)
+            return SymbolLookup.libraryLookup(SwiftLibraries.libSwiftCorePath(), LIBRARY_ARENA)
                     .or(SymbolLookup.loaderLookup())
                     .or(Linker.nativeLinker().defaultLookup());
         } else {
