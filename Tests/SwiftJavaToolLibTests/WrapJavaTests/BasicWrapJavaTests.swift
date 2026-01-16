@@ -49,6 +49,42 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJava_docs_signature() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class ExampleSimpleClass {
+        public void example(String name, int age) { }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ExampleSimpleClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+          /**
+           * Java method `example`.
+           *
+           * ### Java method signature
+           * ```java
+           * public void com.example.ExampleSimpleClass.example(java.lang.String,int)
+           * ```
+           */
+           @JavaMethod
+           open func example(_ arg0: String, _ arg1: Int32)
+        """
+      ]
+    )
+  }
+
   func test_wrapJava_doNotDupeImportNestedClassesFromSuperclassAutomatically() async throws {
     let classpathURL = try await compileJava(
       """

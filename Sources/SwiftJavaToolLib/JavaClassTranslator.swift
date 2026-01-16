@@ -695,6 +695,20 @@ extension JavaClassTranslator {
     let swiftMethodName = javaMethod.getName().escapedSwiftName
     let swiftOptionalMethodName = "\(javaMethod.getName())Optional".escapedSwiftName
 
+    // --- Handle docs for the generated method.
+    // Include the original Java signature
+    let docsString = 
+      """
+        /**
+         * Java method `\(javaMethod.getName())`.
+         * 
+         * ### Java method signature
+         * ```java
+         * \(javaMethod.toGenericString())
+         * ```
+         */
+      """
+
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
       if implementedInSwift {
@@ -755,9 +769,9 @@ extension JavaClassTranslator {
           baseBody
         }
 
-
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
@@ -767,6 +781,7 @@ extension JavaClassTranslator {
     } else {
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }

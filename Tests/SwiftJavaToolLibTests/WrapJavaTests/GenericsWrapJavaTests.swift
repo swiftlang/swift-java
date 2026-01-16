@@ -257,10 +257,6 @@ final class GenericsWrapJavaTests: XCTestCase {
         @JavaClass("com.example.ByteArray")
         open class ByteArray: JavaObject {
         """,
-        // """
-        // @JavaInterface("com.example.Store")
-        // public struct Store<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject> {
-        // """,
         """
         @JavaClass("com.example.CompressingStore")
         open class CompressingStore: AbstractStore<ByteArray, [UInt8], [UInt8]> {
@@ -292,6 +288,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.Kappa")
         open class Kappa<T: AnyJavaObject>: JavaObject {
+        """,
+        """
           @JavaMethod(typeErasedResult: "T!")
           open func get() -> T!
         }
