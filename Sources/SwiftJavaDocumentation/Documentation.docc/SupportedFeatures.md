@@ -69,6 +69,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
 | Existential return types `f() -> any Collection `                                    | ❌        | ❌   |
 | Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ❌   |
+| Foundation Date: `f(date: Date) -> Date`                                             | ❌        | ✅   |
 | Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
 | Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |

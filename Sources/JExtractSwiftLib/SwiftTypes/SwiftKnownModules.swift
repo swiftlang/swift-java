@@ -113,6 +113,8 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
     public var count: Int { get }
     public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
   }
+  
+  public struct Date {}
   """
 
 private var foundationSourceFile: SourceFileSyntax {
