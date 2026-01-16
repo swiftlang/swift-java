@@ -616,6 +616,16 @@ extension JavaClassTranslator {
         if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
           return true
         }
+
+        // Also check if the type param is used as a type argument inside a parameterized parameter type
+        if let parameterizedParamType = parameterizedType.as(ParameterizedType.self) {
+          for actualTypeParam in parameterizedParamType.getActualTypeArguments() {
+            guard let actualTypeParam else { continue }
+            if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+              return true
+            }
+          }
+        }
       }
     }
 

@@ -408,5 +408,40 @@ final class GenericsWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+
+  func testWrapJavaGenericMethod_parameterizedParameterType() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class Resolver<T> { }
+      class Serializer<T> { }
+
+      class Store {
+        public <ValueType> Store 
+        bootstrapStore(
+            String name,
+            Resolver<ValueType> resolver, 
+            Serializer<ValueType> serializer
+        ) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Resolver",
+        "com.example.Serializer",
+        "com.example.Store"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func bootstrapStore<ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Resolver<ValueType>?, _ arg2: Serializer<ValueType>?) -> Store!
+        """,
+      ]
+    )
+  }
   
 }
