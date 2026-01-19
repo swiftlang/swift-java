@@ -51,7 +51,7 @@ fun getSwiftRuntimeLibraryPaths(): List<String> {
 /**
  * Find library paths for 'java.library.path' when running or testing projects inside this build.
  */
-// TODO: can't figure out how to share this code between BuildLogic/ and buildSrc/
+// TODO: Deduplicate this code with javaLibraryPaths.kt
 fun javaLibraryPaths(rootDir: File): List<String> {
     val osName = System.getProperty("os.name").lowercase(Locale.getDefault())
     val osArch = System.getProperty("os.arch")
