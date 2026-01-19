@@ -14,11 +14,12 @@
 
 plugins {
     id("build-logic.java-application-conventions")
-    id("maven-publish")
+    `maven-publish`
 }
 
 group = "org.swift.swiftkit"
 version = "1.0-SNAPSHOT"
+
 base {
     archivesName = "swiftkit-ffm"
 }
@@ -30,12 +31,12 @@ repositories {
 
 publishing {
     publications {
-        maven(MavenPublication) {
-            groupId = group
-            artifactId = 'swiftkit-ffm'
-            version = '1.0-SNAPSHOT'
+        create<MavenPublication>("maven") {
+            groupId = group as? String
+            artifactId = "swiftkit-ffm"
+            version = "1.0-SNAPSHOT"
 
-            from components.java
+            from(components["java"])
         }
     }
 }
@@ -47,17 +48,17 @@ java {
 }
 
 dependencies {
-    implementation(project(':SwiftKitCore'))
+    implementation(projects.swiftKitCore)
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // TODO: workaround for not finding junit: https://github.com/gradle/gradle/issues/34512
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly(libs.junit.platform.launcher) // TODO: workaround for not finding junit: https://github.com/gradle/gradle/issues/34512
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
 }
 
 testing {
     suites {
-        test {
-            useJUnitJupiter('5.10.3')
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
         }
     }
 }
@@ -70,37 +71,27 @@ tasks.test {
 }
 
 /// Enable access to preview APIs, e.g. java.lang.foreign.* (Panama)
-tasks.withType(JavaCompile).configureEach {
+tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("--enable-preview")
     options.compilerArgs.add("-Xlint:preview")
 }
 
 // SwiftKit depends on SwiftRuntimeFunctions (Swift library that this Java library calls into)
 
-def compileSwift = tasks.register("compileSwift", Exec) {
-    description "Compile the swift-java SwiftRuntimeFunctions dynamic library that SwiftKit (Java) calls into"
+val compileSwift = tasks.register<Exec>("compileSwift") {
+    description = "Compile the swift-java SwiftRuntimeFunctions dynamic library that SwiftKit (Java) calls into"
 
-    inputs.file(new File(rootDir, "Package.swift"))
-    inputs.dir(new File(rootDir, "Sources/")) // a bit generous, but better safe than sorry, and include all Swift source changes
-    outputs.dir(new File(rootDir, ".build"))
+    inputs.file(File(rootDir, "Package.swift"))
+    inputs.dir(File(rootDir, "Sources/")) // a bit generous, but better safe than sorry, and include all Swift source changes
+    outputs.dir(File(rootDir, ".build"))
 
     workingDir = rootDir
-    commandLine "swift"
+    commandLine("swift")
     // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
     args("build", "--disable-experimental-prebuilts", "--target", "SwiftRuntimeFunctions")
 }
 tasks.build {
-    dependsOn("compileSwift")
+    dependsOn(compileSwift)
 }
 
-
-
-def cleanSwift = tasks.register("cleanSwift", Exec) {
-    workingDir = rootDir
-    commandLine "swift"
-    args("package", "clean")
-}
-tasks.clean {
-    dependsOn("cleanSwift")
-}
-
+registerCleanSwift(rootDir)

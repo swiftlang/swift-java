@@ -18,15 +18,16 @@ pluginManagement {
 
 rootProject.name = "swift-java"
 
-include "SwiftKitCore"
-include "SwiftKitFFM"
+include("SwiftKitCore")
+include("SwiftKitFFM")
 
 // Include sample apps -- you can run them via `gradle Name:run`
-// Can be disabled with -PskipSamples=true
-if (!hasProperty('skipSamples') || skipSamples != 'true') {
-    new File(rootDir, "Samples").listFiles().each {
-        if (it.directory && new File(it, 'build.gradle').exists()) {
-            include ":Samples:${it.name}"
+if (!(settings.providers.gradleProperty("skipSamples").orNull.toBoolean())) {
+    File(rootDir, "Samples").listFiles().forEach {
+        if (it.isDirectory && (File(it, "build.gradle").exists() || File(it, "build.gradle.kts").exists())) {
+            include(":Samples:${it.name}")
         }
     }
 }
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

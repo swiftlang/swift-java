@@ -12,15 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
+plugins {
+    `kotlin-dsl`
+    embeddedKotlin("plugin.serialization")
+}
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3")
-}
-
-plugins {
-    `kotlin-dsl`
+    implementation(libs.kotlinx.serialization.json)
 }
