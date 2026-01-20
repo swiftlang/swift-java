@@ -365,7 +365,10 @@ extension SwiftType {
       }
       typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
     } else {
-      typeDecl = try lookupContext.unqualifiedLookup(name: Identifier(name)!, from: name)
+      guard let ident = Identifier(name) else {
+        throw TypeTranslationError.unknown(originalType)
+      }
+      typeDecl = try lookupContext.unqualifiedLookup(name: ident, from: name)
     }
     guard let typeDecl else {
      throw TypeTranslationError.unknown(originalType)
