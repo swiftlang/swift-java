@@ -65,9 +65,9 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
 | Protocols: `protocol`                                                                | ❌        | ✅   |
 | Protocols: `protocol` with associated types                                          | ❌        | ❌   |
-| Existential parameters `f(x: any SomeProtocol) `                                     | ❌        | ✅   |
+| Existential parameters `f(x: any SomeProtocol)` (excepts `Any`)                      | ❌        | ✅   |
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
-| Existential return types `f() -> any Collection `                                    | ❌        | ❌   |
+| Existential return types `f() -> any Collection`                                     | ❌        | ❌   |
 | Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ❌   |
 | Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
 | Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |

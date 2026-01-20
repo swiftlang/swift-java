@@ -41,6 +41,8 @@ final class MethodImportTests {
     )
     
     public func globalReturnClass() -> MySwiftClass
+
+    public func globalReturnAny() -> Any
     
     public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
 
@@ -455,5 +457,19 @@ final class MethodImportTests {
         }
         """
     )
+  }
+
+  @Test("Import: public func globalReturnAny() -> Any")
+  func func_globalReturnAny() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = Swift2JavaTranslator(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
+
+    #expect(!st.importedGlobalFuncs.contains {
+      $0.name == "globalReturnAny"
+    }, "'Any' return type is not supported yet")
   }
 }
