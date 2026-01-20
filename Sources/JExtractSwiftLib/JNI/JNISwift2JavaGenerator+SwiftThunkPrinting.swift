@@ -31,7 +31,7 @@ extension JNISwift2JavaGenerator {
       return // no need to write any empty files, yay
     }
 
-    logger.info("[swift-java] Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
+    logger.info("Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
 
     for expectedFileName in self.expectedOutputSwiftFileNames {
       logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
