@@ -657,12 +657,14 @@ extension JNISwift2JavaGenerator {
   }
 
   private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
-      return if nativeSignature.result.javaType.isVoid {
-        "return"
-      } else {
-        // We assume it is something that implements JavaValue
-        "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
-      }
+    return if nativeSignature.result.javaType.isVoid {
+      "return"
+    } else if nativeSignature.result.javaType.isString {
+      "return String.jniPlaceholderValue"
+    } else {
+      // We assume it is something that implements JavaValue
+      "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
+    }
   }
 
   private func printCDecl(

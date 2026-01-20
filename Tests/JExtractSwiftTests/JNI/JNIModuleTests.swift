@@ -30,6 +30,7 @@ struct JNIModuleTests {
   let globalMethodThrowing = """
     public func methodA() throws
     public func methodB() throws -> Int64
+    public func methodC() throws -> String
   """
 
   @Test
@@ -256,6 +257,17 @@ struct JNIModuleTests {
             }
           }
           """,
+          """
+          @_cdecl("Java_com_example_swift_SwiftModule__00024methodC__")
+          public func Java_com_example_swift_SwiftModule__00024methodC__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
+            do {
+              return try SwiftModule.methodC().getJNIValue(in: environment)
+            } catch {
+              environment.throwAsException(error)
+              return String.jniPlaceholderValue
+            }
+          }
+          """
       ]
     )
   }
