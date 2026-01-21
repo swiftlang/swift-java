@@ -43,7 +43,11 @@ class JavaKitMacroTests: XCTestCase {
       
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
       
             public required init(javaHolder: JavaObjectHolder) {
@@ -150,7 +154,11 @@ class JavaKitMacroTests: XCTestCase {
       
             /// The full Java class name for this Swift type.
             public static var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
 
             public typealias JavaSuperclass = JavaObject
@@ -242,7 +250,11 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
 
             public required init(javaHolder: JavaObjectHolder) {
@@ -283,7 +295,11 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Object")
+              #else
                 "java.lang.Object"
+              #endif
             }
 
             public var javaHolder: JavaObjectHolder
@@ -319,7 +335,11 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Optional")
+              #else
                 "java.lang.Optional"
+              #endif
             }
 
             public required init(javaHolder: JavaObjectHolder) {

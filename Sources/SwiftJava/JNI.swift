@@ -28,7 +28,7 @@ package final class JNI {
   package fileprivate(set) static var shared: JNI?
 
   /// The default application class loader
-  package let applicationClassLoader: JavaClassLoader
+  package let applicationClassLoader: JavaClassLoader?
 
   init(fromVM javaVM: JavaVirtualMachine) {
     // Update the global JavaVM
@@ -36,12 +36,25 @@ package final class JNI {
       $0 = javaVM
     }
     let environment = try! javaVM.environment()
-    self.applicationClassLoader = try! JavaClass<JavaThread>(environment: environment).currentThread().getContextClassLoader()
+    do {
+      let clazz = try JavaClass<JavaThread>(environment: environment)
+      guard let thread: JavaThread = clazz.currentThread() else {
+        applicationClassLoader = nil
+        return 
+      }
+      guard let cl = thread.getContextClassLoader() else {
+        applicationClassLoader = nil
+        return 
+      }
+      self.applicationClassLoader = cl
+    } catch {
+      fatalError("Failed to get current thread's ContextClassLoader: \(error)")
+    }
   }
 }
 
 @_cdecl("JNI_OnLoad")
-func SwiftJava_JNI_OnLoad(javaVM: JavaVMPointer, reserved: UnsafeMutableRawPointer) -> jint {
+public func SwiftJava_JNI_OnLoad(javaVM: JavaVMPointer, reserved: UnsafeMutableRawPointer) -> jint {
   JNI.shared = JNI(fromVM: JavaVirtualMachine(adoptingJVM: javaVM))
   return JNI_VERSION_1_6
 }

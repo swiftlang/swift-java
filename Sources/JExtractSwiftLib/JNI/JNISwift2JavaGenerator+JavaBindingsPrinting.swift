@@ -509,7 +509,7 @@ extension JNISwift2JavaGenerator {
     let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
-    let throwsClause = translatedDecl.isThrowing && !translatedDecl.isAsync ? " throws Exception" : ""
+    let throwsClause = translatedDecl.throwsClause()
 
     let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) { generics, parameter in
       guard case .generic(let name, let extends) = parameter.parameter.type else {

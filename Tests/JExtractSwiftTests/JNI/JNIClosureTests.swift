@@ -61,8 +61,8 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2")
-        func Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
-          SwiftModule.emptyClosure(closure: { 
+        public func Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.emptyClosure(closure: {
             let class$ = environment.interface.GetObjectClass(environment, closure)
             let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "()V")!
             let arguments$: [jvalue] = []
@@ -113,7 +113,7 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2")
-        func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.closureWithArgumentsAndReturn(closure: { _0, _1 in
             let class$ = environment.interface.GetObjectClass(environment, closure)
             let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "(JZ)J")!

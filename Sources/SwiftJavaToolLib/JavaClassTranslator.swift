@@ -616,6 +616,16 @@ extension JavaClassTranslator {
         if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
           return true
         }
+
+        // Also check if the type param is used as a type argument inside a parameterized parameter type
+        if let parameterizedParamType = parameterizedType.as(ParameterizedType.self) {
+          for actualTypeParam in parameterizedParamType.getActualTypeArguments() {
+            guard let actualTypeParam else { continue }
+            if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+              return true
+            }
+          }
+        }
       }
     }
 
@@ -685,6 +695,20 @@ extension JavaClassTranslator {
     let swiftMethodName = javaMethod.getName().escapedSwiftName
     let swiftOptionalMethodName = "\(javaMethod.getName())Optional".escapedSwiftName
 
+    // --- Handle docs for the generated method.
+    // Include the original Java signature
+    let docsString = 
+      """
+        /**
+         * Java method `\(javaMethod.getName())`.
+         * 
+         * ### Java method signature
+         * ```java
+         * \(javaMethod.toGenericString())
+         * ```
+         */
+      """
+
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
       if implementedInSwift {
@@ -698,6 +722,11 @@ extension JavaClassTranslator {
           }
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
+        // If the method name is "init", we need to explicitly specify it in the annotation
+        // because "init" is a Swift keyword and will be escaped in the function name via `init`
+        if javaMethod.getName() == "init" {
+          parameters.append("\"init\"")
+        }
         if hasTypeEraseGenericResultType {
           parameters.append("typeErasedResult: \"\(resultType)\"")
         }
@@ -740,9 +769,9 @@ extension JavaClassTranslator {
           baseBody
         }
 
-
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
@@ -752,6 +781,7 @@ extension JavaClassTranslator {
     } else {
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }

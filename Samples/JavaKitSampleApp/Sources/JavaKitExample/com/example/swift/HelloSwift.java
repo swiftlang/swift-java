@@ -42,6 +42,11 @@ public class HelloSwift {
         System.out.println("Salutations, " + name);
     }
 
+    // method called 'init' to check we're able to handle these and not clash with swift 'init' keyword
+    public long init(long value) {
+        return value;
+    }
+
     public Predicate<Integer> lessThanTen() {
         Predicate<Integer> predicate = i -> (i < 10);
         return predicate;

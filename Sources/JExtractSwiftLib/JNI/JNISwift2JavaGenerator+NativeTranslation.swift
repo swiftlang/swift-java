@@ -104,11 +104,16 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
 
+            let indirectStepType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(for: knownType, from: knownTypes)
+            let indirectCheck = JNIJavaTypeTranslator.checkStep(for: knownType, from: knownTypes)
+
             return NativeParameter(
               parameters: [
                 JavaParameter(name: parameterName, type: javaType)
               ],
-              conversion: .initFromJNI(.placeholder, swiftType: type)
+              conversion: indirectStepType != nil ? .labelessAssignmentOfVariable(.placeholder, swiftType: type) : .initFromJNI(.placeholder, swiftType: type),
+              indirectConversion: indirectStepType.flatMap { .initFromJNI(.placeholder, swiftType: $0) },
+              conversionCheck: indirectCheck
             )
 
           }
@@ -130,7 +135,9 @@ extension JNISwift2JavaGenerator {
                 fatalErrorMessage: "\(parameterName) was null in call to \\(#function), but Swift requires non-optional!"
               ),
               wrapperName: nominalTypeName
-            )
+            ),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
@@ -139,7 +146,9 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(name: parameterName, type: .long)
           ],
-          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type))
+          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type)),
+          indirectConversion: nil,
+          conversionCheck: nil
         )
 
       case .tuple([]):
@@ -147,7 +156,9 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(name: parameterName, type: .void)
           ],
-          conversion: .placeholder
+          conversion: .placeholder,
+          indirectConversion: nil,
+          conversionCheck: nil
         )
 
       case .function(let fn):
@@ -194,7 +205,9 @@ extension JNISwift2JavaGenerator {
           conversion: .closureLowering(
             parameters: parameters,
             result: result
-          )
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil
         )
 
       case .optional(let wrapped):
@@ -284,7 +297,9 @@ extension JNISwift2JavaGenerator {
           ),
           protocolTypes: protocolTypes,
           allowsJavaImplementations: allowsJavaImplementations
-        )
+        ),
+        indirectConversion: nil,
+        conversionCheck: nil
       )
     }
 
@@ -314,7 +329,9 @@ extension JNISwift2JavaGenerator {
               .initFromJNI(.placeholder, swiftType: swiftType),
               discriminatorName: discriminatorName,
               valueName: valueName
-            )
+            ),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
@@ -327,7 +344,9 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: javaType)
             ],
-            conversion: .optionalMap(.initializeSwiftJavaWrapper(.placeholder, wrapperName: nominalTypeName))
+            conversion: .optionalMap(.initializeSwiftJavaWrapper(.placeholder, wrapperName: nominalTypeName)),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
@@ -342,7 +361,9 @@ extension JNISwift2JavaGenerator {
                 allowNil: true
               )
             )
-          )
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil
         )
 
       default:
@@ -485,7 +506,9 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: javaType)
             ],
-            conversion: .getJValue(.placeholder)
+            conversion: .getJValue(.placeholder),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
@@ -621,7 +644,9 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: .array(javaType)),
             ],
-            conversion: .initFromJNI(.placeholder, swiftType: .array(elementType))
+            conversion: .initFromJNI(.placeholder, swiftType: .array(elementType)),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
@@ -645,7 +670,9 @@ extension JNISwift2JavaGenerator {
                   convertLongFromJNI: false
                 ))))
             ]
-          )
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil
         )
 
       default:
@@ -667,6 +694,13 @@ extension JNISwift2JavaGenerator {
 
     /// Represents how to convert the JNI parameter to a Swift parameter
     let conversion: NativeSwiftConversionStep
+
+    /// Represents swift type for conversion checks. This will introduce a new name$indirect variable used in required checks.
+    /// e.g Int64 for Int overflow check on 32-bit platforms
+    let indirectConversion: NativeSwiftConversionStep?
+
+    /// Represents check operations executed in if/guard conditional block for check during conversion
+    let conversionCheck: NativeSwiftConversionCheck?
   }
 
   struct NativeResult {
@@ -761,6 +795,8 @@ extension JNISwift2JavaGenerator {
 
     /// `{ (args) -> return body }`
     indirect case closure(args: [String] = [], body: NativeSwiftConversionStep)
+
+    indirect case labelessAssignmentOfVariable(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -1129,7 +1165,21 @@ extension JNISwift2JavaGenerator {
         )
 
         func printDo(printer: inout CodePrinter) {
-          printer.print("let swiftResult$ = await \(placeholder)")
+          // Make sure try/await are printed when necessary and avoid duplicate, or wrong-order, keywords (which would cause warnings)
+          let placeholderWithoutTry = 
+            if placeholder.hasPrefix("try ") {
+              String(placeholder.dropFirst("try ".count))
+            } else {
+              placeholder
+            }
+
+          let tryAwaitString: String = 
+            if isThrowing {
+              "try await"
+            } else {
+              "await"
+            }
+          printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
           printer.print("environment = try! JavaVirtualMachine.shared().environment()")
           let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
@@ -1204,6 +1254,20 @@ extension JNISwift2JavaGenerator {
           }
         }
         return printer.finalize()
+      case .labelessAssignmentOfVariable(let name, let swiftType):
+        return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder))))"
+      }
+    }
+  }
+
+  enum NativeSwiftConversionCheck {
+    case check32BitIntOverflow(typeWithMinAndMax: SwiftType)
+
+    // Returns the check string
+    func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+      switch self {
+        case .check32BitIntOverflow(let minMaxSource):
+          return "\(placeholder) >= \(minMaxSource).min && \(placeholder) <= \(minMaxSource).max"
       }
     }
   }

@@ -103,10 +103,21 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal):
       switch nominal.nominalTypeDecl.knownTypeKind {
-      case .uint8, .uint16, .uint32, .uint64: true
+      case .uint8, .uint16, .uint32, .uint64, .uint: true
       default: false
       }
     default: false
+    }
+  }
+
+  var isArchDependingInteger: Bool {
+    switch self {
+      case .nominal(let nominal):
+        switch nominal.nominalTypeDecl.knownTypeKind {
+          case .int, .uint: true
+          default: false
+        }
+      default: false
     }
   }
 
@@ -368,7 +379,10 @@ extension SwiftType {
       }
       typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
     } else {
-      typeDecl = try lookupContext.unqualifiedLookup(name: Identifier(name)!, from: name)
+      guard let ident = Identifier(name) else {
+        throw TypeTranslationError.unknown(originalType)
+      }
+      typeDecl = try lookupContext.unqualifiedLookup(name: ident, from: name)
     }
     guard let typeDecl else {
      throw TypeTranslationError.unknown(originalType)
