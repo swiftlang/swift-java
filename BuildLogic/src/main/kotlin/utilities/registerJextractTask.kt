@@ -19,12 +19,11 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
 import java.io.File
-import java.nio.file.Files
 
-private fun Project.swiftProductsWithJExtractPlugin(): List<String> = swiftPMPackage().targets.filter {
+private fun Project.swiftTargetsWithJExtractPlugin(): List<String> = swiftPMPackage().targets.filter {
     it.productDependencies.contains("JExtractSwiftPlugin")
-}.flatMap {
-    it.productMemberships
+}.map {
+    it.name
 }
 
 private fun Project.registerSwiftCheckValidTask(): TaskProvider<*> = tasks.register<Exec>("swift-check-valid") {
@@ -50,7 +49,7 @@ fun Project.registerJextractTask(
         inputs.file(File(projectDir, "Package.swift"))
 
         // monitor all targets/products which depend on the JExtract plugin
-        swiftProductsWithJExtractPlugin().forEach { targetName ->
+        swiftTargetsWithJExtractPlugin().forEach { targetName ->
             logger.info("[swift-java:jextract (Gradle)] Swift input target: ${targetName}")
             inputs.dir(File(layout.projectDirectory.asFile, "Sources/${targetName}"))
             outputs.dir(
