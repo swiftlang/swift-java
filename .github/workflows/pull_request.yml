@@ -70,7 +70,7 @@ jobs:
 
   test-java-macos:
     name: Test (Java) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
-    runs-on: [self-hosted, macos, sequoia, ARM64]
+    runs-on: [self-hosted, macos, tahoe, ARM64]
     strategy:
       fail-fast: true
       matrix:
@@ -160,7 +160,7 @@ jobs:
 
   test-swift-macos:
     name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
-    runs-on: [self-hosted, macos, sequoia, ARM64]
+    runs-on: [self-hosted, macos, tahoe, ARM64]
     strategy:
       fail-fast: false
       matrix:
@@ -238,7 +238,7 @@ jobs:
 
   verify-samples-macos:
     name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
-    runs-on: [self-hosted, macos, sequoia, ARM64]
+    runs-on: [self-hosted, macos, tahoe, ARM64]
     strategy:
       fail-fast: false
       matrix:
