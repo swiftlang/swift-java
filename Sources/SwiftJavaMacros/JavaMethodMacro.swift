@@ -126,23 +126,15 @@ extension JavaMethodMacro: BodyMacro {
       }
 
     let resultSyntax: CodeBlockItemSyntax =
-      if canRethrowError {
-        """
-        try {
+      """
+      \(raw: canRethrowError ? "try " : ""){
+        do {
           return try dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))
-        }()
-        """
-      } else {
-        """
-        \(raw: canRethrowError ? "try " : ""){
-          do {
-            return try dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))
-          } catch {
-            \(raw: catchPhrase)
-          }
-        }()
-        """
-      }
+        } catch {
+          \(raw: catchPhrase)
+        }
+      }()
+      """
 
     if let genericResultType {
       return [
