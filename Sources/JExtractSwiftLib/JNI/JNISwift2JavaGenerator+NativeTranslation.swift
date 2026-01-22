@@ -181,7 +181,9 @@ extension JNISwift2JavaGenerator {
             conversion: .escapingClosureLowering(
               syntheticFunction: syntheticFunction,
               closureName: parameterName
-            )
+            ),
+            indirectConversion: nil,
+            conversionCheck: nil
           )
         }
 
