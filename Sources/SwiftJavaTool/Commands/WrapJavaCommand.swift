@@ -339,10 +339,10 @@ extension SwiftJava.WrapJavaCommand {
       let anyIncludeFilterMatched = includes.contains { include in
         if javaClassName.starts(with: include) {
           // TODO: lower to trace level
-          log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
           return true
         }
 
+        log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
         return false
       }
 
@@ -362,4 +362,5 @@ extension SwiftJava.WrapJavaCommand {
     // The class matches import filters, if any, and was not excluded.
     return true
   }
+
 }
