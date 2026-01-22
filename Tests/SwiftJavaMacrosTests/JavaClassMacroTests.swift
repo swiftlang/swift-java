@@ -128,7 +128,16 @@ class JavaKitMacroTests: XCTestCase {
               self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                    throwable.printStackTrace()
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
           public var myField: Int64 {
               get {
@@ -224,7 +233,16 @@ class JavaKitMacroTests: XCTestCase {
               self.init(javaThis: javaThis, environment: _environment)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                    throwable.printStackTrace()
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
           public var myField: Int64 {
               get {
@@ -290,7 +308,16 @@ class JavaKitMacroTests: XCTestCase {
               self.init(javaThis: javaThis, environment: _environment)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                throwable.printStackTrace()
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
 
             /// The full Java class name for this Swift type.
@@ -326,7 +353,17 @@ class JavaKitMacroTests: XCTestCase {
         open class JavaOptional<T: AnyJavaObject>: JavaObject {
           open func get() -> T! {
               /* convert erased return value to T */
-              if let result$ = try! dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self) {
+              let result$ = {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                    throwable.printStackTrace()
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
+              if let result$ {
                 return T(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
               } else {
                 return nil
