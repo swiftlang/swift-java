@@ -133,7 +133,10 @@ class JavaKitMacroTests: XCTestCase {
                   return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
                 } catch {
                   if let throwable = error as? Throwable {
-                    throwable.printStackTrace()
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
                   }
                   fatalError("Java call threw unhandled exception: \\(error)")
                 }
@@ -238,7 +241,10 @@ class JavaKitMacroTests: XCTestCase {
                   return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
                 } catch {
                   if let throwable = error as? Throwable {
-                    throwable.printStackTrace()
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
                   }
                   fatalError("Java call threw unhandled exception: \\(error)")
                 }
@@ -313,7 +319,10 @@ class JavaKitMacroTests: XCTestCase {
                   return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
                 } catch {
                   if let throwable = error as? Throwable {
-                throwable.printStackTrace()
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
                   }
                   fatalError("Java call threw unhandled exception: \\(error)")
                 }
@@ -358,7 +367,10 @@ class JavaKitMacroTests: XCTestCase {
                   return try dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self)
                 } catch {
                   if let throwable = error as? Throwable {
-                    throwable.printStackTrace()
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
                   }
                   fatalError("Java call threw unhandled exception: \\(error)")
                 }

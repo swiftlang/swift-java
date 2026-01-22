@@ -116,7 +116,10 @@ extension JavaMethodMacro: BodyMacro {
       } else {
         """
         if let throwable = error as? Throwable {
-          throwable.printStackTrace()
+          let sw = StringWriter()
+          let pw = PrintWriter(sw)
+          throwable.printStackTrace(pw)
+          fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
         }
         fatalError("Java call threw unhandled exception: \\(error)")
         """
