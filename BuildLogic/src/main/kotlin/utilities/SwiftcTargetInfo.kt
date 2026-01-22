@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,16 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-plugins {
-    `kotlin-dsl`
-    embeddedKotlin("plugin.serialization")
-}
+package utilities
 
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
-}
+import kotlinx.serialization.Serializable
 
-dependencies {
-    implementation(libs.kotlinx.serialization.json)
-}
+@Serializable
+internal data class SwiftcTargetInfo(
+    val paths: SwiftcTargetInfoPaths,
+)

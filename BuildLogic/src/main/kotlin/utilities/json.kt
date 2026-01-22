@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,19 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-repositories {
-    mavenCentral()
-}
+package utilities
 
-dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3")
-}
+import kotlinx.serialization.json.Json
 
-def cleanSwift = tasks.register("cleanSwift", Exec) {
-    workingDir = layout.projectDirectory
-    commandLine "swift"
-    args("package", "clean")
-}
-tasks.clean {
-    dependsOn("cleanSwift")
-}
+internal val json = Json { ignoreUnknownKeys = true }
