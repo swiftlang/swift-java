@@ -12,12 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension List: Sequence {
+extension JavaIterator: IteratorProtocol {
   public typealias Element = E
-  public typealias Iterator = JavaIterator<E>
 
-  public func makeIterator() -> Iterator {
-    return self.iterator()!.as(JavaIterator<E>.self)!
+  public func next() -> E? {
+    if hasNext() {
+      let nextResult: JavaObject? = next()
+      return nextResult.map { $0.as(E.self)! }
+    }
+
+    return nil
   }
 }
-

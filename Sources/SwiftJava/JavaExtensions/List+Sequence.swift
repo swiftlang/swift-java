@@ -11,17 +11,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-import SwiftJava
 
-extension JavaIterator: IteratorProtocol {
+extension List: Sequence {
   public typealias Element = E
+  public typealias Iterator = JavaIterator<E>
 
-  public func next() -> E? {
-    if hasNext() {
-      let nextResult: JavaObject? = next()
-      return nextResult.map { $0.as(E.self)! }
-    }
-
-    return nil
+  public func makeIterator() -> Iterator {
+    return self.iterator()!.as(JavaIterator<E>.self)!
   }
 }
