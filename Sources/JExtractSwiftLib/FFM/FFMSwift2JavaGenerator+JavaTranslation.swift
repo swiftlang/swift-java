@@ -156,11 +156,24 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let javaName = switch decl.apiKind {
+      let baseName = switch decl.apiKind {
       case .getter, .subscriptGetter: decl.javaGetterName
       case .setter, .subscriptSetter: decl.javaSetterName
       case .function, .initializer, .enumCase: decl.name
       }
+      
+      // Add parameter labels to make method names unique (for overloading support)
+      let suffix: String
+      switch decl.apiKind {
+      case .getter, .subscriptGetter, .setter, .subscriptSetter:
+        suffix = ""
+      default:
+        suffix = decl.functionSignature.parameters
+          .map { "_" + ($0.argumentLabel ?? "_") }
+          .joined()
+      }
+      
+      let javaName = baseName + suffix
 
       // Signature.
       let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
