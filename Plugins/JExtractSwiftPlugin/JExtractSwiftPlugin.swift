@@ -66,6 +66,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
+      "--config", configFile.path(percentEncoded: false),
       "--swift-module", sourceModule.name,
       "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
