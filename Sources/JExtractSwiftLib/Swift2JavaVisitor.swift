@@ -129,6 +129,14 @@ final class Swift2JavaVisitor {
       return
     }
 
+    switch node.name.tokenKind {
+    case .binaryOperator, .prefixOperator, .postfixOperator:
+      self.log.debug("Skip importing: '\(node.qualifiedNameForDebug)'; Operators are not supported.")
+      return
+    default:
+      break
+    }
+
     self.log.debug("Import function: '\(node.qualifiedNameForDebug)'")
 
     let signature: SwiftFunctionSignature
