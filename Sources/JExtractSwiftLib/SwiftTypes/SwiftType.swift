@@ -239,23 +239,37 @@ extension SwiftType {
       throw TypeTranslationError.unimplementedType(type)
 
     case .attributedType(let attributedType):
-      // Only recognize the "@convention(c)" and "@convention(swift)" attributes, and
-      // then only on function types.
+      // Recognize "@convention(c)", "@convention(swift)", and "@escaping" attributes on function types.
       // FIXME: This string matching is a horrible hack.
-      switch attributedType.attributes.trimmedDescription {
-      case "@convention(c)", "@convention(swift)":
+      let attrs = attributedType.attributes.trimmedDescription
+      
+      // Handle @escaping attribute
+      if attrs.contains("@escaping") {
         let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
         switch innerType {
         case .function(var functionType):
-          let isConventionC = attributedType.attributes.trimmedDescription == "@convention(c)"
-          let convention: SwiftFunctionType.Convention = isConventionC ? .c : .swift
-          functionType.convention = convention
+          functionType.isEscaping = true
           self = .function(functionType)
         default:
           throw TypeTranslationError.unimplementedType(type)
         }
-      default:
-        throw TypeTranslationError.unimplementedType(type)
+      } else {
+        // Handle @convention attributes
+        switch attrs {
+        case "@convention(c)", "@convention(swift)":
+          let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
+          switch innerType {
+          case .function(var functionType):
+            let isConventionC = attrs == "@convention(c)"
+            let convention: SwiftFunctionType.Convention = isConventionC ? .c : .swift
+            functionType.convention = convention
+            self = .function(functionType)
+          default:
+            throw TypeTranslationError.unimplementedType(type)
+          }
+        default:
+          throw TypeTranslationError.unimplementedType(type)
+        }
       }
 
     case .functionType(let functionType):

@@ -75,6 +75,22 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  /// Represents a synthetic protocol-like translation for escaping closures.
+  /// This allows closures to use the same conversion infrastructure as protocols,
+  /// providing support for optionals, arrays, custom types, async, etc.
+  struct SyntheticClosureFunction {
+    /// The wrap-java interface name (e.g., "JavaMyClass.setCallback.callback")
+    let wrapJavaInterfaceName: String
+
+    /// Conversion steps for each parameter
+    let parameterConversions: [UpcallConversionStep]
+
+    /// Conversion step for the result
+    let resultConversion: UpcallConversionStep
+
+    /// The original Swift function type
+    let functionType: SwiftFunctionType
+  }
 
   struct JavaInterfaceProtocolWrapperGenerator {
     func generate(for type: ImportedNominalType) throws -> JavaInterfaceSwiftWrapper {
@@ -104,6 +120,34 @@ extension JNISwift2JavaGenerator {
         importedType: type
       )
     }
+
+        /// Generates a synthetic closure function translation.
+    /// This treats the closure as if it were a protocol with a single `apply` method,
+    /// allowing it to use the same conversion infrastructure for optionals, arrays, etc.
+    func generateSyntheticClosureFunction(
+      functionType: SwiftFunctionType,
+      wrapJavaInterfaceName: String
+    ) throws -> SyntheticClosureFunction {
+      let parameterConversions = try functionType.parameters.enumerated().map { idx, param in
+        try self.translateParameter(
+          parameterName: param.parameterName ?? "_\(idx)",
+          type: param.type
+        )
+      }
+
+      let resultConversion = try self.translateResult(
+        type: functionType.resultType,
+        methodName: "apply"
+      )
+
+      return SyntheticClosureFunction(
+        wrapJavaInterfaceName: wrapJavaInterfaceName,
+        parameterConversions: parameterConversions,
+        resultConversion: resultConversion,
+        functionType: functionType
+      )
+    }
+
 
     private func translate(function: ImportedFunc) throws -> JavaInterfaceSwiftWrapper.Function {
       let parameters = try function.functionSignature.parameters.map {
