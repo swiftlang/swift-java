@@ -745,6 +745,8 @@ extension JNISwift2JavaGenerator {
 
       """
     )
+
+    self.lookupContext.symbolTable.printImportedModules(&printer)
   }
 
   private func printTypeMetadataAddressThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
