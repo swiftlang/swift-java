@@ -50,12 +50,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // which we are generating Swift wrappers for Java classes.
     let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
     let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
-    
-    guard let javaPackage = configuration?.javaPackage else {
-      // throw SwiftJavaPluginError.missingConfiguration(sourceDir: "\(sourceDir)", key: "javaPackage")
-      log("Skipping jextract step, no 'javaPackage' configuration in \(getSwiftJavaConfigPath(target: target) ?? "")")
-      return []
-    }
 
     // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
     // that is common in JVM ecosystem
@@ -66,6 +60,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
+      "--config", configFile.path(percentEncoded: false),
       "--swift-module", sourceModule.name,
       "--input-swift", sourceDir,
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
@@ -87,10 +82,6 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       ]
     }
     arguments += dependentConfigFilesArguments
-
-    if !javaPackage.isEmpty {
-      arguments += ["--java-package", javaPackage]
-    }
 
     let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
       $0.pathExtension == "swift"

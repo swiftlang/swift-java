@@ -120,7 +120,6 @@ let package = Package(
       ],
       plugins: [
         .plugin(name: "JavaCompilerPlugin", package: "swift-java"),
-        .plugin(name: "JExtractSwiftPlugin", package: "swift-java"),
         .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
       ]
     ),

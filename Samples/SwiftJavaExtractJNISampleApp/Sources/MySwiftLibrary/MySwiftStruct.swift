@@ -60,4 +60,9 @@ public struct MySwiftStruct {
     get { return subscriptArray[Int(index)] }
     set { subscriptArray[Int(index)] = newValue }
   }
+
+  // operator functions are ignored.
+  public static func ==(lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {
+    return false
+  }
 }
