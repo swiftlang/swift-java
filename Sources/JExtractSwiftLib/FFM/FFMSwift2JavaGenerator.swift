@@ -13,9 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftJavaConfigurationShared
+
 import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
@@ -39,7 +40,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
-  /// 
+  ///
   /// Since Swift files in SwiftPM builds needs to be unique, we use this fact to flatten paths into plain names here.
   /// For uniqueness checking "did we write this file already", just checking the name should be sufficient.
   var expectedOutputSwiftFileNames: Set<String>
@@ -63,16 +64,18 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     // If we are forced to write empty files, construct the expected outputs.
     // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
     if translator.config.writeEmptyFiles ?? false {
-      self.expectedOutputSwiftFileNames = Set(translator.inputs.compactMap { (input) -> String? in
-        guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
-          return nil
-        }
-        guard fileName.hasSuffix(".swift") else {
-          return nil
-        }
-        return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
-      })
-      self.expectedOutputSwiftFileNames.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
+      self.expectedOutputSwiftFileNames = Set(
+        translator.inputs.compactMap { (input) -> String? in
+          guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
+            return nil
+          }
+          guard fileName.hasSuffix(".swift") else {
+            return nil
+          }
+          return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
+        })
+      self.expectedOutputSwiftFileNames.insert(
+        "\(translator.swiftModuleName)Module+SwiftJava.swift")
       self.expectedOutputSwiftFileNames.insert("Foundation+SwiftJava.swift")
     } else {
       self.expectedOutputSwiftFileNames = []
@@ -81,7 +84,8 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   func generate() throws {
     try writeSwiftThunkSources()
-    log.info("Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
+    log.info(
+      "Generated Swift sources (module: '\(self.swiftModuleName)') in: \(swiftOutputDirectory)/")
 
     try writeExportedJavaSources()
     log.info("Generated Java sources (package: '\(javaPackage)') in: \(javaOutputDirectory)/")
@@ -96,7 +100,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 extension FFMSwift2JavaGenerator {
 
   /// Default set Java imports for every generated file
-  static let defaultJavaImports: Array<String> = [
+  static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.ffm.*",
@@ -114,7 +118,6 @@ extension FFMSwift2JavaGenerator {
 
 // ==== ---------------------------------------------------------------------------------------------------------------
 // MARK: File writing
-
 
 extension FFMSwift2JavaGenerator {
   package func writeExportedJavaSources() throws {
@@ -134,7 +137,9 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename
       ) {
-        log.info("Generated: \((ty.swiftNominal.name.bold + ".java").bold) (at \(outputFile.absoluteString))")
+        log.info(
+          "Generated: \((ty.swiftNominal.name.bold + ".java").bold) (at \(outputFile.absoluteString))"
+        )
       }
     }
 
@@ -148,7 +153,8 @@ extension FFMSwift2JavaGenerator {
         javaPackagePath: javaPackagePath,
         filename: filename)
       {
-        log.info("Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
+        log.info(
+          "Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
       }
     }
   }
@@ -184,7 +190,7 @@ extension FFMSwift2JavaGenerator {
   func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
-    printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
+    printImports(&printer)  // TODO: we could have some imports be driven from types used in the generated decl
 
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,
@@ -295,10 +301,22 @@ extension FFMSwift2JavaGenerator {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
     }
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)") {
+    printer.printBraceBlock(
+      "public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)"
+    ) {
       printer in
       // Constants
       printClassConstants(printer: &printer)
+
+      printer.print(
+        """
+        private static void checkIntegerRange(String swiftType, long value, long min, long max) {
+          if (value < min || value > max) {
+            throw new ArithmeticException("Value out of range for " + swiftType + ": " + value);
+          }
+        }
+        """
+      )
 
       body(&printer)
     }
@@ -418,4 +436,3 @@ extension FFMSwift2JavaGenerator {
       """)
   }
 }
-

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -38,21 +38,15 @@ extension FFMSwift2JavaGenerator {
     return translated
   }
 
-  /// Represent a Swift API parameter translated to Java.
-  struct TranslatedParameter {
-    /// Java parameter(s) mapped to the Swift parameter.
-    ///
-    /// Array because one Swift parameter can be mapped to multiple parameters.
-    var javaParameters: [JavaParameter]
-
-    /// Describes how to convert the Java parameter to the lowered arguments for
-    /// the foreign function.
-    var conversion: JavaConversionStep
+  struct IntegerRangeCheck {
+    let targetSwiftType: String
+    let minValue: String
+    let maxValue: String
+    let onlyWhenSwiftIntIs32Bit: Bool
   }
 
   /// Represent a Swift API result translated to Java.
   struct TranslatedResult {
-    /// Java type that represents the Swift result type.
     var javaResultType: JavaType
 
     /// Java annotations that should be propagated from the result type onto the method
@@ -60,10 +54,6 @@ extension FFMSwift2JavaGenerator {
 
     /// Required indirect return receivers for receiving the result.
     ///
-    /// 'JavaParameter.name' is the suffix for the receiver variable names. For example
-    ///
-    ///   var _result_pointer = MemorySegment.allocate(...)
-    ///   var _result_count = MemorySegment.allocate(...)
     ///   downCall(_result_pointer, _result_count)
     ///   return constructResult(_result_pointer, _result_count)
     ///
@@ -73,14 +63,14 @@ extension FFMSwift2JavaGenerator {
     /// Similar to out parameters, but instead of parameters we "fill in" in native,
     /// we create an upcall handle before the downcall and pass it to the downcall.
     /// Swift then invokes the upcall in order to populate some data in Java (our callback).
-    /// 
+    ///
     /// After the call is made, we may need to further extact the result from the called-back-into
     /// Java function class, for example:
-    /// 
+    ///
     ///   var _result_initialize = new $result_initialize.Function();
     ///   downCall($result_initialize.toUpcallHandle(_result_initialize, arena))
     ///   return _result_initialize.result
-    /// 
+    ///
     var outCallback: OutCallback?
 
     /// Describes how to construct the Java result from the foreign function return
@@ -88,6 +78,16 @@ extension FFMSwift2JavaGenerator {
     var conversion: JavaConversionStep
   }
 
+  /// Represent a Swift API parameter translated to Java.
+  struct TranslatedParameter {
+    /// One Swift parameter can be lowered to multiple parameters.
+    /// E.g. 'Data' as (baseAddress, length) pair.
+    var javaParameters: [JavaParameter]
+
+    var conversion: JavaConversionStep
+
+    var integerRangeCheck: IntegerRangeCheck? = nil
+  }
 
   /// Translated Java API representing a Swift API.
   ///
@@ -156,14 +156,16 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let javaName = switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName
-      case .setter, .subscriptSetter: decl.javaSetterName
-      case .function, .initializer, .enumCase: decl.name
-      }
+      let javaName =
+        switch decl.apiKind {
+        case .getter, .subscriptGetter: decl.javaGetterName
+        case .setter, .subscriptSetter: decl.javaSetterName
+        case .function, .initializer, .enumCase: decl.name
+        }
 
       // Signature.
-      let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
+      let translatedSignature = try translate(
+        loweredFunctionSignature: loweredSignature, methodName: javaName)
 
       // Closures.
       var funcTypes: [TranslatedFunctionType] = []
@@ -171,10 +173,13 @@ extension FFMSwift2JavaGenerator {
         switch param.type {
         case .function(let funcTy):
           let paramName = param.parameterName ?? "_\(idx)"
-          guard case .function( let cdeclTy)  = loweredSignature.parameters[idx].cdeclParameters[0].type else {
+          guard
+            case .function(let cdeclTy) = loweredSignature.parameters[idx].cdeclParameters[0].type
+          else {
             preconditionFailure("closure parameter wasn't lowered to a function type; \(funcTy)")
           }
-          let translatedClosure = try translateFunctionType(name: paramName, swiftType: funcTy, cdeclType: cdeclTy)
+          let translatedClosure = try translateFunctionType(
+            name: paramName, swiftType: funcTy, cdeclType: cdeclTy)
           funcTypes.append(translatedClosure)
         case .tuple:
           // TODO: Implement
@@ -203,7 +208,8 @@ extension FFMSwift2JavaGenerator {
       for (i, param) in swiftType.parameters.enumerated() {
         let paramName = param.parameterName ?? "_\(i)"
         translatedParams.append(
-          try translateClosureParameter(param.type, convention: param.convention, parameterName: paramName)
+          try translateClosureParameter(
+            param.type, convention: param.convention, parameterName: paramName)
         )
       }
 
@@ -334,7 +340,26 @@ extension FFMSwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       // If the result type should cause any annotations on the method, include them here.
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(
+        swiftType: swiftType, config: config)
+
+      if case .nominal(let swiftNominalType) = swiftType,
+        let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind
+      {
+        switch knownType {
+        case .int8, .uint8, .int16, .uint16, .uint32, .uint64, .int, .uint:
+          if let integerTranslation = try translateIntegerParameter(
+            swiftType: swiftType,
+            knownType: knownType,
+            parameterName: parameterName,
+            parameterAnnotations: parameterAnnotations
+          ) {
+            return integerTranslation
+          }
+        default:
+          break
+        }
+      }
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
@@ -382,11 +407,11 @@ extension FFMSwift2JavaGenerator {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
               javaParameters: [
-                JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
+                JavaParameter(name: parameterName, type: .javaForeignMemorySegment)
               ],
               conversion: .commaSeparated([
                 .placeholder,
-                .method(.placeholder, methodName: "byteSize", arguments: [], withArena: false)
+                .method(.placeholder, methodName: "byteSize", arguments: [], withArena: false),
               ])
             )
 
@@ -444,13 +469,17 @@ extension FFMSwift2JavaGenerator {
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
-              name: parameterName, type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"))
+              name: parameterName,
+              type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)"))
           ],
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
 
       case .existential, .opaque, .genericParameter:
-        if let concreteTy = swiftType.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
+        if let concreteTy = swiftType.representativeConcreteTypeIn(
+          knownTypes: knownTypes, genericParameters: genericParameters,
+          genericRequirements: genericRequirements)
+        {
           return try translateParameter(
             type: concreteTy,
             convention: convention,
@@ -482,23 +511,111 @@ extension FFMSwift2JavaGenerator {
       case .array(let wrapped) where wrapped == knownTypes.uint8:
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations),
+            JavaParameter(
+              name: parameterName, type: .array(.byte), annotations: parameterAnnotations)
           ],
-          conversion: 
+          conversion:
             .commaSeparated([
               .call(
-                .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]), 
+                .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
                 base: .temporaryArena,
-                function: "allocateFrom", 
-                withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
-            ),
-            .property(.placeholder, propertyName: "length"),
-          ])
+                function: "allocateFrom",
+                withArena: false  // this would pass the arena as last argument, but instead we make a call on the arena
+              ),
+              .property(.placeholder, propertyName: "length"),
+            ])
         )
 
       case .array:
         throw JavaTranslationError.unhandledType(swiftType)
       }
+    }
+
+    func translateIntegerParameter(
+      swiftType: SwiftType,
+      knownType: SwiftKnownTypeDeclKind,
+      parameterName: String,
+      parameterAnnotations: [JavaAnnotation]
+    ) throws -> TranslatedParameter? {
+      let cType = try CType(cdeclType: swiftType)
+      let cJavaType = cType.javaType
+
+      let translation: (JavaType, JavaConversionStep, IntegerRangeCheck?)
+      switch knownType {
+      case .int8:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int8", minValue: "-128", maxValue: "127",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint8:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt8", minValue: "0", maxValue: "0xFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .int16:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int16", minValue: "-32768", maxValue: "32767",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint16:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt16", minValue: "0", maxValue: "0xFFFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint32:
+        translation = (
+          .long,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt32", minValue: "0L", maxValue: "0xFFFF_FFFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint64:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt64", minValue: "0L", maxValue: "Long.MAX_VALUE",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .int:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int", minValue: "Integer.MIN_VALUE",
+            maxValue: "Integer.MAX_VALUE", onlyWhenSwiftIntIs32Bit: true)
+        )
+      case .uint:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt", minValue: "0L", maxValue: "0xFFFF_FFFFL",
+            onlyWhenSwiftIntIs32Bit: true)
+        )
+      default:
+        return nil
+      }
+
+      let (javaType, conversion, rangeCheck) = translation
+
+      return TranslatedParameter(
+        javaParameters: [
+          JavaParameter(name: parameterName, type: javaType, annotations: parameterAnnotations)
+        ],
+        conversion: conversion,
+        integerRangeCheck: rangeCheck
+      )
     }
 
     /// Translate an Optional Swift API parameter to the user-facing Java API parameter.
@@ -514,18 +631,19 @@ extension FFMSwift2JavaGenerator {
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
-        let (translatedClass, lowerFunc) = switch cType.javaType {
-        case .int: ("OptionalInt", "toOptionalSegmentInt")
-        case .long: ("OptionalLong", "toOptionalSegmentLong")
-        case .double: ("OptionalDouble", "toOptionalSegmentDouble")
-        case .boolean: ("Optional<Boolean>", "toOptionalSegmentBoolean")
-        case .byte: ("Optional<Byte>", "toOptionalSegmentByte")
-        case .char: ("Optional<Character>", "toOptionalSegmentCharacter")
-        case .short: ("Optional<Short>", "toOptionalSegmentShort")
-        case .float: ("Optional<Float>", "toOptionalSegmentFloat")
-        default:
-          throw JavaTranslationError.unhandledType(.optional(swiftType))
-        }
+        let (translatedClass, lowerFunc) =
+          switch cType.javaType {
+          case .int: ("OptionalInt", "toOptionalSegmentInt")
+          case .long: ("OptionalLong", "toOptionalSegmentLong")
+          case .double: ("OptionalDouble", "toOptionalSegmentDouble")
+          case .boolean: ("Optional<Boolean>", "toOptionalSegmentBoolean")
+          case .byte: ("Optional<Byte>", "toOptionalSegmentByte")
+          case .char: ("Optional<Character>", "toOptionalSegmentCharacter")
+          case .short: ("Optional<Short>", "toOptionalSegmentShort")
+          case .float: ("Optional<Float>", "toOptionalSegmentFloat")
+          default:
+            throw JavaTranslationError.unhandledType(.optional(swiftType))
+          }
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(name: parameterName, type: JavaType(className: translatedClass))
@@ -548,12 +666,18 @@ extension FFMSwift2JavaGenerator {
         let translatedTy = try self.translate(swiftType: swiftType)
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(name: parameterName, type: JavaType(className: "Optional<\(translatedTy.description)>"))
+            JavaParameter(
+              name: parameterName,
+              type: JavaType(className: "Optional<\(translatedTy.description)>"))
           ],
-          conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
+          conversion: .call(
+            .placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
         )
       case .existential, .opaque, .genericParameter:
-        if let concreteTy = swiftType.representativeConcreteTypeIn(knownTypes: knownTypes, genericParameters: genericParameters, genericRequirements: genericRequirements) {
+        if let concreteTy = swiftType.representativeConcreteTypeIn(
+          knownTypes: knownTypes, genericParameters: genericParameters,
+          genericRequirements: genericRequirements)
+        {
           return try translateOptionalParameter(
             wrappedType: concreteTy,
             convention: convention,
@@ -590,7 +714,8 @@ extension FFMSwift2JavaGenerator {
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
       // If the result type should cause any annotations on the method, include them here.
-      let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(
+        swiftType: swiftType, config: config)
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
       // be expressed as a Java primitive type.
@@ -627,10 +752,11 @@ extension FFMSwift2JavaGenerator {
                 JavaParameter(name: "count", type: .long),
               ],
               conversion: .method(
-                .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
+                .readMemorySegment(
+                  .explodedName(component: "pointer"), as: .javaForeignMemorySegment),
                 methodName: "reinterpret",
                 arguments: [
-                  .readMemorySegment(.explodedName(component: "count"), as: .long),
+                  .readMemorySegment(.explodedName(component: "count"), as: .long)
                 ],
                 withArena: false
               )
@@ -674,40 +800,45 @@ extension FFMSwift2JavaGenerator {
 
       case .array(let wrapped) where wrapped == knownTypes.uint8:
         return TranslatedResult(
-          javaResultType: 
-            .array(.byte), 
-            annotations: [.unsigned], 
-            outParameters: [], // no out parameters, but we do an "out" callback
-            outCallback: OutCallback(
-              name: "$_result_initialize",
-              members: [
-                "byte[] result = null"
-              ],
+          javaResultType:
+            .array(.byte),
+          annotations: [.unsigned],
+          outParameters: [],  // no out parameters, but we do an "out" callback
+          outCallback: OutCallback(
+            name: "$_result_initialize",
+            members: [
+              "byte[] result = null"
+            ],
+            parameters: [
+              JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+              JavaParameter(name: "count", type: .long),
+            ],
+            cFunc: CFunction(
+              resultType: .void,
+              name: "apply",
               parameters: [
-                JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
-                JavaParameter(name: "count", type: .long),
+                CParameter(type: .pointer(.void)),
+                CParameter(type: .integral(.size_t)),
               ],
-              cFunc: CFunction(
-                resultType: .void,
-                name: "apply", 
-                parameters: [
-                  CParameter(type: .pointer(.void)),
-                  CParameter(type: .integral(.size_t)),
-                ], 
-                isVariadic: false),
-              body: "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
-            ),
-            conversion: .initializeResultWithUpcall([
+              isVariadic: false),
+            body:
+              "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
+          ),
+          conversion: .initializeResultWithUpcall(
+            [
               .introduceVariable(
-                name: "_result_initialize", 
-                initializeWith: .javaNew(.commaSeparated([
-                  // We need to refer to the nested class that is created for this function.
-                  // The class that contains all the related functional interfaces is called the same
-                  // as the downcall function, so we use the thunk name to find this class/
-                  .placeholderForSwiftThunkName, .constant("$_result_initialize.Function$Impl()")
-                ], separator: "."))),
+                name: "_result_initialize",
+                initializeWith: .javaNew(
+                  .commaSeparated(
+                    [
+                      // We need to refer to the nested class that is created for this function.
+                      // The class that contains all the related functional interfaces is called the same
+                      // as the downcall function, so we use the thunk name to find this class/
+                      .placeholderForSwiftThunkName,
+                      .constant("$_result_initialize.Function$Impl()"),
+                    ], separator: "."))),
               // .constant("var  = new \(.placeholderForDowncallThunkName).."),
-              .placeholderForDowncall, // perform the downcall here
+              .placeholderForDowncall,  // perform the downcall here
             ],
             extractResult: .property(.constant("_result_initialize"), propertyName: "result"))
         )
@@ -732,19 +863,19 @@ extension FFMSwift2JavaGenerator {
   enum JavaConversionStep {
     /// The input
     case placeholder
-    
+
     /// The "downcall", e.g. `swiftjava_SwiftModule_returnArray.call(...)`.
     /// This can be used in combination with aggregate conversion steps to prepare a setup and processing of the downcall.
     case placeholderForDowncall
-    
+
     /// Placeholder for Swift thunk name, e.g. "swiftjava_SwiftModule_returnArray".
-    /// 
-    /// This is derived from the placeholderForDowncall substitution - could be done more cleanly, 
+    ///
+    /// This is derived from the placeholderForDowncall substitution - could be done more cleanly,
     /// however this has the benefit of not needing to pass the name substituion separately.
     case placeholderForSwiftThunkName
 
     /// The temporary `arena$` that is necessary to complete the conversion steps.
-    /// 
+    ///
     /// This is distinct from just a constant 'arena$' string, since it forces the creation of a temporary arena.
     case temporaryArena
 
@@ -755,22 +886,24 @@ extension FFMSwift2JavaGenerator {
     case constant(String)
 
     /// The result of the function will be initialized with a callback to Java (an upcall).
-    /// 
-    /// The `extractResult` is used for the actual `return ...` statement, because we need to extract 
+    ///
+    /// The `extractResult` is used for the actual `return ...` statement, because we need to extract
     /// the return value from the called back into class, e.g. `return _result_initialize.result`.
-    indirect case initializeResultWithUpcall([JavaConversionStep], extractResult: JavaConversionStep)
+    indirect case initializeResultWithUpcall(
+      [JavaConversionStep], extractResult: JavaConversionStep)
 
     /// 'value.$memorySegment()'
     indirect case swiftValueSelfSegment(JavaConversionStep)
 
     /// Call specified function using the placeholder as arguments.
-    /// 
+    ///
     /// The 'base' is if the call should be performed as 'base.function',
     /// otherwise the function is assumed to be a free function.
-    /// 
+    ///
     /// If `withArena` is true, `arena$` argument is added.
-    indirect case call(JavaConversionStep, base: JavaConversionStep?, function: String, withArena: Bool)
-    
+    indirect case call(
+      JavaConversionStep, base: JavaConversionStep?, function: String, withArena: Bool)
+
     static func call(_ step: JavaConversionStep, function: String, withArena: Bool) -> Self {
       .call(step, base: nil, function: function, withArena: withArena)
     }
@@ -778,8 +911,9 @@ extension FFMSwift2JavaGenerator {
     // TODO: just use make call more powerful and use it instead?
     /// Apply a method on the placeholder.
     /// If `withArena` is true, `arena$` argument is added.
-    indirect case method(JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)
-    
+    indirect case method(
+      JavaConversionStep, methodName: String, arguments: [JavaConversionStep] = [], withArena: Bool)
+
     /// Fetch a property from the placeholder.
     /// Similar to 'method', however for a property i.e. without adding the '()' after the name
     indirect case property(JavaConversionStep, propertyName: String)
@@ -789,7 +923,7 @@ extension FFMSwift2JavaGenerator {
 
     /// Construct the type using the placeholder as arguments.
     indirect case construct(JavaConversionStep, JavaType)
-    
+
     /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
     indirect case wrapMemoryAddressUnsafe(JavaConversionStep, JavaType)
 
@@ -798,9 +932,9 @@ extension FFMSwift2JavaGenerator {
 
     /// Casting the placeholder to the certain type.
     indirect case cast(JavaConversionStep, JavaType)
-    
+
     /// Prefix the conversion step with a java `new`.
-    /// 
+    ///
     /// This is useful if constructing the value is complex and we use
     /// a combination of separated values and constants to do so; Generally prefer using `construct`
     /// if you only want to construct a "wrapper" for the current `.placeholder`.
@@ -817,7 +951,6 @@ extension FFMSwift2JavaGenerator {
     }
   }
 }
-
 
 extension FFMSwift2JavaGenerator.TranslatedFunctionSignature {
   /// Whether or not if the down-calling requires temporary "Arena" which is
@@ -854,7 +987,7 @@ extension CType {
     case .integral(.signed(bits: 32)): return .int
     case .integral(.signed(bits: 64)): return .long
     case .integral(.unsigned(bits: 8)): return .byte
-    case .integral(.unsigned(bits: 16)): return .char // char is Java's only unsigned primitive, we can use it!
+    case .integral(.unsigned(bits: 16)): return .char  // char is Java's only unsigned primitive, we can use it!
     case .integral(.unsigned(bits: 32)): return .int
     case .integral(.unsigned(bits: 64)): return .long
 
@@ -877,7 +1010,7 @@ extension CType {
 
     case .tag(_):
       fatalError("unsupported")
-    case .integral(.signed(bits: _)),  .integral(.unsigned(bits: _)):
+    case .integral(.signed(bits: _)), .integral(.unsigned(bits: _)):
       fatalError("unreachable")
     }
   }
@@ -910,7 +1043,7 @@ extension CType {
 
     case .tag(_):
       fatalError("unsupported")
-    case .void, .integral(.signed(bits: _)),  .integral(.unsigned(bits: _)):
+    case .void, .integral(.signed(bits: _)), .integral(.unsigned(bits: _)):
       fatalError("unreachable")
     }
   }
