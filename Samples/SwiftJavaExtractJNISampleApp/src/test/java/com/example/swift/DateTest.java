@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,6 +34,21 @@ public class DateTest {
 
             var date3 = Date.init(1000.49, arena);
             assertFalse(MySwiftLibrary.compareDates(date, date3));
+        }
+    }
+
+    @Test
+    void date_helpers() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var nowInstant = Instant.now();
+            var date = Date.fromInstant(nowInstant, arena);
+            var converted = date.toInstant();
+
+            long diffNanos = Math.abs(ChronoUnit.NANOS.between(nowInstant, converted));
+            System.out.println(diffNanos);
+            assertTrue(diffNanos < 1000,
+                    "Precision loss should be contained to sub-microseconds. Actual drift: " + diffNanos + "ns");
+            assertEquals(nowInstant.getEpochSecond(), converted.getEpochSecond());
         }
     }
 

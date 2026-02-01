@@ -116,6 +116,12 @@ struct DateTests {
           """
           public double getTimeIntervalSince1970() {
           """,
+          """
+          public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena$) {
+          """,
+          """
+          public java.time.Instant toInstant() {
+          """
         ],
         /* expected Swift chunks */
         [
