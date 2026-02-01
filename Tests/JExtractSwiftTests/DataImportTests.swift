@@ -17,16 +17,16 @@ import Testing
 
 final class DataImportTests {
   private static let ifConfigImport = """
-  #if canImport(FoundationEssentials)
-  import FoundationEssentials
-  #else
-  import Foundation
-  #endif
-  """
+    #if canImport(FoundationEssentials)
+    import FoundationEssentials
+    #else
+    import Foundation
+    #endif
+    """
   private static let foundationData_interfaceFile =
     """
     import Foundation
-    
+
     public func receiveData(dat: Data)
     public func returnData() -> Data
     """
@@ -34,14 +34,14 @@ final class DataImportTests {
   private static let foundationDataProtocol_interfaceFile =
     """
     import Foundation
-    
+
     public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
 
   private static let essentialsData_interfaceFile =
     """
     import FoundationEssentials
-    
+
     public func receiveData(dat: Data)
     public func returnData() -> Data
     """
@@ -49,13 +49,13 @@ final class DataImportTests {
   private static let essentialsDataProtocol_interfaceFile =
     """
     import FoundationEssentials
-    
+
     public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
   private static let ifConfigData_interfaceFile =
     """
     \(ifConfigImport)
-    
+
     public func receiveData(dat: Data)
     public func returnData() -> Data
     """
@@ -63,14 +63,19 @@ final class DataImportTests {
   private static let ifConfigDataProtocol_interfaceFile =
     """
     \(ifConfigImport)
-    
+
     public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
     """
 
-  @Test("Import Data: Swift thunks", arguments: zip(
-    [Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile, Self.ifConfigData_interfaceFile],
-    ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
-  ))
+  @Test(
+    "Import Data: Swift thunks",
+    arguments: zip(
+      [
+        Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile,
+        Self.ifConfigData_interfaceFile,
+      ],
+      ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
+    ))
   func data_swiftThunk(fileContent: String, expectedImportChunk: String) throws {
 
     try assertOutput(
@@ -123,10 +128,13 @@ final class DataImportTests {
       ]
     )
   }
-  
-  @Test("Import Data: JavaBindings", arguments: [
-    Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile, Self.ifConfigData_interfaceFile
-  ])
+
+  @Test(
+    "Import Data: JavaBindings",
+    arguments: [
+      Self.foundationData_interfaceFile, Self.essentialsData_interfaceFile,
+      Self.ifConfigData_interfaceFile,
+    ])
   func data_javaBindings(fileContent: String) throws {
     try assertOutput(
       input: fileContent, .ffm, .java,
@@ -209,7 +217,6 @@ final class DataImportTests {
         }
         """,
 
-
         """
         /**
          * {@snippet lang=c :
@@ -246,6 +253,9 @@ final class DataImportTests {
          * }
          */
         public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena$) {
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", count, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
           MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
           swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, _result);
           return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
@@ -352,7 +362,6 @@ final class DataImportTests {
         }
         """,
 
-
         """
         /**
          * Downcall to Swift:
@@ -366,15 +375,20 @@ final class DataImportTests {
             swiftjava_SwiftModule_Data_withUnsafeBytes__.call(withUnsafeBytes.$toUpcallStub(body, arena$), this.$memorySegment());
           }
         }
-        """
+        """,
       ]
     )
   }
 
-  @Test("Import DataProtocol: Swift thunks", arguments: zip(
-    [Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile, Self.ifConfigDataProtocol_interfaceFile], 
-    ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
-  ))
+  @Test(
+    "Import DataProtocol: Swift thunks",
+    arguments: zip(
+      [
+        Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile,
+        Self.ifConfigDataProtocol_interfaceFile,
+      ],
+      ["import Foundation", "import FoundationEssentials", Self.ifConfigImport]
+    ))
   func dataProtocol_swiftThunk(fileContent: String, expectedImportChunk: String) throws {
     try assertOutput(
       input: fileContent, .ffm, .swift,
@@ -390,14 +404,17 @@ final class DataImportTests {
         // Just to make sure 'Data' is imported.
         """
         @_cdecl("swiftjava_getType_SwiftModule_Data")
-        """
+        """,
       ]
     )
   }
 
-  @Test("Import DataProtocol: JavaBindings", arguments: [
-    Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile, Self.ifConfigDataProtocol_interfaceFile
-  ])
+  @Test(
+    "Import DataProtocol: JavaBindings",
+    arguments: [
+      Self.foundationDataProtocol_interfaceFile, Self.essentialsDataProtocol_interfaceFile,
+      Self.ifConfigDataProtocol_interfaceFile,
+    ])
   func dataProtocol_javaBindings(fileContent: String) throws {
 
     try assertOutput(
@@ -445,9 +462,9 @@ final class DataImportTests {
         // Just to make sure 'Data' is imported.
         """
         public final class Data extends FFMSwiftInstance implements SwiftValue {
-        """
+        """,
       ]
     )
   }
-  
+
 }

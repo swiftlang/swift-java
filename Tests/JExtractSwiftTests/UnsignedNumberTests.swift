@@ -37,8 +37,9 @@ final class UnsignedNumberTests {
           );
           """,
           """
-          public static void unsignedChar(@Unsigned char arg) {
-            swiftjava_SwiftModule_unsignedChar__.call(arg);
+          public static void unsignedChar(@Unsigned int arg) {
+            checkIntegerRange("Swift.UInt16", arg, 0, 0xFFFFL);
+            swiftjava_SwiftModule_unsignedChar__.call((char) arg);
           }
           """,
         ]
@@ -52,9 +53,9 @@ final class UnsignedNumberTests {
             SwiftModule.$unsignedChar(arg);
           }
           private static native void $unsignedChar(char arg);
-          """,
+          """
         ]
-      )
+      ),
     ])
   func unsignedChar(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     try assertOutput(
@@ -84,8 +85,9 @@ final class UnsignedNumberTests {
           );
           """,
           """
-          public static void unsignedInt(@Unsigned int arg) {
-            swiftjava_SwiftModule_unsignedInt__.call(arg);
+          public static void unsignedInt(@Unsigned long arg) {
+            checkIntegerRange("Swift.UInt32", arg, 0L, 0xFFFF_FFFFL);
+            swiftjava_SwiftModule_unsignedInt__.call((int) arg);
           }
           """,
         ]
@@ -99,9 +101,9 @@ final class UnsignedNumberTests {
             SwiftModule.$unsignedInt(arg);
           }
           private static native void $unsignedInt(int arg);
-          """,
+          """
         ]
-      )
+      ),
     ])
   func unsignedIntAnnotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
@@ -151,9 +153,9 @@ final class UnsignedNumberTests {
             return SwiftModule.$returnUnsignedInt();
           }
           private static native int $returnUnsignedInt();
-          """,
+          """
         ]
-      )
+      ),
     ])
   func returnUnsignedIntDefault(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     let config = Configuration()
@@ -203,9 +205,9 @@ final class UnsignedNumberTests {
             return SwiftModule.$returnUnsignedLong();
           }
           private static native long $returnUnsignedLong();
-          """,
+          """
         ]
-      )
+      ),
     ])
   func return_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
@@ -239,6 +241,7 @@ final class UnsignedNumberTests {
           """,
           """
           public static void takeUnsignedLong(@Unsigned long arg) {
+            checkIntegerRange("Swift.UInt64", arg, 0L, Long.MAX_VALUE);
             swiftjava_SwiftModule_takeUnsignedLong_arg.call(arg);
           }
           """,
@@ -253,9 +256,9 @@ final class UnsignedNumberTests {
             SwiftModule.$takeUnsignedLong(arg);
           }
           private static native void $takeUnsignedLong(long arg);
-          """,
+          """
         ]
-      )
+      ),
     ])
   func take_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
@@ -291,8 +294,10 @@ final class UnsignedNumberTests {
           """,
           """
           @Unsigned
-          public static int unsignedLong(@Unsigned long first, @Unsigned int second) {
-            return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+          public static int unsignedLong(@Unsigned long first, @Unsigned long second) {
+            checkIntegerRange("Swift.UInt64", first, 0L, Long.MAX_VALUE);
+            checkIntegerRange("Swift.UInt32", second, 0L, 0xFFFF_FFFFL);
+            return swiftjava_SwiftModule_unsignedLong_first_second.call(first, (int) second);
           }
           """,
         ]
@@ -307,7 +312,7 @@ final class UnsignedNumberTests {
             return SwiftModule.$unsignedLong(first, second);
           }
           private static native int $unsignedLong(long first, int second);
-          """,
+          """
         ]
       ),
     ])
@@ -322,7 +327,7 @@ final class UnsignedNumberTests {
       expectedChunks: expectedChunks
     )
   }
-  
+
   @Test(
     "Import: take UInt return UInt (annotate)",
     arguments: [
@@ -346,6 +351,12 @@ final class UnsignedNumberTests {
           """
           @Unsigned
           public static long unsignedLong(@Unsigned long first, @Unsigned long second) {
+            if (SwiftValueLayout.has32bitSwiftInt) {
+              checkIntegerRange("Swift.UInt", first, 0L, 0xFFFF_FFFFL);
+            }
+            if (SwiftValueLayout.has32bitSwiftInt) {
+              checkIntegerRange("Swift.UInt", second, 0L, 0xFFFF_FFFFL);
+            }
             return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
           }
           """,
@@ -361,7 +372,7 @@ final class UnsignedNumberTests {
             return SwiftModule.$unsignedLong(first, second);
           }
           private static native long $unsignedLong(long first, long second);
-          """,
+          """
         ]
       ),
     ])

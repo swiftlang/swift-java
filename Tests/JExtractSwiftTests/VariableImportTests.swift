@@ -103,6 +103,9 @@ final class VariableImportTests {
          */
         public void setCounterInt(long newValue) {
           $ensureAlive();
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", newValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
           swiftjava_FakeModule_MySwiftClass_counterInt$set.call(newValue, this.$memorySegment())
         }
         """,

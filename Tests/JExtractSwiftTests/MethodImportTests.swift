@@ -39,11 +39,11 @@ final class MethodImportTests {
       l: Int64,
       s: String
     )
-    
+
     public func globalReturnClass() -> MySwiftClass
 
     public func globalReturnAny() -> Any
-    
+
     public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
 
     extension MySwiftClass {
@@ -143,7 +143,10 @@ final class MethodImportTests {
          * }
          */
         public static void globalTakeInt(long i) {
-            swiftjava___FakeModule_globalTakeInt_i.call(i);
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", i, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
+          swiftjava___FakeModule_globalTakeInt_i.call(i);
         }
         """
     )
@@ -406,9 +409,15 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena$) {
-            MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
-            swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
-            return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", len, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", cap, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
+          MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+          swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
+          return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """
     )
@@ -451,9 +460,15 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena$) {
-            MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
-            swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
-            return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena$);
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", len, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            checkIntegerRange("Swift.Int", cap, Integer.MIN_VALUE, Integer.MAX_VALUE);
+          }
+          MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
+          swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
+          return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
         """
     )
@@ -468,8 +483,9 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    #expect(!st.importedGlobalFuncs.contains {
-      $0.name == "globalReturnAny"
-    }, "'Any' return type is not supported yet")
+    #expect(
+      !st.importedGlobalFuncs.contains {
+        $0.name == "globalReturnAny"
+      }, "'Any' return type is not supported yet")
   }
 }
