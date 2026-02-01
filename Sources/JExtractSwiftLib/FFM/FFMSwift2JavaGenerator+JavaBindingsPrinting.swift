@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -309,7 +309,9 @@ extension FFMSwift2JavaGenerator {
         """
       )
 
-      let cdeclParams = functionType.cdeclType.parameters.map({ "\($0.parameterName!)" })
+      let cdeclParams = functionType.cdeclType.parameters.enumerated().map { idx, param in
+        param.parameterName ?? "_\(idx)"
+      }
 
       printer.printBraceBlock(
         """

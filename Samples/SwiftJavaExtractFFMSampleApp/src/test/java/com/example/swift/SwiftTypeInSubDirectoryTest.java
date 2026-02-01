@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -14,13 +14,8 @@
 
 package com.example.swift;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
-
-import java.io.File;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 

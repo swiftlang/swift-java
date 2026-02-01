@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -36,34 +36,24 @@ extension FFMSwift2JavaGenerator {
 
     translatedDecls[decl] = translated
     return translated
-          (.int,
-           .cast(.placeholder, cJavaType),
-           IntegerRangeCheck(targetSwiftType: "Swift.Int8", minValue: "-128", maxValue: "127", onlyWhenSwiftIntIs32Bit: false))
-    ///
-          (.int,
-           .cast(.placeholder, cJavaType),
-           IntegerRangeCheck(targetSwiftType: "Swift.UInt8", minValue: "0", maxValue: "0xFFL", onlyWhenSwiftIntIs32Bit: false))
-    var conversion: JavaConversionStep
-          (.int,
-           .cast(.placeholder, cJavaType),
-           IntegerRangeCheck(targetSwiftType: "Swift.Int16", minValue: "-32768", maxValue: "32767", onlyWhenSwiftIntIs32Bit: false))
-  struct IntegerRangeCheck {
-          (.int,
-           .cast(.placeholder, cJavaType),
-           IntegerRangeCheck(targetSwiftType: "Swift.UInt16", minValue: "0", maxValue: "0xFFFFL", onlyWhenSwiftIntIs32Bit: false))
+  }
 
-          (.long,
-           .cast(.placeholder, cJavaType),
-           IntegerRangeCheck(targetSwiftType: "Swift.UInt32", minValue: "0L", maxValue: "0xFFFF_FFFFL", onlyWhenSwiftIntIs32Bit: false))
+  struct IntegerRangeCheck {
+    let targetSwiftType: String
+    let minValue: String
+    let maxValue: String
+    let onlyWhenSwiftIntIs32Bit: Bool
+  }
+
+  /// Represent a Swift API result translated to Java.
+  struct TranslatedResult {
+    var javaResultType: JavaType
+
     /// Java annotations that should be propagated from the result type onto the method
-          (cJavaType, .placeholder,
-           IntegerRangeCheck(targetSwiftType: "Swift.UInt64", minValue: "0L", maxValue: "Long.MAX_VALUE", onlyWhenSwiftIntIs32Bit: false))
+    var annotations: [JavaAnnotation] = []
+
     /// Required indirect return receivers for receiving the result.
-          (cJavaType, .placeholder,
-           IntegerRangeCheck(targetSwiftType: "Swift.Int", minValue: "Integer.MIN_VALUE", maxValue: "Integer.MAX_VALUE", onlyWhenSwiftIntIs32Bit: true))
     ///
-          (cJavaType, .placeholder,
-           IntegerRangeCheck(targetSwiftType: "Swift.UInt", minValue: "0L", maxValue: "0xFFFF_FFFFL", onlyWhenSwiftIntIs32Bit: true))
     ///   downCall(_result_pointer, _result_count)
     ///   return constructResult(_result_pointer, _result_count)
     ///
@@ -86,6 +76,17 @@ extension FFMSwift2JavaGenerator {
     /// Describes how to construct the Java result from the foreign function return
     /// value and/or the out parameters.
     var conversion: JavaConversionStep
+  }
+
+  /// Represent a Swift API parameter translated to Java.
+  struct TranslatedParameter {
+    /// One Swift parameter can be lowered to multiple parameters.
+    /// E.g. 'Data' as (baseAddress, length) pair.
+    var javaParameters: [JavaParameter]
+
+    var conversion: JavaConversionStep
+
+    var integerRangeCheck: IntegerRangeCheck? = nil
   }
 
   /// Translated Java API representing a Swift API.
@@ -343,15 +344,21 @@ extension FFMSwift2JavaGenerator {
         swiftType: swiftType, config: config)
 
       if case .nominal(let swiftNominalType) = swiftType,
-        let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind,
-        let integerTranslation = try translateIntegerParameter(
-          swiftType: swiftType,
-          knownType: knownType,
-          parameterName: parameterName,
-          parameterAnnotations: parameterAnnotations
-        )
+        let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind
       {
-        return integerTranslation
+        switch knownType {
+        case .int8, .uint8, .int16, .uint16, .uint32, .uint64, .int, .uint:
+          if let integerTranslation = try translateIntegerParameter(
+            swiftType: swiftType,
+            knownType: knownType,
+            parameterName: parameterName,
+            parameterAnnotations: parameterAnnotations
+          ) {
+            return integerTranslation
+          }
+        default:
+          break
+        }
       }
 
       // If there is a 1:1 mapping between this Swift type and a C type, that can
@@ -533,72 +540,74 @@ extension FFMSwift2JavaGenerator {
       let cType = try CType(cdeclType: swiftType)
       let cJavaType = cType.javaType
 
-      let (javaType, conversion, rangeCheck): (JavaType, JavaConversionStep, IntegerRangeCheck?) =
-        switch knownType {
-        case .int8:
-          (
-            .int,
-            .cast(.placeholder, cJavaType),
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.Int8", minValue: "-128", maxValue: "127",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .uint8:
-          (
-            .int,
-            .cast(.placeholder, cJavaType),
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.UInt8", minValue: "0", maxValue: "0xFFL",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .int16:
-          (
-            .int,
-            .cast(.placeholder, cJavaType),
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.Int16", minValue: "-32768", maxValue: "32767",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .uint16:
-          (
-            .int,
-            .cast(.placeholder, cJavaType),
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.UInt16", minValue: "0", maxValue: "0xFFFFL",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .uint32:
-          (
-            .long,
-            .cast(.placeholder, cJavaType),
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.UInt32", minValue: "0L", maxValue: "0xFFFF_FFFFL",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .uint64:
-          (
-            cJavaType, .placeholder,
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.UInt64", minValue: "0L", maxValue: "Long.MAX_VALUE",
-              onlyWhenSwiftIntIs32Bit: false)
-          )
-        case .int:
-          (
-            cJavaType, .placeholder,
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.Int", minValue: "Integer.MIN_VALUE",
-              maxValue: "Integer.MAX_VALUE", onlyWhenSwiftIntIs32Bit: true)
-          )
-        case .uint:
-          (
-            cJavaType, .placeholder,
-            IntegerRangeCheck(
-              targetSwiftType: "Swift.UInt", minValue: "0L", maxValue: "0xFFFF_FFFFL",
-              onlyWhenSwiftIntIs32Bit: true)
-          )
-        default:
-          return nil
-        }
+      let translation: (JavaType, JavaConversionStep, IntegerRangeCheck?)
+      switch knownType {
+      case .int8:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int8", minValue: "-128", maxValue: "127",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint8:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt8", minValue: "0", maxValue: "0xFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .int16:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int16", minValue: "-32768", maxValue: "32767",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint16:
+        translation = (
+          .int,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt16", minValue: "0", maxValue: "0xFFFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint32:
+        translation = (
+          .long,
+          .cast(.placeholder, cJavaType),
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt32", minValue: "0L", maxValue: "0xFFFF_FFFFL",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .uint64:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt64", minValue: "0L", maxValue: "Long.MAX_VALUE",
+            onlyWhenSwiftIntIs32Bit: false)
+        )
+      case .int:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.Int", minValue: "Integer.MIN_VALUE",
+            maxValue: "Integer.MAX_VALUE", onlyWhenSwiftIntIs32Bit: true)
+        )
+      case .uint:
+        translation = (
+          cJavaType, .placeholder,
+          IntegerRangeCheck(
+            targetSwiftType: "Swift.UInt", minValue: "0L", maxValue: "0xFFFF_FFFFL",
+            onlyWhenSwiftIntIs32Bit: true)
+        )
+      default:
+        return nil
+      }
+
+      let (javaType, conversion, rangeCheck) = translation
 
       return TranslatedParameter(
         javaParameters: [

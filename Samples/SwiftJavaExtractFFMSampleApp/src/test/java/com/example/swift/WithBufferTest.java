@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -15,16 +15,11 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.*;
-import org.swift.swiftkit.ffm.*;
+import org.swift.swiftkit.core.CallTraces;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.IntStream;
 
 public class WithBufferTest {
 
