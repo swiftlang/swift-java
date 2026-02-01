@@ -19,6 +19,9 @@ open class Throwable: JavaObject {
   open func printStackTrace()
 
   @JavaMethod
+  open func printStackTrace(_ writer: PrintWriter?)
+
+  @JavaMethod
   open func fillInStackTrace() -> Throwable!
 
   @JavaMethod

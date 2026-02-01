@@ -79,7 +79,7 @@ extension JavaClassMacro: MemberMacro {
     }
 
     var members: [DeclSyntax] = []
-
+    
     // Determine the modifiers to use for the fullJavaClassName member.
     let fullJavaClassNameMemberModifiers: String
     switch (isSwiftClass, isJavaLangObject) {
@@ -94,7 +94,13 @@ extension JavaClassMacro: MemberMacro {
     let classNameAccessSpecifier = isSwiftClass ? "open" : "public"
     members.append("""
       /// The full Java class name for this Swift type.
-      \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String { \(literal: className) }
+      \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String {
+        #if os(Android)
+          AndroidSupport.androidDesugarClassNameConversion(for: "\(raw: className)")
+        #else
+          "\(raw: className)"
+        #endif
+      }
       """
     )
 

@@ -62,7 +62,7 @@ struct JNIStructTests {
         private MyStruct(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
-        
+
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
         }
@@ -141,7 +141,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024init__JJ")
-        func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
+        public func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
           result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -161,7 +161,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024destroy__J")
-        func Java_com_example_swift_MyStruct__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+        public func Java_com_example_swift_MyStruct__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
           guard let env$ = environment else {
             fatalError("Missing JNIEnv in downcall to \\(#function)")
           }
@@ -213,7 +213,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024doSomething__JJ")
-        func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
+        public func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
           assert(self != 0, "self memory address was null")
           let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)

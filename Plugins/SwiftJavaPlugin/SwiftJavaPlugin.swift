@@ -242,30 +242,40 @@ extension SwiftJavaBuildToolPlugin {
   func outputFilePath(context: PluginContext, generated: Bool, filename: String) -> URL {
     outputDirectory(context: context, generated: generated).appending(path: filename)
   }
-}
 
-func getExtractedJavaStdlibModules() -> [String] {
-  let fileManager = FileManager.default
-  let sourcesPath = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent()
-    .deletingLastPathComponent()
-    .appendingPathComponent("Sources")
-    .appendingPathComponent("JavaStdlib")
+  func getExtractedJavaStdlibModules() -> [String] {
+    let fileManager = FileManager.default
+    log("Search for JavaStdlib inside: \(#filePath)")
+    let sourcesPath = URL(fileURLWithPath: #filePath)
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .appendingPathComponent("Sources")
+      .appendingPathComponent("JavaStdlib")
 
-  guard let stdlibDirContents = try? fileManager.contentsOfDirectory(
-    at: sourcesPath,
-    includingPropertiesForKeys: [.isDirectoryKey],
-    options: [.skipsHiddenFiles]
-  ) else {
-    return []
-  }
-
-  return stdlibDirContents.compactMap { url in
-    guard let resourceValues = try? url.resourceValues(forKeys: [.isDirectoryKey]),
-          let isDirectory = resourceValues.isDirectory,
-          isDirectory else {
-      return nil
+    guard let stdlibDirContents = try? fileManager.contentsOfDirectory(
+      at: sourcesPath,
+      includingPropertiesForKeys: [.isDirectoryKey],
+      options: [.skipsHiddenFiles]
+    ) else {
+      warn("Unable to find Java standard library Swift wrappers! Expected \(sourcesPath) to exist." + 
+           "May be unable to wrap-java types involving Java standard library types.")
+      return []
     }
-    return url.lastPathComponent
-  }.sorted()
+
+    return stdlibDirContents.compactMap { url in
+      let swiftJavaConfigURL = url.appending(path: "swift-java.config")
+      guard fileManager.fileExists(atPath: swiftJavaConfigURL.absoluteString) else {
+        warn("Expected JavaStdlib directory \(url) to contain swift-java.config but it was missing!")
+        return nil
+      }
+      
+      guard let resourceValues = try? url.resourceValues(forKeys: [.isDirectoryKey]),
+            let isDirectory = resourceValues.isDirectory,
+            isDirectory else {
+        return nil
+      }
+      return url.lastPathComponent
+    }.sorted()
+  }
 }

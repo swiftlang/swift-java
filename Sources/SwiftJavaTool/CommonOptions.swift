@@ -65,7 +65,7 @@ extension SwiftJava {
     @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
     var filterInclude: [String] = []
 
-    @Option(name: .long, help: "While scanning a classpath, skip types which match the filter prefix")
+    @Option(name: .long, help: "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format.")
     var filterExclude: [String] = []
 
     @Option(help: "A path to a custom swift-java.config to use")

@@ -26,7 +26,7 @@ struct JNIArrayTest {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static byte[] f(@Unsigned byte[] array) { 
+        public static byte[] f(@Unsigned byte[] array) {
           return SwiftModule.$f(Objects.requireNonNull(array, "array must not be null"));
         }
         """,
@@ -46,7 +46,7 @@ struct JNIArrayTest {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
-        func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? { 
+        public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
           return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNIValue(in: environment)
         }
         """
@@ -62,7 +62,7 @@ struct JNIArrayTest {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static byte[] f(@Unsigned byte[] array) { 
+        public static byte[] f(@Unsigned byte[] array) {
           return SwiftModule.$f(Objects.requireNonNull(array, "array must not be null"));
         }
         """,
@@ -82,7 +82,7 @@ struct JNIArrayTest {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
-        func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? { 
+        public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
           return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNIValue(in: environment)
         }
         """
@@ -98,7 +98,7 @@ struct JNIArrayTest {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static long[] f(long[] array) { 
+        public static long[] f(long[] array) {
           return SwiftModule.$f(Objects.requireNonNull(array, "array must not be null"));
         }
         """,
@@ -118,7 +118,7 @@ struct JNIArrayTest {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3J")
-        func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? { 
+        public func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? {
           return SwiftModule.f(array: [Int64](fromJNI: array, in: environment)).getJNIValue(in: environment)
         }
         """
@@ -137,8 +137,8 @@ struct JNIArrayTest {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static MySwiftClass[] f(MySwiftClass[] array, SwiftArena swiftArena$) { 
-          return Arrays.stream(SwiftModule.$f(Arrays.stream(Objects.requireNonNull(array, "array must not be null")).mapToLong(MySwiftClass::$memoryAddress).toArray())).mapToObj((pointer) -> { 
+        public static MySwiftClass[] f(MySwiftClass[] array, SwiftArena swiftArena$) {
+          return Arrays.stream(SwiftModule.$f(Arrays.stream(Objects.requireNonNull(array, "array must not be null")).mapToLong(MySwiftClass::$memoryAddress).toArray())).mapToObj((pointer) -> {
             return MySwiftClass.wrapMemoryAddressUnsafe(pointer, swiftArena$);
           }
           ).toArray(MySwiftClass[]::new);
@@ -163,7 +163,7 @@ struct JNIArrayTest {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3J")
-        func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? { 
+        public func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? {
           return SwiftModule.f(array: [Int64](fromJNI: array, in: environment).map( { (pointer$) in
             assert(pointer$ != 0, "pointer$ memory address was null")
             let pointer$Bits$ = Int(pointer$)

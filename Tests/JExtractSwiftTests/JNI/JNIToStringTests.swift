@@ -51,7 +51,7 @@ struct JNIToStringTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyType__00024toString__J")
-        func Java_com_example_swift_MyType__00024toString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
+        public func Java_com_example_swift_MyType__00024toString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
           ...
           return String(describing: self$.pointee).getJNIValue(in: environment)
         }
@@ -85,7 +85,7 @@ struct JNIToStringTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyType__00024toDebugString__J")
-        func Java_com_example_swift_MyType__00024toDebugString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
+        public func Java_com_example_swift_MyType__00024toDebugString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
           ...
           return String(reflecting: self$.pointee).getJNIValue(in: environment)
         }

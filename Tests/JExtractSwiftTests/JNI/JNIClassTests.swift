@@ -83,7 +83,7 @@ struct JNIClassTests {
         private MyClass(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
-        
+
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
         }
@@ -163,7 +163,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024method__")
-        func Java_com_example_swift_MyClass__00024method__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        public func Java_com_example_swift_MyClass__00024method__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           MyClass.method()
         }
         """
@@ -220,7 +220,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024init__JJ")
-        func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
+        public func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -229,7 +229,7 @@ struct JNIClassTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyClass__00024init__")
-        func Java_com_example_swift_MyClass__00024init__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        public func Java_com_example_swift_MyClass__00024init__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init())
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -250,7 +250,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024destroy__J")
-        func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+        public func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
           guard let env$ = environment else {
             fatalError("Missing JNIEnv in downcall to \\(#function)")
           }
@@ -302,7 +302,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
-        func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
+        public func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
           assert(self != 0, "self memory address was null")
           let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
@@ -351,7 +351,7 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024copy__J")
-        func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
+        public func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
           assert(self != 0, "self memory address was null")
           let selfBits$ = Int(Int64(fromJNI: self, in: environment))
           let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
@@ -383,7 +383,7 @@ struct JNIClassTests {
          * }
          */
         public boolean isEqual(MyClass other) {
-          return MyClass.$isEqual(other.$memoryAddress(), this.$memoryAddress()); 
+          return MyClass.$isEqual(other.$memoryAddress(), this.$memoryAddress());
         }
         """,
         """
@@ -403,10 +403,10 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024isEqual__JJ")
-        func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, self: jlong) -> jboolean {
+        public func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, self: jlong) -> jboolean {
           assert(other != 0, "other memory address was null")
           let otherBits$ = Int(Int64(fromJNI: other, in: environment))
-          let other$ = UnsafeMutablePointer<MyClass>(bitPattern: otherBits$) 
+          let other$ = UnsafeMutablePointer<MyClass>(bitPattern: otherBits$)
           guard let other$ else {
             fatalError("other memory address was null in call to \\(#function)!")
           }

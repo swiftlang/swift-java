@@ -32,6 +32,8 @@ enum JNIJavaTypeTranslator {
 
     case .int64: return .long
     case .uint64: return .long
+    
+    case .int, .uint: return .long
 
     case .float: return .float
     case .double: return .double
@@ -39,13 +41,46 @@ enum JNIJavaTypeTranslator {
 
     case .string: return .javaLangString
 
-    case .int, .uint, // FIXME: why not supported int/uint?
-        .unsafeRawPointer, .unsafeMutableRawPointer,
+    case .unsafeRawPointer, .unsafeMutableRawPointer,
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
         .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array, .foundationDate, .essentialsDate:
       return nil
+    }
+  }
+
+  static func indirectConversionStepSwiftType(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> SwiftType? {
+    switch knownKind {
+    case .int: knownTypes.int64
+    case .uint: knownTypes.uint64
+
+    case .bool, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64,
+      .float, .double, .void, .string,
+      .unsafeRawPointer, .unsafeMutableRawPointer,
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer,
+      .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
+      .array:
+      nil
+    }
+  }
+
+  static func checkStep(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> JNISwift2JavaGenerator.NativeSwiftConversionCheck? {
+    switch knownKind {
+    case .int: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.int32)
+    case .uint: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.uint32)
+
+    case .bool, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64,
+      .float, .double, .void, .string,
+      .unsafeRawPointer, .unsafeMutableRawPointer,
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer,
+      .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
+      .array:
+      nil
     }
   }
 }

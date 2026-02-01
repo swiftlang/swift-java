@@ -257,10 +257,6 @@ final class GenericsWrapJavaTests: XCTestCase {
         @JavaClass("com.example.ByteArray")
         open class ByteArray: JavaObject {
         """,
-        // """
-        // @JavaInterface("com.example.Store")
-        // public struct Store<K: AnyJavaObject, V: AnyJavaObject, T: AnyJavaObject> {
-        // """,
         """
         @JavaClass("com.example.CompressingStore")
         open class CompressingStore: AbstractStore<ByteArray, [UInt8], [UInt8]> {
@@ -292,6 +288,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.Kappa")
         open class Kappa<T: AnyJavaObject>: JavaObject {
+        """,
+        """
           @JavaMethod(typeErasedResult: "T!")
           open func get() -> T!
         }
@@ -404,6 +402,41 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaMethod(typeErasedResult: "M!")
         open func putIn<M: AnyJavaObject>(_ arg0: M?) -> M!
+        """,
+      ]
+    )
+  }
+
+
+  func testWrapJavaGenericMethod_parameterizedParameterType() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class Resolver<T> { }
+      class Serializer<T> { }
+
+      class Store {
+        public <ValueType> Store 
+        bootstrapStore(
+            String name,
+            Resolver<ValueType> resolver, 
+            Serializer<ValueType> serializer
+        ) { return null; }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Resolver",
+        "com.example.Serializer",
+        "com.example.Store"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func bootstrapStore<ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Resolver<ValueType>?, _ arg2: Serializer<ValueType>?) -> Store!
         """,
       ]
     )

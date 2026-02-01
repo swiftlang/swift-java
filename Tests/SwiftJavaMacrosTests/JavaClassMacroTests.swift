@@ -43,7 +43,11 @@ class JavaKitMacroTests: XCTestCase {
       
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
       
             public required init(javaHolder: JavaObjectHolder) {
@@ -124,7 +128,19 @@ class JavaKitMacroTests: XCTestCase {
               self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
           public var myField: Int64 {
               get {
@@ -150,7 +166,11 @@ class JavaKitMacroTests: XCTestCase {
       
             /// The full Java class name for this Swift type.
             public static var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
 
             public typealias JavaSuperclass = JavaObject
@@ -216,7 +236,19 @@ class JavaKitMacroTests: XCTestCase {
               self.init(javaThis: javaThis, environment: _environment)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
           public var myField: Int64 {
               get {
@@ -242,7 +274,11 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
+              #else
                 "org.swift.example.HelloWorld"
+              #endif
             }
 
             public required init(javaHolder: JavaObjectHolder) {
@@ -278,12 +314,28 @@ class JavaKitMacroTests: XCTestCase {
               self.init(javaThis: javaThis, environment: _environment)
           }
           public func isBigEnough(_: Int32) -> Bool {
-              return try! dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
           }
 
             /// The full Java class name for this Swift type.
             open class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Object")
+              #else
                 "java.lang.Object"
+              #endif
             }
 
             public var javaHolder: JavaObjectHolder
@@ -310,7 +362,20 @@ class JavaKitMacroTests: XCTestCase {
         open class JavaOptional<T: AnyJavaObject>: JavaObject {
           open func get() -> T! {
               /* convert erased return value to T */
-              if let result$ = try! dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self) {
+              let result$ = {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "get", resultType: /*type-erased:T*/ JavaObject?.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \\(error)")
+                }
+              }()
+              if let result$ {
                 return T(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
               } else {
                 return nil
@@ -319,7 +384,11 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
+              #if os(Android)
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Optional")
+              #else
                 "java.lang.Optional"
+              #endif
             }
 
             public required init(javaHolder: JavaObjectHolder) {

@@ -194,10 +194,10 @@ extension FFMSwift2JavaGenerator {
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-            System.loadLibrary(LIB_NAME);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
             return true;
         }
 
@@ -345,10 +345,10 @@ extension FFMSwift2JavaGenerator {
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
             if (SwiftLibraries.AUTO_LOAD_LIBS) {
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-                System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-                System.loadLibrary(LIB_NAME);
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+                SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
             }
 
             if (PlatformUtils.isMacOS()) {

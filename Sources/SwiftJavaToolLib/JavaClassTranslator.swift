@@ -214,7 +214,7 @@ struct JavaClassTranslator {
     for method in methods {
       guard let method else { continue }
 
-      guard shouldExtract(method: method) else {
+      guard shouldExtract(method: method, config: translator.config) else {
         continue
       }
 
@@ -257,7 +257,34 @@ extension JavaClassTranslator {
 
   /// Determines whether a method should be extracted for translation.
   /// Only look at public and protected methods here.
-  private func shouldExtract(method: Method) -> Bool {
+  private func shouldExtract(method: Method, config: Configuration) -> Bool {
+    // Check exclude filters, if they're applicable to methods:
+    for exclude in config.filterExclude ?? [] where exclude.contains("#") {
+      let split = exclude.split(separator: "#")
+      guard split.count == 2 else {
+        self.log.warning("Malformed method exclude filter, must have only one '#' marker: \(exclude)")
+        continue // cannot use this filter, malformed
+      }
+
+      let javaClassName = method.getDeclaringClass().getName()
+      let javaMemberName = method.getName()
+
+      let className = split.first!
+      let excludedName = split.dropFirst().first!
+        
+      self.log.warning("Exclude filter: \(exclude) ||| \(javaClassName) / \(javaMemberName)")
+
+      if javaClassName.starts(with: className) {
+        if excludedName.hasSuffix("*"), javaMemberName.starts(with: excludedName.dropLast()) {
+          log.info("Skip Java member '\(javaClassName)#\(javaMemberName)', prefix exclude matched: \(exclude)")
+          return false
+        } else if javaMemberName == excludedName {
+          log.info("Skip Java member '\(javaClassName)#\(javaMemberName)', exact exclude matched: \(exclude)")
+          return false
+        }
+      }
+    }
+
     switch self.translator.config.effectiveMinimumInputAccessLevelMode {
       case .internal:
         return method.isPublic || method.isProtected || method.isPackage
@@ -579,7 +606,8 @@ extension JavaClassTranslator {
   package func renderConstructor(
     _ javaConstructor: Constructor<some AnyJavaObject>
   ) throws -> DeclSyntax {
-    let parameters = try translateJavaParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
+    let parameters: [FunctionParameterSyntax]
+    parameters = try translateJavaParameters(javaConstructor.getParameters()) + ["environment: JNIEnvironment? = nil"]
     let parametersStr = parameters.map { $0.description }.joined(separator: ", ")
     let throwsStr = javaConstructor.throwsCheckedException ? "throws" : ""
     let accessModifier = javaConstructor.isPublic ? "public " : ""
@@ -615,6 +643,16 @@ extension JavaClassTranslator {
       if let parameterizedType = parameter?.getParameterizedType() {
         if parameterizedType.isEqualTo(typeParam.as(Type.self)) {
           return true
+        }
+
+        // Also check if the type param is used as a type argument inside a parameterized parameter type
+        if let parameterizedParamType = parameterizedType.as(ParameterizedType.self) {
+          for actualTypeParam in parameterizedParamType.getActualTypeArguments() {
+            guard let actualTypeParam else { continue }
+            if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+              return true
+            }
+          }
         }
       }
     }
@@ -685,6 +723,20 @@ extension JavaClassTranslator {
     let swiftMethodName = javaMethod.getName().escapedSwiftName
     let swiftOptionalMethodName = "\(javaMethod.getName())Optional".escapedSwiftName
 
+    // --- Handle docs for the generated method.
+    // Include the original Java signature
+    let docsString = 
+      """
+        /**
+         * Java method `\(javaMethod.getName())`.
+         * 
+         * ### Java method signature
+         * ```java
+         * \(javaMethod.toGenericString())
+         * ```
+         */
+      """
+
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
       if implementedInSwift {
@@ -698,6 +750,11 @@ extension JavaClassTranslator {
           }
         // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
         var parameters: [String] = []
+        // If the method name is "init", we need to explicitly specify it in the annotation
+        // because "init" is a Swift keyword and will be escaped in the function name via `init`
+        if javaMethod.getName() == "init" {
+          parameters.append("\"init\"")
+        }
         if hasTypeEraseGenericResultType {
           parameters.append("typeErasedResult: \"\(resultType)\"")
         }
@@ -740,9 +797,9 @@ extension JavaClassTranslator {
           baseBody
         }
 
-
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
@@ -752,6 +809,7 @@ extension JavaClassTranslator {
     } else {
       return 
         """
+        \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }
@@ -957,7 +1015,7 @@ extension JavaClassTranslator {
           continue
         }
 
-        guard shouldExtract(method: overriddenMethod) else {
+        guard shouldExtract(method: overriddenMethod, config: translator.config) else {
           continue
         }
 

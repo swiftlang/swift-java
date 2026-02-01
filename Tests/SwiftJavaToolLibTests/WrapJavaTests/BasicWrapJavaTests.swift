@@ -49,6 +49,42 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJava_docs_signature() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class ExampleSimpleClass {
+        public void example(String name, int age) { }
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ExampleSimpleClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        import CSwiftJavaJNI
+        import SwiftJava
+        """,
+        """
+          /**
+           * Java method `example`.
+           *
+           * ### Java method signature
+           * ```java
+           * public void com.example.ExampleSimpleClass.example(java.lang.String,int)
+           * ```
+           */
+           @JavaMethod
+           open func example(_ arg0: String, _ arg1: Int32)
+        """
+      ]
+    )
+  }
+
   func test_wrapJava_doNotDupeImportNestedClassesFromSuperclassAutomatically() async throws {
     let classpathURL = try await compileJava(
       """
@@ -99,6 +135,7 @@ final class BasicWrapJavaTests: XCTestCase {
 
       class SuperClass {
         public static final long serialVersionUID = 1L;
+        public void init() throws Exception {}
       }
 
       class SubClass extends SuperClass {
@@ -124,6 +161,81 @@ final class BasicWrapJavaTests: XCTestCase {
         extension JavaClass<SubClass> {
         @JavaStaticField(isFinal: true)
         public var serialVersionUID: Int64
+        """,
+      ]
+    )
+  }
+
+  // Test that Java methods named "init" get @JavaMethod("init") annotation.
+  // Since "init" is a Swift keyword and gets escaped with backticks in the function name,
+  // we explicitly specify the Java method name in the annotation.
+  // See KeyAgreement.init() methods as a real-world example.
+  func test_wrapJava_initMethodAnnotation() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class TestClass {
+        public void init(String arg) throws Exception {}
+        public void init() throws Exception {}
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.TestClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod("init")
+        open func `init`(_ arg0: String) throws
+        """,
+        """
+        @JavaMethod("init")
+        open func `init`() throws
+        """,
+      ]
+    )
+  }
+
+  func test_wrapJava_inheritFromBiFunction() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      import java.util.function.BiFunction;
+
+      interface CallMe<ValueType> extends BiFunction<ValueType, ValueType, ValueType> {
+        @Override
+        ValueType apply(
+            ValueType newest,
+            ValueType oldest
+        );
+      }
+      """)
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "java.util.function.BiFunction",
+        "com.example.CallMe",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.CallMe", extends: BiFunction<ValueType, ValueType, ValueType>.self)
+        public struct CallMe<ValueType: AnyJavaObject> {
+          /**
+           * Java method `apply`.
+           *
+           * ### Java method signature
+           * ```java
+           * public abstract ValueType com.example.CallMe.apply(ValueType,ValueType)
+           * ```
+           */
+          @JavaMethod(typeErasedResult: "ValueType!")
+            public func apply(_ arg0: ValueType?, _ arg1: ValueType?) -> ValueType!
+          }
         """,
       ]
     )

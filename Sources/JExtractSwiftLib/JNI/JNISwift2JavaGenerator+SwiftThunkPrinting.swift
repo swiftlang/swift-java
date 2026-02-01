@@ -31,7 +31,7 @@ extension JNISwift2JavaGenerator {
       return // no need to write any empty files, yay
     }
 
-    logger.info("[swift-java] Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
+    logger.info("Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
 
     for expectedFileName in self.expectedOutputSwiftFileNames {
       logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
@@ -522,11 +522,44 @@ extension JNISwift2JavaGenerator {
     let tryClause: String = decl.isThrowing ? "try " : ""
 
     // Regular parameters.
-    var arguments = [String]()
+    var arguments: [String] = [String]()
+    var indirectVariables: [(name: String, lowered: String)] = []
+    var int32OverflowChecks: [String] = []
+
     for (idx, parameter) in nativeSignature.parameters.enumerated() {
       let javaParameterName = translatedDecl.translatedFunctionSignature.parameters[idx].parameter.name
       let lowered = parameter.conversion.render(&printer, javaParameterName)
       arguments.append(lowered)
+
+      parameter.indirectConversion.flatMap {
+        indirectVariables.append((javaParameterName, $0.render(&printer, javaParameterName)))
+      }
+
+      switch parameter.conversionCheck {
+        case .check32BitIntOverflow:
+        int32OverflowChecks.append(
+          parameter.conversionCheck!.render(
+            &printer, JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName)))
+        case nil:
+          break
+      }
+    }
+
+    // Make indirect variables
+    for (name, lowered) in indirectVariables {
+      printer.print("let \(JNISwift2JavaGenerator.indirectVariableName(for: name)) = \(lowered)")
+    }
+
+    if !int32OverflowChecks.isEmpty {
+      printer.print("#if _pointerBitWidth(_32)")
+
+      for check in int32OverflowChecks {
+        printer.printBraceBlock("guard \(check) else") { printer in 
+          printer.print("environment.throwJavaException(javaException: .integerOverflow)")
+          printer.print(dummyReturn(for: nativeSignature))
+        }
+      }
+      printer.print("#endif")
     }
 
     // Callee
@@ -604,15 +637,6 @@ extension JNISwift2JavaGenerator {
     }
 
     if decl.isThrowing, !decl.isAsync {
-      let dummyReturn: String
-
-      if nativeSignature.result.javaType.isVoid {
-        dummyReturn = ""
-      } else {
-        // We assume it is something that implements JavaValue
-        dummyReturn = "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
-      }
-
       printer.print("do {")
       printer.indent()
       printer.print(innerBody(in: &printer))
@@ -622,13 +646,24 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         environment.throwAsException(error)
-        \(dummyReturn)
+        \(dummyReturn(for: nativeSignature))
         """
       )
       printer.outdent()
       printer.print("}")
     } else {
       printer.print(innerBody(in: &printer))
+    }
+  }
+
+  private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
+    return if nativeSignature.result.javaType.isVoid {
+      "return"
+    } else if nativeSignature.result.javaType.isString {
+      "return String.jniPlaceholderValue"
+    } else {
+      // We assume it is something that implements JavaValue
+      "return \(nativeSignature.result.javaType.swiftTypeName(resolver: { _ in "" })).jniPlaceholderValue"
     }
   }
 
@@ -692,7 +727,7 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock(
       """
       @_cdecl("\(cName)")
-      func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
+      public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """
     ) { printer in
       body(&printer)

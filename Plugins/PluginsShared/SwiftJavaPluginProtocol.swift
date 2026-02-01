@@ -23,4 +23,8 @@ extension SwiftJavaPluginProtocol {
   func log(_ message: @autoclosure () -> String, terminator: String = "\n") {
     print("[\(pluginName)] \(message())", terminator: terminator)
   }
+  
+  func warn(_ message: @autoclosure () -> String, terminator: String = "\n") {
+    print("[\(pluginName)][warning] \(message())", terminator: terminator)
+  }
 }

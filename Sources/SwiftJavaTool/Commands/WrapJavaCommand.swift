@@ -86,7 +86,7 @@ extension SwiftJava.WrapJavaCommand {
     // Load all of the dependent configurations and associate them with Swift modules.
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in
       guard let moduleName else {
-        throw JavaToSwiftError.badConfigOption
+        throw JavaToSwiftError.badConfigOption(self.dependsOn.joined(separator: " "))
       }
       return (moduleName, config)
     }
@@ -339,10 +339,10 @@ extension SwiftJava.WrapJavaCommand {
       let anyIncludeFilterMatched = includes.contains { include in
         if javaClassName.starts(with: include) {
           // TODO: lower to trace level
-          log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
           return true
         }
 
+        log.info("Skip Java type: \(javaClassName) (does not match any include filter)")
         return false
       }
 
@@ -362,4 +362,5 @@ extension SwiftJava.WrapJavaCommand {
     // The class matches import filters, if any, and was not excluded.
     return true
   }
+
 }

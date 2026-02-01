@@ -523,7 +523,7 @@ extension JNISwift2JavaGenerator {
     let translatedSignature = translatedDecl.translatedFunctionSignature
     let resultType = translatedSignature.resultType.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
-    let throwsClause = translatedDecl.isThrowing && !translatedDecl.isAsync ? " throws Exception" : ""
+    let throwsClause = translatedDecl.throwsClause()
 
     let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) { generics, parameter in
       guard case .generic(let name, let extends) = parameter.parameter.type else {
@@ -552,7 +552,11 @@ extension JNISwift2JavaGenerator {
 
     if shouldGenerateGlobalArenaVariation {
       if let importedFunc {
-        printDeclDocumentation(&printer, importedFunc)
+        TranslatedDocumentation.printDocumentation(
+          importedFunc: importedFunc,
+          translatedDecl: translatedDecl,
+          in: &printer
+        )
       }
       var modifiers = modifiers
 
@@ -578,7 +582,11 @@ extension JNISwift2JavaGenerator {
       parameters.append("SwiftArena swiftArena$")
     }
     if let importedFunc {
-      printDeclDocumentation(&printer, importedFunc)
+      TranslatedDocumentation.printDocumentation(
+        importedFunc: importedFunc,
+        translatedDecl: translatedDecl,
+        in: &printer
+      )
     }
     let signature = "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     if skipMethodBody {
@@ -645,19 +653,6 @@ extension JNISwift2JavaGenerator {
       let result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
       printer.print("return \(result);")
     }
-  }
-
-  private func printDeclDocumentation(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
-    printer.print(
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * \(decl.signatureString)
-       * }
-       */
-      """
-    )
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {

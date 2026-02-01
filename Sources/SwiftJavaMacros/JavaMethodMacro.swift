@@ -109,18 +109,39 @@ extension JavaMethodMacro: BodyMacro {
       parametersAsArgs = ", arguments: \(paramNames)"
     }
 
-    let tryKeyword =
-      funcDecl.signature.effectSpecifiers?.throwsClause != nil
-      ? "try" : "try!"
+    let canRethrowError = funcDecl.signature.effectSpecifiers?.throwsClause != nil
+    let catchPhrase = // how are we able to catch/handle thrown errors from the dynamicJava call
+      if canRethrowError {
+        "throw error"
+      } else {
+        """
+        if let throwable = error as? Throwable {
+          let sw = StringWriter()
+          let pw = PrintWriter(sw)
+          throwable.printStackTrace(pw)
+          fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+        }
+        fatalError("Java call threw unhandled exception: \\(error)")
+        """
+      }
 
     let resultSyntax: CodeBlockItemSyntax =
-      "\(raw: tryKeyword) dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))"
+      """
+      \(raw: canRethrowError ? "try " : ""){
+        do {
+          return try dynamicJava\(raw: isStatic ? "Static" : "")MethodCall(methodName: \(literal: funcName)\(raw: parametersAsArgs)\(raw: resultType))
+        } catch {
+          \(raw: catchPhrase)
+        }
+      }()
+      """
 
     if let genericResultType {
       return [
         """
         /* convert erased return value to \(raw: genericResultType) */
-        if let result$ = \(resultSyntax) {
+        let result$ = \(resultSyntax)
+        if let result$ {
           return \(raw: genericResultType)(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
         } else {
           return nil

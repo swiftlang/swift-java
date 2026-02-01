@@ -1,0 +1,76 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+package utilities
+
+import org.gradle.api.Project
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.register
+import java.io.File
+
+private fun Project.swiftTargetsWithJExtractPlugin(): List<String> = swiftPMPackage().targets.filter {
+    it.productDependencies.contains("JExtractSwiftPlugin")
+}.map {
+    it.name
+}
+
+private fun Project.registerSwiftCheckValidTask(): TaskProvider<*> = tasks.register<Exec>("swift-check-valid") {
+    commandLine("swift")
+    args("-version")
+}
+
+fun Project.registerJextractTask(
+    arguments: () -> List<String> = {
+        listOf("build", "--disable-experimental-prebuilts")
+    }
+): TaskProvider<*> {
+    val swiftCheckValid = registerSwiftCheckValidTask()
+    return tasks.register<Exec>("jextract") {
+        description = "Generate Java wrappers for swift target"
+        dependsOn(swiftCheckValid)
+
+        // only because we depend on "live developing" the plugin while using this project to test it
+        inputs.file(File(rootDir, "Package.swift"))
+        inputs.dir(File(rootDir, "Sources"))
+
+        // If the package description changes, we should execute jextract again, maybe we added jextract to new targets
+        inputs.file(File(projectDir, "Package.swift"))
+
+        // monitor all targets/products which depend on the JExtract plugin
+        swiftTargetsWithJExtractPlugin().forEach { targetName ->
+            logger.info("[swift-java:jextract (Gradle)] Swift input target: ${targetName}")
+            inputs.dir(File(layout.projectDirectory.asFile, "Sources/${targetName}"))
+            outputs.dir(
+                layout.buildDirectory.dir(
+                    "../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().lowercase()}/${targetName}/destination/JExtractSwiftPlugin/src/generated/java"
+                )
+            )
+        }
+
+        workingDir = layout.projectDirectory.asFile
+        commandLine("swift")
+        // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+        args(arguments()) // since Swift targets which need to be jextract-ed have the jextract build plugin, we just need to build
+        // If we wanted to execute a specific subcommand, we can like this:
+        //     args("run",/*
+        //             "swift-java", "jextract",
+        //             "--swift-module", "MySwiftLibrary",
+        //             // java.package is obtained from the swift-java.config in the swift module
+        //             "--output-java", "${layout.buildDirectory.dir(".build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractSwiftPlugin/src/generated/java").get()}",
+        //             "--output-swift", "${layout.buildDirectory.dir(".build/plugins/outputs/${layout.projectDirectory.asFile.getName().toLowerCase()}/JExtractSwiftPlugin/Sources").get()}",
+        //             "--log-level", (logging.level <= LogLevel.INFO ? "debug" :  */"info")
+        //     )
+    }
+}
