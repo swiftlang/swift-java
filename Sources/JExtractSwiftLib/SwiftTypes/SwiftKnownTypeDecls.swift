@@ -14,7 +14,7 @@
 
 import SwiftSyntax
 
-enum SwiftKnownTypeDeclKind: String, Hashable, CaseIterable {
+enum SwiftKnownTypeDeclKind: String, Hashable {
   // Swift
   case bool = "Swift.Bool"
   case int = "Swift.Int"
