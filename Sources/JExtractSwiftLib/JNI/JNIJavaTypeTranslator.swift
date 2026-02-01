@@ -62,7 +62,7 @@ enum JNIJavaTypeTranslator {
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
       .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
-      .array:
+      .array, .foundationDate, .essentialsDate:
       nil
     }
   }
@@ -79,7 +79,7 @@ enum JNIJavaTypeTranslator {
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
       .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
-      .array:
+      .array, .foundationDate, .essentialsDate:
       nil
     }
   }
