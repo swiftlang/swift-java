@@ -727,7 +727,7 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       /**
-       * Initializes a date from a Java {@link java.time.Instant}.
+       * Initializes a Swift {@code Foundation.Date} from a Java {@link java.time.Instant}.
        *
        * <h3>Warning: Precision Loss</h3>
        * <p>
