@@ -99,18 +99,8 @@ extension JNISwift2JavaGenerator {
             return try translateArrayParameter(elementType: elementType, parameterName: parameterName)
 
           case .foundationDate, .essentialsDate:
-            return NativeParameter(
-              parameters: [
-                JavaParameter(name: parameterName, type: .double)
-              ],
-              conversion: .method(
-                .constant("Date"),
-                function: "init",
-                arguments: [
-                  ("timeIntervalSince1970", .initFromJNI(.placeholder, swiftType: self.knownTypes.double))
-                ]
-              )
-            )
+            // Handled as wrapped struct
+            break
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
@@ -499,11 +489,8 @@ extension JNISwift2JavaGenerator {
             return try translateArrayResult(elementType: elementType, resultName: resultName)
 
           case .foundationDate, .essentialsDate:
-            return NativeResult(
-              javaType: .double,
-              conversion: .getJNIValue(.member(.placeholder, member: "timeIntervalSince1970")),
-              outParameters: []
-            )
+            // Handled as wrapped struct
+            break
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {

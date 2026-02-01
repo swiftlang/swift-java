@@ -15,6 +15,7 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.time.Instant;
 
@@ -22,15 +23,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DateTest {
     @Test
-    void date() {
-        assertEquals(Instant.ofEpochSecond(1000), MySwiftLibrary.dateFromSeconds(1000.0));
-        assertEquals(Instant.ofEpochSecond(1000, 500_000_000), MySwiftLibrary.dateFromSeconds(1000.50));
-        assertTrue(MySwiftLibrary.compareDates(Instant.ofEpochSecond(5000), Instant.ofEpochSecond(5000)));
-        assertFalse(MySwiftLibrary.compareDates(Instant.ofEpochSecond(4999, 500_000_000), Instant.ofEpochSecond(5000)));
-        assertTrue(MySwiftLibrary.compareDates(MySwiftLibrary.dateFromSeconds(1000.5), Instant.ofEpochSecond(1000, 500_000_000)));
+    void date_functions() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var date = MySwiftLibrary.dateFromSeconds(1000.50, arena);
+            assertEquals(1000.5, date.getTimeIntervalSince1970());
 
-        var date = MySwiftLibrary.dateFromSeconds(50000.5);
-        assertEquals(50_000, date.getEpochSecond());
-        assertEquals(500_000_000, date.getNano());
+            var date2 = Date.init(1000.5, arena);
+            assertTrue(MySwiftLibrary.compareDates(date, date2));
+
+            var date3 = Date.init(1000.49, arena);
+            assertFalse(MySwiftLibrary.compareDates(date, date3));
+        }
+    }
+
+    @Test
+    void date_timeIntervalSince1970() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var date = Date.init(1000, arena);
+            assertEquals(1000, date.getTimeIntervalSince1970());
+        }
     }
 }
