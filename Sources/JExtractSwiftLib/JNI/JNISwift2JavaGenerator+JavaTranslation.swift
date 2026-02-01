@@ -405,6 +405,10 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -686,6 +690,10 @@ extension JNISwift2JavaGenerator {
             return try translateArrayResult(
               elementType: elementType
             )
+
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {

@@ -47,6 +47,8 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case essentialsDataProtocol = "FoundationEssentials.DataProtocol"
   case foundationData = "Foundation.Data"
   case essentialsData = "FoundationEssentials.Data"
+  case foundationDate = "Foundation.Date"
+  case essentialsDate = "FoundationEssentials.Date"
 
   var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue
@@ -73,7 +75,8 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   /// this type between jextract and wrap-java
   var isDirectlyTranslatedToWrapJava: Bool {
     switch self {
-    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:
+    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string,
+      .void:
       return true
     default:
       return false

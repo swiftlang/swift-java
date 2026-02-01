@@ -265,12 +265,26 @@ extension JNISwift2JavaGenerator {
       printToStringMethods(&printer, decl)
       printer.println()
 
+      printSpecificTypeHelpers(&printer, decl)
+
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
       printDestroyFunction(&printer, decl)
     }
   }
 
+  /// Prints helpers for specific types like `Foundation.Date`
+  private func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    guard let knownType = decl.swiftNominal.knownTypeKind else { return }
+
+    switch knownType {
+    case .foundationDate, .essentialsDate:
+      printFoundationDateHelpers(&printer, decl)
+
+    default:
+      break
+    }
+  }
 
   private func printToStringMethods(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printer.printBraceBlock("public String toString()") { printer in
@@ -688,5 +702,58 @@ extension JNISwift2JavaGenerator {
         """
       )
     }
+  }
+
+  private func printFoundationDateHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print(
+      """
+      /**
+       * Converts this wrapped date to a Java {@link java.time.Instant}.
+       * <p>
+       * This method constructs the {@code Instant} using the underlying {@code double} value
+       * representing seconds since the Unix Epoch (January 1, 1970).
+       * </p>
+       *
+       * @return A {@code java.time.Instant} derived from the floating-point timestamp.
+       */
+      public java.time.Instant toInstant() {
+          long seconds = (long) this.getTimeIntervalSince1970();
+          long nanos = Math.round((this.getTimeIntervalSince1970() - seconds) * 1_000_000_000);
+          return java.time.Instant.ofEpochSecond(seconds, nanos);
+      }
+      """
+    )
+    printer.println()
+    printer.print(
+      """
+      /**
+       * Initializes a Swift {@code Foundation.Date} from a Java {@link java.time.Instant}.
+       *
+       * <h3>Warning: Precision Loss</h3>
+       * <p>
+       * <strong>The input precision will be degraded.</strong>
+       * </p>
+       * <p>
+       * Java's {@code Instant} stores time with <strong>nanosecond</strong> precision (9 decimal places).
+       * However, this class stores time as a 64-bit floating-point value.
+       * </p>
+       * <p>
+       * This leaves enough capacity for <strong>microsecond</strong> precision (approx. 6 decimal places).
+       * </p>
+       * <p>
+       * Consequently, the last ~3 digits of the {@code Instant}'s nanosecond field will be
+       * truncated or subjected to rounding errors during conversion.
+       * </p>
+       *
+       * @param instant The source timestamp to convert.
+       * @return A date derived from the input instant with microsecond precision.
+       */
+      public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena$) {
+        Objects.requireNonNull(instant, "Instant cannot be null");
+        double timeIntervalSince1970 = instant.getEpochSecond() + (instant.getNano() / 1_000_000_000.0);
+        return Date.init(timeIntervalSince1970, swiftArena$);
+      }
+      """
+    )
   }
 }
