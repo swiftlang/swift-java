@@ -113,6 +113,14 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
     public var count: Int { get }
     public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
   }
+  
+  public struct Date {
+    /// The interval between the date object and 00:00:00 UTC on 1 January 1970.
+    public var timeIntervalSince1970: Double { get }
+  
+    /// Returns a `Date` initialized relative to 00:00:00 UTC on 1 January 1970 by a given number of seconds.
+    public init(timeIntervalSince1970: Double)
+  }
   """
 
 private var foundationSourceFile: SourceFileSyntax {
