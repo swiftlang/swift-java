@@ -110,6 +110,7 @@ extension Swift2JavaTranslator {
       let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
       if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
         visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift")
+        visitor.visit(nominalDecl: dataProtocolDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift")
       }
     }
 
