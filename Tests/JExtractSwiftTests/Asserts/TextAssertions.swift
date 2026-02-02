@@ -110,17 +110,15 @@ func assertOutput(
 
     var diffLineNumbers: [Int] = []
     guard let matchingOutputOffset else {
-      print("error: Output did not contain expected chunk!".red)
-      
-      print("==== ---------------------------------------------------------------")
-      print("Expected output:")
-      print("'\(expectedChunk.yellow)'")
-      print("==== ---------------------------------------------------------------")
-      print("Got output:")
-      print(output)
-      print("==== ---------------------------------------------------------------")
-      
-      #expect(output.contains(expectedChunk), sourceLocation: sourceLocation)
+      let `output.contains(expectedChunk)` = output.contains(expectedChunk)
+      #expect(`output.contains(expectedChunk)`, """
+      \("error: Output did not contain expected chunk!".red)
+      ==== Expected output -----------------------------------------------  
+      \(expectedChunk.yellow)
+      ==== Got output ----------------------------------------------------
+      \(output)
+      ==== ---------------------------------------------------------------
+      """, sourceLocation: sourceLocation)
       continue
     }
 
@@ -183,8 +181,7 @@ func assertOutput(
       if hasDiff {
         print("error: Number of not matching lines: \(diffLineNumbers.count)!".red)
 
-        print("==== ---------------------------------------------------------------")
-        print("Expected output:")
+        print("==== Expected output -----------------------------------------------")
         for (n, e) in expectedLines.enumerated() {
           let isMismatch = diffLineNumbers.map({$0 - matchingOutputOffset}).contains(n)
           let marker = isMismatch ? " // <<<<<<<<<<< mismatch" : ""
@@ -192,8 +189,7 @@ func assertOutput(
         }
       }
 
-      print("==== ---------------------------------------------------------------")
-      print("Got output:")
+      print("==== Got output ----------------------------------------------------")
       let printFromLineNo = matchingOutputOffset
       for (n, g) in gotLines.enumerated() where n >= printFromLineNo {
         let baseLine = "\(n): \(g)"
@@ -246,8 +242,7 @@ func assertOutput(
     if hasDiff {
       print("error: Number of not matching lines: \(diffLineNumbers.count)!".red)
 
-      print("==== ---------------------------------------------------------------")
-      print("Expected output:")
+      print("==== Expected output -----------------------------------------------")
       for (n, e) in expectedLines.enumerated() {
         let isMismatch = diffLineNumbers.contains(n)
         let marker = isMismatch ? " // <<<<<<<< error: mismatch" : ""
@@ -255,8 +250,7 @@ func assertOutput(
       }
     }
 
-    print("==== ---------------------------------------------------------------")
-    print("Got output:")
+    print("==== Got output ----------------------------------------------------")
     for (n, g) in gotLines.enumerated() {
       let isMismatch = diffLineNumbers.contains(n)
       let marker = isMismatch ? "// <<<<<<<< error: mismatch" : ""
