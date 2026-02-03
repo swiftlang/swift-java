@@ -370,8 +370,8 @@ extension FFMSwift2JavaGenerator {
       paramDecls.append("AllocatingSwiftArena swiftArena$")
     }
 
-    let needsThrows = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck } ||
-                      translatedSignature.result.needs32BitIntOverflowCheck
+    let needsThrows = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none } ||
+                      translatedSignature.result.needs32BitIntOverflowCheck != .none
     let throwsClause = needsThrows ? " throws SwiftIntegerOverflowException" : ""
 
     TranslatedDocumentation.printDocumentation(
@@ -463,15 +463,26 @@ extension FFMSwift2JavaGenerator {
       )
     }
 
-    let hasOverflowChecks = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck }
+    let hasOverflowChecks = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none }
     if hasOverflowChecks {
       printer.print("if (SwiftValueLayout.has32bitSwiftInt) {")
       printer.indent()
       for (i, parameter) in translatedSignature.parameters.enumerated() {
-        if parameter.needs32BitIntOverflowCheck {
+        switch parameter.needs32BitIntOverflowCheck {
+        case .none:
+          break
+        case .signedInt:
           let original = decl.functionSignature.parameters[i]
           let parameterName = original.parameterName ?? "_\(i)"
           printer.print("if (\(parameterName) < Integer.MIN_VALUE || \(parameterName) > Integer.MAX_VALUE) {")
+          printer.indent()
+          printer.print("throw new SwiftIntegerOverflowException(\"Parameter '\(parameterName)' overflow: \" + \(parameterName));")
+          printer.outdent()
+          printer.print("}")
+        case .unsignedInt:
+          let original = decl.functionSignature.parameters[i]
+          let parameterName = original.parameterName ?? "_\(i)"
+          printer.print("if (\(parameterName) < 0 || \(parameterName) > 0xFFFFFFFFL) {")
           printer.indent()
           printer.print("throw new SwiftIntegerOverflowException(\"Parameter '\(parameterName)' overflow: \" + \(parameterName));")
           printer.outdent()
@@ -512,7 +523,10 @@ extension FFMSwift2JavaGenerator {
         case .initializeResultWithUpcall(_, let extractResult):
           printer.print("\(result);") // the result in the callback situation is a series of setup steps
           let extracted = extractResult.render(&printer, placeholder)
-          if translatedSignature.result.needs32BitIntOverflowCheck {
+          switch translatedSignature.result.needs32BitIntOverflowCheck {
+          case .none:
+            printer.print("return \(extracted);") // extract the actual result
+          case .signedInt:
             let resultVar = "_result$checked"
             printer.print("long \(resultVar) = \(extracted);")
             printer.print("if (SwiftValueLayout.has32bitSwiftInt) {")
@@ -525,11 +539,25 @@ extension FFMSwift2JavaGenerator {
             printer.outdent()
             printer.print("}")
             printer.print("return \(resultVar);")
-          } else {
-            printer.print("return \(extracted);") // extract the actual result
+          case .unsignedInt:
+            let resultVar = "_result$checked"
+            printer.print("long \(resultVar) = \(extracted);")
+            printer.print("if (SwiftValueLayout.has32bitSwiftInt) {")
+            printer.indent()
+            printer.print("if (\(resultVar) < 0 || \(resultVar) > 0xFFFFFFFFL) {")
+            printer.indent()
+            printer.print("throw new SwiftIntegerOverflowException(\"Return value overflow: \" + \(resultVar));")
+            printer.outdent()
+            printer.print("}")
+            printer.outdent()
+            printer.print("}")
+            printer.print("return \(resultVar);")
           }
         default:
-          if translatedSignature.result.needs32BitIntOverflowCheck {
+          switch translatedSignature.result.needs32BitIntOverflowCheck {
+          case .none:
+            printer.print("return \(result);")
+          case .signedInt:
             let resultVar = "_result$checked"
             printer.print("long \(resultVar) = \(result);")
             printer.print("if (SwiftValueLayout.has32bitSwiftInt) {")
@@ -542,8 +570,19 @@ extension FFMSwift2JavaGenerator {
             printer.outdent()
             printer.print("}")
             printer.print("return \(resultVar);")
-          } else {
-            printer.print("return \(result);")
+          case .unsignedInt:
+            let resultVar = "_result$checked"
+            printer.print("long \(resultVar) = \(result);")
+            printer.print("if (SwiftValueLayout.has32bitSwiftInt) {")
+            printer.indent()
+            printer.print("if (\(resultVar) < 0 || \(resultVar) > 0xFFFFFFFFL) {")
+            printer.indent()
+            printer.print("throw new SwiftIntegerOverflowException(\"Return value overflow: \" + \(resultVar));")
+            printer.outdent()
+            printer.print("}")
+            printer.outdent()
+            printer.print("}")
+            printer.print("return \(resultVar);")
           }
         }
       } else {
