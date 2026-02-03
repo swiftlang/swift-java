@@ -48,6 +48,9 @@ extension FFMSwift2JavaGenerator {
     /// Describes how to convert the Java parameter to the lowered arguments for
     /// the foreign function.
     var conversion: JavaConversionStep
+
+    /// Whether this parameter requires 32-bit integer overflow checking
+    var needs32BitIntOverflowCheck: Bool = false
   }
 
   /// Represent a Swift API result translated to Java.
@@ -86,6 +89,9 @@ extension FFMSwift2JavaGenerator {
     /// Describes how to construct the Java result from the foreign function return
     /// value and/or the out parameters.
     var conversion: JavaConversionStep
+
+    /// Whether this result requires 32-bit integer overflow checking
+    var needs32BitIntOverflowCheck: Bool = false
   }
 
 
@@ -340,6 +346,14 @@ extension FFMSwift2JavaGenerator {
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
         let javaType = cType.javaType
+        let needsOverflowCheck: Bool
+        if case .integral(.ptrdiff_t) = cType {
+          needsOverflowCheck = true
+        } else if case .integral(.size_t) = cType {
+          needsOverflowCheck = true
+        } else {
+          needsOverflowCheck = false
+        }
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
@@ -347,7 +361,8 @@ extension FFMSwift2JavaGenerator {
               type: javaType,
               annotations: parameterAnnotations)
           ],
-          conversion: .placeholder
+          conversion: .placeholder,
+          needs32BitIntOverflowCheck: needsOverflowCheck
         )
       }
 
@@ -596,11 +611,20 @@ extension FFMSwift2JavaGenerator {
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
         let javaType = cType.javaType
+        let needsOverflowCheck: Bool
+        if case .integral(.ptrdiff_t) = cType {
+          needsOverflowCheck = true
+        } else if case .integral(.size_t) = cType {
+          needsOverflowCheck = true
+        } else {
+          needsOverflowCheck = false
+        }
         return TranslatedResult(
           javaResultType: javaType,
           annotations: resultAnnotations,
           outParameters: [],
-          conversion: .placeholder
+          conversion: .placeholder,
+          needs32BitIntOverflowCheck: needsOverflowCheck
         )
       }
 

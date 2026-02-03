@@ -245,8 +245,13 @@ final class DataImportTests {
          * public init(bytes: UnsafeRawPointer, count: Int)
          * }
          */
-        public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena$) {
+        public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena$) throws SwiftIntegerOverflowException {
           MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            if (count < Integer.MIN_VALUE || count > Integer.MAX_VALUE) {
+              throw new SwiftIntegerOverflowException("Parameter 'count' overflow: " + count);
+            }
+          }
           swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, _result);
           return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
         }
@@ -286,9 +291,15 @@ final class DataImportTests {
          * public var count: Int
          * }
          */
-        public long getCount() {
+        public long getCount() throws SwiftIntegerOverflowException {
           $ensureAlive();
-          return swiftjava_SwiftModule_Data_count$get.call(this.$memorySegment());
+          long _result$checked = swiftjava_SwiftModule_Data_count$get.call(this.$memorySegment());
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
+              throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+            }
+          }
+          return _result$checked;
         }
         """,
 

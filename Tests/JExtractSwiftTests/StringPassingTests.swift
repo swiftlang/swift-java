@@ -62,9 +62,15 @@ final class StringPassingTests {
          * public func writeString(string: String) -> Int
          * }
          */
-        public static long writeString(java.lang.String string) {
+        public static long writeString(java.lang.String string) throws SwiftIntegerOverflowException {
             try(var arena$ = Arena.ofConfined()) {
-                return swiftjava___FakeModule_writeString_string.call(SwiftRuntime.toCString(string, arena$));
+                long _result$checked = swiftjava___FakeModule_writeString_string.call(SwiftRuntime.toCString(string, arena$));
+                if (SwiftValueLayout.has32bitSwiftInt) {
+                    if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
+                        throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+                    }
+                }
+                return _result$checked;
             }
         }
         """

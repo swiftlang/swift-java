@@ -68,9 +68,15 @@ final class VariableImportTests {
          * public var counterInt: Int
          * }
          */
-        public long getCounterInt() {
+        public long getCounterInt() throws SwiftIntegerOverflowException {
           $ensureAlive();
-          return swiftjava_FakeModule_MySwiftClass_counterInt$get.call(this.$memorySegment());
+          long _result$checked = swiftjava_FakeModule_MySwiftClass_counterInt$get.call(this.$memorySegment());
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
+              throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+            }
+          }
+          return _result$checked;
         }
         """,
         """
@@ -101,8 +107,13 @@ final class VariableImportTests {
          * public var counterInt: Int
          * }
          */
-        public void setCounterInt(long newValue) {
+        public void setCounterInt(long newValue) throws SwiftIntegerOverflowException {
           $ensureAlive();
+          if (SwiftValueLayout.has32bitSwiftInt) {
+            if (newValue < Integer.MIN_VALUE || newValue > Integer.MAX_VALUE) {
+              throw new SwiftIntegerOverflowException("Parameter 'newValue' overflow: " + newValue);
+            }
+          }
           swiftjava_FakeModule_MySwiftClass_counterInt$set.call(newValue, this.$memorySegment())
         }
         """,
