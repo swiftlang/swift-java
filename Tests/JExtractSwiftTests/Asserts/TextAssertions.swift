@@ -110,8 +110,8 @@ func assertOutput(
 
     var diffLineNumbers: [Int] = []
     guard let matchingOutputOffset else {
-      let `output.contains(expectedChunk)` = output.contains(expectedChunk)
-      #expect(`output.contains(expectedChunk)`, """
+      let outputContainsExpectedChunk = output.contains(expectedChunk)
+      #expect(outputContainsExpectedChunk, """
       \("error: Output did not contain expected chunk!".red)
       ==== Expected output -----------------------------------------------  
       \(expectedChunk.yellow)
