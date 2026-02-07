@@ -129,7 +129,7 @@ extension SwiftKnownTypeDeclKind {
     case .void: .void
     case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, 
       .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol, 
-      .essentialsData, .essentialsDataProtocol, .optional, .foundationDate, .essentialsDate:
+      .essentialsData, .essentialsDataProtocol, .optional, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
        nil
     }
   }

@@ -49,6 +49,8 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case essentialsData = "FoundationEssentials.Data"
   case foundationDate = "Foundation.Date"
   case essentialsDate = "FoundationEssentials.Date"
+  case foundationUUID = "Foundation.UUID"
+  case essentialsUUID = "FoundationEssentials.UUID"
 
   var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue

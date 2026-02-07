@@ -102,6 +102,24 @@ extension JNISwift2JavaGenerator {
             // Handled as wrapped struct
             break
 
+          case .foundationUUID, .essentialsUUID:
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: .javaLangString)
+              ],
+              conversion: .unwrapOptional(
+                .method(
+                  .constant("UUID"),
+                  function: "init",
+                  arguments: [("uuidString",  .initFromJNI(.placeholder, swiftType: self.knownTypes.string))]
+                ),
+                name: parameterName,
+                fatalErrorMessage: "Invalid UUID passed from Java"
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
                   javaType.implementsJavaValue else {
@@ -514,6 +532,13 @@ extension JNISwift2JavaGenerator {
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
+
+          case .foundationUUID, .essentialsUUID:
+            return NativeResult(
+              javaType: .javaLangString,
+              conversion: .getJNIValue(.member(.placeholder, member: "uuidString")),
+              outParameters: []
+            )
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {

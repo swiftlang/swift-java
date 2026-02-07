@@ -45,7 +45,7 @@ enum JNIJavaTypeTranslator {
         .unsafePointer, .unsafeMutablePointer,
         .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
         .unsafeBufferPointer, .unsafeMutableBufferPointer,
-        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array, .foundationDate, .essentialsDate:
+        .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol, .array, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
       return nil
     }
   }
@@ -62,7 +62,7 @@ enum JNIJavaTypeTranslator {
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
       .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
-      .array, .foundationDate, .essentialsDate:
+      .array, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
       nil
     }
   }
@@ -79,7 +79,7 @@ enum JNIJavaTypeTranslator {
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
       .optional, .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol,
-      .array, .foundationDate, .essentialsDate:
+      .array, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
       nil
     }
   }
