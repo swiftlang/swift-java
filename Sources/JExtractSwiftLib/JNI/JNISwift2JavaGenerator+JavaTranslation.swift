@@ -409,6 +409,12 @@ extension JNISwift2JavaGenerator {
             // Handled as wrapped struct
             break
 
+          case .foundationUUID, .essentialsUUID:
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: .javaUtilUUID),
+              conversion: .method(.placeholder, function: "toString")
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -694,6 +700,17 @@ extension JNISwift2JavaGenerator {
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
+
+          case .foundationUUID, .essentialsUUID:
+            return TranslatedResult(
+              javaType: .javaUtilUUID,
+              outParameters: [],
+              conversion: .method(
+                .constant("java.util.UUID"),
+                function: "fromString",
+                arguments: [.placeholder]
+              )
+            )
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
