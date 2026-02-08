@@ -35,8 +35,9 @@ struct UUIDTests {
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024acceptUUID__Ljava_lang_String_2")
           public func Java_com_example_swift_SwiftModule__00024acceptUUID__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, uuid: jstring?) {
-            guard let uuid_unwrapped$ = UUID.init(uuidString: String(fromJNI: uuid, in: environment)) else {
-              fatalError("Invalid UUID passed from Java")
+            let uuid_string$ = String(fromJNI: uuid, in: environment)
+            guard let uuid_unwrapped$ = UUID.init(uuidString: uuid_string$) else {
+              fatalError("Invalid UUID string passed from Java: \\(uuid_string$)")
             }
             SwiftModule.acceptUUID(uuid: uuid_unwrapped$)
           }

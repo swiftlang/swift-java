@@ -103,18 +103,27 @@ extension JNISwift2JavaGenerator {
             break
 
           case .foundationUUID, .essentialsUUID:
+            let uuidStringVariable = "\(parameterName)_string$"
+            let initUUIDStep = NativeSwiftConversionStep.unwrapOptional(
+              .method(
+                .constant("UUID"),
+                function: "init",
+                arguments: [("uuidString", .placeholder)]
+              ),
+              name: parameterName,
+              fatalErrorMessage: "Invalid UUID string passed from Java: \\(\(uuidStringVariable))"
+            )
+
             return NativeParameter(
               parameters: [
                 JavaParameter(name: parameterName, type: .javaLangString)
               ],
-              conversion: .unwrapOptional(
-                .method(
-                  .constant("UUID"),
-                  function: "init",
-                  arguments: [("uuidString",  .initFromJNI(.placeholder, swiftType: self.knownTypes.string))]
+              conversion: .replacingPlaceholder(
+                .aggregate(
+                  variable: uuidStringVariable,
+                  [initUUIDStep]
                 ),
-                name: parameterName,
-                fatalErrorMessage: "Invalid UUID passed from Java"
+                placeholder: .initFromJNI(.placeholder, swiftType: self.knownTypes.string)
               ),
               indirectConversion: nil,
               conversionCheck: nil
@@ -791,6 +800,10 @@ extension JNISwift2JavaGenerator {
 
     indirect case labelessAssignmentOfVariable(NativeSwiftConversionStep, swiftType: SwiftType)
 
+    indirect case aggregate(variable: String, [NativeSwiftConversionStep])
+
+    indirect case replacingPlaceholder(NativeSwiftConversionStep, placeholder: NativeSwiftConversionStep)
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -1191,8 +1204,21 @@ extension JNISwift2JavaGenerator {
           }
         }
         return printer.finalize()
+
       case .labelessAssignmentOfVariable(let name, let swiftType):
         return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder))))"
+
+      case .aggregate(let variable, let steps):
+        precondition(!steps.isEmpty, "Aggregate must contain steps")
+        printer.print("let \(variable) = \(placeholder)")
+        let steps = steps.map {
+          $0.render(&printer, variable)
+        }
+        return steps.last!
+
+      case .replacingPlaceholder(let inner, let newPlaceholder):
+        let newPlaceholder = newPlaceholder.render(&printer, placeholder)
+        return inner.render(&printer, newPlaceholder)
       }
     }
   }
