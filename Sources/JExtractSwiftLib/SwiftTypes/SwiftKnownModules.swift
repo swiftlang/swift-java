@@ -121,6 +121,8 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
     /// Returns a `Date` initialized relative to 00:00:00 UTC on 1 January 1970 by a given number of seconds.
     public init(timeIntervalSince1970: Double)
   }
+  
+  public struct UUID {}
   """
 
 private var foundationSourceFile: SourceFileSyntax {

@@ -102,6 +102,33 @@ extension JNISwift2JavaGenerator {
             // Handled as wrapped struct
             break
 
+          case .foundationUUID, .essentialsUUID:
+            let uuidStringVariable = "\(parameterName)_string$"
+            let initUUIDStep = NativeSwiftConversionStep.unwrapOptional(
+              .method(
+                .constant("UUID"),
+                function: "init",
+                arguments: [("uuidString", .placeholder)]
+              ),
+              name: parameterName,
+              fatalErrorMessage: "Invalid UUID string passed from Java: \\(\(uuidStringVariable))"
+            )
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: .javaLangString)
+              ],
+              conversion: .replacingPlaceholder(
+                .aggregate(
+                  variable: uuidStringVariable,
+                  [initUUIDStep]
+                ),
+                placeholder: .initFromJNI(.placeholder, swiftType: self.knownTypes.string)
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
                   javaType.implementsJavaValue else {
@@ -166,12 +193,38 @@ extension JNISwift2JavaGenerator {
         )
 
       case .function(let fn):
+
+        // @Sendable is not supported yet as "environment" is later captured inside the closure.
+        if fn.isEscaping {
+          // Use the protocol infrastructure for escaping closures.
+          // This provides full support for optionals, arrays, custom types, async, etc.
+          let wrapJavaInterfaceName = "Java\(parentName).\(methodName).\(parameterName)"
+          let generator = JavaInterfaceProtocolWrapperGenerator()
+          let syntheticFunction = try generator.generateSyntheticClosureFunction(
+            functionType: fn,
+            wrapJavaInterfaceName: wrapJavaInterfaceName
+          )
+
+          return NativeParameter(
+            parameters: [
+              JavaParameter(name: parameterName, type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"))
+            ],
+            conversion: .escapingClosureLowering(
+              syntheticFunction: syntheticFunction,
+              closureName: parameterName
+            ),
+            indirectConversion: nil,
+            conversionCheck: nil
+          )
+        }
+
+        // Non-escaping closures use the legacy translation
         var parameters = [NativeParameter]()
         for (i, parameter) in fn.parameters.enumerated() {
-          let parameterName = parameter.parameterName ?? "_\(i)"
+          let closureParamName = parameter.parameterName ?? "_\(i)"
           let closureParameter = try translateClosureParameter(
             parameter.type,
-            parameterName: parameterName
+            parameterName: closureParamName
           )
           parameters.append(closureParameter)
         }
@@ -432,6 +485,15 @@ extension JNISwift2JavaGenerator {
       switch type {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+
+          if knownType == .void {
+            return NativeResult(
+              javaType: .void,
+              conversion: .placeholder,
+              outParameters: []
+            )
+          }
+
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue else {
             throw JavaTranslationError.unsupportedSwiftType(type)
@@ -514,6 +576,13 @@ extension JNISwift2JavaGenerator {
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
+
+          case .foundationUUID, .essentialsUUID:
+            return NativeResult(
+              javaType: .javaLangString,
+              conversion: .getJNIValue(.member(.placeholder, member: "uuidString")),
+              outParameters: []
+            )
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config), javaType.implementsJavaValue else {
@@ -734,6 +803,13 @@ extension JNISwift2JavaGenerator {
     indirect case pointee(NativeSwiftConversionStep)
 
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
+    
+    /// Escaping closure lowering using the protocol infrastructure.
+    /// This uses UpcallConversionStep for full support of optionals, arrays, custom types, etc.
+    indirect case escapingClosureLowering(
+      syntheticFunction: SyntheticClosureFunction,
+      closureName: String
+    )
 
     indirect case initializeSwiftJavaWrapper(NativeSwiftConversionStep, wrapperName: String)
 
@@ -765,6 +841,10 @@ extension JNISwift2JavaGenerator {
     indirect case closure(args: [String] = [], body: NativeSwiftConversionStep)
 
     indirect case labelessAssignmentOfVariable(NativeSwiftConversionStep, swiftType: SwiftType)
+
+    indirect case aggregate(variable: String, [NativeSwiftConversionStep])
+
+    indirect case replacingPlaceholder(NativeSwiftConversionStep, placeholder: NativeSwiftConversionStep)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -960,6 +1040,62 @@ extension JNISwift2JavaGenerator {
         printer.outdent()
         printer.print("}")
 
+        return printer.finalize()
+      
+      case .escapingClosureLowering(let syntheticFunction, let closureName):
+        var printer = CodePrinter()
+
+        let fn = syntheticFunction.functionType
+        let parameterNames = fn.parameters.enumerated().map { idx, param in
+          param.parameterName ?? "_\(idx)"
+        }
+        let closureParameters = parameterNames.joined(separator: ", ")
+        let isVoid = fn.resultType == .tuple([])
+
+        // Build upcall arguments using UpcallConversionStep conversions
+        var upcallArguments: [String] = []
+        for (idx, conversion) in syntheticFunction.parameterConversions.enumerated() {
+          var argPrinter = CodePrinter()
+          let paramName = parameterNames[idx]
+          let converted = conversion.render(&argPrinter, paramName)
+          upcallArguments.append(converted)
+        }
+
+        // Build result conversion
+        // Note: The Java interface is synchronous even for async closures.
+        // The async nature is on the Swift side, inferred from the expected type.
+        var resultPrinter = CodePrinter()
+        let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: ", ")))"
+        let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
+        let resultPrefix = resultPrinter.finalize()
+
+        // Note: async is part of the closure TYPE, not the closure literal syntax.
+        // For closures without parameters, we can omit "in" entirely.
+        let closureHeader = fn.parameters.isEmpty
+          ? "{"
+          : "{ \(closureParameters) in"
+
+        printer.print(
+          """
+          {
+            guard let \(placeholder) else {
+              fatalError(\"\(placeholder) is null\")
+            }
+
+            let closureContext_\(closureName)$ = JavaObjectHolder(object: \(placeholder), environment: environment)
+            
+            return \(closureHeader)
+              guard let env$ = try? JavaVirtualMachine.shared().environment() else {
+                fatalError(\"Failed to get JNI environment for escaping closure call\")
+              }
+
+              let javaInterface$ = \(syntheticFunction.wrapJavaInterfaceName)(javaThis: closureContext_\(closureName)$.object!, environment: env$)
+              \(resultPrefix)\(isVoid ? resultConverted : "return \(resultConverted)")
+            }
+          }()
+          """
+        )
+        
         return printer.finalize()
 
       case .initializeSwiftJavaWrapper(let inner, let wrapperName):
@@ -1166,8 +1302,21 @@ extension JNISwift2JavaGenerator {
           }
         }
         return printer.finalize()
+
       case .labelessAssignmentOfVariable(let name, let swiftType):
         return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder))))"
+
+      case .aggregate(let variable, let steps):
+        precondition(!steps.isEmpty, "Aggregate must contain steps")
+        printer.print("let \(variable) = \(placeholder)")
+        let steps = steps.map {
+          $0.render(&printer, variable)
+        }
+        return steps.last!
+
+      case .replacingPlaceholder(let inner, let newPlaceholder):
+        let newPlaceholder = newPlaceholder.render(&printer, placeholder)
+        return inner.render(&printer, newPlaceholder)
       }
     }
   }

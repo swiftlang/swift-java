@@ -26,11 +26,9 @@ import Darwin.C
 import Foundation
 
 public func helloWorld() {
-  p("\(#function)")
 }
 
 public func globalTakeInt(i: Int) {
-  p("i:\(i)")
 }
 
 public func globalMakeInt() -> Int {
@@ -42,7 +40,6 @@ public func globalWriteString(string: String) -> Int {
 }
 
 public func globalTakeIntInt(i: Int, j: Int) {
-  p("i:\(i), j:\(j)")
 }
 
 public func globalCallMeRunnable(run: () -> ()) {
@@ -92,16 +89,12 @@ public func globalReceiveSomeDataProtocol(data: some DataProtocol) -> Int {
 public func globalReceiveOptional(o1: Int?, o2: (some DataProtocol)?) -> Int {
   switch (o1, o2) {
   case (nil, nil):
-    p("<nil>, <nil>")
     return 0
   case (let v1?, nil):
-    p("\(v1), <nil>")
     return 1
   case (nil, let v2?):
-    p("<nil>, \(v2)")
     return 2
   case (let v1?, let v2?):
-    p("\(v1), \(v2)")
     return 3
   }
 }

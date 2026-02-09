@@ -65,11 +65,13 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
 | Protocols: `protocol`                                                                | ❌        | ✅   |
 | Protocols: `protocol` with associated types                                          | ❌        | ❌   |
+| Protocols static requirements: `static func`, `init(rawValue:)`                      | ❌        | ❌   |
 | Existential parameters `f(x: any SomeProtocol)` (excepts `Any`)                      | ❌        | ✅   |
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
 | Existential return types `f() -> any Collection`                                     | ❌        | ❌   |
 | Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ❌   |
 | Foundation Date: `f(date: Date) -> Date`                                             | ❌        | ✅   |
+| Foundation UUID: `f(uuid: UUID) -> UUID`                                             | ❌        | ✅   |
 | Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
 | Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
@@ -92,7 +94,9 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Non-escaping `Void` closures: `func callMe(maybe: () -> ())`                                      | ✅        | ✅   |
 | Non-escaping closures with primitive arguments/results: `func callMe(maybe: (Int) -> (Double))`   | ✅        | ✅   |
 | Non-escaping closures with object arguments/results: `func callMe(maybe: (JavaObj) -> (JavaObj))` | ❌        | ❌   |
-| `@escaping` closures: `func callMe(_: @escaping () -> ())`                                        | ❌        | ❌   |
+| `@escaping` `Void` closures: `func callMe(_: @escaping () -> ())`                                 | ❌        | ✅   |
+| `@escaping` closures with primitive arguments/results: `func callMe(_: @escaping (String) -> (String))`       | ❌        | ✅   |
+| `@escaping` closures with custom arguments/results: `func callMe(_: @escaping (Obj) -> (Obj))`       | ❌        | ❌   |
 | Swift type extensions: `extension String { func uppercased() }`                      | ✅       | ✅  |
 | Swift macros (maybe)                                                                 | ❌        | ❌   |
 | Result builders                                                                      | ❌        | ❌   |
