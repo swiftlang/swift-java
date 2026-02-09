@@ -519,7 +519,9 @@ final class DataImportTests {
       expectedChunks: [
         "public final class Data implements JNISwiftInstance, DataProtocol {",
         "public long getCount() {",
-        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {"
+        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {",
+        "public byte[] toByteArray() {",
+        "private static native byte[] $toByteArray(long selfPointer);"
       ])
   }
 

@@ -764,7 +764,7 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       /**
-       * Creates a new Data instance from a byte array.
+       * Creates a new Swift @{link Data} instance from a byte array.
        *
        * @param bytes The byte array to copy into the Data
        * @param swiftArena$ The arena for memory management
@@ -774,7 +774,25 @@ extension JNISwift2JavaGenerator {
         Objects.requireNonNull(bytes, "bytes cannot be null");
         return Data.init(bytes, swiftArena$);
       }
+      """
+    )
 
+    printer.print(
+      """
+      /**
+       * Copies the contents of this Data to a new byte array.
+       *
+       * <p><b>Note:</b> This operation copies the bytes from Swift memory
+       * to the Java heap. For large Data objects, consider the performance
+       * implications.</p>
+       *
+       * @return A byte array containing a copy of this Data's bytes
+       */
+      public byte[] toByteArray() {
+        return $toByteArray(this.$memoryAddress());
+      }
+
+      private static native byte[] $toByteArray(long selfPointer);
       """
     )
   }

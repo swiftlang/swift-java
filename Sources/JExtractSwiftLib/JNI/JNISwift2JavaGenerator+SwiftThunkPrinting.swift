@@ -253,6 +253,7 @@ extension JNISwift2JavaGenerator {
     }
 
     printToStringMethods(&printer, type)
+    printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
     printDestroyFunctionThunk(&printer, type)
@@ -786,6 +787,45 @@ extension JNISwift2JavaGenerator {
         """
         \(selfVar).deinitialize(count: 1)
         \(selfVar).deallocate()
+        """
+      )
+    }
+  }
+
+  /// Prints thunks for specific known types like Foundation.Date, Foundation.Data
+  private func printSpecificTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    guard let knownType = type.swiftNominal.knownTypeKind else { return }
+
+    switch knownType {
+    case .foundationData, .essentialsData:
+      printFoundationDataThunks(&printer, type)
+      printer.println()
+
+    default:
+      break
+    }
+  }
+
+  /// Prints Swift thunks for Foundation.Data helper methods
+  private func printFoundationDataThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    let parentName = type.qualifiedName
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$toByteArray",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .array(.byte)
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        // TODO: This is a double copy, we need to initialize the array and then copy into a JVM array in getJNIValue
+        return [UInt8](\(selfVar).pointee).getJNIValue(in: environment)
         """
       )
     }

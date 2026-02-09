@@ -63,4 +63,43 @@ public class DataTest {
             assertFalse(MySwiftLibrary.compareData(data1, data3));
         }
     }
+
+    @Test
+    void data_toByteArray() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 10, 20, 30, 40 };
+            var data = Data.fromByteArray(original, arena);
+
+            byte[] result = data.toByteArray();
+
+            assertEquals(original.length, result.length);
+            assertArrayEquals(original, result);
+        }
+    }
+
+    @Test
+    void data_toByteArray_empty() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] {};
+            var data = Data.fromByteArray(original, arena);
+
+            byte[] result = data.toByteArray();
+
+            assertArrayEquals(original, result);
+            assertEquals(0, result.length);
+        }
+    }
+
+    @Test
+    void data_roundTrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var data = Data.fromByteArray(original, arena);
+            var echoed = MySwiftLibrary.echoData(data, arena);
+
+            byte[] result = echoed.toByteArray();
+
+            assertArrayEquals(original, result);
+        }
+    }
 }
