@@ -25,7 +25,6 @@ extension FFMSwift2JavaGenerator {
     let typeName = decl.swiftNominal.name
     let thunkNameCopyBytes = "swiftjava_\(swiftModuleName)_\(typeName)_copyBytes__"
 
-    // Print the descriptor class for copyBytes native call
     printer.printSeparator("\(typeName) helper methods")
 
     // This is primarily here for API parity with the JNI version and easier discovery
@@ -45,54 +44,20 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    // TODO: fromByteBuffer also
+    // TODO: Implement a fromByteBuffer as well
 
-    // FIXME: remove the duplication text here
-    printer.print(
-      """
-      /**
-       * {@snippet lang=c :
-       * void \(thunkNameCopyBytes)(const void *self, void *destination, ptrdiff_t count)
-       * }
-       */
-      private static class \(thunkNameCopyBytes) {
-        private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-          /* self: */SwiftValueLayout.SWIFT_POINTER,
-          /* destination: */SwiftValueLayout.SWIFT_POINTER,
-          /* count: */SwiftValueLayout.SWIFT_INT
-        );
-        private static final MemorySegment ADDR =
-          \(swiftModuleName).findOrThrow("\(thunkNameCopyBytes)");
-        private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-        public static void call(java.lang.foreign.MemorySegment self, java.lang.foreign.MemorySegment destination, long count) {
-          try {
-            if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall(self, destination, count);
-            }
-            HANDLE.invokeExact(self, destination, count);
-          } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-          }
-        }
-      }
-      """
+    // Print the descriptor class for copyBytes native call using the shared helper
+    let copyBytesCFunc = CFunction(
+      resultType: .void,
+      name: thunkNameCopyBytes,
+      parameters: [
+        CParameter(name: "self", type: .qualified(const: true, volatile: false, type: .pointer(.void))),
+        CParameter(name: "destination", type: .pointer(.void)),
+        CParameter(name: "count", type: .integral(.ptrdiff_t))
+      ],
+      isVariadic: false
     )
-        // Print fromByteArray convenience method
-    printer.print(
-      """
-      /**
-       * Creates a new Swift {@link \(typeName)} instance from a byte array.
-       *
-       * @param bytes The byte array to copy into the \(typeName)
-       * @param swiftarena The arena for memory management
-       * @return A new \(typeName) instance containing a copy of the bytes
-       */
-      public static \(typeName) fromByteArray(byte[] bytes, AllocatingSwiftArena swiftarena) {
-        Objects.requireNonNull(bytes, "bytes cannot be null");
-        return \(typeName).init(bytes, swiftarena);
-      }
-      """
-    )
+    printJavaBindingDescriptorClass(&printer, copyBytesCFunc)
 
     // Print toMemorySegment - zero-copy after the initial Swift copy
     printer.print(
@@ -201,4 +166,3 @@ extension FFMSwift2JavaGenerator {
     )
   }
 }
-

@@ -96,8 +96,8 @@ public class DataImportTest {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
             var segment = data.toMemorySegment(arena);
+
             assertEquals(original.length, segment.byteSize());
-            // Verify contents
             for (int i = 0; i < original.length; i++) {
                 assertEquals(original[i], segment.get(ValueLayout.JAVA_BYTE, i));
             }
@@ -110,8 +110,8 @@ public class DataImportTest {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
             var buffer = data.toByteBuffer(arena);
+
             assertEquals(original.length, buffer.capacity());
-            // Verify contents
             for (int i = 0; i < original.length; i++) {
                 assertEquals(original[i], buffer.get(i));
             }
@@ -134,7 +134,9 @@ public class DataImportTest {
             byte[] original = new byte[0];
             var data = Data.fromByteArray(original, arena);
             var buffer = data.toByteBuffer(arena);
+            
             assertEquals(0, buffer.capacity());
         }
     }
+
 }

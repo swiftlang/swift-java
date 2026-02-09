@@ -78,12 +78,12 @@ public class DataTest {
     }
 
     @Test
-    void data_toByteArray() {
+    void data_toByteArrayIndirectCopy() {
         try (var arena = SwiftArena.ofConfined()) {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
 
-            byte[] result = data.toByteArray();
+            byte[] result = data.toByteArrayIndirectCopy();
 
             assertEquals(original.length, result.length);
             assertArrayEquals(original, result);
