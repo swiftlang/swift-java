@@ -14,7 +14,7 @@ jobs:
       # Not API stable package (yet)
       api_breakage_check_enabled: false
       # FIXME: Something is off with the format task and it gets "stuck", need to investigate
-      format_check_enabled: false
+      format_check_enabled: true
       license_header_check_project_name: Swift.org
       # Since we need JAVA_HOME to be set up for building the project and depending on a different workflow won't
       # give us that, we disable the checking and make a separate job that performs docs validation
