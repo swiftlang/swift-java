@@ -121,7 +121,7 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-        /// Generates a synthetic closure function translation.
+    /// Generates a synthetic closure function translation.
     /// This treats the closure as if it were a protocol with a single `apply` method,
     /// allowing it to use the same conversion infrastructure for optionals, arrays, etc.
     func generateSyntheticClosureFunction(

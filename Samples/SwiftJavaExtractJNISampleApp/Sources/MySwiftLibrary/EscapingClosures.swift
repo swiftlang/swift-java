@@ -39,12 +39,6 @@ public class CallbackManager {
   }
 }
 
-// public func delayedExecution(closure: @escaping (Int64) -> Int64, input: Int64) -> Int64 {
-//   // In a real implementation, this might be async
-//   // For testing purposes, we just call it synchronously
-//   return closure(input)
-// }
-
 public class ClosureStore {
   private var closures: [() -> Void] = []
   
