@@ -23,7 +23,7 @@ extension JNISwift2JavaGenerator {
   ) -> [ImportedNominalType: JavaInterfaceSwiftWrapper] {
     var wrappers = [ImportedNominalType: JavaInterfaceSwiftWrapper]()
 
-    for type in types {
+    for type in types where type.swiftNominal.kind == .protocol {
       do {
         let translator = JavaInterfaceProtocolWrapperGenerator()
         wrappers[type] = try translator.generate(for: type)
