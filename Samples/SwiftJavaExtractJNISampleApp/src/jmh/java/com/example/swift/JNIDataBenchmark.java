@@ -64,30 +64,11 @@ public class JNIDataBenchmark {
         return MySwiftLibrary.getDataCount(data);
     }
 
-    /**
-     * toByteArray: Creates [UInt8] from Data, then copies to JVM array.
-     * This involves two copies: Data -> Swift Array -> JVM Array.
-     */
     @Benchmark
     public byte[] jni_data_toByteArray() {
         return data.toByteArray();
     }
 
-    /**
-     * toByteArrayLessCopy: Creates JVM array, maps Data bytes to buffer,
-     * then uses SetByteArrayRegion.
-     * Still creates an intermediate Swift array via map().
-     */
-    @Benchmark
-    public byte[] jni_data_toByteArrayLessCopy() {
-        return data.toByteArrayLessCopy();
-    }
-
-    /**
-     * toByteArrayDirect: Uses withUnsafeBytes to pass Data's memory
-     * directly to SetByteArrayRegion.
-     * No intermediate Swift array allocation - just one copy to JVM.
-     */
     @Benchmark
     public byte[] jni_data_toByteArrayDirect() {
         return data.toByteArrayDirect();

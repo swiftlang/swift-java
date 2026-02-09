@@ -781,10 +781,13 @@ extension JNISwift2JavaGenerator {
       """
       /**
        * Copies the contents of this Data to a new byte array.
-       *
-       * <p><b>Note:</b> This operation copies the bytes from Swift memory
-       * to the Java heap. For large Data objects, consider the performance
-       * implications.</p>
+       * 
+       * This is a relatively efficient implementation, which avoids native array copies,
+       * however it will still perform a copy of the data onto the JVM heap, so use this 
+       * only when necessary.
+       * 
+       * </p> When utmost performance is necessary, you may want to investigate the FFM mode
+       * of jextract which is able to map memory more efficiently. 
        *
        * @return A byte array containing a copy of this Data's bytes
        */
@@ -795,33 +798,20 @@ extension JNISwift2JavaGenerator {
       private static native byte[] $toByteArray(long selfPointer);
 
       /**
-       * Copies the contents of this Data to a new byte array with fewer intermediate copies.
-       *
-       * <p><b>Note:</b> This operation copies the bytes from Swift memory
-       * to the Java heap. For large Data objects, consider the performance
-       * implications.</p>
-       *
+       * Copies the contents of this Data to a new byte array.
+       * 
+       * @deprecated Prefer using the `toByteArray` method as it is more performant.
+       * This implementation uses a naive conversion path from native bytes into jbytes 
+       * and then copying them onto the jvm heap.
+       * 
        * @return A byte array containing a copy of this Data's bytes
        */
-      public byte[] toByteArrayLessCopy() {
-        return $toByteArrayLessCopy(this.$memoryAddress());
-      }
-
-      private static native byte[] $toByteArrayLessCopy(long selfPointer);
-
-      /**
-       * Copies the contents of this Data to a new byte array using direct memory access.
-       *
-       * <p>This is the most efficient implementation as it uses {@code withUnsafeBytes}
-       * to pass Data's memory directly to JNI without any intermediate Swift allocations.</p>
-       *
-       * @return A byte array containing a copy of this Data's bytes
-       */
+      @Deprecated(forRemoval = true)
       public byte[] toByteArrayDirect() {
-        return $toByteArrayDirect(this.$memoryAddress());
+        return $toByteArrayIndirectCopyDirect(this.$memoryAddress());
       }
 
-      private static native byte[] $toByteArrayDirect(long selfPointer);
+      private static native byte[] $toByteArrayIndirectCopyDirect(long selfPointer);
       """
     )
   }

@@ -811,58 +811,10 @@ extension JNISwift2JavaGenerator {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     let parentName = type.qualifiedName
 
+    // Rebind the memory instead of converting, and set the memory directly using 'jniSetArrayRegion' from the buffer
     printCDecl(
       &printer,
-      javaMethodName: "$toByteArray",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .array(.byte)
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        // TODO: This is a double copy, we need to initialize the array and then copy into a JVM array in getJNIValue
-        return [UInt8](\(selfVar).pointee).getJNIValue(in: environment)
-        """
-      )
-    }
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$toByteArrayLessCopy",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .array(.byte)
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        let jniArray = UInt8.jniNewArray(in: environment)(environment, Int32(\(selfVar).pointee.count))!
-        let jniElementBuffer: [UInt8.JNIType] = \(selfVar).pointee.map {
-          $0.getJNIValue(in: environment)
-        }
-        UInt8.jniSetArrayRegion(in: environment)(
-          environment,
-          jniArray,
-          0,
-          jsize(\(selfVar).pointee.count),
-          jniElementBuffer
-        )
-        return jniArray
-        """
-      )
-    }
-
-    // Zero-copy version: uses withUnsafeBytes to pass Data's memory directly to JNI
-    printCDecl(
-      &printer,
-      javaMethodName: "$toByteArrayDirect",
+      javaMethodName: "$toByteArrayIndirectCopyDirect",
       parentName: type.swiftNominal.qualifiedName,
       parameters: [
         selfPointerParam
@@ -876,6 +828,26 @@ extension JNISwift2JavaGenerator {
         return \(selfVar).pointee.withUnsafeBytes { buffer in
           return buffer.getJNIValue(in: environment)
         }
+        """
+      )
+    }
+
+    // Legacy API, also to compare with as a baseline, we could remove it
+    printCDecl(
+      &printer,
+      javaMethodName: "$toByteArrayIndirectCopy",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .array(.byte)
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        // This is a double copy, we need to initialize the array and then copy into a JVM array in getJNIValue
+        return [UInt8](\(selfVar).pointee).getJNIValue(in: environment)
         """
       )
     }

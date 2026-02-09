@@ -19,15 +19,21 @@ import com.example.swift.MySwiftLibrary;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
-@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
-@Fork(value = 3, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
+@Fork(value = 1, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
 public class FFMDataBenchmark {
+
+    private static class Holder<T> {
+        T value;
+    }
 
     @Param({"4", "100", "1000"})
     public int dataSize;
@@ -38,7 +44,6 @@ public class FFMDataBenchmark {
     @Setup(Level.Trial)
     public void beforeAll() {
         arena = AllocatingSwiftArena.ofConfined();
-        // FFM mode has Data.init(byte[], arena) directly
         data = Data.init(makeBytes(dataSize), arena);
     }
 
@@ -55,27 +60,34 @@ public class FFMDataBenchmark {
         return bytes;
     }
 
-    /**
-     * Baseline: simple int echo to measure FFM call overhead.
-     */
     @Benchmark
-    public long ffm_baseline_globalEchoInt() {
-        return MySwiftLibrary.globalEchoInt(13);
+    public long ffm_baseline_globalMakeInt() {
+        return MySwiftLibrary.globalMakeInt();
     }
 
-    /**
-     * Benchmark passing Data to Swift and getting count back.
-     * Measures: Java → Swift data passing overhead.
-     */
     @Benchmark
     public long ffm_passDataToSwift() {
         return MySwiftLibrary.getDataCount(data);
     }
 
-    /**
-     * Benchmark receiving Data from Swift (makeData returns 4 bytes).
-     * Measures: Swift → Java data return overhead.
-     */
+    @Benchmark
+    public ByteBuffer ffm_data_withUnsafeBytes_asByteBuffer() {
+      Holder<ByteBuffer> buf = new Holder<>();
+      data.withUnsafeBytes((bytes) -> {
+        buf.value = bytes.asByteBuffer();
+      });
+      return buf.value;
+    }
+    
+    @Benchmark
+    public byte[] ffm_data_withUnsafeBytes_toArray() {
+      Holder<byte[]> buf = new Holder<>();
+      data.withUnsafeBytes((bytes) -> {
+        buf.value = bytes.toArray(ValueLayout.JAVA_BYTE);
+      });
+      return buf.value;
+    }
+
     @Benchmark
     public Data ffm_receiveDataFromSwift(Blackhole bh) {
         Data result = MySwiftLibrary.makeData(arena);
@@ -83,10 +95,6 @@ public class FFMDataBenchmark {
         return result;
     }
 
-    /**
-     * Benchmark echo: send Data to Swift and receive it back.
-     * Measures: Full round-trip overhead.
-     */
     @Benchmark
     public Data ffm_echoData(Blackhole bh) {
         Data echoed = MySwiftLibrary.echoData(data, arena);

@@ -51,25 +51,13 @@ extension Array: JavaValue where Element: JavaValue {
   @inlinable
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
     let count = self.count
-    let jniArray = Element.jniNewArray(in: environment)(environment, Int32(count))!
+    var jniArray = Element.jniNewArray(in: environment)(environment, Int32(count))!
 
     if Element.self == UInt8.self || Element.self == Int8.self {
       // Fast path, Since the memory layout of `jbyte`` and those is the same, we rebind the memory
       // rather than convert every element independently. This allows us to avoid another Swift array creation.
       self.withUnsafeBytes { buffer in
-        guard let baseAddress = buffer.baseAddress else { 
-          fatalError("Buffer had no base address?! \(self)")
-        }
-
-        baseAddress.withMemoryRebound(to: jbyte.self, capacity: count) { ptr in
-          UInt8.jniSetArrayRegion(in: environment)(
-            environment,
-            jniArray,
-            0,
-            jsize(count),
-            ptr
-          )
-        }
+        buffer.getJNIValue(into: &jniArray, in: environment)
       }
     } else {
       // Slow path, convert every element to the apropriate JNIType:
@@ -84,6 +72,7 @@ extension Array: JavaValue where Element: JavaValue {
         jniElementBuffer
       )
     }
+
     return jniArray
   }
 
