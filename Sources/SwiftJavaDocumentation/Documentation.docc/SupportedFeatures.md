@@ -68,7 +68,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Existential parameters `f(x: any SomeProtocol)` (excepts `Any`)                      | ❌        | ✅   |
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
 | Existential return types `f() -> any Collection`                                     | ❌        | ❌   |
-| Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ❌   |
+| Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ✅   |
 | Foundation Date: `f(date: Date) -> Date`                                             | ❌        | ✅   |
 | Foundation UUID: `f(uuid: UUID) -> UUID`                                             | ❌        | ✅   |
 | Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
@@ -134,6 +134,30 @@ on the Java side.
 | `UInt64`   | `long` ⚠️ |
 | `Float`    | `float`   |
 | `Double`   | `double`  |
+
+### Passing Foundation.Data
+
+`Data` is a common currency type in Swift for passing a bag of bytes. Some APIs use Data instead of `[UInt8]` or other types
+like Swift-NIO's `ByteBuffer`, because it is so commonly used swift-java offers specialized support for it in order to avoid copying bytes unless necessary.
+
+### Data in jextract FFM mode
+
+When using jextract in FFM mode, the generated `Data` wrapper offers an efficient way to initialize the Swift `Data` type
+from a `MemorySegment` as well as the `withUnsafeBytes` function which offers direct access to Data's underlying bytes
+by exposing the unsafe base pointer as a `MemorySegment`:
+
+```swift
+Data data = MySwiftLibrary.getSomeData(arena);
+data.withUnsafeBytes((bytes) -> {
+    var str = bytes.getString(0);
+    System.out.println("string = " + str);
+});
+```
+
+This API avoids copying the data into the Java heap in order to perform operations on it, as we are able to manipulate
+it directly thanks to the exposed `MemorySegment`.
+
+### Data in jextract JNI mode
 
 ### Enums
 
@@ -281,7 +305,7 @@ interface Named extends JNISwiftInstance {
 }
 ```
 
-#### Parameters
+#### Protocol types in parameters
 Any opaque, existential or generic parameters are imported as Java generics.
 This means that the following function:
 ```swift

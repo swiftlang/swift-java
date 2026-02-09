@@ -98,7 +98,7 @@ extension JNISwift2JavaGenerator {
             }
             return try translateArrayParameter(elementType: elementType, parameterName: parameterName)
 
-          case .foundationDate, .essentialsDate:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
 
@@ -538,7 +538,7 @@ extension JNISwift2JavaGenerator {
             }
             return try translateArrayResult(elementType: elementType, resultName: resultName)
 
-          case .foundationDate, .essentialsDate:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
 

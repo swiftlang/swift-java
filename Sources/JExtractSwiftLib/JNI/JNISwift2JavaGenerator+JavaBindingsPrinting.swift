@@ -281,6 +281,9 @@ extension JNISwift2JavaGenerator {
     case .foundationDate, .essentialsDate:
       printFoundationDateHelpers(&printer, decl)
 
+    case .foundationData, .essentialsData:
+      printFoundationDataHelpers(&printer, decl)
+
     default:
       break
     }
@@ -753,6 +756,25 @@ extension JNISwift2JavaGenerator {
         double timeIntervalSince1970 = instant.getEpochSecond() + (instant.getNano() / 1_000_000_000.0);
         return Date.init(timeIntervalSince1970, swiftArena$);
       }
+      """
+    )
+  }
+
+  private func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print(
+      """
+      /**
+       * Creates a new Data instance from a byte array.
+       *
+       * @param bytes The byte array to copy into the Data
+       * @param swiftArena$ The arena for memory management
+       * @return A new Data instance containing a copy of the bytes
+       */
+      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {
+        Objects.requireNonNull(bytes, "bytes cannot be null");
+        return Data.init(bytes, swiftArena$);
+      }
+
       """
     )
   }
