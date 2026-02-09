@@ -78,12 +78,12 @@ public class DataTest {
     }
 
     @Test
-    void data_toByteArrayDirect() {
+    void data_toByteArray() {
         try (var arena = SwiftArena.ofConfined()) {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
 
-            byte[] result = data.toByteArrayDirect();
+            byte[] result = data.toByteArray();
 
             assertEquals(original.length, result.length);
             assertArrayEquals(original, result);
@@ -117,13 +117,13 @@ public class DataTest {
     }
 
     @Test
-    void data_toByteArrayDirect_roundTrip() {
+    void data_toByteArray_roundTrip() {
         try (var arena = SwiftArena.ofConfined()) {
             byte[] original = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             var data = Data.fromByteArray(original, arena);
             var echoed = MySwiftLibrary.echoData(data, arena);
 
-            byte[] result = echoed.toByteArrayDirect();
+            byte[] result = echoed.toByteArray();
 
             assertArrayEquals(original, result);
         }

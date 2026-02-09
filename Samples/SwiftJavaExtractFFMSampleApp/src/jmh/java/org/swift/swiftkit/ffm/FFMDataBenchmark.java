@@ -19,16 +19,17 @@ import com.example.swift.MySwiftLibrary;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
-@Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
-@Fork(value = 1, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
+@Fork(value = 2, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
 public class FFMDataBenchmark {
 
     private static class Holder<T> {
@@ -86,6 +87,26 @@ public class FFMDataBenchmark {
         buf.value = bytes.toArray(ValueLayout.JAVA_BYTE);
       });
       return buf.value;
+    }
+
+    @Benchmark
+    public byte[] ffm_data_toByteArray() {
+      return data.toByteArray();
+    }
+
+    @Benchmark
+    public byte[] ffm_data_toByteArray_withArena() {
+      return data.toByteArray(arena);
+    }
+
+    @Benchmark
+    public MemorySegment ffm_data_toMemorySegment() {
+      return data.toMemorySegment(arena);
+    }
+
+    @Benchmark
+    public ByteBuffer ffm_data_toByteBuffer() {
+      return data.toByteBuffer(arena);
     }
 
     @Benchmark

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
-@Fork(value = 3, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
+@Fork(value = 2, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED" })
 public class JNIDataBenchmark {
 
     @Param({"4", "100", "1000"})
@@ -70,8 +70,8 @@ public class JNIDataBenchmark {
     }
 
     @Benchmark
-    public byte[] jni_data_toByteArrayDirect() {
-        return data.toByteArrayDirect();
+    public byte[] jni_data_toByteArrayIndirectCopy() {
+        return data.toByteArrayIndirectCopy();
     }
 
     @Benchmark

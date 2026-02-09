@@ -794,7 +794,11 @@ extension JNISwift2JavaGenerator {
       public byte[] toByteArray() {
         return $toByteArray(this.$memoryAddress());
       }
+      """
+    )
 
+    printer.print(
+      """
       private static native byte[] $toByteArray(long selfPointer);
 
       /**
@@ -807,11 +811,11 @@ extension JNISwift2JavaGenerator {
        * @return A byte array containing a copy of this Data's bytes
        */
       @Deprecated(forRemoval = true)
-      public byte[] toByteArrayDirect() {
-        return $toByteArrayIndirectCopyDirect(this.$memoryAddress());
+      public byte[] toByteArrayIndirectCopy() {
+        return $toByteArrayIndirectCopy(this.$memoryAddress());
       }
 
-      private static native byte[] $toByteArrayIndirectCopyDirect(long selfPointer);
+      private static native byte[] $toByteArrayIndirectCopy(long selfPointer);
       """
     )
   }

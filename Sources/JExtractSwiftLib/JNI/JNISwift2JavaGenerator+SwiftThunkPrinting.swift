@@ -814,7 +814,7 @@ extension JNISwift2JavaGenerator {
     // Rebind the memory instead of converting, and set the memory directly using 'jniSetArrayRegion' from the buffer
     printCDecl(
       &printer,
-      javaMethodName: "$toByteArrayIndirectCopyDirect",
+      javaMethodName: "$toByteArray",
       parentName: type.swiftNominal.qualifiedName,
       parameters: [
         selfPointerParam
