@@ -24,12 +24,15 @@ import Darwin.C
 #endif
 
 public func helloWorld() {
+  p("\(#function)")
 }
 
 public func globalTakeInt(i: Int) {
+  p("i:\(i)")
 }
 
 public func globalTakeIntInt(i: Int, j: Int) {
+  p("i:\(i), j:\(j)")
 }
 
 public func globalCallMeRunnable(run: () -> ()) {

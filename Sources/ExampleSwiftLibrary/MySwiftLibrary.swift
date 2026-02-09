@@ -70,16 +70,20 @@ public class MySwiftClass {
   public var counter: Int32 = 0
 
   public func voidMethod() {
+    p("")
   }
 
   public func takeIntMethod(i: Int) {
+    p("i:\(i)")
   }
 
   public func echoIntMethod(i: Int) -> Int {
+    p("i:\(i)")
     return i
   }
 
   public func makeIntMethod() -> Int {
+    p("make int -> 12")
     return 12
   }
 
