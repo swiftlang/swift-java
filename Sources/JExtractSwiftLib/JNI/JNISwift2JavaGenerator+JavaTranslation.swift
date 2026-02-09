@@ -1369,6 +1369,8 @@ extension JNISwift2JavaGenerator {
     // FIXME: Remove once we support protocol variables
     case protocolVariablesNotSupported
 
+    case protocolStaticRequirementsNotSupported
+
     /// We cannot generate interface wrappers for
     /// protocols that we unable to be jextracted.
     case protocolWasNotExtracted

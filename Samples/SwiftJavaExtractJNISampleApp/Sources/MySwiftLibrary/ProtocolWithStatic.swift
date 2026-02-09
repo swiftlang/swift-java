@@ -15,6 +15,19 @@
 public protocol ProtocolWithStatic {
   // static requirements are not yet supported.
   static func myFunc() -> Int
-  static var value: Int64 { get }
   init()
+}
+
+public func useProtocolWithStatic(_ value: any ProtocolWithStatic) -> Int {
+  let meta = type(of: value)
+  return meta.myFunc()
+}
+
+public protocol ProtocolWithStaticProperty {
+  static var value: Int { get }
+}
+
+public func useProtocolWithStaticProperty(_ value: any ProtocolWithStaticProperty) -> Int {
+  let meta = type(of: value)
+  return meta.value
 }
