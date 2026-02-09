@@ -69,7 +69,7 @@ struct JNIAsyncTests {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
                 }
-                let swiftResult$ = await SwiftModule.asyncVoid()
+                await SwiftModule.asyncVoid()
                 environment = try! JavaVirtualMachine.shared().environment()
                 _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
               }
@@ -82,7 +82,7 @@ struct JNIAsyncTests {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                 deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
               }
-              let swiftResult$ = await SwiftModule.asyncVoid()
+              await SwiftModule.asyncVoid()
               environment = try! JavaVirtualMachine.shared().environment()
               _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
             }
@@ -144,7 +144,7 @@ struct JNIAsyncTests {
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
                 }
                 do {
-                  let swiftResult$ = try await SwiftModule.async()
+                  try await SwiftModule.async()
                   environment = try! JavaVirtualMachine.shared().environment()
                   _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
                 }
@@ -164,7 +164,7 @@ struct JNIAsyncTests {
                 deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
               }
               do {
-                let swiftResult$ = try await SwiftModule.async()
+                try await SwiftModule.async()
                 environment = try! JavaVirtualMachine.shared().environment()
                 _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
               }

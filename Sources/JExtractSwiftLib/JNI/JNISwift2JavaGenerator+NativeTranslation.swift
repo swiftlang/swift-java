@@ -1227,12 +1227,14 @@ extension JNISwift2JavaGenerator {
             } else {
               "await"
             }
-          printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
-          printer.print("environment = try! JavaVirtualMachine.shared().environment()")
-          let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
           if swiftFunctionResultType.isVoid {
+            printer.print("\(tryAwaitString) \(placeholderWithoutTry)")
+            printer.print("environment = try! JavaVirtualMachine.shared().environment()")
             printer.print("_ = environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: nil)])")
           } else {
+            printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
+            printer.print("environment = try! JavaVirtualMachine.shared().environment()")
+            let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
             let result: String
             if nativeFunctionSignature.result.javaType.requiresBoxing {
               printer.print("let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)")
