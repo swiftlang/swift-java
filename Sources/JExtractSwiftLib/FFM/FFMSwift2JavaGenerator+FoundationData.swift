@@ -21,7 +21,7 @@ import struct Foundation.URL
 extension FFMSwift2JavaGenerator {
 
   /// Print Java helper methods for Foundation.Data type
-  private func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  package func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     let typeName = decl.swiftNominal.name
     let thunkNameCopyBytes = "swiftjava_\(swiftModuleName)_\(typeName)_copyBytes__"
 
@@ -77,24 +77,93 @@ extension FFMSwift2JavaGenerator {
       }
       """
     )
+        // Print fromByteArray convenience method
+    printer.print(
+      """
+      /**
+       * Creates a new Swift {@link \(typeName)} instance from a byte array.
+       *
+       * @param bytes The byte array to copy into the \(typeName)
+       * @param swiftarena The arena for memory management
+       * @return A new \(typeName) instance containing a copy of the bytes
+       */
+      public static \(typeName) fromByteArray(byte[] bytes, AllocatingSwiftArena swiftarena) {
+        Objects.requireNonNull(bytes, "bytes cannot be null");
+        return \(typeName).init(bytes, swiftarena);
+      }
+      """
+    )
+
+    // Print toMemorySegment - zero-copy after the initial Swift copy
+    printer.print(
+      """
+      /**
+       * Copies the contents of this \(typeName) to a new {@link MemorySegment}.
+       *
+       * This is the most efficient way to access \(typeName) bytes from Java when you don't
+       * need a {@code byte[]}. The returned segment is valid for the lifetime of the arena.
+       *
+       * <p>Copy count: 1 (Swift Data -> MemorySegment)
+       *
+       * @param arena The arena to allocate the segment in
+       * @return A MemorySegment containing a copy of this \(typeName)'s bytes
+       */
+      public MemorySegment toMemorySegment(AllocatingSwiftArena arena) {
+        $ensureAlive();
+        long count = getCount();
+        if (count == 0) return MemorySegment.NULL;
+        MemorySegment segment = arena.allocate(count);
+        \(thunkNameCopyBytes).call(this.$memorySegment(), segment, count);
+        return segment;
+      }
+      """
+    )
+
+    // Print toByteBuffer - zero-copy view of the segment
+    printer.print(
+      """
+      /**
+       * Copies the contents of this \(typeName) to a new {@link ByteBuffer}.
+       *
+       * The returned {@link java.nio.ByteBuffer} is a view over native memory and is valid for the
+       * lifetime of the arena. This avoids an additional copy to the Java heap.
+       *
+       * <p>Copy count: 1 (Swift Data -> native memory (managed by passed arena), then zero-copy view)
+       *
+       * @param arena The arena to allocate the underlying memory in
+       * @return A ByteBuffer view of the copied bytes
+       */
+      public java.nio.ByteBuffer toByteBuffer(AllocatingSwiftArena arena) {
+        $ensureAlive();
+        long count = getCount();
+        if (count == 0) return java.nio.ByteBuffer.allocate(0);
+        MemorySegment segment = arena.allocate(count);
+        \(thunkNameCopyBytes).call(this.$memorySegment(), segment, count);
+        return segment.asByteBuffer();
+      }
+      """
+    )
 
     // Print toByteArray with arena parameter
     printer.print(
       """
       /**
        * Copies the contents of this \(typeName) to a new byte array.
+       * The lifetime of the array is independent of the arena, the arena is just used for an intermediary copy.
        *
-       * This is an efficient implementation that copies the Swift \(typeName) bytes
-       * directly into a native memory segment, then to the Java heap.
+       * <p>Copy count: 2 (Swift Data -> MemorySegment -> byte[])
        *
-       * @param arena$ The arena to use for temporary native memory allocation
+       * <p>For better performance when you can work with {@link MemorySegment} or
+       * {@link java.nio.ByteBuffer}, prefer {@link #toMemorySegment} or {@link #toByteBuffer}.
+       *
+       * @param arena The arena to use for temporary native memory allocation
        * @return A byte array containing a copy of this \(typeName)'s bytes
        */
-      public byte[] toByteArray(AllocatingSwiftArena arena$) {
+      public byte[] toByteArray(AllocatingSwiftArena arena) {
         $ensureAlive();
         long count = getCount();
         if (count == 0) return new byte[0];
-        MemorySegment segment = arena$.allocate(count);
+        MemorySegment segment = arena.allocate(count);
         \(thunkNameCopyBytes).call(this.$memorySegment(), segment, count);
         return segment.toArray(ValueLayout.JAVA_BYTE);
       }
@@ -106,9 +175,15 @@ extension FFMSwift2JavaGenerator {
       """
       /**
        * Copies the contents of this \(typeName) to a new byte array.
+       * The lifetime of the array is independent of the arena, the arena is just used for an intermediary copy.
        *
        * This is a convenience method that creates a temporary arena for the copy.
        * For repeated calls, prefer {@link #toByteArray(AllocatingSwiftArena)} to reuse an arena.
+       *
+       * <p>Copy count: 2 (Swift Data -> MemorySegment -> byte[])
+       *
+       * <p>For better performance when you can work with {@link MemorySegment} or
+       * {@link java.nio.ByteBuffer}, prefer {@link #toMemorySegment} or {@link #toByteBuffer}.
        *
        * @return A byte array containing a copy of this \(typeName)'s bytes
        */
@@ -116,10 +191,10 @@ extension FFMSwift2JavaGenerator {
         $ensureAlive();
         long count = getCount();
         if (count == 0) return new byte[0];
-        try (var arena$ = Arena.ofConfined()) {
-          MemorySegment output = arena$.allocate(count);
-          \(thunkNameCopyBytes).call(this.$memorySegment(), output, count);
-          return output.toArray(ValueLayout.JAVA_BYTE);
+        try (var arena = Arena.ofConfined()) {
+          MemorySegment segment = arena.allocate(count);
+          \(thunkNameCopyBytes).call(this.$memorySegment(), segment, count);
+          return segment.toArray(ValueLayout.JAVA_BYTE);
         }
       }
       """
