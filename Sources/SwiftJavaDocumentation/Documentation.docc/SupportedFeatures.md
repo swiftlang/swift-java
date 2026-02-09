@@ -157,7 +157,18 @@ data.withUnsafeBytes((bytes) -> {
 This API avoids copying the data into the Java heap in order to perform operations on it, as we are able to manipulate
 it directly thanks to the exposed `MemorySegment`.
 
+It is also possible to use the convenience functions `toByteBuffer` and `toByteArray` to obtain a `java.nio.ByteBuffer` or `[byte]` array respectively. Thos operations incurr a copy by moving the data to the JVM's heap. 
+
+It is also possible to get the underlying memory copied into a new `MemorySegment` by using `toMemorySegment(arena)` which performs a copy from native memory to memory managed by the passed arena. The lifetime of that memory is managed by the arena and may outlive the original `Data`.
+
+It is preferable to use the `withUnsafeBytes` pattern if using the bytes only during a fixed scope, because it alows us to avoid copies into the JVM heap entirely. However when a JVM byte array is necessary, the price of copying will have to be paid anyway. Consider these various options when optimizing your FFI calls and patterns for performance.
+
 ### Data in jextract JNI mode
+
+Swift methods which pass or accept the Foundation `Data` type are extracted using the wrapper Java `Data` type,
+which offers utility methods to efficiently copy the underlying native data into a java byte array (`[byte]`).
+
+Unlike the FFM mode, a true zero-copy `withUnsafeBytes` is not available.
 
 ### Enums
 

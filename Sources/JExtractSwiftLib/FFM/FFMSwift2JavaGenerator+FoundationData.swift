@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -59,7 +59,6 @@ extension FFMSwift2JavaGenerator {
     )
     printJavaBindingDescriptorClass(&printer, copyBytesCFunc)
 
-    // Print toMemorySegment - zero-copy after the initial Swift copy
     printer.print(
       """
       /**
@@ -84,7 +83,6 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    // Print toByteBuffer - zero-copy view of the segment
     printer.print(
       """
       /**
@@ -109,7 +107,6 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    // Print toByteArray with arena parameter
     printer.print(
       """
       /**
@@ -135,7 +132,6 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    // Print toByteArray convenience method (creates temporary arena)
     printer.print(
       """
       /**
