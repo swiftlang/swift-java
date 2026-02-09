@@ -45,13 +45,11 @@ public class MySwiftClass {
   }
 
   public static func method() {
-    p("Hello from static method in a class!")
   }
 
   public init(x: Int64, y: Int64) {
     self.x = x
     self.y = y
-    p("\(self)")
   }
 
   public init() {
@@ -68,7 +66,6 @@ public class MySwiftClass {
   }
 
   deinit {
-    p("deinit called!")
   }
 
   public func sum() -> Int64 {
