@@ -521,7 +521,9 @@ final class DataImportTests {
         "public long getCount() {",
         "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {",
         "public byte[] toByteArray() {",
-        "private static native byte[] $toByteArray(long selfPointer);"
+        "private static native byte[] $toByteArray(long selfPointer);",
+        "public byte[] toByteArrayLessCopy() {",
+        "private static native byte[] $toByteArrayLessCopy(long selfPointer);"
       ])
   }
 

@@ -829,6 +829,35 @@ extension JNISwift2JavaGenerator {
         """
       )
     }
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$toByteArrayLessCopy",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .array(.byte)
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        let jniArray = UInt8.jniNewArray(in: environment)(environment, Int32(\(selfVar).pointee.count))!
+        let jniElementBuffer: [UInt8.JNIType] = \(selfVar).pointee.map {
+          $0.getJNIValue(in: environment)
+        }
+        UInt8.jniSetArrayRegion(in: environment)(
+          environment,
+          jniArray,
+          0,
+          jsize(\(selfVar).pointee.count),
+          jniElementBuffer
+        )
+        return jniArray
+        """
+      )
+    }
   }
 
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`

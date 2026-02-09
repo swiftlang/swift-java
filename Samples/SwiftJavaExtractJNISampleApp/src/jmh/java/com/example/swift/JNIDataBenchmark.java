@@ -21,6 +21,8 @@ import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.crypto.Data;
+
 @BenchmarkMode(Mode.AverageTime)
 @Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -62,6 +64,16 @@ public class JNIDataBenchmark {
     @Benchmark
     public long jni_passDataToSwift() {
         return MySwiftLibrary.getDataCount(data);
+    }
+
+    @Benchmark
+    public byte[] jni_data_toByteArray() {
+        return data.toByteArray();
+    }
+
+    @Benchmark
+    public byte[] jni_data_toByteArrayLessCopy() {
+        return data.toByteArrayLessCopy();
     }
 
     @Benchmark

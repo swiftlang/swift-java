@@ -793,6 +793,21 @@ extension JNISwift2JavaGenerator {
       }
 
       private static native byte[] $toByteArray(long selfPointer);
+
+      /**
+       * Copies the contents of this Data to a new byte array with fewer intermediate copies.
+       *
+       * <p><b>Note:</b> This operation copies the bytes from Swift memory
+       * to the Java heap. For large Data objects, consider the performance
+       * implications.</p>
+       *
+       * @return A byte array containing a copy of this Data's bytes
+       */
+      public byte[] toByteArrayLessCopy() {
+        return $toByteArrayLessCopy(this.$memoryAddress());
+      }
+
+      private static native byte[] $toByteArrayLessCopy(long selfPointer);
       """
     )
   }

@@ -48,6 +48,7 @@ extension Array: JavaValue where Element: JavaValue {
     self = jniArray.map { Element(fromJNI: $0, in: environment) }
   }
 
+  @inlinable
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
     // FIXME: If we have a 1:1 match between the Java layout and the
     // Swift layout, as we do for integer/float types, we can do some

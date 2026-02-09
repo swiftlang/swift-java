@@ -102,4 +102,16 @@ public class DataTest {
             assertArrayEquals(original, result);
         }
     }
+    @Test
+    void data_toByteArrayLessCopy_roundTrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var data = Data.fromByteArray(original, arena);
+            var echoed = MySwiftLibrary.echoData(data, arena);
+
+            byte[] result = echoed.toByteArrayLessCopy();
+
+            assertArrayEquals(original, result);
+        }
+    }
 }
