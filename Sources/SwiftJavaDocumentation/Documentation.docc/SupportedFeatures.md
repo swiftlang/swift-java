@@ -65,6 +65,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
 | Protocols: `protocol`                                                                | ❌        | ✅   |
 | Protocols: `protocol` with associated types                                          | ❌        | ❌   |
+| Protocols static requirements: `static func`, `init(rawValue:)`                      | ❌        | ❌   |
 | Existential parameters `f(x: any SomeProtocol)` (excepts `Any`)                      | ❌        | ✅   |
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
 | Existential return types `f() -> any Collection`                                     | ❌        | ❌   |

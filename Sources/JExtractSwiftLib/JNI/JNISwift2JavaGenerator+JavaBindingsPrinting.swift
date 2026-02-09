@@ -145,16 +145,23 @@ extension JNISwift2JavaGenerator {
 
     printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
       for initializer in decl.initializers {
-        printFunctionDowncallMethods(&printer, initializer, skipMethodBody: true)
-        printer.println()
+        self.logger.debug("Skipping static method '\(initializer.name)'")
       }
 
       for method in decl.methods {
+        if method.isStatic {
+          self.logger.debug("Skipping static method '\(method.name)'")
+          continue
+        }
         printFunctionDowncallMethods(&printer, method, skipMethodBody: true)
         printer.println()
       }
 
       for variable in decl.variables {
+        if variable.isStatic {
+          self.logger.debug("Skipping static property '\(variable.name)'")
+          continue
+        }
         printFunctionDowncallMethods(&printer, variable, skipMethodBody: true)
         printer.println()
       }
