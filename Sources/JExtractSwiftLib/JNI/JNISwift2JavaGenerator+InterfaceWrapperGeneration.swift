@@ -23,7 +23,7 @@ extension JNISwift2JavaGenerator {
   ) -> [ImportedNominalType: JavaInterfaceSwiftWrapper] {
     var wrappers = [ImportedNominalType: JavaInterfaceSwiftWrapper]()
 
-    for type in types {
+    for type in types where type.swiftNominal.kind == .protocol {
       do {
         let translator = JavaInterfaceProtocolWrapperGenerator()
         wrappers[type] = try translator.generate(for: type)
@@ -78,6 +78,12 @@ extension JNISwift2JavaGenerator {
 
   struct JavaInterfaceProtocolWrapperGenerator {
     func generate(for type: ImportedNominalType) throws -> JavaInterfaceSwiftWrapper {
+      if !type.initializers.isEmpty
+          || type.methods.contains(where: \.isStatic)
+          || type.variables.contains(where: \.isStatic) {
+        throw JavaTranslationError.protocolStaticRequirementsNotSupported
+      }
+
       let functions = try type.methods.map { method in
         try translate(function: method)
       }
