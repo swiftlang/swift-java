@@ -78,6 +78,32 @@ public class DataTest {
     }
 
     @Test
+    void data_toByteArrayLessCopy() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 10, 20, 30, 40 };
+            var data = Data.fromByteArray(original, arena);
+
+            byte[] result = data.toByteArrayLessCopy();
+
+            assertEquals(original.length, result.length);
+            assertArrayEquals(original, result);
+        }
+    }   
+    
+    @Test
+    void data_toByteArrayDirect() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 10, 20, 30, 40 };
+            var data = Data.fromByteArray(original, arena);
+
+            byte[] result = data.toByteArrayDirect();
+
+            assertEquals(original.length, result.length);
+            assertArrayEquals(original, result);
+        }
+    }
+
+    @Test
     void data_toByteArray_empty() {
         try (var arena = SwiftArena.ofConfined()) {
             byte[] original = new byte[] {};
@@ -110,6 +136,19 @@ public class DataTest {
             var echoed = MySwiftLibrary.echoData(data, arena);
 
             byte[] result = echoed.toByteArrayLessCopy();
+
+            assertArrayEquals(original, result);
+        }
+    }
+
+    @Test
+    void data_toByteArrayDirect_roundTrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var data = Data.fromByteArray(original, arena);
+            var echoed = MySwiftLibrary.echoData(data, arena);
+
+            byte[] result = echoed.toByteArrayDirect();
 
             assertArrayEquals(original, result);
         }

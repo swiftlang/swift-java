@@ -858,6 +858,27 @@ extension JNISwift2JavaGenerator {
         """
       )
     }
+
+    // Zero-copy version: uses withUnsafeBytes to pass Data's memory directly to JNI
+    printCDecl(
+      &printer,
+      javaMethodName: "$toByteArrayDirect",
+      parentName: type.swiftNominal.qualifiedName,
+      parameters: [
+        selfPointerParam
+      ],
+      resultType: .array(.byte)
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        return \(selfVar).pointee.withUnsafeBytes { buffer in
+          return buffer.getJNIValue(in: environment)
+        }
+        """
+      )
+    }
   }
 
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`

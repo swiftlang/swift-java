@@ -808,6 +808,20 @@ extension JNISwift2JavaGenerator {
       }
 
       private static native byte[] $toByteArrayLessCopy(long selfPointer);
+
+      /**
+       * Copies the contents of this Data to a new byte array using direct memory access.
+       *
+       * <p>This is the most efficient implementation as it uses {@code withUnsafeBytes}
+       * to pass Data's memory directly to JNI without any intermediate Swift allocations.</p>
+       *
+       * @return A byte array containing a copy of this Data's bytes
+       */
+      public byte[] toByteArrayDirect() {
+        return $toByteArrayDirect(this.$memoryAddress());
+      }
+
+      private static native byte[] $toByteArrayDirect(long selfPointer);
       """
     )
   }

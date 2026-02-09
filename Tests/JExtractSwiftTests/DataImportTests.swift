@@ -523,7 +523,9 @@ final class DataImportTests {
         "public byte[] toByteArray() {",
         "private static native byte[] $toByteArray(long selfPointer);",
         "public byte[] toByteArrayLessCopy() {",
-        "private static native byte[] $toByteArrayLessCopy(long selfPointer);"
+        "private static native byte[] $toByteArrayLessCopy(long selfPointer);",
+        "public byte[] toByteArrayDirect() {",
+        "private static native byte[] $toByteArrayDirect(long selfPointer);"
       ])
   }
 

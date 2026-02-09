@@ -50,20 +50,40 @@ extension Array: JavaValue where Element: JavaValue {
 
   @inlinable
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
-    // FIXME: If we have a 1:1 match between the Java layout and the
-    // Swift layout, as we do for integer/float types, we can do some
-    // awful alias tries to avoid creating the second array here.
+    let count = self.count
     let jniArray = Element.jniNewArray(in: environment)(environment, Int32(count))!
-    let jniElementBuffer: [Element.JNIType] = map {
-      $0.getJNIValue(in: environment)
+
+    if Element.self == UInt8.self || Element.self == Int8.self {
+      // Fast path, Since the memory layout of `jbyte`` and those is the same, we rebind the memory
+      // rather than convert every element independently. This allows us to avoid another Swift array creation.
+      self.withUnsafeBytes { buffer in
+        guard let baseAddress = buffer.baseAddress else { 
+          fatalError("Buffer had no base address?! \(self)")
+        }
+
+        baseAddress.withMemoryRebound(to: jbyte.self, capacity: count) { ptr in
+          UInt8.jniSetArrayRegion(in: environment)(
+            environment,
+            jniArray,
+            0,
+            jsize(count),
+            ptr
+          )
+        }
+      }
+    } else {
+      // Slow path, convert every element to the apropriate JNIType:
+      let jniElementBuffer: [Element.JNIType] = self.map { // meh, temporary array
+        $0.getJNIValue(in: environment)
+      }
+      Element.jniSetArrayRegion(in: environment)(
+        environment,
+        jniArray,
+        0,
+        jsize(self.count),
+        jniElementBuffer
+      )
     }
-    Element.jniSetArrayRegion(in: environment)(
-      environment,
-      jniArray,
-      0,
-      jsize(count),
-      jniElementBuffer
-    )
     return jniArray
   }
 
