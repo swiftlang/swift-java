@@ -9,146 +9,120 @@ open class StringWriter: Writer {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
-    /**
-   * Java method `toString`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.String java.io.StringWriter.toString()
-   * ```
-   */
+    /// Java method `toString`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.String java.io.StringWriter.toString()
+    /// ```
   @JavaMethod
   open override func toString() -> String
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence,int,int)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence,int,int)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) -> StringWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.StringWriter java.io.StringWriter.append(char)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.StringWriter java.io.StringWriter.append(char)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: UInt16) -> StringWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?) -> StringWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?) throws -> Appendable!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.StringWriter.append(char) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.StringWriter.append(char) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: UInt16) throws -> Appendable!
 
-    /**
-   * Java method `flush`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.flush()
-   * ```
-   */
+    /// Java method `flush`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.flush()
+    /// ```
   @JavaMethod
   open override func flush()
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.write(char[],int,int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.write(char[],int,int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.write(java.lang.String,int,int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.write(java.lang.String,int,int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: String, _ arg1: Int32, _ arg2: Int32)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.write(java.lang.String)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.write(java.lang.String)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: String)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.write(int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.write(int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: Int32)
 
-    /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.StringWriter.close() throws java.io.IOException
-   * ```
-   */
+    /// Java method `close`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.StringWriter.close() throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func close() throws
 }

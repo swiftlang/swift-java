@@ -3,14 +3,12 @@ import CSwiftJavaJNI
 
 @JavaInterface("java.io.Closeable")
 public struct Closeable {
-  /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public abstract void java.io.Closeable.close() throws java.io.IOException
-   * ```
-   */
+  /// Java method `close`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.io.Closeable.close() throws java.io.IOException
+  /// ```
 @JavaMethod
   public func close() throws
 }

@@ -551,7 +551,9 @@ extension FFMSwift2JavaGenerator {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
           switch knownType {
-          case .foundationData, .foundationDataProtocol, .essentialsData, .essentialsDataProtocol:
+          case .foundationData, .foundationDataProtocol:
+            break
+          case .essentialsData, .essentialsDataProtocol:
             break
           default:
             throw JavaTranslationError.unhandledType(.optional(swiftType))
@@ -650,7 +652,7 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            break
+            break // Implemented as wrapper
 
           case .unsafePointer, .unsafeMutablePointer:
             // FIXME: Implement

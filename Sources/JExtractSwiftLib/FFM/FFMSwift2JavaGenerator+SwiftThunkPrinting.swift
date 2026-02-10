@@ -195,6 +195,9 @@ struct SwiftThunkTranslator {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
+    // Add special thunks for known types (e.g. Data)
+    decls.append(contentsOf: renderSpecificTypeThunks(nominal))
+
     return decls
   }
 
@@ -227,5 +230,42 @@ struct SwiftThunkTranslator {
       as: decl.apiKind
     )
     return [DeclSyntax(thunkFunc)]
+  }
+
+  /// Render special thunks for known types like Foundation.Data
+  func renderSpecificTypeThunks(_ nominal: ImportedNominalType) -> [DeclSyntax] {
+    guard let knownType = nominal.swiftNominal.knownTypeKind else {
+      return []
+    }
+
+    switch knownType {
+    case .foundationData, .essentialsData:
+      return renderFoundationDataThunks(nominal)
+    default:
+      return []
+    }
+  }
+
+  /// Render Swift thunks for Foundation.Data helper methods
+  private func renderFoundationDataThunks(_ nominal: ImportedNominalType) -> [DeclSyntax] {
+    let thunkName = "swiftjava_\(st.swiftModuleName)_\(nominal.swiftNominal.name)_copyBytes__"
+    let qualifiedName = nominal.swiftNominal.qualifiedName
+
+    let copyBytesThunk: DeclSyntax =
+      """
+      @_cdecl("\(raw: thunkName)")
+      public func \(raw: thunkName)(
+          selfPointer: UnsafeRawPointer,
+          destinationPointer: UnsafeMutableRawPointer,
+          count: Int
+      ) {
+          let data = selfPointer.assumingMemoryBound(to: \(raw: qualifiedName).self).pointee
+          data.withUnsafeBytes { buffer in
+              destinationPointer.copyMemory(from: buffer.baseAddress!, byteCount: count)
+          }
+      }
+      """
+
+    return [copyBytesThunk]
   }
 }

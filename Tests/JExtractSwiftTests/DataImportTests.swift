@@ -449,5 +449,85 @@ final class DataImportTests {
       ]
     )
   }
-  
+
+  // MARK: - JNI Mode Tests
+
+  @Test("Import Data: JNI accept Data")
+  func data_jni_accept() throws {
+    let text = """
+      import Foundation
+      public func acceptData(data: Data)
+      """
+
+    try assertOutput(
+      input: text, .jni, .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static void acceptData(Data data) {
+          SwiftModule.$acceptData(data.$memoryAddress());
+        }
+        """
+      ])
+
+    try assertOutput(
+      input: text, .jni, .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024acceptData__J")
+        public func Java_com_example_swift_SwiftModule__00024acceptData__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jlong) {
+        """
+      ])
+  }
+
+  @Test("Import Data: JNI return Data")
+  func data_jni_return() throws {
+    let text = """
+      import Foundation
+      public func returnData() -> Data
+      """
+
+    try assertOutput(
+      input: text, .jni, .java,
+      expectedChunks: [
+        """
+        public static Data returnData(SwiftArena swiftArena$) {
+        """
+      ])
+
+    try assertOutput(
+      input: text, .jni, .swift,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024returnData__")
+        public func Java_com_example_swift_SwiftModule__00024returnData__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        """
+      ])
+  }
+
+  @Test("Import Data: JNI Data class")
+  func data_jni_class() throws {
+    let text = """
+      import Foundation
+      public func f() -> Data
+      """
+
+    try assertOutput(
+      input: text, .jni, .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class Data implements JNISwiftInstance, DataProtocol {",
+        "public long getCount() {",
+
+        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {",
+
+        "public byte[] toByteArray() {",
+        "private static native byte[] $toByteArray(long selfPointer);",
+        
+        "public byte[] toByteArrayIndirectCopy() {",
+        "private static native byte[] $toByteArrayIndirectCopy(long selfPointer);"
+      ])
+  }
+
 }

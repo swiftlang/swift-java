@@ -406,8 +406,10 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
+            break // Handled as wrapped struct
+
+          case .foundationData, .essentialsData:
+            break // Handled as wrapped struct
 
           case .foundationUUID, .essentialsUUID:
             return TranslatedParameter(
@@ -698,6 +700,10 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
+
+          case .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
 

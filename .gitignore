@@ -49,3 +49,5 @@ Package.resolved
 */**/*.swiftdeps~
 */**/.docc-build/
 
+
+BuildLogic/.kotlin/

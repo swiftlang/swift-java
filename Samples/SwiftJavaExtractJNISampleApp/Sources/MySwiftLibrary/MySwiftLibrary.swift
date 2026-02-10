@@ -35,6 +35,10 @@ public func globalTakeInt(i: Int64) {
   p("i:\(i)")
 }
 
+public func globalEchoInt(i: Int64) -> Int64{
+  i
+}
+
 public func globalMakeInt() -> Int64 {
   return 42
 }

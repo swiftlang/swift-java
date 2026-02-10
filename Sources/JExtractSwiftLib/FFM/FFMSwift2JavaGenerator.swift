@@ -230,8 +230,8 @@ extension FFMSwift2JavaGenerator {
          *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
          * </ul>
          */
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(MemorySegment selfPointer, AllocatingSwiftArena swiftArena) {
-          return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(MemorySegment selfPointer, AllocatingSwiftArena arena) {
+          return new \(decl.swiftNominal.name)(selfPointer, arena);
         }
         """
       )
@@ -250,6 +250,9 @@ extension FFMSwift2JavaGenerator {
       for funcDecl in decl.methods {
         printFunctionDowncallMethods(&printer, funcDecl)
       }
+
+      // Special helper methods for known types (e.g. Data)
+      printSpecificTypeHelpers(&printer, decl)
 
       // Helper methods and default implementations
       printToStringMethod(&printer, decl)
@@ -417,5 +420,20 @@ extension FFMSwift2JavaGenerator {
       }
       """)
   }
+
+  /// Print special helper methods for known types like Foundation.Data
+  func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    guard let knownType = decl.swiftNominal.knownTypeKind else {
+      return
+    }
+
+    switch knownType {
+    case .foundationData, .essentialsData:
+      printFoundationDataHelpers(&printer, decl)
+    default:
+      break
+    }
+  }
+
 }
 

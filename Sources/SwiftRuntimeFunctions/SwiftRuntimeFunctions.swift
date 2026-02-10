@@ -33,12 +33,12 @@ public func _swiftjava_swift_retainCount(object: UnsafeMutableRawPointer) -> Int
 public func _swiftjava_swift_isUniquelyReferenced(object: UnsafeMutableRawPointer) -> Bool
 
 
- @_alwaysEmitIntoClient @_transparent
+@_alwaysEmitIntoClient @_transparent
 func _swiftjava_withHeapObject<R>(
-   of object: AnyObject,
-   _ body: (UnsafeMutableRawPointer) -> R
- ) -> R {
-   defer { _fixLifetime(object) }
-   let unmanaged = Unmanaged.passUnretained(object)
-   return body(unmanaged.toOpaque())
- }
+  of object: AnyObject,
+  _ body: (UnsafeMutableRawPointer) -> R
+) -> R {
+  defer { _fixLifetime(object) }
+  let unmanaged = Unmanaged.passUnretained(object)
+  return body(unmanaged.toOpaque())
+}

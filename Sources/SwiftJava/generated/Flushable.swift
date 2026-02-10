@@ -3,14 +3,12 @@ import CSwiftJavaJNI
 
 @JavaInterface("java.io.Flushable")
 public struct Flushable {
-  /**
-   * Java method `flush`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public abstract void java.io.Flushable.flush() throws java.io.IOException
-   * ```
-   */
+  /// Java method `flush`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.io.Flushable.flush() throws java.io.IOException
+  /// ```
 @JavaMethod
   public func flush() throws
 }
