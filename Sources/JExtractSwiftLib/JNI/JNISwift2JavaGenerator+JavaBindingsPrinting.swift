@@ -288,6 +288,9 @@ extension JNISwift2JavaGenerator {
     case .foundationDate, .essentialsDate:
       printFoundationDateHelpers(&printer, decl)
 
+    case .foundationData, .essentialsData:
+      printFoundationDataHelpers(&printer, decl)
+
     default:
       break
     }
@@ -760,6 +763,66 @@ extension JNISwift2JavaGenerator {
         double timeIntervalSince1970 = instant.getEpochSecond() + (instant.getNano() / 1_000_000_000.0);
         return Date.init(timeIntervalSince1970, swiftArena$);
       }
+      """
+    )
+  }
+
+  private func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print(
+      """
+      /**
+       * Creates a new Swift @{link Data} instance from a byte array.
+       *
+       * @param bytes The byte array to copy into the Data
+       * @param swiftArena$ The arena for memory management
+       * @return A new Data instance containing a copy of the bytes
+       */
+      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {
+        Objects.requireNonNull(bytes, "bytes cannot be null");
+        return Data.init(bytes, swiftArena$);
+      }
+      """
+    )
+
+    printer.print(
+      """
+      /**
+       * Copies the contents of this Data to a new byte array.
+       * 
+       * This is a relatively efficient implementation, which avoids native array copies,
+       * however it will still perform a copy of the data onto the JVM heap, so use this 
+       * only when necessary.
+       * 
+       * </p> When utmost performance is necessary, you may want to investigate the FFM mode
+       * of jextract which is able to map memory more efficiently. 
+       *
+       * @return A byte array containing a copy of this Data's bytes
+       */
+      public byte[] toByteArray() {
+        return $toByteArray(this.$memoryAddress());
+      }
+      """
+    )
+
+    printer.print(
+      """
+      private static native byte[] $toByteArray(long selfPointer);
+
+      /**
+       * Copies the contents of this Data to a new byte array.
+       * 
+       * @deprecated Prefer using the `toByteArray` method as it is more performant.
+       * This implementation uses a naive conversion path from native bytes into jbytes 
+       * and then copying them onto the jvm heap.
+       * 
+       * @return A byte array containing a copy of this Data's bytes
+       */
+      @Deprecated(forRemoval = true)
+      public byte[] toByteArrayIndirectCopy() {
+        return $toByteArrayIndirectCopy(this.$memoryAddress());
+      }
+
+      private static native byte[] $toByteArrayIndirectCopy(long selfPointer);
       """
     )
   }

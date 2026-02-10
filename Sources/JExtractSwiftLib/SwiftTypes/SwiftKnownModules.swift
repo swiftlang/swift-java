@@ -107,13 +107,14 @@ private let swiftSourceFile: SourceFileSyntax = """
 
 private let foundationEssentialsSourceFile: SourceFileSyntax = """
   public protocol DataProtocol {}
-  
+
   public struct Data: DataProtocol {
     public init(bytes: UnsafeRawPointer, count: Int)
+    public init(_ bytes: [UInt8])
     public var count: Int { get }
     public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
   }
-  
+
   public struct Date {
     /// The interval between the date object and 00:00:00 UTC on 1 January 1970.
     public var timeIntervalSince1970: Double { get }

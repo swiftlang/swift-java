@@ -44,6 +44,21 @@ extension FFMSwift2JavaGenerator {
     // 'try!' because we know 'loweredSignature' can be described with C.
     let cFunc = try! translated.loweredSignature.cFunctionDecl(cName: thunkName)
 
+    printJavaBindingDescriptorClass(&printer, cFunc) { printer in
+      if let outCallback = translated.translatedSignature.result.outCallback {
+        self.printUpcallParameterDescriptorClasses(&printer, outCallback)
+      } else { // FIXME: not an "else"
+        self.printParameterDescriptorClasses(&printer, cFunc)
+      }
+    }
+  }
+
+  /// Reusable function to print the FFM Java binding descriptors for a C function.
+  package func printJavaBindingDescriptorClass(
+    _ printer: inout CodePrinter,
+    _ cFunc: CFunction,
+    additionalContent: ((inout CodePrinter) -> Void)? = nil
+  ) {
     printer.printBraceBlock(
       """
       /**
@@ -63,11 +78,7 @@ extension FFMSwift2JavaGenerator {
         """
       )
       printJavaBindingDowncallMethod(&printer, cFunc)
-      if let outCallback = translated.translatedSignature.result.outCallback {
-        printUpcallParameterDescriptorClasses(&printer, outCallback)
-      } else { // FIXME: not an "else"
-        printParameterDescriptorClasses(&printer, cFunc)
-      }
+      additionalContent?(&printer)
     }
   }
 
