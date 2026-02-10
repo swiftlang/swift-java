@@ -7,169 +7,139 @@ open class InputStream: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-    /**
-   * Java method `reset`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.InputStream.reset() throws java.io.IOException
-   * ```
-   */
+    /// Java method `reset`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.InputStream.reset() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func reset() throws
 
-    /**
-   * Java method `readAllBytes`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public byte[] java.io.InputStream.readAllBytes() throws java.io.IOException
-   * ```
-   */
+    /// Java method `readAllBytes`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public byte[] java.io.InputStream.readAllBytes() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func readAllBytes() throws -> [Int8]
 
-    /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.InputStream.close() throws java.io.IOException
-   * ```
-   */
+    /// Java method `close`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.InputStream.close() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func close() throws
 
-    /**
-   * Java method `mark`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.InputStream.mark(int)
-   * ```
-   */
+    /// Java method `mark`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.InputStream.mark(int)
+    /// ```
   @JavaMethod
   open func mark(_ arg0: Int32)
 
-    /**
-   * Java method `read`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStream.read(byte[]) throws java.io.IOException
-   * ```
-   */
+    /// Java method `read`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStream.read(byte[]) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func read(_ arg0: [Int8]) throws -> Int32
 
-    /**
-   * Java method `read`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStream.read(byte[],int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `read`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStream.read(byte[],int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
-    /**
-   * Java method `read`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public abstract int java.io.InputStream.read() throws java.io.IOException
-   * ```
-   */
+    /// Java method `read`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract int java.io.InputStream.read() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func read() throws -> Int32
 
-    /**
-   * Java method `readNBytes`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStream.readNBytes(byte[],int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `readNBytes`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStream.readNBytes(byte[],int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
-    /**
-   * Java method `readNBytes`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public byte[] java.io.InputStream.readNBytes(int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `readNBytes`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public byte[] java.io.InputStream.readNBytes(int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func readNBytes(_ arg0: Int32) throws -> [Int8]
 
-    /**
-   * Java method `transferTo`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public long java.io.InputStream.transferTo(java.io.OutputStream) throws java.io.IOException
-   * ```
-   */
+    /// Java method `transferTo`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public long java.io.InputStream.transferTo(java.io.OutputStream) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func transferTo(_ arg0: OutputStream?) throws -> Int64
 
-    /**
-   * Java method `skip`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public long java.io.InputStream.skip(long) throws java.io.IOException
-   * ```
-   */
+    /// Java method `skip`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public long java.io.InputStream.skip(long) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func skip(_ arg0: Int64) throws -> Int64
 
-    /**
-   * Java method `available`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStream.available() throws java.io.IOException
-   * ```
-   */
+    /// Java method `available`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStream.available() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func available() throws -> Int32
 
-    /**
-   * Java method `markSupported`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public boolean java.io.InputStream.markSupported()
-   * ```
-   */
+    /// Java method `markSupported`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public boolean java.io.InputStream.markSupported()
+    /// ```
   @JavaMethod
   open func markSupported() -> Bool
 
-    /**
-   * Java method `skipNBytes`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.InputStream.skipNBytes(long) throws java.io.IOException
-   * ```
-   */
+    /// Java method `skipNBytes`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.InputStream.skipNBytes(long) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func skipNBytes(_ arg0: Int64) throws
 }
 extension JavaClass<InputStream> {
-  /**
-   * Java method `nullInputStream`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public static java.io.InputStream java.io.InputStream.nullInputStream()
-   * ```
-   */
+  /// Java method `nullInputStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.io.InputStream java.io.InputStream.nullInputStream()
+  /// ```
 @JavaStaticMethod
   public func nullInputStream() -> InputStream!
 }

@@ -36,410 +36,336 @@ open class PrintWriter: Writer {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: OutputStream?, environment: JNIEnvironment? = nil)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(double)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(double)
+    /// ```
   @JavaMethod
   open func println(_ arg0: Double)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(float)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(float)
+    /// ```
   @JavaMethod
   open func println(_ arg0: Float)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(long)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(long)
+    /// ```
   @JavaMethod
   open func println(_ arg0: Int64)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(char[])
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(char[])
+    /// ```
   @JavaMethod
   open func println(_ arg0: [UInt16])
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(java.lang.String)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(java.lang.String)
+    /// ```
   @JavaMethod
   open func println(_ arg0: String)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(java.lang.Object)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(java.lang.Object)
+    /// ```
   @JavaMethod
   open func println(_ arg0: JavaObject?)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println()
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println()
+    /// ```
   @JavaMethod
   open func println()
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(boolean)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(boolean)
+    /// ```
   @JavaMethod
   open func println(_ arg0: Bool)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(char)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(char)
+    /// ```
   @JavaMethod
   open func println(_ arg0: UInt16)
 
-    /**
-   * Java method `println`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.println(int)
-   * ```
-   */
+    /// Java method `println`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.println(int)
+    /// ```
   @JavaMethod
   open func println(_ arg0: Int32)
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?) throws -> Appendable!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.PrintWriter java.io.PrintWriter.append(char)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.PrintWriter java.io.PrintWriter.append(char)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: UInt16) -> PrintWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence,int,int)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence,int,int)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) -> PrintWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence)
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence)
+    /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?) -> PrintWriter!
 
-    /**
-   * Java method `append`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.Appendable java.io.PrintWriter.append(char) throws java.io.IOException
-   * ```
-   */
+    /// Java method `append`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.Appendable java.io.PrintWriter.append(char) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func append(_ arg0: UInt16) throws -> Appendable!
 
-    /**
-   * Java method `flush`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.flush()
-   * ```
-   */
+    /// Java method `flush`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.flush()
+    /// ```
   @JavaMethod
   open override func flush()
 
-    /**
-   * Java method `format`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.PrintWriter java.io.PrintWriter.format(java.lang.String,java.lang.Object...)
-   * ```
-   */
+    /// Java method `format`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.PrintWriter java.io.PrintWriter.format(java.lang.String,java.lang.Object...)
+    /// ```
   @JavaMethod
   open func format(_ arg0: String, _ arg1: [JavaObject?]) -> PrintWriter!
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(float)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(float)
+    /// ```
   @JavaMethod
   open func print(_ arg0: Float)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(long)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(long)
+    /// ```
   @JavaMethod
   open func print(_ arg0: Int64)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(int)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(int)
+    /// ```
   @JavaMethod
   open func print(_ arg0: Int32)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(char)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(char)
+    /// ```
   @JavaMethod
   open func print(_ arg0: UInt16)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(boolean)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(boolean)
+    /// ```
   @JavaMethod
   open func print(_ arg0: Bool)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(java.lang.Object)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(java.lang.Object)
+    /// ```
   @JavaMethod
   open func print(_ arg0: JavaObject?)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(java.lang.String)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(java.lang.String)
+    /// ```
   @JavaMethod
   open func print(_ arg0: String)
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(char[])
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(char[])
+    /// ```
   @JavaMethod
   open func print(_ arg0: [UInt16])
 
-    /**
-   * Java method `print`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.print(double)
-   * ```
-   */
+    /// Java method `print`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.print(double)
+    /// ```
   @JavaMethod
   open func print(_ arg0: Double)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.write(java.lang.String,int,int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.write(java.lang.String,int,int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: String, _ arg1: Int32, _ arg2: Int32)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.write(java.lang.String)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.write(java.lang.String)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: String)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.write(char[])
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.write(char[])
+    /// ```
   @JavaMethod
   open override func write(_ arg0: [UInt16])
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.write(int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.write(int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: Int32)
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.write(char[],int,int)
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.write(char[],int,int)
+    /// ```
   @JavaMethod
   open override func write(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32)
 
-    /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.PrintWriter.close()
-   * ```
-   */
+    /// Java method `close`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.PrintWriter.close()
+    /// ```
   @JavaMethod
   open override func close()
 
-    /**
-   * Java method `printf`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.io.PrintWriter java.io.PrintWriter.printf(java.lang.String,java.lang.Object...)
-   * ```
-   */
+    /// Java method `printf`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.io.PrintWriter java.io.PrintWriter.printf(java.lang.String,java.lang.Object...)
+    /// ```
   @JavaMethod
   open func printf(_ arg0: String, _ arg1: [JavaObject?]) -> PrintWriter!
 
-    /**
-   * Java method `checkError`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public boolean java.io.PrintWriter.checkError()
-   * ```
-   */
+    /// Java method `checkError`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public boolean java.io.PrintWriter.checkError()
+    /// ```
   @JavaMethod
   open func checkError() -> Bool
 
-    /**
-   * Java method `setError`.
-   * 
-   * ### Java method signature
-   * ```java
-   * protected void java.io.PrintWriter.setError()
-   * ```
-   */
+    /// Java method `setError`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// protected void java.io.PrintWriter.setError()
+    /// ```
   @JavaMethod
   open func setError()
 
-    /**
-   * Java method `clearError`.
-   * 
-   * ### Java method signature
-   * ```java
-   * protected void java.io.PrintWriter.clearError()
-   * ```
-   */
+    /// Java method `clearError`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// protected void java.io.PrintWriter.clearError()
+    /// ```
   @JavaMethod
   open func clearError()
 }
