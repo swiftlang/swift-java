@@ -23,29 +23,56 @@ extension Array: JavaValue where Element: JavaValue {
 
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
     let jniCount = environment.interface.GetArrayLength(environment, value)
-    let jniArray: [Element.JNIType] =
-      if let value {
-        .init(
-          unsafeUninitializedCapacity: Int(jniCount)
-        ) { buffer, initializedCount in
-          Element.jniGetArrayRegion(in: environment)(
+    let count = Int(jniCount)
+
+    guard let value else {
+      self = []
+      return
+    }
+
+    // Fast path for byte types: Since the memory layout of `jbyte` (Int8) and UInt8/Int8 is identical,
+    // we can rebind the memory and fill it directly without creating an intermediate array.
+    // This mirrors the optimization in `getJNIValue` in the reverse direction.
+    if Element.self == UInt8.self {
+      let result = [UInt8](unsafeUninitializedCapacity: count) { buffer, initializedCount in
+        buffer.withMemoryRebound(to: jbyte.self) { jbyteBuffer in
+          UInt8.jniGetArrayRegion(in: environment)(
             environment,
             value,
             0,
             jniCount,
-            buffer.baseAddress
+            jbyteBuffer.baseAddress
           )
-          initializedCount = Int(jniCount)
         }
-      } else {
-        []
+        initializedCount = count
       }
-
-    // FIXME: If we have a 1:1 match between the Java layout and the
-    // Swift layout, as we do for integer/float types, we can do some
-    // awful alias tricks above to have JNI fill in the contents of the
-    // array directly without this extra copy. For now, just map.
-    self = jniArray.map { Element(fromJNI: $0, in: environment) }
+      self = result as! Self
+    } else if Element.self == Int8.self {
+      let result = [Int8](unsafeUninitializedCapacity: Int(jniCount)) { buffer, initializedCount in
+        Int8.jniGetArrayRegion(in: environment)(
+          environment,
+          value,
+          0,
+          jniCount,
+          buffer.baseAddress
+        )
+        initializedCount = count
+      }
+      self = result as! Self
+    } else {
+      // Slow path for other types: create intermediate array and map
+      let jniArray = [Element.JNIType](unsafeUninitializedCapacity: count) { buffer, initializedCount in
+        Element.jniGetArrayRegion(in: environment)(
+          environment,
+          value,
+          0,
+          jniCount,
+          buffer.baseAddress
+        )
+        initializedCount = Int(jniCount)
+      }
+      self = jniArray.map { Element(fromJNI: $0, in: environment) }
+    }
   }
 
   @inlinable
