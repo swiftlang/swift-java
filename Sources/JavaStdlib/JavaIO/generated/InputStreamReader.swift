@@ -13,58 +13,48 @@ open class InputStreamReader: Reader {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: InputStream?, environment: JNIEnvironment? = nil)
 
-    /**
-   * Java method `ready`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public boolean java.io.InputStreamReader.ready() throws java.io.IOException
-   * ```
-   */
+    /// Java method `ready`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public boolean java.io.InputStreamReader.ready() throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func ready() throws -> Bool
 
-    /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.InputStreamReader.close() throws java.io.IOException
-   * ```
-   */
+    /// Java method `close`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.InputStreamReader.close() throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func close() throws
 
-    /**
-   * Java method `read`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStreamReader.read(char[],int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `read`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStreamReader.read(char[],int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func read(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
-    /**
-   * Java method `read`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public int java.io.InputStreamReader.read() throws java.io.IOException
-   * ```
-   */
+    /// Java method `read`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public int java.io.InputStreamReader.read() throws java.io.IOException
+    /// ```
   @JavaMethod
   open override func read() throws -> Int32
 
-    /**
-   * Java method `getEncoding`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public java.lang.String java.io.InputStreamReader.getEncoding()
-   * ```
-   */
+    /// Java method `getEncoding`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.String java.io.InputStreamReader.getEncoding()
+    /// ```
   @JavaMethod
   open func getEncoding() -> String
 }

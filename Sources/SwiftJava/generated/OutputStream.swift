@@ -6,70 +6,58 @@ open class OutputStream: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-    /**
-   * Java method `flush`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.OutputStream.flush() throws java.io.IOException
-   * ```
-   */
+    /// Java method `flush`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.OutputStream.flush() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func flush() throws
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.OutputStream.write(byte[]) throws java.io.IOException
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.OutputStream.write(byte[]) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func write(_ arg0: [Int8]) throws
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.OutputStream.write(byte[],int,int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.OutputStream.write(byte[],int,int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
 
-    /**
-   * Java method `write`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public abstract void java.io.OutputStream.write(int) throws java.io.IOException
-   * ```
-   */
+    /// Java method `write`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract void java.io.OutputStream.write(int) throws java.io.IOException
+    /// ```
   @JavaMethod
   open func write(_ arg0: Int32) throws
 
-    /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public void java.io.OutputStream.close() throws java.io.IOException
-   * ```
-   */
+    /// Java method `close`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public void java.io.OutputStream.close() throws java.io.IOException
+    /// ```
   @JavaMethod
   open func close() throws
 }
 extension JavaClass<OutputStream> {
-  /**
-   * Java method `nullOutputStream`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
-   * ```
-   */
+  /// Java method `nullOutputStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
+  /// ```
 @JavaStaticMethod
   public func nullOutputStream() -> OutputStream!
 }

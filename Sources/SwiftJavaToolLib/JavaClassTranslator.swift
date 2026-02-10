@@ -727,14 +727,12 @@ extension JavaClassTranslator {
     // Include the original Java signature
     let docsString = 
       """
-        /**
-         * Java method `\(javaMethod.getName())`.
-         * 
-         * ### Java method signature
-         * ```java
-         * \(javaMethod.toGenericString())
-         * ```
-         */
+        /// Java method `\(javaMethod.getName())`.
+        ///
+        /// ### Java method signature
+        /// ```java
+        /// \(javaMethod.toGenericString())
+        /// ```
       """
 
     // Compute the parameters for '@...JavaMethod(...)'

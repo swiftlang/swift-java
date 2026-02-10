@@ -4,14 +4,12 @@ import SwiftJava
 
 @JavaInterface("java.nio.file.WatchService", extends: Closeable.self)
 public struct WatchService {
-  /**
-   * Java method `close`.
-   * 
-   * ### Java method signature
-   * ```java
-   * public abstract void java.nio.file.WatchService.close() throws java.io.IOException
-   * ```
-   */
+  /// Java method `close`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.nio.file.WatchService.close() throws java.io.IOException
+  /// ```
 @JavaMethod
   public func close() throws
 }

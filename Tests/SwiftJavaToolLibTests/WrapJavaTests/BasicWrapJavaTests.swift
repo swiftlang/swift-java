@@ -70,14 +70,12 @@ final class BasicWrapJavaTests: XCTestCase {
         import SwiftJava
         """,
         """
-          /**
-           * Java method `example`.
-           *
-           * ### Java method signature
-           * ```java
-           * public void com.example.ExampleSimpleClass.example(java.lang.String,int)
-           * ```
-           */
+          /// Java method `example`.
+          ///
+          /// ### Java method signature
+          /// ```java
+          /// public void com.example.ExampleSimpleClass.example(java.lang.String,int)
+          /// ```
            @JavaMethod
            open func example(_ arg0: String, _ arg1: Int32)
         """
@@ -225,14 +223,12 @@ final class BasicWrapJavaTests: XCTestCase {
         """
         @JavaInterface("com.example.CallMe", extends: BiFunction<ValueType, ValueType, ValueType>.self)
         public struct CallMe<ValueType: AnyJavaObject> {
-          /**
-           * Java method `apply`.
-           *
-           * ### Java method signature
-           * ```java
-           * public abstract ValueType com.example.CallMe.apply(ValueType,ValueType)
-           * ```
-           */
+          /// Java method `apply`.
+          ///
+          /// ### Java method signature
+          /// ```java
+          /// public abstract ValueType com.example.CallMe.apply(ValueType,ValueType)
+          /// ```
           @JavaMethod(typeErasedResult: "ValueType!")
             public func apply(_ arg0: ValueType?, _ arg1: ValueType?) -> ValueType!
           }
