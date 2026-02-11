@@ -29,7 +29,7 @@ public class MySwiftClass {
   public var counter: Int32 = 0
 
   public static func factory(len: Int, cap: Int) -> MySwiftClass {
-    return MySwiftClass(len: len, cap: cap)
+    MySwiftClass(len: len, cap: cap)
   }
 
   public func voidMethod() {
@@ -39,15 +39,15 @@ public class MySwiftClass {
   }
 
   public func echoIntMethod(i: Int) -> Int {
-    return i
+    i
   }
 
   public func makeIntMethod() -> Int {
-    return 12
+    12
   }
 
   public func makeRandomIntMethod() -> Int {
-    return Int.random(in: 1..<256)
+    Int.random(in: 1..<256)
   }
 
   public func takeUnsignedChar(arg: UInt16) {

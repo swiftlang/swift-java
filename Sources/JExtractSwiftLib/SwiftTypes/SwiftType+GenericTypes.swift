@@ -20,7 +20,7 @@ extension SwiftType {
     genericParameters: [SwiftGenericParameterDeclaration],
     genericRequirements: [SwiftGenericRequirement]
   ) -> SwiftType? {
-    return representativeConcreteType(
+    representativeConcreteType(
       self,
       knownTypes: knownTypes,
       genericParameters: genericParameters,

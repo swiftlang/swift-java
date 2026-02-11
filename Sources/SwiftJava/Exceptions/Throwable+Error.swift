@@ -15,7 +15,7 @@
 // Translate all Java Throwable instances in a Swift error.
 extension Throwable: Error, CustomStringConvertible {
   public var description: String {
-    return toString()
+    toString()
   }
 }
 
@@ -23,6 +23,6 @@ extension JavaClass<Throwable> {
   /// Determine whether this instance is a checked exception (which must be
   /// handled) vs. an unchecked exception (which is not handled).
   public var isCheckedException: Bool {
-    return !self.is(RuntimeException.self) && !self.is(JavaError.self)
+    !self.is(RuntimeException.self) && !self.is(JavaError.self)
   }
 }

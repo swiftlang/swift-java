@@ -2,8 +2,8 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
-import PackageDescription
 import Foundation
+import PackageDescription
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,
@@ -60,13 +60,15 @@ func getJavaHomeFromPath() -> String? {
     guard task.terminationStatus == 0 else { return nil }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    guard let javaPath = String(data: data, encoding: .utf8)?
-      .trimmingCharacters(in: .whitespacesAndNewlines),
+    guard
+      let javaPath = String(data: data, encoding: .utf8)?
+        .trimmingCharacters(in: .whitespacesAndNewlines),
       !javaPath.isEmpty
     else { return nil }
 
     let resolved = URL(fileURLWithPath: javaPath).resolvingSymlinksInPath()
-    return resolved
+    return
+      resolved
       .deletingLastPathComponent()
       .deletingLastPathComponent()
       .path
@@ -78,12 +80,12 @@ let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
 #if os(Linux)
-  let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
-  let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #else
-  // TODO: Handle windows as well
-  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+// TODO: Handle windows as well
+#error("Currently only macOS and Linux platforms are supported, this may change in the future.")
 #endif
 
 let package = Package(
@@ -99,11 +101,11 @@ let package = Package(
       name: "MySwiftLibrary",
       type: .dynamic,
       targets: ["MySwiftLibrary"]
-    ),
+    )
 
   ],
   dependencies: [
-    .package(name: "swift-java", path: "../../"),
+    .package(name: "swift-java", path: "../../")
   ],
   targets: [
     .target(
@@ -111,18 +113,18 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "CSwiftJavaJNI", package: "swift-java"),
-        .product(name: "SwiftRuntimeFunctions", package: "swift-java")
+        .product(name: "SwiftRuntimeFunctions", package: "swift-java"),
       ],
       exclude: [
-        "swift-java.config",
+        "swift-java.config"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
-        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"]),
       ],
       plugins: [
-        .plugin(name: "JExtractSwiftPlugin", package: "swift-java"),
+        .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
       ]
-    ),
+    )
   ]
 )

@@ -23,7 +23,7 @@ struct JNIExtensionTests {
       public var variableInExtension: String { get }
       public func methodInExtension() {}
     }
-    
+
     public protocol MyProtocol {}
     public struct MyStruct {}
     extension MyStruct: MyProtocol {}
@@ -33,7 +33,8 @@ struct JNIExtensionTests {
   func import_javaMethods() throws {
     try assertOutput(
       input: interfaceFile,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -43,14 +44,16 @@ struct JNIExtensionTests {
           ...
         }
         """
-      ])
+      ]
+    )
   }
 
   @Test("Import extensions: Computed variables")
   func import_computedVariables() throws {
     try assertOutput(
       input: interfaceFile,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -60,6 +63,7 @@ struct JNIExtensionTests {
           ...
         }
         """
-      ])
+      ]
+    )
   }
 }

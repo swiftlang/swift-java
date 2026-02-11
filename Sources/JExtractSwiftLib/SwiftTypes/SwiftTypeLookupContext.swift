@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftSyntax
 @_spi(Experimental) import SwiftLexicalLookup
+import SwiftSyntax
 
 /// Unqualified type lookup manager.
 /// All unqualified lookup should be done via this instance. This caches the
@@ -43,7 +43,7 @@ class SwiftTypeLookupContext {
         }
 
       case .lookForMembers(let scopeNode):
-        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
+        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") {  // FIXME: no path here // implement some node -> file
           if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl as! SwiftNominalTypeDeclaration) {
             return found
           }
@@ -69,9 +69,9 @@ class SwiftTypeLookupContext {
     for name in names {
       switch name {
       case .identifier(let identifiableSyntax, _):
-        return try? typeDeclaration(for: identifiableSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
+        return try? typeDeclaration(for: identifiableSyntax, sourceFilePath: "FIXME_NO_PATH.swift")  // FIXME: how to get path here?
       case .declaration(let namedDeclSyntax):
-        return try? typeDeclaration(for: namedDeclSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
+        return try? typeDeclaration(for: namedDeclSyntax, sourceFilePath: "FIXME_NO_PATH.swift")  // FIXME: how to get path here?
       case .implicit(let implicitDecl):
         // TODO: Implement
         _ = implicitDecl
@@ -94,7 +94,11 @@ class SwiftTypeLookupContext {
     let typeDecl: SwiftTypeDeclaration
     switch Syntax(node).as(SyntaxEnum.self) {
     case .genericParameter(let node):
-      typeDecl = SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: symbolTable.moduleName, node: node)
+      typeDecl = SwiftGenericParameterDeclaration(
+        sourceFilePath: sourceFilePath,
+        moduleName: symbolTable.moduleName,
+        node: node
+      )
     case .classDecl(let node):
       typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .actorDecl(let node):
@@ -110,7 +114,7 @@ class SwiftTypeLookupContext {
       // as the extentedType is just the identifier of the type.
 
       guard case .identifierType(let id) = Syntax(node.extendedType).as(SyntaxEnum.self),
-            let lookupResult = try unqualifiedLookup(name: Identifier(id.name)!, from: node)
+        let lookupResult = try unqualifiedLookup(name: Identifier(id.name)!, from: node)
       else {
         throw TypeLookupError.notType(Syntax(node))
       }
@@ -129,7 +133,10 @@ class SwiftTypeLookupContext {
   }
 
   /// Create a nominal type declaration instance for the specified syntax node.
-  private func nominalTypeDeclaration(for node: NominalTypeDeclSyntaxNode, sourceFilePath: String) throws -> SwiftNominalTypeDeclaration {
+  private func nominalTypeDeclaration(
+    for node: NominalTypeDeclSyntaxNode,
+    sourceFilePath: String
+  ) throws -> SwiftNominalTypeDeclaration {
 
     if let symbolTableDeclaration = self.symbolTable.lookupType(
       node.name.text,
@@ -152,7 +159,9 @@ class SwiftTypeLookupContext {
     while let parentDecl = node.ancestorDecl {
       switch parentDecl.as(DeclSyntaxEnum.self) {
       case .structDecl, .classDecl, .actorDecl, .enumDecl, .protocolDecl:
-        return (try typeDeclaration(for: parentDecl, sourceFilePath: "FIXME_NO_SOURCE_FILE.swift") as! SwiftNominalTypeDeclaration) // FIXME: need to get the source file of the parent
+        return
+          (try typeDeclaration(for: parentDecl, sourceFilePath: "FIXME_NO_SOURCE_FILE.swift")
+          as! SwiftNominalTypeDeclaration)  // FIXME: need to get the source file of the parent
       default:
         node = parentDecl
         continue

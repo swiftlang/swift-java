@@ -21,5 +21,5 @@ public protocol ProtocolA {
 }
 
 public func takeProtocol(_ proto1: any ProtocolA, _ proto2: some ProtocolA) -> Int64 {
-  return proto1.constantA + proto2.constantA
+  proto1.constantA + proto2.constantA
 }

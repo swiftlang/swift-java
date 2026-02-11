@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import JavaLangReflect
-import SwiftSyntax
-import OrderedCollections
-import SwiftJavaConfigurationShared
 import Logging
+import OrderedCollections
+import SwiftJava
+import SwiftJavaConfigurationShared
+import SwiftSyntax
 
 /// Utility type that translates a single Java class into its corresponding
 /// Swift type and any additional helper types or functions.
@@ -26,7 +26,7 @@ struct JavaClassTranslator {
   /// needed for translation.
   let translator: JavaTranslator
 
-  var log: Logger { 
+  var log: Logger {
     translator.log
   }
 
@@ -91,7 +91,7 @@ struct JavaClassTranslator {
 
   /// Whether the Java class we're translating is actually an interface.
   var isInterface: Bool {
-    return javaClass.isInterface()
+    javaClass.isInterface()
   }
 
   /// The name of the enclosing Swift type, if there is one.
@@ -163,8 +163,9 @@ struct JavaClassTranslator {
 
       self.effectiveJavaSuperclass = javaSuperclass
       self.swiftSuperclass = SwiftJavaParameterizedType(
-        name: swiftSuperclassName, 
-        typeArguments: swiftSuperclassTypeArgs)
+        name: swiftSuperclassName,
+        typeArguments: swiftSuperclassTypeArgs
+      )
     } else {
       self.effectiveJavaSuperclass = nil
       self.swiftSuperclass = nil
@@ -208,7 +209,8 @@ struct JavaClassTranslator {
     }
 
     // Gather methods.
-    let methods = translateAsClass
+    let methods =
+      translateAsClass
       ? javaClass.getDeclaredMethods()
       : javaClass.getMethods()
     for method in methods {
@@ -221,9 +223,9 @@ struct JavaClassTranslator {
       // Skip any methods that are expected to be implemented in Swift. We will
       // visit them in the second pass, over the *declared* methods, because
       // we want to see non-public methods as well.
-      let implementedInSwift = method.isNative &&
-        method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) &&
-        translator.swiftNativeImplementations.contains(javaClass.getName())
+      let implementedInSwift =
+        method.isNative && method.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!)
+        && translator.swiftNativeImplementations.contains(javaClass.getName())
       if implementedInSwift {
         continue
       }
@@ -263,7 +265,7 @@ extension JavaClassTranslator {
       let split = exclude.split(separator: "#")
       guard split.count == 2 else {
         self.log.warning("Malformed method exclude filter, must have only one '#' marker: \(exclude)")
-        continue // cannot use this filter, malformed
+        continue  // cannot use this filter, malformed
       }
 
       let javaClassName = method.getDeclaringClass().getName()
@@ -271,7 +273,7 @@ extension JavaClassTranslator {
 
       let className = split.first!
       let excludedName = split.dropFirst().first!
-        
+
       self.log.warning("Exclude filter: \(exclude) ||| \(javaClassName) / \(javaMemberName)")
 
       if javaClassName.starts(with: className) {
@@ -286,12 +288,12 @@ extension JavaClassTranslator {
     }
 
     switch self.translator.config.effectiveMinimumInputAccessLevelMode {
-      case .internal:
-        return method.isPublic || method.isProtected || method.isPackage
-      case .package:
-        return method.isPublic || method.isProtected || method.isPackage
-      case .public:
-        return method.isPublic || method.isProtected
+    case .internal:
+      return method.isPublic || method.isProtected || method.isPackage
+    case .package:
+      return method.isPublic || method.isProtected || method.isPackage
+    case .public:
+      return method.isPublic || method.isProtected
     }
   }
 
@@ -299,8 +301,7 @@ extension JavaClassTranslator {
   private mutating func addField(_ field: Field) {
     // Don't include inherited fields when translating to a class.
     // This applies to both instance and static fields to avoid duplicates
-    if translateAsClass &&
-        !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
+    if translateAsClass && !field.getDeclaringClass()!.equals(javaClass.as(JavaObject.self)!) {
       return
     }
 
@@ -361,7 +362,9 @@ extension JavaClassTranslator {
       do {
         return try renderField(field)
       } catch {
-        translator.logUntranslated("Unable to translate '\(javaClass.getName())' static field '\(field.getName())': \(error)")
+        translator.logUntranslated(
+          "Unable to translate '\(javaClass.getName())' static field '\(field.getName())': \(error)"
+        )
         return nil
       }
     }
@@ -384,7 +387,9 @@ extension JavaClassTranslator {
       do {
         return try renderMethod(method, implementedInSwift: false)
       } catch {
-        translator.logUntranslated("Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)")
+        translator.logUntranslated(
+          "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
+        )
         return nil
       }
     }
@@ -399,18 +404,18 @@ extension JavaClassTranslator {
     let inheritanceClause: String
     if translateAsClass {
       extendsClause = ""
-      inheritanceClause = 
+      inheritanceClause =
         if let swiftSuperclass, swiftSuperclass.typeArguments.isEmpty {
-           ": \(swiftSuperclass.name)" 
+          ": \(swiftSuperclass.name)"
         } else if let swiftSuperclass {
-           ": \(swiftSuperclass.name)<\(swiftSuperclass.typeArguments.joined(separator: ", "))>" 
-        } else { 
-          "" 
+          ": \(swiftSuperclass.name)<\(swiftSuperclass.typeArguments.joined(separator: ", "))>"
+        } else {
+          ""
         }
     } else {
-      extendsClause = 
+      extendsClause =
         if let swiftSuperclass {
-          ", extends: \(swiftSuperclass.render()).self" 
+          ", extends: \(swiftSuperclass.render()).self"
         } else {
           ""
         }
@@ -426,15 +431,15 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
-    let genericParameterClause = 
-      if genericParameters.isEmpty { 
+    let genericParameterClause =
+      if genericParameters.isEmpty {
         ""
       } else {
         "<\(genericParameters.joined(separator: ", "))>"
       }
 
     // Emit the struct declaration describing the java class.
-    let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass";
+    let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass"
     let introducer = translateAsClass ? "open class" : "public struct"
     var classDecl: DeclSyntax =
       """
@@ -461,17 +466,19 @@ extension JavaClassTranslator {
 
   /// Render any nested classes that will not be rendered separately.
   func renderNestedClasses() -> [DeclSyntax] {
-    return nestedClasses
+    nestedClasses
       .sorted {
         $0.getName() < $1.getName()
       }.compactMap { clazz in
-      do {
-        return try translator.translateClass(clazz)
-      } catch {
-        translator.logUntranslated("Unable to translate '\(javaClass.getName())' nested class '\(clazz.getName())': \(error)")
-        return nil
-      }
-    }.flatMap(\.self)
+        do {
+          return try translator.translateClass(clazz)
+        } catch {
+          translator.logUntranslated(
+            "Unable to translate '\(javaClass.getName())' nested class '\(clazz.getName())': \(error)"
+          )
+          return nil
+        }
+      }.flatMap(\.self)
   }
 
   /// Render the extension of JavaClass that collects all of the static
@@ -485,7 +492,7 @@ extension JavaClassTranslator {
       }
 
       let genericArgumentClause = "<\(genericParameterNames.joined(separator: ", "))>"
-      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)" // FIXME: move the 'where ...' part into the render bit
+      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)"  // FIXME: move the 'where ...' part into the render bit
     } else {
       staticMemberWhereClause = ""
     }
@@ -506,12 +513,15 @@ extension JavaClassTranslator {
       // Translate each static method.
       do {
         return try renderMethod(
-          method, implementedInSwift: /*FIXME:*/false,
+          method,
+          implementedInSwift: /*FIXME:*/ false,
           genericParameters: genericParameters,
           whereClause: staticMemberWhereClause
         )
       } catch {
-        translator.logUntranslated("Unable to translate '\(javaClass.getName())' static method '\(method.getName())': \(error)")
+        translator.logUntranslated(
+          "Unable to translate '\(javaClass.getName())' static method '\(method.getName())': \(error)"
+        )
         return nil
       }
     }
@@ -553,7 +563,9 @@ extension JavaClassTranslator {
           implementedInSwift: true
         )
       } catch {
-        translator.logUntranslated("Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)")
+        translator.logUntranslated(
+          "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
+        )
         return nil
       }
     }
@@ -583,13 +595,13 @@ extension JavaClassTranslator {
 
     for annotation in annotations {
       let annotationName = annotation.annotationType().getName().splitSwiftTypeName().name
-      if annotationName == "ThreadSafe" || annotationName == "Immutable" { // If we are threadsafe, mark as unchecked Sendable
+      if annotationName == "ThreadSafe" || annotationName == "Immutable" {  // If we are threadsafe, mark as unchecked Sendable
         extensions.append(
           """
           extension \(raw: swiftTypeName): @unchecked Swift.Sendable { }
           """
         )
-      } else if annotationName == "NotThreadSafe" { // If we are _not_ threadsafe, mark sendable unavailable
+      } else if annotationName == "NotThreadSafe" {  // If we are _not_ threadsafe, mark sendable unavailable
         extensions.append(
           """
           @available(unavailable, *)
@@ -613,7 +625,7 @@ extension JavaClassTranslator {
     let accessModifier = javaConstructor.isPublic ? "public " : ""
     let convenienceModifier = translateAsClass ? "convenience " : ""
     let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
-    
+
     // FIXME: handle generics in constructors
     return """
       @JavaMethod
@@ -666,11 +678,11 @@ extension JavaClassTranslator {
     method: Method
   ) -> OrderedSet<String> {
     var allGenericParameters = OrderedSet(genericParameters)
-    
+
     let typeParameters = method.getTypeParameters()
     for typeParameter in typeParameters {
       guard let typeParameter else { continue }
-      
+
       guard genericParameterIsUsedInSignature(typeParameter, in: method) else {
         continue
       }
@@ -690,7 +702,7 @@ extension JavaClassTranslator {
   ) throws -> DeclSyntax {
     // Map the generic params on the method.
     let allGenericParameters = collectMethodGenericParameters(genericParameters: genericParameters, method: javaMethod)
-    let genericParameterClauseStr = 
+    let genericParameterClauseStr =
       if allGenericParameters.isEmpty {
         ""
       } else {
@@ -704,11 +716,11 @@ extension JavaClassTranslator {
     // Map the result type.
     let resultTypeStr: String
     let resultType = try translator.getSwiftReturnTypeNameAsString(
-      method: javaMethod, 
-      preferValueTypes: true, 
+      method: javaMethod,
+      preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
-    let hasTypeEraseGenericResultType: Bool = 
+    let hasTypeEraseGenericResultType: Bool =
       isTypeErased(javaMethod.getGenericReturnType())
 
     // FIXME: cleanup the checking here
@@ -725,7 +737,7 @@ extension JavaClassTranslator {
 
     // --- Handle docs for the generated method.
     // Include the original Java signature
-    let docsString = 
+    let docsString =
       """
         /// Java method `\(javaMethod.getName())`.
         ///
@@ -737,45 +749,51 @@ extension JavaClassTranslator {
 
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
-      if implementedInSwift {
-        methodAttribute = ""
-      } else {
-        var methodAttributeStr =
-          if javaMethod.isStatic {
-            "@JavaStaticMethod"
-          } else {
-            "@JavaMethod"
-          }
-        // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
-        var parameters: [String] = []
-        // If the method name is "init", we need to explicitly specify it in the annotation
-        // because "init" is a Swift keyword and will be escaped in the function name via `init`
-        if javaMethod.getName() == "init" {
-          parameters.append("\"init\"")
+    if implementedInSwift {
+      methodAttribute = ""
+    } else {
+      var methodAttributeStr =
+        if javaMethod.isStatic {
+          "@JavaStaticMethod"
+        } else {
+          "@JavaMethod"
         }
-        if hasTypeEraseGenericResultType {
-          parameters.append("typeErasedResult: \"\(resultType)\"")
-        }
-        // TODO: generic parameters?
-        
-        if !parameters.isEmpty {
-          methodAttributeStr += "("
-          methodAttributeStr.append(parameters.joined(separator: ", "))
-          methodAttributeStr += ")"
-        }
-        methodAttributeStr += "\n"
-        methodAttribute = "\(raw: methodAttributeStr)"
+      // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
+      var parameters: [String] = []
+      // If the method name is "init", we need to explicitly specify it in the annotation
+      // because "init" is a Swift keyword and will be escaped in the function name via `init`
+      if javaMethod.getName() == "init" {
+        parameters.append("\"init\"")
       }
+      if hasTypeEraseGenericResultType {
+        parameters.append("typeErasedResult: \"\(resultType)\"")
+      }
+      // TODO: generic parameters?
 
-    let accessModifier = implementedInSwift ? ""
-      : (javaMethod.isStatic || !translateAsClass) ? "public "
-      : "open "
-    let overrideOpt = (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
+      if !parameters.isEmpty {
+        methodAttributeStr += "("
+        methodAttributeStr.append(parameters.joined(separator: ", "))
+        methodAttributeStr += ")"
+      }
+      methodAttributeStr += "\n"
+      methodAttribute = "\(raw: methodAttributeStr)"
+    }
+
+    let accessModifier =
+      implementedInSwift
+      ? ""
+      : (javaMethod.isStatic || !translateAsClass)
+        ? "public "
+        : "open "
+    let overrideOpt =
+      (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
 
     // FIXME: refactor this so we don't have to duplicate the method signatures
-    if resultType.optionalWrappedType() != nil || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil }) {
+    if resultType.optionalWrappedType() != nil
+      || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil })
+    {
       let parameters = parameters.map { param -> (clause: FunctionParameterSyntax, passedArg: String) in
         let name = param.secondName!.trimmedDescription
 
@@ -787,25 +805,26 @@ extension JavaClassTranslator {
       }
 
       let resultOptional: String = resultType.optionalWrappedType() ?? resultType
-      let baseBody: ExprSyntax = "\(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", ")))"
-      let body: ExprSyntax = 
+      let baseBody: ExprSyntax =
+        "\(raw: javaMethod.throwsCheckedException ? "try " : "")\(raw: swiftMethodName)(\(raw: parameters.map(\.passedArg).joined(separator: ", ")))"
+      let body: ExprSyntax =
         if resultType.optionalWrappedType() != nil {
           "Optional(javaOptional: \(baseBody))"
         } else {
           baseBody
         }
 
-      return 
+      return
         """
         \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
-        
+
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
           \(body)
         }
         """
     } else {
-      return 
+      return
         """
         \(raw: docsString)
         \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
@@ -821,36 +840,37 @@ extension JavaClassTranslator {
       preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
-    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField";
+    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField"
     let swiftFieldName = javaField.getName().escapedSwiftName
 
     if let optionalType = typeName.optionalWrappedType() {
-      let setter = if !javaField.isFinal {
-      """
-      
-        set {
-          \(swiftFieldName) = newValue.toJavaOptional()
-        }
-      """
-      } else {
-        ""
-      }
-      return """
-      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
-      public var \(raw: swiftFieldName): \(raw: typeName)
+      let setter =
+        if !javaField.isFinal {
+          """
 
-      
-      public var \(raw: swiftFieldName)Optional: \(raw: optionalType) {
-        get {
-          Optional(javaOptional: \(raw: swiftFieldName))
-        }\(raw: setter)
-      }
-      """
+            set {
+              \(swiftFieldName) = newValue.toJavaOptional()
+            }
+          """
+        } else {
+          ""
+        }
+      return """
+        \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        public var \(raw: swiftFieldName): \(raw: typeName)
+
+
+        public var \(raw: swiftFieldName)Optional: \(raw: optionalType) {
+          get {
+            Optional(javaOptional: \(raw: swiftFieldName))
+          }\(raw: setter)
+        }
+        """
     } else {
       return """
-      \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
-      public var \(raw: swiftFieldName): \(raw: typeName)
-      """
+        \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        public var \(raw: swiftFieldName): \(raw: typeName)
+        """
     }
   }
 
@@ -860,15 +880,15 @@ extension JavaClassTranslator {
     }
 
     let extensionSyntax: DeclSyntax = """
-      public enum \(raw: name): Equatable {
-        \(raw: enumConstants.map { "case \($0.getName())" }.joined(separator: "\n"))
-      }
-    """
+        public enum \(raw: name): Equatable {
+          \(raw: enumConstants.map { "case \($0.getName())" }.joined(separator: "\n"))
+        }
+      """
 
     let mappingSyntax: DeclSyntax = """
-      public var enumValue: \(raw: name)! {
-        let classObj = self.javaClass
-        \(raw: enumConstants.map {
+        public var enumValue: \(raw: name)! {
+          let classObj = self.javaClass
+          \(raw: enumConstants.map {
           // The equals method takes a java object, so we need to cast it here
           """
           if self.equals(classObj.\($0.getName())?.as(JavaObject.self)) {
@@ -876,23 +896,23 @@ extension JavaClassTranslator {
           }
           """
         }.joined(separator: " else ")) else {
-          return nil
+            return nil
+          }
         }
-      }
-    """
+      """
 
     let convenienceModifier = translateAsClass ? "convenience " : ""
     let initSyntax: DeclSyntax = """
-    public \(raw: convenienceModifier)init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
-      let _environment = if let environment {
-        environment
-      } else {
-        try! JavaVirtualMachine.shared().environment()
-      }
-      let classObj = try! JavaClass<\(raw: swiftInnermostTypeName)>(environment: _environment)
-      switch enumValue {
-    \(raw: enumConstants.map {
-      return """
+      public \(raw: convenienceModifier)init(_ enumValue: \(raw: name), environment: JNIEnvironment? = nil) {
+        let _environment = if let environment {
+          environment
+        } else {
+          try! JavaVirtualMachine.shared().environment()
+        }
+        let classObj = try! JavaClass<\(raw: swiftInnermostTypeName)>(environment: _environment)
+        switch enumValue {
+      \(raw: enumConstants.map {
+      """
           case .\($0.getName()):
             if let \($0.getName()) = classObj.\($0.getName()) {
               \(translateAsClass
@@ -903,9 +923,9 @@ extension JavaClassTranslator {
             }
       """
     }.joined(separator: "\n"))
+        }
       }
-    }
-    """
+      """
 
     return [extensionSyntax, mappingSyntax, initSyntax]
   }
@@ -931,11 +951,11 @@ extension JavaClassTranslator {
   }
 
   // Translate a Java parameter list into Swift parameters.
-  @available(*, deprecated, message: "Prefer the method based version") // FIXME: constructors are not well handled
+  @available(*, deprecated, message: "Prefer the method based version")  // FIXME: constructors are not well handled
   private func translateJavaParameters(
     _ parameters: [Parameter?]
   ) throws -> [FunctionParameterSyntax] {
-    return try parameters.compactMap { javaParameter in
+    try parameters.compactMap { javaParameter in
       guard let javaParameter else { return nil }
 
       let typeName = try translator.getSwiftTypeNameAsString(
@@ -1008,8 +1028,11 @@ extension JavaClassTranslator {
 
         // If this superclass declares a method with the same parameter types,
         // we have an override.
-        guard let overriddenMethod = try currentSuperclassNonOpt
-          .getDeclaredMethod(method.getName(), method.getParameterTypes()) else {
+        guard
+          let overriddenMethod =
+            try currentSuperclassNonOpt
+            .getDeclaredMethod(method.getName(), method.getParameterTypes())
+        else {
           continue
         }
 
@@ -1048,4 +1071,3 @@ extension [Type?] {
     return true
   }
 }
-

@@ -43,7 +43,9 @@ package class SwiftSymbolTable {
 
   private var knownTypeToNominal: [SwiftKnownTypeDeclKind: SwiftNominalTypeDeclaration] = [:]
   private var prioritySortedImportedModules: [SwiftModuleSymbolTable] {
-    importedModules.values.sorted(by: { ($0.alternativeModules?.isMainSourceOfSymbols ?? false) && $0.moduleName < $1.moduleName })
+    importedModules.values.sorted(by: {
+      ($0.alternativeModules?.isMainSourceOfSymbols ?? false) && $0.moduleName < $1.moduleName
+    })
   }
 
   init(parsedModule: SwiftModuleSymbolTable, importedModules: [String: SwiftModuleSymbolTable]) {
@@ -73,8 +75,7 @@ extension SwiftSymbolTable {
       // e.g Data from FoundationEssentials and Foundation collide and lead to different results due to random order of keys in Swift's Dictionary
       // guard module.isMainSourceOfSymbols || !importedModules.contains(where: { $0.value.isAlternative(for: String)}) else { continue }
 
-      if
-        importedModules[module.name] == nil,
+      if importedModules[module.name] == nil,
         let knownModule = SwiftKnownModule(rawValue: module.name)
       {
         importedModules[module.name] = knownModule.symbolTable
@@ -83,7 +84,11 @@ extension SwiftSymbolTable {
 
     // FIXME: Support granular lookup context (file, type context).
 
-    var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: moduleName, importedModules: importedModules, log: log)
+    var builder = SwiftParsedModuleSymbolTableBuilder(
+      moduleName: moduleName,
+      importedModules: importedModules,
+      log: log
+    )
     // First, register top-level and nested nominal types to the symbol table.
     for sourceFile in inputFiles {
       builder.handle(sourceFile: sourceFile.syntax, sourceFilePath: sourceFile.path)
@@ -108,7 +113,7 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
         return result
       }
     }
-    
+
     // FIXME: Implement module qualified name lookups. E.g. 'Swift.String'
 
     return nil
@@ -165,7 +170,10 @@ extension SwiftSymbolTable {
       }
 
       // Try to print only on main module from relation chain as it has every other module.
-      guard !mainSymbolSourceModules.isDisjoint(with: alternativeModules.moduleNames) || alternativeModules.isMainSourceOfSymbols else {
+      guard
+        !mainSymbolSourceModules.isDisjoint(with: alternativeModules.moduleNames)
+          || alternativeModules.isMainSourceOfSymbols
+      else {
         if !alternativeModules.isMainSourceOfSymbols {
           printer.print("import \(module)")
         }
@@ -181,7 +189,7 @@ extension SwiftSymbolTable {
       }
 
       for (index, group) in importGroups.keys.sorted().enumerated() {
-        if index > 0  && importGroups.keys.count > 1 {
+        if index > 0 && importGroups.keys.count > 1 {
           printer.print("#elseif canImport(\(group))")
         } else {
           printer.print("#if canImport(\(group))")
@@ -192,7 +200,7 @@ extension SwiftSymbolTable {
         }
       }
 
-      if (importGroups.keys.isEmpty) {
+      if importGroups.keys.isEmpty {
         printer.print("import \(module)")
       } else {
         printer.print("#else")

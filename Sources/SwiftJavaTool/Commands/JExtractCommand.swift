@@ -12,14 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import ArgumentParser
-import SwiftJavaToolLib
-import SwiftJava
-import JavaUtilJar
-import SwiftJavaToolLib
+import Foundation
 import JExtractSwiftLib
+import JavaUtilJar
+import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaToolLib
 
 /// Extract Java bindings from Swift sources or interface files.
 ///
@@ -34,8 +33,9 @@ extension SwiftJava {
 
   struct JExtractCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions {
     static let configuration = CommandConfiguration(
-      commandName: "jextract", // TODO: wrap-swift?
-      abstract: "Wrap Swift functions and types with Java bindings, making them available to be called from Java")
+      commandName: "jextract",  // TODO: wrap-swift?
+      abstract: "Wrap Swift functions and types with Java bindings, making them available to be called from Java"
+    )
 
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
 
@@ -58,28 +58,42 @@ extension SwiftJava {
     @Option(help: "The directory where generated Java files should be written. Generally used with jextract mode.")
     var outputJava: String
 
-    @Flag(inversion: .prefixedNo, help: "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.")
+    @Flag(
+      inversion: .prefixedNo,
+      help:
+        "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary."
+    )
     var writeEmptyFiles: Bool?
 
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
     var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
 
-    @Option(help: "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allowGlobalAutomatic`, user can omit this parameter and a global GC-based arena will be used.")
+    @Option(
+      help:
+        "The memory management mode to use for the generated code. By default, the user must explicitly provide `SwiftArena` to all calls that require it. By choosing `allowGlobalAutomatic`, user can omit this parameter and a global GC-based arena will be used."
+    )
     var memoryManagementMode: JExtractMemoryManagementMode?
 
     @Option(
       help: """
-            A swift-java configuration file for a given Swift module name on which this module depends,
-            e.g., Sources/JavaJar/swift-java.config. There should be one of these options
-            for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
-            """
+        A swift-java configuration file for a given Swift module name on which this module depends,
+        e.g., Sources/JavaJar/swift-java.config. There should be one of these options
+        for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
+        """
     )
     var dependsOn: [String] = []
 
-    @Option(help: "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture.")
+    @Option(
+      help:
+        "The mode to use for extracting asynchronous Swift functions. By default async methods are extracted as Java functions returning CompletableFuture."
+    )
     var asyncFuncMode: JExtractAsyncFuncMode?
 
-    @Flag(inversion: .prefixedNo, help: "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode.")
+    @Flag(
+      inversion: .prefixedNo,
+      help:
+        "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode."
+    )
     var enableJavaCallbacks: Bool?
 
     @Option(help: "If specified, JExtract will output to this file a list of paths to all generated Java source files")
@@ -125,7 +139,9 @@ extension SwiftJava.JExtractCommand {
   func checkModeCompatibility(config: Configuration) throws {
     if config.effectiveMode == .ffm {
       guard config.effectiveMemoryManagementMode == .explicit else {
-        throw IllegalModeCombinationError("FFM mode does not support '\(self.memoryManagementMode ?? .default)' memory management mode! \(Self.helpMessage())")
+        throw IllegalModeCombinationError(
+          "FFM mode does not support '\(self.memoryManagementMode ?? .default)' memory management mode! \(Self.helpMessage())"
+        )
       }
 
       if let enableJavaCallbacks = config.enableJavaCallbacks, enableJavaCallbacks {

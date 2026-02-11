@@ -40,11 +40,11 @@ package final class JNI {
       let clazz = try JavaClass<JavaThread>(environment: environment)
       guard let thread: JavaThread = clazz.currentThread() else {
         applicationClassLoader = nil
-        return 
+        return
       }
       guard let cl = thread.getContextClassLoader() else {
         applicationClassLoader = nil
-        return 
+        return
       }
       self.applicationClassLoader = cl
     } catch {

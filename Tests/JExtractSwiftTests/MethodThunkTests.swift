@@ -23,7 +23,7 @@ final class MethodThunkTests {
     public var globalVar: MyClass = MyClass()
     public func globalFunc(a: Int32, b: Int64) {}
     public func globalFunc(a: Double, b: Int64) {}
-    
+
     public class MyClass {
       public var property: Int
       public init(arg: Int32) {}
@@ -33,11 +33,12 @@ final class MethodThunkTests {
   @Test("Thunk overloads: globalFunc(a: Int32, b: Int64) & globalFunc(i32: Int32, l: Int64)")
   func thunk_overloads() throws {
     try assertOutput(
-      input: input, .ffm, .swift,
+      input: input,
+      .ffm,
+      .swift,
       swiftModuleName: "FakeModule",
       detectChunkByInitialLines: 1,
-      expectedChunks:
-      [
+      expectedChunks: [
         """
         @_cdecl("swiftjava_FakeModule_globalVar$get")
         public func swiftjava_FakeModule_globalVar$get(_ _result: UnsafeMutableRawPointer) {
@@ -85,7 +86,7 @@ final class MethodThunkTests {
         public func swiftjava_FakeModule_MyClass_property$set(_ newValue: Int, _ self: UnsafeRawPointer) {
           self.assumingMemoryBound(to: MyClass.self).pointee.property = newValue
         }
-        """
+        """,
       ]
     )
   }

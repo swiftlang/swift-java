@@ -51,7 +51,7 @@ extension JavaType: CustomStringConvertible {
     case .double: "double"
     case .void: "void"
     case .array(let elementType): "\(elementType.description)[]"
-    case .class(package: let package, name: let name, let typeParameters):
+    case .class(let package, let name, let typeParameters):
       if let package {
         if !typeParameters.isEmpty {
           "\(package).\(name)<\(typeParameters.map(\.description).joined(separator: ", "))>"

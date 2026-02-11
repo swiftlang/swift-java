@@ -52,14 +52,14 @@ extension JavaFieldMacro: AccessorMacro {
       }
 
     let createSetter =
-    if case .argumentList(let arguments) = node.arguments,
-       let wrapperIsBoolean = arguments.first(where: { $0.label?.text == "isFinal" })?.expression,
+      if case .argumentList(let arguments) = node.arguments,
+        let wrapperIsBoolean = arguments.first(where: { $0.label?.text == "isFinal" })?.expression,
         let booleanLiteral = wrapperIsBoolean.as(BooleanLiteralExprSyntax.self)
-    {
-      booleanLiteral.literal.text == "false" // Create the setter if we are not final
-    } else {
-      true
-    }
+      {
+        booleanLiteral.literal.text == "false"  // Create the setter if we are not final
+      } else {
+        true
+      }
 
     let getter: AccessorDeclSyntax = """
       get { self[javaFieldName: \(literal: fieldName), fieldType: \(fieldType).self] }
@@ -70,10 +70,10 @@ extension JavaFieldMacro: AccessorMacro {
     ]
 
     let nonmutatingModifier =
-      (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false ||
-       context.lexicalContext.first?.is(ExtensionDeclSyntax.self) ?? false)
-        ? ""
-        : "nonmutating "
+      (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false
+        || context.lexicalContext.first?.is(ExtensionDeclSyntax.self) ?? false)
+      ? ""
+      : "nonmutating "
 
     if createSetter {
       let setter: AccessorDeclSyntax = """

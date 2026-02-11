@@ -12,19 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Logging
 import ArgumentParser
 import Foundation
-import SwiftJavaToolLib
 import JExtractSwiftLib
-import SwiftJava
-import JavaUtilJar
-import JavaNet
 import JavaLangReflect
-import SwiftSyntax
-import SwiftSyntaxBuilder
+import JavaNet
+import JavaUtilJar
+import Logging
+import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
+import SwiftJavaToolLib
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 extension SwiftJava {
   struct ConfigureCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions, HasCommonJVMOptions {
@@ -33,18 +33,23 @@ extension SwiftJava {
 
     static let configuration = CommandConfiguration(
       commandName: "configure",
-      abstract: "Configure and emit a swift-java.config file based on an input dependency or jar file")
+      abstract: "Configure and emit a swift-java.config file based on an input dependency or jar file"
+    )
 
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
     @OptionGroup var commonJVMOptions: SwiftJava.CommonJVMOptions
 
     // TODO: This should be a "make wrappers" option that just detects when we give it a jar
-    @Flag(help: "Specifies that the input is a *.jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes.")
+    @Flag(
+      help:
+        "Specifies that the input is a *.jar file whose public classes will be loaded. The output of swift-java will be a configuration file (swift-java.config) that can be used as input to a subsequent swift-java invocation to generate wrappers for those public classes."
+    )
     var jar: Bool = false
 
     @Option(
       name: .long,
-      help: "How to handle an existing swift-java.config; by default 'overwrite' by can be changed to amending a configuration"
+      help:
+        "How to handle an existing swift-java.config; by default 'overwrite' by can be changed to amending a configuration"
     )
     var existingConfigFile: ExistingConfigFileMode = .overwrite
     enum ExistingConfigFileMode: String, ExpressibleByArgument, Codable {
@@ -67,7 +72,10 @@ extension SwiftJava {
 extension SwiftJava.ConfigureCommand {
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
     let classpathEntries = self.configureCommandJVMClasspath(
-        searchDirs: [self.effectiveSwiftModuleURL], config: config, log: Self.log)
+      searchDirs: [self.effectiveSwiftModuleURL],
+      config: config,
+      log: Self.log
+    )
 
     let jvm =
       try self.makeJVM(classpathEntries: classpathEntries)
@@ -108,7 +116,7 @@ extension SwiftJava.ConfigureCommand {
 
     if !self.commonOptions.filterInclude.isEmpty {
       log.debug("Generate Java->Swift type mappings. Active include filters: \(self.commonOptions.filterInclude)")
-    } else if let filters = config.filterInclude, !filters.isEmpty { 
+    } else if let filters = config.filterInclude, !filters.isEmpty {
       // take the package filter from the configuration file
       self.commonOptions.filterInclude = filters
     } else {
@@ -124,7 +132,7 @@ extension SwiftJava.ConfigureCommand {
     if amendExistingConfig {
       log.info("Amend existing swift-java.config file...")
     }
-    config.classpath = classpathEntries.joined(separator: ":") // TODO: is this correct?
+    config.classpath = classpathEntries.joined(separator: ":")  // TODO: is this correct?
 
     // Import types from all the classpath entries;
     // Note that we use the package level filtering, so users have some control over what gets imported.
@@ -213,8 +221,10 @@ extension SwiftJava.ConfigureCommand {
       return
     }
 
-    let javaCanonicalName = String(fileName.replacing("/", with: ".")
-      .dropLast(".class".count))
+    let javaCanonicalName = String(
+      fileName.replacing("/", with: ".")
+        .dropLast(".class".count)
+    )
 
     guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
       log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")

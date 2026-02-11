@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// This file exists to exercise the swiftpm plugin generating separate output Java files 
+// This file exists to exercise the swiftpm plugin generating separate output Java files
 // for the public types; because Java public types must be in a file with the same name as the type.
 
 public struct PublicTypeOne {
@@ -20,7 +20,7 @@ public struct PublicTypeOne {
   public func test() {}
 }
 
-public struct PublicTypeTwo { 
+public struct PublicTypeTwo {
   public init() {}
   public func test() {}
 }

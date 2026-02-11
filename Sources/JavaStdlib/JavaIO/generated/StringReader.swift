@@ -7,75 +7,75 @@ open class StringReader: Reader {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
-    /// Java method `ready`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public boolean java.io.StringReader.ready() throws java.io.IOException
-    /// ```
+  /// Java method `ready`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.StringReader.ready() throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func ready() throws -> Bool
 
-    /// Java method `reset`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public void java.io.StringReader.reset() throws java.io.IOException
-    /// ```
+  /// Java method `reset`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.StringReader.reset() throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func reset() throws
 
-    /// Java method `close`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public void java.io.StringReader.close()
-    /// ```
+  /// Java method `close`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.StringReader.close()
+  /// ```
   @JavaMethod
   open override func close()
 
-    /// Java method `mark`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public void java.io.StringReader.mark(int) throws java.io.IOException
-    /// ```
+  /// Java method `mark`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.StringReader.mark(int) throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func mark(_ arg0: Int32) throws
 
-    /// Java method `read`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public int java.io.StringReader.read(char[],int,int) throws java.io.IOException
-    /// ```
+  /// Java method `read`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.io.StringReader.read(char[],int,int) throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func read(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
-    /// Java method `read`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public int java.io.StringReader.read() throws java.io.IOException
-    /// ```
+  /// Java method `read`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.io.StringReader.read() throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func read() throws -> Int32
 
-    /// Java method `skip`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public long java.io.StringReader.skip(long) throws java.io.IOException
-    /// ```
+  /// Java method `skip`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.io.StringReader.skip(long) throws java.io.IOException
+  /// ```
   @JavaMethod
   open override func skip(_ arg0: Int64) throws -> Int64
 
-    /// Java method `markSupported`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public boolean java.io.StringReader.markSupported()
-    /// ```
+  /// Java method `markSupported`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.StringReader.markSupported()
+  /// ```
   @JavaMethod
   open override func markSupported() -> Bool
 }

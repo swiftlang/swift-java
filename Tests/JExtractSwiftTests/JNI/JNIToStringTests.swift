@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import Testing
 import SwiftJavaConfigurationShared
+import Testing
 
 @Suite
 struct JNIToStringTests {
@@ -27,7 +27,8 @@ struct JNIToStringTests {
   func toString_java() throws {
     try assertOutput(
       input: source,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -37,7 +38,7 @@ struct JNIToStringTests {
         """,
         """
         private static native java.lang.String $toString(long selfPointer);
-        """
+        """,
       ]
     )
   }
@@ -46,7 +47,8 @@ struct JNIToStringTests {
   func toString_swift() throws {
     try assertOutput(
       input: source,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -55,7 +57,7 @@ struct JNIToStringTests {
           ...
           return String(describing: self$.pointee).getJNIValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -64,14 +66,15 @@ struct JNIToStringTests {
   func toDebugString_java() throws {
     try assertOutput(
       input: source,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public String toDebugString() {
           return $toDebugString(this.$memoryAddress());
         }
-        """,
+        """
       ]
     )
   }
@@ -80,7 +83,8 @@ struct JNIToStringTests {
   func toDebugString_swift() throws {
     try assertOutput(
       input: source,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -89,7 +93,7 @@ struct JNIToStringTests {
           ...
           return String(reflecting: self$.pointee).getJNIValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }

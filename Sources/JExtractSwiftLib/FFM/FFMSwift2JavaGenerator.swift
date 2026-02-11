@@ -13,9 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftJavaConfigurationShared
+
 import struct Foundation.URL
 
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
@@ -39,7 +40,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
-  /// 
+  ///
   /// Since Swift files in SwiftPM builds needs to be unique, we use this fact to flatten paths into plain names here.
   /// For uniqueness checking "did we write this file already", just checking the name should be sufficient.
   var expectedOutputSwiftFileNames: Set<String>
@@ -63,15 +64,17 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     // If we are forced to write empty files, construct the expected outputs.
     // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
     if translator.config.writeEmptyFiles ?? false {
-      self.expectedOutputSwiftFileNames = Set(translator.inputs.compactMap { (input) -> String? in
-        guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
-          return nil
+      self.expectedOutputSwiftFileNames = Set(
+        translator.inputs.compactMap { (input) -> String? in
+          guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
+            return nil
+          }
+          guard fileName.hasSuffix(".swift") else {
+            return nil
+          }
+          return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
         }
-        guard fileName.hasSuffix(".swift") else {
-          return nil
-        }
-        return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
-      })
+      )
       self.expectedOutputSwiftFileNames.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
       self.expectedOutputSwiftFileNames.insert("Foundation+SwiftJava.swift")
     } else {
@@ -96,7 +99,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 extension FFMSwift2JavaGenerator {
 
   /// Default set Java imports for every generated file
-  static let defaultJavaImports: Array<String> = [
+  static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.ffm.*",
@@ -114,7 +117,6 @@ extension FFMSwift2JavaGenerator {
 
 // ==== ---------------------------------------------------------------------------------------------------------------
 // MARK: File writing
-
 
 extension FFMSwift2JavaGenerator {
   package func writeExportedJavaSources() throws {
@@ -146,8 +148,8 @@ extension FFMSwift2JavaGenerator {
       if let outputFile = try printer.writeContents(
         outputDirectory: javaOutputDirectory,
         javaPackagePath: javaPackagePath,
-        filename: filename)
-      {
+        filename: filename
+      ) {
         log.info("Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
       }
     }
@@ -184,7 +186,7 @@ extension FFMSwift2JavaGenerator {
   func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
-    printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
+    printImports(&printer)  // TODO: we could have some imports be driven from types used in the generated decl
 
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,
@@ -286,7 +288,9 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printNominal(
-    _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
+    _ printer: inout CodePrinter,
+    _ decl: ImportedNominalType,
+    body: (inout CodePrinter) -> Void
   ) {
     let parentProtocol: String
     if decl.swiftNominal.isReferenceType {
@@ -298,7 +302,9 @@ extension FFMSwift2JavaGenerator {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
     }
-    printer.printBraceBlock("public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)") {
+    printer.printBraceBlock(
+      "public final class \(decl.swiftNominal.name) extends FFMSwiftInstance implements \(parentProtocol)"
+    ) {
       printer in
       // Constants
       printClassConstants(printer: &printer)
@@ -406,7 +412,8 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printToStringMethod(
-    _ printer: inout CodePrinter, _ decl: ImportedNominalType
+    _ printer: inout CodePrinter,
+    _ decl: ImportedNominalType
   ) {
     printer.print(
       """
@@ -418,7 +425,8 @@ extension FFMSwift2JavaGenerator {
               + ")@"
               + $memorySegment();
       }
-      """)
+      """
+    )
   }
 
   /// Print special helper methods for known types like Foundation.Data
@@ -436,4 +444,3 @@ extension FFMSwift2JavaGenerator {
   }
 
 }
-

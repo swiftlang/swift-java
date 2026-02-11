@@ -88,8 +88,8 @@ public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.
 /// }
 /// ```
 @attached(accessor)
-public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "SwiftJavaMacros", type: "JavaFieldMacro")
-
+public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift property into one that accesses a Java static field on the underlying Java object.
 ///
@@ -102,7 +102,8 @@ public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) = 
 /// }
 /// ```
 @attached(accessor)
-public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = false) = #externalMacro(module: "SwiftJavaMacros", type: "JavaFieldMacro")
+public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = false) =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaFieldMacro")
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
@@ -123,21 +124,21 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 /// ```
 ///
 /// corresponds to the Java constructor `HelloSwift(String name)`.
-/// 
+///
 /// ### Generics and type-erasure
 /// Swift and Java differ in how they represent generics at runtime.
 /// In Java, generics are type-erased and the JVM representation of generic types is erased to `java.lang.Object`.
-/// Swift on the other hand, reifies types which means a `Test<T>` in practice will be a specific type with 
+/// Swift on the other hand, reifies types which means a `Test<T>` in practice will be a specific type with
 /// the generic substituted `Test<String>`. This means that at runtime, calling a generic @JavaMethod needs to know
 /// which of the parameters (or result type) must be subjected to type-erasure as we form the call into the Java function.
-/// 
+///
 /// In order to mark a generic return type you must indicate it to the @JavaMethod macro like this:
 /// ```swift
 /// // Java: class Test<T> { public <T> get(); }
 /// @JavaMethod(typeErasedResult: "T!")
 /// func get() -> T!
 /// ```
-/// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object` 
+/// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object`
 /// returning method signature, and then, convert the result to the expected `T` type on the Swift side.
 @attached(body)
 public macro JavaMethod(
@@ -155,7 +156,8 @@ public macro JavaMethod(
 /// func sayHelloBack(_ i: Int32) -> Double
 /// ```
 @attached(body)
-public macro JavaStaticMethod(_ javaMethodName: String? = nil) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
+public macro JavaStaticMethod(_ javaMethodName: String? = nil) =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Macro that marks extensions to specify that all of the @JavaMethod
 /// methods are implementations of Java methods spelled as `native`.
@@ -180,4 +182,5 @@ public macro JavaStaticMethod(_ javaMethodName: String? = nil) = #externalMacro(
 /// }
 /// ```
 @attached(peer)
-public macro JavaImplementation(_ fullClassName: String) = #externalMacro(module: "SwiftJavaMacros", type: "JavaImplementationMacro")
+public macro JavaImplementation(_ fullClassName: String) =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaImplementationMacro")

@@ -23,7 +23,7 @@ extension AnyJavaObject {
     _ otherClass: OtherClass.Type
   ) -> jclass? {
     guard let this: jobject = javaThisOptional else {
-      return nil 
+      return nil
     }
     let environment = try! JavaVirtualMachine.shared().environment()
 
@@ -39,7 +39,7 @@ extension AnyJavaObject {
   /// Determine whether this object is an instance of a specific
   /// Java class.
   public func `is`<OtherClass: AnyJavaObject>(_ otherClass: OtherClass.Type) -> Bool {
-    return isInstanceOf(otherClass) != nil
+    isInstanceOf(otherClass) != nil
   }
 
   /// Attempt to downcast this object to a specific Java class.

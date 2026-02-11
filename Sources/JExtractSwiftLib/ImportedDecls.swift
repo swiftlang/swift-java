@@ -47,14 +47,15 @@ package final class ImportedNominalType: ImportedDecl {
 
   init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
     self.swiftNominal = swiftNominal
-    self.inheritedTypes = swiftNominal.inheritanceTypes?.compactMap {
-      try? SwiftType($0.type, lookupContext: lookupContext)
-    } ?? []
+    self.inheritedTypes =
+      swiftNominal.inheritanceTypes?.compactMap {
+        try? SwiftType($0.type, lookupContext: lookupContext)
+      } ?? []
     self.parent = swiftNominal.parent
   }
 
   var swiftType: SwiftType {
-    return .nominal(.init(nominalTypeDecl: swiftNominal))
+    .nominal(.init(nominalTypeDecl: swiftNominal))
   }
 
   var qualifiedName: String {
@@ -108,7 +109,7 @@ extension ImportedEnumCase: Hashable {
     hasher.combine(ObjectIdentifier(self))
   }
   public static func == (lhs: ImportedEnumCase, rhs: ImportedEnumCase) -> Bool {
-    return lhs === rhs
+    lhs === rhs
   }
 }
 
@@ -148,8 +149,8 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// these would be exported here.
   var additionalJavaImports: Set<String> {
     var imports: Set<String> = []
-//    imports += self.functionSignature.parameters.flatMap { $0.additionalJavaImports }
-//    imports += self.functionSignature.result.additionalJavaImports
+    //    imports += self.functionSignature.parameters.flatMap { $0.additionalJavaImports }
+    //    imports += self.functionSignature.result.additionalJavaImports
     return imports
   }
 
@@ -176,20 +177,22 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   /// A display name to use to refer to the Swift declaration with its
   /// enclosing type, if there is one.
   public var displayName: String {
-    let prefix = switch self.apiKind {
-    case .getter: "getter:"
-    case .setter: "setter:"
-    case .enumCase: "case:"
-    case .function, .initializer: ""
-    case .subscriptGetter: "subscriptGetter:"
-    case .subscriptSetter: "subscriptSetter:"
-    }
+    let prefix =
+      switch self.apiKind {
+      case .getter: "getter:"
+      case .setter: "setter:"
+      case .enumCase: "case:"
+      case .function, .initializer: ""
+      case .subscriptGetter: "subscriptGetter:"
+      case .subscriptSetter: "subscriptSetter:"
+      }
 
-    let context = if let parentType {
-      "\(parentType)."
-    } else {
-      ""
-    }
+    let context =
+      if let parentType {
+        "\(parentType)."
+      } else {
+        ""
+      }
 
     return prefix + context + self.name
   }
@@ -233,7 +236,7 @@ extension ImportedFunc: Hashable {
     hasher.combine(ObjectIdentifier(self))
   }
   public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Bool {
-    return lhs === rhs
+    lhs === rhs
   }
 }
 
@@ -270,6 +273,6 @@ extension ImportedNominalType: Hashable {
     hasher.combine(ObjectIdentifier(self))
   }
   public static func == (lhs: ImportedNominalType, rhs: ImportedNominalType) -> Bool {
-    return lhs === rhs
+    lhs === rhs
   }
 }

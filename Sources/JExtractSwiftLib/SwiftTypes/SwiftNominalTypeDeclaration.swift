@@ -16,7 +16,8 @@ import SwiftSyntax
 
 ///// A syntax node for a nominal type declaration.
 @_spi(Testing)
-public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax
+public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax
+  & WithModifiersSyntax
 
 package class SwiftTypeDeclaration {
 
@@ -39,7 +40,7 @@ package class SwiftTypeDeclaration {
   }
 }
 
-/// A syntax node paired with a simple file path 
+/// A syntax node paired with a simple file path
 package struct SwiftJavaInputFile {
   let syntax: SourceFileSyntax
   /// Simple file path of the file from which the syntax node was parsed.
@@ -173,7 +174,7 @@ package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
 }
 
 extension SwiftTypeDeclaration: Equatable {
-  package static func ==(lhs: SwiftTypeDeclaration, rhs: SwiftTypeDeclaration) -> Bool {
+  package static func == (lhs: SwiftTypeDeclaration, rhs: SwiftTypeDeclaration) -> Bool {
     lhs === rhs
   }
 }

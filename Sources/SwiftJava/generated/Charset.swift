@@ -9,7 +9,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final java.lang.String java.nio.charset.Charset.name()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func name() -> String
 
   /// Java method `equals`.
@@ -18,7 +18,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final boolean java.nio.charset.Charset.equals(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
   /// Java method `toString`.
@@ -27,7 +27,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final java.lang.String java.nio.charset.Charset.toString()
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func toString() -> String
 
   /// Java method `hashCode`.
@@ -36,7 +36,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final int java.nio.charset.Charset.hashCode()
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func hashCode() -> Int32
 
   /// Java method `compareTo`.
@@ -45,7 +45,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public int java.nio.charset.Charset.compareTo(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
   /// Java method `compareTo`.
@@ -54,7 +54,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final int java.nio.charset.Charset.compareTo(java.nio.charset.Charset)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func compareTo(_ arg0: Charset?) -> Int32
 
   /// Java method `encode`.
@@ -63,7 +63,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final java.nio.ByteBuffer java.nio.charset.Charset.encode(java.lang.String)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func encode(_ arg0: String) -> ByteBuffer!
 
   /// Java method `canEncode`.
@@ -72,7 +72,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public boolean java.nio.charset.Charset.canEncode()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func canEncode() -> Bool
 
   /// Java method `contains`.
@@ -81,7 +81,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public abstract boolean java.nio.charset.Charset.contains(java.nio.charset.Charset)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func contains(_ arg0: Charset?) -> Bool
 
   /// Java method `isRegistered`.
@@ -90,7 +90,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final boolean java.nio.charset.Charset.isRegistered()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func isRegistered() -> Bool
 
   /// Java method `aliases`.
@@ -99,7 +99,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public final java.util.Set<java.lang.String> java.nio.charset.Charset.aliases()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func aliases() -> JavaSet<JavaString>!
 
   /// Java method `displayName`.
@@ -108,7 +108,7 @@ open class Charset: JavaObject {
   /// ```java
   /// public java.lang.String java.nio.charset.Charset.displayName()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func displayName() -> String
 }
 extension JavaClass<Charset> {
@@ -118,7 +118,7 @@ extension JavaClass<Charset> {
   /// ```java
   /// public static java.nio.charset.Charset java.nio.charset.Charset.forName(java.lang.String,java.nio.charset.Charset)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func forName(_ arg0: String, _ arg1: Charset?) -> Charset!
 
   /// Java method `forName`.
@@ -127,7 +127,7 @@ extension JavaClass<Charset> {
   /// ```java
   /// public static java.nio.charset.Charset java.nio.charset.Charset.forName(java.lang.String)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func forName(_ arg0: String) -> Charset!
 
   /// Java method `defaultCharset`.
@@ -136,7 +136,7 @@ extension JavaClass<Charset> {
   /// ```java
   /// public static java.nio.charset.Charset java.nio.charset.Charset.defaultCharset()
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func defaultCharset() -> Charset!
 
   /// Java method `isSupported`.
@@ -145,6 +145,6 @@ extension JavaClass<Charset> {
   /// ```java
   /// public static boolean java.nio.charset.Charset.isSupported(java.lang.String)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func isSupported(_ arg0: String) -> Bool
 }

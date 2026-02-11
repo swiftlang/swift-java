@@ -42,7 +42,7 @@ extension String {
 
   /// Replace all occurrences of one character in the string with another.
   public func replacing(_ character: Character, with replacement: Character) -> String {
-    return replacingOccurrences(of: String(character), with: String(replacement))
+    replacingOccurrences(of: String(character), with: String(replacement))
   }
 
   public func optionalWrappedType() -> String? {

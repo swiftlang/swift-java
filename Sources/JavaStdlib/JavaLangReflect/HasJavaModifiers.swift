@@ -21,24 +21,24 @@ public protocol HasJavaModifiers {
 extension HasJavaModifiers {
   /// Whether the modifiers contain 'public'.
   public var isPublic: Bool {
-    return (getModifiers() & 0x00000001) != 0
+    (getModifiers() & 0x0000_0001) != 0
   }
 
   /// Whether the modifiers contain 'private'.
   public var isPrivate: Bool {
-    return (getModifiers() & 0x00000002) != 0
+    (getModifiers() & 0x0000_0002) != 0
   }
 
   /// Whether the modifiers contain 'protected'.
   public var isProtected: Bool {
-    return (getModifiers() & 0x00000004) != 0
+    (getModifiers() & 0x0000_0004) != 0
   }
 
   /// Whether the modifiers is equivelant to 'package'..
   ///
   /// The "default" access level in Java is 'package', it is signified by lack of a different access modifier.
   public var isPackage: Bool {
-    return !isPublic && !isPrivate && !isProtected
+    !isPublic && !isPrivate && !isProtected
   }
 }
 

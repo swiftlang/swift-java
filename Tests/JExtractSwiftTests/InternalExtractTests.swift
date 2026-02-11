@@ -30,7 +30,8 @@ final class InternalExtractTests {
     try assertOutput(
       input: text,
       config: config,
-      .ffm, .java,
+      .ffm,
+      .java,
       expectedChunks: [
         """
         /**
@@ -42,7 +43,7 @@ final class InternalExtractTests {
         public static void catchMeIfYouCan() {
           swiftjava_SwiftModule_catchMeIfYouCan.call();
         }
-        """,
+        """
       ]
     )
   }

@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import JavaNet
-import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import SwiftJava
+import XCTest  // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 /// Handy reference to the JVM abstraction.
 var jvm: JavaVirtualMachine {
@@ -32,7 +32,10 @@ class BasicRuntimeTests: XCTestCase {
       XCTAssert(object.toString().starts(with: "java.lang.Object"))
 
       // Make sure this object was promoted to a global reference.
-      XCTAssertEqual(object.javaEnvironment.pointee?.pointee.GetObjectRefType(object.javaEnvironment, object.javaThis), JNIGlobalRefType)
+      XCTAssertEqual(
+        object.javaEnvironment.pointee?.pointee.GetObjectRefType(object.javaEnvironment, object.javaThis),
+        JNIGlobalRefType
+      )
 
       // Keep track of the Java object.
       sneakyJavaThis = object.javaThis
@@ -96,4 +99,4 @@ class BasicRuntimeTests: XCTestCase {
 }
 
 @JavaClass("org.swift.javakit.Nonexistent")
-struct Nonexistent { }
+struct Nonexistent {}

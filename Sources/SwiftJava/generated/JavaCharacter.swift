@@ -27,14 +27,14 @@ open class JavaCharacter: JavaObject {
 extension JavaCharacter {
   @JavaClass("java.lang.Character$Subset")
   open class Subset: JavaObject {
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
+    @JavaMethod
+    open override func equals(_ arg0: JavaObject?) -> Bool
 
-  @JavaMethod
-  open override func toString() -> String
+    @JavaMethod
+    open override func toString() -> String
 
-  @JavaMethod
-  open override func hashCode() -> Int32
+    @JavaMethod
+    open override func hashCode() -> Int32
   }
 }
 extension JavaCharacter {
@@ -1045,514 +1045,515 @@ extension JavaCharacter {
   open class UnicodeScript: JavaObject {
     public enum UnicodeScriptCases: Equatable {
       case COMMON
-  case LATIN
-  case GREEK
-  case CYRILLIC
-  case ARMENIAN
-  case HEBREW
-  case ARABIC
-  case SYRIAC
-  case THAANA
-  case DEVANAGARI
-  case BENGALI
-  case GURMUKHI
-  case GUJARATI
-  case ORIYA
-  case TAMIL
-  case TELUGU
-  case KANNADA
-  case MALAYALAM
-  case SINHALA
-  case THAI
-  case LAO
-  case TIBETAN
-  case MYANMAR
-  case GEORGIAN
-  case HANGUL
-  case ETHIOPIC
-  case CHEROKEE
-  case CANADIAN_ABORIGINAL
-  case OGHAM
-  case RUNIC
-  case KHMER
-  case MONGOLIAN
-  case HIRAGANA
-  case KATAKANA
-  case BOPOMOFO
-  case HAN
-  case YI
-  case OLD_ITALIC
-  case GOTHIC
-  case DESERET
-  case INHERITED
-  case TAGALOG
-  case HANUNOO
-  case BUHID
-  case TAGBANWA
-  case LIMBU
-  case TAI_LE
-  case LINEAR_B
-  case UGARITIC
-  case SHAVIAN
-  case OSMANYA
-  case CYPRIOT
-  case BRAILLE
-  case BUGINESE
-  case COPTIC
-  case NEW_TAI_LUE
-  case GLAGOLITIC
-  case TIFINAGH
-  case SYLOTI_NAGRI
-  case OLD_PERSIAN
-  case KHAROSHTHI
-  case BALINESE
-  case CUNEIFORM
-  case PHOENICIAN
-  case PHAGS_PA
-  case NKO
-  case SUNDANESE
-  case BATAK
-  case LEPCHA
-  case OL_CHIKI
-  case VAI
-  case SAURASHTRA
-  case KAYAH_LI
-  case REJANG
-  case LYCIAN
-  case CARIAN
-  case LYDIAN
-  case CHAM
-  case TAI_THAM
-  case TAI_VIET
-  case AVESTAN
-  case EGYPTIAN_HIEROGLYPHS
-  case SAMARITAN
-  case MANDAIC
-  case LISU
-  case BAMUM
-  case JAVANESE
-  case MEETEI_MAYEK
-  case IMPERIAL_ARAMAIC
-  case OLD_SOUTH_ARABIAN
-  case INSCRIPTIONAL_PARTHIAN
-  case INSCRIPTIONAL_PAHLAVI
-  case OLD_TURKIC
-  case BRAHMI
-  case KAITHI
-  case MEROITIC_HIEROGLYPHS
-  case MEROITIC_CURSIVE
-  case SORA_SOMPENG
-  case CHAKMA
-  case SHARADA
-  case TAKRI
-  case MIAO
-  case CAUCASIAN_ALBANIAN
-  case BASSA_VAH
-  case DUPLOYAN
-  case ELBASAN
-  case GRANTHA
-  case PAHAWH_HMONG
-  case KHOJKI
-  case LINEAR_A
-  case MAHAJANI
-  case MANICHAEAN
-  case MENDE_KIKAKUI
-  case MODI
-  case MRO
-  case OLD_NORTH_ARABIAN
-  case NABATAEAN
-  case PALMYRENE
-  case PAU_CIN_HAU
-  case OLD_PERMIC
-  case PSALTER_PAHLAVI
-  case SIDDHAM
-  case KHUDAWADI
-  case TIRHUTA
-  case WARANG_CITI
-  case AHOM
-  case ANATOLIAN_HIEROGLYPHS
-  case HATRAN
-  case MULTANI
-  case OLD_HUNGARIAN
-  case SIGNWRITING
-  case ADLAM
-  case BHAIKSUKI
-  case MARCHEN
-  case NEWA
-  case OSAGE
-  case TANGUT
-  case MASARAM_GONDI
-  case NUSHU
-  case SOYOMBO
-  case ZANABAZAR_SQUARE
-  case HANIFI_ROHINGYA
-  case OLD_SOGDIAN
-  case SOGDIAN
-  case DOGRA
-  case GUNJALA_GONDI
-  case MAKASAR
-  case MEDEFAIDRIN
-  case ELYMAIC
-  case NANDINAGARI
-  case NYIAKENG_PUACHUE_HMONG
-  case WANCHO
-  case YEZIDI
-  case CHORASMIAN
-  case DIVES_AKURU
-  case KHITAN_SMALL_SCRIPT
-  case VITHKUQI
-  case OLD_UYGHUR
-  case CYPRO_MINOAN
-  case TANGSA
-  case TOTO
-  case KAWI
-  case NAG_MUNDARI
-  case UNKNOWN
+      case LATIN
+      case GREEK
+      case CYRILLIC
+      case ARMENIAN
+      case HEBREW
+      case ARABIC
+      case SYRIAC
+      case THAANA
+      case DEVANAGARI
+      case BENGALI
+      case GURMUKHI
+      case GUJARATI
+      case ORIYA
+      case TAMIL
+      case TELUGU
+      case KANNADA
+      case MALAYALAM
+      case SINHALA
+      case THAI
+      case LAO
+      case TIBETAN
+      case MYANMAR
+      case GEORGIAN
+      case HANGUL
+      case ETHIOPIC
+      case CHEROKEE
+      case CANADIAN_ABORIGINAL
+      case OGHAM
+      case RUNIC
+      case KHMER
+      case MONGOLIAN
+      case HIRAGANA
+      case KATAKANA
+      case BOPOMOFO
+      case HAN
+      case YI
+      case OLD_ITALIC
+      case GOTHIC
+      case DESERET
+      case INHERITED
+      case TAGALOG
+      case HANUNOO
+      case BUHID
+      case TAGBANWA
+      case LIMBU
+      case TAI_LE
+      case LINEAR_B
+      case UGARITIC
+      case SHAVIAN
+      case OSMANYA
+      case CYPRIOT
+      case BRAILLE
+      case BUGINESE
+      case COPTIC
+      case NEW_TAI_LUE
+      case GLAGOLITIC
+      case TIFINAGH
+      case SYLOTI_NAGRI
+      case OLD_PERSIAN
+      case KHAROSHTHI
+      case BALINESE
+      case CUNEIFORM
+      case PHOENICIAN
+      case PHAGS_PA
+      case NKO
+      case SUNDANESE
+      case BATAK
+      case LEPCHA
+      case OL_CHIKI
+      case VAI
+      case SAURASHTRA
+      case KAYAH_LI
+      case REJANG
+      case LYCIAN
+      case CARIAN
+      case LYDIAN
+      case CHAM
+      case TAI_THAM
+      case TAI_VIET
+      case AVESTAN
+      case EGYPTIAN_HIEROGLYPHS
+      case SAMARITAN
+      case MANDAIC
+      case LISU
+      case BAMUM
+      case JAVANESE
+      case MEETEI_MAYEK
+      case IMPERIAL_ARAMAIC
+      case OLD_SOUTH_ARABIAN
+      case INSCRIPTIONAL_PARTHIAN
+      case INSCRIPTIONAL_PAHLAVI
+      case OLD_TURKIC
+      case BRAHMI
+      case KAITHI
+      case MEROITIC_HIEROGLYPHS
+      case MEROITIC_CURSIVE
+      case SORA_SOMPENG
+      case CHAKMA
+      case SHARADA
+      case TAKRI
+      case MIAO
+      case CAUCASIAN_ALBANIAN
+      case BASSA_VAH
+      case DUPLOYAN
+      case ELBASAN
+      case GRANTHA
+      case PAHAWH_HMONG
+      case KHOJKI
+      case LINEAR_A
+      case MAHAJANI
+      case MANICHAEAN
+      case MENDE_KIKAKUI
+      case MODI
+      case MRO
+      case OLD_NORTH_ARABIAN
+      case NABATAEAN
+      case PALMYRENE
+      case PAU_CIN_HAU
+      case OLD_PERMIC
+      case PSALTER_PAHLAVI
+      case SIDDHAM
+      case KHUDAWADI
+      case TIRHUTA
+      case WARANG_CITI
+      case AHOM
+      case ANATOLIAN_HIEROGLYPHS
+      case HATRAN
+      case MULTANI
+      case OLD_HUNGARIAN
+      case SIGNWRITING
+      case ADLAM
+      case BHAIKSUKI
+      case MARCHEN
+      case NEWA
+      case OSAGE
+      case TANGUT
+      case MASARAM_GONDI
+      case NUSHU
+      case SOYOMBO
+      case ZANABAZAR_SQUARE
+      case HANIFI_ROHINGYA
+      case OLD_SOGDIAN
+      case SOGDIAN
+      case DOGRA
+      case GUNJALA_GONDI
+      case MAKASAR
+      case MEDEFAIDRIN
+      case ELYMAIC
+      case NANDINAGARI
+      case NYIAKENG_PUACHUE_HMONG
+      case WANCHO
+      case YEZIDI
+      case CHORASMIAN
+      case DIVES_AKURU
+      case KHITAN_SMALL_SCRIPT
+      case VITHKUQI
+      case OLD_UYGHUR
+      case CYPRO_MINOAN
+      case TANGSA
+      case TOTO
+      case KAWI
+      case NAG_MUNDARI
+      case UNKNOWN
     }
 
     public var enumValue: UnicodeScriptCases! {
       let classObj = self.javaClass
       if self.equals(classObj.COMMON?.as(JavaObject.self)) {
         return UnicodeScriptCases.COMMON
-  } else if self.equals(classObj.LATIN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LATIN?.as(JavaObject.self)) {
         return UnicodeScriptCases.LATIN
-  } else if self.equals(classObj.GREEK?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GREEK?.as(JavaObject.self)) {
         return UnicodeScriptCases.GREEK
-  } else if self.equals(classObj.CYRILLIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CYRILLIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.CYRILLIC
-  } else if self.equals(classObj.ARMENIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ARMENIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.ARMENIAN
-  } else if self.equals(classObj.HEBREW?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HEBREW?.as(JavaObject.self)) {
         return UnicodeScriptCases.HEBREW
-  } else if self.equals(classObj.ARABIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ARABIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.ARABIC
-  } else if self.equals(classObj.SYRIAC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SYRIAC?.as(JavaObject.self)) {
         return UnicodeScriptCases.SYRIAC
-  } else if self.equals(classObj.THAANA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.THAANA?.as(JavaObject.self)) {
         return UnicodeScriptCases.THAANA
-  } else if self.equals(classObj.DEVANAGARI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.DEVANAGARI?.as(JavaObject.self)) {
         return UnicodeScriptCases.DEVANAGARI
-  } else if self.equals(classObj.BENGALI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BENGALI?.as(JavaObject.self)) {
         return UnicodeScriptCases.BENGALI
-  } else if self.equals(classObj.GURMUKHI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GURMUKHI?.as(JavaObject.self)) {
         return UnicodeScriptCases.GURMUKHI
-  } else if self.equals(classObj.GUJARATI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GUJARATI?.as(JavaObject.self)) {
         return UnicodeScriptCases.GUJARATI
-  } else if self.equals(classObj.ORIYA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ORIYA?.as(JavaObject.self)) {
         return UnicodeScriptCases.ORIYA
-  } else if self.equals(classObj.TAMIL?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAMIL?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAMIL
-  } else if self.equals(classObj.TELUGU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TELUGU?.as(JavaObject.self)) {
         return UnicodeScriptCases.TELUGU
-  } else if self.equals(classObj.KANNADA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KANNADA?.as(JavaObject.self)) {
         return UnicodeScriptCases.KANNADA
-  } else if self.equals(classObj.MALAYALAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MALAYALAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.MALAYALAM
-  } else if self.equals(classObj.SINHALA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SINHALA?.as(JavaObject.self)) {
         return UnicodeScriptCases.SINHALA
-  } else if self.equals(classObj.THAI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.THAI?.as(JavaObject.self)) {
         return UnicodeScriptCases.THAI
-  } else if self.equals(classObj.LAO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LAO?.as(JavaObject.self)) {
         return UnicodeScriptCases.LAO
-  } else if self.equals(classObj.TIBETAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TIBETAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.TIBETAN
-  } else if self.equals(classObj.MYANMAR?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MYANMAR?.as(JavaObject.self)) {
         return UnicodeScriptCases.MYANMAR
-  } else if self.equals(classObj.GEORGIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GEORGIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.GEORGIAN
-  } else if self.equals(classObj.HANGUL?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HANGUL?.as(JavaObject.self)) {
         return UnicodeScriptCases.HANGUL
-  } else if self.equals(classObj.ETHIOPIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ETHIOPIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.ETHIOPIC
-  } else if self.equals(classObj.CHEROKEE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CHEROKEE?.as(JavaObject.self)) {
         return UnicodeScriptCases.CHEROKEE
-  } else if self.equals(classObj.CANADIAN_ABORIGINAL?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CANADIAN_ABORIGINAL?.as(JavaObject.self)) {
         return UnicodeScriptCases.CANADIAN_ABORIGINAL
-  } else if self.equals(classObj.OGHAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OGHAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.OGHAM
-  } else if self.equals(classObj.RUNIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.RUNIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.RUNIC
-  } else if self.equals(classObj.KHMER?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KHMER?.as(JavaObject.self)) {
         return UnicodeScriptCases.KHMER
-  } else if self.equals(classObj.MONGOLIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MONGOLIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.MONGOLIAN
-  } else if self.equals(classObj.HIRAGANA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HIRAGANA?.as(JavaObject.self)) {
         return UnicodeScriptCases.HIRAGANA
-  } else if self.equals(classObj.KATAKANA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KATAKANA?.as(JavaObject.self)) {
         return UnicodeScriptCases.KATAKANA
-  } else if self.equals(classObj.BOPOMOFO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BOPOMOFO?.as(JavaObject.self)) {
         return UnicodeScriptCases.BOPOMOFO
-  } else if self.equals(classObj.HAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.HAN
-  } else if self.equals(classObj.YI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.YI?.as(JavaObject.self)) {
         return UnicodeScriptCases.YI
-  } else if self.equals(classObj.OLD_ITALIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_ITALIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_ITALIC
-  } else if self.equals(classObj.GOTHIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GOTHIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.GOTHIC
-  } else if self.equals(classObj.DESERET?.as(JavaObject.self)) {
+      } else if self.equals(classObj.DESERET?.as(JavaObject.self)) {
         return UnicodeScriptCases.DESERET
-  } else if self.equals(classObj.INHERITED?.as(JavaObject.self)) {
+      } else if self.equals(classObj.INHERITED?.as(JavaObject.self)) {
         return UnicodeScriptCases.INHERITED
-  } else if self.equals(classObj.TAGALOG?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAGALOG?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAGALOG
-  } else if self.equals(classObj.HANUNOO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HANUNOO?.as(JavaObject.self)) {
         return UnicodeScriptCases.HANUNOO
-  } else if self.equals(classObj.BUHID?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BUHID?.as(JavaObject.self)) {
         return UnicodeScriptCases.BUHID
-  } else if self.equals(classObj.TAGBANWA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAGBANWA?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAGBANWA
-  } else if self.equals(classObj.LIMBU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LIMBU?.as(JavaObject.self)) {
         return UnicodeScriptCases.LIMBU
-  } else if self.equals(classObj.TAI_LE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAI_LE?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAI_LE
-  } else if self.equals(classObj.LINEAR_B?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LINEAR_B?.as(JavaObject.self)) {
         return UnicodeScriptCases.LINEAR_B
-  } else if self.equals(classObj.UGARITIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.UGARITIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.UGARITIC
-  } else if self.equals(classObj.SHAVIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SHAVIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.SHAVIAN
-  } else if self.equals(classObj.OSMANYA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OSMANYA?.as(JavaObject.self)) {
         return UnicodeScriptCases.OSMANYA
-  } else if self.equals(classObj.CYPRIOT?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CYPRIOT?.as(JavaObject.self)) {
         return UnicodeScriptCases.CYPRIOT
-  } else if self.equals(classObj.BRAILLE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BRAILLE?.as(JavaObject.self)) {
         return UnicodeScriptCases.BRAILLE
-  } else if self.equals(classObj.BUGINESE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BUGINESE?.as(JavaObject.self)) {
         return UnicodeScriptCases.BUGINESE
-  } else if self.equals(classObj.COPTIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.COPTIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.COPTIC
-  } else if self.equals(classObj.NEW_TAI_LUE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NEW_TAI_LUE?.as(JavaObject.self)) {
         return UnicodeScriptCases.NEW_TAI_LUE
-  } else if self.equals(classObj.GLAGOLITIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GLAGOLITIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.GLAGOLITIC
-  } else if self.equals(classObj.TIFINAGH?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TIFINAGH?.as(JavaObject.self)) {
         return UnicodeScriptCases.TIFINAGH
-  } else if self.equals(classObj.SYLOTI_NAGRI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SYLOTI_NAGRI?.as(JavaObject.self)) {
         return UnicodeScriptCases.SYLOTI_NAGRI
-  } else if self.equals(classObj.OLD_PERSIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_PERSIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_PERSIAN
-  } else if self.equals(classObj.KHAROSHTHI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KHAROSHTHI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KHAROSHTHI
-  } else if self.equals(classObj.BALINESE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BALINESE?.as(JavaObject.self)) {
         return UnicodeScriptCases.BALINESE
-  } else if self.equals(classObj.CUNEIFORM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CUNEIFORM?.as(JavaObject.self)) {
         return UnicodeScriptCases.CUNEIFORM
-  } else if self.equals(classObj.PHOENICIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PHOENICIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.PHOENICIAN
-  } else if self.equals(classObj.PHAGS_PA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PHAGS_PA?.as(JavaObject.self)) {
         return UnicodeScriptCases.PHAGS_PA
-  } else if self.equals(classObj.NKO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NKO?.as(JavaObject.self)) {
         return UnicodeScriptCases.NKO
-  } else if self.equals(classObj.SUNDANESE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SUNDANESE?.as(JavaObject.self)) {
         return UnicodeScriptCases.SUNDANESE
-  } else if self.equals(classObj.BATAK?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BATAK?.as(JavaObject.self)) {
         return UnicodeScriptCases.BATAK
-  } else if self.equals(classObj.LEPCHA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LEPCHA?.as(JavaObject.self)) {
         return UnicodeScriptCases.LEPCHA
-  } else if self.equals(classObj.OL_CHIKI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OL_CHIKI?.as(JavaObject.self)) {
         return UnicodeScriptCases.OL_CHIKI
-  } else if self.equals(classObj.VAI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.VAI?.as(JavaObject.self)) {
         return UnicodeScriptCases.VAI
-  } else if self.equals(classObj.SAURASHTRA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SAURASHTRA?.as(JavaObject.self)) {
         return UnicodeScriptCases.SAURASHTRA
-  } else if self.equals(classObj.KAYAH_LI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KAYAH_LI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KAYAH_LI
-  } else if self.equals(classObj.REJANG?.as(JavaObject.self)) {
+      } else if self.equals(classObj.REJANG?.as(JavaObject.self)) {
         return UnicodeScriptCases.REJANG
-  } else if self.equals(classObj.LYCIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LYCIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.LYCIAN
-  } else if self.equals(classObj.CARIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CARIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.CARIAN
-  } else if self.equals(classObj.LYDIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LYDIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.LYDIAN
-  } else if self.equals(classObj.CHAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CHAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.CHAM
-  } else if self.equals(classObj.TAI_THAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAI_THAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAI_THAM
-  } else if self.equals(classObj.TAI_VIET?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAI_VIET?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAI_VIET
-  } else if self.equals(classObj.AVESTAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.AVESTAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.AVESTAN
-  } else if self.equals(classObj.EGYPTIAN_HIEROGLYPHS?.as(JavaObject.self)) {
+      } else if self.equals(classObj.EGYPTIAN_HIEROGLYPHS?.as(JavaObject.self)) {
         return UnicodeScriptCases.EGYPTIAN_HIEROGLYPHS
-  } else if self.equals(classObj.SAMARITAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SAMARITAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.SAMARITAN
-  } else if self.equals(classObj.MANDAIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MANDAIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.MANDAIC
-  } else if self.equals(classObj.LISU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LISU?.as(JavaObject.self)) {
         return UnicodeScriptCases.LISU
-  } else if self.equals(classObj.BAMUM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BAMUM?.as(JavaObject.self)) {
         return UnicodeScriptCases.BAMUM
-  } else if self.equals(classObj.JAVANESE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.JAVANESE?.as(JavaObject.self)) {
         return UnicodeScriptCases.JAVANESE
-  } else if self.equals(classObj.MEETEI_MAYEK?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MEETEI_MAYEK?.as(JavaObject.self)) {
         return UnicodeScriptCases.MEETEI_MAYEK
-  } else if self.equals(classObj.IMPERIAL_ARAMAIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.IMPERIAL_ARAMAIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.IMPERIAL_ARAMAIC
-  } else if self.equals(classObj.OLD_SOUTH_ARABIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_SOUTH_ARABIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_SOUTH_ARABIAN
-  } else if self.equals(classObj.INSCRIPTIONAL_PARTHIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.INSCRIPTIONAL_PARTHIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.INSCRIPTIONAL_PARTHIAN
-  } else if self.equals(classObj.INSCRIPTIONAL_PAHLAVI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.INSCRIPTIONAL_PAHLAVI?.as(JavaObject.self)) {
         return UnicodeScriptCases.INSCRIPTIONAL_PAHLAVI
-  } else if self.equals(classObj.OLD_TURKIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_TURKIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_TURKIC
-  } else if self.equals(classObj.BRAHMI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BRAHMI?.as(JavaObject.self)) {
         return UnicodeScriptCases.BRAHMI
-  } else if self.equals(classObj.KAITHI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KAITHI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KAITHI
-  } else if self.equals(classObj.MEROITIC_HIEROGLYPHS?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MEROITIC_HIEROGLYPHS?.as(JavaObject.self)) {
         return UnicodeScriptCases.MEROITIC_HIEROGLYPHS
-  } else if self.equals(classObj.MEROITIC_CURSIVE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MEROITIC_CURSIVE?.as(JavaObject.self)) {
         return UnicodeScriptCases.MEROITIC_CURSIVE
-  } else if self.equals(classObj.SORA_SOMPENG?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SORA_SOMPENG?.as(JavaObject.self)) {
         return UnicodeScriptCases.SORA_SOMPENG
-  } else if self.equals(classObj.CHAKMA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CHAKMA?.as(JavaObject.self)) {
         return UnicodeScriptCases.CHAKMA
-  } else if self.equals(classObj.SHARADA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SHARADA?.as(JavaObject.self)) {
         return UnicodeScriptCases.SHARADA
-  } else if self.equals(classObj.TAKRI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TAKRI?.as(JavaObject.self)) {
         return UnicodeScriptCases.TAKRI
-  } else if self.equals(classObj.MIAO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MIAO?.as(JavaObject.self)) {
         return UnicodeScriptCases.MIAO
-  } else if self.equals(classObj.CAUCASIAN_ALBANIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CAUCASIAN_ALBANIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.CAUCASIAN_ALBANIAN
-  } else if self.equals(classObj.BASSA_VAH?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BASSA_VAH?.as(JavaObject.self)) {
         return UnicodeScriptCases.BASSA_VAH
-  } else if self.equals(classObj.DUPLOYAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.DUPLOYAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.DUPLOYAN
-  } else if self.equals(classObj.ELBASAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ELBASAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.ELBASAN
-  } else if self.equals(classObj.GRANTHA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GRANTHA?.as(JavaObject.self)) {
         return UnicodeScriptCases.GRANTHA
-  } else if self.equals(classObj.PAHAWH_HMONG?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PAHAWH_HMONG?.as(JavaObject.self)) {
         return UnicodeScriptCases.PAHAWH_HMONG
-  } else if self.equals(classObj.KHOJKI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KHOJKI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KHOJKI
-  } else if self.equals(classObj.LINEAR_A?.as(JavaObject.self)) {
+      } else if self.equals(classObj.LINEAR_A?.as(JavaObject.self)) {
         return UnicodeScriptCases.LINEAR_A
-  } else if self.equals(classObj.MAHAJANI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MAHAJANI?.as(JavaObject.self)) {
         return UnicodeScriptCases.MAHAJANI
-  } else if self.equals(classObj.MANICHAEAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MANICHAEAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.MANICHAEAN
-  } else if self.equals(classObj.MENDE_KIKAKUI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MENDE_KIKAKUI?.as(JavaObject.self)) {
         return UnicodeScriptCases.MENDE_KIKAKUI
-  } else if self.equals(classObj.MODI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MODI?.as(JavaObject.self)) {
         return UnicodeScriptCases.MODI
-  } else if self.equals(classObj.MRO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MRO?.as(JavaObject.self)) {
         return UnicodeScriptCases.MRO
-  } else if self.equals(classObj.OLD_NORTH_ARABIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_NORTH_ARABIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_NORTH_ARABIAN
-  } else if self.equals(classObj.NABATAEAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NABATAEAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.NABATAEAN
-  } else if self.equals(classObj.PALMYRENE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PALMYRENE?.as(JavaObject.self)) {
         return UnicodeScriptCases.PALMYRENE
-  } else if self.equals(classObj.PAU_CIN_HAU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PAU_CIN_HAU?.as(JavaObject.self)) {
         return UnicodeScriptCases.PAU_CIN_HAU
-  } else if self.equals(classObj.OLD_PERMIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_PERMIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_PERMIC
-  } else if self.equals(classObj.PSALTER_PAHLAVI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.PSALTER_PAHLAVI?.as(JavaObject.self)) {
         return UnicodeScriptCases.PSALTER_PAHLAVI
-  } else if self.equals(classObj.SIDDHAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SIDDHAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.SIDDHAM
-  } else if self.equals(classObj.KHUDAWADI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KHUDAWADI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KHUDAWADI
-  } else if self.equals(classObj.TIRHUTA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TIRHUTA?.as(JavaObject.self)) {
         return UnicodeScriptCases.TIRHUTA
-  } else if self.equals(classObj.WARANG_CITI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.WARANG_CITI?.as(JavaObject.self)) {
         return UnicodeScriptCases.WARANG_CITI
-  } else if self.equals(classObj.AHOM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.AHOM?.as(JavaObject.self)) {
         return UnicodeScriptCases.AHOM
-  } else if self.equals(classObj.ANATOLIAN_HIEROGLYPHS?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ANATOLIAN_HIEROGLYPHS?.as(JavaObject.self)) {
         return UnicodeScriptCases.ANATOLIAN_HIEROGLYPHS
-  } else if self.equals(classObj.HATRAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HATRAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.HATRAN
-  } else if self.equals(classObj.MULTANI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MULTANI?.as(JavaObject.self)) {
         return UnicodeScriptCases.MULTANI
-  } else if self.equals(classObj.OLD_HUNGARIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_HUNGARIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_HUNGARIAN
-  } else if self.equals(classObj.SIGNWRITING?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SIGNWRITING?.as(JavaObject.self)) {
         return UnicodeScriptCases.SIGNWRITING
-  } else if self.equals(classObj.ADLAM?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ADLAM?.as(JavaObject.self)) {
         return UnicodeScriptCases.ADLAM
-  } else if self.equals(classObj.BHAIKSUKI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.BHAIKSUKI?.as(JavaObject.self)) {
         return UnicodeScriptCases.BHAIKSUKI
-  } else if self.equals(classObj.MARCHEN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MARCHEN?.as(JavaObject.self)) {
         return UnicodeScriptCases.MARCHEN
-  } else if self.equals(classObj.NEWA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NEWA?.as(JavaObject.self)) {
         return UnicodeScriptCases.NEWA
-  } else if self.equals(classObj.OSAGE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OSAGE?.as(JavaObject.self)) {
         return UnicodeScriptCases.OSAGE
-  } else if self.equals(classObj.TANGUT?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TANGUT?.as(JavaObject.self)) {
         return UnicodeScriptCases.TANGUT
-  } else if self.equals(classObj.MASARAM_GONDI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MASARAM_GONDI?.as(JavaObject.self)) {
         return UnicodeScriptCases.MASARAM_GONDI
-  } else if self.equals(classObj.NUSHU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NUSHU?.as(JavaObject.self)) {
         return UnicodeScriptCases.NUSHU
-  } else if self.equals(classObj.SOYOMBO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SOYOMBO?.as(JavaObject.self)) {
         return UnicodeScriptCases.SOYOMBO
-  } else if self.equals(classObj.ZANABAZAR_SQUARE?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ZANABAZAR_SQUARE?.as(JavaObject.self)) {
         return UnicodeScriptCases.ZANABAZAR_SQUARE
-  } else if self.equals(classObj.HANIFI_ROHINGYA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.HANIFI_ROHINGYA?.as(JavaObject.self)) {
         return UnicodeScriptCases.HANIFI_ROHINGYA
-  } else if self.equals(classObj.OLD_SOGDIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_SOGDIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_SOGDIAN
-  } else if self.equals(classObj.SOGDIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.SOGDIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.SOGDIAN
-  } else if self.equals(classObj.DOGRA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.DOGRA?.as(JavaObject.self)) {
         return UnicodeScriptCases.DOGRA
-  } else if self.equals(classObj.GUNJALA_GONDI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.GUNJALA_GONDI?.as(JavaObject.self)) {
         return UnicodeScriptCases.GUNJALA_GONDI
-  } else if self.equals(classObj.MAKASAR?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MAKASAR?.as(JavaObject.self)) {
         return UnicodeScriptCases.MAKASAR
-  } else if self.equals(classObj.MEDEFAIDRIN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.MEDEFAIDRIN?.as(JavaObject.self)) {
         return UnicodeScriptCases.MEDEFAIDRIN
-  } else if self.equals(classObj.ELYMAIC?.as(JavaObject.self)) {
+      } else if self.equals(classObj.ELYMAIC?.as(JavaObject.self)) {
         return UnicodeScriptCases.ELYMAIC
-  } else if self.equals(classObj.NANDINAGARI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NANDINAGARI?.as(JavaObject.self)) {
         return UnicodeScriptCases.NANDINAGARI
-  } else if self.equals(classObj.NYIAKENG_PUACHUE_HMONG?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NYIAKENG_PUACHUE_HMONG?.as(JavaObject.self)) {
         return UnicodeScriptCases.NYIAKENG_PUACHUE_HMONG
-  } else if self.equals(classObj.WANCHO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.WANCHO?.as(JavaObject.self)) {
         return UnicodeScriptCases.WANCHO
-  } else if self.equals(classObj.YEZIDI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.YEZIDI?.as(JavaObject.self)) {
         return UnicodeScriptCases.YEZIDI
-  } else if self.equals(classObj.CHORASMIAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CHORASMIAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.CHORASMIAN
-  } else if self.equals(classObj.DIVES_AKURU?.as(JavaObject.self)) {
+      } else if self.equals(classObj.DIVES_AKURU?.as(JavaObject.self)) {
         return UnicodeScriptCases.DIVES_AKURU
-  } else if self.equals(classObj.KHITAN_SMALL_SCRIPT?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KHITAN_SMALL_SCRIPT?.as(JavaObject.self)) {
         return UnicodeScriptCases.KHITAN_SMALL_SCRIPT
-  } else if self.equals(classObj.VITHKUQI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.VITHKUQI?.as(JavaObject.self)) {
         return UnicodeScriptCases.VITHKUQI
-  } else if self.equals(classObj.OLD_UYGHUR?.as(JavaObject.self)) {
+      } else if self.equals(classObj.OLD_UYGHUR?.as(JavaObject.self)) {
         return UnicodeScriptCases.OLD_UYGHUR
-  } else if self.equals(classObj.CYPRO_MINOAN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.CYPRO_MINOAN?.as(JavaObject.self)) {
         return UnicodeScriptCases.CYPRO_MINOAN
-  } else if self.equals(classObj.TANGSA?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TANGSA?.as(JavaObject.self)) {
         return UnicodeScriptCases.TANGSA
-  } else if self.equals(classObj.TOTO?.as(JavaObject.self)) {
+      } else if self.equals(classObj.TOTO?.as(JavaObject.self)) {
         return UnicodeScriptCases.TOTO
-  } else if self.equals(classObj.KAWI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.KAWI?.as(JavaObject.self)) {
         return UnicodeScriptCases.KAWI
-  } else if self.equals(classObj.NAG_MUNDARI?.as(JavaObject.self)) {
+      } else if self.equals(classObj.NAG_MUNDARI?.as(JavaObject.self)) {
         return UnicodeScriptCases.NAG_MUNDARI
-  } else if self.equals(classObj.UNKNOWN?.as(JavaObject.self)) {
+      } else if self.equals(classObj.UNKNOWN?.as(JavaObject.self)) {
         return UnicodeScriptCases.UNKNOWN
-  } else {
+      } else {
         return nil
       }
     }
 
-  public convenience init(_ enumValue: UnicodeScriptCases, environment: JNIEnvironment? = nil) {
-    let _environment = if let environment {
-      environment
-    } else {
-      try! JavaVirtualMachine.shared().environment()
-    }
-    let classObj = try! JavaClass<UnicodeScript>(environment: _environment)
-    switch enumValue {
+    public convenience init(_ enumValue: UnicodeScriptCases, environment: JNIEnvironment? = nil) {
+      let _environment =
+        if let environment {
+          environment
+        } else {
+          try! JavaVirtualMachine.shared().environment()
+        }
+      let classObj = try! JavaClass<UnicodeScript>(environment: _environment)
+      switch enumValue {
       case .COMMON:
         if let COMMON = classObj.COMMON {
           self.init(javaHolder: COMMON.javaHolder)
@@ -1575,13 +1576,17 @@ extension JavaCharacter {
         if let CYRILLIC = classObj.CYRILLIC {
           self.init(javaHolder: CYRILLIC.javaHolder)
         } else {
-          fatalError("Enum value CYRILLIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CYRILLIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .ARMENIAN:
         if let ARMENIAN = classObj.ARMENIAN {
           self.init(javaHolder: ARMENIAN.javaHolder)
         } else {
-          fatalError("Enum value ARMENIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value ARMENIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HEBREW:
         if let HEBREW = classObj.HEBREW {
@@ -1611,7 +1616,9 @@ extension JavaCharacter {
         if let DEVANAGARI = classObj.DEVANAGARI {
           self.init(javaHolder: DEVANAGARI.javaHolder)
         } else {
-          fatalError("Enum value DEVANAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value DEVANAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BENGALI:
         if let BENGALI = classObj.BENGALI {
@@ -1623,13 +1630,17 @@ extension JavaCharacter {
         if let GURMUKHI = classObj.GURMUKHI {
           self.init(javaHolder: GURMUKHI.javaHolder)
         } else {
-          fatalError("Enum value GURMUKHI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value GURMUKHI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .GUJARATI:
         if let GUJARATI = classObj.GUJARATI {
           self.init(javaHolder: GUJARATI.javaHolder)
         } else {
-          fatalError("Enum value GUJARATI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value GUJARATI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .ORIYA:
         if let ORIYA = classObj.ORIYA {
@@ -1659,7 +1670,9 @@ extension JavaCharacter {
         if let MALAYALAM = classObj.MALAYALAM {
           self.init(javaHolder: MALAYALAM.javaHolder)
         } else {
-          fatalError("Enum value MALAYALAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MALAYALAM was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SINHALA:
         if let SINHALA = classObj.SINHALA {
@@ -1695,7 +1708,9 @@ extension JavaCharacter {
         if let GEORGIAN = classObj.GEORGIAN {
           self.init(javaHolder: GEORGIAN.javaHolder)
         } else {
-          fatalError("Enum value GEORGIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value GEORGIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HANGUL:
         if let HANGUL = classObj.HANGUL {
@@ -1707,19 +1722,25 @@ extension JavaCharacter {
         if let ETHIOPIC = classObj.ETHIOPIC {
           self.init(javaHolder: ETHIOPIC.javaHolder)
         } else {
-          fatalError("Enum value ETHIOPIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value ETHIOPIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .CHEROKEE:
         if let CHEROKEE = classObj.CHEROKEE {
           self.init(javaHolder: CHEROKEE.javaHolder)
         } else {
-          fatalError("Enum value CHEROKEE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CHEROKEE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .CANADIAN_ABORIGINAL:
         if let CANADIAN_ABORIGINAL = classObj.CANADIAN_ABORIGINAL {
           self.init(javaHolder: CANADIAN_ABORIGINAL.javaHolder)
         } else {
-          fatalError("Enum value CANADIAN_ABORIGINAL was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CANADIAN_ABORIGINAL was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OGHAM:
         if let OGHAM = classObj.OGHAM {
@@ -1743,25 +1764,33 @@ extension JavaCharacter {
         if let MONGOLIAN = classObj.MONGOLIAN {
           self.init(javaHolder: MONGOLIAN.javaHolder)
         } else {
-          fatalError("Enum value MONGOLIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MONGOLIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HIRAGANA:
         if let HIRAGANA = classObj.HIRAGANA {
           self.init(javaHolder: HIRAGANA.javaHolder)
         } else {
-          fatalError("Enum value HIRAGANA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value HIRAGANA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .KATAKANA:
         if let KATAKANA = classObj.KATAKANA {
           self.init(javaHolder: KATAKANA.javaHolder)
         } else {
-          fatalError("Enum value KATAKANA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value KATAKANA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BOPOMOFO:
         if let BOPOMOFO = classObj.BOPOMOFO {
           self.init(javaHolder: BOPOMOFO.javaHolder)
         } else {
-          fatalError("Enum value BOPOMOFO was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value BOPOMOFO was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HAN:
         if let HAN = classObj.HAN {
@@ -1779,7 +1808,9 @@ extension JavaCharacter {
         if let OLD_ITALIC = classObj.OLD_ITALIC {
           self.init(javaHolder: OLD_ITALIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_ITALIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_ITALIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .GOTHIC:
         if let GOTHIC = classObj.GOTHIC {
@@ -1797,7 +1828,9 @@ extension JavaCharacter {
         if let INHERITED = classObj.INHERITED {
           self.init(javaHolder: INHERITED.javaHolder)
         } else {
-          fatalError("Enum value INHERITED was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value INHERITED was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .TAGALOG:
         if let TAGALOG = classObj.TAGALOG {
@@ -1821,7 +1854,9 @@ extension JavaCharacter {
         if let TAGBANWA = classObj.TAGBANWA {
           self.init(javaHolder: TAGBANWA.javaHolder)
         } else {
-          fatalError("Enum value TAGBANWA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value TAGBANWA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .LIMBU:
         if let LIMBU = classObj.LIMBU {
@@ -1839,13 +1874,17 @@ extension JavaCharacter {
         if let LINEAR_B = classObj.LINEAR_B {
           self.init(javaHolder: LINEAR_B.javaHolder)
         } else {
-          fatalError("Enum value LINEAR_B was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value LINEAR_B was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .UGARITIC:
         if let UGARITIC = classObj.UGARITIC {
           self.init(javaHolder: UGARITIC.javaHolder)
         } else {
-          fatalError("Enum value UGARITIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value UGARITIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SHAVIAN:
         if let SHAVIAN = classObj.SHAVIAN {
@@ -1875,7 +1914,9 @@ extension JavaCharacter {
         if let BUGINESE = classObj.BUGINESE {
           self.init(javaHolder: BUGINESE.javaHolder)
         } else {
-          fatalError("Enum value BUGINESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value BUGINESE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .COPTIC:
         if let COPTIC = classObj.COPTIC {
@@ -1887,61 +1928,81 @@ extension JavaCharacter {
         if let NEW_TAI_LUE = classObj.NEW_TAI_LUE {
           self.init(javaHolder: NEW_TAI_LUE.javaHolder)
         } else {
-          fatalError("Enum value NEW_TAI_LUE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value NEW_TAI_LUE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .GLAGOLITIC:
         if let GLAGOLITIC = classObj.GLAGOLITIC {
           self.init(javaHolder: GLAGOLITIC.javaHolder)
         } else {
-          fatalError("Enum value GLAGOLITIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value GLAGOLITIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .TIFINAGH:
         if let TIFINAGH = classObj.TIFINAGH {
           self.init(javaHolder: TIFINAGH.javaHolder)
         } else {
-          fatalError("Enum value TIFINAGH was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value TIFINAGH was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SYLOTI_NAGRI:
         if let SYLOTI_NAGRI = classObj.SYLOTI_NAGRI {
           self.init(javaHolder: SYLOTI_NAGRI.javaHolder)
         } else {
-          fatalError("Enum value SYLOTI_NAGRI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SYLOTI_NAGRI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_PERSIAN:
         if let OLD_PERSIAN = classObj.OLD_PERSIAN {
           self.init(javaHolder: OLD_PERSIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_PERSIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_PERSIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .KHAROSHTHI:
         if let KHAROSHTHI = classObj.KHAROSHTHI {
           self.init(javaHolder: KHAROSHTHI.javaHolder)
         } else {
-          fatalError("Enum value KHAROSHTHI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value KHAROSHTHI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BALINESE:
         if let BALINESE = classObj.BALINESE {
           self.init(javaHolder: BALINESE.javaHolder)
         } else {
-          fatalError("Enum value BALINESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value BALINESE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .CUNEIFORM:
         if let CUNEIFORM = classObj.CUNEIFORM {
           self.init(javaHolder: CUNEIFORM.javaHolder)
         } else {
-          fatalError("Enum value CUNEIFORM was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CUNEIFORM was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .PHOENICIAN:
         if let PHOENICIAN = classObj.PHOENICIAN {
           self.init(javaHolder: PHOENICIAN.javaHolder)
         } else {
-          fatalError("Enum value PHOENICIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PHOENICIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .PHAGS_PA:
         if let PHAGS_PA = classObj.PHAGS_PA {
           self.init(javaHolder: PHAGS_PA.javaHolder)
         } else {
-          fatalError("Enum value PHAGS_PA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PHAGS_PA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .NKO:
         if let NKO = classObj.NKO {
@@ -1953,7 +2014,9 @@ extension JavaCharacter {
         if let SUNDANESE = classObj.SUNDANESE {
           self.init(javaHolder: SUNDANESE.javaHolder)
         } else {
-          fatalError("Enum value SUNDANESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SUNDANESE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BATAK:
         if let BATAK = classObj.BATAK {
@@ -1971,7 +2034,9 @@ extension JavaCharacter {
         if let OL_CHIKI = classObj.OL_CHIKI {
           self.init(javaHolder: OL_CHIKI.javaHolder)
         } else {
-          fatalError("Enum value OL_CHIKI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OL_CHIKI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .VAI:
         if let VAI = classObj.VAI {
@@ -1983,13 +2048,17 @@ extension JavaCharacter {
         if let SAURASHTRA = classObj.SAURASHTRA {
           self.init(javaHolder: SAURASHTRA.javaHolder)
         } else {
-          fatalError("Enum value SAURASHTRA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SAURASHTRA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .KAYAH_LI:
         if let KAYAH_LI = classObj.KAYAH_LI {
           self.init(javaHolder: KAYAH_LI.javaHolder)
         } else {
-          fatalError("Enum value KAYAH_LI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value KAYAH_LI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .REJANG:
         if let REJANG = classObj.REJANG {
@@ -2025,13 +2094,17 @@ extension JavaCharacter {
         if let TAI_THAM = classObj.TAI_THAM {
           self.init(javaHolder: TAI_THAM.javaHolder)
         } else {
-          fatalError("Enum value TAI_THAM was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value TAI_THAM was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .TAI_VIET:
         if let TAI_VIET = classObj.TAI_VIET {
           self.init(javaHolder: TAI_VIET.javaHolder)
         } else {
-          fatalError("Enum value TAI_VIET was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value TAI_VIET was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .AVESTAN:
         if let AVESTAN = classObj.AVESTAN {
@@ -2043,13 +2116,17 @@ extension JavaCharacter {
         if let EGYPTIAN_HIEROGLYPHS = classObj.EGYPTIAN_HIEROGLYPHS {
           self.init(javaHolder: EGYPTIAN_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value EGYPTIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value EGYPTIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SAMARITAN:
         if let SAMARITAN = classObj.SAMARITAN {
           self.init(javaHolder: SAMARITAN.javaHolder)
         } else {
-          fatalError("Enum value SAMARITAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SAMARITAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MANDAIC:
         if let MANDAIC = classObj.MANDAIC {
@@ -2073,43 +2150,57 @@ extension JavaCharacter {
         if let JAVANESE = classObj.JAVANESE {
           self.init(javaHolder: JAVANESE.javaHolder)
         } else {
-          fatalError("Enum value JAVANESE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value JAVANESE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MEETEI_MAYEK:
         if let MEETEI_MAYEK = classObj.MEETEI_MAYEK {
           self.init(javaHolder: MEETEI_MAYEK.javaHolder)
         } else {
-          fatalError("Enum value MEETEI_MAYEK was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MEETEI_MAYEK was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .IMPERIAL_ARAMAIC:
         if let IMPERIAL_ARAMAIC = classObj.IMPERIAL_ARAMAIC {
           self.init(javaHolder: IMPERIAL_ARAMAIC.javaHolder)
         } else {
-          fatalError("Enum value IMPERIAL_ARAMAIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value IMPERIAL_ARAMAIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_SOUTH_ARABIAN:
         if let OLD_SOUTH_ARABIAN = classObj.OLD_SOUTH_ARABIAN {
           self.init(javaHolder: OLD_SOUTH_ARABIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_SOUTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_SOUTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .INSCRIPTIONAL_PARTHIAN:
         if let INSCRIPTIONAL_PARTHIAN = classObj.INSCRIPTIONAL_PARTHIAN {
           self.init(javaHolder: INSCRIPTIONAL_PARTHIAN.javaHolder)
         } else {
-          fatalError("Enum value INSCRIPTIONAL_PARTHIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value INSCRIPTIONAL_PARTHIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .INSCRIPTIONAL_PAHLAVI:
         if let INSCRIPTIONAL_PAHLAVI = classObj.INSCRIPTIONAL_PAHLAVI {
           self.init(javaHolder: INSCRIPTIONAL_PAHLAVI.javaHolder)
         } else {
-          fatalError("Enum value INSCRIPTIONAL_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value INSCRIPTIONAL_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_TURKIC:
         if let OLD_TURKIC = classObj.OLD_TURKIC {
           self.init(javaHolder: OLD_TURKIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_TURKIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_TURKIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BRAHMI:
         if let BRAHMI = classObj.BRAHMI {
@@ -2127,19 +2218,25 @@ extension JavaCharacter {
         if let MEROITIC_HIEROGLYPHS = classObj.MEROITIC_HIEROGLYPHS {
           self.init(javaHolder: MEROITIC_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value MEROITIC_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MEROITIC_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MEROITIC_CURSIVE:
         if let MEROITIC_CURSIVE = classObj.MEROITIC_CURSIVE {
           self.init(javaHolder: MEROITIC_CURSIVE.javaHolder)
         } else {
-          fatalError("Enum value MEROITIC_CURSIVE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MEROITIC_CURSIVE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SORA_SOMPENG:
         if let SORA_SOMPENG = classObj.SORA_SOMPENG {
           self.init(javaHolder: SORA_SOMPENG.javaHolder)
         } else {
-          fatalError("Enum value SORA_SOMPENG was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SORA_SOMPENG was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .CHAKMA:
         if let CHAKMA = classObj.CHAKMA {
@@ -2169,19 +2266,25 @@ extension JavaCharacter {
         if let CAUCASIAN_ALBANIAN = classObj.CAUCASIAN_ALBANIAN {
           self.init(javaHolder: CAUCASIAN_ALBANIAN.javaHolder)
         } else {
-          fatalError("Enum value CAUCASIAN_ALBANIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CAUCASIAN_ALBANIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .BASSA_VAH:
         if let BASSA_VAH = classObj.BASSA_VAH {
           self.init(javaHolder: BASSA_VAH.javaHolder)
         } else {
-          fatalError("Enum value BASSA_VAH was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value BASSA_VAH was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .DUPLOYAN:
         if let DUPLOYAN = classObj.DUPLOYAN {
           self.init(javaHolder: DUPLOYAN.javaHolder)
         } else {
-          fatalError("Enum value DUPLOYAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value DUPLOYAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .ELBASAN:
         if let ELBASAN = classObj.ELBASAN {
@@ -2199,7 +2302,9 @@ extension JavaCharacter {
         if let PAHAWH_HMONG = classObj.PAHAWH_HMONG {
           self.init(javaHolder: PAHAWH_HMONG.javaHolder)
         } else {
-          fatalError("Enum value PAHAWH_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PAHAWH_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .KHOJKI:
         if let KHOJKI = classObj.KHOJKI {
@@ -2211,25 +2316,33 @@ extension JavaCharacter {
         if let LINEAR_A = classObj.LINEAR_A {
           self.init(javaHolder: LINEAR_A.javaHolder)
         } else {
-          fatalError("Enum value LINEAR_A was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value LINEAR_A was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MAHAJANI:
         if let MAHAJANI = classObj.MAHAJANI {
           self.init(javaHolder: MAHAJANI.javaHolder)
         } else {
-          fatalError("Enum value MAHAJANI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MAHAJANI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MANICHAEAN:
         if let MANICHAEAN = classObj.MANICHAEAN {
           self.init(javaHolder: MANICHAEAN.javaHolder)
         } else {
-          fatalError("Enum value MANICHAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MANICHAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MENDE_KIKAKUI:
         if let MENDE_KIKAKUI = classObj.MENDE_KIKAKUI {
           self.init(javaHolder: MENDE_KIKAKUI.javaHolder)
         } else {
-          fatalError("Enum value MENDE_KIKAKUI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MENDE_KIKAKUI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MODI:
         if let MODI = classObj.MODI {
@@ -2247,37 +2360,49 @@ extension JavaCharacter {
         if let OLD_NORTH_ARABIAN = classObj.OLD_NORTH_ARABIAN {
           self.init(javaHolder: OLD_NORTH_ARABIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_NORTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_NORTH_ARABIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .NABATAEAN:
         if let NABATAEAN = classObj.NABATAEAN {
           self.init(javaHolder: NABATAEAN.javaHolder)
         } else {
-          fatalError("Enum value NABATAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value NABATAEAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .PALMYRENE:
         if let PALMYRENE = classObj.PALMYRENE {
           self.init(javaHolder: PALMYRENE.javaHolder)
         } else {
-          fatalError("Enum value PALMYRENE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PALMYRENE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .PAU_CIN_HAU:
         if let PAU_CIN_HAU = classObj.PAU_CIN_HAU {
           self.init(javaHolder: PAU_CIN_HAU.javaHolder)
         } else {
-          fatalError("Enum value PAU_CIN_HAU was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PAU_CIN_HAU was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_PERMIC:
         if let OLD_PERMIC = classObj.OLD_PERMIC {
           self.init(javaHolder: OLD_PERMIC.javaHolder)
         } else {
-          fatalError("Enum value OLD_PERMIC was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_PERMIC was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .PSALTER_PAHLAVI:
         if let PSALTER_PAHLAVI = classObj.PSALTER_PAHLAVI {
           self.init(javaHolder: PSALTER_PAHLAVI.javaHolder)
         } else {
-          fatalError("Enum value PSALTER_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value PSALTER_PAHLAVI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SIDDHAM:
         if let SIDDHAM = classObj.SIDDHAM {
@@ -2289,7 +2414,9 @@ extension JavaCharacter {
         if let KHUDAWADI = classObj.KHUDAWADI {
           self.init(javaHolder: KHUDAWADI.javaHolder)
         } else {
-          fatalError("Enum value KHUDAWADI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value KHUDAWADI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .TIRHUTA:
         if let TIRHUTA = classObj.TIRHUTA {
@@ -2301,7 +2428,9 @@ extension JavaCharacter {
         if let WARANG_CITI = classObj.WARANG_CITI {
           self.init(javaHolder: WARANG_CITI.javaHolder)
         } else {
-          fatalError("Enum value WARANG_CITI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value WARANG_CITI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .AHOM:
         if let AHOM = classObj.AHOM {
@@ -2313,7 +2442,9 @@ extension JavaCharacter {
         if let ANATOLIAN_HIEROGLYPHS = classObj.ANATOLIAN_HIEROGLYPHS {
           self.init(javaHolder: ANATOLIAN_HIEROGLYPHS.javaHolder)
         } else {
-          fatalError("Enum value ANATOLIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value ANATOLIAN_HIEROGLYPHS was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HATRAN:
         if let HATRAN = classObj.HATRAN {
@@ -2331,13 +2462,17 @@ extension JavaCharacter {
         if let OLD_HUNGARIAN = classObj.OLD_HUNGARIAN {
           self.init(javaHolder: OLD_HUNGARIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_HUNGARIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_HUNGARIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SIGNWRITING:
         if let SIGNWRITING = classObj.SIGNWRITING {
           self.init(javaHolder: SIGNWRITING.javaHolder)
         } else {
-          fatalError("Enum value SIGNWRITING was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value SIGNWRITING was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .ADLAM:
         if let ADLAM = classObj.ADLAM {
@@ -2349,7 +2484,9 @@ extension JavaCharacter {
         if let BHAIKSUKI = classObj.BHAIKSUKI {
           self.init(javaHolder: BHAIKSUKI.javaHolder)
         } else {
-          fatalError("Enum value BHAIKSUKI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value BHAIKSUKI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MARCHEN:
         if let MARCHEN = classObj.MARCHEN {
@@ -2379,7 +2516,9 @@ extension JavaCharacter {
         if let MASARAM_GONDI = classObj.MASARAM_GONDI {
           self.init(javaHolder: MASARAM_GONDI.javaHolder)
         } else {
-          fatalError("Enum value MASARAM_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MASARAM_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .NUSHU:
         if let NUSHU = classObj.NUSHU {
@@ -2397,19 +2536,25 @@ extension JavaCharacter {
         if let ZANABAZAR_SQUARE = classObj.ZANABAZAR_SQUARE {
           self.init(javaHolder: ZANABAZAR_SQUARE.javaHolder)
         } else {
-          fatalError("Enum value ZANABAZAR_SQUARE was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value ZANABAZAR_SQUARE was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .HANIFI_ROHINGYA:
         if let HANIFI_ROHINGYA = classObj.HANIFI_ROHINGYA {
           self.init(javaHolder: HANIFI_ROHINGYA.javaHolder)
         } else {
-          fatalError("Enum value HANIFI_ROHINGYA was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value HANIFI_ROHINGYA was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_SOGDIAN:
         if let OLD_SOGDIAN = classObj.OLD_SOGDIAN {
           self.init(javaHolder: OLD_SOGDIAN.javaHolder)
         } else {
-          fatalError("Enum value OLD_SOGDIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_SOGDIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .SOGDIAN:
         if let SOGDIAN = classObj.SOGDIAN {
@@ -2427,7 +2572,9 @@ extension JavaCharacter {
         if let GUNJALA_GONDI = classObj.GUNJALA_GONDI {
           self.init(javaHolder: GUNJALA_GONDI.javaHolder)
         } else {
-          fatalError("Enum value GUNJALA_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value GUNJALA_GONDI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .MAKASAR:
         if let MAKASAR = classObj.MAKASAR {
@@ -2439,7 +2586,9 @@ extension JavaCharacter {
         if let MEDEFAIDRIN = classObj.MEDEFAIDRIN {
           self.init(javaHolder: MEDEFAIDRIN.javaHolder)
         } else {
-          fatalError("Enum value MEDEFAIDRIN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value MEDEFAIDRIN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .ELYMAIC:
         if let ELYMAIC = classObj.ELYMAIC {
@@ -2451,13 +2600,17 @@ extension JavaCharacter {
         if let NANDINAGARI = classObj.NANDINAGARI {
           self.init(javaHolder: NANDINAGARI.javaHolder)
         } else {
-          fatalError("Enum value NANDINAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value NANDINAGARI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .NYIAKENG_PUACHUE_HMONG:
         if let NYIAKENG_PUACHUE_HMONG = classObj.NYIAKENG_PUACHUE_HMONG {
           self.init(javaHolder: NYIAKENG_PUACHUE_HMONG.javaHolder)
         } else {
-          fatalError("Enum value NYIAKENG_PUACHUE_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value NYIAKENG_PUACHUE_HMONG was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .WANCHO:
         if let WANCHO = classObj.WANCHO {
@@ -2475,37 +2628,49 @@ extension JavaCharacter {
         if let CHORASMIAN = classObj.CHORASMIAN {
           self.init(javaHolder: CHORASMIAN.javaHolder)
         } else {
-          fatalError("Enum value CHORASMIAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CHORASMIAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .DIVES_AKURU:
         if let DIVES_AKURU = classObj.DIVES_AKURU {
           self.init(javaHolder: DIVES_AKURU.javaHolder)
         } else {
-          fatalError("Enum value DIVES_AKURU was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value DIVES_AKURU was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .KHITAN_SMALL_SCRIPT:
         if let KHITAN_SMALL_SCRIPT = classObj.KHITAN_SMALL_SCRIPT {
           self.init(javaHolder: KHITAN_SMALL_SCRIPT.javaHolder)
         } else {
-          fatalError("Enum value KHITAN_SMALL_SCRIPT was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value KHITAN_SMALL_SCRIPT was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .VITHKUQI:
         if let VITHKUQI = classObj.VITHKUQI {
           self.init(javaHolder: VITHKUQI.javaHolder)
         } else {
-          fatalError("Enum value VITHKUQI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value VITHKUQI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .OLD_UYGHUR:
         if let OLD_UYGHUR = classObj.OLD_UYGHUR {
           self.init(javaHolder: OLD_UYGHUR.javaHolder)
         } else {
-          fatalError("Enum value OLD_UYGHUR was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value OLD_UYGHUR was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .CYPRO_MINOAN:
         if let CYPRO_MINOAN = classObj.CYPRO_MINOAN {
           self.init(javaHolder: CYPRO_MINOAN.javaHolder)
         } else {
-          fatalError("Enum value CYPRO_MINOAN was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value CYPRO_MINOAN was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .TANGSA:
         if let TANGSA = classObj.TANGSA {
@@ -2529,7 +2694,9 @@ extension JavaCharacter {
         if let NAG_MUNDARI = classObj.NAG_MUNDARI {
           self.init(javaHolder: NAG_MUNDARI.javaHolder)
         } else {
-          fatalError("Enum value NAG_MUNDARI was unexpectedly nil, please re-run swift-java on the most updated Java class")
+          fatalError(
+            "Enum value NAG_MUNDARI was unexpectedly nil, please re-run swift-java on the most updated Java class"
+          )
         }
       case .UNKNOWN:
         if let UNKNOWN = classObj.UNKNOWN {
@@ -2537,15 +2704,15 @@ extension JavaCharacter {
         } else {
           fatalError("Enum value UNKNOWN was unexpectedly nil, please re-run swift-java on the most updated Java class")
         }
+      }
     }
-  }
   }
 }
 extension JavaCharacter.UnicodeScript {
   @JavaClass("java.lang.Enum$EnumDesc")
   open class EnumDesc<E: AnyJavaObject>: JavaObject {
-  @JavaMethod
-  open override func toString() -> String
+    @JavaMethod
+    open override func toString() -> String
   }
 }
 extension JavaClass<JavaCharacter.UnicodeScript> {

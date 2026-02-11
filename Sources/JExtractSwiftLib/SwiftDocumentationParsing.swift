@@ -145,8 +145,9 @@ enum SwiftDocumentationParser {
   }
 
   private static func append(_ existing: inout String?, _ new: String) {
-    if existing == nil { existing = new }
-    else {
+    if existing == nil {
+      existing = new
+    } else {
       existing! += "\n" + new
     }
   }

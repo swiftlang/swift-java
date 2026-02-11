@@ -36,13 +36,13 @@ public struct ForeignValueLayout: CustomStringConvertible, Equatable {
   public init?(javaType: JavaType) {
     switch javaType {
     case .boolean: self = .SwiftBool
-    case .byte: self =  .SwiftInt8
-    case .char: self =  .SwiftUInt16
-    case .short: self =  .SwiftInt16
-    case .int: self =  .SwiftInt32
-    case .long: self =  .SwiftInt64
-    case .float: self =  .SwiftFloat
-    case .double: self =  .SwiftDouble
+    case .byte: self = .SwiftInt8
+    case .char: self = .SwiftUInt16
+    case .short: self = .SwiftInt16
+    case .int: self = .SwiftInt32
+    case .long: self = .SwiftInt64
+    case .float: self = .SwiftFloat
+    case .double: self = .SwiftDouble
     case .javaForeignMemorySegment: self = .SwiftPointer
     case .array, .class, .void: return nil
     }

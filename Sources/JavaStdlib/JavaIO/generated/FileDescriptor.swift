@@ -7,21 +7,21 @@ open class FileDescriptor: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-    /// Java method `sync`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public void java.io.FileDescriptor.sync() throws java.io.SyncFailedException
-    /// ```
+  /// Java method `sync`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.FileDescriptor.sync() throws java.io.SyncFailedException
+  /// ```
   @JavaMethod
   open func sync() throws
 
-    /// Java method `valid`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public boolean java.io.FileDescriptor.valid()
-    /// ```
+  /// Java method `valid`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.FileDescriptor.valid()
+  /// ```
   @JavaMethod
   open func valid() -> Bool
 }

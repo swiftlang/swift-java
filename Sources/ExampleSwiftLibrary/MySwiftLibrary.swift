@@ -39,12 +39,12 @@ public func globalTakeIntInt(i: Int, j: Int) {
   p("i:\(i), j:\(j)")
 }
 
-public func globalCallMeRunnable(run: () -> ()) {
+public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
-  return buf.count
+  buf.count
 }
 
 public class MySwiftClass {
@@ -76,15 +76,15 @@ public class MySwiftClass {
   }
 
   public func echoIntMethod(i: Int) -> Int {
-    return i
+    i
   }
 
   public func makeIntMethod() -> Int {
-    return 12
+    12
   }
 
   public func makeRandomIntMethod() -> Int {
-    return Int.random(in: 1..<256)
+    Int.random(in: 1..<256)
   }
 }
 
@@ -93,9 +93,9 @@ public func _getTypeByMangledNameInEnvironment(
   _ name: UnsafePointer<UInt8>,
   _ nameLength: UInt,
   genericEnvironment: UnsafeRawPointer?,
-  genericArguments: UnsafeRawPointer?)
+  genericArguments: UnsafeRawPointer?
+)
   -> Any.Type?
-
 
 // ==== Internal helpers
 

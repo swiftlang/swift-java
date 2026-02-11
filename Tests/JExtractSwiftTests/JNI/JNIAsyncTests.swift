@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import Testing
 import SwiftJavaConfigurationShared
+import Testing
 
 @Suite
 struct JNIAsyncTests {
@@ -23,7 +23,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncVoid_java() throws {
     try assertOutput(
       input: "public func asyncVoid() async",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -53,7 +54,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncVoid_swift() throws {
     try assertOutput(
       input: "public func asyncVoid() async",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -97,7 +99,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncThrowsVoid_java() throws {
     try assertOutput(
       input: "public func async() async throws",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -127,7 +130,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncThrowsVoid_swift() throws {
     try assertOutput(
       input: "public func async() async throws",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -185,7 +189,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncIntToInt_java() throws {
     try assertOutput(
       input: "public func async(i: Int64) async -> Int64",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -215,7 +220,8 @@ struct JNIAsyncTests {
   func completableFuture_asyncIntToInt_swift() throws {
     try assertOutput(
       input: "public func async(i: Int64) async -> Int64",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -262,11 +268,12 @@ struct JNIAsyncTests {
   func completableFuture_asyncMyClassToMyClass_java() throws {
     try assertOutput(
       input: """
-      class MyClass { }
+        class MyClass { }
 
-      public func async(c: MyClass) async -> MyClass
-      """,
-      .jni, .java,
+        public func async(c: MyClass) async -> MyClass
+        """,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -296,11 +303,12 @@ struct JNIAsyncTests {
   func completableFuture_asyncMyClassToMyClass_swift() throws {
     try assertOutput(
       input: """
-      class MyClass { }
+        class MyClass { }
 
-      public func async(c: MyClass) async -> MyClass
-      """,
-      .jni, .swift,
+        public func async(c: MyClass) async -> MyClass
+        """,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -359,9 +367,10 @@ struct JNIAsyncTests {
   func completableFuture_asyncStringToString_java() throws {
     try assertOutput(
       input: """
-      public func async(s: String) async -> String
-      """,
-      .jni, .java,
+        public func async(s: String) async -> String
+        """,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -385,9 +394,10 @@ struct JNIAsyncTests {
   func completableFuture_asyncStringToString_swift() throws {
     try assertOutput(
       input: """
-      public func async(s: String) async -> String
-      """,
-      .jni, .swift,
+        public func async(s: String) async -> String
+        """,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -417,12 +427,13 @@ struct JNIAsyncTests {
 
     try assertOutput(
       input: """
-      class MyClass { }
+        class MyClass { }
 
-      public func async(c: MyClass) async -> MyClass
-      """,
+        public func async(c: MyClass) async -> MyClass
+        """,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -449,12 +460,13 @@ struct JNIAsyncTests {
 
     try assertOutput(
       input: """
-      class MyClass { }
+        class MyClass { }
 
-      public func async(c: MyClass) async -> MyClass
-      """,
+        public func async(c: MyClass) async -> MyClass
+        """,
       config: config,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """

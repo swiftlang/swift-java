@@ -9,6 +9,6 @@ public struct Flushable {
   /// ```java
   /// public abstract void java.io.Flushable.flush() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   public func flush() throws
 }

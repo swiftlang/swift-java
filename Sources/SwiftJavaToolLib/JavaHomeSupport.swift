@@ -50,7 +50,6 @@ public func findJavaHome() -> String {
     return home
   }
 
-
   if ProcessInfo.processInfo.environment["SPI_PROCESSING"] == "1"
     && ProcessInfo.processInfo.environment["SPI_BUILD"] == nil
   {
@@ -81,7 +80,8 @@ public func getJavaHomeFromLibexecJavaHome() -> String? {
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     let output = String(data: data, encoding: .utf8)?.trimmingCharacters(
-      in: .whitespacesAndNewlines)
+      in: .whitespacesAndNewlines
+    )
 
     if task.terminationStatus == 0 {
       return output
@@ -89,7 +89,9 @@ public func getJavaHomeFromLibexecJavaHome() -> String? {
       print("java_home terminated with status: \(task.terminationStatus)")
       // Optionally, log the error output for debugging
       if let errorOutput = String(
-        data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
+        data: pipe.fileHandleForReading.readDataToEndOfFile(),
+        encoding: .utf8
+      ) {
         print("Error output: \(errorOutput)")
       }
       return nil
@@ -125,13 +127,15 @@ func getJavaHomeFromPath() -> String? {
     guard task.terminationStatus == 0 else { return nil }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    guard let javaPath = String(data: data, encoding: .utf8)?
-      .trimmingCharacters(in: .whitespacesAndNewlines),
+    guard
+      let javaPath = String(data: data, encoding: .utf8)?
+        .trimmingCharacters(in: .whitespacesAndNewlines),
       !javaPath.isEmpty
     else { return nil }
 
     let resolved = URL(fileURLWithPath: javaPath).resolvingSymlinksInPath()
-    return resolved
+    return
+      resolved
       .deletingLastPathComponent()
       .deletingLastPathComponent()
       .path

@@ -32,7 +32,7 @@ extension JavaType {
       } else {
         return "L\(nameWithInnerClasses);"
       }
-    case .array(let javaType): return  "[\(javaType.jniTypeSignature)"
+    case .array(let javaType): return "[\(javaType.jniTypeSignature)"
     case .void: fatalError("There is no type signature for 'void'")
     }
   }
@@ -104,7 +104,7 @@ extension JavaType {
 
   /// Returns whether this type returns `JavaValue` from SwiftJava
   var implementsJavaValue: Bool {
-    return switch self {
+    switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString:
       true
     default:

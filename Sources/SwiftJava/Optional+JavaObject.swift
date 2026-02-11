@@ -69,7 +69,7 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   }
 
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
-    return { environment, size in
+    { environment, size in
       try! Wrapped.withJNIClass(in: environment) { jniClass in
         environment.interface.NewObjectArray(environment, size, jniClass, nil)
       }
@@ -77,7 +77,7 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   }
 
   public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {
         buffer.initializeElement(
@@ -89,7 +89,7 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   }
 
   public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {
         environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])

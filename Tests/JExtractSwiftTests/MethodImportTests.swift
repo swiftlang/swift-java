@@ -39,11 +39,11 @@ final class MethodImportTests {
       l: Int64,
       s: String
     )
-    
+
     public func globalReturnClass() -> MySwiftClass
 
     public func globalReturnAny() -> Any
-    
+
     public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
 
     extension MySwiftClass {
@@ -468,8 +468,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    #expect(!st.importedGlobalFuncs.contains {
-      $0.name == "globalReturnAny"
-    }, "'Any' return type is not supported yet")
+    #expect(
+      !st.importedGlobalFuncs.contains {
+        $0.name == "globalReturnAny"
+      },
+      "'Any' return type is not supported yet"
+    )
   }
 }

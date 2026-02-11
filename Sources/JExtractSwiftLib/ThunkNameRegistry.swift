@@ -24,7 +24,8 @@ package struct ThunkNameRegistry {
 
   package mutating func functionThunkName(
     decl: ImportedFunc,
-    file: String = #fileID, line: UInt = #line
+    file: String = #fileID,
+    line: UInt = #line
   ) -> String {
     if let existingName = self.registry[decl] {
       return existingName
@@ -42,11 +43,12 @@ package struct ThunkNameRegistry {
         .joined()
     }
 
-    let name = if let parent = decl.parentType {
-      "swiftjava_\(decl.module)_\(parent)_\(decl.name)\(suffix)"
-    } else {
-      "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
-    }
+    let name =
+      if let parent = decl.parentType {
+        "swiftjava_\(decl.module)_\(parent)_\(decl.name)\(suffix)"
+      } else {
+        "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
+      }
 
     let emittedCount = self.duplicateNames[name, default: 0]
     defer { self.duplicateNames[name] = emittedCount + 1 }

@@ -22,7 +22,8 @@ struct JNIArrayTest {
   func uint8Array_explicitType_java() throws {
     try assertOutput(
       input: "public func f(array: Array<UInt8>) -> Array<UInt8> {}",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -41,7 +42,8 @@ struct JNIArrayTest {
   func uint8Array_explicitType_swift() throws {
     try assertOutput(
       input: "public func f(array: Array<UInt8>) -> Array<UInt8> {}",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -58,7 +60,8 @@ struct JNIArrayTest {
   func uint8Array_syntaxSugar_java() throws {
     try assertOutput(
       input: "public func f(array: Array<UInt8>) -> Array<UInt8> {}",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -77,7 +80,8 @@ struct JNIArrayTest {
   func uint8Array_syntaxSugar_swift() throws {
     try assertOutput(
       input: "public func f(array: [UInt8]) -> [UInt8] {}",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -94,7 +98,8 @@ struct JNIArrayTest {
   func int64Array_syntaxSugar_java() throws {
     try assertOutput(
       input: "public func f(array: [Int64]) -> [Int64] {}",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -113,7 +118,8 @@ struct JNIArrayTest {
   func int64Array_syntaxSugar_swift() throws {
     try assertOutput(
       input: "public func f(array: [Int64]) -> [Int64] {}",
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -130,10 +136,11 @@ struct JNIArrayTest {
   func swiftClassArray_syntaxSugar_java() throws {
     try assertOutput(
       input: """
-        public class MySwiftClass {}
-        public func f(array: [MySwiftClass]) -> [MySwiftClass] {}
-      """,
-      .jni, .java,
+          public class MySwiftClass {}
+          public func f(array: [MySwiftClass]) -> [MySwiftClass] {}
+        """,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -155,10 +162,11 @@ struct JNIArrayTest {
   func swiftClassArray_syntaxSugar_swift() throws {
     try assertOutput(
       input: """
-        public class MySwiftClass {}
-        public func f(array: [MySwiftClass]) -> [MySwiftClass] {}
-      """,
-      .jni, .swift,
+          public class MySwiftClass {}
+          public func f(array: [MySwiftClass]) -> [MySwiftClass] {}
+        """,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """

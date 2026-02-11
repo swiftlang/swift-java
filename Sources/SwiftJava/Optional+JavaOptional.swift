@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-public extension Optional where Wrapped: AnyJavaObject {
-  func toJavaOptional() -> JavaOptional<Wrapped> {
-    return try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
+extension Optional where Wrapped: AnyJavaObject {
+  public func toJavaOptional() -> JavaOptional<Wrapped> {
+    try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
   }
 
-  init(javaOptional: JavaOptional<Wrapped>?) {
+  public init(javaOptional: JavaOptional<Wrapped>?) {
     if let javaOptional {
       self = javaOptional.isPresent() ? javaOptional.get().as(Wrapped.self) : Optional<Wrapped>.none
     } else {
@@ -26,8 +26,8 @@ public extension Optional where Wrapped: AnyJavaObject {
   }
 }
 
-public extension Optional where Wrapped == Double {
-  func toJavaOptional() -> JavaOptionalDouble {
+extension Optional where Wrapped == Double {
+  public func toJavaOptional() -> JavaOptionalDouble {
     if let self {
       return try! JavaClass<JavaOptionalDouble>().of(self)!
     } else {
@@ -35,7 +35,7 @@ public extension Optional where Wrapped == Double {
     }
   }
 
-  init(javaOptional: JavaOptionalDouble?) {
+  public init(javaOptional: JavaOptionalDouble?) {
     if let javaOptional {
       self = javaOptional.isPresent() ? javaOptional.getAsDouble() : nil
     } else {
@@ -44,8 +44,8 @@ public extension Optional where Wrapped == Double {
   }
 }
 
-public extension Optional where Wrapped == Int32 {
-  func toJavaOptional() -> JavaOptionalInt {
+extension Optional where Wrapped == Int32 {
+  public func toJavaOptional() -> JavaOptionalInt {
     if let self {
       return try! JavaClass<JavaOptionalInt>().of(self)!
     } else {
@@ -53,7 +53,7 @@ public extension Optional where Wrapped == Int32 {
     }
   }
 
-  init(javaOptional: JavaOptionalInt?) {
+  public init(javaOptional: JavaOptionalInt?) {
     if let javaOptional {
       self = javaOptional.isPresent() ? javaOptional.getAsInt() : nil
     } else {
@@ -62,8 +62,8 @@ public extension Optional where Wrapped == Int32 {
   }
 }
 
-public extension Optional where Wrapped == Int64 {
-  func toJavaOptional() -> JavaOptionalLong {
+extension Optional where Wrapped == Int64 {
+  public func toJavaOptional() -> JavaOptionalLong {
     if let self {
       return try! JavaClass<JavaOptionalLong>().of(self)!
     } else {
@@ -71,7 +71,7 @@ public extension Optional where Wrapped == Int64 {
     }
   }
 
-  init(javaOptional: JavaOptionalLong?) {
+  public init(javaOptional: JavaOptionalLong?) {
     if let javaOptional {
       self = javaOptional.isPresent() ? javaOptional.getAsLong() : nil
     } else {

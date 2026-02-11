@@ -27,17 +27,18 @@ struct SwiftParsedModuleSymbolTableBuilder {
   var unresolvedExtensions: [ExtensionDeclSyntax]
 
   init(
-    moduleName: String, 
-    requiredAvailablityOfModuleWithName: String? = nil, 
-    alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil, 
-    importedModules: [String: SwiftModuleSymbolTable], 
+    moduleName: String,
+    requiredAvailablityOfModuleWithName: String? = nil,
+    alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil,
+    importedModules: [String: SwiftModuleSymbolTable],
     log: Logger? = nil
   ) {
     self.log = log
     self.symbolTable = .init(
-      moduleName: moduleName, 
-      requiredAvailablityOfModuleWithName: requiredAvailablityOfModuleWithName, 
-      alternativeModules: alternativeModules)
+      moduleName: moduleName,
+      requiredAvailablityOfModuleWithName: requiredAvailablityOfModuleWithName,
+      alternativeModules: alternativeModules
+    )
     self.importedModules = importedModules
     self.unresolvedExtensions = []
   }
@@ -164,7 +165,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
     while !unresolvedExtensions.isEmpty {
       var extensions = self.unresolvedExtensions
       extensions.removeAll(where: {
-        self.tryHandle(extension: $0, sourceFilePath: "FIXME_MISSING_FILEPATH.swift") // FIXME: missing filepath here in finalize
+        self.tryHandle(extension: $0, sourceFilePath: "FIXME_MISSING_FILEPATH.swift")  // FIXME: missing filepath here in finalize
       })
 
       // If we didn't resolve anything, we're done.

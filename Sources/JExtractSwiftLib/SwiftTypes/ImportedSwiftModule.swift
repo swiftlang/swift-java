@@ -12,21 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 struct ImportedSwiftModule: Hashable {
   let name: String
   let availableWithModuleName: String?
   var alternativeModuleNames: Set<String>
   var isMainSourceOfSymbols: Bool
 
-  init(name: String, availableWithModuleName: String? = nil, alternativeModuleNames: Set<String> = [], isMainSourceOfSymbols: Bool = false) {
+  init(
+    name: String,
+    availableWithModuleName: String? = nil,
+    alternativeModuleNames: Set<String> = [],
+    isMainSourceOfSymbols: Bool = false
+  ) {
     self.name = name
     self.availableWithModuleName = availableWithModuleName
     self.alternativeModuleNames = alternativeModuleNames
     self.isMainSourceOfSymbols = isMainSourceOfSymbols
   }
 
-  static func ==(lhs: Self, rhs: Self) -> Bool {
+  static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.name == rhs.name
   }
 

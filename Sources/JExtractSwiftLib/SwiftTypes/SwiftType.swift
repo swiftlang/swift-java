@@ -44,7 +44,7 @@ enum SwiftType: Equatable {
   indirect case array(SwiftType)
 
   static var void: Self {
-    return .tuple([])
+    .tuple([])
   }
 
   var asNominalType: SwiftNominalType? {
@@ -65,7 +65,8 @@ enum SwiftType: Equatable {
     case .tuple([]):
       return true
     case .nominal(let nominal):
-      return nominal.parent == nil && nominal.nominalTypeDecl.moduleName == "Swift" && nominal.nominalTypeDecl.name == "Void"
+      return nominal.parent == nil && nominal.nominalTypeDecl.moduleName == "Swift"
+        && nominal.nominalTypeDecl.name == "Void"
     default:
       return false
     }
@@ -81,7 +82,7 @@ enum SwiftType: Equatable {
     default:
       break
     }
-    return false;
+    return false
   }
 
   /// Reference type
@@ -112,12 +113,12 @@ enum SwiftType: Equatable {
 
   var isArchDependingInteger: Bool {
     switch self {
-      case .nominal(let nominal):
-        switch nominal.nominalTypeDecl.knownTypeKind {
-          case .int, .uint: true
-          default: false
-        }
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .int, .uint: true
       default: false
+      }
+    default: false
     }
   }
 
@@ -173,8 +174,8 @@ extension SwiftType: CustomStringConvertible {
 }
 
 struct SwiftNominalType: Equatable {
-  enum Parent: Equatable {
-    indirect case nominal(SwiftNominalType)
+  indirect enum Parent: Equatable {
+    case nominal(SwiftNominalType)
   }
 
   private var storedParent: Parent?
@@ -186,7 +187,8 @@ struct SwiftNominalType: Equatable {
     nominalTypeDecl: SwiftNominalTypeDeclaration,
     genericArguments: [SwiftType]? = nil
   ) {
-    self.storedParent = parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
+    self.storedParent =
+      parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
     self.nominalTypeDecl = nominalTypeDecl
     self.genericArguments = genericArguments
   }
@@ -234,15 +236,15 @@ extension SwiftType {
   init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     switch type.as(TypeSyntaxEnum.self) {
     case .classRestrictionType,
-        .dictionaryType, .missingType, .namedOpaqueReturnType,
-        .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
+      .dictionaryType, .missingType, .namedOpaqueReturnType,
+      .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
       throw TypeTranslationError.unimplementedType(type)
 
     case .attributedType(let attributedType):
       // Recognize "@convention(c)", "@convention(swift)", and "@escaping" attributes on function types.
       // FIXME: This string matching is a horrible hack.
       let attrs = attributedType.attributes.trimmedDescription
-      
+
       // Handle @escaping attribute
       if attrs.contains("@escaping") {
         let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
@@ -340,9 +342,11 @@ extension SwiftType {
       self = .optional(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .tupleType(let tupleType):
-      self = try .tuple(tupleType.elements.map { element in
-         try SwiftType(element.type, lookupContext: lookupContext)
-      })
+      self = try .tuple(
+        tupleType.elements.map { element in
+          try SwiftType(element.type, lookupContext: lookupContext)
+        }
+      )
 
     case .someOrAnyType(let someOrAntType):
       if someOrAntType.someOrAnySpecifier.tokenKind == .keyword(.some) {
@@ -385,7 +389,7 @@ extension SwiftType {
       typeDecl = try lookupContext.unqualifiedLookup(name: ident, from: name)
     }
     guard let typeDecl else {
-     throw TypeTranslationError.unknown(originalType)
+      throw TypeTranslationError.unknown(originalType)
     }
 
     if let nominalDecl = typeDecl as? SwiftNominalTypeDeclaration {
@@ -408,10 +412,12 @@ extension SwiftType {
     parent: SwiftType?,
     symbolTable: SwiftSymbolTable
   ) {
-    guard let nominalTypeDecl = symbolTable.lookupType(
-      nominalDecl.name.text,
-      parent: parent?.asNominalTypeDeclaration
-    ) else {
+    guard
+      let nominalTypeDecl = symbolTable.lookupType(
+        nominalDecl.name.text,
+        parent: parent?.asNominalTypeDeclaration
+      )
+    else {
       return nil
     }
 

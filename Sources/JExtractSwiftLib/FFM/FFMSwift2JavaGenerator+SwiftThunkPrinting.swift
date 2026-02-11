@@ -24,11 +24,13 @@ extension FFMSwift2JavaGenerator {
   package func writeSwiftExpectedEmptySources() throws {
     let pendingFileCount = self.expectedOutputSwiftFileNames.count
     guard pendingFileCount > 0 else {
-      return // no need to write any empty files, yay
+      return  // no need to write any empty files, yay
     }
-    
-    log.info("[swift-java] Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
-    
+
+    log.info(
+      "[swift-java] Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/"
+    )
+
     for expectedFileName in self.expectedOutputSwiftFileNames {
       log.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
@@ -37,7 +39,8 @@ extension FFMSwift2JavaGenerator {
       _ = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
-        filename: expectedFileName)
+        filename: expectedFileName
+      )
     }
   }
 
@@ -52,7 +55,8 @@ extension FFMSwift2JavaGenerator {
       if let outputFile = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
-        filename: moduleFilename) {
+        filename: moduleFilename
+      ) {
         log.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
         self.expectedOutputSwiftFileNames.remove(moduleFilename)
       }
@@ -63,7 +67,10 @@ extension FFMSwift2JavaGenerator {
     // === All types
     // We have to write all types to their corresponding output file that matches the file they were declared in,
     // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
-    for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(grouping: self.analysis.importedTypes, by: { $0.value.sourceFilePath }) {
+    for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
+      grouping: self.analysis.importedTypes,
+      by: { $0.value.sourceFilePath }
+    ) {
       log.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")
 
       let importedTypesForThisFile = group.value
@@ -82,7 +89,7 @@ extension FFMSwift2JavaGenerator {
         } catch {
           log.warning("Failed to print to Swift thunks for type'\(ty.qualifiedName)' to '\(filename)', error: \(error)")
         }
-        
+
       }
 
       log.warning("Write Swift thunks file: \(filename.bold)")
@@ -90,7 +97,8 @@ extension FFMSwift2JavaGenerator {
         if let outputFile = try printer.writeContents(
           outputDirectory: self.swiftOutputDirectory,
           javaPackagePath: nil,
-          filename: filename) {
+          filename: filename
+        ) {
           log.info("Done writing Swift thunks to: \(outputFile.absoluteString)")
           self.expectedOutputSwiftFileNames.remove(filename)
         }
@@ -109,7 +117,8 @@ extension FFMSwift2JavaGenerator {
 
       import SwiftRuntimeFunctions
 
-      """)
+      """
+    )
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
@@ -205,7 +214,8 @@ struct SwiftThunkTranslator {
   func renderSwiftTypeAccessor(_ nominal: ImportedNominalType) -> DeclSyntax {
     let funcName = SwiftKitPrinting.Names.getType(
       module: st.swiftModuleName,
-      nominal: nominal)
+      nominal: nominal
+    )
 
     return
       """

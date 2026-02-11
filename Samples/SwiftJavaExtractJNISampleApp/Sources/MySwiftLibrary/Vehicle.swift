@@ -21,11 +21,11 @@ public enum Vehicle {
 
   public init?(name: String) {
     switch name {
-      case "bicycle": self = .bicycle
-      case "car": self = .car("Unknown", trailer: nil)
-      case "motorbike": self = .motorbike("Unknown", horsePower: 0, helmets: nil)
-      case "boat": self = .boat(passengers: nil, length: nil)
-      default: return nil
+    case "bicycle": self = .bicycle
+    case "car": self = .car("Unknown", trailer: nil)
+    case "motorbike": self = .motorbike("Unknown", horsePower: 0, helmets: nil)
+    case "boat": self = .boat(passengers: nil, length: nil)
+    default: return nil
     }
   }
 
@@ -41,23 +41,23 @@ public enum Vehicle {
 
   public func isFasterThan(other: Vehicle) -> Bool {
     switch (self, other) {
-      case (.bicycle, .bicycle), (.bicycle, .car), (.bicycle, .motorbike), (.bicycle, .transformer): false
-      case (.car, .bicycle): true
-      case (.car, .motorbike), (.car, .transformer), (.car, .car): false
-      case (.motorbike, .bicycle), (.motorbike, .car): true
-      case (.motorbike, .motorbike), (.motorbike, .transformer): false
-      case (.transformer, .bicycle), (.transformer, .car), (.transformer, .motorbike): true
-      case (.transformer, .transformer): false
-      default: false
+    case (.bicycle, .bicycle), (.bicycle, .car), (.bicycle, .motorbike), (.bicycle, .transformer): false
+    case (.car, .bicycle): true
+    case (.car, .motorbike), (.car, .transformer), (.car, .car): false
+    case (.motorbike, .bicycle), (.motorbike, .car): true
+    case (.motorbike, .motorbike), (.motorbike, .transformer): false
+    case (.transformer, .bicycle), (.transformer, .car), (.transformer, .motorbike): true
+    case (.transformer, .transformer): false
+    default: false
     }
   }
 
   public mutating func upgrade() {
     switch self {
-      case .bicycle: self = .car("Unknown", trailer: nil)
-      case .car: self = .motorbike("Unknown", horsePower: 0, helmets: nil)
-      case .motorbike: self = .transformer(front: .car("BMW", trailer: nil), back: self)
-      case .transformer, .boat: break
+    case .bicycle: self = .car("Unknown", trailer: nil)
+    case .car: self = .motorbike("Unknown", horsePower: 0, helmets: nil)
+    case .motorbike: self = .transformer(front: .car("BMW", trailer: nil), back: self)
+    case .transformer, .boat: break
     }
   }
 }

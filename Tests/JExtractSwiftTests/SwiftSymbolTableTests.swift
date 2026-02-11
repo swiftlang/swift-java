@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing) import JExtractSwiftLib
-import SwiftSyntax
 import SwiftParser
+import SwiftSyntax
 import Testing
 
 @Suite("Swift symbol table")
@@ -36,7 +36,7 @@ struct SwiftSymbolTableSuite {
       moduleName: "MyModule",
       [
         .init(syntax: sourceFile1, path: "Fake.swift"),
-        .init(syntax: sourceFile2, path: "Fake2.swift")
+        .init(syntax: sourceFile2, path: "Fake2.swift"),
       ],
       log: Logger(label: "swift-java", logLevel: .critical)
     )

@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import CSwiftJavaJNI
-
 import Foundation
+import SwiftJava
+
 public typealias SwiftJavaFoundationURL = Foundation.URL
 
 extension SwiftJavaFoundationURL {
@@ -26,9 +26,9 @@ extension SwiftJavaFoundationURL {
     return converted
   }
 }
-  
+
 extension URL {
   public static func fromSwift(_ url: SwiftJavaFoundationURL) throws -> URL {
-    return try URL(url.absoluteString)
+    try URL(url.absoluteString)
   }
 }

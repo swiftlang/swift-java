@@ -16,16 +16,16 @@ extension Method {
 
   /// Whether this is a 'static' method.
   public var isStatic: Bool {
-    return (getModifiers() & 0x00000008) != 0
+    (getModifiers() & 0x0000_0008) != 0
   }
 
   /// Whether this is a 'native' method.
   public var isNative: Bool {
-    return (getModifiers() & 0x00000100) != 0
+    (getModifiers() & 0x0000_0100) != 0
   }
-  
+
   /// Whether this is a 'final' method.
   public var isFinal: Bool {
-    return (getModifiers() & 0x00000010) != 0
+    (getModifiers() & 0x0000_0010) != 0
   }
 }

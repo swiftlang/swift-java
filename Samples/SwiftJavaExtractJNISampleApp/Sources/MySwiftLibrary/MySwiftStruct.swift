@@ -26,12 +26,12 @@ public struct MySwiftStruct {
   }
 
   public init?(doInit: Bool) {
-      if doInit {
-        self.init(cap: 10, len: 10)
-      } else {
-        return nil
-      }
+    if doInit {
+      self.init(cap: 10, len: 10)
+    } else {
+      return nil
     }
+  }
 
   public func getCapacity() -> Int64 {
     self.cap
@@ -44,25 +44,25 @@ public struct MySwiftStruct {
   }
 
   public func getSubscriptValue() -> Int64 {
-    return self.subscriptValue
+    self.subscriptValue
   }
 
   public func getSubscriptArrayValue(index: Int64) -> Int64 {
-    return self.subscriptArray[Int(index)]
+    self.subscriptArray[Int(index)]
   }
 
   public subscript() -> Int64 {
-    get { return subscriptValue }
+    get { subscriptValue }
     set { subscriptValue = newValue }
   }
 
   public subscript(index: Int64) -> Int64 {
-    get { return subscriptArray[Int(index)] }
+    get { subscriptArray[Int(index)] }
     set { subscriptArray[Int(index)] = newValue }
   }
 
   // operator functions are ignored.
-  public static func ==(lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {
-    return false
+  public static func == (lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {
+    false
   }
 }

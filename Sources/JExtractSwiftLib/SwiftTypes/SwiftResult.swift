@@ -15,7 +15,7 @@
 import SwiftSyntax
 
 struct SwiftResult: Equatable {
-  var convention: SwiftResultConvention // currently not used.
+  var convention: SwiftResultConvention  // currently not used.
   var type: SwiftType
 }
 
@@ -26,6 +26,6 @@ enum SwiftResultConvention: Equatable {
 
 extension SwiftResult {
   static var void: Self {
-    return Self(convention: .direct, type: .void)
+    Self(convention: .direct, type: .void)
   }
 }

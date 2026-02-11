@@ -59,9 +59,11 @@ public final class _JNIMethodIDCache: Sendable {
       guard let jni = JNI.shared else {
         fatalError("Cannot get JNI.shared, it should have been initialized by JNI_OnLoad when loading the library")
       }
-      guard let javaClass = try? jni.applicationClassLoader?.loadClass(
-        className.replacing("/", with: ".")
-      ) else {
+      guard
+        let javaClass = try? jni.applicationClassLoader?.loadClass(
+          className.replacing("/", with: ".")
+        )
+      else {
         fatalError("Class \(className) could not be found!")
       }
 
@@ -75,7 +77,9 @@ public final class _JNIMethodIDCache: Sendable {
         if let methodID = environment.interface.GetStaticMethodID(environment, clazz, method.name, method.signature) {
           result[method] = methodID
         } else {
-          fatalError("Static method \(method.signature) with signature \(method.signature) not found in class \(className)")
+          fatalError(
+            "Static method \(method.signature) with signature \(method.signature) not found in class \(className)"
+          )
         }
       } else {
         if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, method.signature) {

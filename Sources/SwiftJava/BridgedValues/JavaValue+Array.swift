@@ -88,7 +88,7 @@ extension Array: JavaValue where Element: JavaValue {
       }
     } else {
       // Slow path, convert every element to the apropriate JNIType:
-      let jniElementBuffer: [Element.JNIType] = self.map { // meh, temporary array
+      let jniElementBuffer: [Element.JNIType] = self.map {  // meh, temporary array
         $0.getJNIValue(in: environment)
       }
       Element.jniSetArrayRegion(in: environment)(
@@ -128,7 +128,7 @@ extension Array: JavaValue where Element: JavaValue {
   }
 
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
-    return { environment, size in
+    { environment, size in
       // FIXME: We should have a bridged JavaArray that we can use here.
       let arrayClass = environment.interface.FindClass(environment, "java/lang/Array")
       return environment.interface.NewObjectArray(environment, size, arrayClass, nil)
@@ -136,7 +136,7 @@ extension Array: JavaValue where Element: JavaValue {
   }
 
   public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
       for i in 0..<length {
         buffer.initializeElement(
@@ -148,7 +148,7 @@ extension Array: JavaValue where Element: JavaValue {
   }
 
   public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {
         environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])

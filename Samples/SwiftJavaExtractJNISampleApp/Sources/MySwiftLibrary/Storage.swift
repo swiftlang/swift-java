@@ -28,9 +28,9 @@ public protocol Storage {
 }
 
 public func saveWithStorage(_ item: StorageItem, s: any Storage) {
-  s.save(item);
+  s.save(item)
 }
 
 public func loadWithStorage(s: any Storage) -> StorageItem {
-  return s.load();
+  s.load()
 }

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import JavaMath
+import SwiftJava
 
 let jvm = try JavaVirtualMachine.shared()
 
@@ -23,7 +23,7 @@ do {
     print("Found prime: \(prime.intValue())")
   }
 
-  _ = try JavaClass<RoundingMode>().HALF_UP // can import a Java enum value
+  _ = try JavaClass<RoundingMode>().HALF_UP  // can import a Java enum value
 } catch {
   print("Failure: \(error)")
 }

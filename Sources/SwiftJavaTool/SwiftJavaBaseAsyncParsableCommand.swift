@@ -14,17 +14,17 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaToolLib
 import JExtractSwiftLib
-import SwiftJava
-import JavaUtilJar
-import JavaNet
 import JavaLangReflect
-import SwiftSyntax
-import SwiftSyntaxBuilder
+import JavaNet
+import JavaUtilJar
+import Logging
+import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
-import Logging
+import SwiftJavaToolLib
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
 
@@ -72,7 +72,8 @@ extension SwiftJavaBaseAsyncParsableCommand {
     _ contents: String,
     outputDirectory: Foundation.URL?,
     to filename: String,
-    description: String) throws {
+    description: String
+  ) throws {
     guard let outputDir = outputDirectory else {
       print("// \(filename) - \(description)")
       print(contents)
@@ -97,9 +98,8 @@ extension SwiftJavaBaseAsyncParsableCommand {
   }
 }
 
-
 extension SwiftJavaBaseAsyncParsableCommand {
-  var log: Logging.Logger { // FIXME: replace with stored property inside specific commands
+  var log: Logging.Logger {  // FIXME: replace with stored property inside specific commands
     .init(label: "swift-java")
   }
 
@@ -108,7 +108,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
       self.commonOptions.logLevel
     }
     set {
-    self.commonOptions.logLevel = newValue
+      self.commonOptions.logLevel = newValue
     }
   }
 
@@ -124,8 +124,8 @@ extension SwiftJavaBaseAsyncParsableCommand {
       if outputDirectory == "-" {
         return nil
       }
-//      print("[debug][swift-java] Module base directory based on outputDirectory!")
-//      return URL(fileURLWithPath: outputDirectory)
+      //      print("[debug][swift-java] Module base directory based on outputDirectory!")
+      //      return URL(fileURLWithPath: outputDirectory)
     }
 
     // Put the result into Sources/\(swiftModule).

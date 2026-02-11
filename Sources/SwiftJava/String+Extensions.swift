@@ -36,7 +36,7 @@ extension String {
   package var javaClassNameToCanonicalName: String {
     let regex = try! Regex(#"(\w)\$"#, as: (Substring, Substring).self)
     return self.replacing(regex) { match in
-        "\(match.output.1)."
+      "\(match.output.1)."
     }
   }
 

@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaToolLib
-import SwiftJavaShared
 import CSwiftJavaJNI
 import SwiftJava
+import SwiftJavaShared
+import SwiftJavaToolLib
 
 // FIXME: do we need this here or can we rely on the generated one?
 @JavaClass("java.lang.ClassLoader")

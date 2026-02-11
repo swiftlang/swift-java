@@ -12,14 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
-import JavaUtilFunction
-import JavaIO
-import SwiftJavaConfigurationShared
 import Foundation
-
 // Import the commons-csv library wrapper:
 import JavaCommonsCSV
+import JavaIO
+import JavaUtilFunction
+import SwiftJava
+import SwiftJavaConfigurationShared
 
 print("")
 print("")
@@ -27,7 +26,7 @@ print("-----------------------------------------------------------------------")
 print("Start Sample app...")
 
 // TODO: locating the classpath is more complex, need to account for dependencies of our module
-let swiftJavaClasspath = findSwiftJavaClasspaths() // scans for .classpath files
+let swiftJavaClasspath = findSwiftJavaClasspaths()  // scans for .classpath files
 
 // 1) Start a JVM with appropriate classpath
 let jvm = try JavaVirtualMachine.shared(classpath: swiftJavaClasspath)

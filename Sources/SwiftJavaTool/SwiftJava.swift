@@ -14,16 +14,16 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaToolLib
 import JExtractSwiftLib
-import SwiftJava
-import JavaUtilJar
-import JavaNet
 import JavaLangReflect
-import SwiftSyntax
-import SwiftSyntaxBuilder
+import JavaNet
+import JavaUtilJar
+import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
+import SwiftJavaToolLib
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 /// Command-line utility to drive the export of Java classes into Swift types.
 @main
@@ -36,8 +36,9 @@ struct SwiftJava: AsyncParsableCommand {
       ConfigureCommand.self,
       ResolveCommand.self,
       WrapJavaCommand.self,
-      JExtractCommand.self
-    ])
+      JExtractCommand.self,
+    ]
+  )
 
   public static func main() async {
     do {
@@ -99,4 +100,3 @@ extension JavaToSwiftError: CustomStringConvertible {
     }
   }
 }
-

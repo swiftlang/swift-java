@@ -14,21 +14,21 @@
 
 import Benchmark
 import Foundation
-import SwiftJava
 import JavaNet
+import SwiftJava
 
 @MainActor let benchmarks = {
-    var jvm: JavaVirtualMachine {
-        get throws {
-            try .shared()
-        }
+  var jvm: JavaVirtualMachine {
+    get throws {
+      try .shared()
     }
-    Benchmark("Simple call to Java library") { benchmark in
-        for _ in benchmark.scaledIterations {
-            let environment = try jvm.environment()
+  }
+  Benchmark("Simple call to Java library") { benchmark in
+    for _ in benchmark.scaledIterations {
+      let environment = try jvm.environment()
 
-            let urlConnectionClass = try JavaClass<URLConnection>(environment: environment)
-            blackHole(urlConnectionClass.getDefaultAllowUserInteraction())
-        }
+      let urlConnectionClass = try JavaClass<URLConnection>(environment: environment)
+      blackHole(urlConnectionClass.getDefaultAllowUserInteraction())
     }
+  }
 }
