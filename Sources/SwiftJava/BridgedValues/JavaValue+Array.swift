@@ -88,7 +88,7 @@ extension Array: JavaValue where Element: JavaValue {
       }
     } else {
       // Slow path, convert every element to the apropriate JNIType:
-      let jniElementBuffer: [Element.JNIType] = self.map {  // meh, temporary array
+      let jniElementBuffer: [Element.JNIType] = self.map { // meh, temporary array
         $0.getJNIValue(in: environment)
       }
       Element.jniSetArrayRegion(in: environment)(

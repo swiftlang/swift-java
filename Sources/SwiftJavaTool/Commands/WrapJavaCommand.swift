@@ -209,7 +209,7 @@ extension SwiftJava.WrapJavaCommand {
       }
 
       // Find all of the nested classes that weren't explicitly translated already.
-      let nestedAndSuperclassNestedClasses = currentClass.getClasses()  // watch out, this includes nested types from superclasses
+      let nestedAndSuperclassNestedClasses = currentClass.getClasses() // watch out, this includes nested types from superclasses
       let nestedClasses: [JavaClass<JavaObject>] = nestedAndSuperclassNestedClasses.compactMap { nestedClass in
         guard let nestedClass else {
           return nil

@@ -16,7 +16,7 @@ import Foundation
 
 // Regex is not sendable yet so we can't cache it in a let
 private var GradleDependencyDescriptorRegex: Regex<(Substring, Substring, Substring, Substring)> {
-  try! Regex(#"^([^:]+):([^:]+):(\d[^:]+)$"#)  // TODO: improve the regex to be more precise
+  try! Regex(#"^([^:]+):([^:]+):(\d[^:]+)$"#) // TODO: improve the regex to be more precise
 }
 
 // note: can't use `package` access level since it would break in usage in plugins in `_PluginsShared`.

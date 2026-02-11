@@ -33,7 +33,7 @@ extension SwiftJava {
 
   struct JExtractCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions {
     static let configuration = CommandConfiguration(
-      commandName: "jextract",  // TODO: wrap-swift?
+      commandName: "jextract", // TODO: wrap-swift?
       abstract: "Wrap Swift functions and types with Java bindings, making them available to be called from Java"
     )
 

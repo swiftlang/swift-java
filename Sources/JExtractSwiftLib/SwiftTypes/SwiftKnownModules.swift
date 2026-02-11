@@ -43,7 +43,7 @@ enum SwiftKnownModule: String {
 
 private var swiftSymbolTable: SwiftModuleSymbolTable {
   var builder = SwiftParsedModuleSymbolTableBuilder(moduleName: "Swift", importedModules: [:])
-  builder.handle(sourceFile: swiftSourceFile, sourceFilePath: "SwiftStdlib.swift")  // FIXME: missing path here
+  builder.handle(sourceFile: swiftSourceFile, sourceFilePath: "SwiftStdlib.swift") // FIXME: missing path here
   return builder.finalize()
 }
 

@@ -1,4 +1,3 @@
-import JavaLangReflect
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -12,6 +11,8 @@ import JavaLangReflect
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+import JavaLangReflect
 import SwiftJava
 
 /// Captures the relationship between two methods by comparing their parameter

@@ -797,7 +797,7 @@ struct CdeclLowering {
       let resultName = "_result"
 
       return LoweredResult(
-        cdeclResultType: .void,  // we call into the _result_initialize instead
+        cdeclResultType: .void, // we call into the _result_initialize instead
         cdeclOutParameters: [
           SwiftParameter(
             convention: .byValue,
@@ -817,7 +817,7 @@ struct CdeclLowering {
                       parameters: [.placeholder],
                       result: .method(
                         base: "\(outParameterName)_initialize",
-                        methodName: nil,  // just `(...)` apply the closure
+                        methodName: nil, // just `(...)` apply the closure
                         arguments: [
                           .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
                           .init(label: nil, argument: .member(.constant("_0"), member: "count")),

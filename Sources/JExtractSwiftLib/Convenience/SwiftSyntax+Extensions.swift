@@ -290,7 +290,7 @@ class TriviaSanitizingDescriptionVisitor: SyntaxVisitor {
   override func visit(_ node: TokenSyntax) -> SyntaxVisitorContinueKind {
     let tokenKind = node.tokenKind
     switch (prevTokenKind, tokenKind) {
-    case  // No whitespace after open parentheses.
+    case // No whitespace after open parentheses.
     (.leftAngle, _), (.leftParen, _), (.leftSquare, _), (.endOfFile, _),
       // No whitespace before close parentheses.
       (_, .rightAngle), (_, .rightParen), (_, .rightSquare):

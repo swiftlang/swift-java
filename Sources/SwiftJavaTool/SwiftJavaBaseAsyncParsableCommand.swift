@@ -99,7 +99,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
 }
 
 extension SwiftJavaBaseAsyncParsableCommand {
-  var log: Logging.Logger {  // FIXME: replace with stored property inside specific commands
+  var log: Logging.Logger { // FIXME: replace with stored property inside specific commands
     .init(label: "swift-java")
   }
 

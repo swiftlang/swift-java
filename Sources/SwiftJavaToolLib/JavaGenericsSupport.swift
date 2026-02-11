@@ -38,7 +38,7 @@ func getGenericJavaTypeOriginInfo(_ type: Type?, from method: Method) -> [Generi
   }
 
   guard isGenericJavaType(type) else {
-    return []  // it's not a generic type, no "origin" of the use to detect
+    return [] // it's not a generic type, no "origin" of the use to detect
   }
 
   var methodTypeVars = method.getTypeParameters()

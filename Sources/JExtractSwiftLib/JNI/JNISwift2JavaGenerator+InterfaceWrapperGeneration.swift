@@ -176,7 +176,7 @@ extension JNISwift2JavaGenerator {
       setter: ImportedFunc?
     ) throws -> JavaInterfaceSwiftWrapper.Variable {
       try JavaInterfaceSwiftWrapper.Variable(
-        swiftDecl: getter.swiftDecl,  // they should be the same
+        swiftDecl: getter.swiftDecl, // they should be the same
         getter: translate(function: getter),
         setter: setter.map { try self.translate(function: $0) }
       )
@@ -226,7 +226,7 @@ extension JNISwift2JavaGenerator {
           nominalType: nominalType
         )
 
-      case .tuple([]):  // void
+      case .tuple([]): // void
         return .placeholder
 
       case .optional(let wrappedType):
@@ -315,7 +315,7 @@ extension JNISwift2JavaGenerator {
           nominalType: nominalType
         )
 
-      case .tuple([]):  // void
+      case .tuple([]): // void
         return .placeholder
 
       case .optional(let wrappedType):

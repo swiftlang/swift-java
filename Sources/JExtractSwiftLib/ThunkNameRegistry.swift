@@ -55,7 +55,7 @@ package struct ThunkNameRegistry {
 
     let deduplicatedName =
       if emittedCount == 0 {
-        name  // first occurrence of a name we keep as-is
+        name // first occurrence of a name we keep as-is
       } else {
         "\(name)$\(emittedCount)"
       }

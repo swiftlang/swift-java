@@ -110,7 +110,7 @@ extension JavaMethodMacro: BodyMacro {
     }
 
     let canRethrowError = funcDecl.signature.effectSpecifiers?.throwsClause != nil
-    let catchPhrase =  // how are we able to catch/handle thrown errors from the dynamicJava call
+    let catchPhrase = // how are we able to catch/handle thrown errors from the dynamicJava call
       if canRethrowError {
         "throw error"
       } else {

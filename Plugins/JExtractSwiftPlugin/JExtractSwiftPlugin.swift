@@ -184,8 +184,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Forward environment: \(gradlewEnvironment)")
 
     let gradleExecutable =
-      findExecutable(name: "gradle")  // try using installed 'gradle' if available in PATH
-      ?? swiftJavaDirectory.appending(path: "gradlew")  // fallback to calling ./gradlew if gradle is not installed
+      findExecutable(name: "gradle") // try using installed 'gradle' if available in PATH
+      ?? swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
     log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
 
     commands += [

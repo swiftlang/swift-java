@@ -72,7 +72,7 @@ public func getJavaHomeFromLibexecJavaHome() -> String? {
 
   let pipe = Pipe()
   task.standardOutput = pipe
-  task.standardError = pipe  // Redirect standard error to the same pipe for simplicity
+  task.standardError = pipe // Redirect standard error to the same pipe for simplicity
 
   do {
     try task.run()

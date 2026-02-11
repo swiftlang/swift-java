@@ -60,8 +60,8 @@ struct SwiftKnownTypes {
       SwiftFunctionType(
         convention: .c,
         parameters: [
-          SwiftParameter(convention: .byValue, parameterName: nil, type: self.unsafeRawPointer),  // array base pointer
-          SwiftParameter(convention: .byValue, parameterName: nil, type: self.int),  // array length
+          SwiftParameter(convention: .byValue, parameterName: nil, type: self.unsafeRawPointer), // array base pointer
+          SwiftParameter(convention: .byValue, parameterName: nil, type: self.int), // array length
         ],
         resultType: .void
       )

@@ -272,8 +272,7 @@ extension JNISwift2JavaGenerator {
         )
 
       case .genericParameter:
-        if let concreteTy = type.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements)
-        {
+        if let concreteTy = type.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
           return try translateProtocolParameter(
             protocolType: concreteTy,
             methodName: methodName,
@@ -1357,7 +1356,7 @@ extension JNISwift2JavaGenerator {
           printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
             printer.printBraceBlock("task = Task.immediate") { printer in
               // Immediate runs on the caller thread, so we don't need to attach the environment again.
-              printer.print("var environment = environment!")  // this is to ensure we always use the same environment name, even though we are rebinding it.
+              printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
               printTaskBody(printer: &printer)
             }
           }

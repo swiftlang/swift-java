@@ -64,7 +64,7 @@ func getJavaHomeFromLibexecJavaHome() -> String? {
 
   let pipe = Pipe()
   task.standardOutput = pipe
-  task.standardError = pipe  // Redirect standard error to the same pipe for simplicity
+  task.standardError = pipe // Redirect standard error to the same pipe for simplicity
 
   do {
     try task.run()
@@ -265,7 +265,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
-    .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")),  // primarily for ordered collections
+    .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")), // primarily for ordered collections
     .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1", traits: ["SubprocessFoundation"]),
 
     // Benchmarking
@@ -312,7 +312,7 @@ let package = Package(
           ["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"],
           .when(platforms: [.macOS, .linux, .windows])
         ),
-        .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)),  // Workaround for https://github.com/swiftlang/swift/issues/84899
+        .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)), // Workaround for https://github.com/swiftlang/swift/issues/84899
       ],
       linkerSettings: [
         .unsafeFlags(

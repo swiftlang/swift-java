@@ -165,7 +165,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
     while !unresolvedExtensions.isEmpty {
       var extensions = self.unresolvedExtensions
       extensions.removeAll(where: {
-        self.tryHandle(extension: $0, sourceFilePath: "FIXME_MISSING_FILEPATH.swift")  // FIXME: missing filepath here in finalize
+        self.tryHandle(extension: $0, sourceFilePath: "FIXME_MISSING_FILEPATH.swift") // FIXME: missing filepath here in finalize
       })
 
       // If we didn't resolve anything, we're done.

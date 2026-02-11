@@ -20,7 +20,7 @@ import Subprocess
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftJavaToolLib
-import XCTest  // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 private func createTemporaryDirectory(in directory: Foundation.URL) throws -> Foundation.URL {
   let uuid = UUID().uuidString
@@ -40,7 +40,7 @@ func compileJava(_ sourceText: String) async throws -> Foundation.URL {
   let javacProcess = try await Subprocess.run(
     .path(.init("\(javaHome)" + "/bin/javac")),
     arguments: [
-      "-d", classesDirectory.path,  // output directory for .class files
+      "-d", classesDirectory.path, // output directory for .class files
       sourceFile.path,
     ],
     output: .string(limit: Int.max, encoding: UTF8.self),
@@ -118,7 +118,7 @@ func assertWrapJavaOutput(
     translateAsClass: true
   )
 
-  let classpathJavaURLs = classpath.map({ try! URL.init("\($0)/") })  // we MUST have a trailing slash for JVM to consider it a search directory
+  let classpathJavaURLs = classpath.map({ try! URL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
   let classLoader = URLClassLoader(classpathJavaURLs, environment: environment)
 
   // FIXME: deduplicate this

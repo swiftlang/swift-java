@@ -265,7 +265,7 @@ extension JavaClassTranslator {
       let split = exclude.split(separator: "#")
       guard split.count == 2 else {
         self.log.warning("Malformed method exclude filter, must have only one '#' marker: \(exclude)")
-        continue  // cannot use this filter, malformed
+        continue // cannot use this filter, malformed
       }
 
       let javaClassName = method.getDeclaringClass().getName()
@@ -492,7 +492,7 @@ extension JavaClassTranslator {
       }
 
       let genericArgumentClause = "<\(genericParameterNames.joined(separator: ", "))>"
-      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)"  // FIXME: move the 'where ...' part into the render bit
+      staticMemberWhereClause = " where ObjectType == \(swiftTypeName)\(genericArgumentClause)" // FIXME: move the 'where ...' part into the render bit
     } else {
       staticMemberWhereClause = ""
     }
@@ -595,13 +595,13 @@ extension JavaClassTranslator {
 
     for annotation in annotations {
       let annotationName = annotation.annotationType().getName().splitSwiftTypeName().name
-      if annotationName == "ThreadSafe" || annotationName == "Immutable" {  // If we are threadsafe, mark as unchecked Sendable
+      if annotationName == "ThreadSafe" || annotationName == "Immutable" { // If we are threadsafe, mark as unchecked Sendable
         extensions.append(
           """
           extension \(raw: swiftTypeName): @unchecked Swift.Sendable { }
           """
         )
-      } else if annotationName == "NotThreadSafe" {  // If we are _not_ threadsafe, mark sendable unavailable
+      } else if annotationName == "NotThreadSafe" { // If we are _not_ threadsafe, mark sendable unavailable
         extensions.append(
           """
           @available(unavailable, *)
@@ -919,10 +919,10 @@ extension JavaClassTranslator {
                   ? "self.init(javaHolder: \($0.getName()).javaHolder)"
                   : "self = \($0.getName())")
             } else {
-              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run swift-java on the most updated Java class") 
+              fatalError("Enum value \($0.getName()) was unexpectedly nil, please re-run swift-java on the most updated Java class")
             }
       """
-    }.joined(separator: "\n"))
+      }.joined(separator: "\n"))
         }
       }
       """
@@ -951,7 +951,7 @@ extension JavaClassTranslator {
   }
 
   // Translate a Java parameter list into Swift parameters.
-  @available(*, deprecated, message: "Prefer the method based version")  // FIXME: constructors are not well handled
+  @available(*, deprecated, message: "Prefer the method based version") // FIXME: constructors are not well handled
   private func translateJavaParameters(
     _ parameters: [Parameter?]
   ) throws -> [FunctionParameterSyntax] {

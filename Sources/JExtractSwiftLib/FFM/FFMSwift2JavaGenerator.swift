@@ -186,7 +186,7 @@ extension FFMSwift2JavaGenerator {
   func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
-    printImports(&printer)  // TODO: we could have some imports be driven from types used in the generated decl
+    printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
 
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,

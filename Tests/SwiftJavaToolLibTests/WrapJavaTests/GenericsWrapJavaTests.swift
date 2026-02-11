@@ -19,7 +19,7 @@ import Subprocess
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftJavaToolLib
-import XCTest  // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class GenericsWrapJavaTests: XCTestCase {
 
@@ -230,7 +230,7 @@ final class GenericsWrapJavaTests: XCTestCase {
   }
 
   func testWrapJavaGenericSuperclass() async throws {
-    return  // FIXME: we need this
+    return // FIXME: we need this
 
     let classpathURL = try await compileJava(
       """

@@ -500,7 +500,7 @@ extension FFMSwift2JavaGenerator {
                 .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
                 base: .temporaryArena,
                 function: "allocateFrom",
-                withArena: false  // this would pass the arena as last argument, but instead we make a call on the arena
+                withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
               ),
               .property(.placeholder, propertyName: "length"),
             ])
@@ -654,7 +654,7 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            break  // Implemented as wrapper
+            break // Implemented as wrapper
 
           case .unsafePointer, .unsafeMutablePointer:
             // FIXME: Implement
@@ -694,7 +694,7 @@ extension FFMSwift2JavaGenerator {
           javaResultType:
             .array(.byte),
           annotations: [.unsigned],
-          outParameters: [],  // no out parameters, but we do an "out" callback
+          outParameters: [], // no out parameters, but we do an "out" callback
           outCallback: OutCallback(
             name: "$_result_initialize",
             members: [
@@ -733,7 +733,7 @@ extension FFMSwift2JavaGenerator {
                 )
               ),
               // .constant("var  = new \(.placeholderForDowncallThunkName).."),
-              .placeholderForDowncall,  // perform the downcall here
+              .placeholderForDowncall, // perform the downcall here
             ],
             extractResult: .property(.constant("_result_initialize"), propertyName: "result")
           )
@@ -880,7 +880,7 @@ extension CType {
     case .integral(.signed(bits: 32)): return .int
     case .integral(.signed(bits: 64)): return .long
     case .integral(.unsigned(bits: 8)): return .byte
-    case .integral(.unsigned(bits: 16)): return .char  // char is Java's only unsigned primitive, we can use it!
+    case .integral(.unsigned(bits: 16)): return .char // char is Java's only unsigned primitive, we can use it!
     case .integral(.unsigned(bits: 32)): return .int
     case .integral(.unsigned(bits: 64)): return .long
 

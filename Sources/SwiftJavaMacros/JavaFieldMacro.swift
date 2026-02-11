@@ -56,7 +56,7 @@ extension JavaFieldMacro: AccessorMacro {
         let wrapperIsBoolean = arguments.first(where: { $0.label?.text == "isFinal" })?.expression,
         let booleanLiteral = wrapperIsBoolean.as(BooleanLiteralExprSyntax.self)
       {
-        booleanLiteral.literal.text == "false"  // Create the setter if we are not final
+        booleanLiteral.literal.text == "false" // Create the setter if we are not final
       } else {
         true
       }

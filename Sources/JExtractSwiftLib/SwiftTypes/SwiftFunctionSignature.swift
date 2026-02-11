@@ -455,7 +455,7 @@ extension AccessorBlockSyntax {
         case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress),
           .keyword(.willSet), .keyword(.didSet):
           return [.get, .set]
-        default:  // Ignore willSet/didSet and unknown accessors.
+        default: // Ignore willSet/didSet and unknown accessors.
           break
         }
       }

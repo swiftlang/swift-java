@@ -53,9 +53,9 @@ final class Swift2JavaVisitor {
     case .extensionDecl(let node):
       self.visit(extensionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .typeAliasDecl:
-      break  // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
+      break // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
     case .associatedTypeDecl:
-      break  // TODO: Implement associated types
+      break // TODO: Implement associated types
 
     case .initializerDecl(let node):
       self.visit(initializerDecl: node, in: parent)

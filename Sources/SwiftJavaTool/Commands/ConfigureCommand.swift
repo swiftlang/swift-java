@@ -132,7 +132,7 @@ extension SwiftJava.ConfigureCommand {
     if amendExistingConfig {
       log.info("Amend existing swift-java.config file...")
     }
-    config.classpath = classpathEntries.joined(separator: ":")  // TODO: is this correct?
+    config.classpath = classpathEntries.joined(separator: ":") // TODO: is this correct?
 
     // Import types from all the classpath entries;
     // Note that we use the package level filtering, so users have some control over what gets imported.

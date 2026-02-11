@@ -57,7 +57,7 @@ public final class Swift2JavaTranslator {
     config: Configuration
   ) {
     guard let swiftModule = config.swiftModule else {
-      fatalError("Missing 'swiftModule' name.")  // FIXME: can we make it required in config? but we shared config for many cases
+      fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
     self.log = Logger(label: "translator", logLevel: config.logLevel ?? .info)
     self.config = config

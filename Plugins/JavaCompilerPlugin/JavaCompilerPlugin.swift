@@ -82,10 +82,10 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
           .appending(path: javac),
         arguments: javaFiles.map { $0.path } + [
           "-d", javaClassFileURL.path,
-          "-parameters",  // keep parameter names, which allows us to emit them in generated Swift decls
+          "-parameters", // keep parameter names, which allows us to emit them in generated Swift decls
         ] + (config?.compilerVersionArgs ?? []),
         inputFiles: javaFiles,
-        outputFiles: classFiles  // FIXME: this is not quite enough, javac may generate more files for closures etc, which we don't know about unless we compile first
+        outputFiles: classFiles // FIXME: this is not quite enough, javac may generate more files for closures etc, which we don't know about unless we compile first
       )
     ]
   }

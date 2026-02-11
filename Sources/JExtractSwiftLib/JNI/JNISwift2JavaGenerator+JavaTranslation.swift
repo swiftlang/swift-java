@@ -90,8 +90,8 @@ extension JNISwift2JavaGenerator {
         protocolWrappers: self.protocolWrappers
       )
 
-      let methodName = ""  // TODO: Used for closures, replace with better name?
-      let parentName = ""  // TODO: Used for closures, replace with better name?
+      let methodName = "" // TODO: Used for closures, replace with better name?
+      let parentName = "" // TODO: Used for closures, replace with better name?
 
       let translatedValues = try self.translateParameters(
         enumCase.parameters.map { ($0.name, $0.type) },
@@ -419,10 +419,10 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            break  // Handled as wrapped struct
+            break // Handled as wrapped struct
 
           case .foundationData, .essentialsData:
-            break  // Handled as wrapped struct
+            break // Handled as wrapped struct
 
           case .foundationUUID, .essentialsUUID:
             return TranslatedParameter(
@@ -561,7 +561,7 @@ extension JNISwift2JavaGenerator {
         conversion: .aggregate(
           variable: nil,
           [
-            .print(.placeholder),  // Make the downcall
+            .print(.placeholder), // Make the downcall
             .method(
               .constant("future$"),
               function: "thenApply",

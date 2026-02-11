@@ -43,7 +43,7 @@ class SwiftTypeLookupContext {
         }
 
       case .lookForMembers(let scopeNode):
-        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") {  // FIXME: no path here // implement some node -> file
+        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
           if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl as! SwiftNominalTypeDeclaration) {
             return found
           }
@@ -69,9 +69,9 @@ class SwiftTypeLookupContext {
     for name in names {
       switch name {
       case .identifier(let identifiableSyntax, _):
-        return try? typeDeclaration(for: identifiableSyntax, sourceFilePath: "FIXME_NO_PATH.swift")  // FIXME: how to get path here?
+        return try? typeDeclaration(for: identifiableSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
       case .declaration(let namedDeclSyntax):
-        return try? typeDeclaration(for: namedDeclSyntax, sourceFilePath: "FIXME_NO_PATH.swift")  // FIXME: how to get path here?
+        return try? typeDeclaration(for: namedDeclSyntax, sourceFilePath: "FIXME_NO_PATH.swift") // FIXME: how to get path here?
       case .implicit(let implicitDecl):
         // TODO: Implement
         _ = implicitDecl
@@ -161,7 +161,7 @@ class SwiftTypeLookupContext {
       case .structDecl, .classDecl, .actorDecl, .enumDecl, .protocolDecl:
         return
           (try typeDeclaration(for: parentDecl, sourceFilePath: "FIXME_NO_SOURCE_FILE.swift")
-          as! SwiftNominalTypeDeclaration)  // FIXME: need to get the source file of the parent
+          as! SwiftNominalTypeDeclaration) // FIXME: need to get the source file of the parent
       default:
         node = parentDecl
         continue

@@ -48,12 +48,12 @@ public final class JavaVirtualMachine: @unchecked Sendable {
   let classpath: [String]
 
   /// Whether to destroy the JVM on deinit.
-  private let destroyOnDeinit: LockedState<Bool>  // FIXME: we should require macOS 15 and then use Synchronization
+  private let destroyOnDeinit: LockedState<Bool> // FIXME: we should require macOS 15 and then use Synchronization
 
   /// Adopt an existing JVM pointer.
   public init(adoptingJVM jvm: JavaVMPointer) {
     self.jvm = jvm
-    self.classpath = []  // FIXME: bad...
+    self.classpath = [] // FIXME: bad...
     self.destroyOnDeinit = .init(initialState: false)
   }
 
@@ -88,7 +88,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
           // FIXME: this should be configurable, a classpath missing a directory isn't reason to blow up
           print(
             "[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)"
-          )  // TODO: stderr
+          ) // TODO: stderr
         }
       }
       let pathSeparatedClassPath = classpath.joined(separator: FileManager.pathSeparator)
@@ -133,7 +133,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       throw error
     }
 
-    destroyOnDeinit.withLock { $0 = false }  // we destroyed explicitly, disable destroy in deinit
+    destroyOnDeinit.withLock { $0 = false } // we destroyed explicitly, disable destroy in deinit
   }
 
   deinit {

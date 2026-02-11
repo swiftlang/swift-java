@@ -190,7 +190,7 @@ enum ConversionStep: Equatable {
         if let methodName {
           ".\(methodName)"
         } else {
-          ""  // this is equivalent to calling `base(...)`
+          "" // this is equivalent to calling `base(...)`
         }
 
       if let base {

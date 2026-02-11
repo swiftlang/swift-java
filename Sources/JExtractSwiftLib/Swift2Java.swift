@@ -142,7 +142,7 @@ public func collectAllFiles(suffix: String, in inputPaths: [URL], log: Logger) -
 
   let fileManager = FileManager.default
   var allFiles: OrderedSet<URL> = []
-  allFiles.reserveCapacity(32)  // rough guesstimate
+  allFiles.reserveCapacity(32) // rough guesstimate
 
   let resourceKeys: [URLResourceKey] = [
     .isRegularFileKey,

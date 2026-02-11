@@ -162,8 +162,8 @@ extension SwiftJava.ResolveCommand {
         ],
         workingDirectory: Optional(FilePath(resolverDir.path)),
         // TODO: we could move to stream processing the outputs
-        output: .string(limit: Int.max, encoding: UTF8.self),  // Don't limit output, we know it will be reasonable size
-        error: .string(limit: Int.max, encoding: UTF8.self)  // Don't limit output, we know it will be reasonable size
+        output: .string(limit: Int.max, encoding: UTF8.self), // Don't limit output, we know it will be reasonable size
+        error: .string(limit: Int.max, encoding: UTF8.self) // Don't limit output, we know it will be reasonable size
       )
 
       let outString = process.standardOutput ?? ""

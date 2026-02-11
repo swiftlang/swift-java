@@ -47,7 +47,7 @@ extension FFMSwift2JavaGenerator {
     printJavaBindingDescriptorClass(&printer, cFunc) { printer in
       if let outCallback = translated.translatedSignature.result.outCallback {
         self.printUpcallParameterDescriptorClasses(&printer, outCallback)
-      } else {  // FIXME: not an "else"
+      } else { // FIXME: not an "else"
         self.printParameterDescriptorClasses(&printer, cFunc)
       }
     }
@@ -120,7 +120,7 @@ extension FFMSwift2JavaGenerator {
     var params: [String] = []
     var args: [String] = []
     for param in cFunc.parameters {
-      let name = param.name!  // !-safe, because cdecl lowering guarantees the parameter named.
+      let name = param.name! // !-safe, because cdecl lowering guarantees the parameter named.
 
       let annotationsStr =
         if param.type.javaType.parameterAnnotations.isEmpty {
@@ -484,7 +484,7 @@ extension FFMSwift2JavaGenerator {
       let placeholderForDowncall: String?
 
       if let outCallback = translatedSignature.result.outCallback {
-        placeholder = "\(outCallback.name)"  // the result will be read out from the _result_initialize java class
+        placeholder = "\(outCallback.name)" // the result will be read out from the _result_initialize java class
         placeholderForDowncall = "\(downCall)"
       } else if translatedSignature.result.outParameters.isEmpty {
         placeholder = downCall
@@ -504,8 +504,8 @@ extension FFMSwift2JavaGenerator {
       if translatedSignature.result.javaResultType != .void {
         switch translatedSignature.result.conversion {
         case .initializeResultWithUpcall(_, let extractResult):
-          printer.print("\(result);")  // the result in the callback situation is a series of setup steps
-          printer.print("return \(extractResult.render(&printer, placeholder));")  // extract the actual result
+          printer.print("\(result);") // the result in the callback situation is a series of setup steps
+          printer.print("return \(extractResult.render(&printer, placeholder));") // extract the actual result
         default:
           printer.print("return \(result);")
         }
@@ -613,7 +613,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     case .placeholderForSwiftThunkName:
       if let placeholderForDowncall {
         let downcall = "\(placeholderForDowncall)"
-        return String(downcall[..<(downcall.firstIndex(of: ".") ?? downcall.endIndex)])  // . separates thunk name from the `.call`
+        return String(downcall[..<(downcall.firstIndex(of: ".") ?? downcall.endIndex)]) // . separates thunk name from the `.call`
       } else {
         return "/*placeholderForDowncall undefined!*/"
       }

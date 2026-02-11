@@ -29,7 +29,7 @@ extension JNISwift2JavaGenerator {
   package func writeSwiftExpectedEmptySources() throws {
     let pendingFileCount = self.expectedOutputSwiftFileNames.count
     guard pendingFileCount > 0 else {
-      return  // no need to write any empty files, yay
+      return // no need to write any empty files, yay
     }
 
     logger.info(

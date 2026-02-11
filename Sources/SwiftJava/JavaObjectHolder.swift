@@ -18,7 +18,7 @@ import CSwiftJavaJNI
 /// that the Java virtual machine will not move or deallocate the object
 /// while this instance is live.
 public final class JavaObjectHolder {
-  public private(set) var object: jobject?  // TODO: thread-safety
+  public private(set) var object: jobject? // TODO: thread-safety
   public let environment: JNIEnvironment
 
   /// Take a reference to a Java object and promote it to a global reference
