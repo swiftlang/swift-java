@@ -40,27 +40,35 @@ struct DateTests {
       )
     ]
   )
-  func func_accept_date(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+  func func_accept_date(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
     let text =
       """
       import Foundation
-      
+
       public func acceptDate(date: Date)
       """
 
     try assertOutput(
-      input: text, 
-      mode, .java,
+      input: text,
+      mode,
+      .java,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedJavaChunks)
-      
-      try assertOutput(
-      input: text, 
-      mode, .swift,
+      expectedChunks: expectedJavaChunks
+    )
+
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedSwiftChunks)
-  }  
-  
+      expectedChunks: expectedSwiftChunks
+    )
+  }
+
   @Test(
     "Import: return Date",
     arguments: [
@@ -82,22 +90,30 @@ struct DateTests {
       )
     ]
   )
-  func func_return_Date(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+  func func_return_Date(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
     let text =
       """
       import Foundation
       public func returnDate() -> Date
       """
-    
+
     try assertOutput(
-      input: text, 
-      mode, .java,
-      expectedChunks: expectedJavaChunks)
-      
-      try assertOutput(
-      input: text, 
-      mode, .swift,
-      expectedChunks: expectedSwiftChunks)
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
+      expectedChunks: expectedSwiftChunks
+    )
   }
 
   @Test(
@@ -121,7 +137,7 @@ struct DateTests {
           """,
           """
           public java.time.Instant toInstant() {
-          """
+          """,
         ],
         /* expected Swift chunks */
         [
@@ -132,7 +148,7 @@ struct DateTests {
           """
           @_cdecl("Java_com_example_swift_Date__00024getTimeIntervalSince1970__J")
           public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jdouble {
-          """
+          """,
         ]
       )
     ]
@@ -146,12 +162,16 @@ struct DateTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
-      expectedChunks: expectedJavaChunks)
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
 
-      try assertOutput(
+    try assertOutput(
       input: text,
-      mode, .swift,
-      expectedChunks: expectedSwiftChunks)
+      mode,
+      .swift,
+      expectedChunks: expectedSwiftChunks
+    )
   }
 }

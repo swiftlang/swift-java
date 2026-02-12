@@ -11,8 +11,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-import SwiftJava
+
 import JavaLangReflect
+import SwiftJava
 
 /// Captures the relationship between two methods by comparing their parameter
 /// and result types.
@@ -37,9 +38,9 @@ enum MethodVariance {
 
   init(_ first: Method, _ second: Method) {
     // If there are obvious differences, note that these are unrelated.
-    if first.getName() != second.getName() ||
-        first.isStatic != second.isStatic ||
-        first.getParameterCount() != second.getParameterCount() {
+    if first.getName() != second.getName() || first.isStatic != second.isStatic
+      || first.getParameterCount() != second.getParameterCount()
+    {
       self = .unrelated
       return
     }

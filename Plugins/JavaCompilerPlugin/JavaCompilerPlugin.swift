@@ -68,15 +68,16 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
     let javaHome = URL(filePath: findJavaHome())
     let javaClassFileURL = context.pluginWorkDirectoryURL
       .appending(path: "Java")
-  #if os(Windows)
+    #if os(Windows)
     let javac = "javac.exe"
-  #else
+    #else
     let javac = "javac"
-  #endif
+    #endif
     return [
       .buildCommand(
         displayName: "Compiling \(javaFiles.count) Java files for target \(sourceModule.name) to \(javaClassFileURL)",
-        executable: javaHome
+        executable:
+          javaHome
           .appending(path: "bin")
           .appending(path: javac),
         arguments: javaFiles.map { $0.path } + [

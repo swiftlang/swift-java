@@ -17,11 +17,11 @@ import CSwiftJavaJNI
 /// Helpers for forming platform specific directory names and paths.
 public struct SwiftPlatform {
 
-  public static var debugOrRelease: String { 
+  public static var debugOrRelease: String {
     #if DEBUG
-      "debug"
-    #else 
-      "release"
+    "debug"
+    #else
+    "release"
     #endif
   }
 }

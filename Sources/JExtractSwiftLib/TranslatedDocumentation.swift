@@ -104,6 +104,6 @@ enum TranslatedDocumentation {
     }
     printer.indentationText = oldIdentationText
     printer.print(" */")
-    
+
   }
 }

@@ -48,7 +48,6 @@ public final class _JNIMethodIDCache: Sendable {
     }
   }
 
-
   public subscript(_ method: Method) -> jmethodID? {
     methods[method]
   }

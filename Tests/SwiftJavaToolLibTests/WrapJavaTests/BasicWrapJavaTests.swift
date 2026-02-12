@@ -12,13 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_spi(Testing) import SwiftJava
-import SwiftJavaToolLib
-import JavaUtilJar
-import SwiftJavaShared
 import JavaNet
-import SwiftJavaConfigurationShared
+import JavaUtilJar
 import Subprocess
+@_spi(Testing) import SwiftJava
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
+import SwiftJavaToolLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class BasicWrapJavaTests: XCTestCase {
@@ -29,7 +29,8 @@ final class BasicWrapJavaTests: XCTestCase {
       package com.example;
 
       class ExampleSimpleClass {}
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -44,7 +45,7 @@ final class BasicWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.ExampleSimpleClass")
         open class ExampleSimpleClass: JavaObject {
-        """
+        """,
       ]
     )
   }
@@ -57,7 +58,8 @@ final class BasicWrapJavaTests: XCTestCase {
       class ExampleSimpleClass {
         public void example(String name, int age) { }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -78,7 +80,7 @@ final class BasicWrapJavaTests: XCTestCase {
           /// ```
            @JavaMethod
            open func example(_ arg0: String, _ arg1: Int32)
-        """
+        """,
       ]
     )
   }
@@ -95,7 +97,8 @@ final class BasicWrapJavaTests: XCTestCase {
       class ExampleSimpleClass {
         class SimpleNested {} 
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -139,12 +142,13 @@ final class BasicWrapJavaTests: XCTestCase {
       class SubClass extends SuperClass {
         public static final long serialVersionUID = 2L;
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.SuperClass",
-        "com.example.SubClass"
+        "com.example.SubClass",
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -177,7 +181,8 @@ final class BasicWrapJavaTests: XCTestCase {
         public void init(String arg) throws Exception {}
         public void init() throws Exception {}
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -211,7 +216,8 @@ final class BasicWrapJavaTests: XCTestCase {
             ValueType oldest
         );
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -232,7 +238,7 @@ final class BasicWrapJavaTests: XCTestCase {
           @JavaMethod(typeErasedResult: "ValueType!")
             public func apply(_ arg0: ValueType?, _ arg1: ValueType?) -> ValueType!
           }
-        """,
+        """
       ]
     )
   }

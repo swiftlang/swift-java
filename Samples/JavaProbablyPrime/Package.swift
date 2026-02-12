@@ -17,7 +17,7 @@ let package = Package(
     .executable(
       name: "JavaProbablyPrime",
       targets: ["JavaProbablyPrime"]
-    ),
+    )
   ],
 
   dependencies: [
@@ -37,8 +37,8 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ],
       plugins: [
-        .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java")
       ]
-    ),
+    )
   ]
 )

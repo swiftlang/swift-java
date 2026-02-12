@@ -26,11 +26,11 @@ typealias JNIEnvPointer = UnsafeMutableRawPointer
 #endif
 
 extension FileManager {
-#if os(Windows)
+  #if os(Windows)
   static let pathSeparator = ";"
-#else
+  #else
   static let pathSeparator = ":"
-#endif
+  #endif
 }
 
 public final class JavaVirtualMachine: @unchecked Sendable {
@@ -86,7 +86,9 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       for path in classpath {
         if !fileManager.fileExists(atPath: path) {
           // FIXME: this should be configurable, a classpath missing a directory isn't reason to blow up
-          print("[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)") // TODO: stderr
+          print(
+            "[warning][swift-java][JavaVirtualMachine] Missing classpath element: \(URL(fileURLWithPath: path).absoluteString)"
+          ) // TODO: stderr
         }
       }
       let pathSeparatedClassPath = classpath.joined(separator: FileManager.pathSeparator)
@@ -139,7 +141,7 @@ public final class JavaVirtualMachine: @unchecked Sendable {
       do {
         try destroyJVM()
       } catch {
-          fatalError("Failed to destroy the JVM: \(error)")
+        fatalError("Failed to destroy the JVM: \(error)")
       }
     }
   }
@@ -174,11 +176,11 @@ extension JavaVirtualMachine {
       return environment.assumingMemoryBound(to: JNIEnv?.self)
     }
 
-#if canImport(Android)
+    #if canImport(Android)
     var jniEnv = environment?.assumingMemoryBound(to: JNIEnv?.self)
-#else
+    #else
     var jniEnv = environment
-#endif
+    #endif
 
     // Attach the current thread to the JVM.
     let attachResult: jint
@@ -196,11 +198,11 @@ extension JavaVirtualMachine {
 
     JavaVirtualMachine.destroyTLS.set(jniEnv!)
 
-#if canImport(Android)
+    #if canImport(Android)
     return jniEnv!
-#else
+    #else
     return jniEnv!.assumingMemoryBound(to: JNIEnv?.self)
-#endif
+    #endif
   }
 
   /// Detach the current thread from the Java Virtual Machine. All Java
@@ -245,7 +247,10 @@ extension JavaVirtualMachine {
     ignoreUnrecognized: Bool = false,
     replace: Bool = false
   ) throws -> JavaVirtualMachine {
-    precondition(!classpath.contains(where: { $0.contains(FileManager.pathSeparator) }), "Classpath element must not contain `\(FileManager.pathSeparator)`! Split the path into elements! Was: \(classpath)")
+    precondition(
+      !classpath.contains(where: { $0.contains(FileManager.pathSeparator) }),
+      "Classpath element must not contain `\(FileManager.pathSeparator)`! Split the path into elements! Was: \(classpath)"
+    )
 
     return try sharedJVM.withLock { (sharedJVMPointer: inout JavaVirtualMachine?) in
       // If we already have a JavaVirtualMachine instance, return it.

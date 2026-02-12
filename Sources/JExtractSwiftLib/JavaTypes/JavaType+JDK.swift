@@ -45,7 +45,6 @@ extension JavaType {
     .class(package: "java.lang", name: "Object")
   }
 
-
   /// The description of the type java.util.concurrent.CompletableFuture<T>
   static func completableFuture(_ T: JavaType) -> JavaType {
     .class(package: "java.util.concurrent", name: "CompletableFuture", typeParameters: [T.boxedType])

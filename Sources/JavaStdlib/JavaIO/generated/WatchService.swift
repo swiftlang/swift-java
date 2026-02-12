@@ -10,6 +10,6 @@ public struct WatchService {
   /// ```java
   /// public abstract void java.nio.file.WatchService.close() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   public func close() throws
 }

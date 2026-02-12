@@ -13,9 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftJavaConfigurationShared
+
 import struct Foundation.URL
 
 extension FFMSwift2JavaGenerator {
@@ -53,7 +54,7 @@ extension FFMSwift2JavaGenerator {
       parameters: [
         CParameter(name: "self", type: .qualified(const: true, volatile: false, type: .pointer(.void))),
         CParameter(name: "destination", type: .pointer(.void)),
-        CParameter(name: "count", type: .integral(.ptrdiff_t))
+        CParameter(name: "count", type: .integral(.ptrdiff_t)),
       ],
       isVariadic: false
     )

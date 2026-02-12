@@ -21,11 +21,11 @@ enum SwiftKnownModule: String {
   case foundationEssentials = "FoundationEssentials"
 
   var name: String {
-    return self.rawValue
+    self.rawValue
   }
 
   var symbolTable: SwiftModuleSymbolTable {
-    return switch self {
+    switch self {
     case .swift: swiftSymbolTable
     case .foundation: foundationSymbolTable
     case .foundationEssentials: foundationEssentialsSymbolTable
@@ -33,7 +33,7 @@ enum SwiftKnownModule: String {
   }
 
   var sourceFile: SourceFileSyntax {
-    return switch self {
+    switch self {
     case .swift: swiftSourceFile
     case .foundation: foundationEssentialsSourceFile
     case .foundationEssentials: foundationEssentialsSourceFile
@@ -49,19 +49,21 @@ private var swiftSymbolTable: SwiftModuleSymbolTable {
 
 private var foundationEssentialsSymbolTable: SwiftModuleSymbolTable {
   var builder = SwiftParsedModuleSymbolTableBuilder(
-    moduleName: "FoundationEssentials", 
+    moduleName: "FoundationEssentials",
     requiredAvailablityOfModuleWithName: "FoundationEssentials",
     alternativeModules: .init(isMainSourceOfSymbols: false, moduleNames: ["Foundation"]),
-    importedModules: ["Swift": swiftSymbolTable])
+    importedModules: ["Swift": swiftSymbolTable]
+  )
   builder.handle(sourceFile: foundationEssentialsSourceFile, sourceFilePath: "FakeFoundation.swift")
   return builder.finalize()
 }
 
 private var foundationSymbolTable: SwiftModuleSymbolTable {
   var builder = SwiftParsedModuleSymbolTableBuilder(
-    moduleName: "Foundation", 
+    moduleName: "Foundation",
     alternativeModules: .init(isMainSourceOfSymbols: true, moduleNames: ["FoundationEssentials"]),
-    importedModules: ["Swift": swiftSymbolTable])
+    importedModules: ["Swift": swiftSymbolTable]
+  )
   builder.handle(sourceFile: foundationSourceFile, sourceFilePath: "Foundation.swift")
   return builder.finalize()
 }
@@ -80,7 +82,7 @@ private let swiftSourceFile: SourceFileSyntax = """
   public struct UInt64 {}
   public struct Float {}
   public struct Double {}
-  
+
   public struct UnsafeRawPointer {}
   public struct UnsafeMutableRawPointer {}
   public struct UnsafeRawBufferPointer {}
@@ -91,14 +93,14 @@ private let swiftSourceFile: SourceFileSyntax = """
 
   public struct UnsafeBufferPointer<Element> {}
   public struct UnsafeMutableBufferPointer<Element> {}
-  
+
   public struct Optional<Wrapped> {}
-  
+
   public struct Array<Element> {}
-  
+
   // FIXME: Support 'typealias Void = ()'
   public struct Void {}
-  
+
   public struct String {
     public init(cString: UnsafePointer<Int8>)
     public func withCString(_ body: (UnsafePointer<Int8>) -> Void)
@@ -118,16 +120,16 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
   public struct Date {
     /// The interval between the date object and 00:00:00 UTC on 1 January 1970.
     public var timeIntervalSince1970: Double { get }
-  
+
     /// Returns a `Date` initialized relative to 00:00:00 UTC on 1 January 1970 by a given number of seconds.
     public init(timeIntervalSince1970: Double)
   }
-  
+
   public struct UUID {}
   """
 
 private var foundationSourceFile: SourceFileSyntax {
-  // On platforms other than Darwin, imports such as FoundationEssentials, FoundationNetworking, etc. are used, 
+  // On platforms other than Darwin, imports such as FoundationEssentials, FoundationNetworking, etc. are used,
   // so this file should be created by combining the files of the aforementioned modules.
   foundationEssentialsSourceFile
 }

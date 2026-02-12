@@ -19,18 +19,19 @@ final class OptionalImportTests {
   let interfaceFile =
     """
     import Foundation
-    
+
     public func receiveOptionalIntSugar(_ arg: Int?)
     public func receiveOptionalIntExplicit(_ arg: Optional<Int>)
     public func receiveOptionalDataProto(_ arg: (some DataProtocol)?))
     """
 
-
   @Test("Import Optionals: JavaBindings")
   func data_javaBindings() throws {
 
     try assertOutput(
-      input: interfaceFile, .ffm, .java,
+      input: interfaceFile,
+      .ffm,
+      .java,
       expectedChunks: [
         """
         /**
@@ -111,7 +112,6 @@ final class OptionalImportTests {
           }
         }
         """,
-
 
         """
         /**

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import JavaUtilFunction
+import SwiftJava
 
 enum SwiftWrappedError: Error {
   case message(String)

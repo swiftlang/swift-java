@@ -73,16 +73,16 @@ extension JavaMethodMacro: BodyMacro {
         let stringLiteral = element.expression
           .as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
-        case let .stringSegment(wrapperName)? = stringLiteral.segments.first {
-          // TODO: Improve this unwrapping a bit;
-          // Trim the trailing ! and ? from the type for purposes 
-          // of initializing the type wrapper in the method body
-          if "\(wrapperName)".hasSuffix("!") ||
-             "\(wrapperName)".hasSuffix("?") {
-            String("\(wrapperName)".dropLast())
-          } else {
-            "\(wrapperName)"
-          }
+        case let .stringSegment(wrapperName)? = stringLiteral.segments.first
+      {
+        // TODO: Improve this unwrapping a bit;
+        // Trim the trailing ! and ? from the type for purposes
+        // of initializing the type wrapper in the method body
+        if "\(wrapperName)".hasSuffix("!") || "\(wrapperName)".hasSuffix("?") {
+          String("\(wrapperName)".dropLast())
+        } else {
+          "\(wrapperName)"
+        }
       } else {
         nil
       }
@@ -92,7 +92,7 @@ extension JavaMethodMacro: BodyMacro {
       if let returnClause = funcDecl.signature.returnClause {
         if let genericResultType {
           // we need to type-erase the signature, because on JVM level generics are erased and we'd otherwise
-          // form a signature with the "concrete" type, which would not match the real byte-code level signature 
+          // form a signature with the "concrete" type, which would not match the real byte-code level signature
           // of the method we're trying to call -- which would result in a MethodNotFound exception.
           ", resultType: /*type-erased:\(genericResultType)*/JavaObject?.self"
         } else {
@@ -214,7 +214,7 @@ extension JavaMethodMacro: BodyMacro {
 
 extension FunctionParameterListSyntax {
   func indexOfParameter(named name: String) -> Index? {
-    return firstIndex { $0.parameterName?.text == name }
+    firstIndex { $0.parameterName?.text == name }
   }
 }
 

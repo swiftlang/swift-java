@@ -66,7 +66,7 @@ extension String: JavaValue {
   }
 
   public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
-    return { environment, size in
+    { environment, size in
       // FIXME: Introduce a JavaString class that we can use for this.
       let stringClass = environment.interface.FindClass(environment, "java/lang/String")
       return environment.interface.NewObjectArray(environment, size, stringClass, nil)
@@ -74,7 +74,7 @@ extension String: JavaValue {
   }
 
   public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
       for i in 0..<length {
         buffer.initializeElement(
@@ -86,7 +86,7 @@ extension String: JavaValue {
   }
 
   public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType> {
-    return { environment, array, start, length, outPointer in
+    { environment, array, start, length, outPointer in
       let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
       for i in start..<start + length {
         environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])

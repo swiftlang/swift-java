@@ -16,7 +16,7 @@ import SwiftJava
 
 public class A {
   public init() {}
-  
+
   public class B {
     public init() {}
 

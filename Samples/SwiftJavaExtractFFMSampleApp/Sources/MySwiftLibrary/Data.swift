@@ -19,17 +19,17 @@ import Foundation
 #endif
 
 public func echoData(_ data: Data) -> Data {
-  return data
+  data
 }
 
 public func makeData() -> Data {
-  return Data([0x01, 0x02, 0x03, 0x04])
+  Data([0x01, 0x02, 0x03, 0x04])
 }
 
 public func getDataCount(_ data: Data) -> Int {
-  return data.count
+  data.count
 }
 
 public func compareData(_ data1: Data, _ data2: Data) -> Bool {
-  return data1 == data2
+  data1 == data2
 }

@@ -21,19 +21,20 @@ final class SendableTests {
     public struct SendableStruct: Sendable {}
     """
 
-
   @Test("Import: Sendable struct (ffm)")
   func sendableStruct_ffm() throws {
 
     try assertOutput(
-      input: source, .ffm, .java,
+      input: source,
+      .ffm,
+      .java,
       expectedChunks: [
         """
         @ThreadSafe // Sendable
         public final class SendableStruct extends FFMSwiftInstance implements SwiftValue {
           static final String LIB_NAME = "SwiftModule";
           static final Arena LIBRARY_ARENA = Arena.ofAuto();
-        """,
+        """
       ]
     )
   }
@@ -42,13 +43,15 @@ final class SendableTests {
   func sendableStruct_jni() throws {
 
     try assertOutput(
-      input: source, .jni, .java,
+      input: source,
+      .jni,
+      .java,
       expectedChunks: [
         """
         @ThreadSafe // Sendable
         public final class SendableStruct implements JNISwiftInstance {
           static final String LIB_NAME = "SwiftModule";
-        """,
+        """
       ]
     )
   }

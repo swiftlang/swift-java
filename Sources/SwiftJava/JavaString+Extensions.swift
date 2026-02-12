@@ -15,20 +15,20 @@
 import CSwiftJavaJNI
 import JavaTypes
 
-extension JavaString: CustomStringConvertible, CustomDebugStringConvertible { 
+extension JavaString: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String {
-    return toString()
+    toString()
   }
   public var debugDescription: String {
-    return "\"" + toString() + "\""
+    "\"" + toString() + "\""
   }
 }
 
 extension Optional where Wrapped == JavaString {
   public var description: String {
-    switch self { 
-      case .some(let value): "Optional(\(value.toString())"
-      case .none: "nil"
+    switch self {
+    case .some(let value): "Optional(\(value.toString())"
+    case .none: "nil"
     }
   }
 }

@@ -53,9 +53,9 @@ final class Swift2JavaVisitor {
     case .extensionDecl(let node):
       self.visit(extensionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .typeAliasDecl:
-      break  // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
+      break // TODO: Implement; https://github.com/swiftlang/swift-java/issues/338
     case .associatedTypeDecl:
-      break  // TODO: Implement associated types
+      break // TODO: Implement associated types
 
     case .initializerDecl(let node):
       self.visit(initializerDecl: node, in: parent)
@@ -111,9 +111,10 @@ final class Swift2JavaVisitor {
     }
 
     // Add any conforming protocols in the extension
-    importedNominalType.inheritedTypes += node.inheritanceClause?.inheritedTypes.compactMap {
-      try? SwiftType($0.type, lookupContext: translator.lookupContext)
-    } ?? []
+    importedNominalType.inheritedTypes +=
+      node.inheritanceClause?.inheritedTypes.compactMap {
+        try? SwiftType($0.type, lookupContext: translator.lookupContext)
+      } ?? []
 
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
@@ -237,14 +238,16 @@ final class Swift2JavaVisitor {
           from: DeclSyntax(node),
           in: typeContext,
           kind: .getter,
-          name: varName)
+          name: varName
+        )
       }
       if supportedAccessors.contains(.set) {
         try importAccessor(
           from: DeclSyntax(node),
           in: typeContext,
           kind: .setter,
-          name: varName)
+          name: varName
+        )
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
@@ -308,14 +311,16 @@ final class Swift2JavaVisitor {
           from: DeclSyntax(node),
           in: typeContext,
           kind: .subscriptGetter,
-          name: name)
+          name: name
+        )
       }
       if accessors.contains(.set) {
         try importAccessor(
           from: DeclSyntax(node),
           in: typeContext,
           kind: .subscriptSetter,
-          name: name)
+          name: name
+        )
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
@@ -336,13 +341,15 @@ final class Swift2JavaVisitor {
         varNode,
         isSet: kind == .setter,
         enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext)
+        lookupContext: translator.lookupContext
+      )
     case .subscriptDecl(let subscriptNode):
       signature = try SwiftFunctionSignature(
         subscriptNode,
         isSet: kind == .subscriptSetter,
         enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext)
+        lookupContext: translator.lookupContext
+      )
     default:
       log.warning("Not supported declaration type \(node.kind) while calling importAccessor!")
       return

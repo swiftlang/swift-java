@@ -40,22 +40,27 @@ struct JNIVariablesTests {
 
   @Test
   func constant_javaBindings() throws {
-    try assertOutput(input: membersSource, .jni, .java, expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public let constant: Int64
-       * }
-       */
-       public long getConstant() {
-         return MyClass.$getConstant(this.$memoryAddress());
-       }
-      """,
-      """
-      private static native long $getConstant(long self);
-      """
-    ])
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public let constant: Int64
+         * }
+         */
+         public long getConstant() {
+           return MyClass.$getConstant(this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getConstant(long self);
+        """,
+      ]
+    )
   }
 
   @Test
@@ -85,34 +90,34 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var mutable: Int64
-       * }
-       */
-       public long getMutable() {
-         return MyClass.$getMutable(this.$memoryAddress());
-       }
-      """,
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var mutable: Int64
-       * }
-       */
-       public void setMutable(long newValue) {
-         MyClass.$setMutable(newValue, this.$memoryAddress());
-       }
-      """,
-      """
-      private static native long $getMutable(long self);
-      """,
-      """
-      private static native void $setMutable(long newValue, long self);
-      """
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var mutable: Int64
+         * }
+         */
+         public long getMutable() {
+           return MyClass.$getMutable(this.$memoryAddress());
+         }
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var mutable: Int64
+         * }
+         */
+         public void setMutable(long newValue) {
+           MyClass.$setMutable(newValue, this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getMutable(long self);
+        """,
+        """
+        private static native void $setMutable(long newValue, long self);
+        """,
       ]
     )
   }
@@ -145,7 +150,7 @@ struct JNIVariablesTests {
           ...
           self$.pointee.mutable = Int64(fromJNI: newValue, in: environment)
         }
-        """
+        """,
       ]
     )
   }
@@ -158,20 +163,20 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var computed: Int64
-       * }
-       */
-       public long getComputed() {
-         return MyClass.$getComputed(this.$memoryAddress());
-       }
-      """,
-      """
-      private static native long $getComputed(long self);
-      """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var computed: Int64
+         * }
+         */
+         public long getComputed() {
+           return MyClass.$getComputed(this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getComputed(long self);
+        """,
       ]
     )
   }
@@ -190,7 +195,7 @@ struct JNIVariablesTests {
           ...
           return self$.pointee.computed.getJNIValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -203,20 +208,20 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var computedThrowing: Int64
-       * }
-       */
-       public long getComputedThrowing() throws Exception {
-         return MyClass.$getComputedThrowing(this.$memoryAddress());
-       }
-      """,
-      """
-      private static native long $getComputedThrowing(long self);
-      """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var computedThrowing: Int64
+         * }
+         */
+         public long getComputedThrowing() throws Exception {
+           return MyClass.$getComputedThrowing(this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getComputedThrowing(long self);
+        """,
       ]
     )
   }
@@ -240,7 +245,7 @@ struct JNIVariablesTests {
             return Int64.jniPlaceholderValue
           }
         }
-        """,
+        """
       ]
     )
   }
@@ -253,34 +258,34 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var getterAndSetter: Int64
-       * }
-       */
-       public long getGetterAndSetter() {
-         return MyClass.$getGetterAndSetter(this.$memoryAddress());
-       }
-      """,
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var getterAndSetter: Int64
-       * }
-       */
-       public void setGetterAndSetter(long newValue) {
-         MyClass.$setGetterAndSetter(newValue, this.$memoryAddress());
-       }
-      """,
-      """
-      private static native long $getGetterAndSetter(long self);
-      """,
-      """
-      private static native void $setGetterAndSetter(long newValue, long self);
-      """
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var getterAndSetter: Int64
+         * }
+         */
+         public long getGetterAndSetter() {
+           return MyClass.$getGetterAndSetter(this.$memoryAddress());
+         }
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var getterAndSetter: Int64
+         * }
+         */
+         public void setGetterAndSetter(long newValue) {
+           MyClass.$setGetterAndSetter(newValue, this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getGetterAndSetter(long self);
+        """,
+        """
+        private static native void $setGetterAndSetter(long newValue, long self);
+        """,
       ]
     )
   }
@@ -306,7 +311,7 @@ struct JNIVariablesTests {
           ...
           self$.pointee.getterAndSetter = Int64(fromJNI: newValue, in: environment)
         }
-        """
+        """,
       ]
     )
   }
@@ -319,34 +324,34 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public var someBoolean: Bool
-       * }
-       */
-       public boolean isSomeBoolean() {
-        return MyClass.$isSomeBoolean(this.$memoryAddress());
-       }
-      """,
-      """
-      /**
-        * Downcall to Swift:
-        * {@snippet lang=swift :
-        * public var someBoolean: Bool
-        * }
-        */
-        public void setSomeBoolean(boolean newValue) {
-          MyClass.$setSomeBoolean(newValue, this.$memoryAddress());
-        }
-      """,
-      """
-      private static native boolean $isSomeBoolean(long self);
-      """,
-      """
-      private static native void $setSomeBoolean(boolean newValue, long self);
-      """
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public var someBoolean: Bool
+         * }
+         */
+         public boolean isSomeBoolean() {
+          return MyClass.$isSomeBoolean(this.$memoryAddress());
+         }
+        """,
+        """
+        /**
+          * Downcall to Swift:
+          * {@snippet lang=swift :
+          * public var someBoolean: Bool
+          * }
+          */
+          public void setSomeBoolean(boolean newValue) {
+            MyClass.$setSomeBoolean(newValue, this.$memoryAddress());
+          }
+        """,
+        """
+        private static native boolean $isSomeBoolean(long self);
+        """,
+        """
+        private static native void $setSomeBoolean(boolean newValue, long self);
+        """,
       ]
     )
   }
@@ -372,7 +377,7 @@ struct JNIVariablesTests {
           ...
           self$.pointee.someBoolean = Bool(fromJNI: newValue, in: environment)
         }
-        """
+        """,
       ]
     )
   }
@@ -385,34 +390,34 @@ struct JNIVariablesTests {
       .java,
       detectChunkByInitialLines: 8,
       expectedChunks: [
-      """
-      /**
-      * Downcall to Swift:
-      * {@snippet lang=swift :
-      * public var isBoolean: Bool
-      * }
-      */
-      public boolean isBoolean() {
-        return MyClass.$isBoolean(this.$memoryAddress());
-      }
-      """,
-      """
-      /**
-      * Downcall to Swift:
-      * {@snippet lang=swift :
-      * public var isBoolean: Bool
-      * }
-      */
-      public void setBoolean(boolean newValue) {
-        MyClass.$setBoolean(newValue, this.$memoryAddress());
-      }
-      """,
-      """
-      private static native boolean $isBoolean(long self);
-      """,
-      """
-      private static native void $setBoolean(boolean newValue, long self);
-      """
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public var isBoolean: Bool
+        * }
+        */
+        public boolean isBoolean() {
+          return MyClass.$isBoolean(this.$memoryAddress());
+        }
+        """,
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public var isBoolean: Bool
+        * }
+        */
+        public void setBoolean(boolean newValue) {
+          MyClass.$setBoolean(newValue, this.$memoryAddress());
+        }
+        """,
+        """
+        private static native boolean $isBoolean(long self);
+        """,
+        """
+        private static native void $setBoolean(boolean newValue, long self);
+        """,
       ]
     )
   }
@@ -438,7 +443,7 @@ struct JNIVariablesTests {
           ...
           self$.pointee.isBoolean = Bool(fromJNI: newValue, in: environment)
         }
-        """
+        """,
       ]
     )
   }

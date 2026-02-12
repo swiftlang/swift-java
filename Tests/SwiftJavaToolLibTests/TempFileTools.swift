@@ -16,19 +16,20 @@ import Foundation
 
 /// Example demonstrating how to create a temporary file using Swift Foundation APIs
 public class TempFile {
-    
-    public static func create(
-        suffix: String,
-        _ contents: String = "",
-        in tempDirectory: URL = FileManager.default.temporaryDirectory) throws -> URL {
-        let tempFileName = "tmp_\(UUID().uuidString).\(suffix)"
-        let tempFileURL = tempDirectory.appendingPathComponent(tempFileName)
-        
-        try contents.write(to: tempFileURL, atomically: true, encoding: .utf8)
-        
-        return tempFileURL
-    }
-    public static func delete(at fileURL: URL) throws {
-        try FileManager.default.removeItem(at: fileURL)
-    }
+
+  public static func create(
+    suffix: String,
+    _ contents: String = "",
+    in tempDirectory: URL = FileManager.default.temporaryDirectory
+  ) throws -> URL {
+    let tempFileName = "tmp_\(UUID().uuidString).\(suffix)"
+    let tempFileURL = tempDirectory.appendingPathComponent(tempFileName)
+
+    try contents.write(to: tempFileURL, atomically: true, encoding: .utf8)
+
+    return tempFileURL
+  }
+  public static func delete(at fileURL: URL) throws {
+    try FileManager.default.removeItem(at: fileURL)
+  }
 }

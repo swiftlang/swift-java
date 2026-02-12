@@ -4,597 +4,597 @@ import CSwiftJavaJNI
 @JavaClass("java.nio.ByteBuffer")
 open class ByteBuffer: JavaObject {
   /// Java method `reset`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.reset()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func reset() -> ByteBuffer!
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(byte[])
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get(_ arg0: [Int8]) -> ByteBuffer!
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract byte java.nio.ByteBuffer.get(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get(_ arg0: Int32) -> Int8
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract byte java.nio.ByteBuffer.get()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get() -> Int8
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(byte[],int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(int,byte[])
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get(_ arg0: Int32, _ arg1: [Int8]) -> ByteBuffer!
 
   /// Java method `get`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(int,byte[],int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func get(_ arg0: Int32, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.put(int,byte)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: Int32, _ arg1: Int8) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(java.nio.ByteBuffer)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: ByteBuffer?) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(int,java.nio.ByteBuffer,int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: Int32, _ arg1: ByteBuffer?, _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final java.nio.ByteBuffer java.nio.ByteBuffer.put(byte[])
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: [Int8]) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(int,byte[])
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: Int32, _ arg1: [Int8]) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(int,byte[],int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: Int32, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(byte[],int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 
   /// Java method `put`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.put(byte)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func put(_ arg0: Int8) -> ByteBuffer!
 
   /// Java method `equals`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public boolean java.nio.ByteBuffer.equals(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
   /// Java method `toString`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.lang.String java.nio.ByteBuffer.toString()
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func toString() -> String
 
   /// Java method `hashCode`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public int java.nio.ByteBuffer.hashCode()
   /// ```
-@JavaMethod
+  @JavaMethod
   open override func hashCode() -> Int32
 
   /// Java method `compareTo`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public int java.nio.ByteBuffer.compareTo(java.nio.ByteBuffer)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func compareTo(_ arg0: ByteBuffer?) -> Int32
 
   /// Java method `compareTo`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public int java.nio.ByteBuffer.compareTo(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
   /// Java method `getShort`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract short java.nio.ByteBuffer.getShort()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getShort() -> Int16
 
   /// Java method `getShort`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract short java.nio.ByteBuffer.getShort(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getShort(_ arg0: Int32) -> Int16
 
   /// Java method `putShort`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putShort(int,short)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putShort(_ arg0: Int32, _ arg1: Int16) -> ByteBuffer!
 
   /// Java method `putShort`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putShort(short)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putShort(_ arg0: Int16) -> ByteBuffer!
 
   /// Java method `getChar`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract char java.nio.ByteBuffer.getChar(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getChar(_ arg0: Int32) -> UInt16
 
   /// Java method `getChar`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract char java.nio.ByteBuffer.getChar()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getChar() -> UInt16
 
   /// Java method `putChar`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putChar(int,char)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putChar(_ arg0: Int32, _ arg1: UInt16) -> ByteBuffer!
 
   /// Java method `putChar`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putChar(char)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putChar(_ arg0: UInt16) -> ByteBuffer!
 
   /// Java method `getInt`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract int java.nio.ByteBuffer.getInt(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getInt(_ arg0: Int32) -> Int32
 
   /// Java method `getInt`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract int java.nio.ByteBuffer.getInt()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getInt() -> Int32
 
   /// Java method `putInt`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putInt(int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putInt(_ arg0: Int32, _ arg1: Int32) -> ByteBuffer!
 
   /// Java method `putInt`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putInt(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putInt(_ arg0: Int32) -> ByteBuffer!
 
   /// Java method `getLong`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract long java.nio.ByteBuffer.getLong(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getLong(_ arg0: Int32) -> Int64
 
   /// Java method `getLong`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract long java.nio.ByteBuffer.getLong()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getLong() -> Int64
 
   /// Java method `putLong`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putLong(long)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putLong(_ arg0: Int64) -> ByteBuffer!
 
   /// Java method `putLong`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putLong(int,long)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putLong(_ arg0: Int32, _ arg1: Int64) -> ByteBuffer!
 
   /// Java method `getFloat`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract float java.nio.ByteBuffer.getFloat()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getFloat() -> Float
 
   /// Java method `getFloat`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract float java.nio.ByteBuffer.getFloat(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getFloat(_ arg0: Int32) -> Float
 
   /// Java method `putFloat`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putFloat(float)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putFloat(_ arg0: Float) -> ByteBuffer!
 
   /// Java method `putFloat`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putFloat(int,float)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putFloat(_ arg0: Int32, _ arg1: Float) -> ByteBuffer!
 
   /// Java method `getDouble`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract double java.nio.ByteBuffer.getDouble(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getDouble(_ arg0: Int32) -> Double
 
   /// Java method `getDouble`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract double java.nio.ByteBuffer.getDouble()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func getDouble() -> Double
 
   /// Java method `putDouble`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putDouble(int,double)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putDouble(_ arg0: Int32, _ arg1: Double) -> ByteBuffer!
 
   /// Java method `putDouble`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.putDouble(double)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func putDouble(_ arg0: Double) -> ByteBuffer!
 
   /// Java method `clear`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.clear()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func clear() -> ByteBuffer!
 
   /// Java method `position`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.position(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func position(_ arg0: Int32) -> ByteBuffer!
 
   /// Java method `mismatch`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public int java.nio.ByteBuffer.mismatch(java.nio.ByteBuffer)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func mismatch(_ arg0: ByteBuffer?) -> Int32
 
   /// Java method `limit`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.limit(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func limit(_ arg0: Int32) -> ByteBuffer!
 
   /// Java method `isDirect`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract boolean java.nio.ByteBuffer.isDirect()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func isDirect() -> Bool
 
   /// Java method `hasArray`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final boolean java.nio.ByteBuffer.hasArray()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func hasArray() -> Bool
 
   /// Java method `array`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final byte[] java.nio.ByteBuffer.array()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func array() -> [Int8]
 
   /// Java method `arrayOffset`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final int java.nio.ByteBuffer.arrayOffset()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func arrayOffset() -> Int32
 
   /// Java method `mark`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.mark()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func mark() -> ByteBuffer!
 
   /// Java method `flip`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.flip()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func flip() -> ByteBuffer!
 
   /// Java method `rewind`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.rewind()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func rewind() -> ByteBuffer!
 
   /// Java method `slice`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.slice()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func slice() -> ByteBuffer!
 
   /// Java method `slice`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.slice(int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func slice(_ arg0: Int32, _ arg1: Int32) -> ByteBuffer!
 
   /// Java method `duplicate`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.duplicate()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func duplicate() -> ByteBuffer!
 
   /// Java method `alignmentOffset`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final int java.nio.ByteBuffer.alignmentOffset(int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func alignmentOffset(_ arg0: Int32, _ arg1: Int32) -> Int32
 
   /// Java method `asReadOnlyBuffer`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.asReadOnlyBuffer()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func asReadOnlyBuffer() -> ByteBuffer!
 
   /// Java method `compact`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public abstract java.nio.ByteBuffer java.nio.ByteBuffer.compact()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func compact() -> ByteBuffer!
 
   /// Java method `alignedSlice`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public final java.nio.ByteBuffer java.nio.ByteBuffer.alignedSlice(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   open func alignedSlice(_ arg0: Int32) -> ByteBuffer!
 }
 extension JavaClass<ByteBuffer> {
   /// Java method `wrap`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.wrap(byte[],int,int)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func wrap(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 
   /// Java method `wrap`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.wrap(byte[])
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func wrap(_ arg0: [Int8]) -> ByteBuffer!
 
   /// Java method `allocate`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.allocate(int)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func allocate(_ arg0: Int32) -> ByteBuffer!
 
   /// Java method `allocateDirect`.
-  /// 
+  ///
   /// ### Java method signature
   /// ```java
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.allocateDirect(int)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func allocateDirect(_ arg0: Int32) -> ByteBuffer!
 }

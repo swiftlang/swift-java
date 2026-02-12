@@ -7,13 +7,23 @@ open class JavaString: JavaObject {
   @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(
+    _ arg0: [Int8],
+    _ arg1: Int32,
+    _ arg2: Int32,
+    environment: JNIEnvironment? = nil
+  )
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [Int8], environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(
+    _ arg0: [UInt16],
+    _ arg1: Int32,
+    _ arg2: Int32,
+    environment: JNIEnvironment? = nil
+  )
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [UInt16], environment: JNIEnvironment? = nil)
@@ -25,16 +35,33 @@ open class JavaString: JavaObject {
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(
+    _ arg0: [Int8],
+    _ arg1: Int32,
+    _ arg2: Int32,
+    _ arg3: String,
+    environment: JNIEnvironment? = nil
+  ) throws
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(
+    _ arg0: [Int8],
+    _ arg1: Int32,
+    _ arg2: Int32,
+    _ arg3: Int32,
+    environment: JNIEnvironment? = nil
+  )
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int32], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(
+    _ arg0: [Int32],
+    _ arg1: Int32,
+    _ arg2: Int32,
+    environment: JNIEnvironment? = nil
+  )
 
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool

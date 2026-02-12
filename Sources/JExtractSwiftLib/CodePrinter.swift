@@ -42,7 +42,7 @@ public struct CodePrinter {
   /// If true, next print() should starts with indentation.
   var atNewline = true
 
-  public static func toString(_ block: (inout CodePrinter) throws -> ()) rethrows -> String {
+  public static func toString(_ block: (inout CodePrinter) throws -> Void) rethrows -> String {
     var printer = CodePrinter()
     try block(&printer)
     return printer.finalize()
@@ -79,7 +79,7 @@ public struct CodePrinter {
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
-    body: (inout CodePrinter) throws -> ()
+    body: (inout CodePrinter) throws -> Void
   ) rethrows {
     print("#if \(header)")
     indent()
@@ -94,7 +94,7 @@ public struct CodePrinter {
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
-    body: (inout CodePrinter) throws -> ()
+    body: (inout CodePrinter) throws -> Void
   ) rethrows {
     print("\(header) {", .continue)
     if let parameters {
@@ -236,7 +236,7 @@ public enum PrinterTerminator: String {
 }
 
 extension CodePrinter {
-  
+
   /// - Returns: the output path of the generated file, if any (i.e. not in accumulate in memory mode)
   package mutating func writeContents(
     outputDirectory _outputDirectory: String,
@@ -250,7 +250,9 @@ extension CodePrinter {
     let filename: String
     if _filename.contains(PATH_SEPARATOR) {
       let parts = _filename.split(separator: PATH_SEPARATOR)
-      outputDirectory = _outputDirectory.appending(PATH_SEPARATOR).appending(parts.dropLast().joined(separator: PATH_SEPARATOR))
+      outputDirectory = _outputDirectory.appending(PATH_SEPARATOR).appending(
+        parts.dropLast().joined(separator: PATH_SEPARATOR)
+      )
       filename = "\(parts.last!)"
     } else {
       outputDirectory = _outputDirectory
@@ -282,7 +284,9 @@ extension CodePrinter {
     log.debug("Prepare target directory: '\(targetDirectory)' for file \(filename.bold)")
     do {
       try FileManager.default.createDirectory(
-        atPath: targetDirectory, withIntermediateDirectories: true)
+        atPath: targetDirectory,
+        withIntermediateDirectories: true
+      )
     } catch {
       // log and throw since it can be confusing what the reason for failing the write was otherwise
       log.warning("Failed to create directory: \(targetDirectory)")
@@ -295,7 +299,7 @@ extension CodePrinter {
       atomically: true,
       encoding: .utf8
     )
-    
+
     return outputPath
   }
 

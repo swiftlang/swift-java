@@ -13,15 +13,17 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import Testing
 import SwiftJavaConfigurationShared
+import Testing
 
 struct FoundationImportTests {
   @Test("Import Foundation", arguments: [JExtractGenerationMode.jni, JExtractGenerationMode.ffm])
   func import_foundation(mode: JExtractGenerationMode) throws {
 
     try assertOutput(
-      input: "import Foundation", mode, .swift,
+      input: "import Foundation",
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "import Foundation"
@@ -33,7 +35,9 @@ struct FoundationImportTests {
   func import_foundationEssentials(mode: JExtractGenerationMode) throws {
 
     try assertOutput(
-      input: "import FoundationEssentials", mode, .swift,
+      input: "import FoundationEssentials",
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "import FoundationEssentials"
@@ -53,7 +57,9 @@ struct FoundationImportTests {
       """
 
     try assertOutput(
-      input: ifConfigImport, mode, .swift,
+      input: ifConfigImport,
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         ifConfigImport

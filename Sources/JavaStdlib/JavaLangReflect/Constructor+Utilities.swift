@@ -15,6 +15,6 @@
 extension Constructor {
   /// Whether this is a 'native' constructor.
   public var isNative: Bool {
-    return (getModifiers() & 256) != 0
+    (getModifiers() & 256) != 0
   }
 }

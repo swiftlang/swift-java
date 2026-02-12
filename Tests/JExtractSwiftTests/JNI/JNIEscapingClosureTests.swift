@@ -36,7 +36,7 @@ struct JNIEscapingClosureTests {
         callback = nil
       }
     }
-    
+
     public func delayedExecution(closure: @escaping (Int64) -> Int64, input: Int64) -> Int64 {
       // Simplified for testing - would normally be async
       return closure(input)
@@ -49,28 +49,33 @@ struct JNIEscapingClosureTests {
       """
       public func setCallback(callback: @escaping () -> Void) {}
       """
-    
-    try assertOutput(input: simpleSource, .jni, .java, expectedChunks: [
-      """
-      public static class setCallback {
-        @FunctionalInterface
-        public interface callback {
-          void apply();
+
+    try assertOutput(
+      input: simpleSource,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static class setCallback {
+          @FunctionalInterface
+          public interface callback {
+            void apply();
+          }
         }
-      }
-      """,
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func setCallback(callback: @escaping () -> Void)
-       * }
-       */
-      public static void setCallback(com.example.swift.SwiftModule.setCallback.callback callback) {
-        SwiftModule.$setCallback(callback);
-      }
-      """
-    ])
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func setCallback(callback: @escaping () -> Void)
+         * }
+         */
+        public static void setCallback(com.example.swift.SwiftModule.setCallback.callback callback) {
+          SwiftModule.$setCallback(callback);
+        }
+        """,
+      ]
+    )
   }
 
   @Test
@@ -79,17 +84,22 @@ struct JNIEscapingClosureTests {
       """
       public func delayedExecution(closure: @escaping (Int64) -> Int64) {}
       """
-    
-    try assertOutput(input: source, .jni, .java, expectedChunks: [
-      """
-      public static class delayedExecution {
-        @FunctionalInterface
-        public interface closure {
-          long apply(long _0);
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static class delayedExecution {
+          @FunctionalInterface
+          public interface closure {
+            long apply(long _0);
+          }
         }
-      }
-      """
-    ])
+        """
+      ]
+    )
   }
 
   @Test
@@ -98,7 +108,7 @@ struct JNIEscapingClosureTests {
       """
       public func setCallback(callback: @escaping () -> Void) {}
       """
-    
+
     try assertOutput(
       input: source,
       .jni,
@@ -118,15 +128,19 @@ struct JNIEscapingClosureTests {
       """
       public func call(closure: () -> Void) {}
       """
-    
-    try assertOutput(input: source, .jni, .java, expectedChunks: [
-      """
-      @FunctionalInterface
-      public interface closure {
-        void apply();
-      }
-      """
-    ])
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        @FunctionalInterface
+        public interface closure {
+          void apply();
+        }
+        """
+      ]
+    )
   }
 }
-

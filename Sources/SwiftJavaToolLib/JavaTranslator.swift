@@ -12,15 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
+import Foundation
 import JavaLangReflect
 import JavaTypes
-import SwiftBasicFormat
-import SwiftSyntax
-import SwiftJavaConfigurationShared
-import SwiftSyntaxBuilder
-import Foundation
 import Logging
+import SwiftBasicFormat
+import SwiftJava
+import SwiftJavaConfigurationShared
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 /// Utility that translates Java classes into Swift source code to access
 /// those Java classes.
@@ -43,7 +43,7 @@ package class JavaTranslator {
   /// Swift type name and its Swift module.
   package var translatedClasses: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
     "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
-    "byte[]": SwiftTypeName(module: nil, name: "[UInt8]")
+    "byte[]": SwiftTypeName(module: nil, name: "[UInt8]"),
   ]
 
   /// A mapping from the name of each known Java class with the Swift value type
@@ -54,7 +54,7 @@ package class JavaTranslator {
   /// an AnyJavaObject-conforming type) whereas the entry here should map to
   /// a value type.
   package let translatedToValueTypes: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
-    "java.lang.String": SwiftTypeName(module: "SwiftJava", name: "String"),
+    "java.lang.String": SwiftTypeName(module: "SwiftJava", name: "String")
   ]
 
   /// The set of Swift modules that need to be imported to make the generated
@@ -84,7 +84,7 @@ package class JavaTranslator {
     self.environment = environment
     self.translateAsClass = translateAsClass
     self.format = format
-    
+
     var l = Logger(label: "swift-java")
     l.logLevel = .init(rawValue: (config.logLevel ?? .info).rawValue)!
     self.log = l
@@ -139,9 +139,10 @@ extension JavaTranslator {
 
     return try getSwiftTypeNameAsString(
       method: method,
-      genericReturnType!, 
-      preferValueTypes: preferValueTypes, 
-      outerOptional: outerOptional)
+      genericReturnType!,
+      preferValueTypes: preferValueTypes,
+      outerOptional: outerOptional
+    )
   }
 
   /// Turn a Java type into a string.
@@ -211,8 +212,13 @@ extension JavaTranslator {
 
         let typeArguments: [String] = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
           guard let typeArg else { return nil }
-          
-          let mappedSwiftName = try getSwiftTypeNameAsString(method: method, typeArg, preferValueTypes: false, outerOptional: .nonoptional)
+
+          let mappedSwiftName = try getSwiftTypeNameAsString(
+            method: method,
+            typeArg,
+            preferValueTypes: false,
+            outerOptional: .nonoptional
+          )
 
           // FIXME: improve the get instead...
           if mappedSwiftName == nil || mappedSwiftName == "JavaObject" {
@@ -239,7 +245,7 @@ extension JavaTranslator {
     let (swiftName, isOptional) = try getSwiftTypeName(javaClass, preferValueTypes: preferValueTypes)
     let resultString =
       if isOptional {
-         outerOptional.adjustTypeName(swiftName)
+        outerOptional.adjustTypeName(swiftName)
       } else {
         swiftName
       }
@@ -276,7 +282,7 @@ extension JavaTranslator {
     if preferValueTypes, let translatedValueType = translatedToValueTypes[name] {
       // Note that we need to import this Swift module.
       if translatedValueType.swiftModule != swiftModuleName {
-        guard let module = translatedValueType.swiftModule else { 
+        guard let module = translatedValueType.swiftModule else {
           preconditionFailure("Translated value type must have Swift module, but was nil! Type: \(translatedValueType)")
         }
         importedSwiftModules.insert(module)
@@ -308,7 +314,7 @@ extension JavaTranslator {
   /// can produce multiple declarations, such as a separate extension of
   /// JavaClass to house static methods.
   package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
-    return try JavaClassTranslator(javaClass: javaClass, translator: self).render()
+    try JavaClassTranslator(javaClass: javaClass, translator: self).render()
   }
 }
 

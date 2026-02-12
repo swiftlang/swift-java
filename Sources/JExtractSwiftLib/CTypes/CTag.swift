@@ -20,10 +20,9 @@ public enum CTag {
 
   public var name: String {
     switch self {
-      case .struct(let cStruct): return cStruct.name
-      case .enum(let cEnum): return cEnum.name
-      case .union(let cUnion): return cUnion.name
+    case .struct(let cStruct): return cStruct.name
+    case .enum(let cEnum): return cEnum.name
+    case .union(let cUnion): return cUnion.name
     }
   }
 }
-

@@ -17,7 +17,7 @@ public struct MySwiftStruct {
   private var cap: Int
   private var len: Int
   private var subscriptValue: Int
-  private var subscriptArray: [Int] 
+  private var subscriptArray: [Int]
 
   public init(cap: Int, len: Int) {
     self.cap = cap
@@ -33,11 +33,11 @@ public struct MySwiftStruct {
   }
 
   public func echoIntMethod(i: Int) -> Int {
-    return i
+    i
   }
 
   public func makeIntMethod() -> Int {
-    return 12
+    12
   }
 
   public func getCapacity() -> Int {
@@ -54,34 +54,34 @@ public struct MySwiftStruct {
 
   public mutating func increaseCap(by value: Int) -> Int {
     precondition(value > 0)
-     self.cap += value
+    self.cap += value
     return self.cap
   }
 
   public func makeRandomIntMethod() -> Int {
-    return Int.random(in: 1..<256)
+    Int.random(in: 1..<256)
   }
 
   public func getSubscriptValue() -> Int {
-    return self.subscriptValue
+    self.subscriptValue
   }
 
   public func getSubscriptArrayValue(index: Int) -> Int {
-    return self.subscriptArray[index]
+    self.subscriptArray[index]
   }
 
   public subscript() -> Int {
-    get { return subscriptValue }
+    get { subscriptValue }
     set { subscriptValue = newValue }
   }
 
   public subscript(index: Int) -> Int {
-    get { return subscriptArray[index] }
+    get { subscriptArray[index] }
     set { subscriptArray[index] = newValue }
   }
-  
+
   // operator functions are ignored.
-  public static func ==(lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {
-    return false
+  public static func == (lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {
+    false
   }
 }

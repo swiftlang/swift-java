@@ -15,51 +15,51 @@
 public class CallbackManager {
   private var callback: (() -> Void)?
   private var intCallback: ((Int64) -> Int64)?
-  
+
   public init() {}
-  
+
   public func setCallback(callback: @escaping () -> Void) {
     self.callback = callback
   }
-  
+
   public func triggerCallback() {
     callback?()
   }
-  
+
   public func clearCallback() {
     callback = nil
   }
-  
+
   public func setIntCallback(callback: @escaping (Int64) -> Int64) {
     self.intCallback = callback
   }
-  
+
   public func triggerIntCallback(value: Int64) -> Int64? {
-    return intCallback?(value)
+    intCallback?(value)
   }
 }
 
 public class ClosureStore {
   private var closures: [() -> Void] = []
-  
+
   public init() {}
-  
+
   public func addClosure(closure: @escaping () -> Void) {
     closures.append(closure)
   }
-  
+
   public func executeAll() {
     for closure in closures {
       closure()
     }
   }
-  
+
   public func clear() {
     closures.removeAll()
   }
-  
+
   public func count() -> Int64 {
-    return Int64(closures.count)
+    Int64(closures.count)
   }
 }
 
@@ -74,4 +74,3 @@ public func multipleEscapingClosures(
     onFailure(-1)
   }
 }
-

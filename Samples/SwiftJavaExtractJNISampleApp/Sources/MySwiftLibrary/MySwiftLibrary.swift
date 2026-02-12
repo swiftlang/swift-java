@@ -18,11 +18,11 @@
 // No annotations are necessary on the Swift side to perform the export.
 
 #if os(Linux)
-  import Glibc
+import Glibc
 #elseif os(Android)
-  import Android
+import Android
 #else
-  import Darwin.C
+import Darwin.C
 #endif
 
 public var globalVariable: Int64 = 0
@@ -35,16 +35,16 @@ public func globalTakeInt(i: Int64) {
   p("i:\(i)")
 }
 
-public func globalEchoInt(i: Int64) -> Int64{
+public func globalEchoInt(i: Int64) -> Int64 {
   i
 }
 
 public func globalMakeInt() -> Int64 {
-  return 42
+  42
 }
 
 public func globalWriteString(string: String) -> Int64 {
-  return Int64(string.count)
+  Int64(string.count)
 }
 
 public func globalTakeIntInt(i: Int64, j: Int64) {
@@ -57,11 +57,11 @@ public func echoUnsignedInt(i: UInt32, j: UInt64) -> UInt64 {
 }
 
 public func returnUnsignedByte(b: UInt8) -> UInt8 {
-  return b
+  b
 }
 
 public func returnLargestUnsignedByte() -> UInt8 {
-  return UInt8.max
+  UInt8.max
 }
 
 // ==== Internal helpers
@@ -72,10 +72,10 @@ func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: Stri
 }
 
 #if os(Linux)
-  // FIXME: why do we need this workaround?
-  @_silgen_name("_objc_autoreleaseReturnValue")
-  public func _objc_autoreleaseReturnValue(a: Any) {}
+// FIXME: why do we need this workaround?
+@_silgen_name("_objc_autoreleaseReturnValue")
+public func _objc_autoreleaseReturnValue(a: Any) {}
 
-  @_silgen_name("objc_autoreleaseReturnValue")
-  public func objc_autoreleaseReturnValue(a: Any) {}
+@_silgen_name("objc_autoreleaseReturnValue")
+public func objc_autoreleaseReturnValue(a: Any) {}
 #endif

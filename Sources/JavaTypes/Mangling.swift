@@ -35,7 +35,7 @@ extension JavaType {
     case .short: "S"
     case .void: "V"
     case .array(let elementType): "[" + elementType.mangledName
-    case .class(package: let package, name: let name, _):
+    case .class(let package, let name, _):
       "L\(package!).\(name.replacingPeriodsWithDollars());".replacingPeriodsWithSlashes()
     }
   }
@@ -88,15 +88,33 @@ extension JavaType {
     }
 
     switch firstChar {
-    case "Z": string = string.dropFirst(); return .boolean
-    case "B": string = string.dropFirst(); return .byte
-    case "C": string = string.dropFirst(); return .char
-    case "D": string = string.dropFirst(); return .double
-    case "F": string = string.dropFirst(); return .float
-    case "I": string = string.dropFirst(); return .int
-    case "J": string = string.dropFirst(); return .long
-    case "S": string = string.dropFirst(); return .short
-    case "V": string = string.dropFirst(); return .void
+    case "Z":
+      string = string.dropFirst()
+      return .boolean
+    case "B":
+      string = string.dropFirst()
+      return .byte
+    case "C":
+      string = string.dropFirst()
+      return .char
+    case "D":
+      string = string.dropFirst()
+      return .double
+    case "F":
+      string = string.dropFirst()
+      return .float
+    case "I":
+      string = string.dropFirst()
+      return .int
+    case "J":
+      string = string.dropFirst()
+      return .long
+    case "S":
+      string = string.dropFirst()
+      return .short
+    case "V":
+      string = string.dropFirst()
+      return .void
     case "[":
       // Count the brackets to determine array depth.
       var arrayDepth = 1
@@ -137,17 +155,17 @@ extension JavaType {
 extension StringProtocol {
   /// Return the string after replacing all of the periods (".") with slashes ("/").
   fileprivate func replacingPeriodsWithSlashes() -> String {
-    return String(self.map { $0 == "." ? "/" as Character : $0 })
+    String(self.map { $0 == "." ? "/" as Character : $0 })
   }
 
   /// Return the string after replacing all of the forward slashes ("/") with
   /// periods (".").
   fileprivate func replacingSlashesWithPeriods() -> String {
-    return String(self.map { $0 == "/" ? "." as Character : $0 })
+    String(self.map { $0 == "/" ? "." as Character : $0 })
   }
 
   /// Return the string after replacing all of the periods (".") with slashes ("$").
   fileprivate func replacingPeriodsWithDollars() -> String {
-    return String(self.map { $0 == "." ? "$" as Character : $0 })
+    String(self.map { $0 == "." ? "$" as Character : $0 })
   }
 }

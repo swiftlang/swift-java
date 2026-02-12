@@ -87,92 +87,92 @@ open class JavaThread: JavaObject {
 extension JavaThread {
   @JavaInterface("java.lang.Thread$Builder")
   public struct Builder {
-  @JavaMethod
-  public func name(_ arg0: String) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
+    @JavaMethod
+    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
+    @JavaMethod
+    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
 }
 extension JavaThread.Builder {
   @JavaInterface("java.lang.Thread$Builder$OfPlatform", extends: JavaThread.Builder.self)
   public struct OfPlatform {
-  @JavaMethod
-  public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func name(_ arg0: String) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func name(_ arg0: String) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func name(_ arg0: String) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func priority(_ arg0: Int32) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func priority(_ arg0: Int32) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func daemon() -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func daemon() -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func daemon(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func daemon(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
+    @JavaMethod
+    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func stackSize(_ arg0: Int64) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func stackSize(_ arg0: Int64) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
+    @JavaMethod
+    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
 
-  @JavaMethod
-  public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
+    @JavaMethod
+    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
 }
 extension JavaThread.Builder {
   @JavaInterface("java.lang.Thread$Builder$OfVirtual", extends: JavaThread.Builder.self)
   public struct OfVirtual {
-  @JavaMethod
-  public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfVirtual!
+    @JavaMethod
+    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfVirtual!
 
-  @JavaMethod
-  public func name(_ arg0: String) -> JavaThread.Builder!
+    @JavaMethod
+    public func name(_ arg0: String) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func name(_ arg0: String) -> JavaThread.Builder.OfVirtual!
+    @JavaMethod
+    public func name(_ arg0: String) -> JavaThread.Builder.OfVirtual!
 
-  @JavaMethod
-  public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
+    @JavaMethod
+    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
 
-  @JavaMethod
-  public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfVirtual!
+    @JavaMethod
+    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfVirtual!
 
-  @JavaMethod
-  public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfVirtual!
+    @JavaMethod
+    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfVirtual!
 
-  @JavaMethod
-  public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
+    @JavaMethod
+    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
 }
 extension JavaThread {
   @JavaInterface("java.lang.Thread$UncaughtExceptionHandler")
   public struct UncaughtExceptionHandler {
-  @JavaMethod
-  public func uncaughtException(_ arg0: JavaThread?, _ arg1: Throwable?)
+    @JavaMethod
+    public func uncaughtException(_ arg0: JavaThread?, _ arg1: Throwable?)
   }
 }
 extension JavaClass<JavaThread> {

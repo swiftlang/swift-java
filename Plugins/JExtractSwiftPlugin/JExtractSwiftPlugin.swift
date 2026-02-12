@@ -15,7 +15,7 @@
 import Foundation
 import PackagePlugin
 
-fileprivate let SwiftJavaConfigFileName = "swift-java.config"
+private let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
@@ -30,11 +30,10 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     guard let sourceModule = target.sourceModule else { return [] }
 
-
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
     for dependency in target.dependencies {
-      switch (dependency) {
+      switch dependency {
       case .target(let t):
         t.sourceModule
       case .product(let p):
@@ -78,7 +77,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       let (moduleName, configFile) = moduleAndConfigFile
       return [
         "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))"
+        "\(moduleName)=\(configFile.path(percentEncoded: false))",
       ]
     }
     arguments += dependentConfigFilesArguments
@@ -114,17 +113,20 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       outputSwiftDirectory.appending(path: "Foundation+SwiftJava.swift")
     ]
 
-    print("[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))")
+    print(
+      "[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))"
+    )
 
     var jextractOutputFiles = outputSwiftFiles
 
     // If the developer has enabled java callbacks in the configuration (default is false)
     // and we are running in JNI mode, we will run additional phases in this build plugin
     // to generate Swift wrappers using wrap-java that can be used to callback to Java.
-    let shouldRunJavaCallbacksPhases = 
-      if let configuration, 
-         configuration.enableJavaCallbacks == true,
-         configuration.effectiveMode == .jni {
+    let shouldRunJavaCallbacksPhases =
+      if let configuration,
+        configuration.enableJavaCallbacks == true,
+        configuration.effectiveMode == .jni
+      {
         true
       } else {
         false
@@ -135,7 +137,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let javaSourcesFile = outputJavaDirectory.appending(path: javaSourcesListFileName)
     if shouldRunJavaCallbacksPhases {
       arguments += [
-        "--generated-java-sources-list-file-output", javaSourcesListFileName
+        "--generated-java-sources-list-file-output", javaSourcesListFileName,
       ]
       jextractOutputFiles += [javaSourcesFile]
     }
@@ -145,7 +147,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         displayName: "Generate Java wrappers for Swift types",
         executable: toolURL,
         arguments: arguments,
-        inputFiles: [ configFile ] + swiftFiles,
+        inputFiles: [configFile] + swiftFiles,
         outputFiles: jextractOutputFiles
       )
     ]
@@ -181,8 +183,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     gradlewEnvironment[GradleUserHome] = gradleUserHomePath
     log("Forward environment: \(gradlewEnvironment)")
 
-    let gradleExecutable = findExecutable(name: "gradle") ?? // try using installed 'gradle' if available in PATH
-      swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
+    let gradleExecutable =
+      findExecutable(name: "gradle") // try using installed 'gradle' if available in PATH
+      ?? swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
     log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
 
     commands += [
@@ -192,9 +195,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         arguments: [
           ":SwiftKitCore:build",
           "--project-dir", swiftJavaDirectory.path(percentEncoded: false),
-          "--gradle-user-home", gradleUserHomePath, 
+          "--gradle-user-home", gradleUserHomePath,
           "--configure-on-demand",
-          "--no-daemon"
+          "--no-daemon",
         ],
         environment: gradlewEnvironment,
         inputFiles: [swiftJavaDirectory],
@@ -208,14 +211,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     commands += [
       .buildCommand(
         displayName: "Build extracted Java sources",
-        executable: javaHome
+        executable:
+          javaHome
           .appending(path: "bin")
           .appending(path: self.javacName),
         arguments: [
           "@\(javaSourcesFile.path(percentEncoded: false))",
           "-d", javaCompiledClassesURL.path(percentEncoded: false),
           "-parameters",
-          "-classpath", swiftKitCoreClassPath.path(percentEncoded: false)
+          "-classpath", swiftKitCoreClassPath.path(percentEncoded: false),
         ],
         inputFiles: [javaSourcesFile, swiftKitCoreClassPath],
         outputFiles: [javaCompiledClassesURL]
@@ -234,7 +238,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           "--output-directory", context.pluginWorkDirectoryURL.path(percentEncoded: false),
           "--cp", javaCompiledClassesURL.path(percentEncoded: false),
           "--swift-module", sourceModule.name,
-          "--swift-type-prefix", "Java"
+          "--swift-type-prefix", "Java",
         ],
         inputFiles: [javaCompiledClassesURL],
         outputFiles: [swiftJavaConfigURL]
@@ -250,7 +254,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
       "--config", swiftJavaConfigURL.path(percentEncoded: false),
       "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
-      "--single-swift-file-output", singleSwiftFileOutputName
+      "--single-swift-file-output", singleSwiftFileOutputName,
     ]
 
     // Add any dependent config files as arguments
@@ -270,11 +274,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   }
 
   var javacName: String {
-#if os(Windows)
+    #if os(Windows)
     "javac.exe"
-#else
+    #else
     "javac"
-#endif
+    #endif
   }
 
   /// Find the manifest files from other swift-java executions in any targets
@@ -287,9 +291,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       let dependencyURL = URL(filePath: target.directory.string)
 
       // Look for a config file within this target.
-      let dependencyConfigURL = dependencyURL
+      let dependencyConfigURL =
+        dependencyURL
         .appending(path: SwiftJavaConfigFileName)
-      let dependencyConfigString = dependencyConfigURL
+      let dependencyConfigString =
+        dependencyConfigURL
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {

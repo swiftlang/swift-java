@@ -1,8 +1,8 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-import PackageDescription
 import Foundation
+import PackageDescription
 
 // Note: the JAVA_HOME environment variable must be set to point to where
 // Java is installed, e.g.,
@@ -59,13 +59,15 @@ func getJavaHomeFromPath() -> String? {
     guard task.terminationStatus == 0 else { return nil }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    guard let javaPath = String(data: data, encoding: .utf8)?
-      .trimmingCharacters(in: .whitespacesAndNewlines),
+    guard
+      let javaPath = String(data: data, encoding: .utf8)?
+        .trimmingCharacters(in: .whitespacesAndNewlines),
       !javaPath.isEmpty
     else { return nil }
 
     let resolved = URL(fileURLWithPath: javaPath).resolvingSymlinksInPath()
-    return resolved
+    return
+      resolved
       .deletingLastPathComponent()
       .deletingLastPathComponent()
       .path
@@ -77,57 +79,57 @@ let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
 #if os(Linux)
-  let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
-  let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #else
-  // TODO: Handle windows as well
-  #error("Currently only macOS and Linux platforms are supported, this may change in the future.")
+// TODO: Handle windows as well
+#error("Currently only macOS and Linux platforms are supported, this may change in the future.")
 #endif
 
 let package = Package(
-    name: "JavaSieve",
-    platforms: [
-        .macOS(.v15),
-        .iOS(.v18),
-        .watchOS(.v11),
-        .tvOS(.v18),
-    ],
-    dependencies: [
-        .package(name: "swift-java", path: "../../"),
-    ],
-    targets: [
-        .target(
-            name: "JavaMath",
-            dependencies: [
-              .product(name: "SwiftJava", package: "swift-java"),
-              .product(name: "JavaUtilJar", package: "swift-java"),
-            ],
-            exclude: ["swift-java.config"],
-            swiftSettings: [
-              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-            ],
-            plugins: [
-              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
-            ]
-        ),
+  name: "JavaSieve",
+  platforms: [
+    .macOS(.v15),
+    .iOS(.v18),
+    .watchOS(.v11),
+    .tvOS(.v18),
+  ],
+  dependencies: [
+    .package(name: "swift-java", path: "../../")
+  ],
+  targets: [
+    .target(
+      name: "JavaMath",
+      dependencies: [
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaUtilJar", package: "swift-java"),
+      ],
+      exclude: ["swift-java.config"],
+      swiftSettings: [
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      plugins: [
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java")
+      ]
+    ),
 
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .executableTarget(
-            name: "JavaSieve",
-            dependencies: [
-                "JavaMath",
-                .product(name: "SwiftJava", package: "swift-java"),
-                .product(name: "JavaUtil", package: "swift-java"),
-            ],
-            exclude: ["swift-java.config"],
-            swiftSettings: [
-              .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
-            ],
-            plugins: [
-              .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
-            ]
-        ),
-    ]
+    // Targets are the basic building blocks of a package, defining a module or a test suite.
+    // Targets can depend on other targets in this package and products from dependencies.
+    .executableTarget(
+      name: "JavaSieve",
+      dependencies: [
+        "JavaMath",
+        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "JavaUtil", package: "swift-java"),
+      ],
+      exclude: ["swift-java.config"],
+      swiftSettings: [
+        .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"])
+      ],
+      plugins: [
+        .plugin(name: "SwiftJavaPlugin", package: "swift-java")
+      ]
+    ),
+  ]
 )

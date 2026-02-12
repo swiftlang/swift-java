@@ -32,7 +32,6 @@ public func _swiftjava_swift_retainCount(object: UnsafeMutableRawPointer) -> Int
 @_silgen_name("swift_isUniquelyReferenced")
 public func _swiftjava_swift_isUniquelyReferenced(object: UnsafeMutableRawPointer) -> Bool
 
-
 @_alwaysEmitIntoClient @_transparent
 func _swiftjava_withHeapObject<R>(
   of object: AnyObject,

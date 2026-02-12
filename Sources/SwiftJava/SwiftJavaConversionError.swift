@@ -14,7 +14,7 @@
 
 /// Used to indicate Swift/Java conversion failures.
 public struct SwiftJavaConversionError: Error {
-  public let message: String 
+  public let message: String
 
   public init(_ message: String) {
     self.message = message

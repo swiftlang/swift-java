@@ -203,7 +203,9 @@ extension SwiftFunctionSignature {
         guard parameterNode.specifier == nil else {
           throw SwiftFunctionTranslationError.genericParameterSpecifier(parameterNode)
         }
-        let param = try lookupContext.typeDeclaration(for: parameterNode, sourceFilePath: "FIXME_HAS_NO_PATH.swift") as! SwiftGenericParameterDeclaration
+        let param =
+          try lookupContext.typeDeclaration(for: parameterNode, sourceFilePath: "FIXME_HAS_NO_PATH.swift")
+          as! SwiftGenericParameterDeclaration
         params.append(param)
         if let inheritedNode = parameterNode.inheritedType {
           let inherited = try SwiftType(inheritedNode, lookupContext: lookupContext)
@@ -232,7 +234,7 @@ extension SwiftFunctionSignature {
           requirement = .equals(
             try SwiftType(leftType, lookupContext: lookupContext),
             try SwiftType(rightType, lookupContext: lookupContext)
-            )
+          )
         case .layoutRequirement:
           throw SwiftFunctionTranslationError.layoutRequirement(requirementNode)
         }
@@ -274,7 +276,8 @@ extension SwiftFunctionSignature {
     self.selfParameter = try Self.variableSelfParameter(
       for: DeclSyntax(varNode),
       enclosingType: enclosingType,
-      isSet: isSet)
+      isSet: isSet
+    )
 
     guard let binding = varNode.bindings.first, varNode.bindings.count == 1 else {
       throw SwiftFunctionTranslationError.multipleBindings(varNode)
@@ -323,13 +326,14 @@ extension SwiftFunctionSignature {
     self.selfParameter = try Self.variableSelfParameter(
       for: DeclSyntax(subscriptNode),
       enclosingType: enclosingType,
-      isSet: isSet)
+      isSet: isSet
+    )
 
     let valueType: SwiftType = try SwiftType(subscriptNode.returnClause.type, lookupContext: lookupContext)
     var nodeParameters = try subscriptNode.parameterClause.parameters.map { param in
       try SwiftParameter(param, lookupContext: lookupContext)
     }
-    
+
     var effectSpecifiers: [SwiftEffectSpecifier]? = nil
     switch subscriptNode.accessorBlock?.accessors {
     case .getter(let getter):
@@ -442,21 +446,21 @@ extension AccessorBlockSyntax {
   /// Determine what operations (i.e. get and/or set) supported in this `AccessorBlockSyntax`
   func supportedAccessorKinds() -> SupportedAccessorKinds {
     switch self.accessors {
-      case .getter:
-        return [.get]
-      case .accessors(let accessors):
-        for accessor in accessors {
-          switch accessor.accessorSpecifier.tokenKind {
-            // Existence of any write accessor or observer implies this supports read/write.
-          case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress),
-              .keyword(.willSet), .keyword(.didSet):
-            return [.get, .set]
-          default: // Ignore willSet/didSet and unknown accessors.
-            break
-          }
+    case .getter:
+      return [.get]
+    case .accessors(let accessors):
+      for accessor in accessors {
+        switch accessor.accessorSpecifier.tokenKind {
+        // Existence of any write accessor or observer implies this supports read/write.
+        case .keyword(.set), .keyword(._modify), .keyword(.unsafeMutableAddress),
+          .keyword(.willSet), .keyword(.didSet):
+          return [.get, .set]
+        default: // Ignore willSet/didSet and unknown accessors.
+          break
         }
-        return [.get]
       }
+      return [.get]
+    }
   }
 }
 

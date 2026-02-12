@@ -32,7 +32,7 @@ public func globalTakeInt(i: Int) {
 public func globalTakeIntInt(i: Int, j: Int) {
 }
 
-public func globalCallMeRunnable(run: () -> ()) {
+public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
@@ -42,4 +42,3 @@ func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: Stri
   print("[swift][\(file):\(line)](\(function)) \(msg)")
   fflush(stdout)
 }
-

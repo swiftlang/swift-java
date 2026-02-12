@@ -18,24 +18,25 @@ import Testing
 @Suite
 struct JNINestedTypesTests {
   let source1 = """
-  public class A {
-    public class B {
-      public func g(c: C) {}
+    public class A {
+      public class B {
+        public func g(c: C) {}
 
-      public struct C {
-        public func h(b: B) {}
+        public struct C {
+          public func h(b: B) {}
+        }
       }
     }
-  }
 
-  public func f(a: A, b: A.B, c: A.B.C) {}
-  """
+    public func f(a: A, b: A.B, c: A.B.C) {}
+    """
 
   @Test("Import: class and struct A.B.C (Java)")
   func nestedClassesAndStructs_java() throws {
     try assertOutput(
       input: source1,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -60,7 +61,7 @@ struct JNINestedTypesTests {
           ...
         }
         ...
-        """
+        """,
       ]
     )
   }
@@ -69,7 +70,8 @@ struct JNINestedTypesTests {
   func nestedClassesAndStructs_swift() throws {
     try assertOutput(
       input: source1,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -95,7 +97,7 @@ struct JNINestedTypesTests {
         public func Java_com_example_swift_A_00024B_00024C__00024h__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jlong, self: jlong) {
           ...
         }
-        """
+        """,
       ]
     )
   }
@@ -104,15 +106,16 @@ struct JNINestedTypesTests {
   func nestedEnums_java() throws {
     try assertOutput(
       input: """
-      public enum MyError {
-        case text(TextMessage)
+        public enum MyError {
+          case text(TextMessage)
 
-        public struct TextMessage {}
-      }
+          public struct TextMessage {}
+        }
 
-      public func f(text: MyError.TextMessage) {}
-      """,
-      .jni, .java,
+        public func f(text: MyError.TextMessage) {}
+        """,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -130,7 +133,7 @@ struct JNINestedTypesTests {
         public static void f(MyError.TextMessage text) {
           ...
         }
-        """
+        """,
       ]
     )
   }

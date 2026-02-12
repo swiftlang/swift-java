@@ -49,8 +49,6 @@ final class FFMNestedTypesTests {
       fatalError("Didn't import nested type!")
     }
 
-    
-    
   }
 
 }

@@ -24,7 +24,7 @@ struct JNIJavaKitTests {
 
   let classLookupTable = [
     "JavaLong": "java.lang.Long",
-    "JavaInteger": "java.lang.Integer"
+    "JavaInteger": "java.lang.Integer",
   ]
 
   @Test
@@ -35,20 +35,20 @@ struct JNIJavaKitTests {
       .java,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64)
-       * }
-       */
-      public static void function(java.lang.Long javaLong, java.lang.Integer javaInteger, long int) {
-        SwiftModule.$function(javaLong, javaInteger, int);
-      }
-      """,
-      """
-      private static native void $function(java.lang.Long javaLong, java.lang.Integer javaInteger, long int);
-      """
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64)
+         * }
+         */
+        public static void function(java.lang.Long javaLong, java.lang.Integer javaInteger, long int) {
+          SwiftModule.$function(javaLong, javaInteger, int);
+        }
+        """,
+        """
+        private static native void $function(java.lang.Long javaLong, java.lang.Integer javaInteger, long int);
+        """,
       ]
     )
   }

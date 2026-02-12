@@ -29,12 +29,13 @@ struct SwiftFunctionType: Equatable {
 extension SwiftFunctionType: CustomStringConvertible {
   var description: String {
     let parameterString = parameters.map { $0.descriptionInType }.joined(separator: ", ")
-    let conventionPrefix = switch convention {
-    case .c: "@convention(c) "
-    case .swift: ""
-    }
+    let conventionPrefix =
+      switch convention {
+      case .c: "@convention(c) "
+      case .swift: ""
+      }
     let escapingPrefix = isEscaping ? "@escaping " : ""
-    return  "\(escapingPrefix)\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
+    return "\(escapingPrefix)\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
   }
 }
 

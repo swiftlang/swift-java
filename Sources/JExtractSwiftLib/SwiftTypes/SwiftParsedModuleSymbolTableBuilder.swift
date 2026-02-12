@@ -27,17 +27,18 @@ struct SwiftParsedModuleSymbolTableBuilder {
   var unresolvedExtensions: [ExtensionDeclSyntax]
 
   init(
-    moduleName: String, 
-    requiredAvailablityOfModuleWithName: String? = nil, 
-    alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil, 
-    importedModules: [String: SwiftModuleSymbolTable], 
+    moduleName: String,
+    requiredAvailablityOfModuleWithName: String? = nil,
+    alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil,
+    importedModules: [String: SwiftModuleSymbolTable],
     log: Logger? = nil
   ) {
     self.log = log
     self.symbolTable = .init(
-      moduleName: moduleName, 
-      requiredAvailablityOfModuleWithName: requiredAvailablityOfModuleWithName, 
-      alternativeModules: alternativeModules)
+      moduleName: moduleName,
+      requiredAvailablityOfModuleWithName: requiredAvailablityOfModuleWithName,
+      alternativeModules: alternativeModules
+    )
     self.importedModules = importedModules
     self.unresolvedExtensions = []
   }

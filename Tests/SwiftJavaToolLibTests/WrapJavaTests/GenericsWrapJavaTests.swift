@@ -12,13 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_spi(Testing) import SwiftJava
-import SwiftJavaToolLib
-import JavaUtilJar
-import SwiftJavaShared
 import JavaNet
-import SwiftJavaConfigurationShared
+import JavaUtilJar
 import Subprocess
+@_spi(Testing) import SwiftJava
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
+import SwiftJavaToolLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 final class GenericsWrapJavaTests: XCTestCase {
@@ -39,13 +39,14 @@ final class GenericsWrapJavaTests: XCTestCase {
       class ExampleSimpleClass {
         <KeyType> KeyType getGeneric(Item<KeyType> key) { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.Item",
         "com.example.Pair",
-        "com.example.ExampleSimpleClass"
+        "com.example.ExampleSimpleClass",
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -89,24 +90,25 @@ final class GenericsWrapJavaTests: XCTestCase {
           return null;
         }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.Item",
         "com.example.Pair",
-        "com.example.ExampleSimpleClass"
+        "com.example.ExampleSimpleClass",
       ],
       classpath: [classpathURL],
       expectedChunks: [
         """
         @JavaMethod(typeErasedResult: "KeyType!")
         open func getGeneric<KeyType: AnyJavaObject>() -> KeyType!
-        """,
+        """
       ]
     )
   }
-  
+
   func testWrapJavaGenericMethod_multipleGenerics() async throws {
     let classpathURL = try await compileJava(
       """
@@ -123,13 +125,14 @@ final class GenericsWrapJavaTests: XCTestCase {
       class ExampleSimpleClass {
         <KeyType, ValueType> Pair<KeyType, ValueType> getPair(String name, Item<KeyType> key, Item<ValueType> value) { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.Item",
         "com.example.Pair",
-        "com.example.ExampleSimpleClass"
+        "com.example.ExampleSimpleClass",
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -182,7 +185,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         
         public T[] getGenericArray() { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -226,7 +230,7 @@ final class GenericsWrapJavaTests: XCTestCase {
   }
 
   func testWrapJavaGenericSuperclass() async throws {
-    return  // FIXME: we need this 
+    return // FIXME: we need this
 
     let classpathURL = try await compileJava(
       """
@@ -237,7 +241,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       abstract class AbstractStore<K, V, T> {} // implements Store<K, V, T> {}
       // interface Store<K, V, T> {}
 
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -260,7 +265,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaClass("com.example.CompressingStore")
         open class CompressingStore: AbstractStore<ByteArray, [UInt8], [UInt8]> {
-        """
+        """,
       ]
     )
   }
@@ -273,11 +278,12 @@ final class GenericsWrapJavaTests: XCTestCase {
       final class Kappa<T> { 
         public T get() { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.Kappa",
+        "com.example.Kappa"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -293,11 +299,11 @@ final class GenericsWrapJavaTests: XCTestCase {
           @JavaMethod(typeErasedResult: "T!")
           open func get() -> T!
         }
-        """
+        """,
       ]
     )
   }
-  
+
   func test_wrapJava_genericMethodTypeErasure_ofNullableOptional_staticMethods() async throws {
     let classpathURL = try await compileJava(
       """
@@ -308,7 +314,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         
         public static <T> T nonNull(T value) { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -331,7 +338,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaStaticMethod(typeErasedResult: "T!")
         public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
-        """
+        """,
       ]
     )
   }
@@ -340,18 +347,19 @@ final class GenericsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJava(
       """
       package com.example;
-      
+
       interface MyInterface {}
 
       final class Public {
         public static <T extends MyInterface> void useInterface(T myInterface) {  }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.MyInterface",
-        "com.example.Public"
+        "com.example.Public",
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -370,7 +378,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         @JavaStaticMethod
         public func useInterface<T: AnyJavaObject>(_ arg0: T?)
         }
-        """
+        """,
       ]
     )
   }
@@ -380,13 +388,14 @@ final class GenericsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJava(
       """
       package com.example;
-      
+
       final class Map<T, U> {}
-      
+
       final class Something {
         public <M extends Map<String, String>> M putIn(M map) { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
@@ -407,7 +416,6 @@ final class GenericsWrapJavaTests: XCTestCase {
     )
   }
 
-
   func testWrapJavaGenericMethod_parameterizedParameterType() async throws {
     let classpathURL = try await compileJava(
       """
@@ -424,22 +432,23 @@ final class GenericsWrapJavaTests: XCTestCase {
             Serializer<ValueType> serializer
         ) { return null; }
       }
-      """)
+      """
+    )
 
     try assertWrapJavaOutput(
       javaClassNames: [
         "com.example.Resolver",
         "com.example.Serializer",
-        "com.example.Store"
+        "com.example.Store",
       ],
       classpath: [classpathURL],
       expectedChunks: [
         """
         @JavaMethod
         open func bootstrapStore<ValueType: AnyJavaObject>(_ arg0: String, _ arg1: Resolver<ValueType>?, _ arg2: Serializer<ValueType>?) -> Store!
-        """,
+        """
       ]
     )
   }
-  
+
 }

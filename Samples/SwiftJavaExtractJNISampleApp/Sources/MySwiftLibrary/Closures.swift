@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-public func emptyClosure(closure: () -> ()) {
+public func emptyClosure(closure: () -> Void) {
   closure()
 }
 
 public func closureWithInt(input: Int64, closure: (Int64) -> Int64) -> Int64 {
-  return closure(input)
+  closure(input)
 }
 
 public func closureMultipleArguments(
@@ -25,7 +25,5 @@ public func closureMultipleArguments(
   input2: Int64,
   closure: (Int64, Int64) -> Int64
 ) -> Int64 {
-  return closure(input1, input2)
+  closure(input1, input2)
 }
-
-

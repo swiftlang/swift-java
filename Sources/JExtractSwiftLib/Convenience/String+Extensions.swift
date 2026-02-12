@@ -53,7 +53,7 @@ extension String {
         return "_2"
       } else if $0 == "[" {
         return "_3"
-      } else if $0.isASCII && ($0.isLetter || $0.isNumber)  {
+      } else if $0.isASCII && ($0.isLetter || $0.isNumber) {
         return String($0)
       } else if let utf16 = $0.utf16.first {
         // Escape any non-alphanumeric to their UTF16 hex encoding

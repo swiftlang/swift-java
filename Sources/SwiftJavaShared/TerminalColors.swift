@@ -53,11 +53,11 @@ package enum Rainbow: String {
   }
 }
 
-package extension String {
-  var black: String {
+extension String {
+  package var black: String {
     self.colored(as: .black)
   }
-  func black(if condition: Bool) -> String {
+  package func black(if condition: Bool) -> String {
     if condition {
       self.colored(as: .black)
     } else {
@@ -65,10 +65,10 @@ package extension String {
     }
   }
 
-  var red: String {
+  package var red: String {
     self.colored(as: .red)
   }
-  func red(if condition: Bool) -> String {
+  package func red(if condition: Bool) -> String {
     if condition {
       self.colored(as: .red)
     } else {
@@ -76,10 +76,10 @@ package extension String {
     }
   }
 
-  var green: String {
+  package var green: String {
     self.colored(as: .green)
   }
-  func green(if condition: Bool) -> String {
+  package func green(if condition: Bool) -> String {
     if condition {
       self.colored(as: .green)
     } else {
@@ -87,10 +87,10 @@ package extension String {
     }
   }
 
-  var yellow: String {
+  package var yellow: String {
     self.colored(as: .yellow)
   }
-  func yellow(if condition: Bool) -> String {
+  package func yellow(if condition: Bool) -> String {
     if condition {
       self.colored(as: .yellow)
     } else {
@@ -98,10 +98,10 @@ package extension String {
     }
   }
 
-  var blue: String {
+  package var blue: String {
     self.colored(as: .blue)
   }
-  func blue(if condition: Bool) -> String {
+  package func blue(if condition: Bool) -> String {
     if condition {
       self.colored(as: .blue)
     } else {
@@ -109,10 +109,10 @@ package extension String {
     }
   }
 
-  var magenta: String {
+  package var magenta: String {
     self.colored(as: .magenta)
   }
-  func magenta(if condition: Bool) -> String {
+  package func magenta(if condition: Bool) -> String {
     if condition {
       self.colored(as: .magenta)
     } else {
@@ -120,10 +120,10 @@ package extension String {
     }
   }
 
-  var cyan: String {
+  package var cyan: String {
     self.colored(as: .cyan)
   }
-  func cyan(if condition: Bool) -> String {
+  package func cyan(if condition: Bool) -> String {
     if condition {
       self.colored(as: .cyan)
     } else {
@@ -131,10 +131,10 @@ package extension String {
     }
   }
 
-  var white: String {
+  package var white: String {
     self.colored(as: .white)
   }
-  func white(if condition: Bool) -> String {
+  package func white(if condition: Bool) -> String {
     if condition {
       self.colored(as: .white)
     } else {
@@ -142,10 +142,10 @@ package extension String {
     }
   }
 
-  var bold: String {
+  package var bold: String {
     self.colored(as: .bold)
   }
-  func bold(if condition: Bool) -> String {
+  package func bold(if condition: Bool) -> String {
     if condition {
       self.colored(as: .bold)
     } else {
@@ -153,12 +153,12 @@ package extension String {
     }
   }
 
-  var `default`: String {
+  package var `default`: String {
     self.colored(as: .default)
   }
 
-  func colored(as color: Rainbow) -> String {
-    return if isColorSupported {
+  package func colored(as color: Rainbow) -> String {
+    if isColorSupported {
       "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
     } else {
       self
@@ -166,49 +166,49 @@ package extension String {
   }
 }
 
-package extension Substring {
-  var black: String {
+extension Substring {
+  package var black: String {
     self.colored(as: .black)
   }
 
-  var red: String {
+  package var red: String {
     self.colored(as: .red)
   }
 
-  var green: String {
+  package var green: String {
     self.colored(as: .green)
   }
 
-  var yellow: String {
+  package var yellow: String {
     self.colored(as: .yellow)
   }
 
-  var blue: String {
+  package var blue: String {
     self.colored(as: .blue)
   }
 
-  var magenta: String {
+  package var magenta: String {
     self.colored(as: .magenta)
   }
 
-  var cyan: String {
+  package var cyan: String {
     self.colored(as: .cyan)
   }
 
-  var white: String {
+  package var white: String {
     self.colored(as: .white)
   }
 
-  var bold: String {
+  package var bold: String {
     self.colored(as: .bold)
   }
 
-  var `default`: String {
+  package var `default`: String {
     self.colored(as: .default)
   }
 
-  func colored(as color: Rainbow) -> String {
-    return if isColorSupported {
+  package func colored(as color: Rainbow) -> String {
+    if isColorSupported {
       "\(color.rawValue)\(self)\(Rainbow.default.rawValue)"
     } else {
       String(self)

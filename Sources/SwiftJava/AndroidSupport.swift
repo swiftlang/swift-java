@@ -18,7 +18,7 @@ public enum AndroidSupport {
   public static func androidDesugarClassNameConversion(
     for fullClassName: String
   ) -> String {
-#if os(Android) && compiler(>=6.3)
+    #if os(Android) && compiler(>=6.3)
     switch fullClassName {
     case "java.util.Optional":
       // On API 23, Optionals are desugared
@@ -29,7 +29,7 @@ public enum AndroidSupport {
     default:
       break
     }
-#endif
+    #endif
     return fullClassName
   }
 }

@@ -11,7 +11,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public boolean java.io.Reader.ready() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func ready() throws -> Bool
 
   /// Java method `readAllAsString`.
@@ -20,7 +20,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public java.lang.String java.io.Reader.readAllAsString() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func readAllAsString() throws -> String
 
   /// Java method `reset`.
@@ -29,7 +29,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public void java.io.Reader.reset() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func reset() throws
 
   /// Java method `close`.
@@ -38,7 +38,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public abstract void java.io.Reader.close() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func close() throws
 
   /// Java method `mark`.
@@ -47,7 +47,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public void java.io.Reader.mark(int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func mark(_ arg0: Int32) throws
 
   /// Java method `read`.
@@ -56,7 +56,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public abstract int java.io.Reader.read(char[],int,int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func read(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   /// Java method `read`.
@@ -65,7 +65,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public int java.io.Reader.read() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func read() throws -> Int32
 
   /// Java method `read`.
@@ -74,7 +74,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public int java.io.Reader.read(char[]) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func read(_ arg0: [UInt16]) throws -> Int32
 
   /// Java method `transferTo`.
@@ -83,7 +83,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public long java.io.Reader.transferTo(java.io.Writer) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func transferTo(_ arg0: Writer?) throws -> Int64
 
   /// Java method `skip`.
@@ -92,7 +92,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public long java.io.Reader.skip(long) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func skip(_ arg0: Int64) throws -> Int64
 
   /// Java method `markSupported`.
@@ -101,7 +101,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public boolean java.io.Reader.markSupported()
   /// ```
-@JavaMethod
+  @JavaMethod
   open func markSupported() -> Bool
 
   /// Java method `readAllLines`.
@@ -110,7 +110,7 @@ open class Reader: JavaObject {
   /// ```java
   /// public java.util.List<java.lang.String> java.io.Reader.readAllLines() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func readAllLines() throws -> List<JavaString>!
 }
 extension JavaClass<Reader> {
@@ -120,7 +120,7 @@ extension JavaClass<Reader> {
   /// ```java
   /// public static java.io.Reader java.io.Reader.nullReader()
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func nullReader() -> Reader!
 
   /// Java method `of`.
@@ -129,6 +129,6 @@ extension JavaClass<Reader> {
   /// ```java
   /// public static java.io.Reader java.io.Reader.of(java.lang.CharSequence)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func of(_ arg0: CharSequence?) -> Reader!
 }

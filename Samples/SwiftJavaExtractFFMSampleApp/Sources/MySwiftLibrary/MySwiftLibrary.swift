@@ -17,13 +17,13 @@
 //
 // No annotations are necessary on the Swift side to perform the export.
 
+import Foundation
+
 #if os(Linux)
 import Glibc
 #else
 import Darwin.C
 #endif
-
-import Foundation
 
 public func helloWorld() {
 }
@@ -32,28 +32,30 @@ public func globalTakeInt(i: Int) {
 }
 
 public func globalMakeInt() -> Int {
-  return 42
+  42
 }
 
 public func globalWriteString(string: String) -> Int {
-  return string.count
+  string.count
 }
 
 public func globalTakeIntInt(i: Int, j: Int) {
 }
 
-public func globalCallMeRunnable(run: () -> ()) {
+public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
-  return buf.count
+  buf.count
 }
 
-public var globalBuffer: UnsafeRawBufferPointer = UnsafeRawBufferPointer(UnsafeMutableRawBufferPointer.allocate(byteCount: 124, alignment: 1))
+public var globalBuffer: UnsafeRawBufferPointer = UnsafeRawBufferPointer(
+  UnsafeMutableRawBufferPointer.allocate(byteCount: 124, alignment: 1)
+)
 
 public func globalReceiveReturnData(data: Data) -> Data {
-  return Data(data)
+  Data(data)
 }
 
 public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
@@ -61,7 +63,7 @@ public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
 }
 
 public func getArray() -> [UInt8] {
-  return [1, 2, 3]
+  [1, 2, 3]
 }
 
 public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: Int) -> Int {
@@ -71,10 +73,10 @@ public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: In
 }
 
 public func sumAllByteArrayElements(array: [UInt8]) -> Int {
-  return Int(array.reduce(0, { partialResult, element in partialResult + element }))
+  Int(array.reduce(0, { partialResult, element in partialResult + element }))
 }
 public func returnSwiftArray() -> [UInt8] {
-  return [1, 2, 3, 4]
+  [1, 2, 3, 4]
 }
 
 public func withArray(body: ([UInt8]) -> Void) {
@@ -106,11 +108,11 @@ func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: Stri
   fflush(stdout)
 }
 
- #if os(Linux)
- // FIXME: why do we need this workaround?
- @_silgen_name("_objc_autoreleaseReturnValue")
- public func _objc_autoreleaseReturnValue(a: Any) {}
+#if os(Linux)
+// FIXME: why do we need this workaround?
+@_silgen_name("_objc_autoreleaseReturnValue")
+public func _objc_autoreleaseReturnValue(a: Any) {}
 
- @_silgen_name("objc_autoreleaseReturnValue")
- public func objc_autoreleaseReturnValue(a: Any) {}
- #endif
+@_silgen_name("objc_autoreleaseReturnValue")
+public func objc_autoreleaseReturnValue(a: Any) {}
+#endif

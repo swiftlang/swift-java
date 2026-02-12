@@ -40,7 +40,7 @@ extension DeclModifierSyntax {
   var isAccessControl: Bool {
     switch self.name.tokenKind {
     case .keyword(.private), .keyword(.fileprivate), .keyword(.internal), .keyword(.package),
-        .keyword(.public), .keyword(.open):
+      .keyword(.public), .keyword(.open):
       return true
     default:
       return false
@@ -78,7 +78,7 @@ extension DeclModifierSyntax {
   }
 
   var isInternal: Bool {
-    return switch self.name.tokenKind {
+    switch self.name.tokenKind {
     case .keyword(.private): false
     case .keyword(.fileprivate): false
     case .keyword(.internal): true
@@ -136,7 +136,8 @@ extension AttributeListSyntax.Element {
     }
     let attrName = attr.attributeName.description
     switch attrName {
-    case "JavaClass", "JavaInterface", "JavaField", "JavaStaticField", "JavaMethod", "JavaStaticMethod", "JavaImplementation":
+    case "JavaClass", "JavaInterface", "JavaField", "JavaStaticField", "JavaMethod", "JavaStaticMethod",
+      "JavaImplementation":
       return true
     default:
       return false
@@ -159,7 +160,7 @@ extension DeclSyntaxProtocol {
 
   /// Declaration name primarily for debugging.
   var nameForDebug: String {
-    return switch DeclSyntax(self).as(DeclSyntaxEnum.self) {
+    switch DeclSyntax(self).as(DeclSyntaxEnum.self) {
     case .accessorDecl(let node):
       node.accessorSpecifier.text
     case .actorDecl(let node):
@@ -184,13 +185,13 @@ extension DeclSyntaxProtocol {
     case .extensionDecl(let node):
       node.extendedType.description
     case .functionDecl(let node):
-      node.name.text + "(" + node.signature.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined()  + ")"
+      node.name.text + "(" + node.signature.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined() + ")"
     case .ifConfigDecl(_):
       "#if"
     case .importDecl(_):
       "import"
     case .initializerDecl(let node):
-      "init" + "(" + node.signature.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined()  + ")"
+      "init" + "(" + node.signature.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined() + ")"
     case .macroDecl(let node):
       node.name.text
     case .macroExpansionDecl(let node):
@@ -208,7 +209,7 @@ extension DeclSyntaxProtocol {
     case .structDecl(let node):
       node.name.text
     case .subscriptDecl(let node):
-      "subscript" + "(" + node.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined()  + ")"
+      "subscript" + "(" + node.parameterClause.parameters.map({ $0.firstName.text + ":" }).joined() + ")"
     case .typeAliasDecl(let node):
       node.name.text
     case .variableDecl(let node):
@@ -234,7 +235,7 @@ extension DeclSyntaxProtocol {
 
   /// Signature part of the declaration. I.e. without body or member block.
   var signatureString: String {
-    return switch DeclSyntax(self.detached).as(DeclSyntaxEnum.self) {
+    switch DeclSyntax(self.detached).as(DeclSyntaxEnum.self) {
     case .functionDecl(let node):
       node.with(\.body, nil).triviaSanitizedDescription
     case .initializerDecl(let node):
@@ -251,13 +252,16 @@ extension DeclSyntaxProtocol {
       node.with(\.accessorBlock, nil).triviaSanitizedDescription
     case .variableDecl(let node):
       node
-        .with(\.bindings, PatternBindingListSyntax(
-          node.bindings.map {
-            $0.detached
-            .with(\.accessorBlock, nil)
-            .with(\.initializer, nil)
-          }
-        ))
+        .with(
+          \.bindings,
+          PatternBindingListSyntax(
+            node.bindings.map {
+              $0.detached
+                .with(\.accessorBlock, nil)
+                .with(\.initializer, nil)
+            }
+          )
+        )
         .triviaSanitizedDescription
     case .enumCaseDecl(let node):
       node.triviaSanitizedDescription
@@ -286,9 +290,8 @@ class TriviaSanitizingDescriptionVisitor: SyntaxVisitor {
   override func visit(_ node: TokenSyntax) -> SyntaxVisitorContinueKind {
     let tokenKind = node.tokenKind
     switch (prevTokenKind, tokenKind) {
-    case
-      // No whitespace after open parentheses.
-      (.leftAngle, _), (.leftParen, _), (.leftSquare, _), (.endOfFile, _),
+    case // No whitespace after open parentheses.
+    (.leftAngle, _), (.leftParen, _), (.leftSquare, _), (.endOfFile, _),
       // No whitespace before close parentheses.
       (_, .rightAngle), (_, .rightParen), (_, .rightSquare):
       break

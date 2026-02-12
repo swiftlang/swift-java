@@ -16,7 +16,7 @@ public struct KnownJavaVMOptions {
 
   /// Helper for the option to configure where native libraries should be searched for: `-Djava.library.path`
   public static func javaLibraryPath(_ path: String) -> String {
-    return "-Djava.library.path=" + path
+    "-Djava.library.path=" + path
   }
 
 }
