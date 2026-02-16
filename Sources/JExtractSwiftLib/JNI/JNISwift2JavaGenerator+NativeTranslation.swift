@@ -61,31 +61,32 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
-      func translateTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> [NativeParameter] {
-        decl.genericParameters.enumerated().map { index, _ in
-          NativeParameter(
+      func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> NativeParameter? {
+        if !decl.genericParameters.isEmpty {
+          return NativeParameter(
             parameters: [
-              JavaParameter(name: "t\(index)Meta", type: .long)
+              JavaParameter(name: "selfType", type: .long)
             ],
             conversion: .genericMetadataPointer(.placeholder),
             indirectConversion: nil,
             conversionCheck: nil
           )
         }
+        return nil
       }
-      let typeParameters: [NativeParameter] = switch functionSignature.selfParameter {
+      let selfTypeParameter: NativeParameter? = switch functionSignature.selfParameter {
       case .instance(let selfParameter):
-        selfParameter.type.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
+        selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
       case .initializer(let swiftType), .staticMethod(let swiftType):
-        swiftType.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
-      case nil: []
+        swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
+      case nil: nil
       }
 
       let result = try translate(swiftResult: functionSignature.result)
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
-        selfTypeParameters: typeParameters,
+        selfTypeParameter: selfTypeParameter,
         parameters: parameters,
         result: result
       )
@@ -789,7 +790,7 @@ extension JNISwift2JavaGenerator {
 
   struct NativeFunctionSignature {
     let selfParameter: NativeParameter?
-    var selfTypeParameters: [NativeParameter]
+    var selfTypeParameter: NativeParameter?
     var parameters: [NativeParameter]
     var result: NativeResult
   }

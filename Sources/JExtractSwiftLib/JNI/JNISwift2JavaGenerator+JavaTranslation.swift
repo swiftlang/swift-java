@@ -155,7 +155,7 @@ extension JNISwift2JavaGenerator {
               ]
             )
           ),
-          selfTypeParameters: [], // TODO: iceman
+          selfTypeParameter: nil, // TODO: iceman
           parameters: [],
           resultType: TranslatedResult(
             javaType: .class(package: nil, name: "Optional<\(caseName)>"),
@@ -173,7 +173,7 @@ extension JNISwift2JavaGenerator {
             indirectConversion: nil,
             conversionCheck: nil
           ),
-          selfTypeParameters: [], // TODO: iceman
+          selfTypeParameter: nil, // TODO: iceman
           parameters: [],
           result: NativeResult(
             javaType: nativeParametersType,
@@ -323,20 +323,21 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
-      func translateTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> [TranslatedParameter] {
-        decl.genericParameters.enumerated().map { index, _ in
-          TranslatedParameter(
-            parameter: JavaParameter(name: "t\(index)Meta", type: .long),
-            conversion: .member("t\(index)MetaPointer")
+      func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> TranslatedParameter? {
+        if !decl.genericParameters.isEmpty {
+          return TranslatedParameter(
+            parameter: JavaParameter(name: "selfType", type: .long),
+            conversion: .typeMetadataAddress(.placeholder)
           )
         }
+        return nil
       }
-      let typeParameters: [TranslatedParameter] = switch functionSignature.selfParameter {
+      let selfTypeParameter: TranslatedParameter? = switch functionSignature.selfParameter {
       case .instance(let selfParameter):
-        selfParameter.type.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
+        selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
       case .initializer(let swiftType), .staticMethod(let swiftType):
-        swiftType.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
-      case nil: []
+        swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
+      case nil: nil
       }
 
       var exceptions: [JavaExceptionType] = []
@@ -349,7 +350,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
-        selfTypeParameters: typeParameters,
+        selfTypeParameter: selfTypeParameter,
         parameters: parameters,
         resultType: resultType,
         exceptions: exceptions
@@ -1068,7 +1069,7 @@ extension JNISwift2JavaGenerator {
 
   struct TranslatedFunctionSignature {
     var selfParameter: TranslatedParameter?
-    var selfTypeParameters: [TranslatedParameter]
+    var selfTypeParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var resultType: TranslatedResult
     var exceptions: [JavaExceptionType]

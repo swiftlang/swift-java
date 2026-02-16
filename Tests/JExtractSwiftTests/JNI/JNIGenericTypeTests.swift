@@ -36,35 +36,31 @@ struct JNIGenericTypeTests {
       input: genericFile,
       .jni,
       .java,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public final class MyID implements JNISwiftInstance {
         """,
         """
-        private final long t0MetaPointer;
+        private final long selfTypePointer;
         """,
         """
         public java.lang.String getDescription() {
-          return MyID.$getDescription(this.$memoryAddress(), this.t0MetaPointer);
+          return MyID.$getDescription(this.$memoryAddress(), this.$typeMetadataAddress());
         }
-        private static native java.lang.String $getDescription(long self, long t0Meta);
+        private static native java.lang.String $getDescription(long self, long selfType);
         """,
         """
         public String toString() {
-          return $toString(this.$memoryAddress(), this.t0MetaPointer);
+          return $toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
-        private static native java.lang.String $toString(long selfPointer, long t0Meta);
+        private static native java.lang.String $toString(long selfPointer, long selfType);
         """,
         """
-        private static native long $typeMetadataAddressDowncall(long t0Meta);
         @Override
         public long $typeMetadataAddress() {
-          long self$ = this.$memoryAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("MyID.$typeMetadataAddress",
-                "this", this,
-                "self", self$);
+          return this.selfTypePointer;
+        }
           }
           return MyID.$typeMetadataAddressDowncall(this.t0MetaPointer);
         }
