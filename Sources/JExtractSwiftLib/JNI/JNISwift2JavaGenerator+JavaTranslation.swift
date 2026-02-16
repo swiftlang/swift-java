@@ -326,7 +326,7 @@ extension JNISwift2JavaGenerator {
       func translateTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> [TranslatedParameter] {
         decl.genericParameters.enumerated().map { index, _ in
           TranslatedParameter(
-            parameter: JavaParameter(name: "t\(index)MetaPointer", type: .long),
+            parameter: JavaParameter(name: "t\(index)Meta", type: .long),
             conversion: .member("t\(index)MetaPointer")
           )
         }

@@ -48,13 +48,16 @@ struct JNIGenericTypeTests {
         public java.lang.String getDescription() {
           return MyID.$getDescription(this.$memoryAddress(), this.t0MetaPointer);
         }
-        private static native java.lang.String $getDescription(long self, long t0MetaPointer);
+        private static native java.lang.String $getDescription(long self, long t0Meta);
         """,
         """
-        private static native java.lang.String $toString(long selfPointer, long t0MetaPointer);
+        public String toString() {
+          return $toString(this.$memoryAddress(), this.t0MetaPointer);
+        }
+        private static native java.lang.String $toString(long selfPointer, long t0Meta);
         """,
         """
-        private static native long $typeMetadataAddressDowncall(long t0MetaPointer);
+        private static native long $typeMetadataAddressDowncall(long t0Meta);
         @Override
         public long $typeMetadataAddress() {
           long self$ = this.$memoryAddress();
@@ -63,7 +66,7 @@ struct JNIGenericTypeTests {
                 "this", this,
                 "self", self$);
           }
-          return MyID.$typeMetadataAddressDowncall(t0MetaPointer);
+          return MyID.$typeMetadataAddressDowncall(this.t0MetaPointer);
         }
         """
       ]

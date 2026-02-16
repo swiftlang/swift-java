@@ -65,7 +65,7 @@ extension JNISwift2JavaGenerator {
         decl.genericParameters.enumerated().map { index, _ in
           NativeParameter(
             parameters: [
-              JavaParameter(name: "t\(index)MetaPointer", type: .long)
+              JavaParameter(name: "t\(index)Meta", type: .long)
             ],
             conversion: .genericMetadataPointer(.placeholder),
             indirectConversion: nil,

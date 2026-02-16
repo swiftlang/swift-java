@@ -322,7 +322,7 @@ extension JNISwift2JavaGenerator {
     var arguments = ["selfPointer"]
     var parameters = ["this.$memoryAddress()"]
     for (index, _) in decl.genericParameters.enumerated() {
-      arguments.append("t\(index)MetaPointer")
+      arguments.append("t\(index)Meta")
       parameters.append("this.t\(index)MetaPointer")
     }
     let argument = arguments.map { "long \($0)" }.joined(separator: ", ")
@@ -722,14 +722,16 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    var downcallParams = [String]()
-    if !type.genericParameters.isEmpty {
-      for (index, _) in type.genericParameters.enumerated() {
-        downcallParams.append("t\(index)MetaPointer")
-      }
+    var arguments = [String]()
+    var parameters = [String]()
+    for (index, _) in type.genericParameters.enumerated() {
+      arguments.append("t\(index)Meta")
+      parameters.append("this.t\(index)MetaPointer")
     }
-    let downcallArg = downcallParams.map { "long \($0)" }.joined(separator: ", ")
-    printer.print("private static native long $typeMetadataAddressDowncall(\(downcallArg));")
+    let argument = arguments.map { "long \($0)" }.joined(separator: ", ")
+    let parameter = parameters.joined(separator: ", ")
+
+    printer.print("private static native long $typeMetadataAddressDowncall(\(argument));")
 
     let funcName = "$typeMetadataAddress"
     printer.print("@Override")
@@ -744,7 +746,7 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
-      printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall(\(downcallParams.joined(separator: ", ")));")
+      printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall(\(parameter));")
     }
   }
 
