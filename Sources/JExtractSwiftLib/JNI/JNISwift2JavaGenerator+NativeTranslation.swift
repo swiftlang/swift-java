@@ -61,10 +61,31 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
+      func translateTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> [NativeParameter] {
+        decl.genericParameters.enumerated().map { index, _ in
+          NativeParameter(
+            parameters: [
+              JavaParameter(name: "t\(index)MetaPointer", type: .long)
+            ],
+            conversion: .genericMetadataPointer(.placeholder),
+            indirectConversion: nil,
+            conversionCheck: nil
+          )
+        }
+      }
+      let typeParameters: [NativeParameter] = switch functionSignature.selfParameter {
+      case .instance(let selfParameter):
+        selfParameter.type.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
+      case .initializer(let swiftType), .staticMethod(let swiftType):
+        swiftType.asNominalTypeDeclaration.map(translateTypeParameters) ?? []
+      case nil: []
+      }
+
       let result = try translate(swiftResult: functionSignature.result)
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
+        selfTypeParameters: typeParameters,
         parameters: parameters,
         result: result
       )
@@ -768,6 +789,7 @@ extension JNISwift2JavaGenerator {
 
   struct NativeFunctionSignature {
     let selfParameter: NativeParameter?
+    var selfTypeParameters: [NativeParameter]
     var parameters: [NativeParameter]
     var result: NativeResult
   }
@@ -835,6 +857,8 @@ extension JNISwift2JavaGenerator {
       allowNil: Bool = false,
       convertLongFromJNI: Bool = true
     )
+
+    indirect case genericMetadataPointer(NativeSwiftConversionStep)
 
     /// Allocate memory for a Swift value and outputs the pointer
     indirect case allocateSwiftValue(NativeSwiftConversionStep, name: String, swiftType: SwiftType)
@@ -1033,6 +1057,20 @@ extension JNISwift2JavaGenerator {
           )
         }
         return pointerName
+
+      case .genericMetadataPointer(let inner):
+        let inner = inner.render(&printer, placeholder)
+        let bitsName = "\(inner)Bits$"
+        let pointerName = "\(inner)Pointer$"
+        printer.print(
+          """
+          let \(bitsName) = Int(Int64(fromJNI: \(inner), in: environment))
+          guard let \(pointerName) = UnsafeRawPointer(bitPattern: \(bitsName)) else {
+            fatalError("\(inner) metadata address was null")
+          }
+          """
+        )
+        return "unsafeBitCast(\(pointerName), to: Any.Type.self)"
 
       case .allocateSwiftValue(let inner, let name, let swiftType):
         let inner = inner.render(&printer, placeholder)

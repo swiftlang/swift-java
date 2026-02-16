@@ -199,14 +199,33 @@ extension JNISwift2JavaGenerator {
         * @param selfPointer  a pointer to the memory containing the value
         * @param swiftArena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
         */
-        private \(decl.swiftNominal.name)(long selfPointer, SwiftArena swiftArena) {
-          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
-          this.selfPointer = selfPointer;
+        """
+      )
+      var swiftPointerParams = ["selfPointer"]
+      for (index, _) in decl.genericParameters.enumerated() {
+        swiftPointerParams.append("t\(index)MetaPointer")
+      }
+      let swiftPointerArg = swiftPointerParams.map { "long \($0)" }.joined(separator: ", ")
+      printer.printBraceBlock("private \(decl.swiftNominal.name)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
+        for param in swiftPointerParams {
+          printer.print(
+          """
+          SwiftObjects.requireNonZero(\(param), "\(param)");
+          this.\(param) = \(param);
+          """
+          )
+        }
+        printer.print(
+          """
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
-        }
-
+          """
+        )
+      }
+      printer.println()
+      printer.print(
+        """
         /** 
          * Assume that the passed {@code long} represents a memory address of a {@link \(decl.swiftNominal.name)}.
          * <p/>
@@ -216,12 +235,12 @@ extension JNISwift2JavaGenerator {
          *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
          * </ul>
          */
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
-          return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
+          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
         }
 
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer) {
-          return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
+          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """
       )
@@ -244,6 +263,11 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
+
+      for (index, param) in decl.genericParameters.enumerated() {
+        printer.print("/** Pointer to the metatype of type parameter '\(param.name)' */")
+        printer.print("private final long t\(index)MetaPointer;")
+      }
 
       printer.println()
 
@@ -295,25 +319,34 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printToStringMethods(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    var arguments = ["selfPointer"]
+    var parameters = ["this.$memoryAddress()"]
+    for (index, _) in decl.genericParameters.enumerated() {
+      arguments.append("t\(index)MetaPointer")
+      parameters.append("this.t\(index)MetaPointer")
+    }
+    let argument = arguments.map { "long \($0)" }.joined(separator: ", ")
+    let parameter = parameters.joined(separator: ", ")
+
     printer.printBraceBlock("public String toString()") { printer in
       printer.print(
         """
-        return $toString(this.$memoryAddress());
+        return $toString(\(parameter));
         """
       )
     }
-    printer.print("private static native java.lang.String $toString(long selfPointer);")
+    printer.print("private static native java.lang.String $toString(\(argument));")
 
     printer.println()
 
     printer.printBraceBlock("public String toDebugString()") { printer in
       printer.print(
         """
-        return $toDebugString(this.$memoryAddress());
+        return $toDebugString(\(parameter));
         """
       )
     }
-    printer.print("private static native java.lang.String $toDebugString(long selfPointer);")
+    printer.print("private static native java.lang.String $toDebugString(\(argument));")
   }
 
   private func printHeader(_ printer: inout CodePrinter) {
@@ -630,6 +663,7 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = nativeSignature.selfParameter?.parameters {
       parameters += selfParameter
     }
+    parameters += nativeSignature.selfTypeParameters.flatMap(\.parameters)
     parameters += nativeSignature.result.outParameters
 
     let renderedParameters = parameters.map { javaParameter in
@@ -658,6 +692,12 @@ extension JNISwift2JavaGenerator {
       arguments.append(lowered)
     }
 
+    // Generic metadata pointers in Self
+    for typeParameter in translatedFunctionSignature.selfTypeParameters {
+      let lowered = typeParameter.conversion.render(&printer, "this")
+      arguments.append(lowered)
+    }
+
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.resultType.outParameters {
       printer.print(
@@ -682,7 +722,14 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    printer.print("private static native long $typeMetadataAddressDowncall();")
+    var downcallParams = [String]()
+    if !type.genericParameters.isEmpty {
+      for (index, _) in type.genericParameters.enumerated() {
+        downcallParams.append("t\(index)MetaPointer")
+      }
+    }
+    let downcallArg = downcallParams.map { "long \($0)" }.joined(separator: ", ")
+    printer.print("private static native long $typeMetadataAddressDowncall(\(downcallArg));")
 
     let funcName = "$typeMetadataAddress"
     printer.print("@Override")
@@ -695,9 +742,9 @@ extension JNISwift2JavaGenerator {
               "this", this,
               "self", self$);
         }
-        return \(type.swiftNominal.name).$typeMetadataAddressDowncall();
         """
       )
+      printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall(\(downcallParams.joined(separator: ", ")));")
     }
   }
 

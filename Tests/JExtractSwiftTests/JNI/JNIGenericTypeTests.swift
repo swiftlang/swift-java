@@ -51,14 +51,17 @@ struct JNIGenericTypeTests {
         private static native java.lang.String $getDescription(long self, long t0MetaPointer);
         """,
         """
+        private static native java.lang.String $toString(long selfPointer, long t0MetaPointer);
+        """,
+        """
         private static native long $typeMetadataAddressDowncall(long t0MetaPointer);
         @Override
         public long $typeMetadataAddress() {
           long self$ = this.$memoryAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("MyID.$typeMetadataAddress",
-            "this", this,
-            "self", self$);
+            CallTraces.traceDowncall("MyID.$typeMetadataAddress",
+                "this", this,
+                "self", self$);
           }
           return MyID.$typeMetadataAddressDowncall(t0MetaPointer);
         }

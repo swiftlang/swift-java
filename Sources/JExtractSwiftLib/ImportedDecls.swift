@@ -43,6 +43,9 @@ package final class ImportedNominalType: ImportedDecl {
   package var variables: [ImportedFunc] = []
   package var cases: [ImportedEnumCase] = []
   var inheritedTypes: [SwiftType]
+  package var genericParameters: [SwiftGenericParameterDeclaration] {
+    self.swiftNominal.genericParameters
+  }
   package var parent: SwiftNominalTypeDeclaration?
 
   init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
