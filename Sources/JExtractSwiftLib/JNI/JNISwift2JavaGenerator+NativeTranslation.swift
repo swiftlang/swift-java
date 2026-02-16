@@ -612,6 +612,10 @@ extension JNISwift2JavaGenerator {
               outParameters: []
             )
 
+          case .int, .uint:
+            // Returning arch depending integers is not supported yet.
+            throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue
