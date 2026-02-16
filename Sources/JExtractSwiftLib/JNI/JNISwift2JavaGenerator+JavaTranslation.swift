@@ -1169,8 +1169,6 @@ extension JNISwift2JavaGenerator {
 
     indirect case call(JavaNativeConversionStep, function: String)
 
-    case member(String)
-
     indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep] = [])
 
     case isOptionalPresent
@@ -1281,9 +1279,6 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(function)(\(inner))"
 
-      case .member(let member):
-        return "\(placeholder).\(member)"
-
       case .isOptionalPresent:
         return "(byte) (\(placeholder).isPresent() ? 1 : 0)"
 
@@ -1391,7 +1386,7 @@ extension JNISwift2JavaGenerator {
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent, .combinedName, .member:
+      case .placeholder, .constant, .isOptionalPresent, .combinedName:
         return false
 
       case .constructSwiftValue, .wrapMemoryAddressUnsafe:
