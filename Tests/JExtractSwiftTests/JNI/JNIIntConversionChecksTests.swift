@@ -152,7 +152,7 @@ struct JNIIntConversionChecksTests {
           guard let self$ else {
             fatalError("self memory address was null in call to \\(#function)!")
           }
-          return self$.pointee.unsignedInt.getJNIValue(in: environment)
+          return UInt64(self$.pointee.unsignedInt).getJNIValue(in: environment)
         """
       ]
     )
@@ -210,7 +210,7 @@ struct JNIIntConversionChecksTests {
         guard let self$ else {
           fatalError("self memory address was null in call to \\(#function)!")
         }
-        return self$.pointee.dummyFunc(arg: Int(arg$indirect)).getJNIValue(in: environment)
+        return Int64(self$.pointee.dummyFunc(arg: Int(arg$indirect))).getJNIValue(in: environment)
         """,
       ]
     )
@@ -238,7 +238,7 @@ struct JNIIntConversionChecksTests {
         guard let self$ else {
           fatalError("self memory address was null in call to \\(#function)!")
         }
-        return self$.pointee.dummyFunc(arg: UInt(arg$indirect)).getJNIValue(in: environment)
+        return UInt64(self$.pointee.dummyFunc(arg: UInt(arg$indirect))).getJNIValue(in: environment)
         """,
       ]
     )

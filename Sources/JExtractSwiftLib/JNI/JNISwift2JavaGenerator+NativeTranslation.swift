@@ -619,11 +619,22 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
 
-            return NativeResult(
-              javaType: javaType,
-              conversion: .getJNIValue(.placeholder),
-              outParameters: []
-            )
+            if let indirectReturnType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
+              for: knownType,
+              from: knownTypes
+            ) {
+              return NativeResult(
+                javaType: javaType,
+                conversion: .getJNIValue(.labelessInitializer(.placeholder, swiftType: indirectReturnType)),
+                outParameters: []
+              )
+            } else {
+              return NativeResult(
+                javaType: javaType,
+                conversion: .getJNIValue(.placeholder),
+                outParameters: []
+              )
+            }
           }
         }
 
@@ -901,6 +912,9 @@ extension JNISwift2JavaGenerator {
     indirect case aggregate(variable: String, [NativeSwiftConversionStep])
 
     indirect case replacingPlaceholder(NativeSwiftConversionStep, placeholder: NativeSwiftConversionStep)
+
+    /// `SwiftType(inner)`
+    indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -1396,6 +1410,10 @@ extension JNISwift2JavaGenerator {
       case .replacingPlaceholder(let inner, let newPlaceholder):
         let newPlaceholder = newPlaceholder.render(&printer, placeholder)
         return inner.render(&printer, newPlaceholder)
+
+      case .labelessInitializer(let inner, let swiftType):
+        let inner = inner.render(&printer, placeholder)
+        return "\(swiftType)(\(inner))"
       }
     }
   }
