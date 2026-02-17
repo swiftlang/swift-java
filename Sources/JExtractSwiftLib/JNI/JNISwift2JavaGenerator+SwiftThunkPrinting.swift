@@ -271,7 +271,6 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    printToStringMethods(&printer, type)
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
@@ -284,49 +283,6 @@ extension JNISwift2JavaGenerator {
     }
 
     try printSwiftInterfaceWrapper(&printer, protocolWrapper)
-  }
-
-  private func printToStringMethods(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    let parentName = type.qualifiedName
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$toString",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .javaLangString
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        return String(describing: \(selfVar).pointee).getJNIValue(in: environment)
-        """
-      )
-    }
-
-    printer.println()
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$toDebugString",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .javaLangString
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)
-        """
-      )
-    }
   }
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
@@ -657,6 +613,10 @@ extension JNISwift2JavaGenerator {
 
       let parameters = argumentsWithoutNewValue.joined(separator: ", ")
       result = "\(callee)[\(parameters)] = \(newValueArgument)"
+    case .toString:
+      result = "String(describing: \(callee))"
+    case .toDebugString:
+      result = "String(reflecting: \(callee))"
     }
 
     // Lower the result.

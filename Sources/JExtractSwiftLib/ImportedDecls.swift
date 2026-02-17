@@ -25,6 +25,8 @@ package enum SwiftAPIKind {
   case enumCase
   case subscriptGetter
   case subscriptSetter
+  case toString
+  case toDebugString
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -182,7 +184,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
       case .getter: "getter:"
       case .setter: "setter:"
       case .enumCase: "case:"
-      case .function, .initializer: ""
+      case .function, .initializer, .toString, .toDebugString: ""
       case .subscriptGetter: "subscriptGetter:"
       case .subscriptSetter: "subscriptSetter:"
       }

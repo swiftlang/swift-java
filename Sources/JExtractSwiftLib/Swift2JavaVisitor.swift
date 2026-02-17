@@ -85,6 +85,8 @@ final class Swift2JavaVisitor {
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
+
+    self.synthesizeToStringMethods(in: importedNominalType)
   }
 
   func visit(
@@ -403,6 +405,46 @@ final class Swift2JavaVisitor {
         let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
+    }
+  }
+
+  private func synthesizeToStringMethods(in imported: ImportedNominalType) {
+    switch imported.swiftNominal.kind {
+    case .actor, .class, .enum, .struct:
+      break
+    case .protocol:
+      return
+    }
+
+    let knownTypes = SwiftKnownTypes(symbolTable: translator.symbolTable)
+    let toStringFunctionSignature = SwiftFunctionSignature(
+      selfParameter: .instance(SwiftParameter(convention: .byValue, type: imported.swiftType)),
+      parameters: [],
+      result: SwiftResult(convention: .direct, type: knownTypes.string),
+      effectSpecifiers: [],
+      genericParameters: [],
+      genericRequirements: []
+    )
+
+    func makeToStringFunc(name: String, kind: SwiftAPIKind) -> ImportedFunc {
+      return ImportedFunc(
+        module: translator.swiftModuleName,
+        swiftDecl: DeclSyntax("func \(raw: name)() -> String"),
+        name: name,
+        apiKind: kind,
+        functionSignature: toStringFunctionSignature
+      )
+    }
+
+    if !imported.methods.contains(where: {
+      $0.name == "toString" && $0.functionSignature == toStringFunctionSignature
+    }) {
+      imported.methods.append(makeToStringFunc(name: "toString", kind: .toString))
+    }
+    if !imported.methods.contains(where: {
+      $0.name == "toDebugString" && $0.functionSignature == toStringFunctionSignature
+    }) {
+      imported.methods.append(makeToStringFunc(name: "toDebugString", kind: .toDebugString))
     }
   }
 }

@@ -1016,6 +1016,10 @@ extension LoweredFunctionSignature {
 
       let parameters = argumentsWithoutNewValue.map { $0.description }.joined(separator: ", ")
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"
+    case .toString:
+      resultExpr = "String(describing: \(callee))"
+    case .toDebugString:
+      resultExpr = "String(reflecting: \(callee))"
     }
 
     // Lower the result.
