@@ -36,7 +36,7 @@ struct JNIToStringTests {
           return MyType.$toString(this.$memoryAddress());
         }
         private static native java.lang.String $toString(long self);
-        """,
+        """
       ]
     )
   }

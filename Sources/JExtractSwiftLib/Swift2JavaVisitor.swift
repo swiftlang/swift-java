@@ -427,7 +427,7 @@ final class Swift2JavaVisitor {
     )
 
     func makeToStringFunc(name: String, kind: SwiftAPIKind) -> ImportedFunc {
-      return ImportedFunc(
+      ImportedFunc(
         module: translator.swiftModuleName,
         swiftDecl: DeclSyntax("func \(raw: name)() -> String"),
         name: name,
