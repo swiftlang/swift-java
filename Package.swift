@@ -258,8 +258,20 @@ let package = Package(
       type: .dynamic,
       targets: ["ExampleSwiftLibrary"]
     ),
-
   ],
+  traits: [
+    // guards dependencies pulled by the swift-java tool (source generator)
+    .trait(name: "_SwiftJavaToolDependencyGuardTrait", enabledTraits: []), 
+
+    // guards dependencies pulled by the SwiftJava target to support `@Java...` macros 
+    .trait(name: "_SwiftJavaMacrosDependencyGuardTrait", enabledTraits: []), 
+
+    .default(enabledTraits: [
+      "_SwiftJavaToolDependencyGuardTrait",
+      "_SwiftJavaMacrosDependencyGuardTrait",
+    ])
+  ],
+
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
@@ -284,8 +296,16 @@ let package = Package(
     .macro(
       name: "SwiftJavaMacros",
       dependencies: [
-        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+        .product(
+          name: "SwiftSyntaxMacros", 
+          package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaMacrosDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftCompilerPlugin", 
+          package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaMacrosDependencyGuardTrait"])
+        ),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
@@ -462,11 +482,26 @@ let package = Package(
     .target(
       name: "SwiftJavaToolLib",
       dependencies: [
-        .product(name: "Logging", package: "swift-log"),
-        .product(name: "OrderedCollections", package: "swift-collections"),
-        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
-        .product(name: "SwiftSyntax", package: "swift-syntax"),
-        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+        .product(
+          name: "Logging", package: "swift-log",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "OrderedCollections", package: "swift-collections",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftBasicFormat", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntax", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntaxBuilder", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
         "SwiftJava",
         "JavaUtilJar",
         "JavaLangReflect",
@@ -486,11 +521,26 @@ let package = Package(
     .executableTarget(
       name: "SwiftJavaTool",
       dependencies: [
-        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
-        .product(name: "SwiftSyntax", package: "swift-syntax"),
-        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "SystemPackage", package: "swift-system"),
+        .product(
+          name: "SwiftBasicFormat", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntax", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntaxBuilder", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "ArgumentParser", package: "swift-argument-parser",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SystemPackage", package: "swift-system",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
         "SwiftJava",
         "JavaUtilJar",
         "JavaNet",
@@ -514,12 +564,26 @@ let package = Package(
     .target(
       name: "JExtractSwiftLib",
       dependencies: [
-        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
-        .product(name: "SwiftLexicalLookup", package: "swift-syntax"),
-        .product(name: "SwiftSyntax", package: "swift-syntax"),
-        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "OrderedCollections", package: "swift-collections"),
+        .product(
+          name: "SwiftBasicFormat", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftLexicalLookup", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntax", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "SwiftSyntaxBuilder", package: "swift-syntax",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"])
+        ),
+        .product(
+          name: "ArgumentParser", package: "swift-argument-parser",
+          condition: .when(traits: ["_SwiftJavaToolDependencyGuardTrait"]),
+        ),
         "JavaTypes",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
