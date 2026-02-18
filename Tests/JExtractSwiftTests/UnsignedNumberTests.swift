@@ -357,8 +357,22 @@ final class UnsignedNumberTests {
           """,
           """
           @Unsigned
-          public static long unsignedLong(@Unsigned long first, @Unsigned long second) {
-            return swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+          public static long unsignedLong(@Unsigned long first, @Unsigned long second) throws SwiftIntegerOverflowException {
+            if (SwiftValueLayout.has32bitSwiftInt) {
+              if (first < 0 || first > 0xFFFFFFFFL) {
+                throw new SwiftIntegerOverflowException("Parameter 'first' overflow: " + first);
+              }
+              if (second < 0 || second > 0xFFFFFFFFL) {
+                throw new SwiftIntegerOverflowException("Parameter 'second' overflow: " + second);
+              }
+            }
+            long _result$checked = swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+            if (SwiftValueLayout.has32bitSwiftInt) {
+              if (_result$checked < 0 || _result$checked > 0xFFFFFFFFL) {
+                throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+              }
+            }
+            return _result$checked;
           }
           """,
         ]

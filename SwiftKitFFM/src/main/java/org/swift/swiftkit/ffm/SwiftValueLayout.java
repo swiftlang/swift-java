@@ -69,4 +69,6 @@ public class SwiftValueLayout {
      * Java does not have unsigned integer types, so we use the layout for Swift's {@code Int}.
      */
     public static ValueLayout SWIFT_UINT = SWIFT_INT;
+
+    public static final boolean has32bitSwiftInt = (SWIFT_INT == ValueLayout.JAVA_INT);
 }

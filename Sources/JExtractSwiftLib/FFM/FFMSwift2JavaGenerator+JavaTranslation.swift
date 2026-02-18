@@ -49,6 +49,15 @@ extension FFMSwift2JavaGenerator {
     /// Describes how to convert the Java parameter to the lowered arguments for
     /// the foreign function.
     var conversion: JavaConversionStep
+
+    /// Whether this parameter requires 32-bit integer overflow checking
+    var needs32BitIntOverflowCheck: OverflowCheckType = .none
+  }
+
+  enum OverflowCheckType {
+    case none
+    case signedInt    // Int: -2147483648 to 2147483647
+    case unsignedInt  // UInt: 0 to 4294967295
   }
 
   /// Represent a Swift API result translated to Java.
@@ -87,6 +96,9 @@ extension FFMSwift2JavaGenerator {
     /// Describes how to construct the Java result from the foreign function return
     /// value and/or the out parameters.
     var conversion: JavaConversionStep
+
+    /// Whether this result requires 32-bit integer overflow checking
+    var needs32BitIntOverflowCheck: OverflowCheckType = .none
   }
 
   /// Translated Java API representing a Swift API.
@@ -341,6 +353,14 @@ extension FFMSwift2JavaGenerator {
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
         let javaType = cType.javaType
+        let overflowCheck: OverflowCheckType
+        if case .integral(.ptrdiff_t) = cType {
+          overflowCheck = .signedInt
+        } else if case .integral(.size_t) = cType {
+          overflowCheck = .unsignedInt
+        } else {
+          overflowCheck = .none
+        }
         return TranslatedParameter(
           javaParameters: [
             JavaParameter(
@@ -349,7 +369,8 @@ extension FFMSwift2JavaGenerator {
               annotations: parameterAnnotations
             )
           ],
-          conversion: .placeholder
+          conversion: .placeholder,
+          needs32BitIntOverflowCheck: overflowCheck
         )
       }
 
@@ -613,11 +634,20 @@ extension FFMSwift2JavaGenerator {
       // be expressed as a Java primitive type.
       if let cType = try? CType(cdeclType: swiftType) {
         let javaType = cType.javaType
+        let overflowCheck: OverflowCheckType
+        if case .integral(.ptrdiff_t) = cType {
+          overflowCheck = .signedInt
+        } else if case .integral(.size_t) = cType {
+          overflowCheck = .unsignedInt
+        } else {
+          overflowCheck = .none
+        }
         return TranslatedResult(
           javaResultType: javaType,
           annotations: resultAnnotations,
           outParameters: [],
-          conversion: .placeholder
+          conversion: .placeholder,
+          needs32BitIntOverflowCheck: overflowCheck
         )
       }
 
