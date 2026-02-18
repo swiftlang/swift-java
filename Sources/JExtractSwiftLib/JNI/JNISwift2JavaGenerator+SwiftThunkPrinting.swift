@@ -246,6 +246,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    if type.swiftNominal.isGeneric {
+      printOpenerProtocol(&printer, type)
+      printer.println()
+    }
+
     for initializer in type.initializers {
       printSwiftFunctionThunk(&printer, initializer)
       printer.println()
@@ -295,17 +300,25 @@ extension JNISwift2JavaGenerator {
       javaMethodName: "$toString",
       parentName: type.swiftNominal.qualifiedName,
       parameters: [
-        selfPointerParam
+        selfPointerParam,
+        JavaParameter(name: "selfType", type: .long)
       ],
       resultType: .javaLangString
     ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        return String(describing: \(selfVar).pointee).getJNIValue(in: environment)
-        """
-      )
+      if type.swiftNominal.isGeneric {
+        printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
+        printer.printBraceBlock(
+          "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
+        ) { printer in
+          printer.print("fatalError(\"selfType memory address was null\")")
+        }
+        printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
+        printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
+        printer.print("return openerType._toString(selfBits$: selfBits$).getJNIValue(in: environment)")
+      } else {
+        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+        printer.print("return String(describing: \(selfVar).pointee).getJNIValue(in: environment)")
+      }
     }
 
     printer.println()
@@ -315,17 +328,25 @@ extension JNISwift2JavaGenerator {
       javaMethodName: "$toDebugString",
       parentName: type.swiftNominal.qualifiedName,
       parameters: [
-        selfPointerParam
+        selfPointerParam,
+        JavaParameter(name: "selfType", type: .long)
       ],
       resultType: .javaLangString
     ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)
-        """
-      )
+      if type.swiftNominal.isGeneric {
+        printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
+        printer.printBraceBlock(
+          "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
+        ) { printer in
+          printer.print("fatalError(\"selfType memory address was null\")")
+        }
+        printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
+        printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
+        printer.print("return openerType._toDebugString(selfBits$: selfBits$).getJNIValue(in: environment)")
+      } else {
+        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+        printer.print("return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)")
+      }
     }
   }
 
@@ -445,7 +466,11 @@ extension JNISwift2JavaGenerator {
       &printer,
       translatedDecl
     ) { printer in
-      self.printFunctionDowncall(&printer, decl)
+      if let parent = decl.parentType?.asNominalType, parent.nominalTypeDecl.isGeneric {
+        self.printFunctionOpenerCall(&printer, decl)
+      } else {
+        self.printFunctionDowncall(&printer, decl)
+      }
     }
   }
 
@@ -712,7 +737,9 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = nativeSignature.selfParameter {
       parameters += selfParameter.parameters
     }
-
+    if let selfTypeParameter = nativeSignature.selfTypeParameter {
+      parameters += selfTypeParameter.parameters
+    }
     parameters += nativeSignature.result.outParameters
 
     printCDecl(
@@ -886,6 +913,135 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  private func printFunctionOpenerCall(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+    guard let translatedDecl = self.translatedDecl(for: decl) else {
+      fatalError("Cannot print function opener for a function that can't be translated: \(decl)")
+    }
+    guard let parentNominalType = decl.parentType?.asNominalType else {
+      fatalError("Only functions with nominal type parents can have openers")
+    }
+    let nativeSignature = translatedDecl.nativeFunctionSignature
+
+    let selfTypePointer = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
+    let openerName = openerProtocolName(for: parentNominalType.nominalTypeDecl)
+    printer.print("let openerType = \(selfTypePointer) as! (any \(openerName).Type)")
+
+    var parameters = nativeSignature.parameters.flatMap(\.parameters)
+    if let selfParameter = nativeSignature.selfParameter {
+      parameters += selfParameter.parameters
+    }
+    parameters += nativeSignature.result.outParameters
+
+    let openerArguments =
+    [
+      "environment: environment",
+      "thisClass: thisClass",
+    ] + parameters.map { javaParameter in
+      "\(javaParameter.name): \(javaParameter.name)"
+    }
+    let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: ", ")))"
+
+    if !decl.functionSignature.result.type.isVoid {
+      printer.print("return \(call)")
+    } else {
+      printer.print(call)
+    }
+  }
+
+  private func openerProtocolName(for type: SwiftNominalTypeDeclaration) -> String {
+    "_\(swiftModuleName)_\(type.name)_opener"
+  }
+
+  private func printOpenerProtocol(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let protocolName = openerProtocolName(for: type.swiftNominal)
+
+    func printFunctionDecl(_ printer: inout CodePrinter, decl: ImportedFunc, skipMethodBody: Bool) {
+      guard let translatedDecl = self.translatedDecl(for: decl) else { return }
+      let nativeSignature = translatedDecl.nativeFunctionSignature
+
+      var parameters = nativeSignature.parameters.flatMap(\.parameters)
+      if let selfParameter = nativeSignature.selfParameter {
+        parameters += selfParameter.parameters
+      }
+      parameters += nativeSignature.result.outParameters
+
+      let resultType = nativeSignature.result.javaType
+
+      let translatedParameters = parameters.map {
+        "\($0.name): \($0.type.jniTypeName)"
+      }
+      
+      let thunkParameters =
+      [
+        "environment: UnsafeMutablePointer<JNIEnv?>!",
+        "thisClass: jclass",
+      ] + translatedParameters
+      let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
+
+      let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: ", ")))\#(thunkReturnType)"#
+      if !skipMethodBody {
+        printer.printBraceBlock(signature) { printer in
+          printFunctionDowncall(&printer, decl)
+        }
+      } else {
+        printer.print(signature)
+      }
+    }
+
+    printer.printBraceBlock("protocol \(protocolName)") { printer in
+      for variable in type.variables {
+        if variable.isStatic {
+          logger.debug("Skipping \(variable.name), static variables in generic type is not yet supported.")
+          continue
+        }
+        printFunctionDecl(&printer, decl: variable, skipMethodBody: true)
+      }
+
+      for method in type.methods {
+        if method.isStatic {
+          logger.debug("Skipping \(method.name), static methods in generic type is not yet supported.")
+          continue
+        }
+        printFunctionDecl(&printer, decl: method, skipMethodBody: true)
+      }
+
+      printer.print("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
+      printer.print("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
+    }
+    printer.println()
+    printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
+      for variable in type.variables {
+        if variable.isStatic { continue }
+        printFunctionDecl(&printer, decl: variable, skipMethodBody: false)
+      }
+
+      for method in type.methods {
+        if method.isStatic { continue }
+        printFunctionDecl(&printer, decl: method, skipMethodBody: false)
+      }
+
+      printer.printBraceBlock("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> String") { printer in
+        printer.print(#"assert(self != 0, "self memory address was null")"#)
+        printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
+        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
+        printer.printBraceBlock("guard let self$ else") { printer in
+          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
+        }
+        printer.print("return String(describing: self$.pointee)")
+      }
+
+      printer.printBraceBlock("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> String") { printer in
+        printer.print(#"assert(self != 0, "self memory address was null")"#)
+        printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
+        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
+        printer.printBraceBlock("guard let self$ else") { printer in
+          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
+        }
+        printer.print("return String(reflecting: self$.pointee)")
+      }
+    }
+  }
+
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`
   ///
   /// - Returns: name of the created "self" variable
@@ -949,5 +1105,16 @@ extension SwiftNominalTypeDeclaration {
     }
 
     return "Java\(self.name)"
+  }
+}
+
+extension ImportedFunc {
+  fileprivate var openerMethodName: String {
+    let prefix = switch apiKind {
+    case .getter: "_get_"
+    case .setter: "_set_"
+    default: "_"
+    }
+    return "\(prefix)\(name)"
   }
 }

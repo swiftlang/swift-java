@@ -62,7 +62,7 @@ extension JNISwift2JavaGenerator {
         }
 
       func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> NativeParameter? {
-        if !decl.genericParameters.isEmpty {
+        if decl.isGeneric {
           return NativeParameter(
             parameters: [
               JavaParameter(name: "selfType", type: .long)
@@ -1047,7 +1047,12 @@ extension JNISwift2JavaGenerator {
         } else {
           printer.print("let \(inner)Bits$ = Int(\(inner))")
         }
-        printer.print("let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)")
+        let typeName = if swiftType.asNominalTypeDeclaration?.isGeneric == true {
+          "Self"
+        } else {
+          swiftType.description
+        }
+        printer.print("let \(pointerName) = UnsafeMutablePointer<\(typeName)>(bitPattern: \(inner)Bits$)")
         if !allowNil {
           printer.print(
             """
@@ -1061,12 +1066,11 @@ extension JNISwift2JavaGenerator {
 
       case .genericMetadataPointer(let inner):
         let inner = inner.render(&printer, placeholder)
-        let bitsName = "\(inner)Bits$"
-        let pointerName = "\(inner)Pointer$"
+        let pointerName = "\(inner)$"
         printer.print(
           """
-          let \(bitsName) = Int(Int64(fromJNI: \(inner), in: environment))
-          guard let \(pointerName) = UnsafeRawPointer(bitPattern: \(bitsName)) else {
+          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
+          guard let \(pointerName) = UnsafeRawPointer(bitPattern: \(inner)Bits$) else {
             fatalError("\(inner) metadata address was null")
           }
           """

@@ -17,5 +17,28 @@ public struct MyID<T> {
   public init(_ rawValue: T) {
     self.rawValue = rawValue  
   }
+  public var description: String {
+    "\(rawValue)"
+  }
 }
 
+public func makeIntID(_ value: Int) -> MyID<Int> {
+  return MyID(value)
+}
+
+public func makeStringID(_ value: String) -> MyID<String> {
+  return MyID(value)
+}
+
+public struct MyEntity {
+  public var id: MyID<Int>
+  public var name: String
+  public init(id: MyID<Int>, name: String) {
+    self.id = id
+    self.name = name
+  }
+}
+
+public func takeMyEntity() -> MyEntity {
+  return MyEntity(id: MyID(42), name: "Example")
+}

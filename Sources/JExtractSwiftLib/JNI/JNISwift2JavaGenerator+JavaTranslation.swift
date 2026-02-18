@@ -324,7 +324,7 @@ extension JNISwift2JavaGenerator {
       )
 
       func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> TranslatedParameter? {
-        if !decl.genericParameters.isEmpty {
+        if decl.isGeneric {
           return TranslatedParameter(
             parameter: JavaParameter(name: "selfType", type: .long),
             conversion: .typeMetadataAddress(.placeholder)

@@ -202,7 +202,7 @@ extension JNISwift2JavaGenerator {
         """
       )
       var swiftPointerParams = ["selfPointer"]
-      if !decl.genericParameters.isEmpty {
+      if decl.swiftNominal.isGeneric {
         swiftPointerParams.append("selfTypePointer")
       }
       let swiftPointerArg = swiftPointerParams.map { "long \($0)" }.joined(separator: ", ")
@@ -264,7 +264,7 @@ extension JNISwift2JavaGenerator {
         """
       )
 
-      if !decl.genericParameters.isEmpty {
+      if decl.swiftNominal.isGeneric {
         printer.print("/** Pointer to the metatype of Self */")
         printer.print("private final long selfTypePointer;")
       }
@@ -321,7 +321,7 @@ extension JNISwift2JavaGenerator {
   private func printToStringMethods(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     var arguments = ["selfPointer"]
     var parameters = ["this.$memoryAddress()"]
-    if !decl.genericParameters.isEmpty {
+    if decl.swiftNominal.isGeneric {
       arguments.append("selfType")
       parameters.append("this.$typeMetadataAddress()")
     }
@@ -724,7 +724,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    if !type.genericParameters.isEmpty {
+    if type.swiftNominal.isGeneric {
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
         printer.print("return this.selfTypePointer;")

@@ -162,6 +162,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
       return false
     }
   }
+
+  var isGeneric: Bool {
+    return !genericParameters.isEmpty
+  }
 }
 
 package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
