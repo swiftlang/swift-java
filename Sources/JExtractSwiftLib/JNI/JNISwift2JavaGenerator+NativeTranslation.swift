@@ -23,6 +23,7 @@ extension JNISwift2JavaGenerator {
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let logger: Logger
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -385,6 +386,7 @@ extension JNISwift2JavaGenerator {
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue
             else {
+              self.logger.debug("Known type \(knownType) is not supported for optional parameters, skipping.")
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
 
@@ -462,6 +464,7 @@ extension JNISwift2JavaGenerator {
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue
             else {
+              self.logger.debug("Known type \(knownType) is not supported for optional results, skipping.")
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
 

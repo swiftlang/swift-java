@@ -23,7 +23,8 @@ extension JNISwift2JavaGenerator {
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-      protocolWrappers: self.interfaceProtocolWrappers
+      protocolWrappers: self.interfaceProtocolWrappers,
+      logger: self.logger
     )
   }
 
@@ -61,7 +62,8 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-        protocolWrappers: self.interfaceProtocolWrappers
+        protocolWrappers: self.interfaceProtocolWrappers,
+        logger: self.logger
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -80,6 +82,7 @@ extension JNISwift2JavaGenerator {
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let logger: Logger
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
@@ -87,7 +90,8 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers
+        protocolWrappers: self.protocolWrappers,
+        logger: self.logger
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -197,7 +201,8 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers
+        protocolWrappers: self.protocolWrappers,
+        logger: self.logger
       )
 
       // Types with no parent will be outputted inside a "module" class.
