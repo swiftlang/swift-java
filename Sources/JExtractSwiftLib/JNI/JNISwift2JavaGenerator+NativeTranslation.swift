@@ -372,25 +372,36 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-            javaType.implementsJavaValue
-          else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
-          return NativeParameter(
-            parameters: [
-              JavaParameter(name: discriminatorName, type: .byte),
-              JavaParameter(name: valueName, type: javaType),
-            ],
-            conversion: .optionalLowering(
-              .initFromJNI(.placeholder, swiftType: swiftType),
-              discriminatorName: discriminatorName,
-              valueName: valueName
-            ),
-            indirectConversion: nil,
-            conversionCheck: nil
-          )
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
+
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                  javaType.implementsJavaValue
+            else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: discriminatorName, type: .byte),
+                JavaParameter(name: valueName, type: javaType),
+              ],
+              conversion: .optionalLowering(
+                .initFromJNI(.placeholder, swiftType: swiftType),
+                discriminatorName: discriminatorName,
+                valueName: valueName
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+          }
         }
 
         if nominalType.isSwiftJavaWrapper {
@@ -438,46 +449,57 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-            javaType.implementsJavaValue
-          else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
-
-          // Check if we can fit the value and a discriminator byte in a primitive.
-          // so the return JNI value will be (value, discriminator)
-          if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
-            return NativeResult(
-              javaType: nextIntergralTypeWithSpaceForByte.javaType,
-              conversion: .getJNIValue(
-                .optionalRaisingWidenIntegerType(
-                  .placeholder,
-                  resultName: resultName,
-                  valueType: javaType,
-                  combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
-                  valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
-                )
-              ),
-              outParameters: []
-            )
-          } else {
-            // Use indirect byte array to store discriminator
-
-            return NativeResult(
-              javaType: javaType,
-              conversion: .optionalRaisingIndirectReturn(
-                .getJNIValue(.placeholder),
-                returnType: javaType,
-                discriminatorParameterName: discriminatorName,
-                placeholderValue: .member(
-                  .constant("\(swiftType)"),
-                  member: "jniPlaceholderValue"
-                )
-              ),
-              outParameters: [
-                JavaParameter(name: discriminatorName, type: .array(.byte))
-              ]
-            )
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
+            
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
+            
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+                  javaType.implementsJavaValue
+            else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            
+            // Check if we can fit the value and a discriminator byte in a primitive.
+            // so the return JNI value will be (value, discriminator)
+            if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
+              return NativeResult(
+                javaType: nextIntergralTypeWithSpaceForByte.javaType,
+                conversion: .getJNIValue(
+                  .optionalRaisingWidenIntegerType(
+                    .placeholder,
+                    resultName: resultName,
+                    valueType: javaType,
+                    combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
+                    valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
+                  )
+                ),
+                outParameters: []
+              )
+            } else {
+              // Use indirect byte array to store discriminator
+              
+              return NativeResult(
+                javaType: javaType,
+                conversion: .optionalRaisingIndirectReturn(
+                  .getJNIValue(.placeholder),
+                  returnType: javaType,
+                  discriminatorParameterName: discriminatorName,
+                  placeholderValue: .member(
+                    .constant("\(swiftType)"),
+                    member: "jniPlaceholderValue"
+                  )
+                ),
+                outParameters: [
+                  JavaParameter(name: discriminatorName, type: .array(.byte))
+                ]
+              )
+            }
           }
         }
 
