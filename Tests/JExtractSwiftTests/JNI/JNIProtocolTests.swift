@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaConfigurationShared
 import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
@@ -25,28 +25,29 @@ struct JNIProtocolTests {
   }
 
   let source = """
-    public protocol SomeProtocol {
-      public func method() {}
-      public func withObject(c: SomeClass) -> SomeClass {}
-    }
+      public protocol SomeProtocol {
+        public func method() {}
+        public func withObject(c: SomeClass) -> SomeClass {}
+      }
 
-    public protocol B {}
+      public protocol B {}
 
-    public class SomeClass: SomeProtocol {
-      public func makeClass() -> SomeClass {}
-    }
+      public class SomeClass: SomeProtocol {
+        public func makeClass() -> SomeClass {}
+      }
 
-    public func takeProtocol(x: some SomeProtocol, y: any SomeProtocol)
-    public func takeGeneric<S: SomeProtocol>(s: S)
-    public func takeComposite(x: any SomeProtocol & B)
-  """
+      public func takeProtocol(x: some SomeProtocol, y: any SomeProtocol)
+      public func takeGeneric<S: SomeProtocol>(s: S)
+      public func takeComposite(x: any SomeProtocol & B)
+    """
 
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -66,8 +67,9 @@ struct JNIProtocolTests {
           public SomeClass withObject(SomeClass c, SwiftArena swiftArena$);
           ...
         }
-        """
-      ])
+        """,
+      ]
+    )
   }
 
   @Test
@@ -75,7 +77,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -84,8 +87,9 @@ struct JNIProtocolTests {
           public SomeClass makeClass(SwiftArena swiftArena$) {
           ...
         }
-        """,
-      ])
+        """
+      ]
+    )
   }
 
   @Test
@@ -93,7 +97,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -103,8 +108,9 @@ struct JNIProtocolTests {
         """,
         """
         private static native void $takeProtocol(java.lang.Object x, java.lang.Object y);
-        """
-      ])
+        """,
+      ]
+    )
   }
 
   @Test
@@ -112,7 +118,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -156,7 +163,7 @@ struct JNIProtocolTests {
           }
           SwiftModule.takeProtocol(x: xswiftObject$, y: yswiftObject$)
         }
-        """
+        """,
       ]
     )
   }
@@ -166,7 +173,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -176,8 +184,9 @@ struct JNIProtocolTests {
         """,
         """
         private static native void $takeGeneric(java.lang.Object s);
-        """
-      ])
+        """,
+      ]
+    )
   }
 
   @Test
@@ -185,7 +194,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -209,7 +219,7 @@ struct JNIProtocolTests {
           }
           SwiftModule.takeGeneric(s: sswiftObject$)
         }
-        """
+        """,
       ]
     )
   }
@@ -219,7 +229,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -229,8 +240,9 @@ struct JNIProtocolTests {
         """,
         """
         private static native void $takeComposite(java.lang.Object x);
-        """
-      ])
+        """,
+      ]
+    )
   }
 
   @Test
@@ -238,7 +250,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -280,7 +293,7 @@ struct JNIProtocolTests {
           }
           SwiftModule.takeComposite(x: xswiftObject$)
         }
-        """
+        """,
       ]
     )
   }
@@ -290,7 +303,8 @@ struct JNIProtocolTests {
     try assertOutput(
       input: source,
       config: config,
-      .jni, .swift,
+      .jni,
+      .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -324,7 +338,7 @@ struct JNIProtocolTests {
         """
         extension SwiftJavaBWrapper {
         }
-        """
+        """,
       ]
     )
   }

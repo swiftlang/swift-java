@@ -16,6 +16,6 @@ extension JavaClass<Exception> {
   /// Determine whether this instance is a checked exception (which must be
   /// handled) vs. an unchecked exception (which is not handled).
   public var isCheckedException: Bool {
-    return !self.is(RuntimeException.self)
+    !self.is(RuntimeException.self)
   }
 }

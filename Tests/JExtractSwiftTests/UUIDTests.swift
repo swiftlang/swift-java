@@ -46,27 +46,35 @@ struct UUIDTests {
       )
     ]
   )
-  func func_accept_uuid(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+  func func_accept_uuid(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
     let text =
       """
       import Foundation
-      
+
       public func acceptUUID(uuid: UUID)
       """
 
     try assertOutput(
-      input: text, 
-      mode, .java,
+      input: text,
+      mode,
+      .java,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedJavaChunks)
-      
-      try assertOutput(
-      input: text, 
-      mode, .swift,
+      expectedChunks: expectedJavaChunks
+    )
+
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedSwiftChunks)
-  }  
-  
+      expectedChunks: expectedSwiftChunks
+    )
+  }
+
   @Test(
     "Import: return UUID",
     arguments: [
@@ -92,24 +100,31 @@ struct UUIDTests {
       )
     ]
   )
-  func func_return_UUID(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
+  func func_return_UUID(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
     let text =
       """
       import Foundation
       public func returnUUID() -> UUID
       """
-    
+
     try assertOutput(
-      input: text, 
-      mode, .java,
+      input: text,
+      mode,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: expectedJavaChunks
     )
 
-      try assertOutput(
-      input: text, 
-      mode, .swift,
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedSwiftChunks)
+      expectedChunks: expectedSwiftChunks
+    )
   }
 }

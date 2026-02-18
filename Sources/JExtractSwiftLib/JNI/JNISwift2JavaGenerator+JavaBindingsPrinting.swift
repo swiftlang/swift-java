@@ -20,14 +20,14 @@ import OrderedCollections
 
 extension JNISwift2JavaGenerator {
   /// Default set Java imports for every generated file
-  static let defaultJavaImports: Array<String> = [
+  static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
     "java.util.*",
     "java.util.concurrent.atomic.AtomicBoolean",
 
     // NonNull, Unsigned and friends
-    "org.swift.swiftkit.core.annotations.*"
+    "org.swift.swiftkit.core.annotations.*",
   ]
 }
 
@@ -86,8 +86,6 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-
-
   private func printModule(_ printer: inout CodePrinter) {
     printHeader(&printer)
     printPackage(&printer)
@@ -97,7 +95,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         static final String LIB_NAME = "\(swiftModuleName)";
-        
+
         static {
           System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
           System.loadLibrary(LIB_NAME);
@@ -173,7 +171,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         static final String LIB_NAME = "\(swiftModuleName)";
-        
+
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
         static boolean initializeLibs() {
@@ -221,7 +219,7 @@ extension JNISwift2JavaGenerator {
         public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
           return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
         }
-        
+
         public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer) {
           return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
@@ -232,14 +230,14 @@ extension JNISwift2JavaGenerator {
         """
         /** Pointer to the "self". */
         private final long selfPointer;
-        
+
         /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
         private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
-        
+
         public long $memoryAddress() {
           return this.selfPointer;
         }
-        
+
         @Override
         public AtomicBoolean $statusDestroyedFlag() {
           return $state$destroyed;
@@ -345,7 +343,9 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printNominal(
-    _ printer: inout CodePrinter, _ decl: ImportedNominalType, body: (inout CodePrinter) -> Void
+    _ printer: inout CodePrinter,
+    _ decl: ImportedNominalType,
+    body: (inout CodePrinter) -> Void
   ) {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
@@ -361,7 +361,9 @@ extension JNISwift2JavaGenerator {
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
-    printer.printBraceBlock("\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name) implements \(implementsClause)") { printer in
+    printer.printBraceBlock(
+      "\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name) implements \(implementsClause)"
+    ) { printer in
       body(&printer)
     }
   }
@@ -412,7 +414,9 @@ extension JNISwift2JavaGenerator {
             continue
           }
           let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
-          printer.print("case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();")
+          printer.print(
+            "case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
+          )
         }
       }
       printer.print(#"throw new RuntimeException("Unknown discriminator value " + discriminator);"#)
@@ -438,8 +442,11 @@ extension JNISwift2JavaGenerator {
       let caseName = enumCase.name.firstCharacterUppercased
 
       // Print record
-      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") { printer in
-        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap { value, conversion in
+      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") {
+        printer in
+        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap {
+          value,
+          conversion in
           ["\(conversion.native.javaType) \(value.parameter.name)"]
         }
 
@@ -499,12 +506,12 @@ extension JNISwift2JavaGenerator {
     let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
 
     printer.print(
-        """
-        @FunctionalInterface
-        public interface \(functionType.name) {
-          \(functionType.result.javaType) apply(\(apiParams.joined(separator: ", ")));
-        }
-        """
+      """
+      @FunctionalInterface
+      public interface \(functionType.name) {
+        \(functionType.result.javaType) apply(\(apiParams.joined(separator: ", ")));
+      }
+      """
     )
   }
 
@@ -535,14 +542,16 @@ extension JNISwift2JavaGenerator {
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
     let throwsClause = translatedDecl.throwsClause()
 
-    let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) { generics, parameter in
+    let generics = translatedDecl.translatedFunctionSignature.parameters.reduce(into: [(String, [JavaType])]()) {
+      generics,
+      parameter in
       guard case .generic(let name, let extends) = parameter.parameter.type else {
         return
       }
       generics.append((name, extends))
     }
-      .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
-      .joined(separator: ", ")
+    .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
+    .joined(separator: ", ")
 
     if !generics.isEmpty {
       modifiers.append("<" + generics + ">")
@@ -557,7 +566,8 @@ extension JNISwift2JavaGenerator {
     // If we have enabled javaCallbacks we must emit default
     // arena methods for protocols, as this is what
     // Swift will call into, when you call a interface from Swift.
-    let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena
+    let shouldGenerateGlobalArenaVariation =
+      config.effectiveMemoryManagementMode.requiresGlobalArena && translatedSignature.requiresSwiftArena
     let isParentProtocol = importedFunc?.parentType?.asNominalType?.isProtocol ?? false
 
     if shouldGenerateGlobalArenaVariation {
@@ -575,7 +585,9 @@ extension JNISwift2JavaGenerator {
         modifiers.insert("default", at: 1)
       }
 
-      printer.printBraceBlock("\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)") { printer in
+      printer.printBraceBlock(
+        "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
+      ) { printer in
         let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
@@ -598,7 +610,8 @@ extension JNISwift2JavaGenerator {
         in: &printer
       )
     }
-    let signature = "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
+    let signature =
+      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
     if skipMethodBody {
       printer.print("\(signature);")
     } else {
@@ -620,7 +633,7 @@ extension JNISwift2JavaGenerator {
     parameters += nativeSignature.result.outParameters
 
     let renderedParameters = parameters.map { javaParameter in
-        "\(javaParameter.type) \(javaParameter.name)"
+      "\(javaParameter.type) \(javaParameter.name)"
     }.joined(separator: ", ")
 
     printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
@@ -647,14 +660,17 @@ extension JNISwift2JavaGenerator {
 
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.resultType.outParameters {
-      printer.print("\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));")
+      printer.print(
+        "\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));"
+      )
       arguments.append(outParameter.name)
     }
 
     //=== Part 3: Downcall.
     // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
     // using the registry?
-    let downcall = "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+    let downcall =
+      "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.resultType.javaType.isVoid {

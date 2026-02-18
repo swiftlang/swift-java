@@ -15,8 +15,8 @@
 import Foundation
 import JavaTypes
 import SwiftBasicFormat
-import SwiftParser
 import SwiftJavaConfigurationShared
+import SwiftParser
 import SwiftSyntax
 
 /// Takes swift interfaces and translates them into Java used to access those.
@@ -50,7 +50,7 @@ public final class Swift2JavaTranslator {
   var lookupContext: SwiftTypeLookupContext! = nil
 
   var symbolTable: SwiftSymbolTable! {
-    return lookupContext?.symbolTable
+    lookupContext?.symbolTable
   }
 
   public init(
@@ -109,15 +109,27 @@ extension Swift2JavaTranslator {
     if let dataDecl = self.symbolTable[.foundationData] ?? self.symbolTable[.essentialsData] {
       let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
       if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
-        visitor.visit(nominalDecl: dataDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift")
-        visitor.visit(nominalDecl: dataProtocolDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift")
+        visitor.visit(
+          nominalDecl: dataDecl.syntax!.asNominal!,
+          in: nil,
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift"
+        )
+        visitor.visit(
+          nominalDecl: dataProtocolDecl.syntax!.asNominal!,
+          in: nil,
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift"
+        )
       }
     }
 
     // Foundation.Date
     if let dateDecl = self.symbolTable[.foundationDate] ?? self.symbolTable[.essentialsDate] {
       if self.isUsing(where: { $0 == dateDecl }) {
-        visitor.visit(nominalDecl: dateDecl.syntax!.asNominal!, in: nil, sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift")
+        visitor.visit(
+          nominalDecl: dateDecl.syntax!.asNominal!,
+          in: nil,
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift"
+        )
       }
     }
   }

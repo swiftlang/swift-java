@@ -36,7 +36,9 @@ final class VariableImportTests {
   @Test("Import: var counter: Int")
   func variable_int() throws {
     try assertOutput(
-      input: class_interfaceFile, .ffm, .java,
+      input: class_interfaceFile,
+      .ffm,
+      .java,
       swiftModuleName: "FakeModule",
       detectChunkByInitialLines: 8,
       expectedChunks: [

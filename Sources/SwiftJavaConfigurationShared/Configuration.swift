@@ -73,7 +73,7 @@ public struct Configuration: Codable {
   public var classpath: String? = nil
 
   public var classpathEntries: [String] {
-    return classpath?.split(separator: ":").map(String.init) ?? []
+    classpath?.split(separator: ":").map(String.init) ?? []
   }
 
   /// The Java classes that should be translated to Swift. The keys are
@@ -121,18 +121,20 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
     let container = try decoder.singleValueContainer()
     let string = try container.decode(String.self)
     let parts = string.split(separator: ":")
-    
+
     if parts.count == 1 && string.hasPrefix(":") {
       self.groupID = ""
       self.artifactID = ":" + String(parts.first!)
       self.version = ""
       return
     }
-    
+
     guard parts.count == 3 else {
-      throw JavaDependencyDescriptorError(message: "Illegal dependency, did not match: `groupID:artifactID:version`, parts: '\(parts)'")
+      throw JavaDependencyDescriptorError(
+        message: "Illegal dependency, did not match: `groupID:artifactID:version`, parts: '\(parts)'"
+      )
     }
-    
+
     self.groupID = String(parts[0])
     self.artifactID = String(parts[1])
     self.version = String(parts[2])
@@ -155,14 +157,14 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
   // Workaround since filePath is macOS 13
   let sourcePath =
-  if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
+    if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
   let configPath = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
-  
+
   return try readConfiguration(configPath: configPath, file: file, line: line)
 }
 
 /// Read a swift-java.config file at the specified path.
-/// 
+///
 /// Configuration is expected to be "JSON-with-comments".
 /// Specifically "//" comments are allowed and will be trimmed before passing the rest of the config into a standard JSON parser.
 public func readConfiguration(configPath: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
@@ -181,7 +183,12 @@ public func readConfiguration(configPath: URL, file: String = #fileID, line: UIn
   return try readConfiguration(string: configString, configPath: configPath)
 }
 
-public func readConfiguration(string: String, configPath: URL?, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
+public func readConfiguration(
+  string: String,
+  configPath: URL?,
+  file: String = #fileID,
+  line: UInt = #line
+) throws -> Configuration? {
   guard let configData = string.data(using: .utf8) else {
     return nil
   }
@@ -192,10 +199,13 @@ public func readConfiguration(string: String, configPath: URL?, file: String = #
     return try decoder.decode(Configuration.self, from: configData)
   } catch {
     throw ConfigurationError(
-      message: "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)", 
+      message:
+        "Failed to parse SwiftJava configuration at '\(configPath.map({ $0.absoluteURL.description }) ?? "<no-path>")'! \(#fileID):\(#line)",
       error: error,
       text: string,
-      file: file, line: line)
+      file: file,
+      line: line
+    )
   }
 }
 
@@ -241,7 +251,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
     print("[warning][swift-java] Failed to get enumerator for \(baseURL)")
     return []
   }
-  
+
   for case let fileURL as URL in enumerator {
     if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
       print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.path)")
@@ -309,7 +319,7 @@ public enum LogLevel: String, ExpressibleByStringLiteral, Codable, Hashable {
   case warning = "warning"
   case error = "error"
   case critical = "critical"
-  
+
   public init(stringLiteral value: String) {
     self = LogLevel(rawValue: value) ?? .info
   }

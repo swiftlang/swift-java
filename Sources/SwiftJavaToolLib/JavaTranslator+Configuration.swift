@@ -23,7 +23,7 @@ extension JavaTranslator {
     guard let classes = config.classes else {
       return
     }
-  
+
     for (javaClassName, swiftName) in classes {
       translatedClasses[javaClassName] = SwiftTypeName(module: swiftModule, name: swiftName)
     }

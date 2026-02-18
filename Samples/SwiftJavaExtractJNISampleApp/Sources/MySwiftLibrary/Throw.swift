@@ -15,5 +15,5 @@
 import SwiftJava
 
 public func throwString(input: String) throws -> String {
-  return input
+  input
 }

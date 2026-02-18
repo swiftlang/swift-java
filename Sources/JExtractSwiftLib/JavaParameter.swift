@@ -81,7 +81,7 @@ struct JavaParameter {
       return "\(type) \(name)"
     }
 
-    let annotationsStr = annotations.map({$0.render()}).joined(separator: "")
+    let annotationsStr = annotations.map({ $0.render() }).joined(separator: "")
     return "\(annotationsStr) \(type) \(name)"
   }
 }
@@ -93,8 +93,7 @@ struct OutCallback {
       precondition("\(newValue)".starts(with: "$"), "OutCallback class names should stat with $")
     }
   }
-  var members: [String
-  ]
+  var members: [String]
   var parameters: [JavaParameter]
   // FIXME: compute this instead
   var cFunc: CFunction

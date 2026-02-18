@@ -15,7 +15,7 @@
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
-import Foundation 
+import Foundation
 #endif
 
 extension UnsafeRawBufferPointer {
@@ -35,7 +35,7 @@ extension UnsafeRawBufferPointer {
     // Fast path, Since the memory layout of `jbyte`` and those is the same, we rebind the memory
     // rather than convert every element independently. This allows us to avoid another Swift array creation.
     self.withUnsafeBytes { buffer in
-      guard let baseAddress = buffer.baseAddress else { 
+      guard let baseAddress = buffer.baseAddress else {
         fatalError("Buffer had no base address?! \(self)")
       }
 

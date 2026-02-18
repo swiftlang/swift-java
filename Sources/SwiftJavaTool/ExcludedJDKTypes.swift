@@ -31,7 +31,7 @@ extension SwiftJava {
       }
     }
 
-    for exclude in commonOptions.filterExclude { 
+    for exclude in commonOptions.filterExclude {
       if javaCanonicalName.hasPrefix(exclude) {
         return false
       }

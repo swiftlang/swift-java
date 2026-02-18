@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import JavaMath
+import SwiftJava
 
 let jvm = try JavaVirtualMachine.shared()
 

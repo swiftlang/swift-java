@@ -32,7 +32,9 @@ extension CType {
 
         switch knownType {
         case .unsafePointer where nominalType.genericArguments?.count == 1:
-          self = .pointer(.qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0])))
+          self = .pointer(
+            .qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0]))
+          )
           return
         case .unsafeMutablePointer where nominalType.genericArguments?.count == 1:
           self = .pointer(try CType(cdeclType: nominalType.genericArguments![0]))
@@ -121,16 +123,18 @@ extension SwiftKnownTypeDeclKind {
     case .float: .floating(.float)
     case .double: .floating(.double)
     case .unsafeMutableRawPointer: .pointer(.void)
-    case .unsafeRawPointer: .pointer(
-      .qualified(const: true, volatile: false, type: .void)
-    )
-    case .array: 
+    case .unsafeRawPointer:
+      .pointer(
+        .qualified(const: true, volatile: false, type: .void)
+      )
+    case .array:
       .pointer(.qualified(const: false, volatile: false, type: .void))
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer, 
-      .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol, 
-      .essentialsData, .essentialsDataProtocol, .optional, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
-       nil
+    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol,
+      .essentialsData, .essentialsDataProtocol, .optional, .foundationDate, .essentialsDate, .foundationUUID,
+      .essentialsUUID:
+      nil
     }
   }
 }

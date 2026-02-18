@@ -13,11 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import OrderedCollections
+import SwiftJavaConfigurationShared
+import SwiftJavaShared
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftJavaShared
-import SwiftJavaConfigurationShared
-import OrderedCollections
 
 public struct SwiftToJava {
   let config: Configuration
@@ -38,7 +38,9 @@ public struct SwiftToJava {
     let log = translator.log
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
-      translator.log.warning("Configured java package is '', consider specifying concrete package for generated sources.")
+      translator.log.warning(
+        "Configured java package is '', consider specifying concrete package for generated sources."
+      )
     }
 
     guard let inputSwift = config.inputSwiftDirectory else {
@@ -60,7 +62,7 @@ public struct SwiftToJava {
       guard let data = fileManager.contents(atPath: file.path) else {
         continue
       }
-      guard let text = String(data:data, encoding: .utf8) else {
+      guard let text = String(data: data, encoding: .utf8) else {
         continue
       }
       translator.add(filePath: file.path, text: text)
@@ -110,10 +112,9 @@ public struct SwiftToJava {
 
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
-  
+
   func canExtract(from file: URL) -> Bool {
-    guard file.lastPathComponent.hasSuffix(".swift") || 
-          file.lastPathComponent.hasSuffix(".swiftinterface") else {
+    guard file.lastPathComponent.hasSuffix(".swift") || file.lastPathComponent.hasSuffix(".swiftinterface") else {
       return false
     }
     if file.lastPathComponent.hasSuffix("+SwiftJava.swift") {
@@ -142,13 +143,13 @@ public func collectAllFiles(suffix: String, in inputPaths: [URL], log: Logger) -
   let fileManager = FileManager.default
   var allFiles: OrderedSet<URL> = []
   allFiles.reserveCapacity(32) // rough guesstimate
-  
+
   let resourceKeys: [URLResourceKey] = [
     .isRegularFileKey,
     .isDirectoryKey,
-    .nameKey
+    .nameKey,
   ]
-  
+
   for path in inputPaths {
     do {
       try collectFilesFromPath(
@@ -163,8 +164,8 @@ public func collectAllFiles(suffix: String, in inputPaths: [URL], log: Logger) -
       log.trace("Failed to collect paths in: \(path), skipping.")
     }
   }
-  
-  return allFiles 
+
+  return allFiles
 }
 
 private func collectFilesFromPath(
@@ -178,24 +179,32 @@ private func collectFilesFromPath(
   guard fileManager.fileExists(atPath: path.path) else {
     return
   }
-  
+
   if path.isDirectory {
     let enumerator = fileManager.enumerator(
       at: path,
       includingPropertiesForKeys: resourceKeys,
       options: [.skipsHiddenFiles],
       errorHandler: { url, error in
-        return true
-      })
+        true
+      }
+    )
     guard let enumerator else {
       return
     }
-    
+
     for case let fileURL as URL in enumerator {
-      try? collectFilesFromPath(fileURL, suffix: suffix, fileManager: fileManager, resourceKeys: resourceKeys, into: &allFiles, log: log)
+      try? collectFilesFromPath(
+        fileURL,
+        suffix: suffix,
+        fileManager: fileManager,
+        resourceKeys: resourceKeys,
+        into: &allFiles,
+        log: log
+      )
     }
-  } 
-  
+  }
+
   guard path.isFileURL else {
     return
   }

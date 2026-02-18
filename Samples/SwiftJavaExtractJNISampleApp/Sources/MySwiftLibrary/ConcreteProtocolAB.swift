@@ -23,10 +23,10 @@ public class ConcreteProtocolAB: ProtocolA, ProtocolB {
   }
 
   public func name() -> String {
-    return "ConcreteProtocolAB"
+    "ConcreteProtocolAB"
   }
 
   public func makeClass() -> MySwiftClass {
-    return MySwiftClass(x: 10, y: 50)
+    MySwiftClass(x: 10, y: 50)
   }
 }

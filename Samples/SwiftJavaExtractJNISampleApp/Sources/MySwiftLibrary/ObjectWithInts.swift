@@ -22,6 +22,6 @@ public final class ObjectWithInts {
   }
 
   public func callMe(arg: UInt) -> UInt {
-    return arg
+    arg
   }
 }

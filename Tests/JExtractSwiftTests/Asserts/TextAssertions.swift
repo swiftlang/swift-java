@@ -13,8 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
-import Testing
 import SwiftJavaConfigurationShared
+import Testing
+
 import struct Foundation.CharacterSet
 
 enum RenderKind {
@@ -92,12 +93,12 @@ func assertOutput(
 
     var matchingOutputOffset: Int? = nil
     let expectedInitialMatchingLines = expectedLines[0..<min(expectedLines.count, detectChunkByInitialLines)]
-      .map({$0.trimmingCharacters(in: .whitespacesAndNewlines)})
+      .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })
       .joined(separator: "\n")
 
-    for lineOffset in 0..<gotLines.count where gotLines.count > (lineOffset+detectChunkByInitialLines) {
-      let textLinesAtOffset = gotLines[lineOffset..<lineOffset+detectChunkByInitialLines]
-        .map({$0.trimmingCharacters(in: .whitespacesAndNewlines)})
+    for lineOffset in 0..<gotLines.count where gotLines.count > (lineOffset + detectChunkByInitialLines) {
+      let textLinesAtOffset = gotLines[lineOffset..<lineOffset + detectChunkByInitialLines]
+        .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })
         .joined(separator: "\n")
       if textLinesAtOffset == expectedInitialMatchingLines {
         matchingOutputOffset = lineOffset
@@ -106,19 +107,27 @@ func assertOutput(
     }
 
     let sourceLocation = SourceLocation(
-      fileID: fileID, filePath: filePath, line: line, column: column)
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
 
     var diffLineNumbers: [Int] = []
     guard let matchingOutputOffset else {
       let outputContainsExpectedChunk = output.contains(expectedChunk)
-      #expect(outputContainsExpectedChunk, """
-      \("error: Output did not contain expected chunk!".red)
-      ==== Expected output -----------------------------------------------  
-      \(expectedChunk.yellow)
-      ==== Got output ----------------------------------------------------
-      \(output)
-      ==== ---------------------------------------------------------------
-      """, sourceLocation: sourceLocation)
+      #expect(
+        outputContainsExpectedChunk,
+        """
+        \("error: Output did not contain expected chunk!".red)
+        ==== Expected output -----------------------------------------------  
+        \(expectedChunk.yellow)
+        ==== Got output ----------------------------------------------------
+        \(output)
+        ==== ---------------------------------------------------------------
+        """,
+        sourceLocation: sourceLocation
+      )
       continue
     }
 
@@ -150,7 +159,10 @@ func assertOutput(
 
           if currentGotLine == gotLines.count {
             diffLineNumbers.append(currentExpectedLine + matchingOutputOffset + 1)
-            Issue.record("Expected to find '\(nextLine)' after wildcard, but end of file reached.", sourceLocation: sourceLocation)
+            Issue.record(
+              "Expected to find '\(nextLine)' after wildcard, but end of file reached.",
+              sourceLocation: sourceLocation
+            )
             break outer
           }
         }
@@ -183,7 +195,7 @@ func assertOutput(
 
         print("==== Expected output -----------------------------------------------")
         for (n, e) in expectedLines.enumerated() {
-          let isMismatch = diffLineNumbers.map({$0 - matchingOutputOffset}).contains(n)
+          let isMismatch = diffLineNumbers.map({ $0 - matchingOutputOffset }).contains(n)
           let marker = isMismatch ? " // <<<<<<<<<<< mismatch" : ""
           print("\(n): \(e)\(marker)".yellow(if: isMismatch))
         }
@@ -220,7 +232,8 @@ func assertOutput(
 
   for (no, (g, e)) in zip(gotLines, expectedLines).enumerated() {
     if g.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0
-         || e.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0 {
+      || e.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0
+    {
       continue
     }
 
@@ -230,7 +243,11 @@ func assertOutput(
       diffLineNumbers.append(no)
 
       let sourceLocation = SourceLocation(
-        fileID: fileID, filePath: filePath, line: line, column: column)
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
+      )
       #expect(ge == ee, sourceLocation: sourceLocation)
     }
 

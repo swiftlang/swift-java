@@ -12,17 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJava
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import SwiftJava
 
 public func echoUUID(_ uuid: UUID) -> UUID {
-  return uuid
+  uuid
 }
 
 public func makeUUID() -> UUID {
-  return UUID()
+  UUID()
 }

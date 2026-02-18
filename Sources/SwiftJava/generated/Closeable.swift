@@ -9,6 +9,6 @@ public struct Closeable {
   /// ```java
   /// public abstract void java.io.Closeable.close() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   public func close() throws
 }

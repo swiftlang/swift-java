@@ -52,14 +52,16 @@ final class UnsignedNumberTests {
             SwiftModule.$unsignedChar(arg);
           }
           private static native void $unsignedChar(char arg);
-          """,
+          """
         ]
-      )
-    ])
+      ),
+    ]
+  )
   func unsignedChar(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     try assertOutput(
       input: "public func unsignedChar(_ arg: UInt16)",
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
@@ -99,17 +101,19 @@ final class UnsignedNumberTests {
             SwiftModule.$unsignedInt(arg);
           }
           private static native void $unsignedInt(int arg);
-          """,
+          """
         ]
-      )
-    ])
+      ),
+    ]
+  )
   func unsignedIntAnnotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
 
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
@@ -151,17 +155,19 @@ final class UnsignedNumberTests {
             return SwiftModule.$returnUnsignedInt();
           }
           private static native int $returnUnsignedInt();
-          """,
+          """
         ]
-      )
-    ])
+      ),
+    ]
+  )
   func returnUnsignedIntDefault(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     let config = Configuration()
 
     try assertOutput(
       input: "public func returnUnsignedInt() -> UInt32",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
@@ -203,17 +209,19 @@ final class UnsignedNumberTests {
             return SwiftModule.$returnUnsignedLong();
           }
           private static native long $returnUnsignedLong();
-          """,
+          """
         ]
-      )
-    ])
+      ),
+    ]
+  )
   func return_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
 
     try assertOutput(
       input: "public func returnUnsignedLong() -> UInt64",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
@@ -253,17 +261,19 @@ final class UnsignedNumberTests {
             SwiftModule.$takeUnsignedLong(arg);
           }
           private static native void $takeUnsignedLong(long arg);
-          """,
+          """
         ]
-      )
-    ])
+      ),
+    ]
+  )
   func take_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     var config = Configuration()
 
     try assertOutput(
       input: "public func takeUnsignedLong(arg: UInt64)",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
@@ -307,22 +317,24 @@ final class UnsignedNumberTests {
             return SwiftModule.$unsignedLong(first, second);
           }
           private static native int $unsignedLong(long first, int second);
-          """,
+          """
         ]
       ),
-    ])
+    ]
+  )
   func echo_unsignedLong_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     let config = Configuration()
 
     try assertOutput(
       input: "public func unsignedLong(first: UInt64, second: UInt32) -> UInt32",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )
   }
-  
+
   @Test(
     "Import: take UInt return UInt (annotate)",
     arguments: [
@@ -361,17 +373,19 @@ final class UnsignedNumberTests {
             return SwiftModule.$unsignedLong(first, second);
           }
           private static native long $unsignedLong(long first, long second);
-          """,
+          """
         ]
       ),
-    ])
+    ]
+  )
   func echo_uint_annotate(mode: JExtractGenerationMode, expectedChunks: [String]) throws {
     let config = Configuration()
 
     try assertOutput(
       input: "public func unsignedLong(first: UInt, second: UInt) -> UInt",
       config: config,
-      mode, .java,
+      mode,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: expectedChunks
     )

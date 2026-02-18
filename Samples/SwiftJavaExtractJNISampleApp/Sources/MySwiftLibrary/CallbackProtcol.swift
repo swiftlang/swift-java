@@ -27,7 +27,7 @@ public protocol CallbackProtocol {
   func withVoid()
   func withObject(_ input: MySwiftClass) -> MySwiftClass
   func withOptionalInt64(_ input: Int64?) -> Int64?
-  func withOptionalObject(_ input: MySwiftClass?) -> Optional<MySwiftClass>
+  func withOptionalObject(_ input: MySwiftClass?) -> MySwiftClass?
   func withInt64Array(_ input: [Int64]) -> [Int64]
   func withStringArray(_ input: [String]) -> [String]
   func withObjectArray(_ input: [MySwiftClass]) -> [MySwiftClass]
@@ -54,15 +54,15 @@ public struct CallbackOutput {
 }
 
 public func callProtocolVoid(_ callbacks: some CallbackProtocol) {
-  callbacks.withVoid();
+  callbacks.withVoid()
 }
 
 public func callProtocolWithFailedThrowingFunction(_ callbacks: some CallbackProtocol) throws {
-  try callbacks.throwingFunction();
+  try callbacks.throwingFunction()
 }
 
 public func callProtocolWithSuccessfulThrowingFunction(_ callbacks: some CallbackProtocol) throws {
-  try callbacks.successfulThrowingFunction();
+  try callbacks.successfulThrowingFunction()
 }
 
 public func outputCallbacks(
@@ -83,7 +83,7 @@ public func outputCallbacks(
   stringArray: [String],
   objectArray: [MySwiftClass]
 ) -> CallbackOutput {
-  return CallbackOutput(
+  CallbackOutput(
     bool: callbacks.withBool(bool),
     int8: callbacks.withInt8(int8),
     uint16: callbacks.withUInt16(uint16),

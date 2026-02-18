@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation // for e.g. replacingOccurrences
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import Foundation // for e.g. replacingOccurrences
 
 package enum JavaClassMacro {}
 
@@ -79,7 +79,7 @@ extension JavaClassMacro: MemberMacro {
     }
 
     var members: [DeclSyntax] = []
-    
+
     // Determine the modifiers to use for the fullJavaClassName member.
     let fullJavaClassNameMemberModifiers: String
     switch (isSwiftClass, isJavaLangObject) {
@@ -92,7 +92,8 @@ extension JavaClassMacro: MemberMacro {
     }
 
     let classNameAccessSpecifier = isSwiftClass ? "open" : "public"
-    members.append("""
+    members.append(
+      """
       /// The full Java class name for this Swift type.
       \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String {
         #if os(Android)
@@ -106,7 +107,8 @@ extension JavaClassMacro: MemberMacro {
 
     // struct wrappers need a JavaSuperclass type.
     if !isSwiftClass {
-      members.append("""
+      members.append(
+        """
         public typealias JavaSuperclass = \(raw: superclass)
         """
       )
@@ -115,17 +117,20 @@ extension JavaClassMacro: MemberMacro {
     // If this is for a struct or is the root java.lang.Object class, we need
     // a javaHolder instance property.
     if !isSwiftClass || isJavaLangObject {
-      members.append("""
+      members.append(
+        """
         public var javaHolder: JavaObjectHolder
         """
       )
     }
 
     let requiredModifierOpt = isSwiftClass ? "required " : ""
-    let initBody: CodeBlockItemSyntax = isSwiftClass && !isJavaLangObject
+    let initBody: CodeBlockItemSyntax =
+      isSwiftClass && !isJavaLangObject
       ? "super.init(javaHolder: javaHolder)"
       : "self.javaHolder = javaHolder"
-    members.append("""
+    members.append(
+      """
       public \(raw: requiredModifierOpt)init(javaHolder: JavaObjectHolder) {
           \(initBody)
       }
@@ -133,7 +138,8 @@ extension JavaClassMacro: MemberMacro {
     )
 
     if !isSwiftClass {
-      members.append("""
+      members.append(
+        """
         /// Casting to ``\(raw: superclass)`` will never be nil because ``\(raw: swiftName)`` extends it.
         public func `as`(_: \(raw: superclass).Type) -> \(raw: superclass) {
             return \(raw: superclass)(javaHolder: javaHolder)
@@ -172,6 +178,6 @@ extension ClassDeclSyntax {
   var isJavaLangObject: Bool {
     // FIXME: This is somewhat of a hack; we could look for
     // @JavaClass("java.lang.Object") instead.
-    return name.text == "JavaObject"
+    name.text == "JavaObject"
   }
 }

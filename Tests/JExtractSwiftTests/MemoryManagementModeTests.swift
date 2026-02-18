@@ -21,7 +21,7 @@ struct MemoryManagementModeTests {
   let text =
     """
     class MyClass {}
-    
+
     public func f() -> MyClass
     """
 
@@ -33,7 +33,8 @@ struct MemoryManagementModeTests {
     try assertOutput(
       input: text,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       expectedChunks: [
         """
         /**
@@ -45,7 +46,7 @@ struct MemoryManagementModeTests {
         public static MyClass f(SwiftArena swiftArena$) {
           return MyClass.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena$);
         }
-        """,
+        """
       ]
     )
   }
@@ -58,7 +59,8 @@ struct MemoryManagementModeTests {
     try assertOutput(
       input: text,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -84,13 +86,14 @@ struct MemoryManagementModeTests {
       input:
         """
         public class MyClass {}
-        
+
         public protocol MyProtocol {
           public func f() -> MyClass
         }
         """,
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
@@ -100,7 +103,7 @@ struct MemoryManagementModeTests {
         """,
         """
         public MyClass f(SwiftArena swiftArena$);
-        """
+        """,
       ]
     )
   }

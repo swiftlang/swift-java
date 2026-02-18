@@ -20,14 +20,16 @@ struct SwiftJavaConfigurationTests {
 
   @Test
   func parseJSONWithComments() throws {
-    let config = try readConfiguration(string: 
-      """
-      // some comments
-      {
-        // anywhere is ok
-        "classpath": ""
-      }
-      """, configPath: nil)
+    let config = try readConfiguration(
+      string:
+        """
+        // some comments
+        {
+          // anywhere is ok
+          "classpath": ""
+        }
+        """,
+      configPath: nil
+    )
   }
 }
-

@@ -51,7 +51,7 @@ struct SwiftDocumentationParsingTests {
           public static void f() {
           """
         ]
-      )
+      ),
     ]
   )
   func simple(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
@@ -63,7 +63,8 @@ struct SwiftDocumentationParsingTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -93,7 +94,7 @@ struct SwiftDocumentationParsingTests {
            * }
            */
           public static void g() {
-          """
+          """,
         ]
       ),
       (
@@ -118,30 +119,31 @@ struct SwiftDocumentationParsingTests {
            * }
            */
           public static void g() {
-          """
+          """,
         ]
-      )
+      ),
     ]
   )
   func swiftFileWithNewlines(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
     let text =
       """
       /// Random comment
-      
-      
-      
-      
+
+
+
+
       public func f() {}
-      
+
       /// Random comment 2
-      
+
       /// Simple summary
       public func g() {}
       """
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -184,21 +186,22 @@ struct SwiftDocumentationParsingTests {
           public static MyClass f(AllocatingSwiftArena swiftArena$)
           """
         ]
-      )
+      ),
     ]
   )
   func swiftArenaParam(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
     let text =
       """
       public class MyClass {}
-      
+
       /// Simple summary
       public func f() -> MyClass {}
       """
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -251,7 +254,7 @@ struct SwiftDocumentationParsingTests {
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
         ]
-      )
+      ),
     ]
   )
   func full_individualParams(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
@@ -271,7 +274,8 @@ struct SwiftDocumentationParsingTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -324,7 +328,7 @@ struct SwiftDocumentationParsingTests {
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
         ]
-      )
+      ),
     ]
   )
   func full_groupedParams(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
@@ -345,7 +349,8 @@ struct SwiftDocumentationParsingTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -416,7 +421,7 @@ struct SwiftDocumentationParsingTests {
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
         ]
-      )
+      ),
     ]
   )
   func complex(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
@@ -446,7 +451,8 @@ struct SwiftDocumentationParsingTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }
@@ -493,7 +499,7 @@ struct SwiftDocumentationParsingTests {
           public static void f(java.lang.String arg0, java.lang.String arg1) {
           """
         ]
-      )
+      ),
     ]
   )
   func randomOrder(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
@@ -509,7 +515,8 @@ struct SwiftDocumentationParsingTests {
 
     try assertOutput(
       input: text,
-      mode, .java,
+      mode,
+      .java,
       expectedChunks: expectedJavaChunks
     )
   }

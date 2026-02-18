@@ -15,7 +15,7 @@
 protocol SwiftJavaPluginProtocol {
   var verbose: Bool { get }
   var pluginName: String { get }
-  
+
   func log(_ message: @autoclosure () -> String, terminator: String)
 }
 
@@ -23,7 +23,7 @@ extension SwiftJavaPluginProtocol {
   func log(_ message: @autoclosure () -> String, terminator: String = "\n") {
     print("[\(pluginName)] \(message())", terminator: terminator)
   }
-  
+
   func warn(_ message: @autoclosure () -> String, terminator: String = "\n") {
     print("[\(pluginName)][warning] \(message())", terminator: terminator)
   }

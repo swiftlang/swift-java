@@ -15,46 +15,45 @@
 import SwiftJava
 
 public func booleanArray(array: [Bool]) -> [Bool] {
-  return array
+  array
 }
 
 public func byteArray(array: [UInt8]) -> [UInt8] {
-  return array
+  array
 }
 
-public func byteArrayExplicit(array: Array<UInt8>) -> Array<UInt8> {
-  return array
+public func byteArrayExplicit(array: [UInt8]) -> [UInt8] {
+  array
 }
 
 public func charArray(array: [UInt16]) -> [UInt16] {
-  return array
+  array
 }
 
 public func shortArray(array: [Int16]) -> [Int16] {
-  return array
+  array
 }
 
 public func intArray(array: [Int32]) -> [Int32] {
-  return array
+  array
 }
 
 public func longArray(array: [Int64]) -> [Int64] {
-  return array
+  array
 }
 
 public func floatArray(array: [Float]) -> [Float] {
-  return array
+  array
 }
 
 public func doubleArray(array: [Double]) -> [Double] {
-  return array
+  array
 }
 
 public func stringArray(array: [String]) -> [String] {
-  return array
+  array
 }
 
 public func objectArray(array: [MySwiftClass]) -> [MySwiftClass] {
-  return array
+  array
 }
-

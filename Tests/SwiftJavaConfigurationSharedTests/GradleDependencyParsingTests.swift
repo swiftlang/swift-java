@@ -42,4 +42,3 @@ struct GradleDependencyParsingTests {
     #expect(parsed[1].version == "1.2.3-beta.1")
   }
 }
-

@@ -15,7 +15,7 @@
 import SwiftJava
 
 public func asyncSum(i1: Int64, i2: Int64) async -> Int64 {
-  return i1 + i2
+  i1 + i2
 }
 
 public func asyncSleep() async throws {
@@ -38,5 +38,5 @@ public func asyncThrows() async throws {
 }
 
 public func asyncString(input: String) async -> String {
-  return input
+  input
 }

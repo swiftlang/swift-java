@@ -14,15 +14,15 @@
 
 import ArgumentParser
 import Foundation
-import SwiftJavaToolLib
 import JExtractSwiftLib
-import SwiftJava
-import JavaUtilJar
 import JavaNet
-import SwiftSyntax
+import JavaUtilJar
 import Logging
+import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
+import SwiftJavaToolLib
+import SwiftSyntax
 
 // - MARK: Common Options
 
@@ -35,7 +35,7 @@ extension HasCommonOptions {
       setting = value
     }
   }
-  
+
   func configure<T>(_ setting: inout [T]?, append value: [T]?) {
     if let value {
       if setting == nil {
@@ -56,7 +56,10 @@ extension SwiftJava {
     @Option(name: .shortAndLong, help: "The directory in which to output generated SwiftJava configuration files.")
     var outputDirectory: String? = nil
 
-    @Option(help: "Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.")
+    @Option(
+      help:
+        "Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift."
+    )
     var inputSwift: String? = nil
 
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
@@ -65,7 +68,11 @@ extension SwiftJava {
     @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
     var filterInclude: [String] = []
 
-    @Option(name: .long, help: "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format.")
+    @Option(
+      name: .long,
+      help:
+        "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format."
+    )
     var filterExclude: [String] = []
 
     @Option(help: "A path to a custom swift-java.config to use")
@@ -101,11 +108,16 @@ extension HasCommonJVMOptions {
   /// swift-java.classpath files as configured.
   /// Parameters:
   ///   - searchDirs: search directories where we can find swift.java.classpath files to include in the configuration
-  func configureCommandJVMClasspath(searchDirs: [Foundation.URL], config: Configuration, log: Logging.Logger) -> [String] {
+  func configureCommandJVMClasspath(
+    searchDirs: [Foundation.URL],
+    config: Configuration,
+    log: Logging.Logger
+  ) -> [String] {
     // Form a class path from all of our input sources:
     //   * Command-line option --classpath
     let classpathOptionEntries: [String] = self.classpathEntries
-    let classpathFromEnv = ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
+    let classpathFromEnv =
+      ProcessInfo.processInfo.environment["CLASSPATH"]?.split(separator: ":").map(String.init) ?? []
     log.debug("Base classpath from CLASSPATH environment: \(classpathFromEnv)")
     let classpathFromConfig: [String] = config.classpath?.split(separator: ":").map(String.init) ?? []
     log.debug("Base classpath from config: \(classpathFromConfig)")

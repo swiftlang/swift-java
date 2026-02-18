@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -31,7 +32,9 @@ extension JNISwift2JavaGenerator {
       return // no need to write any empty files, yay
     }
 
-    logger.info("Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/")
+    logger.info(
+      "Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/"
+    )
 
     for expectedFileName in self.expectedOutputSwiftFileNames {
       logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
@@ -41,7 +44,8 @@ extension JNISwift2JavaGenerator {
       _ = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
         javaPackagePath: nil,
-        filename: expectedFileName)
+        filename: expectedFileName
+      )
     }
   }
 
@@ -66,7 +70,10 @@ extension JNISwift2JavaGenerator {
       // === All types
       // We have to write all types to their corresponding output file that matches the file they were declared in,
       // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
-      for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(grouping: self.analysis.importedTypes, by: { $0.value.sourceFilePath }) {
+      for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
+        grouping: self.analysis.importedTypes,
+        by: { $0.value.sourceFilePath }
+      ) {
         logger.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")
 
         let importedTypesForThisFile = group.value
@@ -83,9 +90,11 @@ extension JNISwift2JavaGenerator {
           do {
             try printNominalTypeThunks(&printer, ty)
           } catch {
-            logger.warning("Failed to print to Swift thunks for type'\(ty.qualifiedName)' to '\(filename)', error: \(error)")
+            logger.warning(
+              "Failed to print to Swift thunks for type'\(ty.qualifiedName)' to '\(filename)', error: \(error)"
+            )
           }
-          
+
         }
 
         logger.warning("Write Swift thunks file: \(filename.bold)")
@@ -93,7 +102,8 @@ extension JNISwift2JavaGenerator {
           if let outputFile = try printer.writeContents(
             outputDirectory: self.swiftOutputDirectory,
             javaPackagePath: nil,
-            filename: filename) {
+            filename: filename
+          ) {
             logger.info("Done writing Swift thunks to: \(outputFile.absoluteString)")
             self.expectedOutputSwiftFileNames.remove(filename)
           }
@@ -110,7 +120,9 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
       for enumCase in type.cases {
         guard let translatedCase = translatedEnumCase(for: enumCase) else { continue }
-        printer.print("static let \(JNICaching.cacheMemberName(for: enumCase)) = \(renderEnumCaseCacheInit(translatedCase))")
+        printer.print(
+          "static let \(JNICaching.cacheMemberName(for: enumCase)) = \(renderEnumCaseCacheInit(translatedCase))"
+        )
       }
     }
   }
@@ -121,7 +133,9 @@ extension JNISwift2JavaGenerator {
     _ translatedWrapper: JavaInterfaceSwiftWrapper
   ) throws {
     printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(translatedWrapper.swiftName)") { printer in
-      printer.print("var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }")
+      printer.print(
+        "var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }"
+      )
     }
     printer.println()
     try printer.printBraceBlock("extension \(translatedWrapper.wrapperName)") { printer in
@@ -131,10 +145,10 @@ extension JNISwift2JavaGenerator {
       }
 
       // FIXME: Add support for protocol variables https://github.com/swiftlang/swift-java/issues/457
-//      for variable in translatedWrapper.variables {
-//        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
-//        printer.println()
-//      }
+      //      for variable in translatedWrapper.variables {
+      //        printerInterfaceWrapperVariable(&printer, variable, inside: translatedWrapper)
+      //        printer.println()
+      //      }
     }
   }
 
@@ -143,7 +157,11 @@ extension JNISwift2JavaGenerator {
     _ function: JavaInterfaceSwiftWrapper.Function,
     inside wrapper: JavaInterfaceSwiftWrapper
   ) throws {
-    guard let protocolMethod = wrapper.importedType.methods.first(where: { $0.functionSignature == function.originalFunctionSignature }) else {
+    guard
+      let protocolMethod = wrapper.importedType.methods.first(where: {
+        $0.functionSignature == function.originalFunctionSignature
+      })
+    else {
       fatalError("Failed to find protocol method")
     }
     guard let translatedDecl = self.translatedDecl(for: protocolMethod) else {
@@ -166,7 +184,8 @@ extension JNISwift2JavaGenerator {
       }
 
       let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
-      let javaUpcall = "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+      let javaUpcall =
+        "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
 
       let resultType = function.originalFunctionSignature.result.type
       let result = function.resultConversion.render(&printer, javaUpcall)
@@ -348,19 +367,22 @@ extension JNISwift2JavaGenerator {
   }
 
   private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-      let nativeParametersClassName = "\(enumCase.enumName)$\(enumCase.name)$_NativeParameters"
-      let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
+    let nativeParametersClassName = "\(enumCase.enumName)$\(enumCase.name)$_NativeParameters"
+    let methodSignature = MethodSignature(
+      resultType: .void,
+      parameterTypes: enumCase.parameterConversions.map(\.native.javaType)
+    )
 
-      return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
+    return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
   }
 
   private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
-      let fullClassName = "\(javaPackagePath)/\(className)"
-      let methods = methods.map { name, signature in
-          #".init(name: "\#(name)", signature: "\#(signature.mangledName)")"#
-      }.joined(separator: ",\n")
+    let fullClassName = "\(javaPackagePath)/\(className)"
+    let methods = methods.map { name, signature in
+      #".init(name: "\#(name)", signature: "\#(signature.mangledName)")"#
+    }.joined(separator: ",\n")
 
-      return #"_JNIMethodIDCache(className: "\#(fullClassName)", methods: [\#(methods)])"#
+    return #"_JNIMethodIDCache(className: "\#(fullClassName)", methods: [\#(methods)])"#
   }
 
   private func printEnumGetAsCaseThunk(
@@ -371,12 +393,18 @@ extension JNISwift2JavaGenerator {
       &printer,
       enumCase.getAsCaseFunction
     ) { printer in
-      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(&printer, "self")
+      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
+        &printer,
+        "self"
+      )
       let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
         parameter.name ?? "_\(idx)"
       }
       let caseNamesWithLet = caseNames.map { "let \($0)" }
-      let methodSignature = MethodSignature(resultType: .void, parameterTypes: enumCase.parameterConversions.map(\.native.javaType))
+      let methodSignature = MethodSignature(
+        resultType: .void,
+        parameterTypes: enumCase.parameterConversions.map(\.native.javaType)
+      )
       printer.print(
         """
         guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
@@ -421,7 +449,6 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-
   private func printSwiftFunctionHelperClasses(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc
@@ -435,8 +462,8 @@ extension JNISwift2JavaGenerator {
       }
 
       switch parameter.type {
-        case .opaque(let protocolType),
-          .existential(let protocolType):
+      case .opaque(let protocolType),
+        .existential(let protocolType):
         return (parameter, protocolType)
 
       default:
@@ -458,7 +485,7 @@ extension JNISwift2JavaGenerator {
     for (parameter, protocolTypes) in protocolParameters {
       let protocolWrappers: [JavaInterfaceSwiftWrapper] = protocolTypes.compactMap { protocolType in
         guard let importedType = self.asImportedNominalTypeDecl(protocolType),
-              let wrapper = self.interfaceProtocolWrappers[importedType]
+          let wrapper = self.interfaceProtocolWrappers[importedType]
         else {
           return nil
         }
@@ -486,7 +513,7 @@ extension JNISwift2JavaGenerator {
 
       printer.printBraceBlock("final class \(swiftClassName): \(implementingProtocols)") { printer in
         let variables: [(String, String)] = protocolWrappers.map { wrapper in
-          return (wrapper.javaInterfaceVariableName, wrapper.javaInterfaceName)
+          (wrapper.javaInterfaceVariableName, wrapper.javaInterfaceName)
         }
         for (name, type) in variables {
           printer.print("let \(name): \(type)")
@@ -504,12 +531,14 @@ extension JNISwift2JavaGenerator {
   }
 
   private func asImportedNominalTypeDecl(_ type: SwiftType) -> ImportedNominalType? {
-      self.analysis.importedTypes.first(where: ( { name, nominalType in
+    self.analysis.importedTypes.first(
+      where: ({ name, nominalType in
         nominalType.swiftType == type
-      })).map {
-        $0.value
-      }
+      })
+    ).map {
+      $0.value
     }
+  }
 
   private func printFunctionDowncall(
     _ printer: inout CodePrinter,
@@ -537,12 +566,15 @@ extension JNISwift2JavaGenerator {
       }
 
       switch parameter.conversionCheck {
-        case .check32BitIntOverflow:
+      case .check32BitIntOverflow:
         int32OverflowChecks.append(
           parameter.conversionCheck!.render(
-            &printer, JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName)))
-        case nil:
-          break
+            &printer,
+            JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName)
+          )
+        )
+      case nil:
+        break
       }
     }
 
@@ -555,7 +587,7 @@ extension JNISwift2JavaGenerator {
       printer.print("#if _pointerBitWidth(_32)")
 
       for check in int32OverflowChecks {
-        printer.printBraceBlock("guard \(check) else") { printer in 
+        printer.printBraceBlock("guard \(check) else") { printer in
           printer.print("environment.throwJavaException(javaException: .integerOverflow)")
           printer.print(dummyReturn(for: nativeSignature))
         }
@@ -564,17 +596,18 @@ extension JNISwift2JavaGenerator {
     }
 
     // Callee
-    let callee: String = switch decl.functionSignature.selfParameter {
-    case .instance(let swiftSelf):
-      nativeSignature.selfParameter!.conversion.render(
-        &printer,
-        swiftSelf.parameterName ?? "self"
-      )
-    case .staticMethod(let selfType), .initializer(let selfType):
-      "\(selfType)"
-    case .none:
-      swiftModuleName
-    }
+    let callee: String =
+      switch decl.functionSignature.selfParameter {
+      case .instance(let swiftSelf):
+        nativeSignature.selfParameter!.conversion.render(
+          &printer,
+          swiftSelf.parameterName ?? "self"
+        )
+      case .staticMethod(let selfType), .initializer(let selfType):
+        "\(selfType)"
+      case .none:
+        swiftModuleName
+      }
 
     // Build the result
     let result: String
@@ -658,7 +691,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
-    return if nativeSignature.result.javaType.isVoid {
+    if nativeSignature.result.javaType.isVoid {
       "return"
     } else if nativeSignature.result.javaType.isString {
       "return String.jniPlaceholderValue"
@@ -720,7 +753,7 @@ extension JNISwift2JavaGenerator {
     let thunkParameters =
       [
         "environment: UnsafeMutablePointer<JNIEnv?>!",
-        "thisClass: jclass"
+        "thisClass: jclass",
       ] + translatedParameters
     let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
 
@@ -857,9 +890,9 @@ extension JNISwift2JavaGenerator {
   ///
   /// - Returns: name of the created "self" variable
   private func printSelfJLongToUnsafeMutablePointer(
-      _ printer: inout CodePrinter,
-      swiftParentName: String,
-      _ selfPointerParam: JavaParameter
+    _ printer: inout CodePrinter,
+    swiftParentName: String,
+    _ selfPointerParam: JavaParameter
   ) -> String {
     let newSelfParamName = "self$"
     printer.print(
@@ -882,11 +915,12 @@ extension JNISwift2JavaGenerator {
     parameterName: String,
     parentName: String?
   ) -> String {
-    let parent = if let parentName {
-      "\(parentName)_"
-    } else {
-      ""
-    }
+    let parent =
+      if let parentName {
+        "\(parentName)_"
+      } else {
+        ""
+      }
     return "_\(parent)\(methodName)_\(parameterName)_Wrapper"
   }
 }

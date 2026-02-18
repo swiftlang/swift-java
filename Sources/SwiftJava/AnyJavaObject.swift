@@ -61,7 +61,7 @@ extension AnyJavaObject {
   public var javaThis: jobject {
     javaHolder.object! // FIXME: this is a bad idea, can be null
   }
-  
+
   public var javaThisOptional: jobject? {
     javaHolder.object
   }
@@ -119,7 +119,7 @@ extension AnyJavaObject {
           applicationClassLoader,
           in: environment
         ) { applicationLoadedClass in
-          return try body(applicationLoadedClass)
+          try body(applicationLoadedClass)
         }
       } else {
         throw error
@@ -146,10 +146,11 @@ extension AnyJavaObject {
     _ body: (jclass) throws -> Result
   ) throws -> Result {
     if let AnyJavaObjectWithCustomClassLoader = self as? AnyJavaObjectWithCustomClassLoader.Type,
-       let customClassLoader = try AnyJavaObjectWithCustomClassLoader.getJavaClassLoader(in: environment) {
+      let customClassLoader = try AnyJavaObjectWithCustomClassLoader.getJavaClassLoader(in: environment)
+    {
       do {
         return try _withJNIClassFromCustomClassLoader(customClassLoader, in: environment) { clazz in
-          return try body(clazz)
+          try body(clazz)
         }
       } catch {
         return try _withJNIClassFromDefaultClassLoader(in: environment, body)

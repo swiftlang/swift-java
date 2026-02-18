@@ -9,7 +9,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.getName(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func getName(_ arg0: Int32) -> Path!
 
   /// Java method `equals`.
@@ -18,7 +18,7 @@ public struct Path {
   /// ```java
   /// public abstract boolean java.nio.file.Path.equals(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
   /// Java method `toString`.
@@ -27,7 +27,7 @@ public struct Path {
   /// ```java
   /// public abstract java.lang.String java.nio.file.Path.toString()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func toString() -> String
 
   /// Java method `hashCode`.
@@ -36,7 +36,7 @@ public struct Path {
   /// ```java
   /// public abstract int java.nio.file.Path.hashCode()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func hashCode() -> Int32
 
   /// Java method `compareTo`.
@@ -45,7 +45,7 @@ public struct Path {
   /// ```java
   /// public default int java.nio.file.Path.compareTo(java.lang.Object)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func compareTo(_ arg0: JavaObject?) -> Int32
 
   /// Java method `compareTo`.
@@ -54,7 +54,7 @@ public struct Path {
   /// ```java
   /// public abstract int java.nio.file.Path.compareTo(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func compareTo(_ arg0: Path?) -> Int32
 
   /// Java method `startsWith`.
@@ -63,7 +63,7 @@ public struct Path {
   /// ```java
   /// public abstract boolean java.nio.file.Path.startsWith(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func startsWith(_ arg0: Path?) -> Bool
 
   /// Java method `startsWith`.
@@ -72,7 +72,7 @@ public struct Path {
   /// ```java
   /// public default boolean java.nio.file.Path.startsWith(java.lang.String)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func startsWith(_ arg0: String) -> Bool
 
   /// Java method `iterator`.
@@ -81,7 +81,7 @@ public struct Path {
   /// ```java
   /// public default java.util.Iterator<java.nio.file.Path> java.nio.file.Path.iterator()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func iterator() -> JavaIterator<Path>!
 
   /// Java method `endsWith`.
@@ -90,7 +90,7 @@ public struct Path {
   /// ```java
   /// public default boolean java.nio.file.Path.endsWith(java.lang.String)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func endsWith(_ arg0: String) -> Bool
 
   /// Java method `endsWith`.
@@ -99,7 +99,7 @@ public struct Path {
   /// ```java
   /// public abstract boolean java.nio.file.Path.endsWith(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func endsWith(_ arg0: Path?) -> Bool
 
   /// Java method `isAbsolute`.
@@ -108,7 +108,7 @@ public struct Path {
   /// ```java
   /// public abstract boolean java.nio.file.Path.isAbsolute()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func isAbsolute() -> Bool
 
   /// Java method `resolve`.
@@ -117,7 +117,7 @@ public struct Path {
   /// ```java
   /// public default java.nio.file.Path java.nio.file.Path.resolve(java.lang.String,java.lang.String...)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolve(_ arg0: String, _ arg1: [String]) -> Path!
 
   /// Java method `resolve`.
@@ -126,7 +126,7 @@ public struct Path {
   /// ```java
   /// public default java.nio.file.Path java.nio.file.Path.resolve(java.nio.file.Path,java.nio.file.Path...)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolve(_ arg0: Path?, _ arg1: [Path?]) -> Path!
 
   /// Java method `resolve`.
@@ -135,7 +135,7 @@ public struct Path {
   /// ```java
   /// public default java.nio.file.Path java.nio.file.Path.resolve(java.lang.String)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolve(_ arg0: String) -> Path!
 
   /// Java method `resolve`.
@@ -144,7 +144,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.resolve(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolve(_ arg0: Path?) -> Path!
 
   /// Java method `getParent`.
@@ -153,7 +153,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.getParent()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func getParent() -> Path!
 
   /// Java method `getRoot`.
@@ -162,7 +162,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.getRoot()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func getRoot() -> Path!
 
   /// Java method `toFile`.
@@ -171,7 +171,7 @@ public struct Path {
   /// ```java
   /// public default java.io.File java.nio.file.Path.toFile()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func toFile() -> File!
 
   /// Java method `getFileName`.
@@ -180,7 +180,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.getFileName()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func getFileName() -> Path!
 
   /// Java method `normalize`.
@@ -189,7 +189,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.normalize()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func normalize() -> Path!
 
   /// Java method `relativize`.
@@ -198,7 +198,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.relativize(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func relativize(_ arg0: Path?) -> Path!
 
   /// Java method `toAbsolutePath`.
@@ -207,7 +207,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.toAbsolutePath()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func toAbsolutePath() -> Path!
 
   /// Java method `resolveSibling`.
@@ -216,7 +216,7 @@ public struct Path {
   /// ```java
   /// public default java.nio.file.Path java.nio.file.Path.resolveSibling(java.nio.file.Path)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolveSibling(_ arg0: Path?) -> Path!
 
   /// Java method `resolveSibling`.
@@ -225,7 +225,7 @@ public struct Path {
   /// ```java
   /// public default java.nio.file.Path java.nio.file.Path.resolveSibling(java.lang.String)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func resolveSibling(_ arg0: String) -> Path!
 
   /// Java method `getNameCount`.
@@ -234,7 +234,7 @@ public struct Path {
   /// ```java
   /// public abstract int java.nio.file.Path.getNameCount()
   /// ```
-@JavaMethod
+  @JavaMethod
   public func getNameCount() -> Int32
 
   /// Java method `subpath`.
@@ -243,7 +243,7 @@ public struct Path {
   /// ```java
   /// public abstract java.nio.file.Path java.nio.file.Path.subpath(int,int)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func subpath(_ arg0: Int32, _ arg1: Int32) -> Path!
 }
 extension JavaClass<Path> {
@@ -253,6 +253,6 @@ extension JavaClass<Path> {
   /// ```java
   /// public static java.nio.file.Path java.nio.file.Path.of(java.lang.String,java.lang.String...)
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func of(_ arg0: String, _ arg1: [String]) -> Path!
 }

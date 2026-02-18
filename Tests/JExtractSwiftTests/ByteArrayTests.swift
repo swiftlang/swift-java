@@ -39,18 +39,18 @@ final class ByteArrayTests {
             );
           """,
           """
-            /**
-             * Downcall to Swift:
-             * {@snippet lang=swift :
-             * public func acceptArray(array: [UInt8])
-             * }
-             */
-            public static void acceptArray(@Unsigned byte[] array) {
-              try(var arena$ = Arena.ofConfined()) {
-                swiftjava_SwiftModule_acceptArray_array.call(arena$.allocateFrom(ValueLayout.JAVA_BYTE, array), array.length);
-              }
+          /**
+           * Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func acceptArray(array: [UInt8])
+           * }
+           */
+          public static void acceptArray(@Unsigned byte[] array) {
+            try(var arena$ = Arena.ofConfined()) {
+              swiftjava_SwiftModule_acceptArray_array.call(arena$.allocateFrom(ValueLayout.JAVA_BYTE, array), array.length);
             }
-            """
+          }
+          """,
         ],
         /* expected Swift chunks */
         [
@@ -64,23 +64,31 @@ final class ByteArrayTests {
       )
     ]
   )
-  func func_accept_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
-    let text = 
+  func func_accept_array_uint8(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
+    let text =
       """
       public func acceptArray(array: [UInt8])
       """
 
     try assertOutput(
-      input: text, 
-      mode, .java,
-      expectedChunks: expectedJavaChunks)
-      
-      try assertOutput(
-      input: text, 
-      mode, .swift,
-      expectedChunks: expectedSwiftChunks)
-  }  
-  
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
+      expectedChunks: expectedSwiftChunks
+    )
+  }
+
   @Test(
     "Import: return [UInt8] array",
     arguments: [
@@ -148,23 +156,31 @@ final class ByteArrayTests {
       )
     ]
   )
-  func func_return_array_uint8(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
-    let text = 
+  func func_return_array_uint8(
+    mode: JExtractGenerationMode,
+    expectedJavaChunks: [String],
+    expectedSwiftChunks: [String]
+  ) throws {
+    let text =
       """
       public func returnArray() -> [UInt8]
       """
-    
+
     var config = Configuration()
     config.logLevel = .trace
-    
+
     try assertOutput(
-      input: text, 
-      mode, .java,
-      expectedChunks: expectedJavaChunks)
-      
-      try assertOutput(
-      input: text, 
-      mode, .swift,
-      expectedChunks: expectedSwiftChunks)
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+
+    try assertOutput(
+      input: text,
+      mode,
+      .swift,
+      expectedChunks: expectedSwiftChunks
+    )
   }
 }

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import CSwiftJavaJNI
+import SwiftJava
 
 @JavaClass("com.example.swift.HelloJava2Swift")
 open class HelloJava2Swift: JavaObject {
@@ -36,11 +36,11 @@ protocol HelloJava2SwiftNativeMethods {
 extension HelloJava2Swift: HelloJava2SwiftNativeMethods {
   @JavaMethod
   func jniWriteString(_ message: String) -> Int32 {
-    return Int32(message.count)
+    Int32(message.count)
   }
 
   @JavaMethod
   func jniGetInt() -> Int32 {
-    return 12
+    12
   }
 }

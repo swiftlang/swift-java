@@ -26,6 +26,6 @@ enum SwiftResultConvention: Equatable {
 
 extension SwiftResult {
   static var void: Self {
-    return Self(convention: .direct, type: .void)
+    Self(convention: .direct, type: .void)
   }
 }

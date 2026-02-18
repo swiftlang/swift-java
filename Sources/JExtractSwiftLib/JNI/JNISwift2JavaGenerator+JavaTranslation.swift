@@ -23,7 +23,8 @@ extension JNISwift2JavaGenerator {
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-      protocolWrappers: self.interfaceProtocolWrappers
+      protocolWrappers: self.interfaceProtocolWrappers,
+      logger: self.logger
     )
   }
 
@@ -61,7 +62,8 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-        protocolWrappers: self.interfaceProtocolWrappers
+        protocolWrappers: self.interfaceProtocolWrappers,
+        logger: self.logger
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -80,6 +82,7 @@ extension JNISwift2JavaGenerator {
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let logger: Logger
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
@@ -87,7 +90,8 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers
+        protocolWrappers: self.protocolWrappers,
+        logger: self.logger
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -105,7 +109,10 @@ extension JNISwift2JavaGenerator {
         let resultName = parameter.name ?? "arg\(idx)"
         let result = SwiftResult(convention: .direct, type: parameter.type)
         var translatedResult = try self.translate(swiftResult: result, resultName: resultName)
-        translatedResult.conversion = .replacingPlaceholder(translatedResult.conversion, placeholder: "$nativeParameters.\(resultName)")
+        translatedResult.conversion = .replacingPlaceholder(
+          translatedResult.conversion,
+          placeholder: "$nativeParameters.\(resultName)"
+        )
         let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: resultName)
         return (translated: translatedResult, native: nativeResult)
       }
@@ -115,12 +122,16 @@ extension JNISwift2JavaGenerator {
       let nativeParametersType = JavaType.class(package: nil, name: "\(caseName)._NativeParameters")
       let getAsCaseName = "getAs\(caseName)"
       // If the case has no parameters, we can skip the native call.
-      let constructRecordConversion = JavaNativeConversionStep.method(.constant("Optional"), function: "of", arguments: [
-        .constructJavaClass(
-          .commaSeparated(conversions.map(\.translated.conversion)),
-          .class(package: nil,name: caseName)
-        )
-      ])
+      let constructRecordConversion = JavaNativeConversionStep.method(
+        .constant("Optional"),
+        function: "of",
+        arguments: [
+          .constructJavaClass(
+            .commaSeparated(conversions.map(\.translated.conversion)),
+            .class(package: nil, name: caseName)
+          )
+        ]
+      )
       var exceptions: [JavaExceptionType] = []
 
       if enumCase.parameters.contains(where: \.type.isArchDependingInteger) {
@@ -140,8 +151,11 @@ extension JNISwift2JavaGenerator {
             parameter: JavaParameter(name: "self", type: .long),
             conversion: .aggregate(
               [
-                .ifStatement(.constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"), thenExp: .constant("return Optional.empty();")),
-                .valueMemoryAddress(.placeholder)
+                .ifStatement(
+                  .constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"),
+                  thenExp: .constant("return Optional.empty();")
+                ),
+                .valueMemoryAddress(.placeholder),
               ]
             )
           ),
@@ -149,7 +163,9 @@ extension JNISwift2JavaGenerator {
           resultType: TranslatedResult(
             javaType: .class(package: nil, name: "Optional<\(caseName)>"),
             outParameters: conversions.flatMap(\.translated.outParameters),
-            conversion: enumCase.parameters.isEmpty ? constructRecordConversion : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion])
+            conversion: enumCase.parameters.isEmpty
+              ? constructRecordConversion
+              : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion])
           ),
           exceptions: exceptions
         ),
@@ -185,18 +201,20 @@ extension JNISwift2JavaGenerator {
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers
+        protocolWrappers: self.protocolWrappers,
+        logger: self.logger
       )
 
       // Types with no parent will be outputted inside a "module" class.
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
       // Name.
-      let javaName = switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName
-      case .setter, .subscriptSetter: decl.javaSetterName
-      case .function, .initializer, .enumCase: decl.name
-      }
+      let javaName =
+        switch decl.apiKind {
+        case .getter, .subscriptGetter: decl.javaGetterName
+        case .setter, .subscriptSetter: decl.javaSetterName
+        case .function, .initializer, .enumCase: decl.name
+        }
 
       // Swift -> Java
       var translatedFunctionSignature = try translate(
@@ -292,7 +310,7 @@ extension JNISwift2JavaGenerator {
       parentName: String
     ) throws -> TranslatedFunctionSignature {
       let parameters = try translateParameters(
-        functionSignature.parameters.map { ($0.parameterName, $0.type )},
+        functionSignature.parameters.map { ($0.parameterName, $0.type) },
         methodName: methodName,
         parentName: parentName,
         genericParameters: functionSignature.genericParameters,
@@ -484,7 +502,10 @@ extension JNISwift2JavaGenerator {
         )
 
       case .genericParameter(let generic):
-        if let concreteTy = swiftType.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
+        if let concreteTy = swiftType.typeIn(
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        ) {
           return try translateProtocolParameter(
             protocolType: concreteTy,
             parameterName: parameterName,
@@ -542,12 +563,22 @@ extension JNISwift2JavaGenerator {
         javaType: translatedFutureType,
         annotations: result.annotations,
         outParameters: result.outParameters + [futureOutParameter],
-        conversion: .aggregate(variable: nil, [
-          .print(.placeholder), // Make the downcall
-          .method(.constant("future$"), function: "thenApply", arguments: [
-            .lambda(args: ["futureResult$"], body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$"))
-          ])
-        ])
+        conversion: .aggregate(
+          variable: nil,
+          [
+            .print(.placeholder), // Make the downcall
+            .method(
+              .constant("future$"),
+              function: "thenApply",
+              arguments: [
+                .lambda(
+                  args: ["futureResult$"],
+                  body: .replacingPlaceholder(result.conversion, placeholder: "futureResult$")
+                )
+              ]
+            ),
+          ]
+        )
       )
 
       // Update native function
@@ -569,10 +600,18 @@ extension JNISwift2JavaGenerator {
     ) throws -> TranslatedParameter {
       switch protocolType {
       case .nominal:
-        return try translateProtocolParameter(protocolTypes: [protocolType], parameterName: parameterName, javaGenericName: javaGenericName)
+        return try translateProtocolParameter(
+          protocolTypes: [protocolType],
+          parameterName: parameterName,
+          javaGenericName: javaGenericName
+        )
 
       case .composite(let types):
-        return try translateProtocolParameter(protocolTypes: types, parameterName: parameterName, javaGenericName: javaGenericName)
+        return try translateProtocolParameter(
+          protocolTypes: types,
+          parameterName: parameterName,
+          javaGenericName: javaGenericName
+        )
 
       default:
         throw JavaTranslationError.unsupportedSwiftType(protocolType)
@@ -617,25 +656,37 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
-          guard let translatedClass = javaType.optionalType, let placeholderValue = javaType.optionalPlaceholderValue else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
 
-          return TranslatedParameter(
-            parameter: JavaParameter(
-              name: parameterName,
-              type: JavaType(className: translatedClass),
-              annotations: parameterAnnotations
-            ),
-            conversion: .commaSeparated([
-              .isOptionalPresent,
-              .method(.placeholder, function: "orElse", arguments: [.constant(placeholderValue)])
-            ])
-          )
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            guard let translatedClass = javaType.optionalType, let placeholderValue = javaType.optionalPlaceholderValue
+            else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: JavaType(className: translatedClass),
+                annotations: parameterAnnotations
+              ),
+              conversion: .commaSeparated([
+                .isOptionalPresent,
+                .method(.placeholder, function: "orElse", arguments: [.constant(placeholderValue)]),
+              ])
+            )
+          }
         }
 
         if nominalType.isSwiftJavaWrapper {
@@ -774,47 +825,58 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
-          guard let returnType = javaType.optionalType, let optionalClass = javaType.optionalWrapperType else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
 
-          // Check if we can fit the value and a discriminator byte in a primitive.
-          // so the return JNI value will be (value, discriminator)
-          if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
-            return TranslatedResult(
-              javaType: .class(package: nil, name: returnType),
-              annotations: parameterAnnotations,
-              outParameters: [],
-              conversion: .combinedValueToOptional(
-                .placeholder,
-                nextIntergralTypeWithSpaceForByte.javaType,
-                resultName: resultName,
-                valueType: javaType,
-                valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
-                optionalType: optionalClass
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            guard let returnType = javaType.optionalType, let optionalClass = javaType.optionalWrapperType else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            // Check if we can fit the value and a discriminator byte in a primitive.
+            // so the return JNI value will be (value, discriminator)
+            if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
+              return TranslatedResult(
+                javaType: .class(package: nil, name: returnType),
+                annotations: parameterAnnotations,
+                outParameters: [],
+                conversion: .combinedValueToOptional(
+                  .placeholder,
+                  nextIntergralTypeWithSpaceForByte.javaType,
+                  resultName: resultName,
+                  valueType: javaType,
+                  valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
+                  optionalType: optionalClass
+                )
               )
-            )
-          } else {
-            // Otherwise, we return the result as normal, but
-            // use an indirect return for the discriminator.
-            return TranslatedResult(
-              javaType: .class(package: nil, name: returnType),
-              annotations: parameterAnnotations,
-              outParameters: [
-                OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
-              ],
-              conversion: .toOptionalFromIndirectReturn(
-                discriminatorName: .combinedName(component: "discriminator$"),
-                optionalClass: optionalClass,
-                javaType: javaType,
-                toValue: .placeholder,
-                resultName: resultName
+            } else {
+              // Otherwise, we return the result as normal, but
+              // use an indirect return for the discriminator.
+              return TranslatedResult(
+                javaType: .class(package: nil, name: returnType),
+                annotations: parameterAnnotations,
+                outParameters: [
+                  OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
+                ],
+                conversion: .toOptionalFromIndirectReturn(
+                  discriminatorName: .combinedName(component: "discriminator$"),
+                  optionalClass: optionalClass,
+                  javaType: javaType,
+                  toValue: .placeholder,
+                  resultName: resultName
+                )
               )
-            )
+            }
           }
         }
 
@@ -994,7 +1056,7 @@ extension JNISwift2JavaGenerator {
 
     /// Function signature of the native function that will be implemented by Swift
     let nativeFunctionSignature: NativeFunctionSignature
-    
+
     /// Annotations to include on the Java function declaration
     var annotations: [JavaAnnotation] {
       self.translatedFunctionSignature.annotations
@@ -1005,7 +1067,9 @@ extension JNISwift2JavaGenerator {
         return isThrowing && !isAsync ? " throws Exception" : ""
       }
 
-      let signatureExceptions = translatedFunctionSignature.exceptions.compactMap(\.type.className).joined(separator: ", ")
+      let signatureExceptions = translatedFunctionSignature.exceptions.compactMap(\.type.className).joined(
+        separator: ", "
+      )
       return " throws \(signatureExceptions)\(isThrowing ? ", Exception" : "")"
     }
   }
@@ -1023,7 +1087,7 @@ extension JNISwift2JavaGenerator {
     }
 
     var requiresSwiftArena: Bool {
-      return self.resultType.conversion.requiresSwiftArena
+      self.resultType.conversion.requiresSwiftArena
     }
   }
 
@@ -1115,9 +1179,20 @@ extension JNISwift2JavaGenerator {
 
     case isOptionalPresent
 
-    indirect case combinedValueToOptional(JavaNativeConversionStep, JavaType, resultName: String, valueType: JavaType, valueSizeInBytes: Int, optionalType: String)
+    indirect case combinedValueToOptional(
+      JavaNativeConversionStep,
+      JavaType,
+      resultName: String,
+      valueType: JavaType,
+      valueSizeInBytes: Int,
+      optionalType: String
+    )
 
-    indirect case ternary(JavaNativeConversionStep, thenExp: JavaNativeConversionStep, elseExp: JavaNativeConversionStep)
+    indirect case ternary(
+      JavaNativeConversionStep,
+      thenExp: JavaNativeConversionStep,
+      elseExp: JavaNativeConversionStep
+    )
 
     indirect case equals(JavaNativeConversionStep, JavaNativeConversionStep)
 
@@ -1148,7 +1223,11 @@ extension JNISwift2JavaGenerator {
     /// Perform multiple conversions using the same input.
     case aggregate(variable: (name: String, type: JavaType)? = nil, [JavaNativeConversionStep])
 
-    indirect case ifStatement(JavaNativeConversionStep, thenExp: JavaNativeConversionStep, elseExp: JavaNativeConversionStep? = nil)
+    indirect case ifStatement(
+      JavaNativeConversionStep,
+      thenExp: JavaNativeConversionStep,
+      elseExp: JavaNativeConversionStep? = nil
+    )
 
     /// Access a member of the value
     indirect case replacingPlaceholder(JavaNativeConversionStep, placeholder: String)
@@ -1181,7 +1260,7 @@ extension JNISwift2JavaGenerator {
         return "\(placeholder)_\(component)"
 
       case .commaSeparated(let list):
-        return list.map({ $0.render(&printer, placeholder)}).joined(separator: ", ")
+        return list.map({ $0.render(&printer, placeholder) }).joined(separator: ", ")
 
       case .valueMemoryAddress:
         return "\(placeholder).$memoryAddress()"
@@ -1193,7 +1272,7 @@ extension JNISwift2JavaGenerator {
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "new \(javaType.className!)(\(inner), swiftArena$)"
-        
+
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
         return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
@@ -1206,7 +1285,6 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(function)(\(inner))"
 
-
       case .isOptionalPresent:
         return "(byte) (\(placeholder).isPresent() ? 1 : 0)"
 
@@ -1216,7 +1294,14 @@ extension JNISwift2JavaGenerator {
         let argsStr = args.joined(separator: ", ")
         return "\(inner).\(methodName)(\(argsStr))"
 
-      case .combinedValueToOptional(let combined, let combinedType, let resultName, let valueType, let valueSizeInBytes, let optionalType):
+      case .combinedValueToOptional(
+        let combined,
+        let combinedType,
+        let resultName,
+        let valueType,
+        let valueSizeInBytes,
+        let optionalType
+      ):
         let combined = combined.render(&printer, placeholder)
         printer.print(
           """
@@ -1228,7 +1313,9 @@ extension JNISwift2JavaGenerator {
         if valueType == .boolean {
           printer.print("boolean \(resultName)_value$ = ((byte) (\(resultName)_combined$ >> 8)) != 0;")
         } else {
-          printer.print("\(valueType) \(resultName)_value$ = (\(valueType)) (\(resultName)_combined$ >> \(valueSizeInBytes * 8));")
+          printer.print(
+            "\(valueType) \(resultName)_value$ = (\(valueType)) (\(resultName)_combined$ >> \(valueSizeInBytes * 8));"
+          )
         }
 
         return "\(resultName)_discriminator$ == 1 ? \(optionalType).of(\(resultName)_value$) : \(optionalType).empty()"
@@ -1364,7 +1451,11 @@ extension JNISwift2JavaGenerator {
 
   enum JavaTranslationError: Error {
     case unsupportedSwiftType(SwiftType, fileID: String, line: Int)
-    static func unsupportedSwiftType(_ type: SwiftType, _fileID: String = #fileID, _line: Int = #line) -> JavaTranslationError {
+    static func unsupportedSwiftType(
+      _ type: SwiftType,
+      _fileID: String = #fileID,
+      _line: Int = #line
+    ) -> JavaTranslationError {
       .unsupportedSwiftType(type, fileID: _fileID, line: _line)
     }
 

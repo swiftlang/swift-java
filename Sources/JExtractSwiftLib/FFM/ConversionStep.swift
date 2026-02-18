@@ -21,7 +21,7 @@ import SwiftSyntaxBuilder
 enum ConversionStep: Equatable {
   /// The value being lowered.
   case placeholder
-  
+
   case constant(String)
 
   /// A reference to a component in a value that has been exploded, such as
@@ -75,13 +75,13 @@ enum ConversionStep: Equatable {
   var placeholderCount: Int {
     switch self {
     case .explodedComponent(let inner, component: _),
-        .pointee(let inner),
-        .typedPointer(let inner, swiftType: _),
-        .unsafeCastPointer(let inner, swiftType: _),
-        .populatePointer(name: _, assumingType: _, to: let inner),
-        .member(let inner, member: _), .optionalChain(let inner):
+      .pointee(let inner),
+      .typedPointer(let inner, swiftType: _),
+      .unsafeCastPointer(let inner, swiftType: _),
+      .populatePointer(name: _, assumingType: _, to: let inner),
+      .member(let inner, member: _), .optionalChain(let inner):
       inner.placeholderCount
-    case .initialize(_, arguments: let arguments):
+    case .initialize(_, let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
     case .method(_, _, let arguments):
       arguments.reduce(0) { $0 + $1.argument.placeholderCount }
@@ -111,10 +111,10 @@ enum ConversionStep: Equatable {
     case .constant(let name):
       return "\(raw: name)"
 
-    case .explodedComponent(let step, component: let component):
+    case .explodedComponent(let step, let component):
       return step.asExprSyntax(placeholder: "\(placeholder)_\(component)", bodyItems: &bodyItems)
 
-    case .unsafeCastPointer(let step, swiftType: let swiftType):
+    case .unsafeCastPointer(let step, let swiftType):
       let untypedExpr = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
       return "unsafeBitCast(\(untypedExpr), to: \(swiftType.metatypeReferenceExprSyntax))"
 
@@ -126,7 +126,7 @@ enum ConversionStep: Equatable {
       let untypedExpr = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
       return "\(untypedExpr).pointee"
 
-    case .initialize(let type, arguments: let arguments):
+    case .initialize(let type, let arguments):
       let renderedArguments: [String] = arguments.map { labeledArgument in
         let argExpr = labeledArgument.argument.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
         return LabeledExprSyntax(label: labeledArgument.label, expression: argExpr!).description
@@ -136,7 +136,7 @@ enum ConversionStep: Equatable {
       // of splatting out text.
       let renderedArgumentList = renderedArguments.joined(separator: ", ")
       return "\(raw: type.description)(\(raw: renderedArgumentList))"
-    
+
     case .tuplify(let elements):
       let renderedElements: [String] = elements.enumerated().map { (index, element) in
         element.asExprSyntax(placeholder: "\(placeholder)_\(index)", bodyItems: &bodyItems)!.description
@@ -149,11 +149,12 @@ enum ConversionStep: Equatable {
 
     case .populatePointer(name: let pointer, assumingType: let type, to: let step):
       let inner = step.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
-      let casting = if let type {
-        ".assumingMemoryBound(to: \(type.metatypeReferenceExprSyntax))"
-      } else {
-        ""
-      }
+      let casting =
+        if let type {
+          ".assumingMemoryBound(to: \(type.metatypeReferenceExprSyntax))"
+        } else {
+          ""
+        }
       return "\(raw: pointer)\(raw: casting).initialize(to: \(inner))"
 
     case .tupleExplode(let steps, let name):
@@ -176,7 +177,7 @@ enum ConversionStep: Equatable {
       return "\(inner).\(raw: member)"
 
     case .method(let base, let methodName, let arguments):
-      // TODO: this is duplicated, try to dedupe it a bit 
+      // TODO: this is duplicated, try to dedupe it a bit
       let renderedArguments: [String] = arguments.map { labeledArgument in
         let argExpr = labeledArgument.argument.asExprSyntax(placeholder: placeholder, bodyItems: &bodyItems)
         return LabeledExprSyntax(label: labeledArgument.label, expression: argExpr!).description
@@ -267,4 +268,4 @@ struct LabeledArgument<Element> {
   var argument: Element
 }
 
-extension LabeledArgument: Equatable where Element: Equatable { }
+extension LabeledArgument: Equatable where Element: Equatable {}

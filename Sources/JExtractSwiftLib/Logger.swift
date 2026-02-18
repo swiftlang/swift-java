@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-import SwiftSyntax
 import ArgumentParser
+import Foundation
 import SwiftJavaConfigurationShared
+import SwiftSyntax
 
 // Placeholder for some better logger, we could depend on swift-log
 public struct Logger {
@@ -150,6 +150,6 @@ extension Logger.Level {
 
 extension Logger.Level: Comparable {
   public static func < (lhs: Logger.Level, rhs: Logger.Level) -> Bool {
-    return lhs.naturalIntegralValue < rhs.naturalIntegralValue
+    lhs.naturalIntegralValue < rhs.naturalIntegralValue
   }
 }

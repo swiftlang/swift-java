@@ -15,21 +15,21 @@
 import Foundation
 import PackagePlugin
 
-fileprivate let SwiftJavaConfigFileName = "swift-java.config"
+private let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
-  
+
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
     log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
     let executable = try context.tool(named: "SwiftJavaTool").url
     var commands: [Command] = []
-    
+
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
     let sourceDir = target.directory.string
@@ -52,9 +52,11 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       let dependencyURL = URL(filePath: target.directory.string)
 
       // Look for a config file within this target.
-      let dependencyConfigURL = dependencyURL
+      let dependencyConfigURL =
+        dependencyURL
         .appending(path: SwiftJavaConfigFileName)
-      let dependencyConfigString = dependencyConfigURL
+      let dependencyConfigString =
+        dependencyConfigURL
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
@@ -102,10 +104,10 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       let swiftNestedName = swiftName.replacingOccurrences(of: ".", with: "+")
       return outputDirectoryGenerated.appending(path: "\(swiftNestedName).swift")
     }
-    
+
     arguments += [
       "--cache-directory",
-      context.pluginWorkDirectoryURL.path(percentEncoded: false)
+      context.pluginWorkDirectoryURL.path(percentEncoded: false),
     ]
 
     // Find the Java .class files generated from prior plugins.
@@ -133,13 +135,14 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           classFile.deleteLastPathComponent()
         }
 
-        let className = classNameComponents
+        let className =
+          classNameComponents
           .reversed()
           .joined(separator: ".")
         arguments += ["--swift-native-implementation", className]
       }
     }
-    
+
     var fetchDependenciesOutputFiles: [URL] = []
     if let dependencies = config.dependencies, !dependencies.isEmpty {
       let displayName = "Fetch (Java) dependencies for Swift target \(sourceModule.name)"
@@ -164,7 +167,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     } else {
       log("No dependencies to fetch for target \(sourceModule.name)")
     }
-    
+
     // Add all the core Java stdlib modules as --depends-on
     let javaStdlibModules = getExtractedJavaStdlibModules()
     log("Include Java standard library SwiftJava modules: \(javaStdlibModules)")
@@ -183,7 +186,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           executable: executable,
           arguments: ["wrap-java"]
             + arguments,
-          inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [ configFile ],
+          inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [configFile],
           outputFiles: outputSwiftFiles
         )
       ]
@@ -199,8 +202,8 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
 extension SwiftJavaBuildToolPlugin {
   func argumentsSwiftModule(sourceModule: Target) -> [String] {
-    return [
-      "--swift-module", sourceModule.name
+    [
+      "--swift-module", sourceModule.name,
     ]
   }
 
@@ -208,15 +211,15 @@ extension SwiftJavaBuildToolPlugin {
   //        since we cannot have the same option in common options and in the top level
   //        command from which we get into sub commands. The top command will NOT have this option.
   func argumentsSwiftModuleDeprecated(sourceModule: Target) -> [String] {
-    return [
-      "--swift-module-deprecated", sourceModule.name
+    [
+      "--swift-module-deprecated", sourceModule.name,
     ]
   }
 
   func argumentsOutputDirectory(context: PluginContext, generated: Bool = true) -> [String] {
-    return [
+    [
       "--output-directory",
-      outputDirectory(context: context, generated: generated).path(percentEncoded: false)
+      outputDirectory(context: context, generated: generated).path(percentEncoded: false),
     ]
   }
 
@@ -225,7 +228,7 @@ extension SwiftJavaBuildToolPlugin {
       let (moduleName, configFile) = moduleAndConfigFile
       return [
         "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))"
+        "\(moduleName)=\(configFile.path(percentEncoded: false))",
       ]
     }
   }
@@ -238,7 +241,7 @@ extension SwiftJavaBuildToolPlugin {
       return dir
     }
   }
-  
+
   func outputFilePath(context: PluginContext, generated: Bool, filename: String) -> URL {
     outputDirectory(context: context, generated: generated).appending(path: filename)
   }
@@ -253,13 +256,17 @@ extension SwiftJavaBuildToolPlugin {
       .appendingPathComponent("Sources")
       .appendingPathComponent("JavaStdlib")
 
-    guard let stdlibDirContents = try? fileManager.contentsOfDirectory(
-      at: sourcesPath,
-      includingPropertiesForKeys: [.isDirectoryKey],
-      options: [.skipsHiddenFiles]
-    ) else {
-      warn("Unable to find Java standard library Swift wrappers! Expected \(sourcesPath) to exist." + 
-           "May be unable to wrap-java types involving Java standard library types.")
+    guard
+      let stdlibDirContents = try? fileManager.contentsOfDirectory(
+        at: sourcesPath,
+        includingPropertiesForKeys: [.isDirectoryKey],
+        options: [.skipsHiddenFiles]
+      )
+    else {
+      warn(
+        "Unable to find Java standard library Swift wrappers! Expected \(sourcesPath) to exist."
+          + "May be unable to wrap-java types involving Java standard library types."
+      )
       return []
     }
 
@@ -269,10 +276,11 @@ extension SwiftJavaBuildToolPlugin {
         warn("Expected JavaStdlib directory \(url) to contain swift-java.config but it was missing!")
         return nil
       }
-      
+
       guard let resourceValues = try? url.resourceValues(forKeys: [.isDirectoryKey]),
-            let isDirectory = resourceValues.isDirectory,
-            isDirectory else {
+        let isDirectory = resourceValues.isDirectory,
+        isDirectory
+      else {
         return nil
       }
       return url.lastPathComponent

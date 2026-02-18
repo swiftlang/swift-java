@@ -13,12 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import JavaUtilJar
+import Subprocess
 @_spi(Testing) import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftJavaToolLib
-import XCTest  // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
-import Subprocess
+import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
 class JavaTranslatorTests: XCTestCase {
 
@@ -42,7 +42,8 @@ class JavaTranslatorTests: XCTestCase {
             Item<ValueType> value
         ) { return null; }
       }
-      """)
+      """
+    )
 
     try withJavaTranslator(
       javaClassNames: [
@@ -51,7 +52,7 @@ class JavaTranslatorTests: XCTestCase {
         "com.example.ExampleSimpleClass",
       ],
       classpath: [classpathURL],
-    ) { translator in 
+    ) { translator in
 
     }
   }

@@ -13,21 +13,20 @@
 //===----------------------------------------------------------------------===//
 
 import JavaKitExample
-
-import SwiftJava
 import JavaUtilFunction
+import SwiftJava
 
-/// Utility to configure the classpath and native libraries paths for writing tests against 
+/// Utility to configure the classpath and native libraries paths for writing tests against
 /// classes defined in this JavaKitExample project
 struct JavaKitSampleJVM {
 
   static var shared: JavaVirtualMachine = {
     try! JavaVirtualMachine.shared(
       classpath: [
-        ".build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java",
+        ".build/plugins/outputs/javakitsampleapp/JavaKitExample/destination/JavaCompilerPlugin/Java"
       ],
       vmOptions: [
-        KnownJavaVMOptions.javaLibraryPath(".build/\(SwiftPlatform.debugOrRelease)/"),
+        KnownJavaVMOptions.javaLibraryPath(".build/\(SwiftPlatform.debugOrRelease)/")
       ]
     )
   }()

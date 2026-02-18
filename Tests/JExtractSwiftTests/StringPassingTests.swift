@@ -26,7 +26,9 @@ final class StringPassingTests {
   @Test("Import: public func writeString(string: String) -> Int")
   func method_helloWorld() throws {
     try assertOutput(
-      input: class_interfaceFile, .ffm, .java,
+      input: class_interfaceFile,
+      .ffm,
+      .java,
       swiftModuleName: "__FakeModule",
       expectedChunks: [
         """
@@ -67,7 +69,8 @@ final class StringPassingTests {
                 return swiftjava___FakeModule_writeString_string.call(SwiftRuntime.toCString(string, arena$));
             }
         }
-        """
-      ])
+        """,
+      ]
+    )
   }
 }

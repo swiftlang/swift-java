@@ -94,7 +94,7 @@ extension CType: CustomStringConvertible {
         result: &result
       )
 
-    case .function(resultType: let resultType, parameters: _, variadic: _):
+    case .function(let resultType, parameters: _, variadic: _):
       let previousHasEmptyPlaceholder = hasEmptyPlaceholder
       hasEmptyPlaceholder = false
       defer {
@@ -208,7 +208,7 @@ extension CType: CustomStringConvertible {
     switch self {
     case .floating, .integral, .tag, .void: break
 
-    case .function(resultType: let resultType, parameters: let parameters, variadic: let variadic):
+    case .function(let resultType, let parameters, let variadic):
       if !hasEmptyPlaceholder {
         result += ")"
       }
@@ -281,7 +281,7 @@ extension CType: CustomStringConvertible {
     switch self {
     case .floating, .integral, .tag, .void: true
     case .function, .pointer: false
-    case .qualified(const: _, volatile: _, type: let type): type.canPrefixQualifiers
+    case .qualified(const: _, volatile: _, let type): type.canPrefixQualifiers
     }
   }
 }
@@ -301,7 +301,7 @@ extension CType {
 
 extension CType {
   var isVoid: Bool {
-    return switch self {
+    switch self {
     case .void: true
     default: false
     }

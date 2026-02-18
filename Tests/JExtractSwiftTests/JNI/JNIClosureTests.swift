@@ -25,30 +25,35 @@ struct JNIClosureTests {
 
   @Test
   func emptyClosure_javaBindings() throws {
-    try assertOutput(input: source, .jni, .java, expectedChunks: [
-      """
-      public static class emptyClosure {
-        @FunctionalInterface
-        public interface closure {
-          void apply();
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static class emptyClosure {
+          @FunctionalInterface
+          public interface closure {
+            void apply();
+          }
         }
-      }
-      """,
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func emptyClosure(closure: () -> ())
-       * }
-       */
-      public static void emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure) {
-        SwiftModule.$emptyClosure(closure);
-      }
-      """,
-      """
-      private static native void $emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure);
-      """
-    ])
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func emptyClosure(closure: () -> ())
+         * }
+         */
+        public static void emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure) {
+          SwiftModule.$emptyClosure(closure);
+        }
+        """,
+        """
+        private static native void $emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure);
+        """,
+      ]
+    )
   }
 
   @Test
@@ -77,30 +82,35 @@ struct JNIClosureTests {
 
   @Test
   func closureWithArgumentsAndReturn_javaBindings() throws {
-    try assertOutput(input: source, .jni, .java, expectedChunks: [
-      """
-      public static class closureWithArgumentsAndReturn {
-        @FunctionalInterface
-        public interface closure {
-          long apply(long _0, boolean _1);
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static class closureWithArgumentsAndReturn {
+          @FunctionalInterface
+          public interface closure {
+            long apply(long _0, boolean _1);
+          }
         }
-      }
-      """,
-      """
-      /**
-       * Downcall to Swift:
-       * {@snippet lang=swift :
-       * public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64)
-       * }
-       */
-      public static void closureWithArgumentsAndReturn(com.example.swift.SwiftModule.closureWithArgumentsAndReturn.closure closure) {
-        SwiftModule.$closureWithArgumentsAndReturn(closure);
-      }
-      """,
-      """
-      private static native void $closureWithArgumentsAndReturn(com.example.swift.SwiftModule.closureWithArgumentsAndReturn.closure closure);
-      """
-    ])
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64)
+         * }
+         */
+        public static void closureWithArgumentsAndReturn(com.example.swift.SwiftModule.closureWithArgumentsAndReturn.closure closure) {
+          SwiftModule.$closureWithArgumentsAndReturn(closure);
+        }
+        """,
+        """
+        private static native void $closureWithArgumentsAndReturn(com.example.swift.SwiftModule.closureWithArgumentsAndReturn.closure closure);
+        """,
+      ]
+    )
   }
 
   @Test

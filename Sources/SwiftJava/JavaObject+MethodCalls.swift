@@ -86,7 +86,7 @@ extension AnyJavaObject {
     resultType: Result.Type,
     in environment: JNIEnvironment
   ) throws -> jmethodID {
-    return try environment.translatingJNIExceptions {
+    try environment.translatingJNIExceptions {
       try javaMethodLookup(
         thisClass: thisClass,
         methodName: methodName,
@@ -157,7 +157,7 @@ extension AnyJavaObject {
     let jniMethod = Result.jniMethodCall(in: environment)
     let jniArgs = getJValues(repeat each args, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
-      return jniMethod(environment, this, method, jniArgs)
+      jniMethod(environment, this, method, jniArgs)
     }
 
     return Result(fromJNI: jniResult, in: environment)

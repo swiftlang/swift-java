@@ -22,7 +22,7 @@ public class MySwiftClass {
   public let constant: Int64 = 100
   public var mutable: Int64 = 0
   public var product: Int64 {
-    return x * y
+    x * y
   }
   public var throwingVariable: Int64 {
     get throws {
@@ -31,7 +31,7 @@ public class MySwiftClass {
   }
   public var mutableDividedByTwo: Int64 {
     get {
-      return mutable / 2
+      mutable / 2
     }
     set {
       mutable = newValue * 2
@@ -40,7 +40,7 @@ public class MySwiftClass {
   public let warm: Bool = false
   public var getAsync: Int64 {
     get async {
-      return 42
+      42
     }
   }
 
@@ -69,11 +69,11 @@ public class MySwiftClass {
   }
 
   public func sum() -> Int64 {
-    return x + y
+    x + y
   }
 
   public func xMultiplied(by z: Int64) -> Int64 {
-    return x * z;
+    x * z
   }
 
   enum MySwiftClassError: Error {
@@ -85,15 +85,15 @@ public class MySwiftClass {
   }
 
   public func sumX(with other: MySwiftClass) -> Int64 {
-    return self.x + other.x
+    self.x + other.x
   }
 
   public func copy() -> MySwiftClass {
-    return MySwiftClass(x: self.x, y: self.y)
+    MySwiftClass(x: self.x, y: self.y)
   }
 
   public func addXWithJavaLong(_ other: JavaLong) -> Int64 {
-    return self.x + other.longValue()
+    self.x + other.longValue()
   }
 }
 

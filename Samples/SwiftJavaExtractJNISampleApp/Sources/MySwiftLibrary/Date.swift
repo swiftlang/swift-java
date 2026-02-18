@@ -12,17 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJava
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import SwiftJava
 
 public func compareDates(date1: Date, date2: Date) -> Bool {
-  return date1 == date2
+  date1 == date2
 }
 
 public func dateFromSeconds(_ seconds: Double) -> Date {
-  return Date(timeIntervalSince1970: seconds)
+  Date(timeIntervalSince1970: seconds)
 }

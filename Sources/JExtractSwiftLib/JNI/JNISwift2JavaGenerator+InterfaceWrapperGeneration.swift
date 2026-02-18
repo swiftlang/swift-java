@@ -95,8 +95,9 @@ extension JNISwift2JavaGenerator {
   struct JavaInterfaceProtocolWrapperGenerator {
     func generate(for type: ImportedNominalType) throws -> JavaInterfaceSwiftWrapper {
       if !type.initializers.isEmpty
-          || type.methods.contains(where: \.isStatic)
-          || type.variables.contains(where: \.isStatic) {
+        || type.methods.contains(where: \.isStatic)
+        || type.variables.contains(where: \.isStatic)
+      {
         throw JavaTranslationError.protocolStaticRequirementsNotSupported
       }
 
@@ -154,7 +155,6 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-
     private func translate(function: ImportedFunc) throws -> JavaInterfaceSwiftWrapper.Function {
       let parameters = try function.functionSignature.parameters.map {
         try self.translateParameter($0)
@@ -171,8 +171,11 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    private func translateVariable(getter: ImportedFunc, setter: ImportedFunc?) throws -> JavaInterfaceSwiftWrapper.Variable {
-      return try JavaInterfaceSwiftWrapper.Variable(
+    private func translateVariable(
+      getter: ImportedFunc,
+      setter: ImportedFunc?
+    ) throws -> JavaInterfaceSwiftWrapper.Variable {
+      try JavaInterfaceSwiftWrapper.Variable(
         swiftDecl: getter.swiftDecl, // they should be the same
         getter: translate(function: getter),
         setter: setter.map { try self.translate(function: $0) }
@@ -300,8 +303,9 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        let inner: UpcallConversionStep = !allowNilForObjects ?
-          .unwrapOptional(.placeholder, message: "Upcall to \(methodName) unexpectedly returned nil")
+        let inner: UpcallConversionStep =
+          !allowNilForObjects
+          ? .unwrapOptional(.placeholder, message: "Upcall to \(methodName) unexpectedly returned nil")
           : .placeholder
 
         // We assume this is then a JExtracted Swift class
@@ -355,100 +359,100 @@ extension JNISwift2JavaGenerator {
   }
 }
 
-  /// Describes how to convert values from and to wrap-java types
-  enum UpcallConversionStep {
-    case placeholder
+/// Describes how to convert values from and to wrap-java types
+enum UpcallConversionStep {
+  case placeholder
 
-    case constant(String)
+  case constant(String)
 
-    indirect case toJavaWrapper(
-      UpcallConversionStep,
-      name: String,
-      nominalType: SwiftNominalType
-    )
+  indirect case toJavaWrapper(
+    UpcallConversionStep,
+    name: String,
+    nominalType: SwiftNominalType
+  )
 
-    indirect case toSwiftClass(
-      UpcallConversionStep,
-      name: String,
-      nominalType: SwiftNominalType
-    )
+  indirect case toSwiftClass(
+    UpcallConversionStep,
+    name: String,
+    nominalType: SwiftNominalType
+  )
 
-    indirect case unwrapOptional(
-      UpcallConversionStep,
-      message: String
-    )
+  indirect case unwrapOptional(
+    UpcallConversionStep,
+    message: String
+  )
 
-    indirect case toJavaOptional(UpcallConversionStep)
+  indirect case toJavaOptional(UpcallConversionStep)
 
-    indirect case fromJavaOptional(UpcallConversionStep)
+  indirect case fromJavaOptional(UpcallConversionStep)
 
-    indirect case map(UpcallConversionStep, body: UpcallConversionStep)
+  indirect case map(UpcallConversionStep, body: UpcallConversionStep)
 
-    /// Returns the conversion string applied to the placeholder.
-    func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
-      switch self {
-      case .placeholder:
-        return placeholder
+  /// Returns the conversion string applied to the placeholder.
+  func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+    switch self {
+    case .placeholder:
+      return placeholder
 
-      case .constant(let constant):
-        return constant
+    case .constant(let constant):
+      return constant
 
-      case .toJavaWrapper(let inner, let name, let nominalType):
-        let inner = inner.render(&printer, placeholder)
-        printer.print(
-          """
-          let \(name)Class = try! JavaClass<\(nominalType.nominalTypeDecl.generatedJavaClassMacroName)>(environment: JavaVirtualMachine.shared().environment())
-          let \(name)Pointer = UnsafeMutablePointer<\(nominalType.nominalTypeDecl.qualifiedName)>.allocate(capacity: 1)
-          \(name)Pointer.initialize(to: \(inner))
-          """
-        )
+    case .toJavaWrapper(let inner, let name, let nominalType):
+      let inner = inner.render(&printer, placeholder)
+      printer.print(
+        """
+        let \(name)Class = try! JavaClass<\(nominalType.nominalTypeDecl.generatedJavaClassMacroName)>(environment: JavaVirtualMachine.shared().environment())
+        let \(name)Pointer = UnsafeMutablePointer<\(nominalType.nominalTypeDecl.qualifiedName)>.allocate(capacity: 1)
+        \(name)Pointer.initialize(to: \(inner))
+        """
+      )
 
-        return "\(name)Class.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: \(name)Pointer)))"
+      return "\(name)Class.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: \(name)Pointer)))"
 
-      case .toSwiftClass(let inner, let name, let nominalType):
-        let inner = inner.render(&printer, placeholder)
+    case .toSwiftClass(let inner, let name, let nominalType):
+      let inner = inner.render(&printer, placeholder)
 
-        // The wrap-java methods will return null
-        printer.print(
-          """
-          let \(name)MemoryAddress$ = \(inner).as(JavaJNISwiftInstance.self)!.memoryAddress()
-          let \(name)Pointer = UnsafeMutablePointer<\(nominalType.nominalTypeDecl.qualifiedName)>(bitPattern: Int(\(name)MemoryAddress$))!
-          """
-        )
+      // The wrap-java methods will return null
+      printer.print(
+        """
+        let \(name)MemoryAddress$ = \(inner).as(JavaJNISwiftInstance.self)!.memoryAddress()
+        let \(name)Pointer = UnsafeMutablePointer<\(nominalType.nominalTypeDecl.qualifiedName)>(bitPattern: Int(\(name)MemoryAddress$))!
+        """
+      )
 
-        return "\(name)Pointer.pointee"
+      return "\(name)Pointer.pointee"
 
-      case .unwrapOptional(let inner, let message):
-        let inner = inner.render(&printer, placeholder)
+    case .unwrapOptional(let inner, let message):
+      let inner = inner.render(&printer, placeholder)
 
-        printer.print(
-          """
-          guard let unwrapped$ = \(inner) else {
-            fatalError("\(message)")
-          }
-          """
-        )
-
-        return "unwrapped$"
-
-      case .toJavaOptional(let inner):
-        let inner = inner.render(&printer, placeholder)
-        return "\(inner).toJavaOptional()"
-
-      case .fromJavaOptional(let inner):
-        let inner = inner.render(&printer, placeholder)
-        return "Optional(javaOptional: \(inner))"
-
-      case .map(let inner, let body):
-        let inner = inner.render(&printer, placeholder)
-        var printer = CodePrinter()
-        printer.printBraceBlock("\(inner).map") { printer in
-          let body = body.render(&printer, "$0")
-          printer.print("return \(body)")
+      printer.print(
+        """
+        guard let unwrapped$ = \(inner) else {
+          fatalError("\(message)")
         }
-        return printer.finalize()
+        """
+      )
+
+      return "unwrapped$"
+
+    case .toJavaOptional(let inner):
+      let inner = inner.render(&printer, placeholder)
+      return "\(inner).toJavaOptional()"
+
+    case .fromJavaOptional(let inner):
+      let inner = inner.render(&printer, placeholder)
+      return "Optional(javaOptional: \(inner))"
+
+    case .map(let inner, let body):
+      let inner = inner.render(&printer, placeholder)
+      var printer = CodePrinter()
+      printer.printBraceBlock("\(inner).map") { printer in
+        let body = body.render(&printer, "$0")
+        printer.print("return \(body)")
       }
+      return printer.finalize()
     }
+  }
 }
 
 extension SwiftType {
@@ -464,7 +468,8 @@ extension SwiftType {
         return false
       }
       switch knownType {
-      case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string, .void:
+      case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double,
+        .string, .void:
         return true
       default:
         return false

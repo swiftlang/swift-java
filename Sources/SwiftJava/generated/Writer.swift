@@ -9,7 +9,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.io.Writer java.io.Writer.append(java.lang.CharSequence,int,int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Writer!
 
   /// Java method `append`.
@@ -18,7 +18,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.io.Writer java.io.Writer.append(char) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: UInt16) throws -> Writer!
 
   /// Java method `append`.
@@ -27,7 +27,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.lang.Appendable java.io.Writer.append(java.lang.CharSequence) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: CharSequence?) throws -> Appendable!
 
   /// Java method `append`.
@@ -36,7 +36,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.lang.Appendable java.io.Writer.append(char) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: UInt16) throws -> Appendable!
 
   /// Java method `append`.
@@ -45,7 +45,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.lang.Appendable java.io.Writer.append(java.lang.CharSequence,int,int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
 
   /// Java method `append`.
@@ -54,7 +54,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public java.io.Writer java.io.Writer.append(java.lang.CharSequence) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func append(_ arg0: CharSequence?) throws -> Writer!
 
   /// Java method `flush`.
@@ -63,7 +63,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public abstract void java.io.Writer.flush() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func flush() throws
 
   /// Java method `write`.
@@ -72,7 +72,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public void java.io.Writer.write(java.lang.String,int,int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func write(_ arg0: String, _ arg1: Int32, _ arg2: Int32) throws
 
   /// Java method `write`.
@@ -81,7 +81,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public void java.io.Writer.write(int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func write(_ arg0: Int32) throws
 
   /// Java method `write`.
@@ -90,7 +90,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public void java.io.Writer.write(java.lang.String) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func write(_ arg0: String) throws
 
   /// Java method `write`.
@@ -99,7 +99,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public abstract void java.io.Writer.write(char[],int,int) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func write(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws
 
   /// Java method `write`.
@@ -108,7 +108,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public void java.io.Writer.write(char[]) throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func write(_ arg0: [UInt16]) throws
 
   /// Java method `close`.
@@ -117,7 +117,7 @@ open class Writer: JavaObject {
   /// ```java
   /// public abstract void java.io.Writer.close() throws java.io.IOException
   /// ```
-@JavaMethod
+  @JavaMethod
   open func close() throws
 }
 extension JavaClass<Writer> {
@@ -127,6 +127,6 @@ extension JavaClass<Writer> {
   /// ```java
   /// public static java.io.Writer java.io.Writer.nullWriter()
   /// ```
-@JavaStaticMethod
+  @JavaStaticMethod
   public func nullWriter() -> Writer!
 }

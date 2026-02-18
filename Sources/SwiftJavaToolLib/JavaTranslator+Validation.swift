@@ -40,9 +40,9 @@ package struct SwiftTypeName: Hashable, CustomStringConvertible {
   }
 }
 
-package extension JavaTranslator {
+extension JavaTranslator {
 
-  struct SwiftToJavaMapping: Equatable {
+  package struct SwiftToJavaMapping: Equatable {
     let swiftType: SwiftTypeName
     let javaTypes: [JavaFullyQualifiedTypeName]
 
@@ -52,7 +52,7 @@ package extension JavaTranslator {
     }
   }
 
-  enum ValidationError: Error, CustomStringConvertible {
+  package enum ValidationError: Error, CustomStringConvertible {
     case multipleClassesMappedToSameName(swiftToJavaMapping: [SwiftToJavaMapping])
 
     package var description: String {
@@ -67,21 +67,26 @@ package extension JavaTranslator {
 
     private func mappingDescription(mapping: SwiftToJavaMapping) -> String {
       let javaTypes = mapping.javaTypes.map { "'\($0)'" }.joined(separator: ", ")
-      return "Swift module: '\(mapping.swiftType.swiftModule ?? "")', type: '\(mapping.swiftType.swiftType)', Java Types: \(javaTypes)"
+      return
+        "Swift module: '\(mapping.swiftType.swiftModule ?? "")', type: '\(mapping.swiftType.swiftType)', Java Types: \(javaTypes)"
 
     }
   }
-  func validateClassConfiguration() throws(ValidationError) {
+  package func validateClassConfiguration() throws(ValidationError) {
     // Group all classes by swift name
-    let groupedDictionary: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = Dictionary(grouping: translatedClasses, by: { 
-      // SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule) 
-      $0.value
-    })
+    let groupedDictionary: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = Dictionary(
+      grouping: translatedClasses,
+      by: {
+        // SwiftTypeName(swiftType: $0.value.swiftType, swiftModule: $0.value.swiftModule)
+        $0.value
+      }
+    )
     // Find all that are mapped to multiple names
-    let multipleClassesMappedToSameName: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] = groupedDictionary.filter { 
+    let multipleClassesMappedToSameName: [SwiftTypeName: [(JavaFullyQualifiedTypeName, SwiftTypeName)]] =
+      groupedDictionary.filter {
         (key: SwiftTypeName, value: [(JavaFullyQualifiedTypeName, SwiftTypeName)]) in
-      value.count > 1
-    }
+        value.count > 1
+      }
 
     if !multipleClassesMappedToSameName.isEmpty {
       // Convert them to swift object and throw

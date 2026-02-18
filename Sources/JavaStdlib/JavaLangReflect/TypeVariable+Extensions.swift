@@ -16,11 +16,11 @@ import CSwiftJavaJNI
 import SwiftJava
 
 // FIXME: all interfaces should ahve these https://github.com/swiftlang/swift-java/issues/430
-extension TypeVariable {  
+extension TypeVariable {
 
   @JavaMethod
   public func toString() -> String
-  
+
   @JavaMethod
   public func getClass() -> JavaClass<JavaObject>!
 
@@ -37,7 +37,7 @@ extension TypeVariable: Hashable {
 
   public func hash(into hasher: inout Hasher) {
     guard let pojo = self.as(JavaObject.self) else {
-      return 
+      return
     }
 
     hasher.combine(pojo.hashCode())
@@ -57,7 +57,7 @@ extension TypeVariable: Hashable {
 }
 
 extension TypeVariable {
-  public var description: String { 
+  public var description: String {
     toString()
   }
 }

@@ -28,7 +28,9 @@ final class ExtensionImportTests {
   @Test("Import extensions: Swift thunks")
   func data_swiftThunk() throws {
     try assertOutput(
-      input: interfaceFile, .ffm, .swift,
+      input: interfaceFile,
+      .ffm,
+      .swift,
       expectedChunks: [
         """
         @_cdecl("swiftjava_getType_SwiftModule_MyStruct")
@@ -41,7 +43,7 @@ final class ExtensionImportTests {
         public func swiftjava_SwiftModule_MyStruct_methodInExtension(_ self: UnsafeRawPointer) {
           self.assumingMemoryBound(to: MyStruct.self).pointee.methodInExtension()
         }
-        """
+        """,
       ]
     )
   }

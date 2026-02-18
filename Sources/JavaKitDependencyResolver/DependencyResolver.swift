@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
 import CSwiftJavaJNI
+import SwiftJava
 
 @JavaInterface("org.swift.jni.dependencies.DependencyResolver")
 public struct DependencyResolver {
@@ -24,7 +24,8 @@ extension JavaClass<DependencyResolver> {
   @JavaStaticMethod
   public func resolveDependenciesToClasspath(
     projectBaseDirectory: String,
-    dependencies: [String]) throws -> String
+    dependencies: [String]
+  ) throws -> String
 
   @JavaStaticMethod
   public func hasDependencyResolverDependenciesLoaded() -> Bool

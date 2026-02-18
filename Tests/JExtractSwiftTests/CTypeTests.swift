@@ -54,7 +54,7 @@ struct CTypeTests {
               type: .integral(.signed(bits: 8))
             )
           )
-        )
+        ),
       ],
       isVariadic: true
     )
@@ -100,7 +100,7 @@ struct CTypeTests {
           .qualified(const: false, volatile: true, type: .void)
         )
       )
-    ) 
+    )
     #expect(ptrptr.description == "volatile void *const *")
   }
 }

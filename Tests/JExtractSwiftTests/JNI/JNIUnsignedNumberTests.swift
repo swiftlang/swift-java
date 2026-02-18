@@ -22,7 +22,8 @@ final class JNIUnsignedNumberTests {
   func jni_unsignedChar() throws {
     try assertOutput(
       input: "public func unsignedChar(_ arg: UInt16)",
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -50,7 +51,8 @@ final class JNIUnsignedNumberTests {
     try assertOutput(
       input: "public func unsignedInt(_ arg: UInt32)",
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -64,7 +66,7 @@ final class JNIUnsignedNumberTests {
           SwiftModule.$unsignedInt(arg);
         }
         private static native void $unsignedInt(int arg);
-        """,
+        """
       ]
     )
   }
@@ -76,7 +78,8 @@ final class JNIUnsignedNumberTests {
     try assertOutput(
       input: "public func returnUnsignedInt() -> UInt32",
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -91,7 +94,7 @@ final class JNIUnsignedNumberTests {
           return SwiftModule.$returnUnsignedInt();
         }
         private static native int $returnUnsignedInt();
-        """,
+        """
       ]
     )
   }
@@ -103,7 +106,8 @@ final class JNIUnsignedNumberTests {
     try assertOutput(
       input: "public func unsignedLong(first: UInt64, second: UInt32) -> UInt32",
       config: config,
-      .jni, .java,
+      .jni,
+      .java,
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
@@ -118,7 +122,7 @@ final class JNIUnsignedNumberTests {
             return SwiftModule.$unsignedLong(first, second);
           }
           private static native int $unsignedLong(long first, int second);
-        """,
+        """
       ]
     )
   }

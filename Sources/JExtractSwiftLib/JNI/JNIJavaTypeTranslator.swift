@@ -32,7 +32,7 @@ enum JNIJavaTypeTranslator {
 
     case .int64: return .long
     case .uint64: return .long
-    
+
     case .int, .uint: return .long
 
     case .float: return .float
@@ -42,20 +42,23 @@ enum JNIJavaTypeTranslator {
     case .string: return .javaLangString
 
     case .unsafeRawPointer, .unsafeMutableRawPointer,
-        .unsafePointer, .unsafeMutablePointer,
-        .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-        .unsafeBufferPointer, .unsafeMutableBufferPointer,
-        .optional, 
-        .foundationData, .foundationDataProtocol, 
-        .essentialsData, .essentialsDataProtocol, 
-        .array, 
-        .foundationDate, .essentialsDate, 
-        .foundationUUID, .essentialsUUID:
+      .unsafePointer, .unsafeMutablePointer,
+      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
+      .unsafeBufferPointer, .unsafeMutableBufferPointer,
+      .optional,
+      .foundationData, .foundationDataProtocol,
+      .essentialsData, .essentialsDataProtocol,
+      .array,
+      .foundationDate, .essentialsDate,
+      .foundationUUID, .essentialsUUID:
       return nil
     }
   }
 
-  static func indirectConversionStepSwiftType(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> SwiftType? {
+  static func indirectConversionStepSwiftType(
+    for knownKind: SwiftKnownTypeDeclKind,
+    from knownTypes: SwiftKnownTypes
+  ) -> SwiftType? {
     switch knownKind {
     case .int: knownTypes.int64
     case .uint: knownTypes.uint64
@@ -66,17 +69,20 @@ enum JNIJavaTypeTranslator {
       .unsafePointer, .unsafeMutablePointer,
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
-      .optional, 
-      .foundationData, .foundationDataProtocol, 
+      .optional,
+      .foundationData, .foundationDataProtocol,
       .essentialsData, .essentialsDataProtocol,
-      .array, 
-      .foundationDate, .essentialsDate, 
+      .array,
+      .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil
     }
   }
 
-  static func checkStep(for knownKind: SwiftKnownTypeDeclKind, from knownTypes: SwiftKnownTypes) -> JNISwift2JavaGenerator.NativeSwiftConversionCheck? {
+  static func checkStep(
+    for knownKind: SwiftKnownTypeDeclKind,
+    from knownTypes: SwiftKnownTypes
+  ) -> JNISwift2JavaGenerator.NativeSwiftConversionCheck? {
     switch knownKind {
     case .int: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.int32)
     case .uint: .check32BitIntOverflow(typeWithMinAndMax: knownTypes.uint32)
@@ -87,11 +93,11 @@ enum JNIJavaTypeTranslator {
       .unsafePointer, .unsafeMutablePointer,
       .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
       .unsafeBufferPointer, .unsafeMutableBufferPointer,
-      .optional, 
-      .foundationData, .foundationDataProtocol, 
+      .optional,
+      .foundationData, .foundationDataProtocol,
       .essentialsData, .essentialsDataProtocol,
-      .array, 
-      .foundationDate, .essentialsDate, 
+      .array,
+      .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil
     }

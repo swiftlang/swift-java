@@ -42,7 +42,7 @@ func getGenericJavaTypeOriginInfo(_ type: Type?, from method: Method) -> [Generi
   }
 
   var methodTypeVars = method.getTypeParameters()
-  
+
   // TODO: also handle nested classes here...
   var classTypeVars = method.getDeclaringClass().getTypeParameters()
 
@@ -89,8 +89,8 @@ func isGenericJavaType(_ type: Type?) -> Bool {
 }
 
 /// Check if a type is type-erased att runtime.
-/// 
-/// E.g. in a method returning a generic `T` the T is type erased and must 
+///
+/// E.g. in a method returning a generic `T` the T is type erased and must
 /// be represented as a `java.lang.Object` instead.
 func isTypeErased(_ type: Type?) -> Bool {
   guard let type else {

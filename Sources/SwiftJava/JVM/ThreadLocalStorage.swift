@@ -29,62 +29,62 @@ private var _globalTlsValue: UnsafeMutableRawPointer?
 #endif
 
 package struct ThreadLocalStorage: ~Copyable {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+  #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
   private typealias PlatformKey = pthread_key_t
-#elseif canImport(WinSDK)
+  #elseif canImport(WinSDK)
   private typealias PlatformKey = DWORD
-#else
+  #else
   private typealias PlatformKey = Void
-#endif
+  #endif
 
-#if canImport(Darwin)
+  #if canImport(Darwin)
   package typealias Value = UnsafeMutableRawPointer
-#else
+  #else
   package typealias Value = UnsafeMutableRawPointer?
-#endif
+  #endif
 
-  package typealias OnThreadExit = @convention(c) (_: Value) -> ()
+  package typealias OnThreadExit = @convention(c) (_: Value) -> Void
 
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+  #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
   private var _key: PlatformKey
-#elseif canImport(WinSDK)
+  #elseif canImport(WinSDK)
   private let _key: PlatformKey
-#endif
+  #endif
 
   package init(onThreadExit: OnThreadExit) {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+    #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
     _key = 0
     pthread_key_create(&_key, onThreadExit)
-#elseif canImport(WinSDK)
+    #elseif canImport(WinSDK)
     _key = FlsAlloc(onThreadExit)
-#endif
+    #endif
   }
 
   package func get() -> UnsafeMutableRawPointer? {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+    #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
     pthread_getspecific(_key)
-#elseif canImport(WinSDK)
+    #elseif canImport(WinSDK)
     FlsGetValue(_key)
-#else
+    #else
     _globalTlsValue
-#endif
+    #endif
   }
 
   package func set(_ value: Value) {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+    #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
     pthread_setspecific(_key, value)
-#elseif canImport(WinSDK)
+    #elseif canImport(WinSDK)
     FlsSetValue(_key, value)
-#else
+    #else
     _globalTlsValue = value
-#endif
+    #endif
   }
 
   deinit {
-#if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
+    #if canImport(Darwin) || canImport(Bionic) || canImport(Glibc) || canImport(Musl)
     pthread_key_delete(_key)
-#elseif canImport(WinSDK)
+    #elseif canImport(WinSDK)
     FlsFree(_key)
-#endif
+    #endif
   }
 }

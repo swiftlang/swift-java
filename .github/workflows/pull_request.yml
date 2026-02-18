@@ -13,8 +13,7 @@ jobs:
     with:
       # Not API stable package (yet)
       api_breakage_check_enabled: false
-      # FIXME: Something is off with the format task and it gets "stuck", need to investigate
-      format_check_enabled: false
+      format_check_enabled: true
       license_header_check_project_name: Swift.org
       # Since we need JAVA_HOME to be set up for building the project and depending on a different workflow won't
       # give us that, we disable the checking and make a separate job that performs docs validation
@@ -34,7 +33,7 @@ jobs:
         os_version: ['jammy']
         jdk_vendor: ['corretto']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Swift Build
@@ -56,7 +55,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle :SwiftKitCore:build
@@ -80,7 +79,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle :SwiftKitCore:build
@@ -106,7 +105,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle compile JMH benchmarks
@@ -126,7 +125,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install jemalloc
@@ -148,7 +147,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Swift Build
@@ -170,7 +169,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swiftly
@@ -193,12 +192,12 @@ jobs:
         swift_version: ['nightly-main']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        sdk_triple: ['x86_64-unknown-linux-android28']
+        sdk_triple: ['x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
         ndk_version: ['r27d']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
@@ -229,7 +228,7 @@ jobs:
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: "Verify sample: ${{ matrix.sample_app }}"
@@ -255,7 +254,7 @@ jobs:
           'SwiftJavaExtractJNISampleApp',
         ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swiftly  # we specifically install Swiftly in macOS jobs because we want a simpler way to find the right dylib paths for libraries

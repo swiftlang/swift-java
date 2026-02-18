@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-public extension Dictionary {
+extension Dictionary {
   /// Same values, corresponding to mapped keys.
-  func mapKeys<Transformed>(
+  public func mapKeys<Transformed>(
     _ transform: (Key) throws -> Transformed
   ) rethrows -> [Transformed: Value] {
     .init(
@@ -41,7 +41,7 @@ extension Collection {
 }
 
 extension Collection where Element == Int {
-  var sum: Int { 
+  var sum: Int {
     var s = 0
     for i in self {
       s += i
