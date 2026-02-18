@@ -383,7 +383,7 @@ extension JNISwift2JavaGenerator {
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-                  javaType.implementsJavaValue
+              javaType.implementsJavaValue
             else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
@@ -453,18 +453,18 @@ extension JNISwift2JavaGenerator {
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
-            
+
           case .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
-            
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-                  javaType.implementsJavaValue
+              javaType.implementsJavaValue
             else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
-            
+
             // Check if we can fit the value and a discriminator byte in a primitive.
             // so the return JNI value will be (value, discriminator)
             if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
@@ -483,7 +483,7 @@ extension JNISwift2JavaGenerator {
               )
             } else {
               // Use indirect byte array to store discriminator
-              
+
               return NativeResult(
                 javaType: javaType,
                 conversion: .optionalRaisingIndirectReturn(
