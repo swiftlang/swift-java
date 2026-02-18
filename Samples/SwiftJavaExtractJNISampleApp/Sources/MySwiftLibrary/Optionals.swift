@@ -14,6 +14,12 @@
 
 import SwiftJava
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 public func optionalBool(input: Bool?) -> Bool? {
   input
 }
@@ -51,6 +57,14 @@ public func optionalString(input: String?) -> String? {
 }
 
 public func optionalClass(input: MySwiftClass?) -> MySwiftClass? {
+  input
+}
+
+public func optionalDate(input: Date?) -> Date? {
+  input
+}
+
+public func optionalData(input: Data?) -> Data? {
   input
 }
 
