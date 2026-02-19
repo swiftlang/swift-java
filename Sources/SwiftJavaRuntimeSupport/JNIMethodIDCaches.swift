@@ -120,4 +120,33 @@ extension _JNIMethodIDCache {
       cache.methods[typeMetadataAddressMethod]!
     }
   }
+
+  public enum OutSwiftGenericInstance {
+    private static let selfPointerField = Field(
+      name: "selfPointer",
+      signature: "J"
+    )
+
+    private static let selfTypePointerField = Field(
+      name: "selfTypePointer",
+      signature: "J"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "org/swift/swiftkit/core/OutSwiftGenericInstance",
+      fields: [selfPointerField, selfTypePointerField]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var selfPointer: jfieldID {
+      cache.fields[selfPointerField]!
+    }
+
+    public static var selfTypePointer: jfieldID {
+      cache.fields[selfTypePointerField]!
+    }
+  }
 }

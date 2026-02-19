@@ -496,16 +496,16 @@ extension JNISwift2JavaGenerator {
     _ decl: ImportedFunc,
     skipMethodBody: Bool = false
   ) {
-    guard translatedDecl(for: decl) != nil else {
+    guard let translatedDecl = self.translatedDecl(for: decl) else {
       // Failed to translate. Skip.
       return
     }
 
     printer.printSeparator(decl.displayName)
 
-    printJavaBindingWrapperHelperClass(&printer, decl)
+    printJavaBindingWrapperHelperClass(&printer, translatedDecl)
 
-    printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody)
+    printJavaBindingWrapperMethod(&printer, translatedDecl, skipMethodBody: skipMethodBody)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -513,9 +513,8 @@ extension JNISwift2JavaGenerator {
   /// * User-facing functional interfaces.
   private func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ translated: TranslatedFunctionDecl
   ) {
-    let translated = self.translatedDecl(for: decl)!
     if translated.functionTypes.isEmpty {
       return
     }

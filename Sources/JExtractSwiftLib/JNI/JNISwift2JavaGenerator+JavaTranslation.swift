@@ -793,12 +793,28 @@ extension JNISwift2JavaGenerator {
 
         // We assume this is a JExtract class.
         let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.name)
-        return TranslatedResult(
-          javaType: javaType,
-          annotations: resultAnnotations,
-          outParameters: [],
-          conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
-        )
+
+        if nominalType.nominalTypeDecl.isGeneric {
+          return TranslatedResult(
+            javaType: javaType,
+            annotations: resultAnnotations,
+            outParameters: [.init(name: "instance", type: .OutSwiftGenericInstance, allocation: .new) ],
+            conversion: .aggregate(variable: nil, [
+              .print(.placeholder),
+              .wrapMemoryAddressUnsafe(.commaSeparated([
+                .member(.constant("instance"), field: "selfPointer"),
+                .member(.constant("instance"), field: "selfTypePointer"),
+              ]), javaType)
+            ])
+          )
+        } else {
+          return TranslatedResult(
+            javaType: javaType,
+            annotations: resultAnnotations,
+            outParameters: [],
+            conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
+          )
+        }
 
       case .tuple([]):
         return TranslatedResult(javaType: .void, outParameters: [], conversion: .placeholder)
@@ -1171,6 +1187,8 @@ extension JNISwift2JavaGenerator {
 
     indirect case method(JavaNativeConversionStep, function: String, arguments: [JavaNativeConversionStep] = [])
 
+    indirect case member(JavaNativeConversionStep, field: String)
+
     case isOptionalPresent
 
     indirect case combinedValueToOptional(
@@ -1287,6 +1305,10 @@ extension JNISwift2JavaGenerator {
         let args = arguments.map { $0.render(&printer, placeholder) }
         let argsStr = args.joined(separator: ", ")
         return "\(inner).\(methodName)(\(argsStr))"
+
+      case .member(let inner, let fieldName):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).\(fieldName)"
 
       case .combinedValueToOptional(
         let combined,
@@ -1406,6 +1428,9 @@ extension JNISwift2JavaGenerator {
 
       case .method(let inner, _, let args):
         return inner.requiresSwiftArena || args.contains(where: \.requiresSwiftArena)
+
+      case .member(let inner, _):
+        return inner.requiresSwiftArena
 
       case .combinedValueToOptional(let inner, _, _, _, _, _):
         return inner.requiresSwiftArena

@@ -314,7 +314,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
         printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toString(selfBits$: selfBits$).getJNIValue(in: environment)")
+        printer.print("return openerType._toString(environment: environment, thisClass: thisClass, self: self).getJNIValue(in: environment)")
       } else {
         let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
         printer.print("return String(describing: \(selfVar).pointee).getJNIValue(in: environment)")
@@ -342,7 +342,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
         printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toDebugString(selfBits$: selfBits$).getJNIValue(in: environment)")
+        printer.print("return openerType._toDebugString(environment: environment, thisClass: thisClass, self: self).getJNIValue(in: environment)")
       } else {
         let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
         printer.print("return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)")
@@ -922,9 +922,9 @@ extension JNISwift2JavaGenerator {
     }
     let nativeSignature = translatedDecl.nativeFunctionSignature
 
-    let selfTypePointer = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
+    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
     let openerName = openerProtocolName(for: parentNominalType.nominalTypeDecl)
-    printer.print("let openerType = \(selfTypePointer) as! (any \(openerName).Type)")
+    printer.print("let openerType = \(selfType) as! (any \(openerName).Type)")
 
     var parameters = nativeSignature.parameters.flatMap(\.parameters)
     if let selfParameter = nativeSignature.selfParameter {

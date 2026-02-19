@@ -46,6 +46,18 @@ struct JNIGenericTypeTests {
         public final class MyID implements JNISwiftInstance {
         """,
         """
+        private MyID(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
+        """,
+        """
+        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
+          return new MyID(selfPointer, selfTypePointer, swiftArena);
+        }
+        
+        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
+          return new MyID(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        }
+        """,
+        """
         private final long selfTypePointer;
         """,
         """
@@ -53,12 +65,6 @@ struct JNIGenericTypeTests {
           return MyID.$getDescription(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         private static native java.lang.String $getDescription(long self, long selfType);
-        """,
-        """
-        public String toString() {
-          return $toString(this.$memoryAddress(), this.$typeMetadataAddress());
-        }
-        private static native java.lang.String $toString(long selfPointer, long selfType);
         """,
         """
         @Override
@@ -107,6 +113,53 @@ struct JNIGenericTypeTests {
           }
           let openerType = unsafeBitCast(selfType$, to: Any.Type.self) as! (any _SwiftModule_MyID_opener.Type)
           return openerType._get_description(environment: environment, thisClass: thisClass, self: self)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func returnsGenericValueFuncJava() throws {
+    try assertOutput(
+      input: genericFile,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        public static MyID makeStringID(java.lang.String value, SwiftArena swiftArena$) {
+          org.swift.swiftkit.core.OutSwiftGenericInstance instance = new org.swift.swiftkit.core.OutSwiftGenericInstance();
+          SwiftModule.$makeStringID(value, instance);
+          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena$);
+        }
+        """,
+        """
+        private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core.OutSwiftGenericInstance out);
+        """
+      ]
+    )
+  }
+
+  @Test
+  func returnsGenericValueFuncSwift() throws {
+    try assertOutput(
+      input: genericFile,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core_OutSwiftGenericInstance_2")
+        public func Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core_OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, out: jobject?) {
+          let result$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
+          result$.initialize(to: SwiftModule.makeStringID(String(fromJNI: value, in: environment)))
+          let resultBits$ = Int64(Int(bitPattern: result$))
+          environment.interface.SetLongField(environment, out, _JNIMethodIDCache.OutSwiftGenericInstance.selfPointer, resultBits$.getJNIValue(in: environment))
+          let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
+          let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+          environment.interface.SetLongField(environment, out, _JNIMethodIDCache.OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          return
         }
         """
       ]
