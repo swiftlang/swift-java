@@ -811,6 +811,10 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    if type.swiftNominal.isGeneric {
+      return
+    }
+    
     printCDecl(
       &printer,
       javaMethodName: "$typeMetadataAddressDowncall",
