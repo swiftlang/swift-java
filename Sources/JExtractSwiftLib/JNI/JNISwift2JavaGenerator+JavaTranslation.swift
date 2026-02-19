@@ -213,7 +213,7 @@ extension JNISwift2JavaGenerator {
         switch decl.apiKind {
         case .getter, .subscriptGetter: decl.javaGetterName
         case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .initializer, .enumCase: decl.name
+        case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
         }
 
       // Swift -> Java
