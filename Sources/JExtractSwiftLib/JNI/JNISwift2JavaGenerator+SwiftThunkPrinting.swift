@@ -20,6 +20,8 @@ import FoundationEssentials
 import Foundation
 #endif
 
+import SwiftSyntax
+
 extension JNISwift2JavaGenerator {
   func writeSwiftThunkSources() throws {
     var printer = CodePrinter()
@@ -294,18 +296,21 @@ extension JNISwift2JavaGenerator {
   private func printToStringMethods(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     let parentName = type.qualifiedName
+    let isGeneric = type.swiftNominal.isGeneric
+
+    var parameters = [selfPointerParam]
+    if isGeneric {
+      parameters.append(JavaParameter(name: "selfType", type: .long))
+    }
 
     printCDecl(
       &printer,
       javaMethodName: "$toString",
       parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam,
-        JavaParameter(name: "selfType", type: .long)
-      ],
+      parameters: parameters,
       resultType: .javaLangString
     ) { printer in
-      if type.swiftNominal.isGeneric {
+      if isGeneric {
         printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
         printer.printBraceBlock(
           "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
@@ -314,7 +319,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
         printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toString(environment: environment, thisClass: thisClass, self: self).getJNIValue(in: environment)")
+        printer.print("return openerType._toString(environment: environment, thisClass: thisClass, self: selfPointer)")
       } else {
         let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
         printer.print("return String(describing: \(selfVar).pointee).getJNIValue(in: environment)")
@@ -327,13 +332,10 @@ extension JNISwift2JavaGenerator {
       &printer,
       javaMethodName: "$toDebugString",
       parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam,
-        JavaParameter(name: "selfType", type: .long)
-      ],
+      parameters: parameters,
       resultType: .javaLangString
     ) { printer in
-      if type.swiftNominal.isGeneric {
+      if isGeneric {
         printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
         printer.printBraceBlock(
           "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
@@ -342,7 +344,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
         printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toDebugString(environment: environment, thisClass: thisClass, self: self).getJNIValue(in: environment)")
+        printer.print("return openerType._toDebugString(environment: environment, thisClass: thisClass, self: selfPointer)")
       } else {
         let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
         printer.print("return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)")
@@ -833,26 +835,50 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the implementation of the destroy function.
   private func printDestroyFunctionThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    let selfPointerParam = JavaParameter(name: "self", type: .long)
+    var parameters = [selfPointerParam]
+    if type.swiftNominal.isGeneric {
+      parameters.append(JavaParameter(name: "selfType", type: .long))
+    }
+
     printCDecl(
       &printer,
       javaMethodName: "$destroy",
       parentName: type.swiftNominal.qualifiedName,
-      parameters: [
-        selfPointerParam
-      ],
+      parameters: parameters,
       resultType: .void
     ) { printer in
-      let parentName = type.qualifiedName
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-      // Deinitialize the pointer allocated (which will call the VWT destroy method)
-      // then deallocate the memory.
-      printer.print(
-        """
-        \(selfVar).deinitialize(count: 1)
-        \(selfVar).deallocate()
-        """
-      )
+      if type.swiftNominal.isGeneric {
+        let destroyFunctionSignature = SwiftFunctionSignature(
+          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "self", type: type.swiftType)),
+          parameters: [],
+          result: .void,
+          effectSpecifiers: [],
+          genericParameters: [],
+          genericRequirements: []
+        )
+        printFunctionOpenerCall(
+          &printer,
+          .init(
+            module: swiftModuleName,
+            swiftDecl: DeclSyntax("func destory()"),
+            name: "destroy",
+            apiKind: .function,
+            functionSignature: destroyFunctionSignature
+          )
+        )
+      } else {
+        let parentName = type.qualifiedName
+        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+        // Deinitialize the pointer allocated (which will call the VWT destroy method)
+        // then deallocate the memory.
+        printer.print(
+          """
+          \(selfVar).deinitialize(count: 1)
+          \(selfVar).deallocate()
+          """
+        )
+      }
     }
   }
 
@@ -1011,6 +1037,7 @@ extension JNISwift2JavaGenerator {
 
       printer.print("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
       printer.print("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
+      printer.print("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong)")
     }
     printer.println()
     printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
@@ -1024,24 +1051,35 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
 
-      printer.printBraceBlock("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> String") { printer in
+      printer.printBraceBlock("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?") { printer in
         printer.print(#"assert(self != 0, "self memory address was null")"#)
         printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
         printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
         printer.printBraceBlock("guard let self$ else") { printer in
           printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
         }
-        printer.print("return String(describing: self$.pointee)")
+        printer.print("return String(describing: self$.pointee).getJNIValue(in: environment)")
       }
 
-      printer.printBraceBlock("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> String") { printer in
+      printer.printBraceBlock("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?") { printer in
         printer.print(#"assert(self != 0, "self memory address was null")"#)
         printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
         printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
         printer.printBraceBlock("guard let self$ else") { printer in
           printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
         }
-        printer.print("return String(reflecting: self$.pointee)")
+        printer.print("return String(reflecting: self$.pointee).getJNIValue(in: environment)")
+      }
+
+      printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong)") { printer in
+        printer.print(#"assert(self != 0, "self memory address was null")"#)
+        printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
+        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
+        printer.printBraceBlock("guard let self$ else") { printer in
+          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
+        }
+        printer.print("self$.deinitialize(count: 1)")
+        printer.print("self$.deallocate()")
       }
     }
   }

@@ -496,16 +496,16 @@ extension JNISwift2JavaGenerator {
     _ decl: ImportedFunc,
     skipMethodBody: Bool = false
   ) {
-    guard let translatedDecl = self.translatedDecl(for: decl) else {
+    guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
       return
     }
 
     printer.printSeparator(decl.displayName)
 
-    printJavaBindingWrapperHelperClass(&printer, translatedDecl)
+    printJavaBindingWrapperHelperClass(&printer, decl)
 
-    printJavaBindingWrapperMethod(&printer, translatedDecl, skipMethodBody: skipMethodBody)
+    printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -513,8 +513,9 @@ extension JNISwift2JavaGenerator {
   /// * User-facing functional interfaces.
   private func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ translated: TranslatedFunctionDecl
+    _ decl: ImportedFunc
   ) {
+    let translated = self.translatedDecl(for: decl)!
     if translated.functionTypes.isEmpty {
       return
     }
@@ -751,11 +752,20 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    printer.print("private static native void $destroy(long selfPointer);")
+    let isGeneric = type.swiftNominal.isGeneric
+    if isGeneric {
+      printer.print("private static native void $destroy(long self, long selfType);")
+    } else {
+      printer.print("private static native void $destroy(long self);")
+    }
 
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
+      if isGeneric {
+        printer.print("long selfType$ = this.$typeMetadataAddress();")
+      }
+      let destroyArg = isGeneric ? "self$, selfType$" : "self$"
       printer.print(
         """
         long self$ = this.$memoryAddress();
@@ -770,7 +780,7 @@ extension JNISwift2JavaGenerator {
             if (CallTraces.TRACE_DOWNCALLS) {
               CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
             }
-            \(type.swiftNominal.name).$destroy(self$);
+            \(type.swiftNominal.name).$destroy(\(destroyArg));
           }
         };
         """
