@@ -439,12 +439,12 @@ final class Swift2JavaVisitor {
     if !imported.methods.contains(where: {
       $0.name == "toString" && $0.functionSignature == toStringFunctionSignature
     }) {
-      imported.methods.append(makeToStringFunc(name: "toString", kind: .toString))
+      imported.methods.append(makeToStringFunc(name: "toString", kind: .synthesizedFunction(.toString)))
     }
     if !imported.methods.contains(where: {
       $0.name == "toDebugString" && $0.functionSignature == toStringFunctionSignature
     }) {
-      imported.methods.append(makeToStringFunc(name: "toDebugString", kind: .toDebugString))
+      imported.methods.append(makeToStringFunc(name: "toDebugString", kind: .synthesizedFunction(.toDebugString)))
     }
   }
 }

@@ -17,16 +17,20 @@ import SwiftSyntax
 /// Any imported (Swift) declaration
 protocol ImportedDecl: AnyObject {}
 
-package enum SwiftAPIKind {
+package enum SynthesizedAPI: Equatable {
+  case toString
+  case toDebugString
+}
+
+package enum SwiftAPIKind: Equatable {
   case function
+  case synthesizedFunction(SynthesizedAPI)
   case initializer
   case getter
   case setter
   case enumCase
   case subscriptGetter
   case subscriptSetter
-  case toString
-  case toDebugString
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -184,7 +188,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
       case .getter: "getter:"
       case .setter: "setter:"
       case .enumCase: "case:"
-      case .function, .initializer, .toString, .toDebugString: ""
+      case .function, .synthesizedFunction, .initializer: ""
       case .subscriptGetter: "subscriptGetter:"
       case .subscriptSetter: "subscriptSetter:"
       }

@@ -579,6 +579,14 @@ extension JNISwift2JavaGenerator {
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
 
+    case .synthesizedFunction(let function):
+      switch function {
+      case .toString:
+        result = "String(describing: \(callee))"
+      case .toDebugString:
+        result = "String(reflecting: \(callee))"
+      }
+
     case .enumCase:
       let downcallArguments = zip(
         decl.functionSignature.parameters,
@@ -613,10 +621,6 @@ extension JNISwift2JavaGenerator {
 
       let parameters = argumentsWithoutNewValue.joined(separator: ", ")
       result = "\(callee)[\(parameters)] = \(newValueArgument)"
-    case .toString:
-      result = "String(describing: \(callee))"
-    case .toDebugString:
-      result = "String(reflecting: \(callee))"
     }
 
     // Lower the result.
