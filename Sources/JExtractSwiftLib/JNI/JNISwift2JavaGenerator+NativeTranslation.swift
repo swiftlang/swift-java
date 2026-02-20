@@ -61,26 +61,21 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
-      func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> NativeParameter? {
-        if decl.isGeneric {
-          return NativeParameter(
-            parameters: [
-              JavaParameter(name: "selfType", type: .long)
-            ],
-            conversion: .extractMetatypeValue(.placeholder),
-            indirectConversion: nil,
-            conversionCheck: nil
+      let selfTypeParameter: NativeParameter? =
+        if let selfType = functionSignature.selfParameter?.selfType,
+          selfType.asNominalTypeDeclaration?.isGeneric == true
+        {
+          try translateParameter(
+            type: .metatype(selfType),
+            parameterName: "selfType",
+            methodName: methodName,
+            parentName: parentName,
+            genericParameters: functionSignature.genericParameters,
+            genericRequirements: functionSignature.genericRequirements
           )
+        } else {
+          nil
         }
-        return nil
-      }
-      let selfTypeParameter: NativeParameter? = switch functionSignature.selfParameter {
-      case .instance(let selfParameter):
-        selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-      case .initializer(let swiftType), .staticMethod(let swiftType):
-        swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-      case nil: nil
-      }
 
       let result = try translate(swiftResult: functionSignature.result)
 
@@ -311,7 +306,17 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .composite:
+      case .metatype:
+        return NativeParameter(
+          parameters: [
+            JavaParameter(name: parameterName, type: .long)
+          ],
+          conversion: .extractMetatypeValue(.placeholder),
+          indirectConversion: nil,
+          conversionCheck: nil
+        )
+
+      case .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -1065,11 +1070,12 @@ extension JNISwift2JavaGenerator {
         } else {
           printer.print("let \(inner)Bits$ = Int(\(inner))")
         }
-        let typeName = if swiftType.asNominalTypeDeclaration?.isGeneric == true {
-          "Self"
-        } else {
-          swiftType.description
-        }
+        let typeName =
+          if swiftType.asNominalTypeDeclaration?.isGeneric == true {
+            "Self"
+          } else {
+            swiftType.description
+          }
         printer.print("let \(pointerName) = UnsafeMutablePointer<\(typeName)>(bitPattern: \(inner)Bits$)")
         if !allowNil {
           printer.print(
