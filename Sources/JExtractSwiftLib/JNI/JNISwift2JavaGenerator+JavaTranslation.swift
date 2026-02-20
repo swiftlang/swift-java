@@ -332,13 +332,14 @@ extension JNISwift2JavaGenerator {
         }
         return nil
       }
-      let selfTypeParameter: TranslatedParameter? = switch functionSignature.selfParameter {
-      case .instance(let selfParameter):
-        selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-      case .initializer(let swiftType), .staticMethod(let swiftType):
-        swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-      case nil: nil
-      }
+      let selfTypeParameter: TranslatedParameter? =
+        switch functionSignature.selfParameter {
+        case .instance(let selfParameter):
+          selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
+        case .initializer(let swiftType), .staticMethod(let swiftType):
+          swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
+        case nil: nil
+        }
 
       var exceptions: [JavaExceptionType] = []
 
@@ -798,14 +799,20 @@ extension JNISwift2JavaGenerator {
           return TranslatedResult(
             javaType: javaType,
             annotations: resultAnnotations,
-            outParameters: [.init(name: "instance", type: .OutSwiftGenericInstance, allocation: .new) ],
-            conversion: .aggregate(variable: nil, [
-              .print(.placeholder),
-              .wrapMemoryAddressUnsafe(.commaSeparated([
-                .member(.constant("instance"), field: "selfPointer"),
-                .member(.constant("instance"), field: "selfTypePointer"),
-              ]), javaType)
-            ])
+            outParameters: [.init(name: "instance", type: .OutSwiftGenericInstance, allocation: .new)],
+            conversion: .aggregate(
+              variable: nil,
+              [
+                .print(.placeholder),
+                .wrapMemoryAddressUnsafe(
+                  .commaSeparated([
+                    .member(.constant("instance"), field: "selfPointer"),
+                    .member(.constant("instance"), field: "selfTypePointer"),
+                  ]),
+                  javaType
+                ),
+              ]
+            )
           )
         } else {
           return TranslatedResult(

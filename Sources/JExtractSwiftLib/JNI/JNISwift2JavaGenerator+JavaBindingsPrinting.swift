@@ -209,10 +209,10 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock("private \(decl.swiftNominal.name)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
         for param in swiftPointerParams {
           printer.print(
-          """
-          SwiftObjects.requireNonZero(\(param), "\(param)");
-          this.\(param) = \(param);
-          """
+            """
+            SwiftObjects.requireNonZero(\(param), "\(param)");
+            this.\(param) = \(param);
+            """
           )
         }
         printer.print(
@@ -731,19 +731,19 @@ extension JNISwift2JavaGenerator {
       }
     } else {
       printer.print("private static native long $typeMetadataAddressDowncall();")
-      
+
       let funcName = "$typeMetadataAddress"
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
         printer.print(
-        """
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-              "this", this,
-              "self", self$);
-        }
-        """
+          """
+          long self$ = this.$memoryAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$);
+          }
+          """
         )
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
       }

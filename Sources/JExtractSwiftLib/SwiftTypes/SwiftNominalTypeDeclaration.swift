@@ -92,9 +92,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   ) {
     self.parent = parent
     self.syntax = node
-    self.genericParameters = node.asProtocol(WithGenericParametersSyntax.self)?.genericParameterClause?.parameters.map {
-      SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: moduleName, node: $0)
-    } ?? []
+    self.genericParameters =
+      node.asProtocol(WithGenericParametersSyntax.self)?.genericParameterClause?.parameters.map {
+        SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: moduleName, node: $0)
+      } ?? []
 
     // Determine the kind from the syntax node.
     switch Syntax(node).as(SyntaxEnum.self) {
@@ -164,7 +165,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 
   var isGeneric: Bool {
-    return !genericParameters.isEmpty
+    !genericParameters.isEmpty
   }
 }
 

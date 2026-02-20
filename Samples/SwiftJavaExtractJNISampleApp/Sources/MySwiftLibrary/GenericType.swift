@@ -15,7 +15,7 @@
 public struct MyID<T> {
   public var rawValue: T
   public init(_ rawValue: T) {
-    self.rawValue = rawValue  
+    self.rawValue = rawValue
   }
   public var description: String {
     "\(rawValue)"
@@ -23,11 +23,11 @@ public struct MyID<T> {
 }
 
 public func makeIntID(_ value: Int) -> MyID<Int> {
-  return MyID(value)
+  MyID(value)
 }
 
 public func makeStringID(_ value: String) -> MyID<String> {
-  return MyID(value)
+  MyID(value)
 }
 
 public struct MyEntity {

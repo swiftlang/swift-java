@@ -28,7 +28,7 @@ struct JNIGenericTypeTests {
         "\(rawValue)"
       }
     }
-    
+
     public func makeStringID(_ value: String) -> MyID<String> {
       return MyID(value)
     }
@@ -52,7 +52,7 @@ struct JNIGenericTypeTests {
         public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
           return new MyID(selfPointer, selfTypePointer, swiftArena);
         }
-        
+
         public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
           return new MyID(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
@@ -93,7 +93,7 @@ struct JNIGenericTypeTests {
             }
           };
         }
-        """
+        """,
       ]
     )
   }
@@ -136,7 +136,7 @@ struct JNIGenericTypeTests {
           let openerType = unsafeBitCast(selfType$, to: Any.Type.self) as! (any _SwiftModule_MyID_opener.Type)
           return openerType._get_description(environment: environment, thisClass: thisClass, self: self)
         }
-        """
+        """,
       ]
     )
   }
@@ -158,7 +158,7 @@ struct JNIGenericTypeTests {
         """,
         """
         private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core.OutSwiftGenericInstance out);
-        """
+        """,
       ]
     )
   }

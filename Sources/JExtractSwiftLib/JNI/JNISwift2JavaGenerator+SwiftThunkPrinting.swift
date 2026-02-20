@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
+import SwiftSyntax
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -20,7 +21,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-import SwiftSyntax
 
 extension JNISwift2JavaGenerator {
   func writeSwiftThunkSources() throws {
@@ -816,7 +816,7 @@ extension JNISwift2JavaGenerator {
     if type.swiftNominal.isGeneric {
       return
     }
-    
+
     printCDecl(
       &printer,
       javaMethodName: "$typeMetadataAddressDowncall",
@@ -963,12 +963,13 @@ extension JNISwift2JavaGenerator {
     parameters += nativeSignature.result.outParameters
 
     let openerArguments =
-    [
-      "environment: environment",
-      "thisClass: thisClass",
-    ] + parameters.map { javaParameter in
-      "\(javaParameter.name): \(javaParameter.name)"
-    }
+      [
+        "environment: environment",
+        "thisClass: thisClass",
+      ]
+      + parameters.map { javaParameter in
+        "\(javaParameter.name): \(javaParameter.name)"
+      }
     let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: ", ")))"
 
     if !decl.functionSignature.result.type.isVoid {
@@ -1000,12 +1001,12 @@ extension JNISwift2JavaGenerator {
       let translatedParameters = parameters.map {
         "\($0.name): \($0.type.jniTypeName)"
       }
-      
+
       let thunkParameters =
-      [
-        "environment: UnsafeMutablePointer<JNIEnv?>!",
-        "thisClass: jclass",
-      ] + translatedParameters
+        [
+          "environment: UnsafeMutablePointer<JNIEnv?>!",
+          "thisClass: jclass",
+        ] + translatedParameters
       let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
 
       let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: ", ")))\#(thunkReturnType)"#
@@ -1152,11 +1153,12 @@ extension SwiftNominalTypeDeclaration {
 
 extension ImportedFunc {
   fileprivate var openerMethodName: String {
-    let prefix = switch apiKind {
-    case .getter: "_get_"
-    case .setter: "_set_"
-    default: "_"
-    }
+    let prefix =
+      switch apiKind {
+      case .getter: "_get_"
+      case .setter: "_set_"
+      default: "_"
+      }
     return "\(prefix)\(name)"
   }
 }
