@@ -73,7 +73,7 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        private static native void $destroy(long self, long selfType);
+        private static native void $destroy(long selfPointer, long selfType);
         @Override
         public Runnable $createDestroyFunction() {
           long selfType$ = this.$typeMetadataAddress();
@@ -117,7 +117,7 @@ struct JNIGenericTypeTests {
           static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring? {
             assert(self != 0, "self memory address was null")
             let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-            let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)
+            let self$ = UnsafeMutablePointer<MyID>(bitPattern: selfBits$)
             guard let self$ else {
              fatalError("self memory address was null in call to \(#function)!")
             }

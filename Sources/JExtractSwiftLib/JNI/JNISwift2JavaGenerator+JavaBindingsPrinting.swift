@@ -754,9 +754,9 @@ extension JNISwift2JavaGenerator {
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let isGeneric = type.swiftNominal.isGeneric
     if isGeneric {
-      printer.print("private static native void $destroy(long self, long selfType);")
+      printer.print("private static native void $destroy(long selfPointer, long selfType);")
     } else {
-      printer.print("private static native void $destroy(long self);")
+      printer.print("private static native void $destroy(long selfPointer);")
     }
 
     let funcName = "$createDestroyFunction"
