@@ -38,7 +38,3 @@ public struct MyEntity {
     self.name = name
   }
 }
-
-public func takeMyEntity() -> MyEntity {
-  return MyEntity(id: MyID(42), name: "Example")
-}

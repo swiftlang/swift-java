@@ -1070,13 +1070,7 @@ extension JNISwift2JavaGenerator {
         } else {
           printer.print("let \(inner)Bits$ = Int(\(inner))")
         }
-        let typeName =
-          if swiftType.asNominalTypeDeclaration?.isGeneric == true {
-            "Self"
-          } else {
-            swiftType.description
-          }
-        printer.print("let \(pointerName) = UnsafeMutablePointer<\(typeName)>(bitPattern: \(inner)Bits$)")
+        printer.print("let \(pointerName) = UnsafeMutablePointer<\(swiftType)>(bitPattern: \(inner)Bits$)")
         if !allowNil {
           printer.print(
             """

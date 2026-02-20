@@ -30,4 +30,13 @@ public class GenericTypeTest {
             assertEquals("42", intId.getDescription());
         }
     }
+
+    @Test
+    void genericTypeProperty() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MyID intId = MySwiftLibrary.makeIntID(42, arena);
+            MyEntity entity = MyEntity.init(intId, "name", arena);
+            assertEquals("42", entity.getId(arena).getDescription());
+        }
+    }
 }
