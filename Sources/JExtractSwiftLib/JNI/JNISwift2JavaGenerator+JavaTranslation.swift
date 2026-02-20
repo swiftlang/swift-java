@@ -323,23 +323,13 @@ extension JNISwift2JavaGenerator {
         genericRequirements: functionSignature.genericRequirements
       )
 
-      func translateSelfTypeParameters(_ decl: SwiftNominalTypeDeclaration) -> TranslatedParameter? {
-        if decl.isGeneric {
-          return TranslatedParameter(
-            parameter: JavaParameter(name: "selfType", type: .long),
-            conversion: .typeMetadataAddress(.placeholder)
-          )
-        }
-        return nil
-      }
-      let selfTypeParameter: TranslatedParameter? =
-        switch functionSignature.selfParameter {
-        case .instance(let selfParameter):
-          selfParameter.type.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-        case .initializer(let swiftType), .staticMethod(let swiftType):
-          swiftType.asNominalTypeDeclaration.flatMap(translateSelfTypeParameters)
-        case nil: nil
-        }
+      let selfTypeParameter = try self.translateSelfTypeParameter(
+        functionSignature.selfParameter,
+        methodName: methodName,
+        parentName: parentName,
+        genericParameters: functionSignature.genericParameters,
+        genericRequirements: functionSignature.genericRequirements
+      )
 
       var exceptions: [JavaExceptionType] = []
 
@@ -391,6 +381,39 @@ extension JNISwift2JavaGenerator {
         return try self.translateParameter(
           swiftType: swiftSelf.type,
           parameterName: swiftSelf.parameterName ?? "self",
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+          parameterPosition: nil
+        )
+      } else {
+        return nil
+      }
+    }
+
+    func translateSelfTypeParameter(
+      _ selfParameter: SwiftSelfParameter?,
+      methodName: String,
+      parentName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> TranslatedParameter? {
+      guard let selfParameter else {
+        return nil
+      }
+
+      let isGeneric =
+        switch selfParameter {
+        case .instance(let selfParameter):
+          selfParameter.type.asNominalTypeDeclaration?.isGeneric == true
+        case .initializer(let swiftType), .staticMethod(let swiftType):
+          swiftType.asNominalTypeDeclaration?.isGeneric == true
+        }
+      if isGeneric {
+        return try self.translateParameter(
+          swiftType: .metatype(selfParameter.selfType),
+          parameterName: "selfType",
           methodName: methodName,
           parentName: parentName,
           genericParameters: genericParameters,
@@ -537,7 +560,13 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .composite:
+      case .metatype:
+        return TranslatedParameter(
+          parameter: JavaParameter(name: parameterName, type: .long),
+          conversion: .typeMetadataAddress(.placeholder)
+        )
+
+      case .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
