@@ -1019,18 +1019,10 @@ extension JNISwift2JavaGenerator {
 
     printer.printBraceBlock("protocol \(protocolName)") { printer in
       for variable in type.variables {
-        if variable.isStatic {
-          logger.debug("Skipping \(variable.name), static variables in generic type is not yet supported.")
-          continue
-        }
         printFunctionDecl(&printer, decl: variable, skipMethodBody: true)
       }
 
       for method in type.methods {
-        if method.isStatic {
-          logger.debug("Skipping \(method.name), static methods in generic type is not yet supported.")
-          continue
-        }
         printFunctionDecl(&printer, decl: method, skipMethodBody: true)
       }
 
