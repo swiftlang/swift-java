@@ -33,6 +33,7 @@ public protocol CallbackProtocol {
   func withObjectArray(_ input: [MySwiftClass]) -> [MySwiftClass]
   func successfulThrowingFunction() throws
   func throwingFunction() throws
+  func withOptionalString(_ input: String?) -> String?
 }
 
 public struct CallbackOutput {
@@ -51,6 +52,7 @@ public struct CallbackOutput {
   public let int64Array: [Int64]
   public let stringArray: [String]
   public let objectArray: [MySwiftClass]
+  public let optionalString: String?
 }
 
 public func callProtocolVoid(_ callbacks: some CallbackProtocol) {
@@ -81,7 +83,8 @@ public func outputCallbacks(
   optionalObject: MySwiftClass?,
   int64Array: [Int64],
   stringArray: [String],
-  objectArray: [MySwiftClass]
+  objectArray: [MySwiftClass],
+  optionalString: String?
 ) -> CallbackOutput {
   CallbackOutput(
     bool: callbacks.withBool(bool),
@@ -98,6 +101,7 @@ public func outputCallbacks(
     optionalObject: callbacks.withOptionalObject(optionalObject),
     int64Array: callbacks.withInt64Array(int64Array),
     stringArray: callbacks.withStringArray(stringArray),
-    objectArray: callbacks.withObjectArray(objectArray)
+    objectArray: callbacks.withObjectArray(objectArray),
+    optionalString: callbacks.withOptionalString(optionalString)
   )
 }
