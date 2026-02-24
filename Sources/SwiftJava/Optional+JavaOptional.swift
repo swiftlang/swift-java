@@ -26,6 +26,24 @@ extension Optional where Wrapped: AnyJavaObject {
   }
 }
 
+extension Optional where Wrapped == String {
+  public func toJavaOptional() -> JavaOptional<JavaString> {
+    if let self {
+      return try! JavaClass<JavaOptional<JavaString>>().of(JavaString(self).as(JavaObject.self)).as(JavaOptional<JavaString>.self)!
+    } else {
+      return try! JavaClass<JavaOptional<JavaString>>().empty().as(JavaOptional<JavaString>.self)!
+    }
+  }
+
+  public init(javaOptional: JavaOptional<JavaString>?) {
+    if let javaOptional {
+      self = javaOptional.isPresent() ? javaOptional.get().toString() : Optional<Wrapped>.none
+    } else {
+      self = nil
+    }
+  }
+}
+
 extension Optional where Wrapped == Double {
   public func toJavaOptional() -> JavaOptionalDouble {
     if let self {
