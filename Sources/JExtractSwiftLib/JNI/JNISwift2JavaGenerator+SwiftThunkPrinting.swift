@@ -809,7 +809,7 @@ extension JNISwift2JavaGenerator {
           &printer,
           .init(
             module: swiftModuleName,
-            swiftDecl: DeclSyntax("func destory()"),
+            swiftDecl: DeclSyntax("func destroy()"),
             name: "destroy",
             apiKind: .function,
             functionSignature: destroyFunctionSignature
