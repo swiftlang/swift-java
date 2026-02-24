@@ -18,6 +18,7 @@ import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -78,6 +79,26 @@ public class OptionalsTest {
     void optionalString() {
         assertEquals(Optional.empty(), MySwiftLibrary.optionalString(Optional.empty()));
         assertEquals(Optional.of("Hello Swift!"), MySwiftLibrary.optionalString(Optional.of("Hello Swift!")));
+    }
+
+    @Test
+    void optionalDate() {
+        try (var arena = SwiftArena.ofConfined()) {
+            assertEquals(Optional.empty(), MySwiftLibrary.optionalDate(Optional.empty(), arena));
+            var date = Date.fromInstant(Instant.now(), arena);
+            Optional<Date> optionalDate = MySwiftLibrary.optionalDate(Optional.of(date), arena);
+            assertTrue(optionalDate.isPresent());
+        }
+    }
+
+    @Test
+    void optionalData() {
+        try (var arena = SwiftArena.ofConfined()) {
+            assertEquals(Optional.empty(), MySwiftLibrary.optionalData(Optional.empty(), arena));
+            var data = Data.fromByteArray(new byte[] { 1, 2 }, arena);
+            Optional<Data> optionalData = MySwiftLibrary.optionalData(Optional.of(data), arena);
+            assertTrue(optionalData.isPresent());
+        }
     }
 
     @Test

@@ -278,7 +278,6 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    printToStringMethods(&printer, type)
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
@@ -291,63 +290,6 @@ extension JNISwift2JavaGenerator {
     }
 
     try printSwiftInterfaceWrapper(&printer, protocolWrapper)
-  }
-
-  private func printToStringMethods(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    let parentName = type.qualifiedName
-    let isGeneric = type.swiftNominal.isGeneric
-
-    var parameters = [selfPointerParam]
-    if isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
-    }
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$toString",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: parameters,
-      resultType: .javaLangString
-    ) { printer in
-      if isGeneric {
-        printer.printBraceBlock(
-          "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
-        ) { printer in
-          printer.print("fatalError(\"selfType memory address was null\")")
-        }
-        printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
-        printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toString(environment: environment, thisClass: thisClass, self: selfPointer)")
-      } else {
-        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-        printer.print("return String(describing: \(selfVar).pointee).getJNIValue(in: environment)")
-      }
-    }
-
-    printer.println()
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$toDebugString",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: parameters,
-      resultType: .javaLangString
-    ) { printer in
-      if isGeneric {
-        printer.printBraceBlock(
-          "guard let selfTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfType, in: environment))) else"
-        ) { printer in
-          printer.print("fatalError(\"selfType memory address was null\")")
-        }
-        printer.print("let erasedSelfType$: Any.Type = unsafeBitCast(selfTypeMetadataPointer$, to: Any.Type.self)")
-        printer.print("let openerType = erasedSelfType$ as! (any \(openerProtocolName(for: type.swiftNominal)).Type)")
-        printer.print("return openerType._toDebugString(environment: environment, thisClass: thisClass, self: selfPointer)")
-      } else {
-        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-        printer.print("return String(reflecting: \(selfVar).pointee).getJNIValue(in: environment)")
-      }
-    }
   }
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
@@ -647,6 +589,14 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
+
+    case .synthesizedFunction(let function):
+      switch function {
+      case .toString:
+        result = "String(describing: \(callee))"
+      case .toDebugString:
+        result = "String(reflecting: \(callee))"
+      }
 
     case .enumCase:
       let downcallArguments = zip(
@@ -1026,8 +976,6 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: true)
       }
 
-      printer.print("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
-      printer.print("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?")
       printer.print("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)")
     }
     printer.println()
@@ -1040,26 +988,6 @@ extension JNISwift2JavaGenerator {
       for method in type.methods {
         if method.isStatic { continue }
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
-      }
-
-      printer.printBraceBlock("static func _toString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?") { printer in
-        printer.print(#"assert(self != 0, "self memory address was null")"#)
-        printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
-        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
-        printer.printBraceBlock("guard let self$ else") { printer in
-          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
-        }
-        printer.print("return String(describing: self$.pointee).getJNIValue(in: environment)")
-      }
-
-      printer.printBraceBlock("static func _toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?") { printer in
-        printer.print(#"assert(self != 0, "self memory address was null")"#)
-        printer.print("let selfBits$ = Int(Int64(fromJNI: self, in: environment))")
-        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
-        printer.printBraceBlock("guard let self$ else") { printer in
-          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
-        }
-        printer.print("return String(reflecting: self$.pointee).getJNIValue(in: environment)")
       }
 
       printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)") { printer in

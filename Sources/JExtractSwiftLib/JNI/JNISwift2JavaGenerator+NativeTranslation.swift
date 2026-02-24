@@ -23,6 +23,7 @@ extension JNISwift2JavaGenerator {
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let logger: Logger
 
     /// Translates a Swift function into the native JNI method signature.
     func translate(
@@ -399,25 +400,37 @@ extension JNISwift2JavaGenerator {
         let nominalTypeName = nominalType.nominalTypeDecl.name
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-            javaType.implementsJavaValue
-          else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
-          return NativeParameter(
-            parameters: [
-              JavaParameter(name: discriminatorName, type: .byte),
-              JavaParameter(name: valueName, type: javaType),
-            ],
-            conversion: .optionalLowering(
-              .initFromJNI(.placeholder, swiftType: swiftType),
-              discriminatorName: discriminatorName,
-              valueName: valueName
-            ),
-            indirectConversion: nil,
-            conversionCheck: nil
-          )
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
+
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue
+            else {
+              self.logger.debug("Known type \(knownType) is not supported for optional parameters, skipping.")
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: discriminatorName, type: .byte),
+                JavaParameter(name: valueName, type: javaType),
+              ],
+              conversion: .optionalLowering(
+                .initFromJNI(.placeholder, swiftType: swiftType),
+                discriminatorName: discriminatorName,
+                valueName: valueName
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+          }
         }
 
         if nominalType.isSwiftJavaWrapper {
@@ -465,46 +478,58 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-            javaType.implementsJavaValue
-          else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
+          switch knownType {
+          case .foundationDate, .essentialsDate:
+            // Handled as wrapped struct
+            break
 
-          // Check if we can fit the value and a discriminator byte in a primitive.
-          // so the return JNI value will be (value, discriminator)
-          if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
-            return NativeResult(
-              javaType: nextIntergralTypeWithSpaceForByte.javaType,
-              conversion: .getJNIValue(
-                .optionalRaisingWidenIntegerType(
-                  .placeholder,
-                  resultName: resultName,
-                  valueType: javaType,
-                  combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
-                  valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
-                )
-              ),
-              outParameters: []
-            )
-          } else {
-            // Use indirect byte array to store discriminator
+          case .foundationData, .essentialsData:
+            // Handled as wrapped struct
+            break
 
-            return NativeResult(
-              javaType: javaType,
-              conversion: .optionalRaisingIndirectReturn(
-                .getJNIValue(.placeholder),
-                returnType: javaType,
-                discriminatorParameterName: discriminatorName,
-                placeholderValue: .member(
-                  .constant("\(swiftType)"),
-                  member: "jniPlaceholderValue"
-                )
-              ),
-              outParameters: [
-                JavaParameter(name: discriminatorName, type: .array(.byte))
-              ]
-            )
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+              javaType.implementsJavaValue
+            else {
+              self.logger.debug("Known type \(knownType) is not supported for optional results, skipping.")
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            // Check if we can fit the value and a discriminator byte in a primitive.
+            // so the return JNI value will be (value, discriminator)
+            if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
+              return NativeResult(
+                javaType: nextIntergralTypeWithSpaceForByte.javaType,
+                conversion: .getJNIValue(
+                  .optionalRaisingWidenIntegerType(
+                    .placeholder,
+                    resultName: resultName,
+                    valueType: javaType,
+                    combinedSwiftType: nextIntergralTypeWithSpaceForByte.swiftType,
+                    valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes
+                  )
+                ),
+                outParameters: []
+              )
+            } else {
+              // Use indirect byte array to store discriminator
+
+              return NativeResult(
+                javaType: javaType,
+                conversion: .optionalRaisingIndirectReturn(
+                  .getJNIValue(.placeholder),
+                  returnType: javaType,
+                  discriminatorParameterName: discriminatorName,
+                  placeholderValue: .member(
+                    .constant("\(swiftType)"),
+                    member: "jniPlaceholderValue"
+                  )
+                ),
+                outParameters: [
+                  JavaParameter(name: discriminatorName, type: .array(.byte))
+                ]
+              )
+            }
           }
         }
 
@@ -646,11 +671,22 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
 
-            return NativeResult(
-              javaType: javaType,
-              conversion: .getJNIValue(.placeholder),
-              outParameters: []
-            )
+            if let indirectReturnType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
+              for: knownType,
+              from: knownTypes
+            ) {
+              return NativeResult(
+                javaType: javaType,
+                conversion: .getJNIValue(.labelessInitializer(.placeholder, swiftType: indirectReturnType)),
+                outParameters: []
+              )
+            } else {
+              return NativeResult(
+                javaType: javaType,
+                conversion: .getJNIValue(.placeholder),
+                outParameters: []
+              )
+            }
           }
         }
 
@@ -949,6 +985,9 @@ extension JNISwift2JavaGenerator {
     indirect case aggregate(variable: String, [NativeSwiftConversionStep])
 
     indirect case replacingPlaceholder(NativeSwiftConversionStep, placeholder: NativeSwiftConversionStep)
+
+    /// `SwiftType(inner)`
+    indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
@@ -1469,6 +1508,10 @@ extension JNISwift2JavaGenerator {
       case .replacingPlaceholder(let inner, let newPlaceholder):
         let newPlaceholder = newPlaceholder.render(&printer, placeholder)
         return inner.render(&printer, newPlaceholder)
+
+      case .labelessInitializer(let inner, let swiftType):
+        let inner = inner.render(&printer, placeholder)
+        return "\(swiftType)(\(inner))"
       }
     }
   }

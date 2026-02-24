@@ -291,9 +291,6 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
-      printToStringMethods(&printer, decl)
-      printer.println()
-
       printSpecificTypeHelpers(&printer, decl)
 
       printTypeMetadataAddressFunction(&printer, decl)
@@ -316,37 +313,6 @@ extension JNISwift2JavaGenerator {
     default:
       break
     }
-  }
-
-  private func printToStringMethods(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    var arguments = ["selfPointer"]
-    var parameters = ["this.$memoryAddress()"]
-    if decl.swiftNominal.isGeneric {
-      arguments.append("selfType")
-      parameters.append("this.$typeMetadataAddress()")
-    }
-    let argument = arguments.map { "long \($0)" }.joined(separator: ", ")
-    let parameter = parameters.joined(separator: ", ")
-
-    printer.printBraceBlock("public String toString()") { printer in
-      printer.print(
-        """
-        return $toString(\(parameter));
-        """
-      )
-    }
-    printer.print("private static native java.lang.String $toString(\(argument));")
-
-    printer.println()
-
-    printer.printBraceBlock("public String toDebugString()") { printer in
-      printer.print(
-        """
-        return $toDebugString(\(parameter));
-        """
-      )
-    }
-    printer.print("private static native java.lang.String $toDebugString(\(argument));")
   }
 
   private func printHeader(_ printer: inout CodePrinter) {
