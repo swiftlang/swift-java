@@ -32,13 +32,11 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public String toString() {
-          return $toString(this.$memoryAddress());
+        public java.lang.String toString() {
+          return MyType.$toString(this.$memoryAddress());
         }
-        """,
-        """
         private static native java.lang.String $toString(long selfPointer);
-        """,
+        """
       ]
     )
   }
@@ -55,7 +53,7 @@ struct JNIToStringTests {
         @_cdecl("Java_com_example_swift_MyType__00024toString__J")
         public func Java_com_example_swift_MyType__00024toString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
           ...
-          return String(describing: self$.pointee).getJNIValue(in: environment)
+          return String(describing: selfPointer$.pointee).getJNIValue(in: environment)
         }
         """
       ]
@@ -71,9 +69,10 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public String toDebugString() {
-          return $toDebugString(this.$memoryAddress());
+        public java.lang.String toDebugString() {
+          return MyType.$toDebugString(this.$memoryAddress());
         }
+        private static native java.lang.String $toDebugString(long selfPointer);
         """
       ]
     )
@@ -91,7 +90,7 @@ struct JNIToStringTests {
         @_cdecl("Java_com_example_swift_MyType__00024toDebugString__J")
         public func Java_com_example_swift_MyType__00024toDebugString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
           ...
-          return String(reflecting: self$.pointee).getJNIValue(in: environment)
+          return String(reflecting: selfPointer$.pointee).getJNIValue(in: environment)
         }
         """
       ]
