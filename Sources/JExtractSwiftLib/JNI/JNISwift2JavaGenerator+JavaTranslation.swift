@@ -138,6 +138,8 @@ extension JNISwift2JavaGenerator {
         exceptions.append(.integerOverflow)
       }
 
+      let isGenericParent = enumCase.caseFunction.parentType?.asNominalTypeDeclaration?.isGeneric == true
+
       let getAsCaseFunction = TranslatedFunctionDecl(
         name: getAsCaseName,
         isStatic: false,
@@ -159,7 +161,12 @@ extension JNISwift2JavaGenerator {
               ]
             )
           ),
-          selfTypeParameter: nil, // TODO: iceman
+          selfTypeParameter: !isGenericParent
+            ? nil
+            : .init(
+              parameter: JavaParameter(name: "selfType", type: .long),
+              conversion: .typeMetadataAddress(.placeholder)
+            ),
           parameters: [],
           resultType: TranslatedResult(
             javaType: .class(package: nil, name: "Optional<\(caseName)>"),
@@ -177,7 +184,14 @@ extension JNISwift2JavaGenerator {
             indirectConversion: nil,
             conversionCheck: nil
           ),
-          selfTypeParameter: nil, // TODO: iceman
+          selfTypeParameter: !isGenericParent
+            ? nil
+            : .init(
+              parameters: [JavaParameter(name: "selfType", type: .long)],
+              conversion: .extractMetatypeValue(.placeholder),
+              indirectConversion: nil,
+              conversionCheck: nil
+            ),
           parameters: [],
           result: NativeResult(
             javaType: nativeParametersType,

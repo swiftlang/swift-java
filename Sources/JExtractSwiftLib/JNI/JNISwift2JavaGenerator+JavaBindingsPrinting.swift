@@ -391,10 +391,17 @@ extension JNISwift2JavaGenerator {
     }
 
     // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
-    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-      printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+    if decl.swiftNominal.isGeneric {
+      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
+      }
+      printer.print("private static native int $getDiscriminator(long self, long selfType);")
+    } else {
+      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+      }
+      printer.print("private static native int $getDiscriminator(long self);")
     }
-    printer.print("private static native int $getDiscriminator(long self);")
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
@@ -423,6 +430,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    if !decl.cases.isEmpty && decl.swiftNominal.isGeneric {
+      self.logger.debug("Skipping generic static initializers in '\(decl.swiftNominal.name)'")
+      return
+    }
+
     for enumCase in decl.cases {
       printFunctionDowncallMethods(&printer, enumCase.caseFunction)
     }

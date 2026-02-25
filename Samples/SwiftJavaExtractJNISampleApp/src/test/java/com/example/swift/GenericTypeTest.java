@@ -39,4 +39,15 @@ public class GenericTypeTest {
             assertEquals("42", entity.getId(arena).getDescription());
         }
     }
+
+    @Test
+    void genericEnum() {
+        try (var arena = SwiftArena.ofConfined()) {
+            GenericEnum value = MySwiftLibrary.makeIntGenericEnum(arena);
+            switch (value.getCase()) {
+                case GenericEnum.Foo _ -> assertTrue(value.getAsFoo().isPresent());
+                case GenericEnum.Bar _ -> assertTrue(value.getAsBar().isPresent());
+            }
+        }
+    }
 }

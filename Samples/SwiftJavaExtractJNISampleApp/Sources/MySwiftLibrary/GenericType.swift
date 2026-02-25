@@ -38,3 +38,12 @@ public struct MyEntity {
     self.name = name
   }
 }
+
+public enum GenericEnum<T> {
+  case foo
+  case bar
+}
+
+public func makeIntGenericEnum() -> GenericEnum<Int> {
+  if Bool.random() { return .foo } else { return .bar }
+}

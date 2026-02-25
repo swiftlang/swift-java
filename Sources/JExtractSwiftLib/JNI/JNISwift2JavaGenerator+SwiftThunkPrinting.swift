@@ -262,9 +262,11 @@ extension JNISwift2JavaGenerator {
       printEnumDiscriminator(&printer, type)
       printer.println()
 
-      for enumCase in type.cases {
-        printEnumCase(&printer, enumCase)
-        printer.println()
+      if !type.swiftNominal.isGeneric {
+        for enumCase in type.cases {
+          printEnumCase(&printer, enumCase)
+          printer.println()
+        }
       }
     }
 
@@ -294,21 +296,48 @@ extension JNISwift2JavaGenerator {
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    var parameters = [selfPointerParam]
+    if type.swiftNominal.isGeneric {
+      parameters.append(JavaParameter(name: "selfType", type: .long))
+    }
+
     printCDecl(
       &printer,
       javaMethodName: "$getDiscriminator",
       parentName: type.swiftNominal.name,
-      parameters: [selfPointerParam],
+      parameters: parameters,
       resultType: .int
     ) { printer in
-      let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
-        &printer,
-        swiftParentName: type.swiftNominal.name,
-        selfPointerParam
-      )
-      printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
-        for (idx, enumCase) in type.cases.enumerated() {
-          printer.print("case .\(enumCase.name): return \(idx)")
+      if type.swiftNominal.isGeneric {
+        let knownTypes = SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+        let discriminatorFunctionSignature = SwiftFunctionSignature(
+          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
+          parameters: [],
+          result: .init(convention: .direct, type: knownTypes.int),
+          effectSpecifiers: [],
+          genericParameters: [],
+          genericRequirements: []
+        )
+        printFunctionOpenerCall(
+          &printer,
+          .init(
+            module: swiftModuleName,
+            swiftDecl: DeclSyntax("func getDiscriminator() -> Int"),
+            name: "getDiscriminator",
+            apiKind: .function,
+            functionSignature: discriminatorFunctionSignature
+          )
+        )
+      } else {
+        let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+          &printer,
+          swiftParentName: type.swiftNominal.name,
+          selfPointerParam
+        )
+        printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
+          for (idx, enumCase) in type.cases.enumerated() {
+            printer.print("case .\(enumCase.name): return \(idx)")
+          }
         }
       }
     }
@@ -976,6 +1005,10 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: true)
       }
 
+      if type.swiftNominal.kind == .enum {
+        printer.print("static func _getDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint")
+      }
+
       printer.print("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)")
     }
     printer.println()
@@ -988,6 +1021,21 @@ extension JNISwift2JavaGenerator {
       for method in type.methods {
         if method.isStatic { continue }
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
+      }
+
+      if type.swiftNominal.kind == .enum {
+        printer.printBraceBlock("static func _getDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint") { printer in
+          let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
+            &printer,
+            swiftParentName: "Self",
+            JavaParameter(name: "selfPointer", type: .long)
+          )
+          printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
+            for (idx, enumCase) in type.cases.enumerated() {
+              printer.print("case .\(enumCase.name): return \(idx)")
+            }
+          }
+        }
       }
 
       printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)") { printer in
