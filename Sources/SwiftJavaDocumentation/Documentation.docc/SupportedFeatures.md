@@ -60,6 +60,9 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
 | Arrays: `[UInt8]`, `[MyType]`, `Array<Int64>` etc                                    | ❌        | ✅   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
+| Generic type: `struct S<T>`                                                          | ❌        | ✅   |
+| Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
+| Static functions or properties in generic type                                       | ❌        | ❌   | 
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
