@@ -14,6 +14,14 @@
 
 package org.swift.swiftkit.core;
 
+/**
+ * A container for receiving Swift generic instances.
+ * <p>
+ * This class acts as an "indirect return" receiver (out-parameter) for
+ * native calls that return Swift generic types. It pairs
+ * the object instance with its corresponding type metadata.
+ * </p>
+ */
 public final class OutSwiftGenericInstance {
     public long selfPointer;
     public long selfTypePointer;
