@@ -201,6 +201,11 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+          JAVA_HOME_17: ${{ env.JAVA_HOME_17 }}
+          JAVA_HOME_25: ${{ env.JAVA_HOME_25 }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
           apt-get -q update && apt-get -yq install curl
           cd Samples/SwiftJavaExtractJNISampleApp
