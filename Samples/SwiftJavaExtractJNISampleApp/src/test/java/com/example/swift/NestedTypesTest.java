@@ -42,4 +42,11 @@ public class NestedTypesTest {
             assertTrue(one.isPresent());
         }
     }
+
+    @Test
+    void testNamespaceEnum() {
+        try (var arena = SwiftArena.ofConfined()) {
+            NamespaceEnum.Nested.something();
+        }
+    }
 }
