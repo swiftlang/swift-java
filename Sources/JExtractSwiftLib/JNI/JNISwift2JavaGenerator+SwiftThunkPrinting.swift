@@ -296,7 +296,7 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
         &printer,
-        swiftParentName: type.swiftNominal.name,
+        swiftParentName: type.swiftNominal.qualifiedName,
         selfPointerParam
       )
       printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in

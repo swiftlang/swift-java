@@ -374,7 +374,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    printer.print("public sealed interface Case {}")
+    if decl.cases.isEmpty {
+      printer.print("public interface Case {}")
+    } else {
+      printer.print("public sealed interface Case {}")
+    }
     printer.println()
 
     let requiresSwiftArena = decl.cases.compactMap {
