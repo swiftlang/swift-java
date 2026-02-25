@@ -76,18 +76,19 @@ struct JNIGenericTypeTests {
         private static native void $destroy(long selfPointer, long selfType);
         @Override
         public Runnable $createDestroyFunction() {
-          long selfType$ = this.$typeMetadataAddress();
           long self$ = this.$memoryAddress();
+          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("MyID.$createDestroyFunction",
               "this", this,
-              "self", self$);
+              "self", self$,
+              "selfType", selfType$);
           }
           return new Runnable() {
             @Override
             public void run() {
               if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("MyID.$destroy", "self", self$);
+                CallTraces.traceDowncall("MyID.$destroy", "self", self$, "selfType", selfType$);
               }
               MyID.$destroy(self$, selfType$);
             }

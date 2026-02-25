@@ -740,29 +740,48 @@ extension JNISwift2JavaGenerator {
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
+      printer.print("long self$ = this.$memoryAddress();")
       if isGeneric {
-        printer.print("long selfType$ = this.$typeMetadataAddress();")
-      }
-      let destroyArg = isGeneric ? "self$, selfType$" : "self$"
-      printer.print(
-        """
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-              "this", this,
-              "self", self$);
-        }
-        return new Runnable() {
-          @Override
-          public void run() {
-            if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
-            }
-            \(type.swiftNominal.name).$destroy(\(destroyArg));
+        printer.print(
+          """
+          long selfType$ = this.$typeMetadataAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$,
+                "selfType", selfType$);
           }
-        };
-        """
-      )
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
+              }
+              \(type.swiftNominal.name).$destroy(self$, selfType$);
+            }
+          };
+          """
+        )
+      } else {
+        printer.print(
+          """
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$);
+          }
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
+              }
+              \(type.swiftNominal.name).$destroy(self$);
+            }
+          };
+          """
+        )
+      }
     }
   }
 
