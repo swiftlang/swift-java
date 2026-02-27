@@ -32,8 +32,21 @@ public final class _JNIMethodIDCache: Sendable {
     }
   }
 
+  public struct Field: Hashable {
+    public let name: String
+    public let signature: String
+    public let isStatic: Bool
+
+    public init(name: String, signature: String, isStatic: Bool = false) {
+      self.name = name
+      self.signature = signature
+      self.isStatic = isStatic
+    }
+  }
+
   nonisolated(unsafe) let _class: jclass?
   nonisolated(unsafe) let methods: [Method: jmethodID]
+  nonisolated(unsafe) let fields: [Field: jfieldID]
 
   public var javaClass: jclass {
     self._class!
@@ -44,7 +57,7 @@ public final class _JNIMethodIDCache: Sendable {
   /// This is to make sure that the underlying reference remains valid
   nonisolated(unsafe) private let javaObjectHolder: JavaObjectHolder?
 
-  public init(className: String, methods: [Method]) {
+  public init(className: String, methods: [Method] = [], fields: [Field] = []) {
     let environment = try! JavaVirtualMachine.shared().environment()
 
     let clazz: jobject
@@ -89,10 +102,31 @@ public final class _JNIMethodIDCache: Sendable {
         }
       }
     }
+    self.fields = fields.reduce(into: [:]) { (result, field) in
+      if field.isStatic {
+        if let fieldID = environment.interface.GetStaticFieldID(environment, clazz, field.name, field.signature) {
+          result[field] = fieldID
+        } else {
+          fatalError(
+            "Static field \(field.signature) with signature \(field.signature) not found in class \(className)"
+          )
+        }
+      } else {
+        if let fieldID = environment.interface.GetFieldID(environment, clazz, field.name, field.signature) {
+          result[field] = fieldID
+        } else {
+          fatalError("field \(field.signature) with signature \(field.signature) not found in class \(className)")
+        }
+      }
+    }
   }
 
   public subscript(_ method: Method) -> jmethodID? {
     methods[method]
+  }
+
+  public subscript(_ field: Field) -> jfieldID? {
+    fields[field]
   }
 
   public func cleanup(environment: UnsafeMutablePointer<JNIEnv?>!) {

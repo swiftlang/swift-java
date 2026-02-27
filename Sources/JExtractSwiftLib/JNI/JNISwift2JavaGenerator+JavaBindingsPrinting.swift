@@ -199,14 +199,33 @@ extension JNISwift2JavaGenerator {
         * @param selfPointer  a pointer to the memory containing the value
         * @param swiftArena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
         */
-        private \(decl.swiftNominal.name)(long selfPointer, SwiftArena swiftArena) {
-          SwiftObjects.requireNonZero(selfPointer, "selfPointer");
-          this.selfPointer = selfPointer;
+        """
+      )
+      var swiftPointerParams = ["selfPointer"]
+      if decl.swiftNominal.isGeneric {
+        swiftPointerParams.append("selfTypePointer")
+      }
+      let swiftPointerArg = swiftPointerParams.map { "long \($0)" }.joined(separator: ", ")
+      printer.printBraceBlock("private \(decl.swiftNominal.name)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
+        for param in swiftPointerParams {
+          printer.print(
+            """
+            SwiftObjects.requireNonZero(\(param), "\(param)");
+            this.\(param) = \(param);
+            """
+          )
+        }
+        printer.print(
+          """
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
-        }
-
+          """
+        )
+      }
+      printer.println()
+      printer.print(
+        """
         /** 
          * Assume that the passed {@code long} represents a memory address of a {@link \(decl.swiftNominal.name)}.
          * <p/>
@@ -216,12 +235,12 @@ extension JNISwift2JavaGenerator {
          *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
          * </ul>
          */
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena) {
-          return new \(decl.swiftNominal.name)(selfPointer, swiftArena);
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
+          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
         }
 
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(long selfPointer) {
-          return new \(decl.swiftNominal.name)(selfPointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
+          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """
       )
@@ -244,6 +263,11 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
+
+      if decl.swiftNominal.isGeneric {
+        printer.print("/** Pointer to the metatype of Self */")
+        printer.print("private final long selfTypePointer;")
+      }
 
       printer.println()
 
@@ -367,10 +391,17 @@ extension JNISwift2JavaGenerator {
     }
 
     // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
-    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-      printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+    if decl.swiftNominal.isGeneric {
+      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
+      }
+      printer.print("private static native int $getDiscriminator(long self, long selfType);")
+    } else {
+      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
+      }
+      printer.print("private static native int $getDiscriminator(long self);")
     }
-    printer.print("private static native int $getDiscriminator(long self);")
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
@@ -399,6 +430,11 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    if !decl.cases.isEmpty && decl.swiftNominal.isGeneric {
+      self.logger.debug("Skipping generic static initializers in '\(decl.swiftNominal.name)'")
+      return
+    }
+
     for enumCase in decl.cases {
       printFunctionDowncallMethods(&printer, enumCase.caseFunction)
     }
@@ -605,6 +641,9 @@ extension JNISwift2JavaGenerator {
     if let selfParameter = nativeSignature.selfParameter?.parameters {
       parameters += selfParameter
     }
+    if let selfTypeParameter = nativeSignature.selfTypeParameter?.parameters {
+      parameters += selfTypeParameter
+    }
     parameters += nativeSignature.result.outParameters
 
     let renderedParameters = parameters.map { javaParameter in
@@ -633,6 +672,12 @@ extension JNISwift2JavaGenerator {
       arguments.append(lowered)
     }
 
+    // 'Self' metatype.
+    if let selfTypeParameter = translatedFunctionSignature.selfTypeParameter {
+      let lowered = selfTypeParameter.conversion.render(&printer, "this")
+      arguments.append(lowered)
+    }
+
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.resultType.outParameters {
       printer.print(
@@ -657,51 +702,86 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    printer.print("private static native long $typeMetadataAddressDowncall();")
+    if type.swiftNominal.isGeneric {
+      printer.print("@Override")
+      printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
+        printer.print("return this.selfTypePointer;")
+      }
+    } else {
+      printer.print("private static native long $typeMetadataAddressDowncall();")
 
-    let funcName = "$typeMetadataAddress"
-    printer.print("@Override")
-    printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
-      printer.print(
-        """
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-              "this", this,
-              "self", self$);
-        }
-        return \(type.swiftNominal.name).$typeMetadataAddressDowncall();
-        """
-      )
+      let funcName = "$typeMetadataAddress"
+      printer.print("@Override")
+      printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
+        printer.print(
+          """
+          long self$ = this.$memoryAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$);
+          }
+          """
+        )
+        printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
+      }
     }
   }
 
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    printer.print("private static native void $destroy(long selfPointer);")
+    let isGeneric = type.swiftNominal.isGeneric
+    if isGeneric {
+      printer.print("private static native void $destroy(long selfPointer, long selfType);")
+    } else {
+      printer.print("private static native void $destroy(long selfPointer);")
+    }
 
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
-      printer.print(
-        """
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-              "this", this,
-              "self", self$);
-        }
-        return new Runnable() {
-          @Override
-          public void run() {
-            if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
-            }
-            \(type.swiftNominal.name).$destroy(self$);
+      printer.print("long self$ = this.$memoryAddress();")
+      if isGeneric {
+        printer.print(
+          """
+          long selfType$ = this.$typeMetadataAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$,
+                "selfType", selfType$);
           }
-        };
-        """
-      )
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
+              }
+              \(type.swiftNominal.name).$destroy(self$, selfType$);
+            }
+          };
+          """
+        )
+      } else {
+        printer.print(
+          """
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+                "this", this,
+                "self", self$);
+          }
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
+              }
+              \(type.swiftNominal.name).$destroy(self$);
+            }
+          };
+          """
+        )
+      }
     }
   }
 

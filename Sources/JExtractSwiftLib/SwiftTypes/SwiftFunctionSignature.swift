@@ -67,6 +67,15 @@ enum SwiftSelfParameter: Equatable {
   /// 'self' is the type for a call to an initializer. We only need the type
   /// to form the call.
   case initializer(SwiftType)
+
+  var selfType: SwiftType {
+    switch self {
+    case .instance(let swiftParameter):
+      return swiftParameter.type
+    case .staticMethod(let swiftType), .initializer(let swiftType):
+      return swiftType
+    }
+  }
 }
 
 extension SwiftFunctionSignature {
