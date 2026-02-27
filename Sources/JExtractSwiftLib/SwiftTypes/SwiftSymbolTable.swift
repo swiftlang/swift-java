@@ -52,6 +52,13 @@ package class SwiftSymbolTable {
     self.parsedModule = parsedModule
     self.importedModules = importedModules
   }
+
+  func isModuleName(_ name: String) -> Bool {
+    if name == moduleName {
+      return true
+    }
+    return importedModules.keys.contains(name)
+  }
 }
 
 extension SwiftSymbolTable {

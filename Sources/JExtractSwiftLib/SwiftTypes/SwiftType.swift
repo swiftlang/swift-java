@@ -309,7 +309,9 @@ extension SwiftType {
       // FIXME: Need a more reasonable notion of which names are module names
       // for this to work. What can we query for this information?
       let parentType: SwiftType?
-      if memberType.baseType.trimmedDescription == "Swift" {
+      if let base = memberType.baseType.as(IdentifierTypeSyntax.self),
+        lookupContext.symbolTable.isModuleName(base.name.trimmedDescription)
+      {
         parentType = nil
       } else {
         parentType = try SwiftType(memberType.baseType, lookupContext: lookupContext)

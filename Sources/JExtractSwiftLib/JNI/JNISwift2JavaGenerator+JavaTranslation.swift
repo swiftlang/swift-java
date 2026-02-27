@@ -852,7 +852,7 @@ extension JNISwift2JavaGenerator {
         }
 
         // We assume this is a JExtract class.
-        let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.name)
+        let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.qualifiedName)
 
         if nominalType.nominalTypeDecl.isGeneric {
           return TranslatedResult(
