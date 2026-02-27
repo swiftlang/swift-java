@@ -295,6 +295,10 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    if type.cases.isEmpty {
+      return
+    }
+
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     var parameters = [selfPointerParam]
     if type.swiftNominal.isGeneric {

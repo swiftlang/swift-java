@@ -384,6 +384,10 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    if decl.cases.isEmpty {
+      return
+    }
+
     printer.printBraceBlock("public enum Discriminator") { printer in
       printer.print(
         decl.cases.map { $0.name.uppercased() }.joined(separator: ",\n")
@@ -405,6 +409,10 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    if decl.cases.isEmpty {
+      return
+    }
+
     printer.print("public sealed interface Case {}")
     printer.println()
 
