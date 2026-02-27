@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing) import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
 import Testing
@@ -48,5 +49,23 @@ struct SwiftSymbolTableSuite {
 
     #expect(symbolTable.lookupType("Y", parent: nil) == nil)
     #expect(symbolTable.lookupType("Z", parent: nil) == nil)
+  }
+
+  @Test(arguments: [JExtractGenerationMode.jni, .ffm])
+  func resolveSelfModuleName(mode: JExtractGenerationMode) throws {
+    try assertOutput(
+      input: """
+        public struct MyValue {}
+
+        public func fullyQualifiedType() -> MyModule.MyValue
+        """,
+      mode,
+      .java,
+      swiftModuleName: "MyModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public static MyValue fullyQualifiedType("
+      ]
+    )
   }
 }
