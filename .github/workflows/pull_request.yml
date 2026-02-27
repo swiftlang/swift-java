@@ -185,7 +185,7 @@ jobs:
 
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (swift:${{ matrix.swift_version }} android:${{matrix.sdk_triple}} NDK:${{matrix.ndk_version}})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -193,12 +193,16 @@ jobs:
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
-        ndk_version: ['r27d', 'r28c']
+        ndk_version: ['r27d']
+    container:
+      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     steps:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
           apt-get -q update && apt-get -yq install curl
           cd Samples/SwiftJavaExtractJNISampleApp
