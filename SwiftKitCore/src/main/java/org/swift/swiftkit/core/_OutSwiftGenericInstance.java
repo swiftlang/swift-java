@@ -22,7 +22,7 @@ package org.swift.swiftkit.core;
  * the object instance with its corresponding type metadata.
  * </p>
  */
-public final class OutSwiftGenericInstance {
+public final class _OutSwiftGenericInstance {
     public long selfPointer;
     public long selfTypePointer;
 }

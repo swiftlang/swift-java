@@ -121,7 +121,7 @@ extension _JNIMethodIDCache {
     }
   }
 
-  public enum OutSwiftGenericInstance {
+  public enum _OutSwiftGenericInstance {
     private static let selfPointerField = Field(
       name: "selfPointer",
       signature: "J"
@@ -133,7 +133,7 @@ extension _JNIMethodIDCache {
     )
 
     private static let cache = _JNIMethodIDCache(
-      className: "org/swift/swiftkit/core/OutSwiftGenericInstance",
+      className: "org/swift/swiftkit/core/_OutSwiftGenericInstance",
       fields: [selfPointerField, selfTypePointerField]
     )
 

@@ -702,7 +702,7 @@ extension JNISwift2JavaGenerator {
               swiftFunctionResultType: swiftResult.type,
               outArgumentName: "out"
             ),
-            outParameters: [.init(name: "out", type: .OutSwiftGenericInstance)]
+            outParameters: [.init(name: "out", type: ._OutSwiftGenericInstance)]
           )
         } else {
           return NativeResult(
@@ -1321,10 +1321,10 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         printer.print(
           """
-          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache.OutSwiftGenericInstance.selfPointer, \(inner))
+          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, \(inner))
           let metadataPointer = unsafeBitCast(\(swiftFunctionResultType).self, to: UnsafeRawPointer.self)
           let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache.OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
           """
         )
         return ""

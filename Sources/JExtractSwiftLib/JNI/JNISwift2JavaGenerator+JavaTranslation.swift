@@ -858,7 +858,7 @@ extension JNISwift2JavaGenerator {
           return TranslatedResult(
             javaType: javaType,
             annotations: resultAnnotations,
-            outParameters: [.init(name: "instance", type: .OutSwiftGenericInstance, allocation: .new)],
+            outParameters: [.init(name: "instance", type: ._OutSwiftGenericInstance, allocation: .new)],
             conversion: .aggregate(
               variable: nil,
               [

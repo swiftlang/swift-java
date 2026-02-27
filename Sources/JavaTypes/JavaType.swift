@@ -82,7 +82,7 @@ extension JavaType {
 }
 
 extension JavaType {
-  public static var OutSwiftGenericInstance: JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "OutSwiftGenericInstance")
+  public static var _OutSwiftGenericInstance: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
   }
 }
