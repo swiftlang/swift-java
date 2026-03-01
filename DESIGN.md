@@ -21,15 +21,11 @@ object MyModule {
 }
 ```
 
----
-
 ## Corners Cut
 
 - **Stub bodies only** — no real JNI bridging or Swift thunk generation. The task asked for stubs, so this was intentional.
 - **Simplified type mapping** — only the required subset: `Int`, `Int32`, `Bool`, `Double`, `String`, `Void`. Optionals, arrays, generics are not handled.
 - **No package support** — no `package` declaration is emitted. Would be easy to add via `--java-package`.
-
----
 
 ## What an Ideal Solution Would Look Like
 
@@ -37,8 +33,6 @@ object MyModule {
 - Full type mapping including optionals, arrays, closures
 - Proper `package` declaration and Kotlin-idiomatic output (`@JvmStatic`, nullable types)
 - A sample Gradle project demonstrating end-to-end usage
-
----
 
 ## What I Would Do Next
 
