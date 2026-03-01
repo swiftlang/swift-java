@@ -69,8 +69,8 @@ Expected output:
 
 object MyModule {
   fun add(a: Int, b: Int): Int = TODO("Not implemented")
-  fun isEven(n: Int): Boolean = TODO("Not implemented")
   fun greet(name: String): String = TODO("Not implemented")
+  fun isEven(n: Int): Boolean = TODO("Not implemented")
 }
 ```
 
