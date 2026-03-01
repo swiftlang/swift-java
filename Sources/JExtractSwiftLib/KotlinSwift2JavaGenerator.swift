@@ -38,11 +38,6 @@ package class KotlinSwift2JavaGenerator: Swift2JavaGenerator {
   }
 
   func printModule(_ printer: inout CodePrinter) {
-    // DEBUG - add these lines temporarily
-    print("DEBUG importedGlobalFuncs count: \(analysis.importedGlobalFuncs.count)")
-    print("DEBUG importedGlobalVariables count: \(analysis.importedGlobalVariables.count)")
-    print("DEBUG importedTypes count: \(analysis.importedTypes.count)")
-
     // Header
     printer.print(
       """

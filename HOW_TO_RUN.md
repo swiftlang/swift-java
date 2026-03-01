@@ -68,9 +68,9 @@ Expected output:
 // Swift module: MyModule
 
 object MyModule {
-  fun add(a: Long, b: Long): Long = TODO("Not implemented")
+  fun add(a: Int, b: Int): Int = TODO("Not implemented")
+  fun isEven(n: Int): Boolean = TODO("Not implemented")
   fun greet(name: String): String = TODO("Not implemented")
-  fun isEven(n: Long): Boolean = TODO("Not implemented")
 }
 ```
 
