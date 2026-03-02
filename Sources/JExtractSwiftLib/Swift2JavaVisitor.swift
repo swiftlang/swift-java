@@ -85,6 +85,8 @@ final class Swift2JavaVisitor {
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
+
+    self.synthesizeToStringMethods(in: importedNominalType)
   }
 
   func visit(
@@ -159,6 +161,11 @@ final class Swift2JavaVisitor {
       apiKind: .function,
       functionSignature: signature
     )
+
+    if typeContext?.swiftNominal.isGeneric == true && imported.isStatic {
+      log.debug("Skip importing static function in generic type: '\(node.qualifiedNameForDebug)'")
+      return
+    }
 
     log.debug("Record imported method \(node.qualifiedNameForDebug)")
     if let typeContext {
@@ -266,6 +273,11 @@ final class Swift2JavaVisitor {
       return
     }
 
+    if typeContext.swiftNominal.isGeneric {
+      log.debug("Skip Importing generic type initializer \(node.kind) '\(node.qualifiedNameForDebug)'")
+      return
+    }
+
     self.log.debug("Import initializer: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
     let signature: SwiftFunctionSignature
@@ -363,6 +375,11 @@ final class Swift2JavaVisitor {
       functionSignature: signature
     )
 
+    if typeContext?.swiftNominal.isGeneric == true && imported.isStatic {
+      log.debug("Skip importing static accessor in generic type: '\(node.qualifiedNameForDebug)'")
+      return
+    }
+
     log.debug(
       "Record imported variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
     )
@@ -403,6 +420,46 @@ final class Swift2JavaVisitor {
         let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
+    }
+  }
+
+  private func synthesizeToStringMethods(in imported: ImportedNominalType) {
+    switch imported.swiftNominal.kind {
+    case .actor, .class, .enum, .struct:
+      break
+    case .protocol:
+      return
+    }
+
+    let knownTypes = SwiftKnownTypes(symbolTable: translator.symbolTable)
+    let toStringFunctionSignature = SwiftFunctionSignature(
+      selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: imported.swiftType)),
+      parameters: [],
+      result: SwiftResult(convention: .direct, type: knownTypes.string),
+      effectSpecifiers: [],
+      genericParameters: [],
+      genericRequirements: []
+    )
+
+    func makeToStringFunc(name: String, kind: SwiftAPIKind) -> ImportedFunc {
+      ImportedFunc(
+        module: translator.swiftModuleName,
+        swiftDecl: DeclSyntax("func \(raw: name)() -> String"),
+        name: name,
+        apiKind: kind,
+        functionSignature: toStringFunctionSignature
+      )
+    }
+
+    if !imported.methods.contains(where: {
+      $0.name == "toString" && $0.functionSignature == toStringFunctionSignature
+    }) {
+      imported.methods.append(makeToStringFunc(name: "toString", kind: .synthesizedFunction(.toString)))
+    }
+    if !imported.methods.contains(where: {
+      $0.name == "toDebugString" && $0.functionSignature == toStringFunctionSignature
+    }) {
+      imported.methods.append(makeToStringFunc(name: "toDebugString", kind: .synthesizedFunction(.toDebugString)))
     }
   }
 }

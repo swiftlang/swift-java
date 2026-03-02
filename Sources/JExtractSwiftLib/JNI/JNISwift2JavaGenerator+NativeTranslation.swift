@@ -62,10 +62,27 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
+      let selfTypeParameter: NativeParameter? =
+        if let selfType = functionSignature.selfParameter?.selfType,
+          selfType.asNominalTypeDeclaration?.isGeneric == true
+        {
+          try translateParameter(
+            type: .metatype(selfType),
+            parameterName: "selfType",
+            methodName: methodName,
+            parentName: parentName,
+            genericParameters: functionSignature.genericParameters,
+            genericRequirements: functionSignature.genericRequirements
+          )
+        } else {
+          nil
+        }
+
       let result = try translate(swiftResult: functionSignature.result)
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
+        selfTypeParameter: selfTypeParameter,
         parameters: parameters,
         result: result
       )
@@ -290,7 +307,17 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
-      case .metatype, .tuple, .composite:
+      case .metatype:
+        return NativeParameter(
+          parameters: [
+            JavaParameter(name: parameterName, type: .long)
+          ],
+          conversion: .extractMetatypeValue(.placeholder),
+          indirectConversion: nil,
+          conversionCheck: nil
+        )
+
+      case .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -667,11 +694,23 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
         }
 
-        return NativeResult(
-          javaType: .long,
-          conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftResult.type)),
-          outParameters: []
-        )
+        if nominalType.nominalTypeDecl.isGeneric {
+          return NativeResult(
+            javaType: .void,
+            conversion: .genericValueIndirectReturn(
+              .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftResult.type)),
+              swiftFunctionResultType: swiftResult.type,
+              outArgumentName: "out"
+            ),
+            outParameters: [.init(name: "out", type: ._OutSwiftGenericInstance)]
+          )
+        } else {
+          return NativeResult(
+            javaType: .long,
+            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftResult.type)),
+            outParameters: []
+          )
+        }
 
       case .tuple([]):
         return NativeResult(
@@ -804,6 +843,7 @@ extension JNISwift2JavaGenerator {
 
   struct NativeFunctionSignature {
     let selfParameter: NativeParameter?
+    var selfTypeParameter: NativeParameter?
     var parameters: [NativeParameter]
     var result: NativeResult
   }
@@ -872,6 +912,8 @@ extension JNISwift2JavaGenerator {
       convertLongFromJNI: Bool = true
     )
 
+    indirect case extractMetatypeValue(NativeSwiftConversionStep)
+
     /// Allocate memory for a Swift value and outputs the pointer
     indirect case allocateSwiftValue(NativeSwiftConversionStep, name: String, swiftType: SwiftType)
 
@@ -907,6 +949,12 @@ extension JNISwift2JavaGenerator {
       returnType: JavaType,
       discriminatorParameterName: String,
       placeholderValue: NativeSwiftConversionStep
+    )
+
+    indirect case genericValueIndirectReturn(
+      NativeSwiftConversionStep,
+      swiftFunctionResultType: SwiftType,
+      outArgumentName: String
     )
 
     indirect case method(
@@ -1072,6 +1120,19 @@ extension JNISwift2JavaGenerator {
           )
         }
         return pointerName
+
+      case .extractMetatypeValue(let inner):
+        let inner = inner.render(&printer, placeholder)
+        let pointerName = "\(inner)$"
+        printer.print(
+          """
+          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
+          guard let \(pointerName) = UnsafeRawPointer(bitPattern: \(inner)Bits$) else {
+            fatalError("\(inner) metadata address was null")
+          }
+          """
+        )
+        return "unsafeBitCast(\(pointerName), to: Any.Type.self)"
 
       case .allocateSwiftValue(let inner, let name, let swiftType):
         let inner = inner.render(&printer, placeholder)
@@ -1255,6 +1316,18 @@ extension JNISwift2JavaGenerator {
         }
 
         return "result$"
+
+      case .genericValueIndirectReturn(let inner, let swiftFunctionResultType, let outArgumentName):
+        let inner = inner.render(&printer, placeholder)
+        printer.print(
+          """
+          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, \(inner))
+          let metadataPointer = unsafeBitCast(\(swiftFunctionResultType).self, to: UnsafeRawPointer.self)
+          let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+          environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          """
+        )
+        return ""
 
       case .method(let inner, let methodName, let arguments):
         let inner = inner.render(&printer, placeholder)

@@ -993,6 +993,14 @@ extension LoweredFunctionSignature {
         .joined(separator: ", ")
       resultExpr = "\(callee)(\(raw: arguments))"
 
+    case .synthesizedFunction(let function):
+      switch function {
+      case .toString:
+        resultExpr = "String(describing: \(callee))"
+      case .toDebugString:
+        resultExpr = "String(reflecting: \(callee))"
+      }
+
     case .getter:
       assert(paramExprs.isEmpty)
       resultExpr = callee

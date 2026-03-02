@@ -178,7 +178,7 @@ extension FFMSwift2JavaGenerator {
         switch decl.apiKind {
         case .getter, .subscriptGetter: decl.javaGetterName
         case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .initializer, .enumCase: decl.name
+        case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
         }
 
       // Signature.
@@ -693,7 +693,7 @@ extension FFMSwift2JavaGenerator {
           throw JavaTranslationError.unhandledType(swiftType)
         }
 
-        let javaType: JavaType = .class(package: nil, name: swiftNominalType.nominalTypeDecl.name)
+        let javaType: JavaType = .class(package: nil, name: swiftNominalType.nominalTypeDecl.qualifiedName)
         return TranslatedResult(
           javaResultType: javaType,
           annotations: resultAnnotations,

@@ -60,6 +60,9 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
 | Arrays: `[UInt8]`, `[MyType]`, `Array<Int64>` etc                                    | ❌        | ✅   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
+| Generic type: `struct S<T>`                                                          | ❌        | ✅   |
+| Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
+| Static functions or properties in generic type                                       | ❌        | ❌   | 
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
 | Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
@@ -354,3 +357,47 @@ This is a mode for legacy platforms, where `CompletableFuture` is not available,
 In this mode `async` functions in Swift are extracted as Java methods returning a `java.util.concurrent.Future`.
 To enable this mode pass the `--async-func-mode future` command line option, 
 or set the `asyncFuncMode` configuration value in `swift-java.config`
+
+### Generic types
+
+> Note: Generic types are currently only supported in JNI mode. 
+
+Support for generic types is still work-in-progress and limited.
+The generated Java classes do not have generic signatures.
+Any members containing type parameters (such as T) are not exported.
+
+```swift
+public struct MyID<T> {
+  // Not exported: Contains the type parameter 'T'
+  public var rawValue: T 
+  
+  // Not exported: The initializer depends on 'T'
+  public init(rawValue: T) { 
+    self.rawValue = rawValue
+  }
+  
+  // Exported: Does not depend on 'T'
+  public var description: String { "\(rawValue)" } 
+  
+  // Not exported: Although it doesn't use 'T' directly, 
+  // it is a member of a generic context (MyID<T>.foo).
+  public static func foo() -> String { "" } 
+}
+
+// Exported: A specialized function with a concrete type (MyID<Int>)
+public func makeIntID() -> MyID<Int> { 
+  ...
+}
+```
+
+will be exported as
+
+```java
+public final class MyID implements JNISwiftInstance {
+    public String getDescription();
+}
+
+public final class MySwiftLibrary {
+    public static MyID makeIntID();
+} 
+```

@@ -45,3 +45,9 @@ public enum NestedEnum {
     public init() {}
   }
 }
+
+public enum NamespaceEnum {
+  public enum Nested {
+    public static func something() {}
+  }
+}

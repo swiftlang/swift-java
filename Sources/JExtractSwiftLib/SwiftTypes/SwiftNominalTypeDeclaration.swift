@@ -73,7 +73,8 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   /// MyCollection.Iterator.
   let parent: SwiftNominalTypeDeclaration?
 
-  // TODO: Generic parameters.
+  /// The generic parameters of this nominal type.
+  let genericParameters: [SwiftGenericParameterDeclaration]
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
@@ -91,6 +92,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   ) {
     self.parent = parent
     self.syntax = node
+    self.genericParameters =
+      node.asProtocol(WithGenericParametersSyntax.self)?.genericParameterClause?.parameters.map {
+        SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: moduleName, node: $0)
+      } ?? []
 
     // Determine the kind from the syntax node.
     switch Syntax(node).as(SyntaxEnum.self) {
@@ -157,6 +162,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     case .enum, .struct, .protocol:
       return false
     }
+  }
+
+  var isGeneric: Bool {
+    !genericParameters.isEmpty
   }
 }
 
