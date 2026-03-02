@@ -95,9 +95,9 @@ struct CdeclLowering {
     // Lower the self parameter.
     let loweredSelf: LoweredParameter? =
       switch signature.selfParameter {
-      case .instance(let convention, let swiftTtype):
+      case .instance(let convention, let swiftType):
         try lowerParameter(
-          swiftTtype,
+          swiftType,
           convention: convention,
           parameterName: "self",
           genericParameters: signature.genericParameters,
