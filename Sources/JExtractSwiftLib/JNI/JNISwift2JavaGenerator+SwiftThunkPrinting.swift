@@ -302,7 +302,7 @@ extension JNISwift2JavaGenerator {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     var parameters = [selfPointerParam]
     if type.swiftNominal.isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
+      parameters.append(JavaParameter(name: "selfTypePointer", type: .long))
     }
 
     printCDecl(
@@ -315,7 +315,7 @@ extension JNISwift2JavaGenerator {
       if type.swiftNominal.isGeneric {
         let knownTypes = SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
         let discriminatorFunctionSignature = SwiftFunctionSignature(
-          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
+          selfParameter: .instance(convention: .byValue, swiftType: type.swiftType),
           parameters: [],
           result: .init(convention: .direct, type: knownTypes.int),
           effectSpecifiers: [],
@@ -391,7 +391,7 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
         &printer,
-        "self"
+        "selfPointer"
       )
       let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
         parameter.name ?? "_\(idx)"
@@ -598,10 +598,10 @@ extension JNISwift2JavaGenerator {
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
-      case .instance(let swiftSelf):
+      case .instance:
         nativeSignature.selfParameter!.conversion.render(
           &printer,
-          swiftSelf.parameterName ?? "self"
+          "selfPointer"
         )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
@@ -819,7 +819,7 @@ extension JNISwift2JavaGenerator {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     var parameters = [selfPointerParam]
     if type.swiftNominal.isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
+      parameters.append(JavaParameter(name: "selfTypePointer", type: .long))
     }
 
     printCDecl(
@@ -831,7 +831,7 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       if type.swiftNominal.isGeneric {
         let destroyFunctionSignature = SwiftFunctionSignature(
-          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
+          selfParameter: .instance(convention: .byValue, swiftType: type.swiftType),
           parameters: [],
           result: .void,
           effectSpecifiers: [],
@@ -933,7 +933,7 @@ extension JNISwift2JavaGenerator {
     }
     let nativeSignature = translatedDecl.nativeFunctionSignature
 
-    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
+    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfTypePointer")
     let openerName = openerProtocolName(for: parentNominalType.nominalTypeDecl)
     printer.print("let openerType = \(selfType) as! (any \(openerName).Type)")
 
@@ -1043,14 +1043,14 @@ extension JNISwift2JavaGenerator {
       }
 
       printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)") { printer in
-        printer.print(#"assert(selfPointer != 0, "self memory address was null")"#)
-        printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
-        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
-        printer.printBraceBlock("guard let self$ else") { printer in
-          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
+        printer.print(#"assert(selfPointer != 0, "selfPointer memory address was null")"#)
+        printer.print("let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
+        printer.print("let selfPointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$)")
+        printer.printBraceBlock("guard let selfPointer$ else") { printer in
+          printer.print("fatalError(\"selfPointer memory address was null in call to \\(#function)!\")")
         }
-        printer.print("self$.deinitialize(count: 1)")
-        printer.print("self$.deallocate()")
+        printer.print("selfPointer$.deinitialize(count: 1)")
+        printer.print("selfPointer$.deallocate()")
       }
     }
   }
@@ -1063,16 +1063,16 @@ extension JNISwift2JavaGenerator {
     swiftParentName: String,
     _ selfPointerParam: JavaParameter
   ) -> String {
-    let newSelfParamName = "self$"
+    let newSelfParamName = "selfPointer$"
     printer.print(
       """
       guard let env$ = environment else {
         fatalError("Missing JNIEnv in downcall to \\(#function)")
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
-      let selfBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
-      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfBits$) else {
-        fatalError("self memory address was null in call to \\(#function)!")
+      let selfPointerBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfPointerBits$) else {
+        fatalError("selfPointer memory address was null in call to \\(#function)!")
       }
       """
     )

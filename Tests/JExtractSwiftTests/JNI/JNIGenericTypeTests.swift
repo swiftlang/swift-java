@@ -64,7 +64,7 @@ struct JNIGenericTypeTests {
         public java.lang.String getDescription() {
           return MyID.$getDescription(this.$memoryAddress(), this.$typeMetadataAddress());
         }
-        private static native java.lang.String $getDescription(long self, long selfType);
+        private static native java.lang.String $getDescription(long selfPointer, long selfTypePointer);
         """,
         """
         @Override
@@ -73,7 +73,7 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        private static native void $destroy(long selfPointer, long selfType);
+        private static native void $destroy(long selfPointer, long selfTypePointer);
         @Override
         public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
@@ -109,33 +109,33 @@ struct JNIGenericTypeTests {
       expectedChunks: [
         """
         protocol _SwiftModule_MyID_opener {
-          static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring?
+          static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring?
           ...
         }
         """,
         #"""
         extension MyID: _SwiftModule_MyID_opener {
-          static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jstring? {
-            assert(self != 0, "self memory address was null")
-            let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-            let self$ = UnsafeMutablePointer<MyID>(bitPattern: selfBits$)
-            guard let self$ else {
-             fatalError("self memory address was null in call to \(#function)!")
+          static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
+            assert(selfPointer != 0, "selfPointer memory address was null")
+            let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+            let selfPointer$ = UnsafeMutablePointer<MyID>(bitPattern: selfPointerBits$)
+            guard let selfPointer$ else {
+              fatalError("selfPointer memory address was null in call to \(#function)!")
             }
-            return self$.pointee.description.getJNIValue(in: environment)
+            return selfPointer$.pointee.description.getJNIValue(in: environment)
           }
           ...
         }
         """#,
         """
         @_cdecl("Java_com_example_swift_MyID__00024getDescription__JJ")
-        public func Java_com_example_swift_MyID__00024getDescription__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong, selfType: jlong) -> jstring? {
-          let selfTypeBits$ = Int(Int64(fromJNI: selfType, in: environment))
-          guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
-            fatalError("selfType metadata address was null")
+        public func Java_com_example_swift_MyID__00024getDescription__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+          let selfTypePointerBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
+          guard let selfTypePointer$ = UnsafeRawPointer(bitPattern: selfTypePointerBits$) else {
+            fatalError("selfTypePointer metadata address was null")
           }
-          let openerType = unsafeBitCast(selfType$, to: Any.Type.self) as! (any _SwiftModule_MyID_opener.Type)
-          return openerType._get_description(environment: environment, thisClass: thisClass, self: self)
+          let openerType = unsafeBitCast(selfTypePointer$, to: Any.Type.self) as! (any _SwiftModule_MyID_opener.Type)
+          return openerType._get_description(environment: environment, thisClass: thisClass, selfPointer: selfPointer)
         }
         """,
       ]
