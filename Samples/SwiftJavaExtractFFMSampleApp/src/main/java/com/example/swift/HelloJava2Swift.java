@@ -40,13 +40,13 @@ public class HelloJava2Swift {
     static void examples() {
         MySwiftLibrary.helloWorld();
 
-        MySwiftLibrary.globalTakeInt_i(1337);
+        MySwiftLibrary.globalTakeInt(1337);
 
-        long cnt = MySwiftLibrary.globalWriteString_string("String from Java");
+        long cnt = MySwiftLibrary.globalWriteString("String from Java");
 
         CallTraces.trace("count = " + cnt);
 
-        MySwiftLibrary.globalCallMeRunnable_run(() -> {
+        MySwiftLibrary.globalCallMeRunnable(() -> {
             CallTraces.trace("running runnable");
         });
 
@@ -55,7 +55,7 @@ public class HelloJava2Swift {
 
         // Example of using an arena; MyClass.deinit is run at end of scope
         try (var arena = AllocatingSwiftArena.ofConfined()) {
-            MySwiftClass obj = MySwiftClass.init_len_cap(2222, 7777, arena);
+            MySwiftClass obj = MySwiftClass.init(2222, 7777, arena);
 
             // just checking retains/releases work
             CallTraces.trace("retainCount = " + SwiftRuntime.retainCount(obj));
@@ -68,14 +68,14 @@ public class HelloJava2Swift {
             CallTraces.trace("obj.counter = " + obj.getCounter());
 
             obj.voidMethod();
-            obj.takeIntMethod_i(42);
+            obj.takeIntMethod(42);
 
-            MySwiftClass otherObj = MySwiftClass.factory_len_cap(12, 42, arena);
+            MySwiftClass otherObj = MySwiftClass.factory(12, 42, arena);
             otherObj.voidMethod();
 
-            MySwiftStruct swiftValue = MySwiftStruct.init_cap_len(2222, 1111, arena);
+            MySwiftStruct swiftValue = MySwiftStruct.init(2222, 1111, arena);
             CallTraces.trace("swiftValue.capacity = " + swiftValue.getCapacity());
-            swiftValue.withCapLen__((cap, len) -> {
+            swiftValue.withCapLen((cap, len) -> {
                 CallTraces.trace("withCapLenCallback: cap=" + cap + ", len=" + len);
             });
         }
@@ -86,8 +86,8 @@ public class HelloJava2Swift {
             var origDat = Data.init_bytes_count(origBytes, origBytes.byteSize(), arena);
             CallTraces.trace("origDat.count = " + origDat.getCount());
             
-            var retDat = MySwiftLibrary.globalReceiveReturnData_data(origDat, arena);
-            retDat.withUnsafeBytes__((retBytes) -> {
+            var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
+            retDat.withUnsafeBytes((retBytes) -> {
                 var str = retBytes.getString(0);
                 CallTraces.trace("retStr=" + str);
             });
@@ -96,10 +96,14 @@ public class HelloJava2Swift {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var bytes = arena.allocateFrom("hello");
             var dat = Data.init_bytes_count(bytes, bytes.byteSize(), arena);
-            MySwiftLibrary.globalReceiveSomeDataProtocol_data(dat);
-            MySwiftLibrary.globalReceiveOptional_o1_o2(OptionalLong.of(12), Optional.of(dat));
+            MySwiftLibrary.globalReceiveSomeDataProtocol(dat);
+            MySwiftLibrary.globalReceiveOptional(OptionalLong.of(12), Optional.of(dat));
         }
 
+        // Test overload conflict detection: only conflicting methods get suffixes
+        MySwiftLibrary.globalMethodOverloadingInt_a(100);
+        MySwiftLibrary.globalMethodOverloadingInt_b(200);
+        CallTraces.trace("Overload conflict detection test passed!");
 
         System.out.println("DONE.");
     }
