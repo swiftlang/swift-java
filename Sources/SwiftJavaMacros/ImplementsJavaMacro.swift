@@ -16,10 +16,39 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-enum JavaImplementationMacro {}
+package enum JavaImplementationMacro {}
+
+// JNI identifier escaping per the JNI specification:
+// https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/design.html#resolving_native_method_names
+extension String {
+  /// Returns the string with characters escaped according to JNI symbol naming rules.
+  /// - `_` → `_1`
+  /// - `.` and `/` → `_` (package/class separator)
+  /// - `;` → `_2`
+  /// - `[` → `_3`
+  /// - Non-ASCII → `_0XXXX` (UTF-16 hex)
+  var escapedJNIIdentifier: String {
+    self.compactMap { ch -> String in
+      switch ch {
+      case "_": return "_1"
+      case "/": return "_"
+      case ";": return "_2"
+      case "[": return "_3"
+      default:
+        if ch.isASCII && (ch.isLetter || ch.isNumber) {
+          return String(ch)
+        } else if let utf16 = ch.utf16.first {
+          return "_0\(String(format: "%04x", utf16))"
+        } else {
+          fatalError("Invalid JNI character: \(ch)")
+        }
+      }
+    }.joined()
+  }
+}
 
 extension JavaImplementationMacro: PeerMacro {
-  static func expansion(
+  package static func expansion(
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
@@ -112,7 +141,8 @@ extension JavaImplementationMacro: PeerMacro {
         } ?? ""
 
       let swiftName = memberFunc.name.text
-      let cName = "Java_" + className.replacingOccurrences(of: ".", with: "_") + "_" + swiftName
+      let escapedClassName = className.split(separator: ".").map { String($0).escapedJNIIdentifier }.joined(separator: "_")
+      let cName = "Java_" + escapedClassName + "_" + swiftName.escapedJNIIdentifier
       let innerBody: CodeBlockItemListSyntax
       let isThrowing = memberFunc.signature.effectSpecifiers?.throwsClause != nil
       let tryClause: String = isThrowing ? "try " : ""
