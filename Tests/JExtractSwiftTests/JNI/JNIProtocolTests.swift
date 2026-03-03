@@ -64,7 +64,7 @@ struct JNIProtocolTests {
           ...
           public void method();
           ...
-          public SomeClass withObject(SomeClass c, SwiftArena swiftArena$);
+          public SomeClass withObject(SomeClass c, SwiftArena swiftArena);
           ...
         }
         """,
@@ -84,7 +84,7 @@ struct JNIProtocolTests {
         """
         public final class SomeClass implements JNISwiftInstance, SomeProtocol {
           ...
-          public SomeClass makeClass(SwiftArena swiftArena$) {
+          public SomeClass makeClass(SwiftArena swiftArena) {
           ...
         }
         """

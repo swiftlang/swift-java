@@ -204,18 +204,18 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static MyEnum first(SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$first(), swiftArena$);
+        public static MyEnum first(SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$first(), swiftArena);
         }
         """,
         """
-        public static MyEnum second(java.lang.String arg0, SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$second(arg0), swiftArena$);
+        public static MyEnum second(java.lang.String arg0, SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$second(arg0), swiftArena);
         }
         """,
         """
-        public static MyEnum third(long x, int y, SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$third(x, y), swiftArena$);
+        public static MyEnum third(long x, int y, SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$third(x, y), swiftArena);
         }
         """,
       ]

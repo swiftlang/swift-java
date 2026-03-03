@@ -283,11 +283,11 @@ struct JNIAsyncTests {
          * public func async(c: MyClass) async -> MyClass
          * }
          */
-        public static java.util.concurrent.CompletableFuture<MyClass> async(MyClass c, SwiftArena swiftArena$) {
+        public static java.util.concurrent.CompletableFuture<MyClass> async(MyClass c, SwiftArena swiftArena) {
           java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
           SwiftModule.$async(c.$memoryAddress(), future$);
           return future$.thenApply((futureResult$) -> {
-            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
+            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena);
           }
           );
         }
@@ -437,11 +437,11 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena$) {
+        public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena) {
           org.swift.swiftkit.core.SimpleCompletableFuture<java.lang.Long> future$ = new org.swift.swiftkit.core.SimpleCompletableFuture<java.lang.Long>();
           SwiftModule.$async(c.$memoryAddress(), future$);
           return future$.thenApply((futureResult$) -> {
-            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena$);
+            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena);
           }
           );
         }

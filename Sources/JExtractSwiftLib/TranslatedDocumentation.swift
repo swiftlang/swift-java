@@ -25,7 +25,7 @@ enum TranslatedDocumentation {
     if translatedDecl.translatedSignature.requiresSwiftArena {
       documentation?.parameters.append(
         SwiftDocumentation.Parameter(
-          name: "swiftArena$",
+          name: "swiftArena",
           description: "the arena that will manage the lifetime and allocation of Swift objects"
         )
       )
@@ -44,7 +44,7 @@ enum TranslatedDocumentation {
     if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
       documentation?.parameters.append(
         SwiftDocumentation.Parameter(
-          name: "swiftArena$",
+          name: "swiftArena",
           description: "the arena that the the returned object will be attached to"
         )
       )

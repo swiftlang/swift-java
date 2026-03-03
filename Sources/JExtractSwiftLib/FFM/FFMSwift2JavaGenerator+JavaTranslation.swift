@@ -811,7 +811,7 @@ extension FFMSwift2JavaGenerator {
     /// Similar to 'method', however for a property i.e. without adding the '()' after the name
     indirect case property(JavaConversionStep, propertyName: String)
 
-    /// Call 'new \(Type)(\(placeholder), swiftArena$)'.
+    /// Call 'new \(Type)(\(placeholder), swiftArena)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
     /// Construct the type using the placeholder as arguments.
