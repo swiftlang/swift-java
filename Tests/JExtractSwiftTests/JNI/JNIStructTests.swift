@@ -135,8 +135,8 @@ struct JNIStructTests {
          * public init(x: Int64, y: Int64)
          * }
          */
-        public static MyStruct init(long x, long y, SwiftArena swiftArena$) {
-          return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena$);
+        public static MyStruct init(long x, long y, SwiftArena swiftArena) {
+          return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena);
         }
         """,
         """

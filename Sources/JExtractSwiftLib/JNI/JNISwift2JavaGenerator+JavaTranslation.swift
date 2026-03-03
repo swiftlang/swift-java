@@ -1251,7 +1251,7 @@ extension JNISwift2JavaGenerator {
     /// `value.$typeMetadataAddress()`
     indirect case typeMetadataAddress(JavaNativeConversionStep)
 
-    /// Call `new \(Type)(\(placeholder), swiftArena$)`
+    /// Call `new \(Type)(\(placeholder), swiftArena)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
 
     /// Call `new \(Type)(\(placeholder))`
@@ -1360,11 +1360,11 @@ extension JNISwift2JavaGenerator {
 
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "new \(javaType.className!)(\(inner), swiftArena$)"
+        return "new \(javaType.className!)(\(inner), swiftArena)"
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
+        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)

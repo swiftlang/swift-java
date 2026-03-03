@@ -191,8 +191,8 @@ struct JNIClassTests {
          * public init(x: Int64, y: Int64)
          * }
          */
-        public static MyClass init(long x, long y, SwiftArena swiftArena$) {
-          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(x, y), swiftArena$);
+        public static MyClass init(long x, long y, SwiftArena swiftArena) {
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(x, y), swiftArena);
         }
         """,
         """
@@ -202,8 +202,8 @@ struct JNIClassTests {
          * public init()
          * }
          */
-        public static MyClass init(SwiftArena swiftArena$) {
-          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(), swiftArena$);
+        public static MyClass init(SwiftArena swiftArena) {
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$init(), swiftArena);
         }
         """,
         """
@@ -336,8 +336,8 @@ struct JNIClassTests {
          * public func copy() -> MyClass
          * }
          */
-        public MyClass copy(SwiftArena swiftArena$) {
-          return MyClass.wrapMemoryAddressUnsafe(MyClass.$copy(this.$memoryAddress()), swiftArena$);
+        public MyClass copy(SwiftArena swiftArena) {
+          return MyClass.wrapMemoryAddressUnsafe(MyClass.$copy(this.$memoryAddress()), swiftArena);
         }
         """,
         """

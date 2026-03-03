@@ -420,14 +420,14 @@ extension JNISwift2JavaGenerator {
       self.translatedEnumCase(for: $0)
     }.contains(where: \.requiresSwiftArena)
 
-    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
       printer.print("Discriminator discriminator = this.getDiscriminator();")
       printer.printBraceBlock("switch (discriminator)") { printer in
         for enumCase in decl.cases {
           guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
             continue
           }
-          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
+          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
           printer.print(
             "case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
           )
@@ -620,7 +620,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if translatedSignature.requiresSwiftArena {
-      parameters.append("SwiftArena swiftArena$")
+      parameters.append("SwiftArena swiftArena")
     }
     if let importedFunc {
       TranslatedDocumentation.printDocumentation(
@@ -837,10 +837,10 @@ extension JNISwift2JavaGenerator {
        * @param instant The source timestamp to convert.
        * @return A date derived from the input instant with microsecond precision.
        */
-      public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena$) {
+      public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena) {
         Objects.requireNonNull(instant, "Instant cannot be null");
         double timeIntervalSince1970 = instant.getEpochSecond() + (instant.getNano() / 1_000_000_000.0);
-        return Date.init(timeIntervalSince1970, swiftArena$);
+        return Date.init(timeIntervalSince1970, swiftArena);
       }
       """
     )
@@ -853,12 +853,12 @@ extension JNISwift2JavaGenerator {
        * Creates a new Swift @{link Data} instance from a byte array.
        *
        * @param bytes The byte array to copy into the Data
-       * @param swiftArena$ The arena for memory management
+       * @param swiftArena The arena for memory management
        * @return A new Data instance containing a copy of the bytes
        */
-      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {
+      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena) {
         Objects.requireNonNull(bytes, "bytes cannot be null");
-        return Data.init(bytes, swiftArena$);
+        return Data.init(bytes, swiftArena);
       }
       """
     )

@@ -378,7 +378,7 @@ extension FFMSwift2JavaGenerator {
       .flatMap(\.javaParameters)
       .map { $0.renderParameter() }
     if translatedSignature.requiresSwiftArena {
-      paramDecls.append("AllocatingSwiftArena swiftArena$")
+      paramDecls.append("AllocatingSwiftArena swiftArena")
     }
 
     TranslatedDocumentation.printDocumentation(
@@ -444,7 +444,7 @@ extension FFMSwift2JavaGenerator {
           analysis.importedTypes[className] != nil
         {
           // Use passed-in 'SwiftArena' for 'SwiftValue'.
-          "swiftArena$"
+          "swiftArena"
         } else {
           // Otherwise use the temporary 'Arena'.
           "arena$"
@@ -664,11 +664,11 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     case .constructSwiftValue(let inner, let javaType):
       let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
-      return "new \(javaType.className!)(\(inner), swiftArena$)"
+      return "new \(javaType.className!)(\(inner), swiftArena)"
 
     case .wrapMemoryAddressUnsafe(let inner, let javaType):
       let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
-      return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
+      return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
     case .construct(let inner, let javaType):
       let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)

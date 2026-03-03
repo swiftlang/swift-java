@@ -151,10 +151,10 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static MyID makeStringID(java.lang.String value, SwiftArena swiftArena$) {
+        public static MyID makeStringID(java.lang.String value, SwiftArena swiftArena) {
           org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
           SwiftModule.$makeStringID(value, instance);
-          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena$);
+          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
         }
         """,
         """
