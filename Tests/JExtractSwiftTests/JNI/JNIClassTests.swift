@@ -102,19 +102,10 @@ struct JNIClassTests {
       .java,
       expectedChunks: [
         """
-        private static native void $destroy(long selfPointer);
-        """
-      ]
-    )
-    try assertOutput(
-      input: source,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
         @Override
         public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
+          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("MyClass.$createDestroyFunction",
                 "this", this,
@@ -126,7 +117,7 @@ struct JNIClassTests {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("MyClass.$destroy", "self", self$);
               }
-              MyClass.$destroy(self$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
         """
@@ -242,33 +233,6 @@ struct JNIClassTests {
           return resultBits$.getJNIValue(in: environment)
         }
         """,
-      ]
-    )
-  }
-
-  @Test
-  func destroyFunction_swiftThunks() throws {
-    try assertOutput(
-      input: source,
-      .jni,
-      .swift,
-      detectChunkByInitialLines: 1,
-      expectedChunks: [
-        """
-        @_cdecl("Java_com_example_swift_MyClass__00024destroy__J")
-        public func Java_com_example_swift_MyClass__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
-          guard let env$ = environment else {
-            fatalError("Missing JNIEnv in downcall to \\(#function)")
-          }
-          assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          guard let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$) else {
-            fatalError("self memory address was null in call to \\(#function)!")
-          }
-          self$.deinitialize(count: 1)
-          self$.deallocate()
-        }
-        """
       ]
     )
   }

@@ -32,28 +32,8 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public java.lang.String toString() {
-          return MyType.$toString(this.$memoryAddress());
-        }
-        private static native java.lang.String $toString(long selfPointer);
-        """
-      ]
-    )
-  }
-
-  @Test("JNI toString (Swift)")
-  func toString_swift() throws {
-    try assertOutput(
-      input: source,
-      .jni,
-      .swift,
-      detectChunkByInitialLines: 1,
-      expectedChunks: [
-        """
-        @_cdecl("Java_com_example_swift_MyType__00024toString__J")
-        public func Java_com_example_swift_MyType__00024toString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
-          ...
-          return String(describing: selfPointer$.pointee).getJNIValue(in: environment)
+        public String toString() {
+          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         """
       ]
@@ -69,28 +49,8 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public java.lang.String toDebugString() {
-          return MyType.$toDebugString(this.$memoryAddress());
-        }
-        private static native java.lang.String $toDebugString(long selfPointer);
-        """
-      ]
-    )
-  }
-
-  @Test("JNI toDebugString (Swift)")
-  func toDebugString_swift() throws {
-    try assertOutput(
-      input: source,
-      .jni,
-      .swift,
-      detectChunkByInitialLines: 1,
-      expectedChunks: [
-        """
-        @_cdecl("Java_com_example_swift_MyType__00024toDebugString__J")
-        public func Java_com_example_swift_MyType__00024toDebugString__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
-          ...
-          return String(reflecting: selfPointer$.pointee).getJNIValue(in: environment)
+        public String toDebugString() {
+          return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         """
       ]

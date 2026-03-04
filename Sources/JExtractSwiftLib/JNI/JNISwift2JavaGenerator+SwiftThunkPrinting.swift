@@ -297,7 +297,7 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): SwiftJava._RawDiscriminatorRepresentable") { printer in
+    printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): _RawDiscriminatorRepresentable") { printer in
       printer.printBraceBlock("public var _rawDiscriminator: Int32") { printer in
         printer.printBraceBlock("switch self") { printer in
           for (idx, enumCase) in type.cases.enumerated() {

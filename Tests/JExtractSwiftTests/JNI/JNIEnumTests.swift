@@ -79,26 +79,25 @@ struct JNIEnumTests {
         }
         """,
         """
-        private static native void $destroy(long selfPointer);
-        """,
-        """
         @Override
         public Runnable $createDestroyFunction() {
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
-              "this", this,
-              "self", self$);
-        }
-        return new Runnable() {
-          @Override
-          public void run() {
-            if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall("MyEnum.$destroy", "self", self$);
-            }
-            MyEnum.$destroy(self$);
+          long self$ = this.$memoryAddress();
+          long selfType$ = this.$typeMetadataAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
+                "this", this,
+                "self", self$);
           }
-        };
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("MyEnum.$destroy", "self", self$);
+              }
+              SwiftObjects.destroy(self$, selfType$);
+            }
+          };
+        }
         """,
       ]
     )
@@ -110,7 +109,7 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .java,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public enum Discriminator {
@@ -121,12 +120,10 @@ struct JNIEnumTests {
         """,
         """
         public Discriminator getDiscriminator() {
-          return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];
+          var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());
+          return Discriminator.values()[raw];
         }
-        """,
         """
-        private static native int $getDiscriminator(long self);
-        """,
       ]
     )
   }
@@ -140,14 +137,14 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyEnum__00024getDiscriminator__J")
-        public func Java_com_example_swift_MyEnum__00024getDiscriminator__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint {
-          ...
-          switch (self$.pointee) {
-            case .first: return 0
-            case .second: return 1
-            case .third: return 2
-          }
+        extension MyEnum: _RawDiscriminatorRepresentable {
+          public var _rawDiscriminator: Int32 {
+            switch self {
+              case .first: return 0
+              case .second: return 1
+              case .third: return 2
+            }
+          } 
         }
         """
       ]

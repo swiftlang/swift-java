@@ -73,7 +73,6 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        private static native void $destroy(long selfPointer, long selfType);
         @Override
         public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
@@ -90,7 +89,7 @@ struct JNIGenericTypeTests {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("MyID.$destroy", "self", self$, "selfType", selfType$);
               }
-              MyID.$destroy(self$, selfType$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
         }

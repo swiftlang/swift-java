@@ -88,19 +88,10 @@ struct JNIStructTests {
       .java,
       expectedChunks: [
         """
-        private static native void $destroy(long selfPointer);
-        """
-      ]
-    )
-    try assertOutput(
-      input: source,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
         @Override
         public Runnable $createDestroyFunction() {
           long self$ = this.$memoryAddress();
+          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("MyStruct.$createDestroyFunction",
                 "this", this,
@@ -112,7 +103,7 @@ struct JNIStructTests {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("MyStruct.$destroy", "self", self$);
               }
-              MyStruct.$destroy(self$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
         }
@@ -161,32 +152,6 @@ struct JNIStructTests {
           result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
           return resultBits$.getJNIValue(in: environment)
-        }
-        """
-      ]
-    )
-  }
-
-  @Test
-  func destroyFunction_swiftThunks() throws {
-    try assertOutput(
-      input: source,
-      .jni,
-      .swift,
-      expectedChunks: [
-        """
-        @_cdecl("Java_com_example_swift_MyStruct__00024destroy__J")
-        public func Java_com_example_swift_MyStruct__00024destroy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
-          guard let env$ = environment else {
-            fatalError("Missing JNIEnv in downcall to \\(#function)")
-          }
-          assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
-            fatalError("self memory address was null in call to \\(#function)!")
-          }
-          self$.deinitialize(count: 1)
-          self$.deallocate()
         }
         """
       ]
