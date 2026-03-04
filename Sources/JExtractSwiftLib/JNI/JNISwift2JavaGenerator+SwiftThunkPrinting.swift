@@ -283,7 +283,6 @@ extension JNISwift2JavaGenerator {
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
-    printDestroyFunctionThunk(&printer, type)
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
@@ -777,55 +776,6 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  /// Prints the implementation of the destroy function.
-  private func printDestroyFunctionThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    var parameters = [selfPointerParam]
-    if type.swiftNominal.isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
-    }
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$destroy",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: parameters,
-      resultType: .void
-    ) { printer in
-      if type.swiftNominal.isGeneric {
-        let destroyFunctionSignature = SwiftFunctionSignature(
-          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
-          parameters: [],
-          result: .void,
-          effectSpecifiers: [],
-          genericParameters: [],
-          genericRequirements: []
-        )
-        printFunctionOpenerCall(
-          &printer,
-          .init(
-            module: swiftModuleName,
-            swiftDecl: DeclSyntax("func destroy()"),
-            name: "destroy",
-            apiKind: .function,
-            functionSignature: destroyFunctionSignature
-          )
-        )
-      } else {
-        let parentName = type.qualifiedName
-        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-        // Deinitialize the pointer allocated (which will call the VWT destroy method)
-        // then deallocate the memory.
-        printer.print(
-          """
-          \(selfVar).deinitialize(count: 1)
-          \(selfVar).deallocate()
-          """
-        )
-      }
-    }
-  }
-
   /// Prints thunks for specific known types like Foundation.Date, Foundation.Data
   private func printSpecificTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     guard let knownType = type.swiftNominal.knownTypeKind else { return }
@@ -971,8 +921,6 @@ extension JNISwift2JavaGenerator {
       for method in type.methods {
         printFunctionDecl(&printer, decl: method, skipMethodBody: true)
       }
-
-      printer.print("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)")
     }
     printer.println()
     printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
@@ -984,17 +932,6 @@ extension JNISwift2JavaGenerator {
       for method in type.methods {
         if method.isStatic { continue }
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
-      }
-
-      printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)") { printer in
-        printer.print(#"assert(selfPointer != 0, "self memory address was null")"#)
-        printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
-        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
-        printer.printBraceBlock("guard let self$ else") { printer in
-          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
-        }
-        printer.print("self$.deinitialize(count: 1)")
-        printer.print("self$.deallocate()")
       }
     }
   }

@@ -734,21 +734,14 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let isGeneric = type.swiftNominal.isGeneric
-    if isGeneric {
-      printer.print("private static native void $destroy(long selfPointer, long selfType);")
-    } else {
-      printer.print("private static native void $destroy(long selfPointer);")
-    }
-
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
       printer.print("long self$ = this.$memoryAddress();")
-      if isGeneric {
+      printer.print("long selfType$ = this.$typeMetadataAddress();")
+      if type.swiftNominal.isGeneric {
         printer.print(
           """
-          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
                 "this", this,
@@ -761,7 +754,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
               }
-              \(type.swiftNominal.name).$destroy(self$, selfType$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """
@@ -780,7 +773,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
               }
-              \(type.swiftNominal.name).$destroy(self$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """
