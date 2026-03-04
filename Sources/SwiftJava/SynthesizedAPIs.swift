@@ -85,7 +85,6 @@ public func Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ(
   return perform(as: typeMetadata)
 }
 
-
 @_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_destroy__JJ")
 public func Java_org_swift_swiftkit_core_SwiftObjects_destroy__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
   let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))

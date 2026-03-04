@@ -725,6 +725,8 @@ extension JNISwift2JavaGenerator {
       printer.print("private static native long $typeMetadataAddressDowncall();")
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
+        // INFO: We are omitting `CallTraces.traceDowncall` here.
+        // It internally calls `toString`, which in turn calls `$typeMetadataAddress`, creating an infinite loop.
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
       }
     }
