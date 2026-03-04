@@ -155,10 +155,10 @@ struct JNIOptionalTests {
          * public func optionalClass(_ arg: MyClass?) -> MyClass?
          * }
          */
-        public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena$) {
+        public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena) {
           byte[] result$_discriminator$ = new byte[1];
           long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result$_discriminator$);
-          return (result$_discriminator$[0] == 1) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena$)) : Optional.empty();
+          return (result$_discriminator$[0] == 1) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena)) : Optional.empty();
         }
         """,
         """

@@ -138,17 +138,7 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
   }
 
   var parentType: SwiftType? {
-    guard let selfParameter = functionSignature.selfParameter else {
-      return nil
-    }
-    switch selfParameter {
-    case .instance(let parameter):
-      return parameter.type
-    case .staticMethod(let type):
-      return type
-    case .initializer(let type):
-      return type
-    }
+    functionSignature.selfParameter?.selfType
   }
 
   /// If this function type uses types that require any additional `import` statements,

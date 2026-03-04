@@ -135,8 +135,8 @@ struct JNIStructTests {
          * public init(x: Int64, y: Int64)
          * }
          */
-        public static MyStruct init(long x, long y, SwiftArena swiftArena$) {
-          return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena$);
+        public static MyStruct init(long x, long y, SwiftArena swiftArena) {
+          return MyStruct.wrapMemoryAddressUnsafe(MyStruct.$init(x, y), swiftArena);
         }
         """,
         """
@@ -181,12 +181,12 @@ struct JNIStructTests {
             fatalError("Missing JNIEnv in downcall to \\(#function)")
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
-          guard let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$) else {
-            fatalError("self memory address was null in call to \\(#function)!")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+          guard let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$) else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          self$.deinitialize(count: 1)
-          self$.deallocate()
+          selfPointer$.deinitialize(count: 1)
+          selfPointer$.deallocate()
         }
         """
       ]
@@ -212,7 +212,7 @@ struct JNIStructTests {
         }
         """,
         """
-        private static native void $doSomething(long x, long self);
+        private static native void $doSomething(long x, long selfPointer);
         """,
       ]
     )
@@ -228,14 +228,14 @@ struct JNIStructTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024doSomething__JJ")
-        public func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
+          selfPointer$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
         }
         """
       ]

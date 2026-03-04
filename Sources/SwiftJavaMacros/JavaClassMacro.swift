@@ -96,7 +96,7 @@ extension JavaClassMacro: MemberMacro {
       """
       /// The full Java class name for this Swift type.
       \(raw: classNameAccessSpecifier) \(raw: fullJavaClassNameMemberModifiers) var fullJavaClassName: String {
-        #if os(Android)
+        #if os(Android) && AndroidCoreLibraryDesugaring
           AndroidSupport.androidDesugarClassNameConversion(for: "\(raw: className)")
         #else
           "\(raw: className)"

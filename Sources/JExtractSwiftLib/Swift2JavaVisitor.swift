@@ -433,7 +433,7 @@ final class Swift2JavaVisitor {
 
     let knownTypes = SwiftKnownTypes(symbolTable: translator.symbolTable)
     let toStringFunctionSignature = SwiftFunctionSignature(
-      selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: imported.swiftType)),
+      selfParameter: .instance(convention: .byValue, swiftType: imported.swiftType),
       parameters: [],
       result: SwiftResult(convention: .direct, type: knownTypes.string),
       effectSpecifiers: [],

@@ -116,7 +116,7 @@ struct JNIIntConversionChecksTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ")
-        public func Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
+        public func Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
           let newValue$indirect = UInt64(fromJNI: newValue, in: environment)
           #if _pointerBitWidth(_32)
             guard newValue$indirect >= UInt32.min && newValue$indirect <= UInt32.max else {
@@ -125,13 +125,13 @@ struct JNIIntConversionChecksTests {
         """,
         """
         #endif
-        assert(self != 0, "self memory address was null")
-        let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-        let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-        guard let self$ else {
-          fatalError("self memory address was null in call to \\(#function)!")
+        assert(selfPointer != 0, "selfPointer memory address was null")
+        let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+        let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+        guard let selfPointer$ else {
+          fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        self$.pointee.unsignedInt = UInt(newValue$indirect)
+        selfPointer$.pointee.unsignedInt = UInt(newValue$indirect)
         """,
       ]
     )
@@ -145,14 +145,14 @@ struct JNIIntConversionChecksTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024getUnsignedInt__J")
-        public func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return UInt64(self$.pointee.unsignedInt).getJNIValue(in: environment)
+          return UInt64(selfPointer$.pointee.unsignedInt).getJNIValue(in: environment)
         """
       ]
     )
@@ -166,7 +166,7 @@ struct JNIIntConversionChecksTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setNormalInt__JJ")
-        public func Java_com_example_swift_MyStruct__00024setNormalInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, self: jlong) {
+        public func Java_com_example_swift_MyStruct__00024setNormalInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
         let newValue$indirect = Int64(fromJNI: newValue, in: environment)
         #if _pointerBitWidth(_32)
         guard newValue$indirect >= Int32.min && newValue$indirect <= Int32.max else {
@@ -175,13 +175,13 @@ struct JNIIntConversionChecksTests {
         """,
         """
         #endif
-        assert(self != 0, "self memory address was null")
-        let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-        let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-        guard let self$ else {
-          fatalError("self memory address was null in call to \\(#function)!")
+        assert(selfPointer != 0, "selfPointer memory address was null")
+        let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+        let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+        guard let selfPointer$ else {
+          fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        self$.pointee.normalInt = Int(newValue$indirect)
+        selfPointer$.pointee.normalInt = Int(newValue$indirect)
         """,
       ]
     )
@@ -195,7 +195,7 @@ struct JNIIntConversionChecksTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
-        public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
+        public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, selfPointer: jlong) -> jlong {
           let arg$indirect = Int64(fromJNI: arg, in: environment)
           #if _pointerBitWidth(_32)
           guard arg$indirect >= Int32.min && arg$indirect <= Int32.max else {
@@ -204,13 +204,13 @@ struct JNIIntConversionChecksTests {
         """,
         """
         #endif
-        assert(self != 0, "self memory address was null")
-        let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-        let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-        guard let self$ else {
-          fatalError("self memory address was null in call to \\(#function)!")
+        assert(selfPointer != 0, "selfPointer memory address was null")
+        let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+        let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+        guard let selfPointer$ else {
+          fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        return Int64(self$.pointee.dummyFunc(arg: Int(arg$indirect))).getJNIValue(in: environment)
+        return Int64(selfPointer$.pointee.dummyFunc(arg: Int(arg$indirect))).getJNIValue(in: environment)
         """,
       ]
     )
@@ -224,7 +224,7 @@ struct JNIIntConversionChecksTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
-        public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, self: jlong) -> jlong {
+        public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, selfPointer: jlong) -> jlong {
           let arg$indirect = UInt64(fromJNI: arg, in: environment)
           #if _pointerBitWidth(_32)
           guard arg$indirect >= UInt32.min && arg$indirect <= UInt32.max else {
@@ -232,13 +232,13 @@ struct JNIIntConversionChecksTests {
             return Int64.jniPlaceholderValue
         """,
         """
-        assert(self != 0, "self memory address was null")
-        let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-        let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-        guard let self$ else {
-          fatalError("self memory address was null in call to \\(#function)!")
+        assert(selfPointer != 0, "selfPointer memory address was null")
+        let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+        let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+        guard let selfPointer$ else {
+          fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        return UInt64(self$.pointee.dummyFunc(arg: UInt(arg$indirect))).getJNIValue(in: environment)
+        return UInt64(selfPointer$.pointee.dummyFunc(arg: UInt(arg$indirect))).getJNIValue(in: environment)
         """,
       ]
     )

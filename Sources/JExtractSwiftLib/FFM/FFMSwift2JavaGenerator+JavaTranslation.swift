@@ -281,11 +281,11 @@ extension FFMSwift2JavaGenerator {
 
       // 'self'
       let selfParameter: TranslatedParameter?
-      if case .instance(let swiftSelf) = swiftSignature.selfParameter {
+      if case .instance(let convention, let swiftType) = swiftSignature.selfParameter {
         selfParameter = try self.translateParameter(
-          type: swiftSelf.type,
-          convention: swiftSelf.convention,
-          parameterName: swiftSelf.parameterName ?? "self",
+          type: swiftType,
+          convention: convention,
+          parameterName: "self",
           loweredParam: loweredFunctionSignature.selfParameter!,
           methodName: methodName,
           genericParameters: swiftSignature.genericParameters,
@@ -811,7 +811,7 @@ extension FFMSwift2JavaGenerator {
     /// Similar to 'method', however for a property i.e. without adding the '()' after the name
     indirect case property(JavaConversionStep, propertyName: String)
 
-    /// Call 'new \(Type)(\(placeholder), swiftArena$)'.
+    /// Call 'new \(Type)(\(placeholder), swiftArena)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
     /// Construct the type using the placeholder as arguments.

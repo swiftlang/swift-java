@@ -150,7 +150,7 @@ extension JNISwift2JavaGenerator {
         functionTypes: [],
         translatedFunctionSignature: TranslatedFunctionSignature(
           selfParameter: TranslatedParameter(
-            parameter: JavaParameter(name: "self", type: .long),
+            parameter: JavaParameter(name: "selfPointer", type: .long),
             conversion: .aggregate(
               [
                 .ifStatement(
@@ -164,7 +164,7 @@ extension JNISwift2JavaGenerator {
           selfTypeParameter: !isGenericParent
             ? nil
             : .init(
-              parameter: JavaParameter(name: "selfType", type: .long),
+              parameter: JavaParameter(name: "selfTypePointer", type: .long),
               conversion: .typeMetadataAddress(.placeholder)
             ),
           parameters: [],
@@ -179,7 +179,7 @@ extension JNISwift2JavaGenerator {
         ),
         nativeFunctionSignature: NativeFunctionSignature(
           selfParameter: NativeParameter(
-            parameters: [JavaParameter(name: "self", type: .long)],
+            parameters: [JavaParameter(name: "selfPointer", type: .long)],
             conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
             indirectConversion: nil,
             conversionCheck: nil
@@ -187,7 +187,7 @@ extension JNISwift2JavaGenerator {
           selfTypeParameter: !isGenericParent
             ? nil
             : .init(
-              parameters: [JavaParameter(name: "selfType", type: .long)],
+              parameters: [JavaParameter(name: "selfTypePointer", type: .long)],
               conversion: .extractMetatypeValue(.placeholder),
               indirectConversion: nil,
               conversionCheck: nil
@@ -396,10 +396,10 @@ extension JNISwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter? {
       // 'self'
-      if case .instance(let swiftSelf) = selfParameter {
+      if case .instance(_, let swiftType) = selfParameter {
         return try self.translateParameter(
-          swiftType: swiftSelf.type,
-          parameterName: swiftSelf.parameterName ?? "self",
+          swiftType: swiftType,
+          parameterName: "selfPointer",
           methodName: methodName,
           parentName: parentName,
           genericParameters: genericParameters,
@@ -422,17 +422,11 @@ extension JNISwift2JavaGenerator {
         return nil
       }
 
-      let isGeneric =
-        switch selfParameter {
-        case .instance(let selfParameter):
-          selfParameter.type.asNominalTypeDeclaration?.isGeneric == true
-        case .initializer(let swiftType), .staticMethod(let swiftType):
-          swiftType.asNominalTypeDeclaration?.isGeneric == true
-        }
+      let isGeneric = selfParameter.selfType.asNominalTypeDeclaration?.isGeneric == true
       if isGeneric {
         return try self.translateParameter(
           swiftType: .metatype(selfParameter.selfType),
-          parameterName: "selfType",
+          parameterName: "selfTypePointer",
           methodName: methodName,
           parentName: parentName,
           genericParameters: genericParameters,
@@ -1251,7 +1245,7 @@ extension JNISwift2JavaGenerator {
     /// `value.$typeMetadataAddress()`
     indirect case typeMetadataAddress(JavaNativeConversionStep)
 
-    /// Call `new \(Type)(\(placeholder), swiftArena$)`
+    /// Call `new \(Type)(\(placeholder), swiftArena)`
     indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
 
     /// Call `new \(Type)(\(placeholder))`
@@ -1360,11 +1354,11 @@ extension JNISwift2JavaGenerator {
 
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "new \(javaType.className!)(\(inner), swiftArena$)"
+        return "new \(javaType.className!)(\(inner), swiftArena)"
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena$)"
+        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)

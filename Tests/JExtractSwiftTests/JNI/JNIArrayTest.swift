@@ -144,9 +144,9 @@ struct JNIArrayTest {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static MySwiftClass[] f(MySwiftClass[] array, SwiftArena swiftArena$) {
+        public static MySwiftClass[] f(MySwiftClass[] array, SwiftArena swiftArena) {
           return Arrays.stream(SwiftModule.$f(Arrays.stream(Objects.requireNonNull(array, "array must not be null")).mapToLong(MySwiftClass::$memoryAddress).toArray())).mapToObj((pointer) -> {
-            return MySwiftClass.wrapMemoryAddressUnsafe(pointer, swiftArena$);
+            return MySwiftClass.wrapMemoryAddressUnsafe(pointer, swiftArena);
           }
           ).toArray(MySwiftClass[]::new);
         }

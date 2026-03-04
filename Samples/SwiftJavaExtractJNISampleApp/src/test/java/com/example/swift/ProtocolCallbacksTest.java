@@ -74,7 +74,7 @@ public class ProtocolCallbacksTest {
         public void withVoid() {}
 
         @Override
-        public MySwiftClass withObject(MySwiftClass input, SwiftArena swiftArena$) {
+        public MySwiftClass withObject(MySwiftClass input, SwiftArena swiftArena) {
             return input;
         }
 
@@ -84,7 +84,7 @@ public class ProtocolCallbacksTest {
         }
 
         @Override
-        public Optional<MySwiftClass> withOptionalObject(Optional<MySwiftClass> input, SwiftArena swiftArena$) {
+        public Optional<MySwiftClass> withOptionalObject(Optional<MySwiftClass> input, SwiftArena swiftArena) {
             return input;
         }
 
@@ -99,7 +99,7 @@ public class ProtocolCallbacksTest {
         }
 
         @Override
-        public MySwiftClass[] withObjectArray(MySwiftClass[] input, SwiftArena swiftArena$) {
+        public MySwiftClass[] withObjectArray(MySwiftClass[] input, SwiftArena swiftArena) {
             return input;
         }
 

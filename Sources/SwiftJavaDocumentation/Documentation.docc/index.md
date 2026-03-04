@@ -42,3 +42,6 @@ which is a quick overview of all the features and approaches offered by SwiftJav
 - <doc:SwiftJavaCommandLineTool>
 - <doc:SwiftPMPlugin>
 
+### Android Support
+
+- <doc:Android>

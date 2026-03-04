@@ -260,6 +260,9 @@ let package = Package(
     ),
 
   ],
+  traits: [
+    .trait(name: "AndroidCoreLibraryDesugaring")
+  ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),

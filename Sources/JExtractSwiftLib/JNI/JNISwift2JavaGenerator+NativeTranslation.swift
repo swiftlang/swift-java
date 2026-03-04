@@ -49,10 +49,10 @@ extension JNISwift2JavaGenerator {
       // Lower the self parameter.
       let nativeSelf: NativeParameter? =
         switch functionSignature.selfParameter {
-        case .instance(let selfParameter):
+        case .instance(_, let swiftType):
           try translateParameter(
-            type: selfParameter.type,
-            parameterName: selfParameter.parameterName ?? "self",
+            type: swiftType,
+            parameterName: "selfPointer",
             methodName: methodName,
             parentName: parentName,
             genericParameters: functionSignature.genericParameters,
@@ -68,7 +68,7 @@ extension JNISwift2JavaGenerator {
         {
           try translateParameter(
             type: .metatype(selfType),
-            parameterName: "selfType",
+            parameterName: "selfTypePointer",
             methodName: methodName,
             parentName: parentName,
             genericParameters: functionSignature.genericParameters,

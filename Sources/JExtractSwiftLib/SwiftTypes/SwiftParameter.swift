@@ -19,7 +19,6 @@ struct SwiftParameter: Equatable {
   var argumentLabel: String?
   var parameterName: String?
   var type: SwiftType
-  var canBeDirectReturn = false
 }
 
 extension SwiftParameter: CustomStringConvertible {
