@@ -723,8 +723,6 @@ extension JNISwift2JavaGenerator {
       }
     } else {
       printer.print("private static native long $typeMetadataAddressDowncall();")
-
-      let funcName = "$typeMetadataAddress"
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
