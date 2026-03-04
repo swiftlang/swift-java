@@ -23,4 +23,6 @@ public class SwiftObjects {
             throw new IllegalArgumentException(String.format("'%s' must not be zero!", name));
         }
     }
+
+    public static native int getRawDiscriminator(long selfPointer, long selfTypePointer);
 }

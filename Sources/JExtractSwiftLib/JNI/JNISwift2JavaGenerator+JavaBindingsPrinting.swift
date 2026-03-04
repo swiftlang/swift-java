@@ -394,17 +394,9 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
-    if decl.swiftNominal.isGeneric {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long self, long selfType);")
-    } else {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long self);")
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());")
+      printer.print("return Discriminator.values()[raw];")
     }
   }
 
