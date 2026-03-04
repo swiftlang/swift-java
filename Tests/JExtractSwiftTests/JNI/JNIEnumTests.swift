@@ -123,7 +123,7 @@ struct JNIEnumTests {
           var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());
           return Discriminator.values()[raw];
         }
-        """
+        """,
       ]
     )
   }

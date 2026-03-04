@@ -17,7 +17,12 @@ public protocol _RawDiscriminatorRepresentable {
 }
 
 @_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_getRawDiscriminator__JJ")
-public func Java_org_swift_swiftkit_core_SwiftObjects_getRawDiscriminator__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jint {
+public func Java_org_swift_swiftkit_core_SwiftObjects_getRawDiscriminator__JJ(
+  environment: UnsafeMutablePointer<JNIEnv?>!,
+  thisClass: jclass,
+  selfPointer: jlong,
+  selfTypePointer: jlong
+) -> jint {
   let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
   guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
     fatalError("selfType metadata address was null")
@@ -37,7 +42,12 @@ public func Java_org_swift_swiftkit_core_SwiftObjects_getRawDiscriminator__JJ(en
 }
 
 @_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ")
-public func Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+public func Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ(
+  environment: UnsafeMutablePointer<JNIEnv?>!,
+  thisClass: jclass,
+  selfPointer: jlong,
+  selfTypePointer: jlong
+) -> jstring? {
   let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
   guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
     fatalError("selfType metadata address was null")
@@ -54,7 +64,12 @@ public func Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ(environment: 
 }
 
 @_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ")
-public func Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+public func Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ(
+  environment: UnsafeMutablePointer<JNIEnv?>!,
+  thisClass: jclass,
+  selfPointer: jlong,
+  selfTypePointer: jlong
+) -> jstring? {
   let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
   guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
     fatalError("selfType metadata address was null")
@@ -88,4 +103,3 @@ public func Java_org_swift_swiftkit_core_SwiftObjects_destroy__JJ(environment: U
   }
   return perform(as: typeMetadata)
 }
-

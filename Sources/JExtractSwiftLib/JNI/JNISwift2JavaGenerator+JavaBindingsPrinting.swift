@@ -301,7 +301,7 @@ extension JNISwift2JavaGenerator {
         public String toString() {
           return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
-        
+
         public String toDebugString() {
           return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
