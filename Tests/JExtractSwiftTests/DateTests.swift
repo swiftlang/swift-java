@@ -147,7 +147,7 @@ struct DateTests {
           """,
           """
           @_cdecl("Java_com_example_swift_Date__00024getTimeIntervalSince1970__J")
-          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jdouble {
+          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
           """,
         ]
       )

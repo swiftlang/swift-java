@@ -144,7 +144,7 @@ struct JNIEnumTests {
               case .second: return 1
               case .third: return 2
             }
-          } 
+          }
         }
         """
       ]
@@ -306,10 +306,10 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
-        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
-          guard case .second(let _0) = self$.pointee else {
-            fatalError("Expected enum case 'second', but was '\\(self$.pointee)'!")
+          guard case .second(let _0) = selfPointer$.pointee else {
+            fatalError("Expected enum case 'second', but was '\\(selfPointer$.pointee)'!")
           }
           let cache$ = _JNI_MyEnum.myEnumSecondCache
           let class$ = cache$.javaClass
@@ -321,10 +321,10 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsThird__J")
-        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
-          guard case .third(let x, let y) = self$.pointee else {
-            fatalError("Expected enum case 'third', but was '\\(self$.pointee)'!")
+          guard case .third(let x, let y) = selfPointer$.pointee else {
+            fatalError("Expected enum case 'third', but was '\\(selfPointer$.pointee)'!")
           }
           let cache$ = _JNI_MyEnum.myEnumThirdCache
           let class$ = cache$.javaClass

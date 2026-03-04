@@ -256,7 +256,7 @@ struct JNIClassTests {
         }
         """,
         """
-        private static native void $doSomething(long x, long self);
+        private static native void $doSomething(long x, long selfPointer);
         """,
       ]
     )
@@ -272,14 +272,14 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
-        public func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, self: jlong) {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          self$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
+          selfPointer$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
         }
         """
       ]
@@ -305,7 +305,7 @@ struct JNIClassTests {
         }
         """,
         """
-        private static native long $copy(long self);
+        private static native long $copy(long selfPointer);
         """,
       ]
     )
@@ -321,15 +321,15 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024copy__J")
-        public func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jlong {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-          result$.initialize(to: self$.pointee.copy())
+          result$.initialize(to: selfPointer$.pointee.copy())
           let resultBits$ = Int64(Int(bitPattern: result$))
           return resultBits$.getJNIValue(in: environment)
         }
@@ -357,7 +357,7 @@ struct JNIClassTests {
         }
         """,
         """
-        private static native boolean $isEqual(long other, long self);
+        private static native boolean $isEqual(long other, long selfPointer);
         """,
       ]
     )
@@ -373,20 +373,20 @@ struct JNIClassTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyClass__00024isEqual__JJ")
-        public func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, self: jlong) -> jboolean {
+        public func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, selfPointer: jlong) -> jboolean {
           assert(other != 0, "other memory address was null")
           let otherBits$ = Int(Int64(fromJNI: other, in: environment))
           let other$ = UnsafeMutablePointer<MyClass>(bitPattern: otherBits$)
           guard let other$ else {
             fatalError("other memory address was null in call to \\(#function)!")
           }
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyClass>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return self$.pointee.isEqual(to: other$.pointee).getJNIValue(in: environment)
+          return selfPointer$.pointee.isEqual(to: other$.pointee).getJNIValue(in: environment)
         }
         """
       ]

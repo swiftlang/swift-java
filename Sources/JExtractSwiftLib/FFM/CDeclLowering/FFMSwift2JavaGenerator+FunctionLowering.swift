@@ -95,11 +95,11 @@ struct CdeclLowering {
     // Lower the self parameter.
     let loweredSelf: LoweredParameter? =
       switch signature.selfParameter {
-      case .instance(let selfParameter):
+      case .instance(let convention, let swiftType):
         try lowerParameter(
-          selfParameter.type,
-          convention: selfParameter.convention,
-          parameterName: selfParameter.parameterName ?? "self",
+          swiftType,
+          convention: convention,
+          parameterName: "self",
           genericParameters: signature.genericParameters,
           genericRequirements: signature.genericRequirements
         )
@@ -949,10 +949,10 @@ extension LoweredFunctionSignature {
 
     let selfExpr: ExprSyntax?
     switch original.selfParameter {
-    case .instance(let swiftSelf):
+    case .instance:
       // Raise the 'self' from cdecl parameters.
       selfExpr = self.selfParameter!.conversion.asExprSyntax(
-        placeholder: swiftSelf.parameterName ?? "self",
+        placeholder: "self",
         bodyItems: &bodyItems
       )
     case .staticMethod(let selfType), .initializer(let selfType):

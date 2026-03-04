@@ -352,7 +352,7 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
         &printer,
-        "self"
+        "selfPointer"
       )
       let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
         parameter.name ?? "_\(idx)"
@@ -559,10 +559,10 @@ extension JNISwift2JavaGenerator {
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
-      case .instance(let swiftSelf):
+      case .instance:
         nativeSignature.selfParameter!.conversion.render(
           &printer,
-          swiftSelf.parameterName ?? "self"
+          "selfPointer"
         )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
@@ -837,7 +837,7 @@ extension JNISwift2JavaGenerator {
     }
     let nativeSignature = translatedDecl.nativeFunctionSignature
 
-    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
+    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfTypePointer")
     let openerName = openerProtocolName(for: parentNominalType.nominalTypeDecl)
     printer.print("let openerType = \(selfType) as! (any \(openerName).Type)")
 
@@ -935,16 +935,16 @@ extension JNISwift2JavaGenerator {
     swiftParentName: String,
     _ selfPointerParam: JavaParameter
   ) -> String {
-    let newSelfParamName = "self$"
+    let newSelfParamName = "selfPointer$"
     printer.print(
       """
       guard let env$ = environment else {
         fatalError("Missing JNIEnv in downcall to \\(#function)")
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
-      let selfBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
-      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfBits$) else {
-        fatalError("self memory address was null in call to \\(#function)!")
+      let selfPointerBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfPointerBits$) else {
+        fatalError("selfPointer memory address was null in call to \\(#function)!")
       }
       """
     )
