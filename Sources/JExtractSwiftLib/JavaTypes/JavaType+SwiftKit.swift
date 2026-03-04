@@ -21,4 +21,9 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core", name: "SimpleCompletableFuture", typeParameters: [T.boxedType])
   }
 
+  /// The description of the type org.swift.swiftkit.core.NativeSwiftDictionaryMap<K, V>
+  static func nativeSwiftDictionaryMap(_ K: JavaType, _ V: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "NativeSwiftDictionaryMap", typeParameters: [K.boxedType, V.boxedType])
+  }
+
 }

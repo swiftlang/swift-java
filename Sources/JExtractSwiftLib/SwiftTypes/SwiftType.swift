@@ -43,6 +43,9 @@ enum SwiftType: Equatable {
   /// `[type]`
   indirect case array(SwiftType)
 
+  /// `[key: value]`
+  indirect case dictionary(key: SwiftType, value: SwiftType)
+
   static var void: Self {
     .tuple([])
   }
@@ -51,7 +54,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
-    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array: nil
+    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array, .dictionary: nil
     }
   }
 
@@ -95,7 +98,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array:
+    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary:
       return false
     }
   }
@@ -142,7 +145,7 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque, .composite: true
-    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array: false
+    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array, .dictionary: false
     }
   }
 
@@ -169,6 +172,8 @@ extension SwiftType: CustomStringConvertible {
       return types.map(\.description).joined(separator: " & ")
     case .array(let type):
       return "[\(type)]"
+    case .dictionary(let key, let value):
+      return "[\(key): \(value)]"
     }
   }
 }
@@ -236,7 +241,7 @@ extension SwiftType {
   init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     switch type.as(TypeSyntaxEnum.self) {
     case .classRestrictionType,
-      .dictionaryType, .missingType, .namedOpaqueReturnType,
+      .missingType, .namedOpaqueReturnType,
       .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
       throw TypeTranslationError.unimplementedType(type)
 
@@ -367,6 +372,11 @@ extension SwiftType {
     case .arrayType(let arrayType):
       let elementType = try SwiftType(arrayType.element, lookupContext: lookupContext)
       self = .array(elementType)
+
+    case .dictionaryType(let dictType):
+      let keyType = try SwiftType(dictType.key, lookupContext: lookupContext)
+      let valueType = try SwiftType(dictType.value, lookupContext: lookupContext)
+      self = .dictionary(key: keyType, value: valueType)
     }
   }
 

@@ -168,6 +168,8 @@ extension Swift2JavaTranslator {
         return false
       case .array(let ty):
         return check(ty)
+      case .dictionary(let key, let value):
+        return check(key) || check(value)
       }
     }
 
