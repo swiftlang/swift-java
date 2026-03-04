@@ -85,8 +85,6 @@ final class Swift2JavaVisitor {
     for memberItem in node.memberBlock.members {
       self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
     }
-
-    self.synthesizeToStringMethods(in: importedNominalType)
   }
 
   func visit(

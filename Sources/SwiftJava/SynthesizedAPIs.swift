@@ -29,8 +29,44 @@ public func Java_org_swift_swiftkit_core_SwiftObjects_getRawDiscriminator__JJ(en
   guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
     fatalError("selfType metadata address was null")
   }
-  guard let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self) as? (any _RawDiscriminatorRepresentable.Type) else {
-    return 0
+  let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+  guard let typeMetadata = typeMetadata as? (any _RawDiscriminatorRepresentable.Type) else {
+    fatalError("_RawDiscriminatorRepresentable conformance did not found in \(typeMetadata)")
   }
   return perform(as: typeMetadata)
 }
+
+@_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ")
+public func Java_org_swift_swiftkit_core_SwiftObjects_toString__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+  func perform<T>(as type: T.Type) -> jstring? {
+    guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      fatalError()
+    }
+    return String(describing: self$.pointee).getJNIValue(in: environment)
+  }
+
+  let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
+  guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
+    fatalError("selfType metadata address was null")
+  }
+  let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+  return perform(as: typeMetadata)
+}
+
+@_cdecl("Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ")
+public func Java_org_swift_swiftkit_core_SwiftObjects_toDebugString__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+  func perform<T>(as type: T.Type) -> jstring? {
+    guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      fatalError()
+    }
+    return String(reflecting: self$.pointee).getJNIValue(in: environment)
+  }
+
+  let selfTypeBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
+  guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypeBits$) else {
+    fatalError("selfType metadata address was null")
+  }
+  let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+  return perform(as: typeMetadata)
+}
+

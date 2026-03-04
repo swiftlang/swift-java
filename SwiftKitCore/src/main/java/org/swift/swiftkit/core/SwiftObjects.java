@@ -25,4 +25,6 @@ public class SwiftObjects {
     }
 
     public static native int getRawDiscriminator(long selfPointer, long selfTypePointer);
+    public static native String toString(long selfPointer, long selfTypePointer);
+    public static native String toDebugString(long selfPointer, long selfTypePointer);
 }

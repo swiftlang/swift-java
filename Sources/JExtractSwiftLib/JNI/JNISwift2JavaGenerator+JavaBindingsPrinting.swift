@@ -295,6 +295,20 @@ extension JNISwift2JavaGenerator {
 
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
+
+      printer.print(
+        """
+        public String toString() {
+          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        
+        public String toDebugString() {
+          return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        """
+      )
+      printer.println()
+
       printDestroyFunction(&printer, decl)
     }
   }
@@ -713,16 +727,6 @@ extension JNISwift2JavaGenerator {
       let funcName = "$typeMetadataAddress"
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
-        printer.print(
-          """
-          long self$ = this.$memoryAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-                "this", this,
-                "self", self$);
-          }
-          """
-        )
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
       }
     }

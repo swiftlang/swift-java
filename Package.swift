@@ -311,6 +311,7 @@ let package = Package(
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
+        .enableUpcomingFeature("ImplicitOpenExistentials"),
         .unsafeFlags(
           ["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"],
           .when(platforms: [.macOS, .linux, .windows])
