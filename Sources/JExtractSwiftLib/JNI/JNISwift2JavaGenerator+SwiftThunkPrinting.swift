@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import JavaTypes
-import SwiftSyntax
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -584,14 +583,6 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
-
-    case .synthesizedFunction(let function):
-      switch function {
-      case .toString:
-        result = "String(describing: \(callee))"
-      case .toDebugString:
-        result = "String(reflecting: \(callee))"
-      }
 
     case .enumCase:
       let downcallArguments = zip(

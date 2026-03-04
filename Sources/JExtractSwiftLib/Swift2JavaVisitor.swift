@@ -420,46 +420,6 @@ final class Swift2JavaVisitor {
       }
     }
   }
-
-  private func synthesizeToStringMethods(in imported: ImportedNominalType) {
-    switch imported.swiftNominal.kind {
-    case .actor, .class, .enum, .struct:
-      break
-    case .protocol:
-      return
-    }
-
-    let knownTypes = SwiftKnownTypes(symbolTable: translator.symbolTable)
-    let toStringFunctionSignature = SwiftFunctionSignature(
-      selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: imported.swiftType)),
-      parameters: [],
-      result: SwiftResult(convention: .direct, type: knownTypes.string),
-      effectSpecifiers: [],
-      genericParameters: [],
-      genericRequirements: []
-    )
-
-    func makeToStringFunc(name: String, kind: SwiftAPIKind) -> ImportedFunc {
-      ImportedFunc(
-        module: translator.swiftModuleName,
-        swiftDecl: DeclSyntax("func \(raw: name)() -> String"),
-        name: name,
-        apiKind: kind,
-        functionSignature: toStringFunctionSignature
-      )
-    }
-
-    if !imported.methods.contains(where: {
-      $0.name == "toString" && $0.functionSignature == toStringFunctionSignature
-    }) {
-      imported.methods.append(makeToStringFunc(name: "toString", kind: .synthesizedFunction(.toString)))
-    }
-    if !imported.methods.contains(where: {
-      $0.name == "toDebugString" && $0.functionSignature == toStringFunctionSignature
-    }) {
-      imported.methods.append(makeToStringFunc(name: "toDebugString", kind: .synthesizedFunction(.toDebugString)))
-    }
-  }
 }
 
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
