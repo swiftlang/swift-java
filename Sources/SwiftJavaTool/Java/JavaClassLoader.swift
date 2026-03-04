@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 import SwiftJava
 import SwiftJavaShared
 import SwiftJavaToolLib

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 import SwiftJavaConfigurationShared
 
 /// Determine if the given type needs any extra annotations that should be included

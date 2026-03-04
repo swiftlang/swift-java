@@ -39,7 +39,7 @@ final class BasicWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
+        import SwiftJavaJNICore
         import SwiftJava
         """,
         """
@@ -68,7 +68,7 @@ final class BasicWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
+        import SwiftJavaJNICore
         import SwiftJava
         """,
         """

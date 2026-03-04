@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 import SwiftJavaConfigurationShared
 
 /// A table that where keys are Swift class names and the values are

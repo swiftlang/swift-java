@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 
 /// Represents a value of a `java.lang.foreign.Self` that we want to render in generated Java code.
 ///

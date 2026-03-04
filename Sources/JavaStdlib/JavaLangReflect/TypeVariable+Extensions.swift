@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 import SwiftJava
 
 // FIXME: all interfaces should ahve these https://github.com/swiftlang/swift-java/issues/430

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaLangReflect
-import JavaTypes
+import SwiftJavaJNICore
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared

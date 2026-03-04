@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
+import SwiftJavaJNICore
+import SwiftJavaJNICore
 
 extension JavaString: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String {

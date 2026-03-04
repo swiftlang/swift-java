@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 import SwiftJava
 
 // FIXME: workaround until importing properly would make UCL inherit from CL https://github.com/swiftlang/swift-java/issues/423

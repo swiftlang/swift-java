@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import JavaTypes
+import SwiftJavaJNICore
 import SwiftBasicFormat
 import SwiftJavaConfigurationShared
 import SwiftParser
