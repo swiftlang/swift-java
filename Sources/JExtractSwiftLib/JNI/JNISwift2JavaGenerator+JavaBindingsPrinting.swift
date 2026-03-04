@@ -399,12 +399,12 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
         printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
       }
-      printer.print("private static native int $getDiscriminator(long self, long selfType);")
+      printer.print("private static native int $getDiscriminator(long selfPointer, long selfTypePointer);")
     } else {
       printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
         printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
       }
-      printer.print("private static native int $getDiscriminator(long self);")
+      printer.print("private static native int $getDiscriminator(long selfPointer);")
     }
   }
 
@@ -740,7 +740,7 @@ extension JNISwift2JavaGenerator {
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let isGeneric = type.swiftNominal.isGeneric
     if isGeneric {
-      printer.print("private static native void $destroy(long selfPointer, long selfType);")
+      printer.print("private static native void $destroy(long selfPointer, long selfTypePointer);")
     } else {
       printer.print("private static native void $destroy(long selfPointer);")
     }

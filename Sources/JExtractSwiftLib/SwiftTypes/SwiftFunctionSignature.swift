@@ -58,7 +58,7 @@ public struct SwiftFunctionSignature: Equatable {
 /// Describes the "self" parameter of a Swift function signature.
 enum SwiftSelfParameter: Equatable {
   /// 'self' is an instance parameter.
-  case instance(SwiftParameter)
+  case instance(convention: SwiftParameterConvention, swiftType: SwiftType)
 
   /// 'self' is a metatype for a static method. We only need the type to
   /// form the call.
@@ -70,9 +70,7 @@ enum SwiftSelfParameter: Equatable {
 
   var selfType: SwiftType {
     switch self {
-    case .instance(let swiftParameter):
-      return swiftParameter.type
-    case .staticMethod(let swiftType), .initializer(let swiftType):
+    case .instance(_, let swiftType), .staticMethod(let swiftType), .initializer(let swiftType):
       return swiftType
     }
   }
@@ -161,10 +159,8 @@ extension SwiftFunctionSignature {
         selfParameter = .staticMethod(enclosingType)
       } else {
         selfParameter = .instance(
-          SwiftParameter(
-            convention: isMutating ? .inout : isConsuming ? .consuming : .byValue,
-            type: enclosingType
-          )
+          convention: isMutating ? .inout : isConsuming ? .consuming : .byValue,
+          swiftType: enclosingType
         )
       }
     } else {
@@ -414,10 +410,8 @@ extension SwiftFunctionSignature {
         return .staticMethod(enclosingType)
       } else {
         return .instance(
-          SwiftParameter(
-            convention: isSet && !enclosingType.isReferenceType ? .inout : .byValue,
-            type: enclosingType
-          )
+          convention: isSet && !enclosingType.isReferenceType ? .inout : .byValue,
+          swiftType: enclosingType
         )
       }
     } else {
