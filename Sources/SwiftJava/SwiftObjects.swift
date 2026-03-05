@@ -23,7 +23,7 @@ open class SwiftObjects: JavaObject {
 @JavaImplementation("org.swift.swiftkit.core.SwiftObjects")
 extension SwiftObjects {
   @JavaMethod
-  func getRawDiscriminator(selfPointer: Int, selfTypePointer: Int) -> Int32 {
+  public static func getRawDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> Int32 {
     guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
       fatalError("selfType metadata address was null")
     }
@@ -42,7 +42,7 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public func toString(selfPointer: Int, selfTypePointer: Int) -> String {
+  public static func toString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> String {
     guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
       fatalError("selfType metadata address was null")
     }
@@ -58,7 +58,7 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public func toDebugString(selfPointer: Int, selfTypePointer: Int) -> String {
+  public static func toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> String {
     guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
       fatalError("selfType metadata address was null")
     }
@@ -74,7 +74,7 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public func destroy(selfPointer: Int, selfTypePointer: Int) {
+  public static func destroy(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) {
     guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
       fatalError("selfType metadata address was null")
     }
