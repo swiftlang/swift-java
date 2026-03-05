@@ -108,6 +108,16 @@ func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: Stri
   fflush(stdout)
 }
 
+// ==== Overload test methods (same base name, different parameter labels → conflict → suffix needed)
+
+public func globalMethodOverloadingInt(a: Int) {
+  p("globalMethodOverloadingInt(a: \(a))")
+}
+
+public func globalMethodOverloadingInt(b: Int) {
+  p("globalMethodOverloadingInt(b: \(b))")
+}
+
 #if os(Linux)
 // FIXME: why do we need this workaround?
 @_silgen_name("_objc_autoreleaseReturnValue")

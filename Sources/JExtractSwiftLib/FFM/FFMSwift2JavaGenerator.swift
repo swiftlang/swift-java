@@ -38,6 +38,9 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
 
+  /// The set of method base names that have Java naming conflicts for the current type/module being generated.
+  var currentDupeNames: DuplicateNames = DuplicateNames(for: [])
+
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
   ///
@@ -169,6 +172,7 @@ extension FFMSwift2JavaGenerator {
     printPackage(&printer)
     printImports(&printer)
 
+    self.currentDupeNames = DuplicateNames(for: self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables)
     printModuleClass(&printer) { printer in
 
       for decl in analysis.importedGlobalVariables {
@@ -188,6 +192,7 @@ extension FFMSwift2JavaGenerator {
     printPackage(&printer)
     printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
 
+    self.currentDupeNames = DuplicateNames(for: decl.initializers + decl.variables + decl.methods)
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,
       // we already have loaded the library where it will be obtained from.

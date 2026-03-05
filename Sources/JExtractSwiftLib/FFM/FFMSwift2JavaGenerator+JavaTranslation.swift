@@ -27,7 +27,8 @@ extension FFMSwift2JavaGenerator {
     do {
       let translation = JavaTranslation(
         config: self.config,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+        dupeNames: self.currentDupeNames
       )
       translated = try translation.translate(decl)
     } catch {
@@ -37,6 +38,37 @@ extension FFMSwift2JavaGenerator {
 
     translatedDecls[decl] = translated
     return translated
+  }
+
+  /// Encapsulates detection and storage of Swift method base names that would produce
+  /// duplicate Java method signatures due to parameter-label overloading.
+  ///
+  /// Swift allows overloads via parameter labels (e.g., `takeValue(a:)` and `takeValue(b:)`),
+  /// but Java only distinguishes methods by their parameter types. This type identifies
+  /// which base names have actual Java naming conflicts so suffixes are applied selectively.
+  struct DuplicateNames {
+    private var duplicates: Set<String> = []
+
+    /// Detects which base names among `methods` would clash in Java.
+    init(for methods: [ImportedFunc]) {
+      var seen: Set<String> = []
+      for method in methods {
+        let baseName =
+          switch method.apiKind {
+          case .getter, .subscriptGetter: method.javaGetterName
+          case .setter, .subscriptSetter: method.javaSetterName
+          case .function, .synthesizedFunction, .initializer, .enumCase: method.name
+          }
+        if !seen.insert(baseName).inserted {
+          duplicates.insert(baseName)
+        }
+      }
+    }
+
+    /// Returns whether the given base name has a Java naming conflict and needs a parameter label suffix.
+    func needsSuffix(for baseName: String) -> Bool {
+      duplicates.contains(baseName)
+    }
   }
 
   /// Represent a Swift API parameter translated to Java.
@@ -145,10 +177,12 @@ extension FFMSwift2JavaGenerator {
   struct JavaTranslation {
     let config: Configuration
     var knownTypes: SwiftKnownTypes
+    var dupeNames: DuplicateNames
 
-    init(config: Configuration, knownTypes: SwiftKnownTypes) {
+    init(config: Configuration, knownTypes: SwiftKnownTypes, dupeNames: DuplicateNames = DuplicateNames(for: [])) {
       self.config = config
       self.knownTypes = knownTypes
+      self.dupeNames = dupeNames
     }
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
@@ -156,12 +190,7 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let javaName =
-        switch decl.apiKind {
-        case .getter, .subscriptGetter: decl.javaGetterName
-        case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
-        }
+      let javaName = makeJavaMethodName(decl)
 
       // Signature.
       let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
@@ -191,6 +220,34 @@ extension FFMSwift2JavaGenerator {
         translatedSignature: translatedSignature,
         loweredSignature: loweredSignature
       )
+    }
+
+    /// Returns the Java method name for the given Swift declaration, applying parameter
+    /// label suffixes only when a naming conflict with another method would occur.
+    private func makeJavaMethodName(_ decl: ImportedFunc) -> String {
+      let baseName = switch decl.apiKind {
+      case .getter, .subscriptGetter: decl.javaGetterName
+      case .setter, .subscriptSetter: decl.javaSetterName
+      case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
+      }
+      return baseName + makeMethodNameWithParamsSuffix(decl, baseName: baseName)
+    }
+
+    /// Returns the parameter label suffix for a method name if needed, or an empty string.
+    ///
+    /// Suffixes are only applied when the method's base name has a Java naming conflict
+    /// (i.e., another Swift overload would produce the same Java method name).
+    /// Getters and setters never receive suffixes.
+    private func makeMethodNameWithParamsSuffix(_ decl: ImportedFunc, baseName: String) -> String {
+      switch decl.apiKind {
+      case .getter, .subscriptGetter, .setter, .subscriptSetter:
+        return ""
+      default:
+        guard dupeNames.needsSuffix(for: baseName) else { return "" }
+        return decl.functionSignature.parameters
+          .map { "_" + ($0.argumentLabel ?? "_") }
+          .joined()
+      }
     }
 
     /// Translate Swift closure type to Java functional interface.

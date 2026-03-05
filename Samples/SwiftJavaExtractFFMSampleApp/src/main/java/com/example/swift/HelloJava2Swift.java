@@ -83,7 +83,7 @@ public class HelloJava2Swift {
         // Example of using 'Data'.
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var origBytes = arena.allocateFrom("foobar");
-            var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
+            var origDat = Data.init_bytes_count(origBytes, origBytes.byteSize(), arena);
             CallTraces.trace("origDat.count = " + origDat.getCount());
             
             var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
@@ -95,11 +95,15 @@ public class HelloJava2Swift {
 
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var bytes = arena.allocateFrom("hello");
-            var dat = Data.init(bytes, bytes.byteSize(), arena);
+            var dat = Data.init_bytes_count(bytes, bytes.byteSize(), arena);
             MySwiftLibrary.globalReceiveSomeDataProtocol(dat);
             MySwiftLibrary.globalReceiveOptional(OptionalLong.of(12), Optional.of(dat));
         }
 
+        // Test overload conflict detection: only conflicting methods get suffixes
+        MySwiftLibrary.globalMethodOverloadingInt_a(100);
+        MySwiftLibrary.globalMethodOverloadingInt_b(200);
+        CallTraces.trace("Overload conflict detection test passed!");
 
         System.out.println("DONE.");
     }

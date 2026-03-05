@@ -122,6 +122,7 @@ extension FFMSwift2JavaGenerator {
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
+    self.currentDupeNames = DuplicateNames(for: self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables)
     for thunk in stt.renderGlobalThunks() {
       printer.print(thunk)
       printer.println()
@@ -139,6 +140,8 @@ extension FFMSwift2JavaGenerator {
 
   package func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ImportedNominalType) throws {
     let stt = SwiftThunkTranslator(self)
+
+    self.currentDupeNames = DuplicateNames(for: ty.initializers + ty.variables + ty.methods)
 
     printer.print(
       """

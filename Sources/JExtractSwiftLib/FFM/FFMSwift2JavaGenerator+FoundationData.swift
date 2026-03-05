@@ -40,7 +40,7 @@ extension FFMSwift2JavaGenerator {
        */
       public static \(typeName) fromByteArray(byte[] bytes, AllocatingSwiftArena arena) {
         Objects.requireNonNull(bytes, "bytes cannot be null");
-        return \(typeName).init(bytes, arena);
+        return \(typeName).init__(bytes, arena);
       }
       """
     )
