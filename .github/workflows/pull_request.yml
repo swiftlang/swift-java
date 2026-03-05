@@ -203,8 +203,7 @@ jobs:
           apt-get -q update && apt-get -yq install curl
           cd Samples/SwiftJavaExtractJNISampleApp
           curl -L -O --retry 3 https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/install-and-build-with-sdk.sh
-          perl -pi -e "s#(download_and_extract_toolchain \".ANDROID_SDK_TAG\"\))#\1\n        PATH=\\\$SWIFT_EXECUTABLE_FOR_ANDROID_SDK:\\\$PATH#" install-and-build-with-sdk.sh
-          ls -l install-and-build-with-sdk.sh
+          perl -pi -e "s#(download_and_extract_toolchain \".ANDROID_SDK_TAG\"\))#\1\n        export PATH=\\\$SWIFT_EXECUTABLE_FOR_ANDROID_SDK:\\\$PATH#" install-and-build-with-sdk.sh
           chmod 500 install-and-build-with-sdk.sh
           ./install-and-build-with-sdk.sh --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
 
