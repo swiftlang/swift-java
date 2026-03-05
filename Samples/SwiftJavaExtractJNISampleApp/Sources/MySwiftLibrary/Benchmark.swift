@@ -13,19 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 public struct BasicStruct {
-    public var value: Int
-    public init(value: Int) {
-        self.value = value
-    }
+  public var value: Int
+  public init(value: Int) {
+    self.value = value
+  }
 }
 
 public struct GenericStruct<T> {
-    public var value: Int
-    public init(value: Int) {
-        self.value = value
-    }
+  public var value: Int
+  public init(value: Int) {
+    self.value = value
+  }
 }
 
 public func makeGenericStruct(value: Int) -> GenericStruct<Int> {
-    return GenericStruct(value: value)
+  GenericStruct(value: value)
 }
