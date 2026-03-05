@@ -152,7 +152,7 @@ let package = Package(
     .library(
       name: "SwiftJava",
       type: .dynamic,
-      targets: ["SwiftJava"]
+      targets: ["SwiftJava", "SwiftJavaRuntimeSupport"]
     ),
 
     .library(
@@ -224,12 +224,6 @@ let package = Package(
       targets: [
         "SwiftJavaPlugin"
       ]
-    ),
-
-    // Support library written in Swift for SwiftKit "Java"
-    .library(
-      name: "SwiftJavaRuntimeSupport",
-      targets: ["SwiftJavaRuntimeSupport"]
     ),
 
     .library(
