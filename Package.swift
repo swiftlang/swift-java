@@ -152,7 +152,7 @@ let package = Package(
     .library(
       name: "SwiftJava",
       type: .dynamic,
-      targets: ["SwiftJava"]
+      targets: ["SwiftJava", "SwiftJavaRuntimeSupport"]
     ),
 
     .library(
@@ -224,12 +224,6 @@ let package = Package(
       targets: [
         "SwiftJavaPlugin"
       ]
-    ),
-
-    // Support library written in Swift for SwiftKit "Java"
-    .library(
-      name: "SwiftJavaRuntimeSupport",
-      targets: ["SwiftJavaRuntimeSupport"]
     ),
 
     .library(
@@ -311,6 +305,7 @@ let package = Package(
       exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
+        .enableUpcomingFeature("ImplicitOpenExistentials"),
         .unsafeFlags(
           ["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"],
           .when(platforms: [.macOS, .linux, .windows])

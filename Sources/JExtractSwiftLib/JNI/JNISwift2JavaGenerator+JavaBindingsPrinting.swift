@@ -295,6 +295,20 @@ extension JNISwift2JavaGenerator {
 
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
+
+      printer.print(
+        """
+        public String toString() {
+          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+
+        public String toDebugString() {
+          return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        """
+      )
+      printer.println()
+
       printDestroyFunction(&printer, decl)
     }
   }
@@ -394,17 +408,9 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
-    if decl.swiftNominal.isGeneric {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long selfPointer, long selfTypePointer);")
-    } else {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long selfPointer);")
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());")
+      printer.print("return Discriminator.values()[raw];")
     }
   }
 
@@ -717,20 +723,10 @@ extension JNISwift2JavaGenerator {
       }
     } else {
       printer.print("private static native long $typeMetadataAddressDowncall();")
-
-      let funcName = "$typeMetadataAddress"
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
-        printer.print(
-          """
-          long self$ = this.$memoryAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-                "this", this,
-                "self", self$);
-          }
-          """
-        )
+        // INFO: We are omitting `CallTraces.traceDowncall` here.
+        // It internally calls `toString`, which in turn calls `$typeMetadataAddress`, creating an infinite loop.
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
       }
     }
@@ -738,21 +734,14 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let isGeneric = type.swiftNominal.isGeneric
-    if isGeneric {
-      printer.print("private static native void $destroy(long selfPointer, long selfTypePointer);")
-    } else {
-      printer.print("private static native void $destroy(long selfPointer);")
-    }
-
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
       printer.print("long self$ = this.$memoryAddress();")
-      if isGeneric {
+      printer.print("long selfType$ = this.$typeMetadataAddress();")
+      if type.swiftNominal.isGeneric {
         printer.print(
           """
-          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
                 "this", this,
@@ -765,7 +754,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
               }
-              \(type.swiftNominal.name).$destroy(self$, selfType$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """
@@ -784,7 +773,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
               }
-              \(type.swiftNominal.name).$destroy(self$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """

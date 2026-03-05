@@ -62,16 +62,6 @@ struct JNISubscriptsTests {
         """,
       ]
     )
-    try assertOutput(
-      input: noParamsSubscriptSource,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
-        private static native void $destroy(long selfPointer);
-        """
-      ]
-    )
   }
 
   @Test("Test generation of JavaClass for subscript with parameters")
