@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 /// A table that where keys are Swift class names and the values are
 /// the fully qualified canoical names.

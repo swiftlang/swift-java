@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJava
+import SwiftJavaJNICore
 
 // FIXME: workaround until importing properly would make UCL inherit from CL https://github.com/swiftlang/swift-java/issues/423
 extension URLClassLoader /* workaround for missing inherits from ClassLoader */ {

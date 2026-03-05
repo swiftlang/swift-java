@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import SwiftJavaJNICore
 import OrderedCollections
+import SwiftJavaJNICore
 
 // MARK: Defaults
 

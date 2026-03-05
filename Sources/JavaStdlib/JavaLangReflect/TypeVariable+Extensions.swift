@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJava
+import SwiftJavaJNICore
 
 // FIXME: all interfaces should ahve these https://github.com/swiftlang/swift-java/issues/430
 extension TypeVariable {

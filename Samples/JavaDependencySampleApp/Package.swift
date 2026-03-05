@@ -35,7 +35,7 @@ let package = Package(
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ],
       plugins: [
         .plugin(name: "SwiftJavaPlugin", package: "swift-java")
@@ -53,7 +53,7 @@ let package = Package(
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ],
       plugins: [
         //        .plugin(name: "SwiftJavaBootstrapJavaPlugin", package: "swift-java"),

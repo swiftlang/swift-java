@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(

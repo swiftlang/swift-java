@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJava
+import SwiftJavaJNICore
 
 public enum _JNIBoxedConversions {
   private static let booleanMethod = _JNIMethodIDCache.Method(

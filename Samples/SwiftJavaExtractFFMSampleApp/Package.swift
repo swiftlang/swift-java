@@ -34,7 +34,7 @@ let package = Package(
         "swift-java.config"
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ],
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")

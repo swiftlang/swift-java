@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJava
+import SwiftJavaJNICore
 
 @JavaInterface("org.swift.jni.dependencies.DependencyResolver")
 public struct DependencyResolver {

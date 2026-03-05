@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJava
+import SwiftJavaJNICore
 import SwiftJavaShared
 import SwiftJavaToolLib
 

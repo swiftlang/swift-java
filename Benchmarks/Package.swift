@@ -21,7 +21,7 @@ let package = Package(
       ],
       path: "Benchmarks/JavaApiCallBenchmarks",
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ],
       plugins: [
         .plugin(name: "BenchmarkPlugin", package: "package-benchmark")

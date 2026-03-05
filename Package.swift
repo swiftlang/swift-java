@@ -118,11 +118,11 @@ let javaHome = findJavaHome()
 
 let javaIncludePath = "\(javaHome)/include"
 #if os(Linux)
-  let javaPlatformIncludePath = "\(javaIncludePath)/linux"
+let javaPlatformIncludePath = "\(javaIncludePath)/linux"
 #elseif os(macOS)
-  let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
+let javaPlatformIncludePath = "\(javaIncludePath)/darwin"
 #elseif os(Windows)
-  let javaPlatformIncludePath = "\(javaIncludePath)/win32"
+let javaPlatformIncludePath = "\(javaIncludePath)/win32"
 #endif
 
 let swiftJavaJNICoreDep: Package.Dependency
@@ -387,7 +387,7 @@ let package = Package(
     .target(
       name: "SwiftJavaRuntimeSupport",
       dependencies: [
-        "SwiftJava",
+        "SwiftJava"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5),

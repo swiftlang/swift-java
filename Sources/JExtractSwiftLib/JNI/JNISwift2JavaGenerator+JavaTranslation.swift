@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 extension JNISwift2JavaGenerator {
   var javaTranslator: JavaTranslation {

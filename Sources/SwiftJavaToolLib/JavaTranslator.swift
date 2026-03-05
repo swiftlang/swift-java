@@ -14,11 +14,11 @@
 
 import Foundation
 import JavaLangReflect
-import SwiftJavaJNICore
 import Logging
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 

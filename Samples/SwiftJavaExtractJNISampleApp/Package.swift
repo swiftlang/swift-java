@@ -24,13 +24,13 @@ let package = Package(
     .target(
       name: "MySwiftLibrary",
       dependencies: [
-        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "SwiftJava", package: "swift-java")
       ],
       exclude: [
         "swift-java.config"
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ],
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
