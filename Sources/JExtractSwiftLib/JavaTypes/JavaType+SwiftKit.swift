@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 
 extension JavaType {
 

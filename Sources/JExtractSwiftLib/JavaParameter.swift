@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 
 /// Represent a parameter in Java code.
 struct JavaParameter {

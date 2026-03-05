@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
 import SwiftJava
+import SwiftJavaJNICore
 
 @JavaClass("com.example.swift.HelloJava2Swift")
 open class HelloJava2Swift: JavaObject {

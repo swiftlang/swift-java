@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
 import SwiftJava
+import SwiftJavaJNICore
 
 /// A cache used to hold references for JNI method and classes.
 ///

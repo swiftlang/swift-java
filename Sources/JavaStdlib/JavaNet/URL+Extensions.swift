@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
 import Foundation
 import SwiftJava
+import SwiftJavaJNICore
 
 public typealias SwiftJavaFoundationURL = Foundation.URL
 

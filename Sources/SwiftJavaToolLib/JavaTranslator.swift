@@ -14,11 +14,11 @@
 
 import Foundation
 import JavaLangReflect
-import JavaTypes
 import Logging
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
@@ -109,7 +109,7 @@ extension JavaTranslator {
   /// Default set of modules that will always be imported.
   private static let defaultImportedSwiftModules: Set<String> = [
     "SwiftJava",
-    "CSwiftJavaJNI",
+    "SwiftJavaJNICore",
   ]
 }
 

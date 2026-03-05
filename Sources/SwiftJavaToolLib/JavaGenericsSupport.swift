@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import JavaLangReflect
-import JavaTypes
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 

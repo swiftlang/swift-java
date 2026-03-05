@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct JavaTypes.JavaExceptionType
+import struct SwiftJavaJNICore.JavaExceptionType
 
 extension JNIEnvironment {
   /// Execute a JNI call and check for an exception at the end. Translate

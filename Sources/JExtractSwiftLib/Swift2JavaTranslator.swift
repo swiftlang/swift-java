@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import JavaTypes
 import SwiftBasicFormat
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftParser
 import SwiftSyntax
 

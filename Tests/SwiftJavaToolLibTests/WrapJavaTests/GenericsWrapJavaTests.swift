@@ -51,8 +51,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Pair")
@@ -137,8 +137,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Item")
@@ -255,8 +255,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.ByteArray")
@@ -288,8 +288,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Kappa")

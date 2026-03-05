@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 extension JNISwift2JavaGenerator {
 
