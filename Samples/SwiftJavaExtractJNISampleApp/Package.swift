@@ -25,7 +25,6 @@ let package = Package(
       name: "MySwiftLibrary",
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
-        .product(name: "CSwiftJavaJNI", package: "swift-java"),
       ],
       exclude: [
         "swift-java.config"
