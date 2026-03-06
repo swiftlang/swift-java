@@ -24,6 +24,7 @@ class JavaKitMacroTests: XCTestCase {
     "JavaClass": JavaClassMacro.self,
     "JavaMethod": JavaMethodMacro.self,
     "JavaField": JavaFieldMacro.self,
+    "JavaStaticMethod": JavaMethodMacro.self,
     "JavaStaticField": JavaFieldMacro.self,
   ]
 
@@ -402,6 +403,67 @@ class JavaKitMacroTests: XCTestCase {
               }
           }
         """,
+      macros: Self.javaKitMacros
+    )
+  }
+
+  func testJavaGenericMethodParameter() throws {
+    assertMacroExpansion(
+      """
+      extension JavaClass {
+        @JavaStaticMethod
+        public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! 
+        where ObjectType == JavaOptional<T>
+
+        @JavaStaticMethod
+        public func ofNullable2<T: AnyJavaObject>(arg0: T!, arg1: Optional<T>, arg2: T, arg3: Int)
+      }
+      """,
+      expandedSource: #"""
+        extension JavaClass {
+          public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! 
+          where ObjectType == JavaOptional<T> {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              return {
+                do {
+                  return try dynamicJavaStaticMethodCall(methodName: "ofNullable", arguments: arg0$erased, resultType: JavaOptional<T>?.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+          public func ofNullable2<T: AnyJavaObject>(arg0: T!, arg1: Optional<T>, arg2: T, arg3: Int) {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              let arg1$erased = arg1.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              let arg2$erased = JavaObject(javaHolder: arg2.javaHolder)
+              return {
+                do {
+                  return try dynamicJavaStaticMethodCall(methodName: "ofNullable2", arguments: arg0$erased, arg1$erased, arg2$erased, arg3)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+        }
+        """#,
       macros: Self.javaKitMacros
     )
   }

@@ -50,6 +50,8 @@ extension JavaMethodMacro: BodyMacro {
       fatalError("not a function: \(declaration)")
     }
 
+    var resultStatements: [CodeBlockItemSyntax] = []
+
     let funcName =
       if case .argumentList(let arguments) = node.arguments,
         let argument = arguments.first,
@@ -65,7 +67,28 @@ extension JavaMethodMacro: BodyMacro {
 
     let isStatic = node.attributeName.trimmedDescription == "JavaStaticMethod"
     let params = funcDecl.signature.parameterClause.parameters
-    let paramNames = params.map { param in param.parameterName?.text ?? "" }.joined(separator: ", ")
+
+    var paramNames: [String] = []
+    for param in params {
+      guard let name = param.parameterName else {
+        throw MacroErrors.parameterMustHaveName
+      }
+      if isJNIGenericParameter(param.type, funcDecl: funcDecl, in: context) {
+        let erasedName: TokenSyntax = "\(name)$erased"
+        if param.type.optionalUnwrappedType() != nil {
+          resultStatements.append(
+            "let \(erasedName) = \(name).map { JavaObject(javaHolder: $0.javaHolder) }"
+          )
+        } else {
+          resultStatements.append(
+            "let \(erasedName) = JavaObject(javaHolder: \(name).javaHolder)"
+          )
+        }
+        paramNames.append(erasedName.text)
+      } else {
+        paramNames.append(name.text)
+      }
+    }
 
     let genericResultType: String? =
       if case let .argumentList(arguments) = node.arguments,
@@ -106,7 +129,7 @@ extension JavaMethodMacro: BodyMacro {
     if paramNames.isEmpty {
       parametersAsArgs = ""
     } else {
-      parametersAsArgs = ", arguments: \(paramNames)"
+      parametersAsArgs = ", arguments: \(paramNames.joined(separator: ", "))"
     }
 
     let canRethrowError = funcDecl.signature.effectSpecifiers?.throwsClause != nil
@@ -137,7 +160,7 @@ extension JavaMethodMacro: BodyMacro {
       """
 
     if let genericResultType {
-      return [
+      resultStatements.append(
         """
         /* convert erased return value to \(raw: genericResultType) */
         let result$ = \(resultSyntax)
@@ -147,13 +170,33 @@ extension JavaMethodMacro: BodyMacro {
           return nil
         }
         """
-      ]
+      )
+    } else {
+      // no return type conversions
+      resultStatements.append("return \(resultSyntax)")
     }
 
-    // no return type conversions
-    return [
-      "return \(resultSyntax)"
-    ]
+    return resultStatements
+  }
+
+  /// Determines whether an argument is generic.
+  /// Since Optional does not appear in JNI signatures, it is removed before checking.
+  private static func isJNIGenericParameter(
+    _ type: TypeSyntax,
+    funcDecl: FunctionDeclSyntax,
+    in context: some MacroExpansionContext
+  ) -> Bool {
+    guard let genericParams = funcDecl.genericParameterClause?.parameters else {
+      return false
+    }
+
+    let baseType = type.optionalUnwrappedType() ?? type
+    guard let identifier = baseType.as(IdentifierTypeSyntax.self) else {
+      return false
+    }
+    let typeName = identifier.name.text
+
+    return genericParams.contains(where: { $0.name.text == typeName })
   }
 
   /// Bridge an initializer into a call to Java.
@@ -237,5 +280,24 @@ extension TypeSyntaxProtocol {
   /// needed to pretty-print it back into source, as a string.
   var typeReferenceString: String {
     typeReference.description
+  }
+
+  func optionalUnwrappedType() -> TypeSyntax? {
+    if let optionalType = self.as(OptionalTypeSyntax.self) {
+      return optionalType.wrappedType
+    }
+
+    if let implicitlyUnwrappedType = self.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
+      return implicitlyUnwrappedType.wrappedType
+    }
+
+    if let identifierType = self.as(IdentifierTypeSyntax.self),
+      identifierType.name.text == "Optional",
+      let genericArgumentClause = identifierType.genericArgumentClause
+    {
+      return genericArgumentClause.arguments.first?.argument.as(TypeSyntax.self)
+    }
+
+    return nil
   }
 }
