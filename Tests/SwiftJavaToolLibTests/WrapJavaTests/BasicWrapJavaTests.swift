@@ -200,7 +200,7 @@ final class BasicWrapJavaTests: XCTestCase {
         @JavaStaticField(isFinal: true)
         public var serialVersionUID: Int64
         }
-        """,
+        """
       ]
     )
   }
