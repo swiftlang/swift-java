@@ -24,6 +24,19 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 
 final class AnnotationsWrapJavaTests: XCTestCase {
 
+  /// Java source for a CLASS-retention `@RequiresApi` annotation,
+  /// matching real AndroidX behavior.
+  static let requiresApiAnnotationSource = """
+    package androidx.annotation;
+    import java.lang.annotation.*;
+    @Retention(RetentionPolicy.CLASS)
+    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
+    public @interface RequiresApi {
+        int api() default 1;
+        int value() default 1;
+    }
+    """
+
   // ==== ------------------------------------------------
   // MARK: @Deprecated
 
@@ -150,18 +163,8 @@ final class AnnotationsWrapJavaTests: XCTestCase {
   // MARK: @RequiresApi
 
   func testWrapJava_requiresApiMethod() async throws {
-    let classpathURL = try await compileJavaMultiFile([
-      "androidx/annotation/RequiresApi.java":
-        """
-      package androidx.annotation;
-      import java.lang.annotation.*;
-      @Retention(RetentionPolicy.RUNTIME)
-      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-      public @interface RequiresApi {
-          int api() default 1;
-          int value() default 1;
-      }
-      """,
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
       "com/example/ApiLevelExample.java":
         """
       package com.example;
@@ -195,22 +198,116 @@ final class AnnotationsWrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJava_requiresApiMethod_fromJar() async throws {
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
+      "com/example/ApiLevelExample.java":
+        """
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      class ApiLevelExample {
+          @RequiresApi(api = 30)
+          public void api30Method() {}
+          public void anyApiMethod() {}
+      }
+      """,
+    ])
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ApiLevelExample"
+      ],
+      classpath: [classpathURL],
+      makeJar: true,
+      expectedChunks: [
+        """
+        #if compiler(>=6.3)
+        @available(Android 30 /* Android 11 */, *)
+        #endif
+        @JavaMethod
+        open func api30Method()
+        """,
+        """
+        @JavaMethod
+        open func anyApiMethod()
+        """,
+      ]
+    )
+  }
+
+  func testWrapJava_requiresApiField() async throws {
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
+      "com/example/ApiFieldExample.java":
+        """
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      class ApiFieldExample {
+          @RequiresApi(api = 30)
+          public static int API30_FIELD = 42;
+          public static int NORMAL_FIELD = 99;
+      }
+      """,
+    ])
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ApiFieldExample"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        #if compiler(>=6.3)
+        @available(Android 30 /* Android 11 */, *)
+        #endif
+        @JavaStaticField(isFinal: false)
+        public var API30_FIELD: Int32
+        """,
+        """
+        @JavaStaticField(isFinal: false)
+        public var NORMAL_FIELD: Int32
+        """,
+      ]
+    )
+  }
+
+  func testWrapJava_requiresApiConstructor() async throws {
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
+      "com/example/ApiConstructorExample.java":
+        """
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      class ApiConstructorExample {
+          @RequiresApi(api = 33)
+          public ApiConstructorExample() {}
+      }
+      """,
+    ])
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.ApiConstructorExample"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        #if compiler(>=6.3)
+        @available(Android 33 /* Tiramisu */, *)
+        #endif
+        @JavaMethod
+        @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+        """
+      ]
+    )
+  }
+
   // ==== ------------------------------------------------
   // MARK: @Deprecated + @RequiresApi
 
   func testWrapJava_deprecatedAndRequiresApi() async throws {
-    let classpathURL = try await compileJavaMultiFile([
-      "androidx/annotation/RequiresApi.java":
-        """
-      package androidx.annotation;
-      import java.lang.annotation.*;
-      @Retention(RetentionPolicy.RUNTIME)
-      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-      public @interface RequiresApi {
-          int api() default 1;
-          int value() default 1;
-      }
-      """,
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
       "com/example/BothAnnotations.java":
         """
       package com.example;
@@ -247,18 +344,8 @@ final class AnnotationsWrapJavaTests: XCTestCase {
   }
 
   func testWrapJava_requiresApiOnClass() async throws {
-    let classpathURL = try await compileJavaMultiFile([
-      "androidx/annotation/RequiresApi.java":
-        """
-      package androidx.annotation;
-      import java.lang.annotation.*;
-      @Retention(RetentionPolicy.RUNTIME)
-      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-      public @interface RequiresApi {
-          int api() default 1;
-          int value() default 1;
-      }
-      """,
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
       "com/example/TiramisuClass.java":
         """
       package com.example;
@@ -286,53 +373,108 @@ final class AnnotationsWrapJavaTests: XCTestCase {
       ]
     )
   }
-}
 
-// MARK: - Multi-file Java compilation helper
+  func testWrapJava_requiresApiSameSimpleNameDifferentPackages() async throws {
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
+      "com/example/Example.java":
+        """
+      package com.example;
 
-/// Compiles multiple Java source files together, supporting different packages.
-///
-/// - Parameter sourceFiles: A dictionary mapping relative file paths
-///   (e.g. `"androidx/annotation/RequiresApi.java"`) to their source text.
-/// - Returns: The directory that should be added to the classpath.
-private func compileJavaMultiFile(_ sourceFiles: [String: String]) async throws -> Foundation.URL {
-  let baseDir = FileManager.default.temporaryDirectory
-    .appendingPathComponent("swift-java-testing-\(UUID().uuidString)")
-  let srcDir = baseDir.appendingPathComponent("src")
-  let classesDir = baseDir.appendingPathComponent("classes")
+      public class Example {
+          @androidx.annotation.RequiresApi(api = 28)
+          public void doWork() {}
+      }
+      """,
+      "com/another/Example.java":
+        """
+      package com.another;
+      public class Example {
+          @androidx.annotation.RequiresApi(api = 33)
+          public void doWork() {}
+      }
+      """,
+    ])
 
-  try FileManager.default.createDirectory(at: srcDir, withIntermediateDirectories: true)
-  try FileManager.default.createDirectory(at: classesDir, withIntermediateDirectories: true)
-
-  var filePaths: [String] = []
-  for (relativePath, source) in sourceFiles {
-    let fileURL = srcDir.appendingPathComponent(relativePath)
-    try FileManager.default.createDirectory(
-      at: fileURL.deletingLastPathComponent(),
-      withIntermediateDirectories: true
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Example",
+        "com.another.Example",
+      ],
+      classNameMappings: [
+        "com.example.Example": "ExampleOne",
+        "com.another.Example": "ExampleTwo",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        // com.example.Example — API 28
+        """
+        @JavaClass("com.example.Example")
+        open class ExampleOne: JavaObject {
+        """,
+        """
+        #if compiler(>=6.3)
+        @available(Android 28 /* Pie */, *)
+        #endif
+        @JavaMethod
+        open func doWork()
+        """,
+        // com.another.Example — API 33
+        """
+        @JavaClass("com.another.Example")
+        open class ExampleTwo: JavaObject {
+        """,
+        """
+        #if compiler(>=6.3)
+        @available(Android 33 /* Tiramisu */, *)
+        #endif
+        @JavaMethod
+        open func doWork()
+        """,
+      ]
     )
-    try source.write(to: fileURL, atomically: true, encoding: .utf8)
-    filePaths.append(fileURL.path)
   }
 
-  var javacArguments: [String] = ["-d", classesDir.path]
-  javacArguments.append(contentsOf: filePaths)
+  func testWrapJava_requiresApiOnSpecificMethod() async throws {
+    let classpathURL = try await CompileJavaTool.compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java": Self.requiresApiAnnotationSource,
+      "com/example/TiramisuClass.java":
+        """
+      package com.example;
+      import androidx.annotation.RequiresApi;
 
-  let javacProcess = try await Subprocess.run(
-    .path(.init("\(javaHome)" + "/bin/javac")),
-    arguments: .init(javacArguments),
-    output: .string(limit: Int.max, encoding: UTF8.self),
-    error: .string(limit: Int.max, encoding: UTF8.self)
-  )
+      class TiramisuClass {
+          @RequiresApi(api = 11)
+          public void doSomething(String name) {}
 
-  guard javacProcess.terminationStatus.isSuccess else {
-    let outString = javacProcess.standardOutput ?? ""
-    let errString = javacProcess.standardError ?? ""
-    fatalError(
-      "javac failed (\(javacProcess.terminationStatus));\nOUT: \(outString)\nERROR: \(errString)"
+          @RequiresApi(api = 33)
+          public void doSomething() {}
+      }
+      """,
+    ])
+
+    // Only the specific overload gets the annotation
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.TiramisuClass"
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        #if compiler(>=6.3)
+        @available(Android 11 /* Honeycomb */, *)
+        #endif
+        @JavaMethod
+        open func doSomething(_ arg0: String)
+        """,
+        """
+        #if compiler(>=6.3)
+        @available(Android 33 /* Tiramisu */, *)
+        #endif
+        @JavaMethod
+        open func doSomething()
+        """,
+      ]
     )
   }
-
-  print("Compiled java sources to: \(classesDir)")
-  return classesDir
 }

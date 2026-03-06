@@ -59,6 +59,12 @@ open class JavaClassLoader: JavaObject {
 
   @JavaMethod
   open func clearAssertionStatus()
+
+  @JavaMethod
+  open func getResourceAsStream(_ arg0: String) -> InputStream!
+
+  @JavaMethod
+  open func getResource(_ arg0: String) -> JavaObject!
 }
 extension JavaClass<JavaClassLoader> {
   @JavaStaticMethod
