@@ -645,20 +645,24 @@ extension JavaClassTranslator {
         let apiLevel = try? annotation.as(JavaObject.self)
           .dynamicJavaMethodCall(methodName: "api", resultType: Int32.self)
         if let apiLevel, apiLevel > 1 {
-          result.attributes.append(SwiftAttribute(
-            value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
-            minimumCompilerVersion: (6, 3)
-          ))
+          result.attributes.append(
+            SwiftAttribute(
+              value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
+              minimumCompilerVersion: (6, 3)
+            )
+          )
           continue
         }
 
         let value = try? annotation.as(JavaObject.self)
           .dynamicJavaMethodCall(methodName: "value", resultType: Int32.self)
         if let value, value > 1 {
-          result.attributes.append(SwiftAttribute(
-            value: "@available(Android \(value)\(apiLevelComment(value)), *)",
-            minimumCompilerVersion: (6, 3)
-          ))
+          result.attributes.append(
+            SwiftAttribute(
+              value: "@available(Android \(value)\(apiLevelComment(value)), *)",
+              minimumCompilerVersion: (6, 3)
+            )
+          )
           continue
         }
       }

@@ -42,7 +42,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.DeprecatedExample",
+        "com.example.DeprecatedExample"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -73,7 +73,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.OldClass",
+        "com.example.OldClass"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -81,7 +81,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
         @available(*, deprecated)
         @JavaClass("com.example.OldClass")
         open class OldClass: JavaObject {
-        """,
+        """
       ]
     )
   }
@@ -101,7 +101,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.FieldExample",
+        "com.example.FieldExample"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -133,7 +133,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.ConstructorExample",
+        "com.example.ConstructorExample"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -141,7 +141,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
         @available(*, deprecated)
         @JavaMethod
         @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
-        """,
+        """
       ]
     )
   }
@@ -153,30 +153,30 @@ final class AnnotationsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJavaMultiFile([
       "androidx/annotation/RequiresApi.java":
         """
-        package androidx.annotation;
-        import java.lang.annotation.*;
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-        public @interface RequiresApi {
-            int api() default 1;
-            int value() default 1;
-        }
-        """,
+      package androidx.annotation;
+      import java.lang.annotation.*;
+      @Retention(RetentionPolicy.RUNTIME)
+      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
+      public @interface RequiresApi {
+          int api() default 1;
+          int value() default 1;
+      }
+      """,
       "com/example/ApiLevelExample.java":
         """
-        package com.example;
-        import androidx.annotation.RequiresApi;
-        class ApiLevelExample {
-            @RequiresApi(api = 30)
-            public void api30Method() {}
-            public void anyApiMethod() {}
-        }
-        """,
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      class ApiLevelExample {
+          @RequiresApi(api = 30)
+          public void api30Method() {}
+          public void anyApiMethod() {}
+      }
+      """,
     ])
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.ApiLevelExample",
+        "com.example.ApiLevelExample"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -202,31 +202,31 @@ final class AnnotationsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJavaMultiFile([
       "androidx/annotation/RequiresApi.java":
         """
-        package androidx.annotation;
-        import java.lang.annotation.*;
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-        public @interface RequiresApi {
-            int api() default 1;
-            int value() default 1;
-        }
-        """,
+      package androidx.annotation;
+      import java.lang.annotation.*;
+      @Retention(RetentionPolicy.RUNTIME)
+      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
+      public @interface RequiresApi {
+          int api() default 1;
+          int value() default 1;
+      }
+      """,
       "com/example/BothAnnotations.java":
         """
-        package com.example;
-        import androidx.annotation.RequiresApi;
-        class BothAnnotations {
-            @Deprecated
-            @RequiresApi(api = 28)
-            public void oldApi28Method() {}
-            public void normalMethod() {}
-        }
-        """,
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      class BothAnnotations {
+          @Deprecated
+          @RequiresApi(api = 28)
+          public void oldApi28Method() {}
+          public void normalMethod() {}
+      }
+      """,
     ])
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.BothAnnotations",
+        "com.example.BothAnnotations"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -250,29 +250,29 @@ final class AnnotationsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJavaMultiFile([
       "androidx/annotation/RequiresApi.java":
         """
-        package androidx.annotation;
-        import java.lang.annotation.*;
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
-        public @interface RequiresApi {
-            int api() default 1;
-            int value() default 1;
-        }
-        """,
+      package androidx.annotation;
+      import java.lang.annotation.*;
+      @Retention(RetentionPolicy.RUNTIME)
+      @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
+      public @interface RequiresApi {
+          int api() default 1;
+          int value() default 1;
+      }
+      """,
       "com/example/TiramisuClass.java":
         """
-        package com.example;
-        import androidx.annotation.RequiresApi;
-        @RequiresApi(api = 33)
-        class TiramisuClass {
-            public void doSomething() {}
-        }
-        """,
+      package com.example;
+      import androidx.annotation.RequiresApi;
+      @RequiresApi(api = 33)
+      class TiramisuClass {
+          public void doSomething() {}
+      }
+      """,
     ])
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.TiramisuClass",
+        "com.example.TiramisuClass"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -282,7 +282,7 @@ final class AnnotationsWrapJavaTests: XCTestCase {
         #endif
         @JavaClass("com.example.TiramisuClass")
         open class TiramisuClass: JavaObject {
-        """,
+        """
       ]
     )
   }
