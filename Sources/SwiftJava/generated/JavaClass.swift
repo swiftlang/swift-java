@@ -137,6 +137,9 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
 
   @JavaMethod
   open func getNestMembers() -> [JavaClass<JavaObject>?]
+
+  @JavaMethod
+  open func getResourceAsStream(_ arg0: String) -> InputStream!
 }
 extension JavaClass {
   @JavaStaticMethod

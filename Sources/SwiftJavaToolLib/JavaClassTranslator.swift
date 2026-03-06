@@ -59,8 +59,13 @@ struct JavaClassTranslator {
   /// The Swift names of the interfaces that this class implements.
   let swiftInterfaces: [String]
 
-  /// The annotations of the Java class
+  /// The annotations of the Java class.
+  /// In other words, RUNTIME retained annotations, visible through reflection.
   let annotations: [Annotation]
+
+  /// Annotations parsed from the .class file's RuntimeInvisibleAnnotations attribute.
+  /// These are CLASS retained annotations, not visible through reflection.
+  let runtimeInvisibleAnnotations: JavaRuntimeInvisibleAnnotations
 
   /// The (instance) fields of the Java class.
   var fields: [Field] = []
@@ -191,6 +196,27 @@ struct JavaClassTranslator {
     }
 
     self.annotations = javaClass.getAnnotations().compactMap(\.self)
+
+    // Parse RuntimeInvisibleAnnotations (CLASS-retention) from .class bytes.
+    let resourcePath = fullName.replacing(".", with: "/") + ".class" // must not have leading `/`
+    if let inputStream = javaClass.getClassLoader()?.getResourceAsStream(resourcePath) {
+      do {
+        let bytes = try inputStream.readAllBytes()
+        self.runtimeInvisibleAnnotations = JavaClassFileReader.parseRuntimeInvisibleAnnotations(
+          bytes.map { UInt8(bitPattern: $0) }
+        )
+        let classCount = self.runtimeInvisibleAnnotations.classAnnotations.count
+        let methodCount = self.runtimeInvisibleAnnotations.methodAnnotations.count
+        let fieldCount = self.runtimeInvisibleAnnotations.fieldAnnotations.count
+        translator.log.info("Parsed runtime invisible annotations for '\(fullName)': \(classCount) class, \(methodCount) method, \(fieldCount) field")
+      } catch {
+        translator.log.warning("Failed to read .class bytes for '\(fullName)': \(error)")
+        self.runtimeInvisibleAnnotations = JavaRuntimeInvisibleAnnotations()
+      }
+    } else {
+      translator.log.warning("Could not get resource stream for '\(resourcePath)'")
+      self.runtimeInvisibleAnnotations = JavaRuntimeInvisibleAnnotations()
+    }
 
     // Collect all of the class members that we will need to translate.
     // TODO: Switch over to "declared" versions of these whenever we don't need
@@ -446,7 +472,10 @@ extension JavaClassTranslator {
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass"
     let introducer = translateAsClass ? "open class" : "public struct"
-    let classAvailableAttributes = swiftAvailableAttributes(from: annotations)
+    let classAvailableAttributes = swiftAvailableAttributes(
+      from: annotations,
+      runtimeInvisibleAnnotations: self.runtimeInvisibleAnnotations.classAnnotations
+    )
     var classDecl: DeclSyntax =
       """
       \(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
@@ -629,46 +658,46 @@ extension JavaClassTranslator {
   }
 
   /// Build Swift `@available` attributes from Java annotations on a reflective element.
-  private func swiftAvailableAttributes(from annotations: [Annotation]) -> SwiftAvailableAttributes {
+  private func swiftAvailableAttributes(
+    from runtimeAnnotations: [Annotation],
+    runtimeInvisibleAnnotations: [JavaRuntimeInvisibleAnnotation] = []
+  ) -> SwiftAvailableAttributes {
     var result = SwiftAvailableAttributes()
 
-    for annotation in annotations {
+    func apiLevelComment(_ level: Int32) -> String {
+      AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
+    }
+
+    for annotation in runtimeAnnotations {
       guard let annotationClass = annotation.annotationType() else { continue }
 
       if annotationClass.isKnown(.javaLangDeprecated) {
         result.attributes.append(SwiftAttribute(value: "@available(*, deprecated)"))
-        continue
       }
+    }
 
-      if annotationClass.isKnown(.androidxRequiresApi) || annotationClass.isKnown(.androidSupportRequiresApi) {
-        func apiLevelComment(_ level: Int32) -> String {
-          AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
-        }
+    // Look for any annotations stored in classfiles, e.g. the Android @RequiresApi
+    for binAnnotation in runtimeInvisibleAnnotations {
+      let fqn = binAnnotation.fullyQualifiedName
+      if fqn == KnownJavaAnnotation.androidxRequiresApi.rawValue
+        || fqn == KnownJavaAnnotation.androidSupportRequiresApi.rawValue
+      {
+        let apiLevel: Int32? =
+          if let api = binAnnotation.elements["api"], api > 1 {
+            api
+          } else if let value = binAnnotation.elements["value"], value > 1 {
+            value
+          } else {
+            nil
+          }
 
-        // The annotation proxy exposes api() which returns the resolved integer value.
-        // Build.VERSION_CODES constants are resolved at compile time by javac.
-        let apiLevel = try? annotation.as(JavaObject.self)
-          .dynamicJavaMethodCall(methodName: "api", resultType: Int32.self)
-        if let apiLevel, apiLevel > 1 {
+        if let apiLevel {
           result.attributes.append(
             SwiftAttribute(
               value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
               minimumCompilerVersion: (6, 3)
             )
           )
-          continue
-        }
-
-        let value = try? annotation.as(JavaObject.self)
-          .dynamicJavaMethodCall(methodName: "value", resultType: Int32.self)
-        if let value, value > 1 {
-          result.attributes.append(
-            SwiftAttribute(
-              value: "@available(Android \(value)\(apiLevelComment(value)), *)",
-              minimumCompilerVersion: (6, 3)
-            )
-          )
-          continue
         }
       }
     }
@@ -712,7 +741,11 @@ extension JavaClassTranslator {
     let convenienceModifier = translateAsClass ? "convenience " : ""
     let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
     let constructorAnnotations = javaConstructor.getDeclaredAnnotations().compactMap(\.self)
-    let availableAttributes = swiftAvailableAttributes(from: constructorAnnotations)
+    let invisibleCtorAnnotations = runtimeInvisibleAnnotations.annotationsFor(constructor: javaConstructor)
+    let availableAttributes = swiftAvailableAttributes(
+      from: constructorAnnotations,
+      runtimeInvisibleAnnotations: invisibleCtorAnnotations
+    )
 
     // FIXME: handle generics in constructors
     return """
@@ -837,7 +870,11 @@ extension JavaClassTranslator {
 
     // --- Handle @available attributes from Java annotations (e.g. @Deprecated, @RequiresApi)
     let methodAnnotations = javaMethod.getDeclaredAnnotations().compactMap(\.self)
-    let availableAttributes = swiftAvailableAttributes(from: methodAnnotations)
+    let invisibleMethodAnnotations = runtimeInvisibleAnnotations.annotationsFor(method: javaMethod)
+    let availableAttributes = swiftAvailableAttributes(
+      from: methodAnnotations,
+      runtimeInvisibleAnnotations: invisibleMethodAnnotations
+    )
 
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
@@ -935,7 +972,11 @@ extension JavaClassTranslator {
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField"
     let swiftFieldName = javaField.getName().escapedSwiftName
     let fieldAnnotations = javaField.getDeclaredAnnotations().compactMap(\.self)
-    let availableAttributes = swiftAvailableAttributes(from: fieldAnnotations)
+    let invisibleFieldAnnotations = runtimeInvisibleAnnotations.annotationsFor(field: javaField.getName())
+    let availableAttributes = swiftAvailableAttributes(
+      from: fieldAnnotations,
+      runtimeInvisibleAnnotations: invisibleFieldAnnotations
+    )
 
     if let optionalType = typeName.optionalWrappedType() {
       let setter =
