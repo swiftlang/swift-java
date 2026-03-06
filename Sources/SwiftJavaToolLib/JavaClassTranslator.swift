@@ -186,7 +186,8 @@ struct JavaClassTranslator {
         let typeName = try translator.getSwiftTypeNameAsString(
           javaType,
           preferValueTypes: false,
-          outerOptional: .nonoptional
+          outerOptional: .nonoptional,
+          eraseTypeArguments: true
         )
         return "\(typeName)"
       } catch {

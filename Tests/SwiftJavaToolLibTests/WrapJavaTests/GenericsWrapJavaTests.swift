@@ -450,4 +450,29 @@ final class GenericsWrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJavaGenericSuperInterface() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      interface Collection<E> { }
+
+      interface Set<E> extends Collection<E> { }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Collection",
+        "com.example.Set",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.Set", extends: Collection<JavaObject>.self)
+        public struct Set<E: AnyJavaObject> {
+        """
+      ]
+    )
+  }
 }
