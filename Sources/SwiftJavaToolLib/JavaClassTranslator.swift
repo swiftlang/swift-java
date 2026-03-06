@@ -654,70 +654,42 @@ extension JavaClassTranslator {
 
   /// Build Swift `@available` attributes from Java annotations on a reflective element.
   private func swiftAvailableAttributes(
-    from annotations: [Annotation],
+    from runtimeAnnotations: [Annotation],
     runtimeInvisibleAnnotations: [JavaRuntimeInvisibleAnnotation] = []
   ) -> SwiftAvailableAttributes {
     var result = SwiftAvailableAttributes()
-    var foundRequiresApi = false
 
     func apiLevelComment(_ level: Int32) -> String {
       AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
     }
 
-    for annotation in annotations {
+    for annotation in runtimeAnnotations {
       guard let annotationClass = annotation.annotationType() else { continue }
 
       if annotationClass.isKnown(.javaLangDeprecated) {
         result.attributes.append(SwiftAttribute(value: "@available(*, deprecated)"))
-      } else if annotationClass.isKnown(.androidxRequiresApi) || annotationClass.isKnown(.androidSupportRequiresApi) {
-        foundRequiresApi = true
-
-        // The annotation proxy exposes api() which returns the resolved integer value.
-        // Build.VERSION_CODES constants are resolved at compile time by javac.
-        let apiLevel = try? annotation.as(JavaObject.self)
-          .dynamicJavaMethodCall(methodName: "api", resultType: Int32.self)
-        let value = try? annotation.as(JavaObject.self)
-          .dynamicJavaMethodCall(methodName: "value", resultType: Int32.self)
-
-        if let apiLevel, apiLevel > 1 {
-          result.attributes.append(
-            SwiftAttribute(
-              value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
-              minimumCompilerVersion: (6, 3)
-            )
-          )
-        } else if let value, value > 1 {
-          result.attributes.append(
-            SwiftAttribute(
-              value: "@available(Android \(value)\(apiLevelComment(value)), *)",
-              minimumCompilerVersion: (6, 3)
-            )
-          )
-        }
       }
     }
 
-    // If @RequiresApi was not found via reflection, check CLASS-retention
-    // annotations parsed from the .class file.
-    if !foundRequiresApi {
-      for binAnnotation in runtimeInvisibleAnnotations {
-        let fqn = binAnnotation.fullyQualifiedName
-        guard
-          fqn == KnownJavaAnnotation.androidxRequiresApi.rawValue
-            || fqn == KnownJavaAnnotation.androidSupportRequiresApi.rawValue
-        else { continue }
+    // Look for any annotations stored in classfiles, e.g. the Android @RequiresApi
+    for binAnnotation in runtimeInvisibleAnnotations {
+      let fqn = binAnnotation.fullyQualifiedName
+      if fqn == KnownJavaAnnotation.androidxRequiresApi.rawValue
+        || fqn == KnownJavaAnnotation.androidSupportRequiresApi.rawValue
+      {
+        let apiLevel: Int32? =
+          if let api = binAnnotation.elements["api"], api > 1 {
+            api
+          } else if let value = binAnnotation.elements["value"], value > 1 {
+            value
+          } else {
+            nil
+          }
 
-        if let apiLevel = binAnnotation.elements["api"], apiLevel > 1 {
+        if let apiLevel {
           result.attributes.append(
             SwiftAttribute(
               value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
-              minimumCompilerVersion: (6, 3)
-            )
-          )
-        } else if let value = binAnnotation.elements["value"], value > 1 {
-          result.attributes.append(
-            SwiftAttribute(
-              value: "@available(Android \(value)\(apiLevelComment(value)), *)",
               minimumCompilerVersion: (6, 3)
             )
           )

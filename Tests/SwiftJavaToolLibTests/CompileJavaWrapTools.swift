@@ -125,7 +125,8 @@ func assertWrapJavaOutput(
     // TODO: especially because nested classes
     // WrapJavaCommand().<TODO>
 
-    let swiftUnqualifiedName = classNameMappings[javaClassName]
+    let swiftUnqualifiedName =
+      classNameMappings[javaClassName]
       ?? javaClassName.javaClassNameToCanonicalName.defaultSwiftNameForJavaClass
     translator.translatedClasses[javaClassName] =
       .init(module: nil, name: swiftUnqualifiedName)
