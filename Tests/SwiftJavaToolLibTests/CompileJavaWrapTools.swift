@@ -19,8 +19,9 @@ import Subprocess
 @_spi(Testing) import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
-import SwiftJavaToolLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
+
+@testable import SwiftJavaToolLib
 
 /// Returns the directory that should be added to the classpath of the JVM to analyze the sources.
 func compileJava(_ sourceText: String) async throws -> Foundation.URL {
@@ -62,6 +63,7 @@ func assertWrapJavaOutput(
   classNameMappings: [String: String] = [:],
   classpath: [Foundation.URL],
   makeJar: Bool = false,
+  androidAPIVersions: AndroidAPIVersions? = nil,
   assert assertBody: (JavaTranslator) throws -> Void = { _ in },
   expectedChunks: [String],
   function: String = #function,
@@ -85,6 +87,7 @@ func assertWrapJavaOutput(
     environment: environment,
     translateAsClass: true
   )
+  translator.androidAPIVersions = androidAPIVersions
 
   let classpathJavaURLs: [JavaNet.URL]
   if makeJar {

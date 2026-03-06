@@ -28,7 +28,7 @@ struct JavaRuntimeInvisibleAnnotations {
 
   /// Returns annotations for a Java method, matched by name and exact descriptor.
   func annotationsFor(method javaMethod: Method) -> [JavaRuntimeInvisibleAnnotation] {
-    let descriptor = Self.jvmDescriptor(
+    let descriptor = jvmDescriptor(
       parameterTypes: javaMethod.getParameterTypes(),
       returnType: javaMethod.getReturnType()
     )
@@ -38,7 +38,7 @@ struct JavaRuntimeInvisibleAnnotations {
 
   /// Returns annotations for a Java constructor, matched by exact descriptor.
   func annotationsFor(constructor: some Executable) -> [JavaRuntimeInvisibleAnnotation] {
-    let descriptor = Self.jvmDescriptor(
+    let descriptor = jvmDescriptor(
       parameterTypes: constructor.getParameterTypes(),
       returnType: nil // constructors return void
     )
@@ -51,9 +51,9 @@ struct JavaRuntimeInvisibleAnnotations {
     fieldAnnotations[name] ?? []
   }
 
-  /// Build a JVM method descriptor from parameter types and return type.
+  /// Build a JVM type descriptor from parameter types and return type.
   /// E.g. `(Ljava/lang/String;)V` for `void doSomething(String)`.
-  private static func jvmDescriptor(
+  private func jvmDescriptor(
     parameterTypes: [JavaClass<JavaObject>?],
     returnType: JavaClass<JavaObject>?
   ) -> String {
