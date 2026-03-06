@@ -602,14 +602,9 @@ extension JavaClassTranslator {
     var minimumCompilerVersion: (Int, Int)? = nil
   }
 
-  /// Collected Swift attributes derived from Java annotations.
   struct SwiftAvailableAttributes {
-    /// Individual attributes.
     var attributes: [SwiftAttribute] = []
 
-    /// Render the attributes as a string suitable for interpolation before a
-    /// declaration.  Returns an empty string when there are no attributes;
-    /// otherwise each attribute is on its own line with a trailing newline.
     func render() -> String {
       if attributes.isEmpty {
         return ""
@@ -629,9 +624,6 @@ extension JavaClassTranslator {
   }
 
   /// Build Swift `@available` attributes from Java annotations on a reflective element.
-  ///
-  /// Checks for `@Deprecated` and `@RequiresApi(api = N)` annotations and returns
-  /// the corresponding Swift `@available(...)` attributes.
   private func swiftAvailableAttributes(from annotations: [Annotation]) -> SwiftAvailableAttributes {
     var result = SwiftAvailableAttributes()
 
@@ -644,14 +636,17 @@ extension JavaClassTranslator {
       }
 
       if annotationClass.isKnown(.androidxRequiresApi) || annotationClass.isKnown(.androidSupportRequiresApi) {
+        func apiLevelComment(_ level: Int32) -> String {
+          AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
+        }
+
         // The annotation proxy exposes api() which returns the resolved integer value.
         // Build.VERSION_CODES constants are resolved at compile time by javac.
         let apiLevel = try? annotation.as(JavaObject.self)
           .dynamicJavaMethodCall(methodName: "api", resultType: Int32.self)
         if let apiLevel, apiLevel > 1 {
-          let levelComment = AndroidAPILevel(rawValue: Int(apiLevel)).map { " /* \($0.name) */" } ?? ""
           result.attributes.append(SwiftAttribute(
-            value: "@available(Android \(apiLevel)\(levelComment), *)",
+            value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
             minimumCompilerVersion: (6, 3)
           ))
           continue
@@ -660,9 +655,8 @@ extension JavaClassTranslator {
         let value = try? annotation.as(JavaObject.self)
           .dynamicJavaMethodCall(methodName: "value", resultType: Int32.self)
         if let value, value > 1 {
-          let levelComment = AndroidAPILevel(rawValue: Int(value)).map { " /* \($0.name) */" } ?? ""
           result.attributes.append(SwiftAttribute(
-            value: "@available(Android \(value)\(levelComment), *)",
+            value: "@available(Android \(value)\(apiLevelComment(value)), *)",
             minimumCompilerVersion: (6, 3)
           ))
           continue

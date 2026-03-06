@@ -195,6 +195,57 @@ final class AnnotationsWrapJavaTests: XCTestCase {
     )
   }
 
+  // ==== ------------------------------------------------
+  // MARK: @Deprecated + @RequiresApi
+
+  func testWrapJava_deprecatedAndRequiresApi() async throws {
+    let classpathURL = try await compileJavaMultiFile([
+      "androidx/annotation/RequiresApi.java":
+        """
+        package androidx.annotation;
+        import java.lang.annotation.*;
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD})
+        public @interface RequiresApi {
+            int api() default 1;
+            int value() default 1;
+        }
+        """,
+      "com/example/BothAnnotations.java":
+        """
+        package com.example;
+        import androidx.annotation.RequiresApi;
+        class BothAnnotations {
+            @Deprecated
+            @RequiresApi(api = 28)
+            public void oldApi28Method() {}
+            public void normalMethod() {}
+        }
+        """,
+    ])
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.BothAnnotations",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @available(*, deprecated)
+        #if compiler(>=6.3)
+        @available(Android 28 /* Pie */, *)
+        #endif
+        @JavaMethod
+        open func oldApi28Method()
+        """,
+        """
+        @JavaMethod
+        open func normalMethod()
+        """,
+      ]
+    )
+  }
+
   func testWrapJava_requiresApiOnClass() async throws {
     let classpathURL = try await compileJavaMultiFile([
       "androidx/annotation/RequiresApi.java":

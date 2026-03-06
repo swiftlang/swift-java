@@ -89,6 +89,8 @@ public enum AndroidAPILevel: Int {
   case VANILLA_ICE_CREAM = 35
   /// Baklava. Android 16 (upcoming, not yet finalized).
   case BAKLAVA = 36
+  /// Magic version number for a current development build, which has not yet turned into an official release.
+  case CUR_DEVELOPMENT = 10000
 
   /// Human-readable release name for this API level.
   public var name: String {
@@ -129,6 +131,7 @@ public enum AndroidAPILevel: Int {
     case .UPSIDE_DOWN_CAKE: "Upside Down Cake"
     case .VANILLA_ICE_CREAM: "Vanilla Ice Cream"
     case .BAKLAVA: "Baklava"
+    case .CUR_DEVELOPMENT: "CUR_DEVELOPMENT"
     }
   }
 }
