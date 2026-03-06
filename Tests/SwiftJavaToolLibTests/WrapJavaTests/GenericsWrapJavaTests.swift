@@ -176,7 +176,9 @@ final class GenericsWrapJavaTests: XCTestCase {
         public <M> M getMethodGeneric() { return null; }
 
         public <M> Map<T, M> getMixedGeneric() { return null; }
-        
+
+        public <M> M[] getMethodGenericArray() { return null; }
+
         public String getNonGeneric() { return null; }
 
         public List<T> getParameterizedClassGeneric() { return null; }
@@ -211,6 +213,10 @@ final class GenericsWrapJavaTests: XCTestCase {
         """,
         """
         @JavaMethod
+        open func getMethodGenericArray<M: AnyJavaObject>() -> [M?] 
+        """,
+        """
+        @JavaMethod
         open func getNonGeneric() -> String
         """,
         """
@@ -224,6 +230,81 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaMethod
         open func getGenericArray() -> [T?]
+        """,
+      ]
+    )
+  }
+
+  func test_Java2Swift_parameterTypes_generic() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      // Mini decls in order to avoid warnings about some funcs we're not yet importing cleanly
+      final class List<T> {}
+      final class Map<T, U> {}
+      final class Number {}
+
+      class GenericClass<T> {
+        public void setClassGeneric(T v) { }
+        
+        public <M> void setMethodGeneric(M v) { }
+
+        public <M> void setMixedGeneric(Map<T, M> v) { }
+
+        public <M> void setMethodGenericArray(M[] v) { }
+
+        public void setNonGeneric(String v) { }
+
+        public void setParameterizedClassGeneric(List<T> v) { }
+        
+        public void setWildcard(List<? super Number> v) { }
+        
+        public void setGenericArray(T[] v) { }
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Map",
+        "com.example.List",
+        "com.example.Number",
+        "com.example.GenericClass",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func setClassGeneric(_ arg0: T?)
+        """,
+        """
+        @JavaMethod
+        open func setMethodGeneric<M: AnyJavaObject>(_ arg0: M?)
+        """,
+        """
+        @JavaMethod
+        open func setMixedGeneric<M: AnyJavaObject>(_ arg0: Map<T, M>?)
+        """,
+        """
+        @JavaMethod
+        open func setMethodGenericArray<M: AnyJavaObject>(_ arg0: [M?]) 
+        """,
+        """
+        @JavaMethod
+        open func setNonGeneric(_ arg0: String)
+        """,
+        """
+        @JavaMethod
+        open func setParameterizedClassGeneric(_ arg0: List<T>?)
+        """,
+        """
+        @JavaMethod
+        open func setWildcard(_ arg0: List<JavaObject>?)
+        """,
+        """
+        @JavaMethod
+        open func setGenericArray(_ arg0: [T?])
         """,
       ]
     )
