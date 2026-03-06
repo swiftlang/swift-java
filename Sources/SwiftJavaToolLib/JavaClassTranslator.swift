@@ -307,6 +307,11 @@ extension JavaClassTranslator {
 
     // Static fields go into a separate list.
     if field.isStatic {
+      // Deduplicate by name: getFields() can return the same field from both an
+      // interface and its super-interface (e.g. serialVersionUID on Key and PublicKey).
+      guard !staticFields.contains(where: { $0.getName() == field.getName() }) else {
+        return
+      }
       staticFields.append(field)
 
       // Enum constants will be used to produce a Swift enum projecting the
