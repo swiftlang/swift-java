@@ -441,9 +441,10 @@ extension JavaClassTranslator {
     // Emit the struct declaration describing the java class.
     let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass"
     let introducer = translateAsClass ? "open class" : "public struct"
+    let classAvailableAttributes = swiftAvailableAttributes(from: annotations)
     var classDecl: DeclSyntax =
       """
-      @\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
+      \(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
       \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
@@ -590,18 +591,100 @@ extension JavaClassTranslator {
     return protocolDecl.formatted(using: translator.format).cast(DeclSyntax.self)
   }
 
+  /// A single Swift attribute derived from a Java annotation.
+  struct SwiftAttribute {
+    /// The attribute text, e.g. `@available(*, deprecated)`.
+    var value: String
+
+    /// The minimum Swift compiler version required to compile this attribute,
+    /// e.g. `(6, 3)` for `@available(Android ...)`.  When non-nil the attribute
+    /// is wrapped in a `#if compiler(>=…)` block during rendering.
+    var minimumCompilerVersion: (Int, Int)? = nil
+  }
+
+  /// Collected Swift attributes derived from Java annotations.
+  struct SwiftAvailableAttributes {
+    /// Individual attributes.
+    var attributes: [SwiftAttribute] = []
+
+    /// Render the attributes as a string suitable for interpolation before a
+    /// declaration.  Returns an empty string when there are no attributes;
+    /// otherwise each attribute is on its own line with a trailing newline.
+    func render() -> String {
+      if attributes.isEmpty {
+        return ""
+      }
+      var lines: [String] = []
+      for attr in attributes {
+        if let (major, minor) = attr.minimumCompilerVersion {
+          lines.append("#if compiler(>=\(major).\(minor))")
+          lines.append(attr.value)
+          lines.append("#endif")
+        } else {
+          lines.append(attr.value)
+        }
+      }
+      return lines.joined(separator: "\n") + "\n"
+    }
+  }
+
+  /// Build Swift `@available` attributes from Java annotations on a reflective element.
+  ///
+  /// Checks for `@Deprecated` and `@RequiresApi(api = N)` annotations and returns
+  /// the corresponding Swift `@available(...)` attributes.
+  private func swiftAvailableAttributes(from annotations: [Annotation]) -> SwiftAvailableAttributes {
+    var result = SwiftAvailableAttributes()
+
+    for annotation in annotations {
+      guard let annotationClass = annotation.annotationType() else { continue }
+
+      if annotationClass.isKnown(.javaLangDeprecated) {
+        result.attributes.append(SwiftAttribute(value: "@available(*, deprecated)"))
+        continue
+      }
+
+      if annotationClass.isKnown(.androidxRequiresApi) || annotationClass.isKnown(.androidSupportRequiresApi) {
+        // The annotation proxy exposes api() which returns the resolved integer value.
+        // Build.VERSION_CODES constants are resolved at compile time by javac.
+        let apiLevel = try? annotation.as(JavaObject.self)
+          .dynamicJavaMethodCall(methodName: "api", resultType: Int32.self)
+        if let apiLevel, apiLevel > 1 {
+          let levelComment = AndroidAPILevel(rawValue: Int(apiLevel)).map { " /* \($0.name) */" } ?? ""
+          result.attributes.append(SwiftAttribute(
+            value: "@available(Android \(apiLevel)\(levelComment), *)",
+            minimumCompilerVersion: (6, 3)
+          ))
+          continue
+        }
+
+        let value = try? annotation.as(JavaObject.self)
+          .dynamicJavaMethodCall(methodName: "value", resultType: Int32.self)
+        if let value, value > 1 {
+          let levelComment = AndroidAPILevel(rawValue: Int(value)).map { " /* \($0.name) */" } ?? ""
+          result.attributes.append(SwiftAttribute(
+            value: "@available(Android \(value)\(levelComment), *)",
+            minimumCompilerVersion: (6, 3)
+          ))
+          continue
+        }
+      }
+    }
+
+    return result
+  }
+
   func renderAnnotationExtensions() -> [DeclSyntax] {
     var extensions: [DeclSyntax] = []
 
     for annotation in annotations {
-      let annotationName = annotation.annotationType().getName().splitSwiftTypeName().name
-      if annotationName == "ThreadSafe" || annotationName == "Immutable" { // If we are threadsafe, mark as unchecked Sendable
+      guard let annotationClass = annotation.annotationType() else { continue }
+      if annotationClass.isKnown(.threadSafe) || annotationClass.isKnown(.immutable) {
         extensions.append(
           """
           extension \(raw: swiftTypeName): @unchecked Swift.Sendable { }
           """
         )
-      } else if annotationName == "NotThreadSafe" { // If we are _not_ threadsafe, mark sendable unavailable
+      } else if annotationClass.isKnown(.notThreadSafe) {
         extensions.append(
           """
           @available(unavailable, *)
@@ -625,10 +708,12 @@ extension JavaClassTranslator {
     let accessModifier = javaConstructor.isPublic ? "public " : ""
     let convenienceModifier = translateAsClass ? "convenience " : ""
     let nonoverrideAttribute = translateAsClass ? "@_nonoverride " : ""
+    let constructorAnnotations = javaConstructor.getDeclaredAnnotations().compactMap(\.self)
+    let availableAttributes = swiftAvailableAttributes(from: constructorAnnotations)
 
     // FIXME: handle generics in constructors
     return """
-      @JavaMethod
+      \(raw: availableAttributes.render())@JavaMethod
       \(raw: nonoverrideAttribute)\(raw: accessModifier)\(raw: convenienceModifier)init(\(raw: parametersStr))\(raw: throwsStr)
       """
   }
@@ -747,6 +832,10 @@ extension JavaClassTranslator {
         /// ```
       """
 
+    // --- Handle @available attributes from Java annotations (e.g. @Deprecated, @RequiresApi)
+    let methodAnnotations = javaMethod.getDeclaredAnnotations().compactMap(\.self)
+    let availableAttributes = swiftAvailableAttributes(from: methodAnnotations)
+
     // Compute the parameters for '@...JavaMethod(...)'
     let methodAttribute: AttributeSyntax
     if implementedInSwift {
@@ -817,7 +906,7 @@ extension JavaClassTranslator {
       return
         """
         \(raw: docsString)
-        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        \(raw: availableAttributes.render())\(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
 
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
           \(body)
@@ -827,7 +916,7 @@ extension JavaClassTranslator {
       return
         """
         \(raw: docsString)
-        \(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+        \(raw: availableAttributes.render())\(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
         """
     }
   }
@@ -842,6 +931,8 @@ extension JavaClassTranslator {
     )
     let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField"
     let swiftFieldName = javaField.getName().escapedSwiftName
+    let fieldAnnotations = javaField.getDeclaredAnnotations().compactMap(\.self)
+    let availableAttributes = swiftAvailableAttributes(from: fieldAnnotations)
 
     if let optionalType = typeName.optionalWrappedType() {
       let setter =
@@ -856,7 +947,7 @@ extension JavaClassTranslator {
           ""
         }
       return """
-        \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        \(raw: availableAttributes.render())\(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
         public var \(raw: swiftFieldName): \(raw: typeName)
 
 
@@ -868,7 +959,7 @@ extension JavaClassTranslator {
         """
     } else {
       return """
-        \(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        \(raw: availableAttributes.render())\(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
         public var \(raw: swiftFieldName): \(raw: typeName)
         """
     }
