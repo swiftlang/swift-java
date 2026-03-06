@@ -168,6 +168,43 @@ final class BasicWrapJavaTests: XCTestCase {
     )
   }
 
+  // Test that static fields are not duplicated when both a Java interface and its
+  // super-interface independently declare the same field name.
+  //
+  // Real-world case: java.security.PublicKey extends java.security.Key, and both
+  // declare serialVersionUID. Class.getFields() returns both Field objects (with
+  // different declaring classes), which previously caused two @JavaStaticField
+  // declarations to be emitted in extension JavaClass<PublicKey>.
+  //
+  // Note: uses real JDK classes rather than compileJava() — the duplicate only
+  // manifests with JDK bytecode; freshly compiled interfaces apply stricter
+  // field-hiding rules that prevent getFields() from returning both fields.
+  //
+  // The closing `}` in the expected chunk is load-bearing: if there are two
+  // serialVersionUID declarations the `}` would be preceded by the second field,
+  // not the first, so the chunk would not match.
+  func test_wrapJava_noDuplicateStaticFieldsFromSuperInterface() async throws {
+    let classpathURL = try await compileJava("class Dummy {}")
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "java.security.Key",
+        "java.security.PublicKey",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        // PublicKey should close its extension block right after one serialVersionUID.
+        // A duplicate would insert a second field before the `}`, breaking this match.
+        """
+        extension JavaClass<PublicKey> {
+        @available(*, deprecated)
+        @JavaStaticField(isFinal: true)
+        public var serialVersionUID: Int64
+        }
+        """,
+      ]
+    )
+  }
+
   // Test that Java methods named "init" get @JavaMethod("init") annotation.
   // Since "init" is a Swift keyword and gets escaped with backticks in the function name,
   // we explicitly specify the Java method name in the annotation.
