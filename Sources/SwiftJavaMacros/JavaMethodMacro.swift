@@ -186,17 +186,29 @@ extension JavaMethodMacro: BodyMacro {
     funcDecl: FunctionDeclSyntax,
     in context: some MacroExpansionContext
   ) -> Bool {
-    guard let genericParams = funcDecl.genericParameterClause?.parameters else {
-      return false
-    }
-
     let baseType = type.optionalUnwrappedType() ?? type
     guard let identifier = baseType.as(IdentifierTypeSyntax.self) else {
       return false
     }
     let typeName = identifier.name.text
 
-    return genericParams.contains(where: { $0.name.text == typeName })
+    if let genericParams = funcDecl.genericParameterClause?.parameters {
+      if genericParams.contains(where: { $0.name.text == typeName }) {
+        return true
+      }
+    }
+
+    for contextNode in context.lexicalContext {
+      if let decl = contextNode.asProtocol(WithGenericParametersSyntax.self) {
+        if decl.genericParameterClause?.parameters.contains(where: {
+          $0.name.text == typeName
+        }) == true {
+          return true
+        }
+      }
+    }
+
+    return false
   }
 
   /// Bridge an initializer into a call to Java.

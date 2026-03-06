@@ -467,4 +467,52 @@ class JavaKitMacroTests: XCTestCase {
       macros: Self.javaKitMacros
     )
   }
+
+  func testJavaGenericClassGenericMethodParameter() throws {
+    assertMacroExpansion(
+      """
+      @JavaClass("java.util.ArrayList")
+      open class ArrayList<E: AnyJavaObject>: JavaObject {
+        @JavaMethod
+        open func add(_ arg0: E?) -> Bool
+      }
+      """,
+      expandedSource: #"""
+        open class ArrayList<E: AnyJavaObject>: JavaObject {
+          open func add(_ arg0: E?) -> Bool {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "add", arguments: arg0$erased, resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+
+            /// The full Java class name for this Swift type.
+            open override class var fullJavaClassName: String {
+              #if os(Android) && AndroidCoreLibraryDesugaring
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.util.ArrayList")
+              #else
+                "java.util.ArrayList"
+              #endif
+            }
+
+            public required init(javaHolder: JavaObjectHolder) {
+                super.init(javaHolder: javaHolder)
+            }
+        }
+        """#,
+      macros: Self.javaKitMacros
+    )
+  }
 }
