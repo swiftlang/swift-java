@@ -333,7 +333,6 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaStaticMethod
         public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
-        }
         """,
         """
         @JavaStaticMethod(typeErasedResult: "T!")
