@@ -50,59 +50,19 @@ extension FFMSwift2JavaGenerator {
     private var duplicates: Set<String> = []
 
     /// Detects which base names among `methods` would clash in Java.
-    /// Only considers methods that can actually be translated to Java AND checks
-    /// for actual Java signature conflicts (not just Swift base name collisions).
-    init(for methods: [ImportedFunc], config: Configuration, lookupContext: SwiftTypeLookupContext) {
-      // First pass: Build Java method signatures for translatable methods
-      var javaSignatures: [String: [String]] = [:] // baseName -> [full Java signatures]
-
-      for method in methods {
-        do {
-          // Attempt translation without checking for duplicates (bootstrap phase)
-          let translation = JavaTranslation(
-            config: config,
-            knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
-            dupeNames: DuplicateNames(_bootstrap: [])
-          )
-          let translated = try translation.translate(method)
-
-          // Build Java method signature (name + parameter types)
-          let baseName = translated.name
-          let paramTypes = translated.translatedSignature.parameters
-            .flatMap { $0.javaParameters }
-            .map { $0.type.description }
-            .joined(separator: ",")
-          let javaSignature = "\(baseName)(\(paramTypes))"
-
-          javaSignatures[baseName, default: []].append(javaSignature)
-        } catch {
-          // Method can't be translated, skip it
-          continue
-        }
-      }
-
-      // Second pass: Detect base names that have actual Java signature conflicts
+    init(for methods: [ImportedFunc]) {
       var seen: Set<String> = []
-      for (baseName, signatures) in javaSignatures {
-        // Multiple methods with same base name, check if Java signatures actually conflict
-        if signatures.count > 1 {
-          // Check if any two signatures are identical
-          var signatureSet: Set<String> = []
-          for sig in signatures {
-            if !signatureSet.insert(sig).inserted {
-              // Found duplicate Java signature!
-              duplicates.insert(baseName)
-              break
-            }
+      for method in methods {
+        let baseName =
+          switch method.apiKind {
+          case .getter, .subscriptGetter: method.javaGetterName
+          case .setter, .subscriptSetter: method.javaSetterName
+          case .function, .synthesizedFunction, .initializer, .enumCase: method.name
           }
+        if !seen.insert(baseName).inserted {
+          duplicates.insert(baseName)
         }
       }
-    }
-
-    /// Internal initializer for bootstrap phase (when we don't want to check duplicates)
-    init(_bootstrap methods: [ImportedFunc]) {
-      // Empty initialization - no duplicates detected
-      self.duplicates = []
     }
 
     /// Returns whether the given base name has a Java naming conflict and needs a parameter label suffix.
@@ -219,7 +179,7 @@ extension FFMSwift2JavaGenerator {
     var knownTypes: SwiftKnownTypes
     var dupeNames: DuplicateNames
 
-    init(config: Configuration, knownTypes: SwiftKnownTypes, dupeNames: DuplicateNames = DuplicateNames(_bootstrap: [])) {
+    init(config: Configuration, knownTypes: SwiftKnownTypes, dupeNames: DuplicateNames = DuplicateNames(for: [])) {
       self.config = config
       self.knownTypes = knownTypes
       self.dupeNames = dupeNames
@@ -265,12 +225,11 @@ extension FFMSwift2JavaGenerator {
     /// Returns the Java method name for the given Swift declaration, applying parameter
     /// label suffixes only when a naming conflict with another method would occur.
     private func makeJavaMethodName(_ decl: ImportedFunc) -> String {
-      let baseName =
-        switch decl.apiKind {
-        case .getter, .subscriptGetter: decl.javaGetterName
-        case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
-        }
+      let baseName = switch decl.apiKind {
+      case .getter, .subscriptGetter: decl.javaGetterName
+      case .setter, .subscriptSetter: decl.javaSetterName
+      case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
+      }
       return baseName + makeMethodNameWithParamsSuffix(decl, baseName: baseName)
     }
 
