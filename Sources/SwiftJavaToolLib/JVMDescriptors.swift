@@ -23,7 +23,7 @@ func jvmMethodDescriptor(
   returnType: JavaClass<JavaObject>?
 ) -> String {
   let params = parameterTypes.map { $0?.descriptorString() ?? "Ljava/lang/Object;" }.joined()
-  let ret = returnType?.descriptorString() ?? "V"
+  let ret = returnType?.descriptorString() ?? "V" // void
   return "\(name)(\(params))\(ret)"
 }
 

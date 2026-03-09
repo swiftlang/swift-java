@@ -214,7 +214,7 @@ extension JavaClassFileReader {
     let key: String
     if includeDescriptor {
       let descriptor = utf8Constants[descriptorIndex] ?? ""
-      key = "\(name):\(descriptor)"
+      key = "\(name)\(descriptor)"
     } else {
       key = name
     }

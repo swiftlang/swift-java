@@ -79,7 +79,7 @@ final class JavaClassFileParserTests: XCTestCase {
     XCTAssertTrue(result.classAnnotations.isEmpty)
 
     // Find the annotated method by key prefix
-    let api30Annotations = result.methodAnnotations.filter { $0.key.hasPrefix("api30Method:") }
+    let api30Annotations = result.methodAnnotations.filter { $0.key.hasPrefix("api30Method(") }
     XCTAssertEqual(api30Annotations.count, 1)
     let annotations = api30Annotations.values.first!
     XCTAssertEqual(annotations.count, 1)
@@ -87,7 +87,7 @@ final class JavaClassFileParserTests: XCTestCase {
     XCTAssertEqual(annotations[0].elements["api"], 30)
 
     // normalMethod should have no annotations
-    let normalAnnotations = result.methodAnnotations.filter { $0.key.hasPrefix("normalMethod:") }
+    let normalAnnotations = result.methodAnnotations.filter { $0.key.hasPrefix("normalMethod(") }
     XCTAssertTrue(normalAnnotations.isEmpty)
   }
 
@@ -121,22 +121,22 @@ final class JavaClassFileParserTests: XCTestCase {
     let classesDir = try await CompileJavaTool.compileJavaMultiFile([
       "androidx/annotation/RequiresApi.java":
         Self.RequiresApi_ClassRetention,
-      "com/example/CtorExample.java":
+      "com/example/ConstructorExample.java":
         """
       package com.example;
       import androidx.annotation.RequiresApi;
-      public class CtorExample {
+      public class ConstructorExample {
           @RequiresApi(api = 31)
-          public CtorExample() {}
+          public ConstructorExample() {}
       }
       """,
     ])
 
-    let classFileURL = classesDir.appendingPathComponent("com/example/CtorExample.class")
+    let classFileURL = classesDir.appendingPathComponent("com/example/ConstructorExample.class")
     let bytes = Array(try Data(contentsOf: classFileURL))
     let result = JavaClassFileReader.parseRuntimeInvisibleAnnotations(bytes)
 
-    let ctorAnnotations = result.methodAnnotations.filter { $0.key.hasPrefix("<init>:") }
+    let ctorAnnotations = result.methodAnnotations.filter { $0.key.hasPrefix("<init>") }
     XCTAssertEqual(ctorAnnotations.count, 1)
     let annotations = ctorAnnotations.values.first!
     XCTAssertEqual(annotations.count, 1)
