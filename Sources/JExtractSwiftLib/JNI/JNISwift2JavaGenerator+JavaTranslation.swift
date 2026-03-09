@@ -579,9 +579,66 @@ extension JNISwift2JavaGenerator {
           conversion: .typeMetadataAddress(.placeholder)
         )
 
+      case .tuple(let elements) where !elements.isEmpty:
+        return try translateTupleParameter(
+          elements: elements,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+          parameterPosition: parameterPosition
+        )
+
       case .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
+    }
+
+    func translateTupleParameter(
+      elements: [SwiftTupleElement],
+      parameterName: String,
+      methodName: String,
+      parentName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement],
+      parameterPosition: Int?
+    ) throws -> TranslatedParameter {
+      let arity = elements.count
+      var elementBoxedTypes: [String] = []
+
+      // Generate a conversion that extracts each element from the Tuple record
+      var elementConversions: [JavaNativeConversionStep] = []
+      for (idx, element) in elements.enumerated() {
+        let elementTranslated = try translateParameter(
+          swiftType: element.type,
+          parameterName: "\(parameterName)_\(idx)",
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+          parameterPosition: parameterPosition
+        )
+
+        // Extract the element from the tuple using .$N() accessor
+        let extraction = JavaNativeConversionStep.replacingPlaceholder(
+          elementTranslated.conversion,
+          placeholder: "\(parameterName).$\(idx)()"
+        )
+        elementConversions.append(extraction)
+        elementBoxedTypes.append(elementTranslated.parameter.type.javaType.boxedName)
+      }
+
+      let genericParams = elementBoxedTypes.joined(separator: ", ")
+      let javaType: JavaType = .class(package: "org.swift.swiftkit.core.tuple", name: "Tuple\(arity)<\(genericParams)>")
+
+      return TranslatedParameter(
+        parameter: JavaParameter(
+          name: parameterName,
+          type: javaType
+        ),
+        conversion: .commaSeparated(elementConversions)
+      )
     }
 
     func convertToAsync(
@@ -887,8 +944,80 @@ extension JNISwift2JavaGenerator {
           elementType: elementType
         )
 
+      case .tuple(let elements) where !elements.isEmpty:
+        return try translateTupleResult(elements: elements, resultName: resultName)
+
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
+    func translateTupleResult(
+      elements: [SwiftTupleElement],
+      resultName: String = "result"
+    ) throws -> TranslatedResult {
+      let arity = elements.count
+      var outParameters: [OutParameter] = []
+      var elementOutParamNames: [String] = []
+      var elementConversions: [JavaNativeConversionStep] = []
+      var elementBoxedTypes: [String] = []
+
+      for (idx, element) in elements.enumerated() {
+        let outParamName = "\(resultName)_\(idx)$"
+
+        // Determine the Java type for this element
+        let (javaType, elementConversion) = try translateTupleElementResult(type: element.type)
+        let arrayType: JavaType = .array(javaType)
+
+        outParameters.append(
+          OutParameter(name: outParamName, type: arrayType, allocation: .newArray(javaType, size: 1))
+        )
+        elementOutParamNames.append(outParamName)
+        elementConversions.append(elementConversion)
+        elementBoxedTypes.append(javaType.boxedName)
+      }
+
+      let genericParams = elementBoxedTypes.joined(separator: ", ")
+      let tupleClassName = "Tuple\(arity)<\(genericParams)>"
+      let fullTupleClassName = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
+      let javaResultType: JavaType = .class(package: "org.swift.swiftkit.core.tuple", name: tupleClassName)
+
+      let tupleElements: [(outParamName: String, elementConversion: JavaNativeConversionStep)] =
+        zip(elementOutParamNames, elementConversions).map { ($0, $1) }
+
+      return TranslatedResult(
+        javaType: javaResultType,
+        outParameters: outParameters,
+        conversion: .tupleFromOutParams(
+          tupleClassName: "new \(fullTupleClassName)<>",
+          elements: tupleElements
+        )
+      )
+    }
+
+    /// Translate a single element type for tuple results on the Java side.
+    private func translateTupleElementResult(type: SwiftType) throws -> (JavaType, JavaNativeConversionStep) {
+      switch type {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+            throw JavaTranslationError.unsupportedSwiftType(type)
+          }
+          // Primitives: just read from array
+          return (javaType, .placeholder)
+        }
+
+        let nominalTypeName = nominalType.nominalTypeDecl.name
+        guard !nominalType.isSwiftJavaWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(type)
+        }
+
+        // JExtract class: wrap memory address
+        let javaType: JavaType = .class(package: nil, name: nominalTypeName)
+        return (.long, .constructSwiftValue(.placeholder, javaType))
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
 
@@ -1323,6 +1452,10 @@ extension JNISwift2JavaGenerator {
 
     indirect case requireNonNull(JavaNativeConversionStep, message: String)
 
+    /// Constructs a TupleN from out-parameter arrays.
+    /// E.g. `new Tuple2<>(result_0$[0], result_1$[0])`
+    case tupleFromOutParams(tupleClassName: String, elements: [(outParamName: String, elementConversion: JavaNativeConversionStep)])
+
     /// `Arrays.stream(args)`
     static func arraysStream(_ argument: JavaNativeConversionStep) -> JavaNativeConversionStep {
       .method(.constant("Arrays"), function: "stream", arguments: [argument])
@@ -1473,6 +1606,16 @@ extension JNISwift2JavaGenerator {
       case .requireNonNull(let inner, let message):
         let inner = inner.render(&printer, placeholder)
         return #"Objects.requireNonNull(\#(inner), "\#(message)")"#
+
+      case .tupleFromOutParams(let tupleClassName, let elements):
+        // Execute the native call first (the placeholder is the downcall expression)
+        printer.print("\(placeholder);")
+        var args: [String] = []
+        for element in elements {
+          let converted = element.elementConversion.render(&printer, "\(element.outParamName)[0]")
+          args.append(converted)
+        }
+        return "\(tupleClassName)(\(args.joined(separator: ", ")))"
       }
     }
 
@@ -1535,6 +1678,9 @@ extension JNISwift2JavaGenerator {
 
       case .requireNonNull(let inner, _):
         return inner.requiresSwiftArena
+
+      case .tupleFromOutParams(_, let elements):
+        return elements.contains(where: { $0.elementConversion.requiresSwiftArena })
       }
     }
   }

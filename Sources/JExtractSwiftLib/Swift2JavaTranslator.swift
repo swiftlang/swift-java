@@ -155,7 +155,7 @@ extension Swift2JavaTranslator {
       case .optional(let ty):
         return check(ty)
       case .tuple(let tuple):
-        return tuple.contains(where: check)
+        return tuple.contains(where: { check($0.type) })
       case .function(let fn):
         return check(fn.resultType) || fn.parameters.contains(where: { check($0.type) })
       case .metatype(let ty):

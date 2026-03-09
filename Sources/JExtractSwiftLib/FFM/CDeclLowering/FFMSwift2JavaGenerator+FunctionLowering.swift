@@ -325,7 +325,7 @@ struct CdeclLowering {
     case .tuple(let tuple):
       if tuple.count == 1 {
         return try lowerParameter(
-          tuple[0],
+          tuple[0].type,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
@@ -341,7 +341,7 @@ struct CdeclLowering {
         // FIXME: Use tuple element label.
         let cdeclName = "\(parameterName)_\(idx)"
         let lowered = try lowerParameter(
-          element,
+          element.type,
           convention: convention,
           parameterName: cdeclName,
           genericParameters: genericParameters,
@@ -518,7 +518,7 @@ struct CdeclLowering {
     case .tuple(let tuple):
       if tuple.count == 1 {
         return try lowerOptionalParameter(
-          tuple[0],
+          tuple[0].type,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
@@ -697,8 +697,8 @@ struct CdeclLowering {
           let isMutable = knownType == .unsafeMutableBufferPointer
           return try lowerResult(
             .tuple([
-              isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
-              knownTypes.int,
+              SwiftTupleElement(label: nil, type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
+              SwiftTupleElement(label: nil, type: knownTypes.int),
             ]),
             outParameterName: outParameterName
           )
@@ -755,14 +755,14 @@ struct CdeclLowering {
 
     case .tuple(let tuple):
       if tuple.count == 1 {
-        return try lowerResult(tuple[0], outParameterName: outParameterName)
+        return try lowerResult(tuple[0].type, outParameterName: outParameterName)
       }
 
       var parameters: [SwiftParameter] = []
       var conversions: [ConversionStep] = []
       for (idx, element) in tuple.enumerated() {
         let outName = "\(outParameterName)_\(idx)"
-        let lowered = try lowerResult(element, outParameterName: outName)
+        let lowered = try lowerResult(element.type, outParameterName: outName)
 
         // Convert direct return values to typed mutable pointers.
         // E.g. (Int8, Int8) is lowered to '_ result_0: UnsafePointer<Int8>, _ result_1: UnsafePointer<Int8>'
