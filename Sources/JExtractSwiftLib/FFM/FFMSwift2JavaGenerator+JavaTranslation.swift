@@ -49,9 +49,17 @@ extension FFMSwift2JavaGenerator {
   struct DuplicateNames {
     private var duplicates: Set<String> = []
 
-    /// Detects which base names among `methods` would clash in Java.
-    init(for methods: [ImportedFunc]) {
-      var seen: Set<String> = []
+    /// Creates an empty DuplicateNames with no conflicts detected.
+    /// Used as the default/placeholder value before real conflict detection is performed.
+    init() {}
+
+    /// Detects which base names among `methods` would clash in Java,
+    /// using Swift-level parameter types to determine conflicts.
+    /// Two methods conflict only if they share the same base name AND have the same
+    /// Swift parameter types (which implies they'll produce the same Java parameter types).
+    /// Methods that are untranslatable (failed CdeclLowering) are excluded from detection.
+    init(for methods: [ImportedFunc], knownTypes: SwiftKnownTypes) {
+      var methodsByBaseName: [String: [ImportedFunc]] = [:]
       for method in methods {
         let baseName =
           switch method.apiKind {
@@ -59,8 +67,28 @@ extension FFMSwift2JavaGenerator {
           case .setter, .subscriptSetter: method.javaSetterName
           case .function, .synthesizedFunction, .initializer, .enumCase: method.name
           }
-        if !seen.insert(baseName).inserted {
-          duplicates.insert(baseName)
+        methodsByBaseName[baseName, default: []].append(method)
+      }
+
+      for (baseName, groupedMethods) in methodsByBaseName where groupedMethods.count > 1 {
+        // Only consider methods that can actually be lowered/translated.
+        let lowering = CdeclLowering(knownTypes: knownTypes)
+        let translatableMethods = groupedMethods.filter {
+          (try? lowering.lowerFunctionSignature($0.functionSignature)) != nil
+        }
+
+        // Detect actual conflicts by comparing Swift parameter type signatures.
+        // Two methods with the same Swift parameter types will produce the same Java types.
+        var seenSignatures: Set<String> = []
+        for method in translatableMethods {
+          let key = method.functionSignature.parameters
+            .map { $0.type.description }
+            .joined(separator: ",")
+          if !seenSignatures.insert(key).inserted {
+            // Two translatable methods share both the base name and Swift parameter types → Java conflict.
+            duplicates.insert(baseName)
+            break
+          }
         }
       }
     }
@@ -179,7 +207,7 @@ extension FFMSwift2JavaGenerator {
     var knownTypes: SwiftKnownTypes
     var dupeNames: DuplicateNames
 
-    init(config: Configuration, knownTypes: SwiftKnownTypes, dupeNames: DuplicateNames = DuplicateNames(for: [])) {
+    init(config: Configuration, knownTypes: SwiftKnownTypes, dupeNames: DuplicateNames = DuplicateNames()) {
       self.config = config
       self.knownTypes = knownTypes
       self.dupeNames = dupeNames
@@ -225,11 +253,12 @@ extension FFMSwift2JavaGenerator {
     /// Returns the Java method name for the given Swift declaration, applying parameter
     /// label suffixes only when a naming conflict with another method would occur.
     private func makeJavaMethodName(_ decl: ImportedFunc) -> String {
-      let baseName = switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName
-      case .setter, .subscriptSetter: decl.javaSetterName
-      case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
-      }
+      let baseName =
+        switch decl.apiKind {
+        case .getter, .subscriptGetter: decl.javaGetterName
+        case .setter, .subscriptSetter: decl.javaSetterName
+        case .function, .synthesizedFunction, .initializer, .enumCase: decl.name
+        }
       return baseName + makeMethodNameWithParamsSuffix(decl, baseName: baseName)
     }
 

@@ -83,8 +83,8 @@ public class HelloJava2Swift {
         // Example of using 'Data'.
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var origBytes = arena.allocateFrom("foobar");
-            var origDat = Data.init_bytes_count(origBytes, origBytes.byteSize(), arena);
-            CallTraces.trace("origDat.count = " + origDat.getCount());
+            var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
+                        CallTraces.trace("origDat.count = " + origDat.getCount());
             
             var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
             retDat.withUnsafeBytes((retBytes) -> {
@@ -95,7 +95,7 @@ public class HelloJava2Swift {
 
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var bytes = arena.allocateFrom("hello");
-            var dat = Data.init_bytes_count(bytes, bytes.byteSize(), arena);
+            var dat = Data.init(bytes, bytes.byteSize(), arena);
             MySwiftLibrary.globalReceiveSomeDataProtocol(dat);
             MySwiftLibrary.globalReceiveOptional(OptionalLong.of(12), Optional.of(dat));
         }
