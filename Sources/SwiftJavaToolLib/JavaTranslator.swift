@@ -66,6 +66,11 @@ package class JavaTranslator {
   /// methods will be implemented in Swift.
   package var swiftNativeImplementations: Set<String> = []
 
+  /// Parsed Android `api-versions.xml` data, if available.
+  /// When set, the translator will emit `@available(Android ...)` attributes
+  /// based on API-level introduction, deprecation, and removal data.
+  package var androidAPIVersions: AndroidAPIVersions?
+
   /// The set of nested classes that we should traverse from the given class,
   /// indexed by the name of the class.
   ///

@@ -389,6 +389,7 @@ let package = Package(
       dependencies: [
         "SwiftJava"
       ],
+      exclude: ["swift-java.config"],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .unsafeFlags(["-I\(javaIncludePath)", "-I\(javaPlatformIncludePath)"], .when(platforms: [.macOS, .linux, .windows])),

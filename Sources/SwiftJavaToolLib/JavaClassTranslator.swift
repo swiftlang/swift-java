@@ -208,7 +208,7 @@ struct JavaClassTranslator {
         let classCount = self.runtimeInvisibleAnnotations.classAnnotations.count
         let methodCount = self.runtimeInvisibleAnnotations.methodAnnotations.count
         let fieldCount = self.runtimeInvisibleAnnotations.fieldAnnotations.count
-        translator.log.info("Parsed runtime invisible annotations for '\(fullName)': \(classCount) class, \(methodCount) method, \(fieldCount) field")
+        translator.log.debug("Parsed runtime invisible annotations for '\(fullName)': \(classCount) class, \(methodCount) method, \(fieldCount) field")
       } catch {
         translator.log.warning("Failed to read .class bytes for '\(fullName)': \(error)")
         self.runtimeInvisibleAnnotations = JavaRuntimeInvisibleAnnotations()
@@ -474,7 +474,8 @@ extension JavaClassTranslator {
     let introducer = translateAsClass ? "open class" : "public struct"
     let classAvailableAttributes = swiftAvailableAttributes(
       from: annotations,
-      runtimeInvisibleAnnotations: self.runtimeInvisibleAnnotations.classAnnotations
+      runtimeInvisibleAnnotations: self.runtimeInvisibleAnnotations.classAnnotations,
+      javaClass: javaClass
     )
     var classDecl: DeclSyntax =
       """
@@ -630,10 +631,9 @@ extension JavaClassTranslator {
     /// The attribute text, e.g. `@available(*, deprecated)`.
     var value: String
 
-    /// The minimum Swift compiler version required to compile this attribute,
-    /// e.g. `(6, 3)` for `@available(Android ...)`.  When non-nil the attribute
-    /// is wrapped in a `#if compiler(>=…)` block during rendering.
-    var minimumCompilerVersion: (Int, Int)? = nil
+    /// The minimum Swift compiler version required to compile this attribute.
+    /// When non-nil the attribute is wrapped in a `#if compiler(>=…)` block during rendering.
+    var minimumCompilerVersion: SwiftVersion? = nil
   }
 
   struct SwiftAvailableAttributes {
@@ -645,8 +645,11 @@ extension JavaClassTranslator {
       }
       var lines: [String] = []
       for attr in attributes {
-        if let (major, minor) = attr.minimumCompilerVersion {
-          lines.append("#if compiler(>=\(major).\(minor))")
+        if let version = attr.minimumCompilerVersion {
+          let versionString =
+            version.patch.map { "\(version.major).\(version.minor).\($0)" }
+            ?? "\(version.major).\(version.minor)"
+          lines.append("#if compiler(>=\(versionString))")
           lines.append(attr.value)
           lines.append("#endif")
         } else {
@@ -657,53 +660,118 @@ extension JavaClassTranslator {
     }
   }
 
+  private func apiLevelComment(_ level: Int32) -> String {
+    AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
+  }
+
+  private func availabilityFromBinRequiresApi(_ binAnnotation: JavaRuntimeInvisibleAnnotation) -> SwiftAttribute? {
+    let apiLevel: Int32? =
+      if let api = binAnnotation.elements["api"], api > 0 {
+        api
+      } else if let value = binAnnotation.elements["value"], value > 0 {
+        value
+      } else {
+        nil
+      }
+
+    guard let apiLevel else { return nil }
+    return SwiftAttribute(
+      value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
+      minimumCompilerVersion: .androidPlatformAvailability
+    )
+  }
+
   /// Build Swift `@available` attributes from Java annotations on a reflective element.
   private func swiftAvailableAttributes(
     from runtimeAnnotations: [Annotation],
-    runtimeInvisibleAnnotations: [JavaRuntimeInvisibleAnnotation] = []
+    runtimeInvisibleAnnotations: [JavaRuntimeInvisibleAnnotation] = [],
+    javaClass: JavaClass<JavaObject>? = nil,
+    javaMethod: Method? = nil,
+    javaConstructor: Executable? = nil,
+    javaFieldName: String? = nil
   ) -> SwiftAvailableAttributes {
     var result = SwiftAvailableAttributes()
-
-    func apiLevelComment(_ level: Int32) -> String {
-      AndroidAPILevel(rawValue: Int(level)).map { " /* \($0.name) */" } ?? ""
-    }
 
     for annotation in runtimeAnnotations {
       guard let annotationClass = annotation.annotationType() else { continue }
 
       if annotationClass.isKnown(.javaLangDeprecated) {
-        result.attributes.append(SwiftAttribute(value: "@available(*, deprecated)"))
+        result.attributes += [SwiftAttribute(value: "@available(*, deprecated)")]
       }
     }
 
-    // Look for any annotations stored in classfiles, e.g. the Android @RequiresApi
+    // Look for any annotations stored in classfiles, e.g. the Android @
     for binAnnotation in runtimeInvisibleAnnotations {
       let fqn = binAnnotation.fullyQualifiedName
+
+      // Handle Android's RequiresApi; though they don't exist in android.jar (!)
       if fqn == KnownJavaAnnotation.androidxRequiresApi.rawValue
         || fqn == KnownJavaAnnotation.androidSupportRequiresApi.rawValue
       {
-        let apiLevel: Int32? =
-          if let api = binAnnotation.elements["api"], api > 1 {
-            api
-          } else if let value = binAnnotation.elements["value"], value > 1 {
-            value
-          } else {
-            nil
-          }
+        if let attr = availabilityFromBinRequiresApi(binAnnotation) {
+          result.attributes += [attr]
+        }
+      }
+    }
 
-        if let apiLevel {
-          result.attributes.append(
+    // For android, the RequiresApi actually are synthetic and stored in api-versions.xml,
+    // so consult that if available
+    if let apiVersions = translator.androidAPIVersions, let javaClass {
+      let className = javaClass.getName()
+      let versionInfo: AndroidAPIAvailability? =
+        if let javaMethod {
+          apiVersions.versionInfo(forClass: className, methodDescriptor: jvmMethodDescriptor(javaMethod))
+        } else if let javaConstructor {
+          apiVersions.versionInfo(forClass: className, methodDescriptor: jvmMethodDescriptor(javaConstructor))
+        } else if let fieldName = javaFieldName {
+          apiVersions.versionInfo(forClass: className, fieldName: fieldName)
+        } else {
+          apiVersions.versionInfo(forClass: className)
+        }
+
+      if let info = versionInfo {
+        let alreadyHasAndroidAvailable = result.attributes.contains {
+          $0.value.contains("@available(Android")
+        }
+
+        // Only add since from api-versions.xml if @RequiresApi didn't already provide one.
+        if !alreadyHasAndroidAvailable, let since = info.since, since.rawValue > 0 {
+          result.attributes += [
             SwiftAttribute(
-              value: "@available(Android \(apiLevel)\(apiLevelComment(apiLevel)), *)",
-              minimumCompilerVersion: (6, 3)
+              value: "@available(Android \(since.rawValue) /* \(since.name) */, *)",
+              minimumCompilerVersion: .androidPlatformAvailability
             )
-          )
+          ]
+        }
+
+        let alreadyHasDeprecated = result.attributes.contains {
+          $0.value.contains("deprecated")
+        }
+
+        // Handle deprecated APIs; also emit deprecated for removed APIs if not already deprecated.
+        if !alreadyHasDeprecated, let deprecated = info.deprecated {
+          result.attributes += [
+            SwiftAttribute(
+              value: "@available(Android, deprecated: \(deprecated.rawValue), message: \"Deprecated in Android API \(deprecated.rawValue) /* \(deprecated.name) */\")",
+              minimumCompilerVersion: .androidPlatformAvailability
+            )
+          ]
+        } else if !alreadyHasDeprecated, let removed = info.removed {
+          // Swift's '@available(Android, unavailable, ...' does not accept a version so we don't use it,
+          // since it may prevent calling an API that's actually still there in some Android version we're targeting.
+          result.attributes += [
+            SwiftAttribute(
+              value: "@available(Android, deprecated: \(removed.rawValue), message: \"Removed in Android API \(removed.rawValue) /* \(removed.name) */\")",
+              minimumCompilerVersion: .androidPlatformAvailability
+            )
+          ]
         }
       }
     }
 
     return result
   }
+
 
   func renderAnnotationExtensions() -> [DeclSyntax] {
     var extensions: [DeclSyntax] = []
@@ -744,7 +812,9 @@ extension JavaClassTranslator {
     let invisibleCtorAnnotations = runtimeInvisibleAnnotations.annotationsFor(constructor: javaConstructor)
     let availableAttributes = swiftAvailableAttributes(
       from: constructorAnnotations,
-      runtimeInvisibleAnnotations: invisibleCtorAnnotations
+      runtimeInvisibleAnnotations: invisibleCtorAnnotations,
+      javaClass: javaClass,
+      javaConstructor: javaConstructor
     )
 
     // FIXME: handle generics in constructors
@@ -873,7 +943,9 @@ extension JavaClassTranslator {
     let invisibleMethodAnnotations = runtimeInvisibleAnnotations.annotationsFor(method: javaMethod)
     let availableAttributes = swiftAvailableAttributes(
       from: methodAnnotations,
-      runtimeInvisibleAnnotations: invisibleMethodAnnotations
+      runtimeInvisibleAnnotations: invisibleMethodAnnotations,
+      javaClass: javaClass,
+      javaMethod: javaMethod
     )
 
     // Compute the parameters for '@...JavaMethod(...)'
@@ -975,7 +1047,9 @@ extension JavaClassTranslator {
     let invisibleFieldAnnotations = runtimeInvisibleAnnotations.annotationsFor(field: javaField.getName())
     let availableAttributes = swiftAvailableAttributes(
       from: fieldAnnotations,
-      runtimeInvisibleAnnotations: invisibleFieldAnnotations
+      runtimeInvisibleAnnotations: invisibleFieldAnnotations,
+      javaClass: javaClass,
+      javaFieldName: javaField.getName()
     )
 
     if let optionalType = typeName.optionalWrappedType() {

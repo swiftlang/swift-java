@@ -61,6 +61,9 @@ extension SwiftJava {
 
     @Option(help: "If specified, a single Swift file will be generated containing all the generated code")
     var singleSwiftFileOutput: String?
+
+    @Option(name: .customLong("android-api-version-file"), help: "Path to Android api-versions.xml for generating @available attributes based on API level data")
+    var androidAPIVersionFile: String?
   }
 }
 
@@ -140,6 +143,14 @@ extension SwiftJava.WrapJavaCommand {
     // Keep track of all of the Java classes that will have
     // Swift-native implementations.
     translator.swiftNativeImplementations = Set(swiftNativeImplementation)
+
+    // Load Android API version data if provided.
+    if let androidAPIVersionFile {
+      let url = URL(fileURLWithPath: androidAPIVersionFile)
+      let apiVersions = try AndroidAPIVersionsParser.parse(contentsOf: url, log: Self.log)
+      translator.androidAPIVersions = apiVersions
+      log.info("Loaded Android API versions: \(apiVersions.stats())")
+    }
 
     // Note all of the dependent configurations.
     for (swiftModuleName, dependentConfig) in dependentConfigs {

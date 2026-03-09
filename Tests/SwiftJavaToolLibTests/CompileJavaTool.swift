@@ -72,7 +72,19 @@ struct CompileJavaTool {
   /// - Parameter sourceText: The Java source code.
   /// - Returns: The directory containing compiled `.class` files (the classpath root).
   static func compileJava(_ sourceText: String) async throws -> Foundation.URL {
-    let sourceFile = try TempFile.create(suffix: "java", sourceText)
+    // Java requires public class files to be named after the class
+    let sourceFile: Foundation.URL
+    if let match = sourceText.range(of: #"public\s+class\s+(\w+)"#, options: .regularExpression) {
+      let classNameRange = sourceText[match]
+      let className = classNameRange.split(separator: " ").last.map(String.init) ?? "tmp_\(UUID().uuidString)"
+      let dir = FileManager.default.temporaryDirectory
+        .appendingPathComponent("swift-java-src-\(UUID().uuidString)")
+      try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+      sourceFile = dir.appendingPathComponent("\(className).java")
+      try sourceText.write(to: sourceFile, atomically: true, encoding: .utf8)
+    } else {
+      sourceFile = try TempFile.create(suffix: "java", sourceText)
+    }
 
     let classesDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-testing-\(UUID().uuidString)")

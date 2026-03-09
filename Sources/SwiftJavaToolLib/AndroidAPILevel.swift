@@ -134,4 +134,13 @@ public enum AndroidAPILevel: Int {
     case .CUR_DEVELOPMENT: "CUR_DEVELOPMENT"
     }
   }
+
+  /// Create from an optional string (e.g. an XML attribute value).
+  /// Returns `nil` if the string is `nil`, not a valid integer, or not a known API level.
+  public init?(_ string: String?) {
+    guard let string, let raw = Int(string) else {
+      return nil
+    }
+    self.init(rawValue: raw)
+  }
 }
