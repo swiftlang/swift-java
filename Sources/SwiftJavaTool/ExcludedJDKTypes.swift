@@ -24,9 +24,9 @@ extension SwiftJava {
       return false
     }
 
-    for include in commonOptions.filterInclude {
-      guard javaCanonicalName.hasPrefix(include) else {
-        // Skip classes which don't match our expected prefix
+    if !commonOptions.filterInclude.isEmpty {
+      let anyIncludeMatches = commonOptions.filterInclude.contains(where: { javaCanonicalName.hasPrefix($0) })
+      guard anyIncludeMatches else {
         return false
       }
     }
