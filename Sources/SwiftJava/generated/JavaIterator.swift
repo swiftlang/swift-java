@@ -3,12 +3,30 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.Iterator")
 public struct JavaIterator<E: AnyJavaObject> {
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default void java.util.Iterator.remove()
+  /// ```
   @JavaMethod
   public func remove()
 
+  /// Java method `hasNext`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Iterator.hasNext()
+  /// ```
   @JavaMethod
   public func hasNext() -> Bool
 
-  @JavaMethod
-  public func next() -> JavaObject!
+  /// Java method `next`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.Iterator.next()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func next() -> E!
 }
