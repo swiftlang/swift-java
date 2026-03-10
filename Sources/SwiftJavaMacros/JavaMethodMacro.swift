@@ -71,7 +71,7 @@ extension JavaMethodMacro: BodyMacro {
     var paramNames: [String] = []
     for param in params {
       guard let name = param.parameterName else {
-        throw MacroErrors.parameterMustHaveName
+        throw MacroErrors.parameterMustHaveName(method: funcName, paramSyntax: param.trimmedDescription)
       }
       if isJNIGenericParameter(param.type, funcDecl: funcDecl, in: context) {
         let erasedName: TokenSyntax = "\(name)$erased"
@@ -183,8 +183,9 @@ extension JavaMethodMacro: BodyMacro {
     return resultStatements
   }
 
-  /// Determines whether an argument is generic.
+  /// Determines whether an argument is generic in heuristic way.
   /// Since Optional does not appear in JNI signatures, it is removed before checking.
+  /// FIXME: It might be preferable to explicitly specify the type from JavaClass, similar to `typeErasedResult`.
   private static func isJNIGenericParameter(
     _ type: TypeSyntax,
     funcDecl: FunctionDeclSyntax,

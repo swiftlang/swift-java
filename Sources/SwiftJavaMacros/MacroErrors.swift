@@ -21,5 +21,5 @@ enum MacroErrors: Error {
   case methodNotOnFunction
   case missingEnvironment
   case macroOutOfContext(String)
-  case parameterMustHaveName
+  case parameterMustHaveName(method: String, paramSyntax: String)
 }
