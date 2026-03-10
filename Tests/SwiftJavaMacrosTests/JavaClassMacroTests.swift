@@ -100,7 +100,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(_ value: Int32, environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
 
           @JavaField
           public var myField: Int64
@@ -131,10 +131,10 @@ class JavaKitMacroTests: XCTestCase {
                 }
                 self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
@@ -207,7 +207,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(_ value: Int32, environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
 
           @JavaField
           public var myField: Int64
@@ -240,10 +240,10 @@ class JavaKitMacroTests: XCTestCase {
                 let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment, arguments: value.self)
                 self.init(javaThis: javaThis, environment: _environment)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
@@ -304,7 +304,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
         }
       """,
       expandedSource: """
@@ -319,10 +319,10 @@ class JavaKitMacroTests: XCTestCase {
                 let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment)
                 self.init(javaThis: javaThis, environment: _environment)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
