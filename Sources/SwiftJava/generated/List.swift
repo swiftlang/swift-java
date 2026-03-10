@@ -33,11 +33,23 @@ public struct List<E: AnyJavaObject> {
   @JavaMethod
   public func isEmpty() -> Bool
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.List.add(int,E)
+  /// ```
   @JavaMethod
-  public func add(_ arg0: JavaObject?) -> Bool
+  public func add(_ arg0: Int32, _ arg1: E?)
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.add(E)
+  /// ```
   @JavaMethod
-  public func add(_ arg0: Int32, _ arg1: JavaObject?)
+  public func add(_ arg0: E?) -> Bool
 
   @JavaMethod
   public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
