@@ -108,6 +108,18 @@ class BasicRuntimeTests: XCTestCase {
 
     XCTAssertEqual(javaList.map { $0.intValue() }, [0, 1, 2])
   }
+
+  func testJavaOptional() throws {
+    let environment = try jvm.environment()
+
+    let value = JavaInteger(42, environment: environment)
+    let javaOptional = Optional.some(value).toJavaOptional()
+    if javaOptional.isPresent() {
+      XCTAssertEqual(javaOptional.get().intValue(), 42)
+    } else {
+      XCTFail("javaOptional is empty")
+    }
+  }
 }
 
 @JavaClass("org.swift.javakit.Nonexistent")

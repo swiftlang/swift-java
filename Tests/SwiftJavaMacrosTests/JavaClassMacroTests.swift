@@ -24,6 +24,7 @@ class JavaKitMacroTests: XCTestCase {
     "JavaClass": JavaClassMacro.self,
     "JavaMethod": JavaMethodMacro.self,
     "JavaField": JavaFieldMacro.self,
+    "JavaStaticMethod": JavaMethodMacro.self,
     "JavaStaticField": JavaFieldMacro.self,
   ]
 
@@ -99,7 +100,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(_ value: Int32, environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
 
           @JavaField
           public var myField: Int64
@@ -130,10 +131,10 @@ class JavaKitMacroTests: XCTestCase {
                 }
                 self = try! Self.dynamicJavaNewObject(in: _environment, arguments: value.self)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
@@ -206,7 +207,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(_ value: Int32, environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
 
           @JavaField
           public var myField: Int64
@@ -239,10 +240,10 @@ class JavaKitMacroTests: XCTestCase {
                 let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment, arguments: value.self)
                 self.init(javaThis: javaThis, environment: _environment)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
@@ -303,7 +304,7 @@ class JavaKitMacroTests: XCTestCase {
           public init(environment: JNIEnvironment? = nil)
 
           @JavaMethod
-          public func isBigEnough(_: Int32) -> Bool
+          public func isBigEnough(_ v: Int32) -> Bool
         }
       """,
       expandedSource: """
@@ -318,10 +319,10 @@ class JavaKitMacroTests: XCTestCase {
                 let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment)
                 self.init(javaThis: javaThis, environment: _environment)
             }
-            public func isBigEnough(_: Int32) -> Bool {
+            public func isBigEnough(_ v: Int32) -> Bool {
                 return {
                   do {
-                    return try dynamicJavaMethodCall(methodName: "isBigEnough", resultType: Bool.self)
+                    return try dynamicJavaMethodCall(methodName: "isBigEnough", arguments: v, resultType: Bool.self)
                   } catch {
                     if let throwable = error as? Throwable {
                   let sw = StringWriter()
@@ -402,6 +403,115 @@ class JavaKitMacroTests: XCTestCase {
               }
           }
         """,
+      macros: Self.javaKitMacros
+    )
+  }
+
+  func testJavaGenericMethodParameter() throws {
+    assertMacroExpansion(
+      """
+      extension JavaClass {
+        @JavaStaticMethod
+        public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! 
+        where ObjectType == JavaOptional<T>
+
+        @JavaStaticMethod
+        public func ofNullable2<T: AnyJavaObject>(arg0: T!, arg1: Optional<T>, arg2: T, arg3: Int)
+      }
+      """,
+      expandedSource: #"""
+        extension JavaClass {
+          public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! 
+          where ObjectType == JavaOptional<T> {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              return {
+                do {
+                  return try dynamicJavaStaticMethodCall(methodName: "ofNullable", arguments: arg0$erased, resultType: JavaOptional<T>?.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+          public func ofNullable2<T: AnyJavaObject>(arg0: T!, arg1: Optional<T>, arg2: T, arg3: Int) {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              let arg1$erased = arg1.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              let arg2$erased = JavaObject(javaHolder: arg2.javaHolder)
+              return {
+                do {
+                  return try dynamicJavaStaticMethodCall(methodName: "ofNullable2", arguments: arg0$erased, arg1$erased, arg2$erased, arg3)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+        }
+        """#,
+      macros: Self.javaKitMacros
+    )
+  }
+
+  func testJavaGenericClassGenericMethodParameter() throws {
+    assertMacroExpansion(
+      """
+      @JavaClass("java.util.ArrayList")
+      open class ArrayList<E: AnyJavaObject>: JavaObject {
+        @JavaMethod
+        open func add(_ arg0: E?) -> Bool
+      }
+      """,
+      expandedSource: #"""
+        open class ArrayList<E: AnyJavaObject>: JavaObject {
+          open func add(_ arg0: E?) -> Bool {
+              let arg0$erased = arg0.map {
+                  JavaObject(javaHolder: $0.javaHolder)
+              }
+              return {
+                do {
+                  return try dynamicJavaMethodCall(methodName: "add", arguments: arg0$erased, resultType: Bool.self)
+                } catch {
+                  if let throwable = error as? Throwable {
+                let sw = StringWriter()
+                let pw = PrintWriter(sw)
+                throwable.printStackTrace(pw)
+                fatalError("Java call threw unhandled exception: \(error)\n\(sw.toString())")
+                  }
+                  fatalError("Java call threw unhandled exception: \(error)")
+                }
+              }()
+          }
+
+            /// The full Java class name for this Swift type.
+            open override class var fullJavaClassName: String {
+              #if os(Android) && AndroidCoreLibraryDesugaring
+                AndroidSupport.androidDesugarClassNameConversion(for: "java.util.ArrayList")
+              #else
+                "java.util.ArrayList"
+              #endif
+            }
+
+            public required init(javaHolder: JavaObjectHolder) {
+                super.init(javaHolder: javaHolder)
+            }
+        }
+        """#,
       macros: Self.javaKitMacros
     )
   }

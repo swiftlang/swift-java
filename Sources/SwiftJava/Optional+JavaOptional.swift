@@ -14,7 +14,7 @@
 
 extension Optional where Wrapped: AnyJavaObject {
   public func toJavaOptional() -> JavaOptional<Wrapped> {
-    try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self?.as(JavaObject.self)).as(JavaOptional<Wrapped>.self)!
+    try! JavaClass<JavaOptional<Wrapped>>().ofNullable(self)
   }
 
   public init(javaOptional: JavaOptional<Wrapped>?) {
@@ -29,7 +29,7 @@ extension Optional where Wrapped: AnyJavaObject {
 extension Optional where Wrapped == String {
   public func toJavaOptional() -> JavaOptional<JavaString> {
     if let self {
-      return try! JavaClass<JavaOptional<JavaString>>().of(JavaString(self).as(JavaObject.self)).as(JavaOptional<JavaString>.self)!
+      return try! JavaClass<JavaOptional<JavaString>>().of(JavaString(self))
     } else {
       return try! JavaClass<JavaOptional<JavaString>>().empty().as(JavaOptional<JavaString>.self)!
     }
