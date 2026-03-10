@@ -102,6 +102,20 @@ extension JavaType {
     }
   }
 
+  var jniSetArrayRegionMethodName: String {
+    switch self {
+    case .boolean: "SetBooleanArrayRegion"
+    case .byte: "SetByteArrayRegion"
+    case .char: "SetCharArrayRegion"
+    case .short: "SetShortArrayRegion"
+    case .int: "SetIntArrayRegion"
+    case .long: "SetLongArrayRegion"
+    case .float: "SetFloatArrayRegion"
+    case .double: "SetDoubleArrayRegion"
+    default: fatalError("Set*ArrayRegion is only available for JNI primitive types, was: \(self)")
+    }
+  }
+
   /// Returns whether this type returns `JavaValue` from SwiftJava
   var implementsJavaValue: Bool {
     switch self {
@@ -144,6 +158,24 @@ extension JavaType {
       true
     default:
       false
+    }
+  }
+
+  /// The boxed class name for this type, suitable for use as a generic type argument.
+  var boxedName: String {
+    switch self {
+    case .boolean: "Boolean"
+    case .byte: "Byte"
+    case .char: "Character"
+    case .short: "Short"
+    case .int: "Integer"
+    case .long: "Long"
+    case .float: "Float"
+    case .double: "Double"
+    case .void: "Void"
+    case .javaLangString: "String"
+    case .class(_, let name, _): name
+    case .array: description
     }
   }
 }

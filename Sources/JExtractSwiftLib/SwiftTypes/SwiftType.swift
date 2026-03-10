@@ -14,6 +14,19 @@
 
 import SwiftSyntax
 
+/// An element of a Swift tuple type, preserving the optional label.
+struct SwiftTupleElement: Equatable, CustomStringConvertible {
+  var label: String?
+  var type: SwiftType
+
+  var description: String {
+    if let label {
+      return "\(label): \(type)"
+    }
+    return "\(type)"
+  }
+}
+
 /// Describes a type in the Swift type system.
 enum SwiftType: Equatable {
   case nominal(SwiftNominalType)
@@ -28,8 +41,8 @@ enum SwiftType: Equatable {
   /// `<type>?`
   indirect case optional(SwiftType)
 
-  /// `(<type>, <type>)`
-  case tuple([SwiftType])
+  /// `(<label>: <type>, <label>: <type>)`
+  case tuple([SwiftTupleElement])
 
   /// `any <type>`
   indirect case existential(SwiftType)
@@ -50,7 +63,7 @@ enum SwiftType: Equatable {
   var asNominalType: SwiftNominalType? {
     switch self {
     case .nominal(let nominal): nominal
-    case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
+    case .tuple(let elements): elements.count == 1 ? elements[0].type.asNominalType : nil
     case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array: nil
     }
   }
@@ -346,7 +359,10 @@ extension SwiftType {
     case .tupleType(let tupleType):
       self = try .tuple(
         tupleType.elements.map { element in
-          try SwiftType(element.type, lookupContext: lookupContext)
+          SwiftTupleElement(
+            label: element.firstName?.text,
+            type: try SwiftType(element.type, lookupContext: lookupContext)
+          )
         }
       )
 

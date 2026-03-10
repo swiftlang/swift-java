@@ -44,6 +44,14 @@ struct JavaParameter {
       }
     }
 
+    /// Returns the concrete JavaType, or `.class` for generics.
+    var javaType: JavaType {
+      switch self {
+      case .concrete(let type): type
+      case .generic: .class(package: "java.lang", name: "Object")
+      }
+    }
+
     var jniTypeName: String {
       switch self {
       case .concrete(let type): type.jniTypeName

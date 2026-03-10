@@ -585,7 +585,7 @@ extension FFMSwift2JavaGenerator {
       case .tuple(let tuple):
         if tuple.count == 1 {
           return try translateOptionalParameter(
-            wrappedType: tuple[0],
+            wrappedType: tuple[0].type,
             convention: convention,
             parameterName: parameterName,
             loweredParam: loweredParam,
