@@ -127,9 +127,9 @@ let javaPlatformIncludePath = "\(javaIncludePath)/win32"
 
 let swiftJavaJNICoreDep: Package.Dependency
 if let localPath = ProcessInfo.processInfo.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
+  print("Using upstream 'swift-java-jni-core' from override path SWIFT_JAVA_JNI_CORE_PATH = \(localPath)")
   swiftJavaJNICoreDep = .package(path: localPath)
 } else {
-  print("Using upstream 'swift-java-jni-core', to override use the SWIFT_JAVA_JNI_CORE_PATH env variable")
   swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
 }
 
