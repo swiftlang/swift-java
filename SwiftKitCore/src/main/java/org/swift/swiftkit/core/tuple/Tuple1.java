@@ -14,23 +14,23 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 1-element tuple type <code>(T0)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple1<T0> {
-    private final T0 $0;
+    public final T0 $0;
 
     public Tuple1(T0 $0) {
         this.$0 = $0;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple1)) return false;
-        Tuple1<?> other = (Tuple1<?>) o;
-        return java.util.Objects.equals($0, other.$0);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple1)) return false;
+        Tuple1 o = (Tuple1) other;
+        return java.util.Objects.equals(this.$0, o.$0);
     }
 
     @Override

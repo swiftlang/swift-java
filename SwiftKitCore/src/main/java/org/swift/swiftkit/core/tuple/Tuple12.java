@@ -14,19 +14,23 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 12-element tuple type <code>(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> {
-    private final T0 $0;
-    private final T1 $1;
-    private final T2 $2;
-    private final T3 $3;
-    private final T4 $4;
-    private final T5 $5;
-    private final T6 $6;
-    private final T7 $7;
-    private final T8 $8;
-    private final T9 $9;
-    private final T10 $10;
-    private final T11 $11;
+    public final T0 $0;
+    public final T1 $1;
+    public final T2 $2;
+    public final T3 $3;
+    public final T4 $4;
+    public final T5 $5;
+    public final T6 $6;
+    public final T7 $7;
+    public final T8 $8;
+    public final T9 $9;
+    public final T10 $10;
+    public final T11 $11;
 
     public Tuple12(T0 $0, T1 $1, T2 $2, T3 $3, T4 $4, T5 $5, T6 $6, T7 $7, T8 $8, T9 $9, T10 $10, T11 $11) {
         this.$0 = $0;
@@ -43,71 +47,23 @@ public final class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> {
         this.$11 = $11;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
-    public T1 $1() {
-        return $1;
-    }
-
-    public T2 $2() {
-        return $2;
-    }
-
-    public T3 $3() {
-        return $3;
-    }
-
-    public T4 $4() {
-        return $4;
-    }
-
-    public T5 $5() {
-        return $5;
-    }
-
-    public T6 $6() {
-        return $6;
-    }
-
-    public T7 $7() {
-        return $7;
-    }
-
-    public T8 $8() {
-        return $8;
-    }
-
-    public T9 $9() {
-        return $9;
-    }
-
-    public T10 $10() {
-        return $10;
-    }
-
-    public T11 $11() {
-        return $11;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple12)) return false;
-        Tuple12<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (Tuple12<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) o;
-        return java.util.Objects.equals($0, other.$0) &&
-                java.util.Objects.equals($1, other.$1) &&
-                java.util.Objects.equals($2, other.$2) &&
-                java.util.Objects.equals($3, other.$3) &&
-                java.util.Objects.equals($4, other.$4) &&
-                java.util.Objects.equals($5, other.$5) &&
-                java.util.Objects.equals($6, other.$6) &&
-                java.util.Objects.equals($7, other.$7) &&
-                java.util.Objects.equals($8, other.$8) &&
-                java.util.Objects.equals($9, other.$9) &&
-                java.util.Objects.equals($10, other.$10) &&
-                java.util.Objects.equals($11, other.$11);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple12)) return false;
+        Tuple12 o = (Tuple12) other;
+        return java.util.Objects.equals(this.$0, o.$0) &&
+                java.util.Objects.equals(this.$1, o.$1) &&
+                java.util.Objects.equals(this.$2, o.$2) &&
+                java.util.Objects.equals(this.$3, o.$3) &&
+                java.util.Objects.equals(this.$4, o.$4) &&
+                java.util.Objects.equals(this.$5, o.$5) &&
+                java.util.Objects.equals(this.$6, o.$6) &&
+                java.util.Objects.equals(this.$7, o.$7) &&
+                java.util.Objects.equals(this.$8, o.$8) &&
+                java.util.Objects.equals(this.$9, o.$9) &&
+                java.util.Objects.equals(this.$10, o.$10) &&
+                java.util.Objects.equals(this.$11, o.$11);
     }
 
     @Override

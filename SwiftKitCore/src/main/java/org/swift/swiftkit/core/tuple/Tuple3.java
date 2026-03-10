@@ -14,10 +14,14 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 3-element tuple type <code>(T0, T1, T2)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple3<T0, T1, T2> {
-    private final T0 $0;
-    private final T1 $1;
-    private final T2 $2;
+    public final T0 $0;
+    public final T1 $1;
+    public final T2 $2;
 
     public Tuple3(T0 $0, T1 $1, T2 $2) {
         this.$0 = $0;
@@ -25,26 +29,14 @@ public final class Tuple3<T0, T1, T2> {
         this.$2 = $2;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
-    public T1 $1() {
-        return $1;
-    }
-
-    public T2 $2() {
-        return $2;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple3)) return false;
-        Tuple3<?, ?, ?> other = (Tuple3<?, ?, ?>) o;
-        return java.util.Objects.equals($0, other.$0) &&
-                java.util.Objects.equals($1, other.$1) &&
-                java.util.Objects.equals($2, other.$2);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple3)) return false;
+        Tuple3 o = (Tuple3) other;
+        return java.util.Objects.equals(this.$0, o.$0) &&
+                java.util.Objects.equals(this.$1, o.$1) &&
+                java.util.Objects.equals(this.$2, o.$2);
     }
 
     @Override

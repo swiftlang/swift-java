@@ -793,13 +793,15 @@ extension JNISwift2JavaGenerator {
           JavaParameter(name: outParamName, type: .array(elementResult.javaType))
         )
 
-        destructureElements.append((
-          index: idx,
-          label: element.label,
-          conversion: elementResult.conversion,
-          outParamName: outParamName,
-          javaType: elementResult.javaType
-        ))
+        destructureElements.append(
+          (
+            index: idx,
+            label: element.label,
+            conversion: elementResult.conversion,
+            outParamName: outParamName,
+            javaType: elementResult.javaType
+          )
+        )
       }
 
       return NativeResult(

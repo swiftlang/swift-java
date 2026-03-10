@@ -14,11 +14,15 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 4-element tuple type <code>(T0, T1, T2, T3)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple4<T0, T1, T2, T3> {
-    private final T0 $0;
-    private final T1 $1;
-    private final T2 $2;
-    private final T3 $3;
+    public final T0 $0;
+    public final T1 $1;
+    public final T2 $2;
+    public final T3 $3;
 
     public Tuple4(T0 $0, T1 $1, T2 $2, T3 $3) {
         this.$0 = $0;
@@ -27,31 +31,15 @@ public final class Tuple4<T0, T1, T2, T3> {
         this.$3 = $3;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
-    public T1 $1() {
-        return $1;
-    }
-
-    public T2 $2() {
-        return $2;
-    }
-
-    public T3 $3() {
-        return $3;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple4)) return false;
-        Tuple4<?, ?, ?, ?> other = (Tuple4<?, ?, ?, ?>) o;
-        return java.util.Objects.equals($0, other.$0) &&
-                java.util.Objects.equals($1, other.$1) &&
-                java.util.Objects.equals($2, other.$2) &&
-                java.util.Objects.equals($3, other.$3);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple4)) return false;
+        Tuple4 o = (Tuple4) other;
+        return java.util.Objects.equals(this.$0, o.$0) &&
+                java.util.Objects.equals(this.$1, o.$1) &&
+                java.util.Objects.equals(this.$2, o.$2) &&
+                java.util.Objects.equals(this.$3, o.$3);
     }
 
     @Override

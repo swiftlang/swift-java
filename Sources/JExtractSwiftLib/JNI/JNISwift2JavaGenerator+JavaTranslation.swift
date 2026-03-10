@@ -604,10 +604,9 @@ extension JNISwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement],
       parameterPosition: Int?
     ) throws -> TranslatedParameter {
-      let arity = elements.count
-      var elementBoxedTypes: [String] = []
+      var elementJavaTypes: [JavaType] = []
 
-      // Generate a conversion that extracts each element from the Tuple record
+      // Generate a conversion that extracts each element from the Tuple
       var elementConversions: [JavaNativeConversionStep] = []
       for (idx, element) in elements.enumerated() {
         let elementTranslated = try translateParameter(
@@ -620,17 +619,16 @@ extension JNISwift2JavaGenerator {
           parameterPosition: parameterPosition
         )
 
-        // Extract the element from the tuple using .$N() accessor
+        // Extract the element from the tuple using .$N field access
         let extraction = JavaNativeConversionStep.replacingPlaceholder(
           elementTranslated.conversion,
-          placeholder: "\(parameterName).$\(idx)()"
+          placeholder: "\(parameterName).$\(idx)"
         )
         elementConversions.append(extraction)
-        elementBoxedTypes.append(elementTranslated.parameter.type.javaType.boxedName)
+        elementJavaTypes.append(elementTranslated.parameter.type.javaType)
       }
 
-      let genericParams = elementBoxedTypes.joined(separator: ", ")
-      let javaType: JavaType = .class(package: "org.swift.swiftkit.core.tuple", name: "Tuple\(arity)<\(genericParams)>")
+      let javaType: JavaType = .tuple(elementTypes: elementJavaTypes)
 
       return TranslatedParameter(
         parameter: JavaParameter(
@@ -960,7 +958,7 @@ extension JNISwift2JavaGenerator {
       var outParameters: [OutParameter] = []
       var elementOutParamNames: [String] = []
       var elementConversions: [JavaNativeConversionStep] = []
-      var elementBoxedTypes: [String] = []
+      var elementJavaTypes: [JavaType] = []
 
       for (idx, element) in elements.enumerated() {
         let outParamName = "\(resultName)_\(idx)$"
@@ -974,13 +972,11 @@ extension JNISwift2JavaGenerator {
         )
         elementOutParamNames.append(outParamName)
         elementConversions.append(elementConversion)
-        elementBoxedTypes.append(javaType.boxedName)
+        elementJavaTypes.append(javaType)
       }
 
-      let genericParams = elementBoxedTypes.joined(separator: ", ")
-      let tupleClassName = "Tuple\(arity)<\(genericParams)>"
+      let javaResultType: JavaType = .tuple(elementTypes: elementJavaTypes)
       let fullTupleClassName = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
-      let javaResultType: JavaType = .class(package: "org.swift.swiftkit.core.tuple", name: tupleClassName)
 
       let tupleElements: [(outParamName: String, elementConversion: JavaNativeConversionStep)] =
         zip(elementOutParamNames, elementConversions).map { ($0, $1) }

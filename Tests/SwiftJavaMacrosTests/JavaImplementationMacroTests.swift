@@ -187,4 +187,5 @@ class JavaImplementationMacroTests: XCTestCase {
       macros: Self.javaImplementationMacros
     )
   }
+
 }

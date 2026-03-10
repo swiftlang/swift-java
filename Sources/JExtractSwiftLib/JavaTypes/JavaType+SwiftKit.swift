@@ -21,4 +21,17 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core", name: "SimpleCompletableFuture", typeParameters: [T.boxedType])
   }
 
+  /// The maximum supported tuple arity.
+  static let maxTupleArity = 24
+
+  /// The description of the type org.swift.swiftkit.core.tuple.TupleN<T0, T1, ...>
+  static func tuple(elementTypes: [JavaType]) -> JavaType {
+    let arity = elementTypes.count
+    guard arity <= maxTupleArity else {
+      fatalError("Tuple arity \(arity) exceeds maximum supported arity of \(maxTupleArity)")
+    }
+    let genericParams = elementTypes.map(\.boxedName).joined(separator: ", ")
+    return .class(package: "org.swift.swiftkit.core.tuple", name: "Tuple\(arity)<\(genericParams)>")
+  }
+
 }

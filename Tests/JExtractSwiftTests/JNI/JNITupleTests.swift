@@ -60,7 +60,7 @@ struct JNITupleTests {
         environment.interface.SetLongArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
         let element_1_jni$ = tupleResult$.1.getJNIValue(in: environment)
         environment.interface.SetObjectArrayElement(environment, result_1$, 0, element_1_jni$)
-        """,
+        """
       ]
     )
   }
@@ -75,7 +75,7 @@ struct JNITupleTests {
       expectedChunks: [
         """
         public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<Long, String> arg) {
-          SwiftModule.$takePair(arg.$0(), arg.$1());
+          SwiftModule.$takePair(arg.$0, arg.$1);
         }
         """,
         """
@@ -95,7 +95,7 @@ struct JNITupleTests {
       expectedChunks: [
         """
         SwiftModule.takePair((Int64(fromJNI: arg_0, in: environment), String(fromJNI: arg_1, in: environment)))
-        """,
+        """
       ]
     )
   }
@@ -131,7 +131,7 @@ struct JNITupleTests {
         environment.interface.SetIntArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
         var element_1_jni$ = tupleResult$.y.getJNIValue(in: environment)
         environment.interface.SetIntArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
-        """,
+        """
       ]
     )
   }

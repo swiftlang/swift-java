@@ -14,30 +14,26 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 2-element tuple type <code>(T0, T1)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple2<T0, T1> {
-    private final T0 $0;
-    private final T1 $1;
+    public final T0 $0;
+    public final T1 $1;
 
     public Tuple2(T0 $0, T1 $1) {
         this.$0 = $0;
         this.$1 = $1;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
-    public T1 $1() {
-        return $1;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple2)) return false;
-        Tuple2<?, ?> other = (Tuple2<?, ?>) o;
-        return java.util.Objects.equals($0, other.$0) &&
-                java.util.Objects.equals($1, other.$1);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple2)) return false;
+        Tuple2 o = (Tuple2) other;
+        return java.util.Objects.equals(this.$0, o.$0) &&
+                java.util.Objects.equals(this.$1, o.$1);
     }
 
     @Override

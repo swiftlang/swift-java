@@ -27,3 +27,17 @@ public func labeledTuple() -> (x: Int32, y: Int32) {
 public func echoTriple(triple: (Bool, Double, Int64)) -> (Bool, Double, Int64) {
   triple
 }
+
+public func makeBigTuple() -> (
+  Bool, Int8, Int16, UInt16,
+  Int32, Int64, Float, Double,
+  String, Bool, Int8, Int16,
+  UInt16, Int32, Int64, Float
+) {
+  (
+    true, 1, 2, 3,
+    4, 5, 6.0, 7.0,
+    "eight", false, 9, 10,
+    11, 12, 13, 14.0
+  )
+}

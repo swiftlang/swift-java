@@ -14,12 +14,16 @@
 
 package org.swift.swiftkit.core.tuple;
 
+/**
+ * Corresponds to Swift's built-in 5-element tuple type <code>(T0, T1, T2, T3, T4)</code>.
+ * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ */
 public final class Tuple5<T0, T1, T2, T3, T4> {
-    private final T0 $0;
-    private final T1 $1;
-    private final T2 $2;
-    private final T3 $3;
-    private final T4 $4;
+    public final T0 $0;
+    public final T1 $1;
+    public final T2 $2;
+    public final T3 $3;
+    public final T4 $4;
 
     public Tuple5(T0 $0, T1 $1, T2 $2, T3 $3, T4 $4) {
         this.$0 = $0;
@@ -29,36 +33,16 @@ public final class Tuple5<T0, T1, T2, T3, T4> {
         this.$4 = $4;
     }
 
-    public T0 $0() {
-        return $0;
-    }
-
-    public T1 $1() {
-        return $1;
-    }
-
-    public T2 $2() {
-        return $2;
-    }
-
-    public T3 $3() {
-        return $3;
-    }
-
-    public T4 $4() {
-        return $4;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (\!(o instanceof Tuple5)) return false;
-        Tuple5<?, ?, ?, ?, ?> other = (Tuple5<?, ?, ?, ?, ?>) o;
-        return java.util.Objects.equals($0, other.$0) &&
-                java.util.Objects.equals($1, other.$1) &&
-                java.util.Objects.equals($2, other.$2) &&
-                java.util.Objects.equals($3, other.$3) &&
-                java.util.Objects.equals($4, other.$4);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Tuple5)) return false;
+        Tuple5 o = (Tuple5) other;
+        return java.util.Objects.equals(this.$0, o.$0) &&
+                java.util.Objects.equals(this.$1, o.$1) &&
+                java.util.Objects.equals(this.$2, o.$2) &&
+                java.util.Objects.equals(this.$3, o.$3) &&
+                java.util.Objects.equals(this.$4, o.$4);
     }
 
     @Override
