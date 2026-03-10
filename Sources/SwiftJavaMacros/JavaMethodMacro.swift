@@ -164,6 +164,10 @@ extension JavaMethodMacro: BodyMacro {
         """
         /* convert erased return value to \(raw: genericResultType) */
         let result$ = \(resultSyntax)
+        """
+      )
+      resultStatements.append(
+        """
         if let result$ {
           return \(raw: genericResultType)(javaThis: result$.javaThis, environment: try! JavaVirtualMachine.shared().environment())
         } else {
