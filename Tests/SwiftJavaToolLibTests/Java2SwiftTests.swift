@@ -128,7 +128,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [T?]
+        public func toArray<T: AnyJavaObject>(_ arg0: MyJavaIntFunction<JavaArray>?) -> [T?]
         """,
       ]
     )

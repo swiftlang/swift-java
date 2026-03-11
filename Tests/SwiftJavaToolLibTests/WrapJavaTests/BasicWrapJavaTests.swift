@@ -264,7 +264,7 @@ final class BasicWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaInterface("com.example.CallMe", extends: BiFunction<ValueType, ValueType, ValueType>.self)
+        @JavaInterface("com.example.CallMe", extends: BiFunction<JavaObject, JavaObject, JavaObject>.self)
         public struct CallMe<ValueType: AnyJavaObject> {
           /// Java method `apply`.
           ///
