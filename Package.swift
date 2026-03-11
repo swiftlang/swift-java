@@ -158,7 +158,7 @@ let package = Package(
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
         .enableUpcomingFeature("ImplicitOpenExistentials"),
         .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)), // Workaround for https://github.com/swiftlang/swift/issues/84899
       ],
@@ -169,7 +169,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaUtil",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -178,7 +178,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaUtilFunction",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -187,7 +187,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaUtilJar",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -196,7 +196,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaNet",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -205,7 +205,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaIO",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -214,7 +214,7 @@ let package = Package(
       path: "Sources/JavaStdlib/JavaLangReflect",
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
