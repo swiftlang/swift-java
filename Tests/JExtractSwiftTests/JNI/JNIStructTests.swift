@@ -151,7 +151,7 @@ struct JNIStructTests {
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
           result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """
       ]

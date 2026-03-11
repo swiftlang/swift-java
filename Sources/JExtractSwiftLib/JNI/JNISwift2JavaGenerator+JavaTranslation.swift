@@ -475,6 +475,16 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(swiftType)
+            }
+            return try translateDictionaryParameter(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1],
+              parameterName: parameterName
+            )
+
           case .foundationDate, .essentialsDate:
             break // Handled as wrapped struct
 
@@ -570,6 +580,13 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayParameter(
           elementType: elementType,
+          parameterName: parameterName
+        )
+
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryParameter(
+          keyType: keyType,
+          valueType: valueType,
           parameterName: parameterName
         )
 
@@ -863,6 +880,15 @@ extension JNISwift2JavaGenerator {
               elementType: elementType
             )
 
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(swiftType)
+            }
+            return try translateDictionaryResult(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1]
+            )
+
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
@@ -940,6 +966,12 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayResult(
           elementType: elementType
+        )
+
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryResult(
+          keyType: keyType,
+          valueType: valueType
         )
 
       case .tuple(let elements) where !elements.isEmpty:
@@ -1210,6 +1242,56 @@ extension JNISwift2JavaGenerator {
       default:
         throw JavaTranslationError.unsupportedSwiftType(elementType)
       }
+    }
+
+    func javaTypeForDictionaryComponent(_ swiftType: SwiftType) throws -> JavaType {
+      switch swiftType {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          }
+          return javaType
+        }
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
+    func translateDictionaryParameter(
+      keyType: SwiftType,
+      valueType: SwiftType,
+      parameterName: String
+    ) throws -> TranslatedParameter {
+      let keyJavaType = try javaTypeForDictionaryComponent(keyType)
+      let valueJavaType = try javaTypeForDictionaryComponent(valueType)
+      let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
+
+      return TranslatedParameter(
+        parameter: JavaParameter(name: parameterName, type: dictType),
+        conversion: .method(
+          .requireNonNull(.placeholder, message: "\(parameterName) must not be null"),
+          function: "$memoryAddress",
+          arguments: []
+        )
+      )
+    }
+
+    func translateDictionaryResult(
+      keyType: SwiftType,
+      valueType: SwiftType
+    ) throws -> TranslatedResult {
+      let keyJavaType = try javaTypeForDictionaryComponent(keyType)
+      let valueJavaType = try javaTypeForDictionaryComponent(valueType)
+      let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
+
+      return TranslatedResult(
+        javaType: dictType,
+        outParameters: [],
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType)
+      )
     }
   }
 
@@ -1703,5 +1785,8 @@ extension JNISwift2JavaGenerator {
     /// We cannot generate interface wrappers for
     /// protocols that we unable to be jextracted.
     case protocolWasNotExtracted
+
+    /// Dictionary type requires exactly two generic type arguments (key and value).
+    case dictionaryRequiresKeyAndValueTypes(SwiftType)
   }
 }

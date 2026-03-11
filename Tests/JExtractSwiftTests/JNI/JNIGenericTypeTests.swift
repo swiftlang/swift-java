@@ -121,7 +121,7 @@ struct JNIGenericTypeTests {
             guard let selfPointer$ else {
               fatalError("selfPointer memory address was null in call to \(#function)!")
             }
-            return selfPointer$.pointee.description.getJNIValue(in: environment)
+            return selfPointer$.pointee.description.getJNILocalRefValue(in: environment)
           }
           ...
         }

@@ -49,7 +49,7 @@ struct JNIArrayTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
         public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
-          return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNIValue(in: environment)
+          return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -87,7 +87,7 @@ struct JNIArrayTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
         public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
-          return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNIValue(in: environment)
+          return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -125,7 +125,7 @@ struct JNIArrayTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3J")
         public func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? {
-          return SwiftModule.f(array: [Int64](fromJNI: array, in: environment)).getJNIValue(in: environment)
+          return SwiftModule.f(array: [Int64](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -187,7 +187,7 @@ struct JNIArrayTest {
             let object$Bits$ = Int64(Int(bitPattern: object$$))
             return object$Bits$
           }
-          ).getJNIValue(in: environment)
+          ).getJNILocalRefValue(in: environment)
         }
         """
       ]

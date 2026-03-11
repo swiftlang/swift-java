@@ -93,7 +93,7 @@ struct UUIDTests {
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024returnUUID__")
           public func Java_com_example_swift_SwiftModule__00024returnUUID__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
-            return SwiftModule.returnUUID().uuidString.getJNIValue(in: environment)
+            return SwiftModule.returnUUID().uuidString.getJNILocalRefValue(in: environment)
           }
           """
         ]
