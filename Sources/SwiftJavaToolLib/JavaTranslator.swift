@@ -155,7 +155,8 @@ extension JavaTranslator {
     method: JavaLangReflect.Method? = nil,
     _ javaType: Type,
     preferValueTypes: Bool,
-    outerOptional: OptionalKind
+    outerOptional: OptionalKind,
+    eraseTypeArguments: Bool = false
   ) throws -> String {
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
@@ -217,6 +218,9 @@ extension JavaTranslator {
 
         let typeArguments: [String] = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
           guard let typeArg else { return nil }
+          if eraseTypeArguments {
+            return "JavaObject"
+          }
 
           let mappedSwiftName = try getSwiftTypeNameAsString(
             method: method,

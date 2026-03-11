@@ -186,7 +186,8 @@ struct JavaClassTranslator {
         let typeName = try translator.getSwiftTypeNameAsString(
           javaType,
           preferValueTypes: false,
-          outerOptional: .nonoptional
+          outerOptional: .nonoptional,
+          eraseTypeArguments: true
         )
         return "\(typeName)"
       } catch {
@@ -841,6 +842,12 @@ extension JavaClassTranslator {
       }
     }
 
+    if let genericArrayType = method.getGenericReturnType().as(GenericArrayType.self) {
+      if genericArrayType.getGenericComponentType().isEqualTo(typeParam.as(Type.self)) {
+        return true
+      }
+    }
+
     // --- Parameter types
     for parameter in method.getParameters() {
       if let parameterizedType = parameter?.getParameterizedType() {
@@ -855,6 +862,12 @@ extension JavaClassTranslator {
             if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
               return true
             }
+          }
+        }
+
+        if let genericArrayType = parameterizedType.as(GenericArrayType.self) {
+          if genericArrayType.getGenericComponentType().isEqualTo(typeParam.as(Type.self)) {
+            return true
           }
         }
       }

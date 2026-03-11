@@ -3,150 +3,258 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.Set", extends: JavaCollection<JavaObject>.self)
 public struct JavaSet<E: AnyJavaObject> {
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.Set.size()
+  /// ```
   @JavaMethod
   public func size() -> Int32
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.Set.hashCode()
+  /// ```
   @JavaMethod
   public func hashCode() -> Int32
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.Set.clear()
+  /// ```
   @JavaMethod
   public func clear()
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.isEmpty()
+  /// ```
   @JavaMethod
   public func isEmpty() -> Bool
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.add(E)
+  /// ```
   @JavaMethod
-  public func add(_ arg0: JavaObject?) -> Bool
+  public func add(_ arg0: E?) -> Bool
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract <T> T[] java.util.Set.toArray(T[])
+  /// ```
+  @JavaMethod
+  public func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
+
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Object[] java.util.Set.toArray()
+  /// ```
   @JavaMethod
   public func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.Iterator<E> java.util.Set.iterator()
+  /// ```
   @JavaMethod
-  public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  public func iterator() -> JavaIterator<E>!
 
-  @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>!
-
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.addAll(java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  public func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.removeAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.retainAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `containsAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Set.containsAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 }
 extension JavaClass {
+  /// Java method `copyOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.copyOf(java.util.Collection<? extends E>)
+  /// ```
   @JavaStaticMethod
-  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> JavaSet<JavaObject>!
+  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<E>?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E...)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: [E?]) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E,E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?, _ arg8: E?, _ arg9: E?) -> JavaSet<E>!
   where ObjectType == JavaSet<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>() -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?,
-    _ arg8: JavaObject?,
-    _ arg9: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?,
-    _ arg8: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?
-  ) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> JavaSet<JavaObject>! where ObjectType == JavaSet<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaSet<JavaObject>!
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?, _ arg8: E?) -> JavaSet<E>!
   where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of(E,E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?) -> JavaSet<E>! where ObjectType == JavaSet<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.Set<E> java.util.Set.of()
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>() -> JavaSet<E>! where ObjectType == JavaSet<E>
 }
