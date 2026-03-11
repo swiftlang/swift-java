@@ -10,7 +10,9 @@ if let localPath = ProcessInfo.processInfo.environment["SWIFT_JAVA_JNI_CORE_PATH
   print("Using upstream 'swift-java-jni-core' from override path SWIFT_JAVA_JNI_CORE_PATH = \(localPath)")
   swiftJavaJNICoreDep = .package(path: localPath)
 } else {
-  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
+  // swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
+  // TODO: restore official dependency once https://github.com/swiftlang/swift-java-jni-core/pull/8 lands
+  swiftJavaJNICoreDep = .package(url: "https://github.com/swift-android-sdk/swift-java-jni-core", branch: "main")
 }
 
 let package = Package(
