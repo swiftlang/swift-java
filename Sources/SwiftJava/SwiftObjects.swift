@@ -23,8 +23,8 @@ open class SwiftObjects: JavaObject {
 @JavaImplementation("org.swift.swiftkit.core.SwiftObjects")
 extension SwiftObjects {
   @JavaMethod
-  public static func getRawDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> Int32 {
-    guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
+  public static func getRawDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64, selfTypePointer: Int64) -> Int32 {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
       fatalError("selfType metadata address was null")
     }
     let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
@@ -33,7 +33,7 @@ extension SwiftObjects {
     }
 
     func perform<T: _RawDiscriminatorRepresentable>(as type: T.Type) -> Int32 {
-      guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      guard let self$ = UnsafeMutablePointer<T>(bitPattern: Int(selfPointer)) else {
         fatalError("self memory address was null")
       }
       return self$.pointee._rawDiscriminator
@@ -42,14 +42,14 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public static func toString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> String {
-    guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
+  public static func toString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64, selfTypePointer: Int64) -> String {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
       fatalError("selfType metadata address was null")
     }
     let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
 
     func perform<T>(as type: T.Type) -> String {
-      guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      guard let self$ = UnsafeMutablePointer<T>(bitPattern: Int(selfPointer)) else {
         fatalError("self memory address was null")
       }
       return String(describing: self$.pointee)
@@ -58,14 +58,14 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public static func toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) -> String {
-    guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
+  public static func toDebugString(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64, selfTypePointer: Int64) -> String {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
       fatalError("selfType metadata address was null")
     }
     let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
 
     func perform<T>(as type: T.Type) -> String {
-      guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      guard let self$ = UnsafeMutablePointer<T>(bitPattern: Int(selfPointer)) else {
         fatalError("self memory address was null")
       }
       return String(reflecting: self$.pointee)
@@ -74,14 +74,14 @@ extension SwiftObjects {
   }
 
   @JavaMethod
-  public static func destroy(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int, selfTypePointer: Int) {
-    guard let selfType$ = UnsafeRawPointer(bitPattern: selfTypePointer) else {
+  public static func destroy(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64, selfTypePointer: Int64) {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
       fatalError("selfType metadata address was null")
     }
     let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
 
     func perform<T>(as type: T.Type) {
-      guard let self$ = UnsafeMutablePointer<T>(bitPattern: selfPointer) else {
+      guard let self$ = UnsafeMutablePointer<T>(bitPattern: Int(selfPointer)) else {
         fatalError("self memory address was null")
       }
       self$.deinitialize(count: 1)
