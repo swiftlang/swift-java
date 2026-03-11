@@ -160,7 +160,7 @@ let package = Package(
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
         .enableUpcomingFeature("ImplicitOpenExistentials"),
         .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)), // Workaround for https://github.com/swiftlang/swift/issues/84899
       ],
@@ -237,7 +237,7 @@ let package = Package(
       name: "ExampleSwiftLibrary",
       dependencies: [],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
@@ -247,14 +247,14 @@ let package = Package(
       ],
       exclude: ["swift-java.config"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
     .target(
       name: "SwiftRuntimeFunctions",
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -329,7 +329,7 @@ let package = Package(
         "SwiftJavaConfigurationShared",
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -348,7 +348,7 @@ let package = Package(
         "JavaNet",
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -369,7 +369,7 @@ let package = Package(
         "SwiftJavaToolLib"
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -377,7 +377,7 @@ let package = Package(
       name: "SwiftJavaConfigurationSharedTests",
       dependencies: ["SwiftJavaConfigurationShared"],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
 
@@ -387,7 +387,7 @@ let package = Package(
         "JExtractSwiftLib"
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5),
+        .swiftLanguageMode(.v5)
       ]
     ),
   ]
