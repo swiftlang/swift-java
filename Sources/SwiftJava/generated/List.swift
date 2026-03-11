@@ -3,33 +3,93 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.List")
 public struct List<E: AnyJavaObject> {
-  @JavaMethod
-  public func remove(_ arg0: Int32) -> JavaObject!
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.List.remove(int)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func remove(_ arg0: Int32) -> E!
 
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.List.size()
+  /// ```
   @JavaMethod
   public func size() -> Int32
 
-  @JavaMethod
-  public func get(_ arg0: Int32) -> JavaObject!
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.List.get(int)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func get(_ arg0: Int32) -> E!
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.List.hashCode()
+  /// ```
   @JavaMethod
   public func hashCode() -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.List.indexOf(java.lang.Object)
+  /// ```
   @JavaMethod
   public func indexOf(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.List.clear()
+  /// ```
   @JavaMethod
   public func clear()
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.List.lastIndexOf(java.lang.Object)
+  /// ```
   @JavaMethod
   public func lastIndexOf(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.isEmpty()
+  /// ```
   @JavaMethod
   public func isEmpty() -> Bool
 
@@ -51,162 +111,303 @@ public struct List<E: AnyJavaObject> {
   @JavaMethod
   public func add(_ arg0: E?) -> Bool
 
+  /// Java method `subList`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.List<E> java.util.List.subList(int,int)
+  /// ```
   @JavaMethod
-  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
+  public func subList(_ arg0: Int32, _ arg1: Int32) -> List<E>!
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Object[] java.util.List.toArray()
+  /// ```
   @JavaMethod
   public func toArray() -> [JavaObject?]
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract <T> T[] java.util.List.toArray(T[])
+  /// ```
   @JavaMethod
-  public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  public func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.Iterator<E> java.util.List.iterator()
+  /// ```
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>!
+  public func iterator() -> JavaIterator<E>!
 
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.addAll(java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  public func addAll(_ arg0: Int32, _ arg1: JavaCollection<JavaObject>?) -> Bool
+  public func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.addAll(int,java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  public func addAll(_ arg0: Int32, _ arg1: JavaCollection<E>?) -> Bool
 
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.List.set(int,E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func set(_ arg0: Int32, _ arg1: E?) -> E!
+
+  /// Java method `getFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default E java.util.List.getFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func getFirst() -> E!
+
+  /// Java method `getLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default E java.util.List.getLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func getLast() -> E!
+
+  /// Java method `addFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default void java.util.List.addFirst(E)
+  /// ```
   @JavaMethod
-  public func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject!
+  public func addFirst(_ arg0: E?)
 
+  /// Java method `addLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default void java.util.List.addLast(E)
+  /// ```
   @JavaMethod
-  public func getFirst() -> JavaObject!
+  public func addLast(_ arg0: E?)
 
-  @JavaMethod
-  public func getLast() -> JavaObject!
+  /// Java method `removeFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default E java.util.List.removeFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func removeFirst() -> E!
 
-  @JavaMethod
-  public func addFirst(_ arg0: JavaObject?)
+  /// Java method `removeLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default E java.util.List.removeLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func removeLast() -> E!
 
-  @JavaMethod
-  public func addLast(_ arg0: JavaObject?)
-
-  @JavaMethod
-  public func removeFirst() -> JavaObject!
-
-  @JavaMethod
-  public func removeLast() -> JavaObject!
-
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.removeAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.retainAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `listIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.ListIterator<E> java.util.List.listIterator()
+  /// ```
   @JavaMethod
-  public func listIterator() -> ListIterator<JavaObject>!
+  public func listIterator() -> ListIterator<E>!
 
+  /// Java method `listIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.ListIterator<E> java.util.List.listIterator(int)
+  /// ```
   @JavaMethod
-  public func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>!
+  public func listIterator(_ arg0: Int32) -> ListIterator<E>!
 
+  /// Java method `reversed`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.List<E> java.util.List.reversed()
+  /// ```
   @JavaMethod
-  public func reversed() -> List<JavaObject>!
+  public func reversed() -> List<E>!
 
+  /// Java method `containsAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.List.containsAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 }
 extension JavaClass {
+  /// Java method `copyOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.copyOf(java.util.Collection<? extends E>)
+  /// ```
   @JavaStaticMethod
-  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<JavaObject>?) -> List<JavaObject>!
+  public func copyOf<E: AnyJavaObject>(_ arg0: JavaCollection<E>?) -> List<E>! where ObjectType == List<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?) -> List<E>! where ObjectType == List<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?) -> List<E>! where ObjectType == List<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?) -> List<E>! where ObjectType == List<E>
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E,E,E,E,E)
+  /// ```
+  @JavaStaticMethod
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?, _ arg8: E?) -> List<E>!
   where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E,E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?) -> List<JavaObject>!
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?, _ arg8: E?, _ arg9: E?) -> List<E>!
   where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E...)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?) -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: [E?]) -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of()
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>() -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>() -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?,
-    _ arg8: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?) -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?, _ arg7: E?) -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?) -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> List<JavaObject>!
-  where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?, _ arg4: E?, _ arg5: E?, _ arg6: E?) -> List<E>! where ObjectType == List<E>
 
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <E> java.util.List<E> java.util.List.of(E,E,E,E)
+  /// ```
   @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(_ arg0: [JavaObject?]) -> List<JavaObject>! where ObjectType == List<E>
-
-  @JavaStaticMethod
-  public func of<E: AnyJavaObject>(
-    _ arg0: JavaObject?,
-    _ arg1: JavaObject?,
-    _ arg2: JavaObject?,
-    _ arg3: JavaObject?,
-    _ arg4: JavaObject?,
-    _ arg5: JavaObject?,
-    _ arg6: JavaObject?,
-    _ arg7: JavaObject?,
-    _ arg8: JavaObject?,
-    _ arg9: JavaObject?
-  ) -> List<JavaObject>! where ObjectType == List<E>
+  public func of<E: AnyJavaObject>(_ arg0: E?, _ arg1: E?, _ arg2: E?, _ arg3: E?) -> List<E>! where ObjectType == List<E>
 }

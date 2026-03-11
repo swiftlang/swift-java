@@ -17,6 +17,6 @@ extension List: Sequence {
   public typealias Iterator = JavaIterator<E>
 
   public func makeIterator() -> Iterator {
-    self.iterator()!.as(JavaIterator<E>.self)!
+    self.iterator()
   }
 }
