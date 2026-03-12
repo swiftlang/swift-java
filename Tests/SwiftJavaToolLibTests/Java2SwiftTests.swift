@@ -500,7 +500,7 @@ class Java2SwiftTests: XCTestCase {
         """
         @JavaMethod
         open override func append(_ arg0: UInt16) throws -> Writer!
-        """
+        """,
       ]
     )
   }

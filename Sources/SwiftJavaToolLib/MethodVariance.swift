@@ -68,14 +68,14 @@ enum MethodVariance {
 
     // If first result type is a subclass of the second result type, it's
     // covariant.
-    if firstResultType.isSubclass(of: secondResultType.as(JavaClass<JavaObject>.self)!) {
+    if secondResultType.isAssignableFrom(firstResultType.as(JavaClass<JavaObject>.self)!) {
       self = .covariantResult
       return
     }
 
     // If second result type is a subclass of the first result type, it's
     // contravariant.
-    if secondResultType.isSubclass(of: firstResultType.as(JavaClass<JavaObject>.self)!) {
+    if firstResultType.isAssignableFrom(secondResultType.as(JavaClass<JavaObject>.self)!) {
       self = .contravariantResult
       return
     }
