@@ -28,12 +28,7 @@ open class PrintWriter: Writer {
   @_nonoverride public convenience init(_ arg0: Writer?, _ arg1: Bool, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: OutputStream?,
-    _ arg1: Bool,
-    _ arg2: Charset?,
-    environment: JNIEnvironment? = nil
-  )
+  @_nonoverride public convenience init(_ arg0: OutputStream?, _ arg1: Bool, _ arg2: Charset?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: OutputStream?, _ arg1: Bool, environment: JNIEnvironment? = nil)
@@ -135,10 +130,10 @@ open class PrintWriter: Writer {
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence) throws java.io.IOException
+  /// public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence)
   /// ```
   @JavaMethod
-  open override func append(_ arg0: CharSequence?) throws -> Appendable!
+  open override func append(_ arg0: CharSequence?) -> PrintWriter!
 
   /// Java method `append`.
   ///
@@ -153,37 +148,10 @@ open class PrintWriter: Writer {
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Appendable java.io.PrintWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
   /// public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence,int,int)
   /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) -> PrintWriter!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.io.PrintWriter java.io.PrintWriter.append(java.lang.CharSequence)
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: CharSequence?) -> PrintWriter!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.PrintWriter.append(char) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: UInt16) throws -> Appendable!
 
   /// Java method `flush`.
   ///

@@ -25,33 +25,6 @@ open class Writer: JavaObject {
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Appendable java.io.Writer.append(java.lang.CharSequence) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func append(_ arg0: CharSequence?) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.Writer.append(char) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func append(_ arg0: UInt16) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.Writer.append(java.lang.CharSequence,int,int) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
   /// public java.io.Writer java.io.Writer.append(java.lang.CharSequence) throws java.io.IOException
   /// ```
   @JavaMethod
