@@ -515,13 +515,13 @@ class Java2SwiftTests: XCTestCase {
       asClass: true,
       translatedClasses: [
         "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
-        "java.util.Queue": SwiftTypeName(module: "SwiftJava", name: "Queue"),
+        "java.util.Deque": SwiftTypeName(module: "SwiftJava", name: "Deque"),
         "java.util.ArrayDeque": SwiftTypeName(module: "JavaUtil", name: "ArrayDeque"),
       ],
       expectedChunks: [
         "import SwiftJava",
         """
-        @JavaClass("java.util.ArrayDeque", implements: Queue<JavaObject>.self)
+        @JavaClass("java.util.ArrayDeque", implements: Deque<JavaObject>.self)
         open class ArrayDeque<E: AnyJavaObject>: JavaObject {
         """,
       ]
