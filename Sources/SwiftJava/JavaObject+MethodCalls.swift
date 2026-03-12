@@ -108,6 +108,7 @@ extension AnyJavaObject {
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return try environment.translatingJNIExceptions {
       try Self.javaMethodLookup(
@@ -131,6 +132,7 @@ extension AnyJavaObject {
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return try environment.translatingJNIExceptions {
       try Self.javaMethodLookup(
@@ -285,6 +287,7 @@ extension AnyJavaObject {
 
     // Retrieve the Java class instance from the object.
     let thisClass = environment.interface.GetObjectClass(environment, this)!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return environment.interface.GetFieldID(environment, thisClass, fieldName, FieldType.jniMangling)
   }
