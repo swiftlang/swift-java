@@ -468,10 +468,10 @@ class Java2SwiftTests: XCTestCase {
   }
 
   func testSuperTypeHasCovariantOverride() throws {
-    /// `Appendable` has `Appendable append(char c)`
+    /// `Appendable` defines `Appendable append(char c)`.
     /// `Writer` implements it as `Writer append(char c)`.
-    /// `PrintWriter` overrides it as `PrintWriter append(char c)`
-    ///  other overrides are redundant and makes compile error.
+    /// `PrintWriter` overrides it as `PrintWriter append(char c)`.
+    /// Other overrides are redundant and would cause a compilation error in Swift.
     try assertTranslatedClass(
       PrintWriter.self,
       swiftTypeName: "PrintWriter",
