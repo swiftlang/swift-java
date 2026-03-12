@@ -2,11 +2,10 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
-import Foundation
 import PackageDescription
 
 let swiftJavaJNICoreDep: Package.Dependency
-if let localPath = ProcessInfo.processInfo.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
+if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
   print("Using upstream 'swift-java-jni-core' from override path SWIFT_JAVA_JNI_CORE_PATH = \(localPath)")
   swiftJavaJNICoreDep = .package(path: localPath)
 } else {
