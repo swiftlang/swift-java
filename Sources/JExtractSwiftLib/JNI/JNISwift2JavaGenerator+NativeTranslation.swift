@@ -1293,6 +1293,7 @@ extension JNISwift2JavaGenerator {
           """
           let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
           let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+          environment.interface.DeleteLocalRef(environment, class$)
           let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
           """
         )
