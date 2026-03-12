@@ -3,12 +3,30 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.Appendable")
 public struct Appendable {
+  /// Java method `append`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Appendable java.lang.Appendable.append(java.lang.CharSequence) throws java.io.IOException
+  /// ```
   @JavaMethod
   public func append(_ arg0: CharSequence?) throws -> Appendable!
 
+  /// Java method `append`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Appendable java.lang.Appendable.append(java.lang.CharSequence,int,int) throws java.io.IOException
+  /// ```
   @JavaMethod
   public func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
 
+  /// Java method `append`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Appendable java.lang.Appendable.append(char) throws java.io.IOException
+  /// ```
   @JavaMethod
   public func append(_ arg0: UInt16) throws -> Appendable!
 }

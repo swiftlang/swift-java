@@ -45,33 +45,6 @@ open class StringWriter: Writer {
   @JavaMethod
   open override func append(_ arg0: CharSequence?) -> StringWriter!
 
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: CharSequence?) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.StringWriter.append(java.lang.CharSequence,int,int) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) throws -> Appendable!
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Appendable java.io.StringWriter.append(char) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: UInt16) throws -> Appendable!
-
   /// Java method `flush`.
   ///
   /// ### Java method signature

@@ -467,6 +467,44 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
+  func testSuperTypeHasCovariantOverride() throws {
+    /// `Appendable` defines `Appendable append(char c)`.
+    /// `Writer` implements it as `Writer append(char c)`.
+    /// `PrintWriter` overrides it as `PrintWriter append(char c)`.
+    /// Other overrides are redundant and would cause a compilation error in Swift.
+    try assertTranslatedClass(
+      PrintWriter.self,
+      swiftTypeName: "PrintWriter",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Appendable": SwiftTypeName(module: "SwiftJava", name: "Appendable"),
+        "java.io.Writer": SwiftTypeName(module: "SwiftJava", name: "Writer"),
+      ],
+      expectedChunks: [
+        "import SwiftJava",
+        """
+        @JavaClass("java.io.PrintWriter")
+        open class PrintWriter: Writer {
+        """,
+        """
+        @JavaMethod
+        open override func append(_ arg0: UInt16) -> PrintWriter!
+        """,
+      ],
+      unexpectedChunks: [
+        """
+        @JavaMethod
+        open func append(_ arg0: UInt16) throws -> Appendable!
+        """,
+        """
+        @JavaMethod
+        open override func append(_ arg0: UInt16) throws -> Writer!
+        """,
+      ]
+    )
+  }
+
   func testJavaInterfaceAsClassNOT() throws {
     try assertTranslatedClass(
       MyJavaIntFunction<JavaObject>.self,
@@ -653,6 +691,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   translatedClasses: [String: SwiftTypeName] = [:],
   nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
+  unexpectedChunks: [String] = [],
   file: StaticString = #filePath,
   line: UInt = #line
 ) throws {
@@ -704,6 +743,18 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
         file: file,
         line: line
       )
+    }
+
+    for unexpectedChunk in unexpectedChunks {
+      let normalizedUnexpectedChunk = normalizeWhitespace(unexpectedChunk)
+
+      if normalizedSwiftFileText.contains(normalizedUnexpectedChunk) {
+        XCTFail(
+          "Unexpected chunk:\n---\n\(unexpectedChunk.yellow)\n---\nfound in:\n===\n\(swiftFileText)\n===",
+          file: file,
+          line: line
+        )
+      }
     }
   }
 }
