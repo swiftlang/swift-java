@@ -163,7 +163,7 @@ struct JavaClassTranslator {
         }
 
         javaSuperclass = javaSuperclassNonOpt.getSuperclass()
-        javaGenericSuperclass = javaClass.getGenericSuperclass()
+        javaGenericSuperclass = javaSuperclassNonOpt.getGenericSuperclass()
       }
 
       self.effectiveJavaSuperclass = javaSuperclass
@@ -183,13 +183,12 @@ struct JavaClassTranslator {
       }
 
       do {
-        let typeName = try translator.getSwiftTypeNameAsString(
+        return try translator.getSwiftTypeNameAsString(
           javaType,
           preferValueTypes: false,
           outerOptional: .nonoptional,
           eraseTypeArguments: true
         )
-        return "\(typeName)"
       } catch {
         translator.logUntranslated("Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
         return nil
