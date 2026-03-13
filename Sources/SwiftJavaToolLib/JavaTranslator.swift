@@ -233,7 +233,8 @@ extension JavaTranslator {
           if mappedSwiftName == nil || mappedSwiftName == "JavaObject" {
             // Try to salvage it, is it perhaps a type parameter?
             if let method {
-              if method.getTypeParameters().contains(where: { $0?.getTypeName() == typeArg.getTypeName() }) {
+              let typeParameters = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
+              if typeParameters.contains(where: { $0?.getTypeName() == typeArg.getTypeName() }) {
                 return typeArg.getTypeName()
               }
             }
