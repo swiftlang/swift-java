@@ -121,6 +121,22 @@ extension Type {
       return selfClass.isSubclass(of: otherClass)
     }
 
+    if let selfType = self.as(ParameterizedType.self),
+      let otherType = other.as(ParameterizedType.self)
+    {
+      if !selfType.getRawType().isEqualToOrSubtypeOf(otherType.getRawType()) {
+        return false
+      }
+
+      if selfType.getActualTypeArguments().allTypesEqual(otherType.getActualTypeArguments()) {
+        return true
+      }
+
+      // Even where Java allows subtyping (e.g., Box<?> from Box<T>),
+      // this cannot be a subtype relationship in Swift.
+      return false
+    }
+
     // Anything object-like is a subclass of java.lang.Object
     if let otherClass = other.as(JavaClass<JavaObject>.self),
       otherClass.getName() == "java.lang.Object"
