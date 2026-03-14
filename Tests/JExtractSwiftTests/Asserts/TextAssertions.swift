@@ -33,6 +33,7 @@ func assertOutput(
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   javaClassLookupTable: [String: String] = [:],
   expectedChunks: [String],
+  notExpectedChunks: [String] = [],
   fileID: String = #fileID,
   filePath: String = #filePath,
   line: Int = #line,
@@ -82,6 +83,15 @@ func assertOutput(
     }
   }
   output = printer.finalize()
+
+  let sourceLocation = SourceLocation(fileID: fileID, filePath: filePath, line: line, column: column)
+  for notExpectedChunk in notExpectedChunks {
+    #expect(
+      !output.contains(notExpectedChunk),
+      "Output must not contain:\n\(notExpectedChunk)\n\nGot output:\n\(output)",
+      sourceLocation: sourceLocation
+    )
+  }
 
   let gotLines = output.split(separator: "\n").filter { l in
     l.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count > 0
