@@ -141,13 +141,13 @@ struct JavaClassTranslator {
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
-      var javaGenericSuperclass: JavaReflectType? = javaClass.getGenericSuperclass()
+      var javaGenericSuperclass: Type? = javaClass.getGenericSuperclass()
       var swiftSuperclassName: String? = nil
       var swiftSuperclassTypeArgs: [String] = []
       while let javaSuperclassNonOpt = javaSuperclass {
         do {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
-          if let javaGenericSuperclass = javaGenericSuperclass?.as(JavaReflectParameterizedType.self) {
+          if let javaGenericSuperclass = javaGenericSuperclass?.as(ParameterizedType.self) {
             for typeArg in javaGenericSuperclass.getActualTypeArguments() {
               let javaTypeArgName = typeArg?.getTypeName() ?? ""
               if let swiftTypeArgName = self.translator.translatedClasses[javaTypeArgName] {
