@@ -19,7 +19,6 @@ import Testing
 struct FoundationImportTests {
   @Test("Import Foundation", arguments: [JExtractGenerationMode.jni, JExtractGenerationMode.ffm])
   func import_foundation(mode: JExtractGenerationMode) throws {
-
     try assertOutput(
       input: "import Foundation",
       mode,
@@ -33,7 +32,6 @@ struct FoundationImportTests {
 
   @Test("Import FoundationEssentials", arguments: [JExtractGenerationMode.jni, JExtractGenerationMode.ffm])
   func import_foundationEssentials(mode: JExtractGenerationMode) throws {
-
     try assertOutput(
       input: "import FoundationEssentials",
       mode,
@@ -47,8 +45,7 @@ struct FoundationImportTests {
 
   @Test("Import conditional foundation", arguments: [JExtractGenerationMode.jni, JExtractGenerationMode.ffm])
   func import_conditionalFoundation(mode: JExtractGenerationMode) throws {
-    let ifConfigImport =
-      """
+    let ifConfigImport = """
       #if canImport(FoundationEssentials)
       import FoundationEssentials
       #else
@@ -63,6 +60,12 @@ struct FoundationImportTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         ifConfigImport
+      ],
+      notExpectedChunks: [
+        """
+        #if canImport(Foundation)
+        import Foundation
+        """
       ]
     )
   }
