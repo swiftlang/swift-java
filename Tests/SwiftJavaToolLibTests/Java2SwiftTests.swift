@@ -613,7 +613,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        open override func getDeclaringClass() -> JavaClass<T>!
+        open func getDeclaringClass() -> JavaClass<T>!
         """,
       ]
     )

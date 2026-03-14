@@ -882,7 +882,7 @@ extension JavaClassTranslator {
   ) -> OrderedSet<String> {
     var allGenericParameters = OrderedSet(genericParameters)
 
-    let typeParameters = method.getTypeParameters()
+    let typeParameters = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
     for typeParameter in typeParameters {
       guard let typeParameter else { continue }
 
