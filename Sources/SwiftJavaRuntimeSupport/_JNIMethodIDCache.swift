@@ -63,6 +63,7 @@ public final class _JNIMethodIDCache: Sendable {
     let clazz: jobject
     if let jniClass = environment.interface.FindClass(environment, className) {
       clazz = environment.interface.NewGlobalRef(environment, jniClass)!
+      environment.interface.DeleteLocalRef(environment, jniClass)
       self.javaObjectHolder = nil
     } else {
       // Clear any ClassNotFound exceptions from FindClass

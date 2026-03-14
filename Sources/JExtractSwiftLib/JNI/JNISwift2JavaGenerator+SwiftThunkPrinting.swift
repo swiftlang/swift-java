@@ -171,6 +171,19 @@ extension JNISwift2JavaGenerator {
     }
 
     printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
+      // Push a local JNI frame so refs created during this upcall are freed on exit.
+      // When called from a Swift async context (e.g. cooperative thread pool) there is
+      // no enclosing JNI frame, so refs would otherwise accumulate indefinitely. When
+      // called from a Java-initiated native call there is already a frame, but pushing
+      // a sub-frame still frees refs earlier and prevents overflow within a single call.
+      let paramCount = function.originalFunctionSignature.parameters.count
+      printer.print(
+        """
+        let environment$ = try! JavaVirtualMachine.shared().environment()
+        environment$.interface.PushLocalFrame(environment$, \(paramCount * 2 + 4))
+        defer { environment$.interface.PopLocalFrame(environment$, nil) }
+        """
+      )
       var upcallArguments = zip(
         function.originalFunctionSignature.parameters,
         function.parameterConversions

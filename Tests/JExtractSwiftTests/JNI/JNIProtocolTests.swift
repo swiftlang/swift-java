@@ -315,9 +315,15 @@ struct JNIProtocolTests {
         """
         extension SwiftJavaSomeProtocolWrapper {
           public func method() {
+            let environment$ = try! JavaVirtualMachine.shared().environment()
+            environment$.interface.PushLocalFrame(environment$, 4)
+            defer { environment$.interface.PopLocalFrame(environment$, nil) }
             _javaSomeProtocolInterface.method()
           }
           public func withObject(c: SomeClass) -> SomeClass {
+            let environment$ = try! JavaVirtualMachine.shared().environment()
+            environment$.interface.PushLocalFrame(environment$, 6)
+            defer { environment$.interface.PopLocalFrame(environment$, nil) }
             let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
             let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
             cPointer.initialize(to: c)
