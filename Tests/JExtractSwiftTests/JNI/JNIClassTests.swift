@@ -56,6 +56,7 @@ struct JNIClassTests {
 
         import org.swift.swiftkit.core.*;
         import org.swift.swiftkit.core.util.*;
+        import org.swift.swiftkit.core.collections.*;
         import java.util.*;
         import java.util.concurrent.atomic.AtomicBoolean;
         import org.swift.swiftkit.core.annotations.*;
@@ -221,7 +222,7 @@ struct JNIClassTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -230,7 +231,7 @@ struct JNIClassTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init())
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
       ]
@@ -331,7 +332,7 @@ struct JNIClassTests {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: selfPointer$.pointee.copy())
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -386,7 +387,7 @@ struct JNIClassTests {
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return selfPointer$.pointee.isEqual(to: other$.pointee).getJNIValue(in: environment)
+          return selfPointer$.pointee.isEqual(to: other$.pointee).getJNILocalRefValue(in: environment)
         }
         """
       ]

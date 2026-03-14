@@ -70,7 +70,7 @@ extension CType {
     case .optional(let wrapped) where wrapped.isPointer:
       try self.init(cdeclType: wrapped)
 
-    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite, .array:
+    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite, .array, .dictionary:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
@@ -130,11 +130,8 @@ extension SwiftKnownTypeDeclKind {
     case .array:
       .pointer(.qualified(const: false, volatile: false, type: .void))
     case .void: .void
-    case .unsafePointer, .unsafeMutablePointer, .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-      .unsafeBufferPointer, .unsafeMutableBufferPointer, .string, .foundationData, .foundationDataProtocol,
-      .essentialsData, .essentialsDataProtocol, .optional, .foundationDate, .essentialsDate, .foundationUUID,
-      .essentialsUUID:
-      nil
+    default:
+      nil // Since we know the set of all primitives, we can safely assume all others are not primitive
     }
   }
 }

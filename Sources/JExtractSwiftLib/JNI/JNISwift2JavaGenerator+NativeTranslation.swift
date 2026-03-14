@@ -117,6 +117,16 @@ extension JNISwift2JavaGenerator {
             }
             return try translateArrayParameter(elementType: elementType, parameterName: parameterName)
 
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(type)
+            }
+            return try translateDictionaryParameter(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1],
+              parameterName: parameterName
+            )
+
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
@@ -304,6 +314,13 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayParameter(
           elementType: elementType,
+          parameterName: parameterName
+        )
+
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryParameter(
+          keyType: keyType,
+          valueType: valueType,
           parameterName: parameterName
         )
 
@@ -639,7 +656,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -671,7 +688,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -695,6 +712,16 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
             return try translateArrayResult(elementType: elementType, resultName: resultName)
+
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(swiftResult.type)
+            }
+            return try translateDictionaryResult(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1],
+              resultName: resultName
+            )
 
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
@@ -767,6 +794,13 @@ extension JNISwift2JavaGenerator {
 
       case .array(let elementType):
         return try translateArrayResult(elementType: elementType, resultName: resultName)
+
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryResult(
+          keyType: keyType,
+          valueType: valueType,
+          resultName: resultName
+        )
 
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(elements: elements, resultName: resultName)
@@ -945,6 +979,37 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(elementType)
       }
     }
+
+    func translateDictionaryParameter(
+      keyType: SwiftType,
+      valueType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      NativeParameter(
+        parameters: [
+          JavaParameter(name: parameterName, type: .long)
+        ],
+        conversion: .initFromJNI(.placeholder, swiftType: .dictionary(key: keyType, value: valueType)),
+        indirectConversion: nil,
+        conversionCheck: nil
+      )
+    }
+
+    func translateDictionaryResult(
+      keyType: SwiftType,
+      valueType: SwiftType,
+      resultName: String
+    ) throws -> NativeResult {
+      NativeResult(
+        javaType: .long,
+        conversion: .method(
+          .placeholder,
+          function: "dictionaryGetJNIValue",
+          arguments: [("in", .constant("environment"))]
+        ),
+        outParameters: []
+      )
+    }
   }
 
   struct NativeFunctionSignature {
@@ -976,6 +1041,12 @@ extension JNISwift2JavaGenerator {
 
     /// Out parameters for populating the indirect return values.
     var outParameters: [JavaParameter]
+
+    init(javaType: JavaType, conversion: NativeSwiftConversionStep, outParameters: [JavaParameter]) {
+      self.javaType = javaType
+      self.conversion = conversion.localRefOutermostJNIValue()
+      self.outParameters = outParameters
+    }
   }
 
   /// Describes how to convert values between Java types and Swift through JNI
@@ -990,6 +1061,10 @@ extension JNISwift2JavaGenerator {
 
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
+
+    /// `value.getJNILocalRefValue(in:)` — used only in return positions of
+    /// @_cdecl functions to ensure the local ref survives ARC destruction.
+    indirect case getJNILocalRefValue(NativeSwiftConversionStep)
 
     /// `value.getJValue(in:)`
     indirect case getJValue(NativeSwiftConversionStep)
@@ -1102,6 +1177,18 @@ extension JNISwift2JavaGenerator {
     /// Destructures a Swift tuple result and writes each element to an out-parameter.
     indirect case tupleDestructure(elements: [(index: Int, label: String?, conversion: NativeSwiftConversionStep, outParamName: String, javaType: JavaType)])
 
+    /// Promotes the outermost `.getJNIValue` to `.getJNILocalRefValue`.
+    /// Used for `@_cdecl` return positions to ensure the local ref survives
+    /// ARC destruction of temporary `JavaObject`s.
+    func localRefOutermostJNIValue() -> NativeSwiftConversionStep {
+      switch self {
+      case .getJNIValue(let inner):
+        return .getJNILocalRefValue(inner)
+      default:
+        return self
+      }
+    }
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -1119,6 +1206,10 @@ extension JNISwift2JavaGenerator {
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).getJNIValue(in: environment)"
+
+      case .getJNILocalRefValue(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).getJNILocalRefValue(in: environment)"
 
       case .getJValue(let inner):
         let inner = inner.render(&printer, placeholder)

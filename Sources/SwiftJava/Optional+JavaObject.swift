@@ -26,6 +26,18 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
     }
   }
 
+  public func getJNILocalRefValue(in environment: JNIEnvironment) -> JNIType {
+    switch self {
+    case let value?:
+      // Create a new local ref so it survives ARC destruction of this JavaObject.
+      // When used as a return value from a @_cdecl JNI function, Swift ARC may
+      // destroy this JavaObject (and its global ref) in the function epilog before
+      // the JVM can read the returned reference.
+      environment.interface.NewLocalRef(environment, value.javaThis)
+    case nil: nil
+    }
+  }
+
   public init(fromJNI value: JNIType, in environment: JNIEnvironment) {
     if let this = value {
       // FIXME: Think about checking the runtime type?
