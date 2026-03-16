@@ -32,6 +32,6 @@ extension URL {
 
 extension JavaURL {
   public static func fromSwift(_ url: URL) throws -> JavaURL {
-    try JavaURL(url.absoluteString)
+    try URI(url.absoluteString).toURL()
   }
 }

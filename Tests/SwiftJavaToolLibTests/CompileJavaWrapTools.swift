@@ -105,10 +105,10 @@ func assertWrapJavaOutput(
         fatalError("jar failed with exit code \(process.terminationStatus)")
       }
       print("Created JAR: \(jarFile)")
-      return try! JavaURL.init("\(jarFile)")
+      return try! URI("\(jarFile)").toURL()
     }
   } else {
-    classpathJavaURLs = classpath.map({ try! JavaURL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
+    classpathJavaURLs = classpath.map({ try! URI("\($0)/").toURL() }) // we MUST have a trailing slash for JVM to consider it a search directory
   }
   let classLoader = URLClassLoader(classpathJavaURLs, environment: environment)
 
