@@ -4,26 +4,40 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Function")
 public struct JavaFunction<T: AnyJavaObject, R: AnyJavaObject> {
-  @JavaMethod
-  public func apply(_ arg0: JavaObject?) -> JavaObject?
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.Function.apply(T)
+  /// ```
+  @JavaMethod(typeErasedResult: "R!")
+  public func apply(_ arg0: T?) -> R!
 
+  /// Java method `compose`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default <V> java.util.function.Function<V, R> java.util.function.Function.compose(java.util.function.Function<? super V, ? extends T>)
+  /// ```
   @JavaMethod
-  public func compose(
-    _ arg0: JavaFunction<JavaObject, JavaObject>?
-  ) -> JavaFunction<
-    JavaObject, JavaObject
-  >?
+  public func compose<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, T>?) -> JavaFunction<V, R>!
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default <V> java.util.function.Function<T, V> java.util.function.Function.andThen(java.util.function.Function<? super R, ? extends V>)
+  /// ```
   @JavaMethod
-  public func andThen(
-    _ arg0: JavaFunction<JavaObject, JavaObject>?
-  ) -> JavaFunction<
-    JavaObject, JavaObject
-  >?
+  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaFunction<T, V>!
 }
 extension JavaClass {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.function.Function<T, T> java.util.function.Function.identity()
+  /// ```
   @JavaStaticMethod
-  public func identity<T: AnyJavaObject, R: AnyJavaObject>() -> JavaFunction<
-    JavaObject, JavaObject
-  >? where ObjectType == JavaFunction<T, R>
+  public func identity<T: AnyJavaObject, R: AnyJavaObject>() -> JavaFunction<T, T>! where ObjectType == JavaFunction<T, R>
 }

@@ -135,6 +135,7 @@ extension JavaTranslator {
 
   func getSwiftReturnTypeNameAsString(
     method: JavaLangReflect.Method,
+    substitution: SubstitutionMap?,
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
@@ -145,6 +146,7 @@ extension JavaTranslator {
     return try getSwiftTypeNameAsString(
       method: method,
       genericReturnType!,
+      substitution: substitution,
       preferValueTypes: preferValueTypes,
       outerOptional: outerOptional
     )
@@ -154,14 +156,18 @@ extension JavaTranslator {
   func getSwiftTypeNameAsString(
     method: JavaLangReflect.Method? = nil,
     _ javaType: Type,
+    substitution: SubstitutionMap?,
     preferValueTypes: Bool,
     outerOptional: OptionalKind,
     eraseTypeArguments: Bool = false
   ) throws -> String {
+    // Replace if it is a type variable and we have a substitution for it.
+    let javaType = substitution?.resolve(javaType) ?? javaType
+
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
-      let bound = typeVariable.getBounds()[0]
+      typeVariable.getBounds()[0] != nil
     {
       return outerOptional.adjustTypeName(typeVariable.getName())
     }
@@ -174,6 +180,7 @@ extension JavaTranslator {
       // Replace a wildcard type with its first bound.
       return try getSwiftTypeNameAsString(
         bound,
+        substitution: substitution,
         preferValueTypes: preferValueTypes,
         outerOptional: outerOptional
       )
@@ -184,6 +191,7 @@ extension JavaTranslator {
       if preferValueTypes {
         let elementType = try getSwiftTypeNameAsString(
           arrayType.getGenericComponentType()!,
+          substitution: substitution,
           preferValueTypes: preferValueTypes,
           outerOptional: .optional
         )
@@ -204,6 +212,7 @@ extension JavaTranslator {
       if let rawJavaType = parameterizedType.getRawType() {
         var rawSwiftType = try getSwiftTypeNameAsString(
           rawJavaType,
+          substitution: substitution,
           preferValueTypes: false,
           outerOptional: outerOptional
         )
@@ -225,12 +234,13 @@ extension JavaTranslator {
           let mappedSwiftName = try getSwiftTypeNameAsString(
             method: method,
             typeArg,
+            substitution: substitution,
             preferValueTypes: false,
             outerOptional: .nonoptional
           )
 
           // FIXME: improve the get instead...
-          if mappedSwiftName == nil || mappedSwiftName == "JavaObject" {
+          if mappedSwiftName == "JavaObject" {
             // Try to salvage it, is it perhaps a type parameter?
             if let method {
               let typeParameters = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
