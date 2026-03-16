@@ -281,3 +281,12 @@ jobs:
         run: ./scripts/run-linkage-test.sh
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+
+  android-sdk-testing:
+    name: Android SDK with emulator testing
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.8
+    with:
+      enable_linux_checks: false
+      enable_windows_checks: false
+      enable_android_sdk_build: true
+      enable_android_sdk_checks: true
