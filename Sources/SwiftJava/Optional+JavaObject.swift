@@ -14,7 +14,7 @@
 
 import SwiftJavaJNICore
 
-extension Optional: JavaValue where Wrapped: AnyJavaObject {
+extension Optional: @retroactive JavaValue where Wrapped: AnyJavaObject {
   public typealias JNIType = jobject?
 
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.l }
@@ -29,10 +29,12 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   public func getJNILocalRefValue(in environment: JNIEnvironment) -> JNIType {
     switch self {
     case let value?:
-      // Create a new local ref so it survives ARC destruction of this JavaObject.
-      // When used as a return value from a @_cdecl JNI function, Swift ARC may
-      // destroy this JavaObject (and its global ref) in the function epilog before
-      // the JVM can read the returned reference.
+      // Create a new local ref so it survives when returned from a JNI call.
+      //
+      // When a JavaObject is used as a return value from a JNI call,
+      // the Swift JavaObjectHolder holding the global reference to the java heap object
+      // may be destroyed before the JVM can read the returned reference, so we need to
+      // make a local ref so that the reference survives the return.
       environment.interface.NewLocalRef(environment, value.javaThis)
     case nil: nil
     }
