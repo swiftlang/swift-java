@@ -556,4 +556,45 @@ final class GenericsWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+  func testInheritedGenericSubstitution() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      interface MyFunction<T, R> {
+          R apply(T t);
+      }
+
+      interface MyUnaryOperator<T> extends MyFunction<T, T> {
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyFunction",
+        "com.example.MyUnaryOperator",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.MyFunction")
+        public struct MyFunction<T: AnyJavaObject, R: AnyJavaObject> {
+        """,
+        """
+        @JavaMethod(typeErasedResult: "R!")
+        public func apply(_ arg0: T?) -> R!
+        """,
+        """
+        @JavaInterface("com.example.MyUnaryOperator", extends: MyFunction<JavaObject, JavaObject>.self)
+        public struct MyUnaryOperator<T: AnyJavaObject> {
+        """,
+        """
+        @JavaMethod(typeErasedResult: "T!")
+        public func apply(_ arg0: T?) -> T!
+        """,
+      ]
+    )
+  }
 }
