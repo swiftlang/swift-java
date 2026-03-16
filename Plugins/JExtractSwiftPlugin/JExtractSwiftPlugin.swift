@@ -152,7 +152,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         executable: toolURL,
         arguments: arguments,
         inputFiles: [configFile] + swiftFiles,
-        outputFiles: jextractOutputFiles
+        outputFiles: jextractOutputFiles,
       )
     ]
 
@@ -193,7 +193,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
 
     let javaHome = URL(filePath: findJavaHome())
-    let javacPath = javaHome
+    let javacPath =
+      javaHome
       .appending(path: "bin")
       .appending(path: self.javacName)
 
@@ -232,7 +233,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         executable: toolURL,
         arguments: javaCallbacksArguments,
         inputFiles: outputSwiftFiles + [swiftJavaDirectory],
-        outputFiles: [javaCallbacksSwiftOutput]
+        outputFiles: [javaCallbacksSwiftOutput],
       )
     ]
 

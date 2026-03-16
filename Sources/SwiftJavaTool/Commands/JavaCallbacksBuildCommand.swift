@@ -40,7 +40,7 @@ extension SwiftJava {
       commandName: "java-callbacks-build",
       abstract:
         "Build SwiftKitCore, compile Java callbacks, and generate Swift wrappers (for use by JExtractSwiftPlugin)",
-      shouldDisplay: false
+      shouldDisplay: false,
     )
 
     // MARK: Gradle options
@@ -78,7 +78,7 @@ extension SwiftJava {
 
     @Option(
       name: .customLong("output-directory"),
-      help: "Directory where generated Swift files should be written"
+      help: "Directory where generated Swift files should be written",
     )
     var outputDirectory: String
 
@@ -109,7 +109,7 @@ extension SwiftJava {
           "--no-daemon",
         ],
         environment: .inherit.updating(["GRADLE_USER_HOME": gradleUserHome]),
-        errorMessage: "gradle :SwiftKitCore:build"
+        errorMessage: "gradle :SwiftKitCore:build",
       )
 
       // If the sources list does not exist, jextract produced no Java callbacks.
@@ -117,14 +117,17 @@ extension SwiftJava {
       guard FileManager.default.fileExists(atPath: javaSourcesList) else {
         try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
         try "// No Java callbacks generated\n".write(
-          to: outputFile, atomically: true, encoding: .utf8)
+          to: outputFile,
+          atomically: true,
+          encoding: .utf8,
+        )
         return
       }
 
       // 2. Compile Java sources with javac.
       try FileManager.default.createDirectory(
         atPath: javaOutputDirectory,
-        withIntermediateDirectories: true
+        withIntermediateDirectories: true,
       )
 
       try await runSubprocess(
@@ -135,7 +138,7 @@ extension SwiftJava {
           "-parameters",
           "-classpath", swiftKitCoreClasspath,
         ],
-        errorMessage: "javac"
+        errorMessage: "javac",
       )
 
       // 3. Generate swift-java.config from compiled classes.
@@ -154,7 +157,7 @@ extension SwiftJava {
       try await runSubprocess(
         executable: swiftJavaTool,
         arguments: configureArgs,
-        errorMessage: "swift-java configure"
+        errorMessage: "swift-java configure",
       )
 
       // 4. Generate Swift wrappers using wrap-java.
@@ -174,7 +177,7 @@ extension SwiftJava {
       try await runSubprocess(
         executable: swiftJavaTool,
         arguments: wrapJavaArgs,
-        errorMessage: "swift-java wrap-java"
+        errorMessage: "swift-java wrap-java",
       )
     }
   }
@@ -186,14 +189,14 @@ private func runSubprocess(
   executable: String,
   arguments: [String],
   environment: Subprocess.Environment = .inherit,
-  errorMessage: String
+  errorMessage: String,
 ) async throws {
   let result = try await Subprocess.run(
     .path(FilePath(executable)),
     arguments: .init(arguments),
     environment: environment,
     output: .standardOutput,
-    error: .standardError
+    error: .standardError,
   )
   guard result.terminationStatus.isSuccess else {
     throw JavaCallbacksBuildError(
