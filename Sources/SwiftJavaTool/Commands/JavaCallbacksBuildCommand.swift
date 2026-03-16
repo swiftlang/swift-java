@@ -22,18 +22,20 @@ import System
 @preconcurrency import SystemPackage
 #endif
 
-/// Builds Swift-Java callbacks in a single command:
-/// 1. Building SwiftKitCore with Gradle
-/// 2. Compiling extracted Java sources with javac
-/// 3. Running `swift-java configure` to produce a swift-java.config
-/// 4. Running `swift-java wrap-java` to generate Swift wrappers
-///
-/// This command is used by ``JExtractSwiftPlugin`` to consolidate all of the above
-/// into a single build command that declares only a Swift file as its output,
-/// avoiding SPM treating intermediate Java artifacts (compiled classes, config files,
-/// Gradle output directories) as module resources, which would trigger
-/// resource_bundle_accessor.swift generation and pull Foundation.Bundle into the binary.
 extension SwiftJava {
+  /// Builds Swift-Java callbacks in a single command:
+  /// 1. Building SwiftKitCore with Gradle
+  /// 2. Compiling extracted Java sources with javac
+  /// 3. Running `swift-java configure` to produce a swift-java.config
+  /// 4. Running `swift-java wrap-java` to generate Swift wrappers
+  ///
+  /// **WORKAROUND**: rdar://172649681 if we invoke commands one by one with java outputs SwiftPM will link Foundation
+  ///
+  /// This command is used by ``JExtractSwiftPlugin`` to consolidate all of the above
+  /// into a single build command that declares only a Swift file as its output,
+  /// avoiding SPM treating intermediate Java artifacts (compiled classes, config files,
+  /// Gradle output directories) as module resources, which would trigger
+  /// resource_bundle_accessor.swift generation and pull Foundation.Bundle into the binary.
   struct JavaCallbacksBuildCommand: AsyncParsableCommand {
 
     static let configuration = CommandConfiguration(
