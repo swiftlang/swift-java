@@ -59,6 +59,9 @@ struct JavaClassTranslator {
   /// The Swift names of the interfaces that this class implements.
   let swiftInterfaces: [String]
 
+  /// Substitution map for resolving generic types.
+  let substitution: SubstitutionMap
+
   /// The annotations of the Java class.
   /// In other words, RUNTIME retained annotations, visible through reflection.
   let annotations: [Annotation]
@@ -138,6 +141,9 @@ struct JavaClassTranslator {
     self.javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
+    // Generic substitution.
+    self.substitution = SubstitutionMap(startingFrom: javaClass)
+
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
@@ -185,6 +191,7 @@ struct JavaClassTranslator {
       do {
         return try translator.getSwiftTypeNameAsString(
           javaType,
+          substitution: nil,
           preferValueTypes: false,
           outerOptional: .nonoptional,
           eraseTypeArguments: true
@@ -920,6 +927,7 @@ extension JavaClassTranslator {
     let resultTypeStr: String
     let resultType = try translator.getSwiftReturnTypeNameAsString(
       method: javaMethod,
+      substitution: substitution,
       preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
@@ -1050,6 +1058,7 @@ extension JavaClassTranslator {
   package func renderField(_ javaField: Field) throws -> DeclSyntax {
     let typeName = try translator.getSwiftTypeNameAsString(
       javaField.getGenericType()!,
+      substitution: substitution,
       preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
@@ -1163,6 +1172,7 @@ extension JavaClassTranslator {
       let typeName = try translator.getSwiftTypeNameAsString(
         method: javaMethod,
         javaParameter.getParameterizedType()!,
+        substitution: substitution,
         preferValueTypes: true,
         outerOptional: .optional
       )
@@ -1181,6 +1191,7 @@ extension JavaClassTranslator {
 
       let typeName = try translator.getSwiftTypeNameAsString(
         javaParameter.getParameterizedType()!,
+        substitution: substitution,
         preferValueTypes: true,
         outerOptional: .optional
       )
