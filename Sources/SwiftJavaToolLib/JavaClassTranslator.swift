@@ -155,12 +155,13 @@ struct JavaClassTranslator {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
           if let javaGenericSuperclass = javaGenericSuperclass?.as(ParameterizedType.self) {
             for typeArg in javaGenericSuperclass.getActualTypeArguments() {
-              let javaTypeArgName = typeArg?.getTypeName() ?? ""
-              if let swiftTypeArgName = self.translator.translatedClasses[javaTypeArgName] {
-                swiftSuperclassTypeArgs.append(swiftTypeArgName.qualifiedName)
-              } else {
-                swiftSuperclassTypeArgs.append("/* MISSING MAPPING FOR */ \(javaTypeArgName)")
-              }
+              let mappedSwiftName = try translator.getSwiftTypeNameAsString(
+                typeArg!,
+                substitution: substitution,
+                preferValueTypes: false,
+                outerOptional: .nonoptional
+              )
+              swiftSuperclassTypeArgs.append(mappedSwiftName)
             }
           }
           break
