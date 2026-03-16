@@ -40,6 +40,7 @@ struct JNIEnumTests {
 
         import org.swift.swiftkit.core.*;
         import org.swift.swiftkit.core.util.*;
+        import org.swift.swiftkit.core.collections.*;
         import java.util.*;
         import java.util.concurrent.atomic.AtomicBoolean;
         import org.swift.swiftkit.core.annotations.*;
@@ -233,7 +234,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -242,7 +243,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -251,7 +252,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment), y: Int32(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
       ]
@@ -315,7 +316,7 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(Ljava/lang/String;)V")
           let constructorID$ = cache$[method$]
-          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNIValue(in: environment) ?? nil)]
+          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNILocalRefValue(in: environment) ?? nil)]
           return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,
@@ -330,7 +331,7 @@ struct JNIEnumTests {
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(JI)V")
           let constructorID$ = cache$[method$]
-          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNIValue(in: environment)), jvalue(i: y.getJNIValue(in: environment))]
+          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNILocalRefValue(in: environment)), jvalue(i: y.getJNILocalRefValue(in: environment))]
           return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,

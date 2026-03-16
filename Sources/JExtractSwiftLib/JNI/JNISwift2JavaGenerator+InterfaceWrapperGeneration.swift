@@ -238,6 +238,9 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayParameter(name: parameterName, elementType: elementType)
 
+      case .dictionary:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+
       case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
@@ -256,7 +259,7 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .array, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
+      case .array, .dictionary, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
         throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
       }
     }
@@ -324,6 +327,9 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try self.translateArrayResult(elementType: elementType)
 
+      case .dictionary:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+
       case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
@@ -342,7 +348,7 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .array, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
+      case .array, .dictionary, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
         throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
       }
     }
@@ -478,7 +484,7 @@ extension SwiftType {
     case .array(let elementType):
       return elementType.isDirectlyTranslatedToWrapJava
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .dictionary:
       return false
     }
   }

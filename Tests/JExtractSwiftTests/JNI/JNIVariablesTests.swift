@@ -75,7 +75,7 @@ struct JNIVariablesTests {
         @_cdecl("Java_com_example_swift_MyClass__00024getConstant__J")
         public func Java_com_example_swift_MyClass__00024getConstant__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           ...
-          return selfPointer$.pointee.constant.getJNIValue(in: environment)
+          return selfPointer$.pointee.constant.getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -140,7 +140,7 @@ struct JNIVariablesTests {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           ...
-          return selfPointer$.pointee.mutable.getJNIValue(in: environment)
+          return selfPointer$.pointee.mutable.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -193,7 +193,7 @@ struct JNIVariablesTests {
         @_cdecl("Java_com_example_swift_MyClass__00024getComputed__J")
         public func Java_com_example_swift_MyClass__00024getComputed__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           ...
-          return selfPointer$.pointee.computed.getJNIValue(in: environment)
+          return selfPointer$.pointee.computed.getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -239,7 +239,7 @@ struct JNIVariablesTests {
         public func Java_com_example_swift_MyClass__00024getComputedThrowing__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           ...
           do {
-            return try selfPointer$.pointee.computedThrowing.getJNIValue(in: environment)
+            return try selfPointer$.pointee.computedThrowing.getJNILocalRefValue(in: environment)
           } catch {
             environment.throwAsException(error)
             return Int64.jniPlaceholderValue
@@ -302,7 +302,7 @@ struct JNIVariablesTests {
         @_cdecl("Java_com_example_swift_MyClass__00024getGetterAndSetter__J")
         public func Java_com_example_swift_MyClass__00024getGetterAndSetter__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           ...
-          return selfPointer$.pointee.getterAndSetter.getJNIValue(in: environment)
+          return selfPointer$.pointee.getterAndSetter.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -368,7 +368,7 @@ struct JNIVariablesTests {
         @_cdecl("Java_com_example_swift_MyClass__00024isSomeBoolean__J")
         public func Java_com_example_swift_MyClass__00024isSomeBoolean__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jboolean {
           ...
-          return selfPointer$.pointee.someBoolean.getJNIValue(in: environment)
+          return selfPointer$.pointee.someBoolean.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -434,7 +434,7 @@ struct JNIVariablesTests {
         @_cdecl("Java_com_example_swift_MyClass__00024isBoolean__J")
         public func Java_com_example_swift_MyClass__00024isBoolean__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jboolean {
           ...
-          return selfPointer$.pointee.isBoolean.getJNIValue(in: environment)
+          return selfPointer$.pointee.isBoolean.getJNILocalRefValue(in: environment)
         }
         """,
         """
