@@ -23,6 +23,7 @@ extension JNISwift2JavaGenerator {
   static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
+    "org.swift.swiftkit.core.collections.*",
     "java.util.*",
     "java.util.concurrent.atomic.AtomicBoolean",
 

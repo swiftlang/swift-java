@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaUtil
 @_spi(Testing) import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaToolLib
@@ -505,6 +506,28 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
+  func testGenericSuperclassNotMapped() throws {
+    // ArrayDeque<E> extends AbstractCollection<E>
+    // If AbstractCollection is not mapped, it should fall back to JavaObject
+    try assertTranslatedClass(
+      ArrayDeque<JavaObject>.self,
+      swiftTypeName: "ArrayDeque",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.util.Deque": SwiftTypeName(module: "SwiftJava", name: "Deque"),
+        "java.util.ArrayDeque": SwiftTypeName(module: "JavaUtil", name: "ArrayDeque"),
+      ],
+      expectedChunks: [
+        "import SwiftJava",
+        """
+        @JavaClass("java.util.ArrayDeque", implements: Deque<JavaObject>.self)
+        open class ArrayDeque<E: AnyJavaObject>: JavaObject {
+        """,
+      ]
+    )
+  }
+
   func testJavaInterfaceAsClassNOT() throws {
     try assertTranslatedClass(
       MyJavaIntFunction<JavaObject>.self,
@@ -590,7 +613,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        open override func getDeclaringClass() -> JavaClass<T>!
+        open func getDeclaringClass() -> JavaClass<T>!
         """,
       ]
     )

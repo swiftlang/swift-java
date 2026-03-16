@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,11 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJava
-import SwiftJavaJNICore
+public func makeStringToLongDictionary() -> [String: Int64] {
+  [
+    "hello": 1,
+    "world": 2,
+  ]
+}
 
-// FIXME: workaround until importing properly would make UCL inherit from CL https://github.com/swiftlang/swift-java/issues/423
-extension URLClassLoader /* workaround for missing inherits from ClassLoader */ {
-  @JavaMethod
-  public func loadClass(_ name: String) throws -> JavaClass<JavaObject>?
+public func stringToLongDictionary(dict: [String: Int64]) -> [String: Int64] {
+  dict
+}
+
+public func insertIntoStringToLongDictionary(dict: [String: Int64], key: String, value: Int64) -> [String: Int64] {
+  var copy = dict
+  copy[key] = value
+  return copy
 }

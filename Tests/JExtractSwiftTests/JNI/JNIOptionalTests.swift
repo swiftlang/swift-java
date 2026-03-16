@@ -75,7 +75,7 @@ struct JNIOptionalTests {
           let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment) : nil).map {
             Int64($0) << 32 | Int64(1)
           } ?? 0
-          return result_value$.getJNIValue(in: environment)
+          return result_value$.getJNILocalRefValue(in: environment)
         }
         """
       ]

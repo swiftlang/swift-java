@@ -34,4 +34,9 @@ extension JavaType {
     return .class(package: "org.swift.swiftkit.core.tuple", name: "Tuple\(arity)<\(genericParams)>")
   }
 
+  /// The description of the type org.swift.swiftkit.core.collections.SwiftDictionaryMap<K, V>
+  static func swiftDictionaryMap(_ K: JavaType, _ V: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core.collections", name: "SwiftDictionaryMap", typeParameters: [K.boxedType, V.boxedType])
+  }
+
 }

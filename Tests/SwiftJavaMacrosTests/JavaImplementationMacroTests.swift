@@ -48,7 +48,7 @@ class JavaImplementationMacroTests: XCTestCase {
         func __macro_local_11test_methodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = HelloWorld(javaThis: thisObj, environment: environment!)
           return obj.test_method()
-          .getJNIValue(in: environment)
+          .getJNILocalRefValue(in: environment)
         }
         """,
       macros: Self.javaImplementationMacros
@@ -78,7 +78,7 @@ class JavaImplementationMacroTests: XCTestCase {
         func __macro_local_12simpleMethodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = MyClass(javaThis: thisObj, environment: environment!)
           return obj.simpleMethod()
-          .getJNIValue(in: environment)
+          .getJNILocalRefValue(in: environment)
         }
         """,
       macros: Self.javaImplementationMacros
@@ -107,7 +107,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @_cdecl("Java_org_example_Utils_static_1helper")
         func __macro_local_13static_helperfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> String.JNIType {
           return Utils.static_helper(environment: environment)
-          .getJNIValue(in: environment)
+          .getJNILocalRefValue(in: environment)
         }
         """,
       macros: Self.javaImplementationMacros
@@ -145,14 +145,56 @@ class JavaImplementationMacroTests: XCTestCase {
         func __macro_local_10method_onefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = ClassWithUnderscores(javaThis: thisObj, environment: environment!)
           return obj.method_one()
-          .getJNIValue(in: environment)
+          .getJNILocalRefValue(in: environment)
         }
 
         @_cdecl("Java_test_Class_1With_1Underscores_method_1two")
         func __macro_local_10method_twofMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = ClassWithUnderscores(javaThis: thisObj, environment: environment!)
           return obj.method_two()
-          .getJNIValue(in: environment)
+          .getJNILocalRefValue(in: environment)
+        }
+        """,
+      macros: Self.javaImplementationMacros
+    )
+  }
+
+  func testJNIIdentifierEscapingWithJavaMethodNameOverride() throws {
+    assertMacroExpansion(
+      """
+      @JavaImplementation("org.swift.swiftkit.core.collections.SwiftDictionaryMap")
+      extension SwiftDictionaryMapJava {
+        @JavaMethod("$size")
+        public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) -> Int32 {
+          return 42
+        }
+
+        @JavaMethod("$destroy")
+        public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) {
+          // cleanup
+        }
+      }
+      """,
+      expandedSource: """
+
+        extension SwiftDictionaryMapJava {
+          public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) -> Int32 {
+              return 42
+          }
+          public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) {
+            // cleanup
+          }
+        }
+
+        @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024size")
+        func __macro_local_5_sizefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) -> Int32.JNIType {
+          return SwiftDictionaryMapJava._size(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
+          .getJNILocalRefValue(in: environment)
+        }
+
+        @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024destroy")
+        func __macro_local_8_destroyfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) {
+          return SwiftDictionaryMapJava._destroy(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
         }
         """,
       macros: Self.javaImplementationMacros

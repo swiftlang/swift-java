@@ -106,7 +106,7 @@ struct JNISubscriptsTests {
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return selfPointer$.pointee[].getJNIValue(in: environment)
+          return selfPointer$.pointee[].getJNILocalRefValue(in: environment)
         """,
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__DJ")
@@ -139,7 +139,7 @@ struct JNISubscriptsTests {
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return selfPointer$.pointee[Int32(fromJNI: index, in: environment)].getJNIValue(in: environment)
+          return selfPointer$.pointee[Int32(fromJNI: index, in: environment)].getJNILocalRefValue(in: environment)
         """,
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__IIJ")

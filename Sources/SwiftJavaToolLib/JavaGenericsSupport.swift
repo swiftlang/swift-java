@@ -41,7 +41,7 @@ func getGenericJavaTypeOriginInfo(_ type: Type?, from method: Method) -> [Generi
     return [] // it's not a generic type, no "origin" of the use to detect
   }
 
-  var methodTypeVars = method.getTypeParameters()
+  var methodTypeVars = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
 
   // TODO: also handle nested classes here...
   var classTypeVars = method.getDeclaringClass().getTypeParameters()

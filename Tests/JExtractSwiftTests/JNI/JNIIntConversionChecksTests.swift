@@ -76,7 +76,7 @@ struct JNIIntConversionChecksTests {
         let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
         result$.initialize(to: MyStruct.init(normalInt: Int(normalInt$indirect)))
         let resultBits$ = Int64(Int(bitPattern: result$))
-        return resultBits$.getJNIValue(in: environment)
+        return resultBits$.getJNILocalRefValue(in: environment)
         """,
       ]
     )
@@ -102,7 +102,7 @@ struct JNIIntConversionChecksTests {
         let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
         result$.initialize(to: MyStruct.init(unsignedInt: UInt(unsignedInt$indirect)))
         let resultBits$ = Int64(Int(bitPattern: result$))
-        return resultBits$.getJNIValue(in: environment)
+        return resultBits$.getJNILocalRefValue(in: environment)
         """,
       ]
     )
@@ -152,7 +152,7 @@ struct JNIIntConversionChecksTests {
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return UInt64(selfPointer$.pointee.unsignedInt).getJNIValue(in: environment)
+          return UInt64(selfPointer$.pointee.unsignedInt).getJNILocalRefValue(in: environment)
         """
       ]
     )
@@ -210,7 +210,7 @@ struct JNIIntConversionChecksTests {
         guard let selfPointer$ else {
           fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        return Int64(selfPointer$.pointee.dummyFunc(arg: Int(arg$indirect))).getJNIValue(in: environment)
+        return Int64(selfPointer$.pointee.dummyFunc(arg: Int(arg$indirect))).getJNILocalRefValue(in: environment)
         """,
       ]
     )
@@ -238,7 +238,7 @@ struct JNIIntConversionChecksTests {
         guard let selfPointer$ else {
           fatalError("selfPointer memory address was null in call to \\(#function)!")
         }
-        return UInt64(selfPointer$.pointee.dummyFunc(arg: UInt(arg$indirect))).getJNIValue(in: environment)
+        return UInt64(selfPointer$.pointee.dummyFunc(arg: UInt(arg$indirect))).getJNILocalRefValue(in: environment)
         """,
       ]
     )
@@ -264,7 +264,7 @@ struct JNIIntConversionChecksTests {
         let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
         result$.initialize(to: MyEnum.secondCase(UInt(arg0$indirect)))
         let resultBits$ = Int64(Int(bitPattern: result$))
-        return resultBits$.getJNIValue(in: environment)
+        return resultBits$.getJNILocalRefValue(in: environment)
         """,
       ]
     )

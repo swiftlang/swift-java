@@ -141,13 +141,13 @@ struct JavaClassTranslator {
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
-      var javaGenericSuperclass: JavaReflectType? = javaClass.getGenericSuperclass()
+      var javaGenericSuperclass: Type? = javaClass.getGenericSuperclass()
       var swiftSuperclassName: String? = nil
       var swiftSuperclassTypeArgs: [String] = []
       while let javaSuperclassNonOpt = javaSuperclass {
         do {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
-          if let javaGenericSuperclass = javaGenericSuperclass?.as(JavaReflectParameterizedType.self) {
+          if let javaGenericSuperclass = javaGenericSuperclass?.as(ParameterizedType.self) {
             for typeArg in javaGenericSuperclass.getActualTypeArguments() {
               let javaTypeArgName = typeArg?.getTypeName() ?? ""
               if let swiftTypeArgName = self.translator.translatedClasses[javaTypeArgName] {
@@ -163,7 +163,7 @@ struct JavaClassTranslator {
         }
 
         javaSuperclass = javaSuperclassNonOpt.getSuperclass()
-        javaGenericSuperclass = javaClass.getGenericSuperclass()
+        javaGenericSuperclass = javaSuperclassNonOpt.getGenericSuperclass()
       }
 
       self.effectiveJavaSuperclass = javaSuperclass
@@ -183,13 +183,12 @@ struct JavaClassTranslator {
       }
 
       do {
-        let typeName = try translator.getSwiftTypeNameAsString(
+        return try translator.getSwiftTypeNameAsString(
           javaType,
           preferValueTypes: false,
           outerOptional: .nonoptional,
           eraseTypeArguments: true
         )
-        return "\(typeName)"
       } catch {
         translator.logUntranslated("Unable to translate '\(fullName)' interface '\(javaType.getTypeName())': \(error)")
         return nil
@@ -883,7 +882,7 @@ extension JavaClassTranslator {
   ) -> OrderedSet<String> {
     var allGenericParameters = OrderedSet(genericParameters)
 
-    let typeParameters = method.getTypeParameters()
+    let typeParameters = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
     for typeParameter in typeParameters {
       guard let typeParameter else { continue }
 

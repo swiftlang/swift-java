@@ -5,31 +5,13 @@ import SwiftJavaJNICore
 @JavaClass("java.net.URI")
 open class URI: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: String,
-    _ arg1: String,
-    _ arg2: String,
-    _ arg3: String,
-    _ arg4: String,
-    environment: JNIEnvironment? = nil
-  ) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, _ arg4: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: String,
-    _ arg1: String,
-    _ arg2: String,
-    _ arg3: String,
-    environment: JNIEnvironment? = nil
-  ) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: String,
-    _ arg1: String,
-    _ arg2: String,
-    environment: JNIEnvironment? = nil
-  ) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
@@ -46,94 +28,274 @@ open class URI: JavaObject {
     environment: JNIEnvironment? = nil
   ) throws
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URI.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URI.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URI.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URI.compareTo(java.net.URI)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: URI?) -> Int32
 
+  /// Java method `isAbsolute`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URI.isAbsolute()
+  /// ```
   @JavaMethod
   open func isAbsolute() -> Bool
 
+  /// Java method `resolve`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URI java.net.URI.resolve(java.lang.String)
+  /// ```
   @JavaMethod
   open func resolve(_ arg0: String) -> URI!
 
+  /// Java method `resolve`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URI java.net.URI.resolve(java.net.URI)
+  /// ```
   @JavaMethod
   open func resolve(_ arg0: URI?) -> URI!
 
+  /// Java method `getScheme`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getScheme()
+  /// ```
   @JavaMethod
   open func getScheme() -> String
 
+  /// Java method `isOpaque`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URI.isOpaque()
+  /// ```
   @JavaMethod
   open func isOpaque() -> Bool
 
+  /// Java method `getRawAuthority`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawAuthority()
+  /// ```
   @JavaMethod
   open func getRawAuthority() -> String
 
+  /// Java method `getRawFragment`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawFragment()
+  /// ```
   @JavaMethod
   open func getRawFragment() -> String
 
+  /// Java method `getRawQuery`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawQuery()
+  /// ```
   @JavaMethod
   open func getRawQuery() -> String
 
+  /// Java method `getRawPath`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawPath()
+  /// ```
   @JavaMethod
   open func getRawPath() -> String
 
+  /// Java method `getHost`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getHost()
+  /// ```
   @JavaMethod
   open func getHost() -> String
 
+  /// Java method `getPort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URI.getPort()
+  /// ```
   @JavaMethod
   open func getPort() -> Int32
 
+  /// Java method `getAuthority`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getAuthority()
+  /// ```
   @JavaMethod
   open func getAuthority() -> String
 
+  /// Java method `getQuery`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getQuery()
+  /// ```
   @JavaMethod
   open func getQuery() -> String
 
+  /// Java method `getPath`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getPath()
+  /// ```
   @JavaMethod
   open func getPath() -> String
 
+  /// Java method `getUserInfo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getUserInfo()
+  /// ```
   @JavaMethod
   open func getUserInfo() -> String
 
+  /// Java method `toURL`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.net.URI.toURL() throws java.net.MalformedURLException
+  /// ```
   @JavaMethod
-  open func toURL() throws -> URL!
+  open func toURL() throws -> JavaURL!
 
+  /// Java method `normalize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URI java.net.URI.normalize()
+  /// ```
   @JavaMethod
   open func normalize() -> URI!
 
+  /// Java method `relativize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URI java.net.URI.relativize(java.net.URI)
+  /// ```
   @JavaMethod
   open func relativize(_ arg0: URI?) -> URI!
 
+  /// Java method `getRawSchemeSpecificPart`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawSchemeSpecificPart()
+  /// ```
   @JavaMethod
   open func getRawSchemeSpecificPart() -> String
 
+  /// Java method `parseServerAuthority`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
+  /// ```
   @JavaMethod
   open func parseServerAuthority() throws -> URI!
 
+  /// Java method `getSchemeSpecificPart`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getSchemeSpecificPart()
+  /// ```
   @JavaMethod
   open func getSchemeSpecificPart() -> String
 
+  /// Java method `getRawUserInfo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getRawUserInfo()
+  /// ```
   @JavaMethod
   open func getRawUserInfo() -> String
 
+  /// Java method `getFragment`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.getFragment()
+  /// ```
   @JavaMethod
   open func getFragment() -> String
 
+  /// Java method `toASCIIString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URI.toASCIIString()
+  /// ```
   @JavaMethod
   open func toASCIIString() -> String
 }
 extension JavaClass<URI> {
+  /// Java method `create`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.net.URI java.net.URI.create(java.lang.String)
+  /// ```
   @JavaStaticMethod
   public func create(_ arg0: String) -> URI!
 }
