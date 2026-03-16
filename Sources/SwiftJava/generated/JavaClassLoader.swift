@@ -3,76 +3,284 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.ClassLoader")
 open class JavaClassLoader: JavaObject {
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.ClassLoader.getName()
+  /// ```
   @JavaMethod
   open func getName() -> String
 
+  /// Java method `loadClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?> java.lang.ClassLoader.loadClass(java.lang.String) throws java.lang.ClassNotFoundException
+  /// ```
   @JavaMethod
   open func loadClass(_ arg0: String) throws -> JavaClass<JavaObject>!
 
+  /// Java method `loadClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.Class<?> java.lang.ClassLoader.loadClass(java.lang.String,boolean) throws java.lang.ClassNotFoundException
+  /// ```
   @JavaMethod
   open func loadClass(_ arg0: String, _ arg1: Bool) throws -> JavaClass<JavaObject>!
 
+  /// Java method `findResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.net.URL java.lang.ClassLoader.findResource(java.lang.String,java.lang.String) throws java.io.IOException
+  /// ```
   @JavaMethod
-  open func setSigners(_ arg0: JavaClass<JavaObject>?, _ arg1: [JavaObject?])
+  open func findResource(_ arg0: String, _ arg1: String) throws -> JavaURL!
 
+  /// Java method `findResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.net.URL java.lang.ClassLoader.findResource(java.lang.String)
+  /// ```
   @JavaMethod
-  open func getClassLoadingLock(_ arg0: String) -> JavaObject!
+  open func findResource(_ arg0: String) -> JavaURL!
 
-  @JavaMethod
-  open func findLoadedClass(_ arg0: String) -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func findClass(_ arg0: String, _ arg1: String) -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func resolveClass(_ arg0: JavaClass<JavaObject>?)
-
-  @JavaMethod
-  open func defineClass(_ arg0: String, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func defineClass(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func findLibrary(_ arg0: String) -> String
-
-  @JavaMethod
-  open func findSystemClass(_ arg0: String) throws -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  open func isRegisteredAsParallelCapable() -> Bool
-
-  @JavaMethod
-  open func getParent() -> JavaClassLoader!
-
-  @JavaMethod
-  open func setDefaultAssertionStatus(_ arg0: Bool)
-
-  @JavaMethod
-  open func setPackageAssertionStatus(_ arg0: String, _ arg1: Bool)
-
-  @JavaMethod
-  open func setClassAssertionStatus(_ arg0: String, _ arg1: Bool)
-
-  @JavaMethod
-  open func clearAssertionStatus()
-
+  /// Java method `getResourceAsStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.io.InputStream java.lang.ClassLoader.getResourceAsStream(java.lang.String)
+  /// ```
   @JavaMethod
   open func getResourceAsStream(_ arg0: String) -> InputStream!
 
+  /// Java method `getResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.lang.ClassLoader.getResource(java.lang.String)
+  /// ```
   @JavaMethod
-  open func getResource(_ arg0: String) -> JavaObject!
+  open func getResource(_ arg0: String) -> JavaURL!
+
+  /// Java method `setSigners`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final void java.lang.ClassLoader.setSigners(java.lang.Class<?>,java.lang.Object[])
+  /// ```
+  @JavaMethod
+  open func setSigners(_ arg0: JavaClass<JavaObject>?, _ arg1: [JavaObject?])
+
+  /// Java method `getClassLoadingLock`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.Object java.lang.ClassLoader.getClassLoadingLock(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func getClassLoadingLock(_ arg0: String) -> JavaObject!
+
+  /// Java method `findLoadedClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final java.lang.Class<?> java.lang.ClassLoader.findLoadedClass(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func findLoadedClass(_ arg0: String) -> JavaClass<JavaObject>!
+
+  /// Java method `findClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.Class<?> java.lang.ClassLoader.findClass(java.lang.String,java.lang.String)
+  /// ```
+  @JavaMethod
+  open func findClass(_ arg0: String, _ arg1: String) -> JavaClass<JavaObject>!
+
+  /// Java method `findClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.Class<?> java.lang.ClassLoader.findClass(java.lang.String) throws java.lang.ClassNotFoundException
+  /// ```
+  @JavaMethod
+  open func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+
+  /// Java method `resolveClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final void java.lang.ClassLoader.resolveClass(java.lang.Class<?>)
+  /// ```
+  @JavaMethod
+  open func resolveClass(_ arg0: JavaClass<JavaObject>?)
+
+  /// Java method `defineClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final java.lang.Class<?> java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int) throws java.lang.ClassFormatError
+  /// ```
+  @JavaMethod
+  open func defineClass(_ arg0: String, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
+
+  /// Java method `defineClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final java.lang.Class<?> java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError
+  /// ```
+  @available(*, deprecated)
+  @JavaMethod
+  open func defineClass(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
+
+  /// Java method `getResources`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Enumeration<java.net.URL> java.lang.ClassLoader.getResources(java.lang.String) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func getResources(_ arg0: String) throws -> Enumeration<JavaURL>!
+
+  /// Java method `findResources`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.util.Enumeration<java.net.URL> java.lang.ClassLoader.findResources(java.lang.String) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func findResources(_ arg0: String) throws -> Enumeration<JavaURL>!
+
+  /// Java method `findLibrary`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.String java.lang.ClassLoader.findLibrary(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func findLibrary(_ arg0: String) -> String
+
+  /// Java method `findSystemClass`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected final java.lang.Class<?> java.lang.ClassLoader.findSystemClass(java.lang.String) throws java.lang.ClassNotFoundException
+  /// ```
+  @JavaMethod
+  open func findSystemClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+
+  /// Java method `isRegisteredAsParallelCapable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final boolean java.lang.ClassLoader.isRegisteredAsParallelCapable()
+  /// ```
+  @JavaMethod
+  open func isRegisteredAsParallelCapable() -> Bool
+
+  /// Java method `getParent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final java.lang.ClassLoader java.lang.ClassLoader.getParent()
+  /// ```
+  @JavaMethod
+  open func getParent() -> JavaClassLoader!
+
+  /// Java method `setDefaultAssertionStatus`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.ClassLoader.setDefaultAssertionStatus(boolean)
+  /// ```
+  @JavaMethod
+  open func setDefaultAssertionStatus(_ arg0: Bool)
+
+  /// Java method `setPackageAssertionStatus`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.ClassLoader.setPackageAssertionStatus(java.lang.String,boolean)
+  /// ```
+  @JavaMethod
+  open func setPackageAssertionStatus(_ arg0: String, _ arg1: Bool)
+
+  /// Java method `setClassAssertionStatus`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.ClassLoader.setClassAssertionStatus(java.lang.String,boolean)
+  /// ```
+  @JavaMethod
+  open func setClassAssertionStatus(_ arg0: String, _ arg1: Bool)
+
+  /// Java method `clearAssertionStatus`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.ClassLoader.clearAssertionStatus()
+  /// ```
+  @JavaMethod
+  open func clearAssertionStatus()
 }
 extension JavaClass<JavaClassLoader> {
+  /// Java method `getPlatformClassLoader`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.ClassLoader java.lang.ClassLoader.getPlatformClassLoader()
+  /// ```
   @JavaStaticMethod
   public func getPlatformClassLoader() -> JavaClassLoader!
 
+  /// Java method `getSystemClassLoader`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader()
+  /// ```
   @JavaStaticMethod
   public func getSystemClassLoader() -> JavaClassLoader!
 
+  /// Java method `getSystemResourceAsStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.io.InputStream java.lang.ClassLoader.getSystemResourceAsStream(java.lang.String)
+  /// ```
+  @JavaStaticMethod
+  public func getSystemResourceAsStream(_ arg0: String) -> InputStream!
+
+  /// Java method `getSystemResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.net.URL java.lang.ClassLoader.getSystemResource(java.lang.String)
+  /// ```
+  @JavaStaticMethod
+  public func getSystemResource(_ arg0: String) -> JavaURL!
+
+  /// Java method `registerAsParallelCapable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected static boolean java.lang.ClassLoader.registerAsParallelCapable()
+  /// ```
   @JavaStaticMethod
   public func registerAsParallelCapable() -> Bool
+
+  /// Java method `getSystemResources`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.Enumeration<java.net.URL> java.lang.ClassLoader.getSystemResources(java.lang.String) throws java.io.IOException
+  /// ```
+  @JavaStaticMethod
+  public func getSystemResources(_ arg0: String) throws -> Enumeration<JavaURL>!
 }

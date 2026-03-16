@@ -89,7 +89,7 @@ func assertWrapJavaOutput(
   )
   translator.androidAPIVersions = androidAPIVersions
 
-  let classpathJavaURLs: [JavaNet.URL]
+  let classpathJavaURLs: [JavaURL]
   if makeJar {
     // Convert each classpath directory into a JAR and use those as classpath entries
     classpathJavaURLs = classpath.map { classpathDir in
@@ -105,10 +105,10 @@ func assertWrapJavaOutput(
         fatalError("jar failed with exit code \(process.terminationStatus)")
       }
       print("Created JAR: \(jarFile)")
-      return try! JavaNet.URL.init("\(jarFile)")
+      return try! JavaURL.init("\(jarFile)")
     }
   } else {
-    classpathJavaURLs = classpath.map({ try! JavaNet.URL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
+    classpathJavaURLs = classpath.map({ try! JavaURL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
   }
   let classLoader = URLClassLoader(classpathJavaURLs, environment: environment)
 

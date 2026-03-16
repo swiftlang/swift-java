@@ -3,161 +3,430 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.net.URLConnection")
-public struct URLConnection {
+open class URLConnection: JavaObject {
+  /// Java method `getDefaultUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URLConnection.getDefaultUseCaches()
+  /// ```
   @JavaMethod
-  public func getDefaultUseCaches() -> Bool
+  open func getDefaultUseCaches() -> Bool
 
+  /// Java method `getContentLengthLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getContentLengthLong()
+  /// ```
   @JavaMethod
-  public func getContentLengthLong() -> Int64
+  open func getContentLengthLong() -> Int64
 
+  /// Java method `getHeaderFieldLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getHeaderFieldLong(java.lang.String,long)
+  /// ```
   @JavaMethod
-  public func getHeaderFieldLong(_ arg0: String, _ arg1: Int64) -> Int64
+  open func getHeaderFieldLong(_ arg0: String, _ arg1: Int64) -> Int64
 
+  /// Java method `getHeaderField`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getHeaderField(java.lang.String)
+  /// ```
   @JavaMethod
-  public func getHeaderField(_ arg0: Int32) -> String
+  open func getHeaderField(_ arg0: String) -> String
 
+  /// Java method `getHeaderField`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getHeaderField(int)
+  /// ```
   @JavaMethod
-  public func getHeaderField(_ arg0: String) -> String
+  open func getHeaderField(_ arg0: Int32) -> String
 
+  /// Java method `getHeaderFieldDate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getHeaderFieldDate(java.lang.String,long)
+  /// ```
   @JavaMethod
-  public func getHeaderFieldDate(_ arg0: String, _ arg1: Int64) -> Int64
+  open func getHeaderFieldDate(_ arg0: String, _ arg1: Int64) -> Int64
 
+  /// Java method `getContentType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getContentType()
+  /// ```
   @JavaMethod
-  public func getContentType() -> String
+  open func getContentType() -> String
 
+  /// Java method `setConnectTimeout`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setConnectTimeout(int)
+  /// ```
   @JavaMethod
-  public func setConnectTimeout(_ arg0: Int32)
+  open func setConnectTimeout(_ arg0: Int32)
 
+  /// Java method `getConnectTimeout`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URLConnection.getConnectTimeout()
+  /// ```
   @JavaMethod
-  public func getConnectTimeout() -> Int32
+  open func getConnectTimeout() -> Int32
 
+  /// Java method `setReadTimeout`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setReadTimeout(int)
+  /// ```
   @JavaMethod
-  public func setReadTimeout(_ arg0: Int32)
+  open func setReadTimeout(_ arg0: Int32)
 
+  /// Java method `getReadTimeout`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URLConnection.getReadTimeout()
+  /// ```
   @JavaMethod
-  public func getReadTimeout() -> Int32
+  open func getReadTimeout() -> Int32
 
+  /// Java method `getContentEncoding`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getContentEncoding()
+  /// ```
   @JavaMethod
-  public func getContentEncoding() -> String
+  open func getContentEncoding() -> String
 
+  /// Java method `getExpiration`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getExpiration()
+  /// ```
   @JavaMethod
-  public func getExpiration() -> Int64
+  open func getExpiration() -> Int64
 
+  /// Java method `getHeaderFieldInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URLConnection.getHeaderFieldInt(java.lang.String,int)
+  /// ```
   @JavaMethod
-  public func getHeaderFieldInt(_ arg0: String, _ arg1: Int32) -> Int32
+  open func getHeaderFieldInt(_ arg0: String, _ arg1: Int32) -> Int32
 
+  /// Java method `getHeaderFieldKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getHeaderFieldKey(int)
+  /// ```
   @JavaMethod
-  public func getHeaderFieldKey(_ arg0: Int32) -> String
+  open func getHeaderFieldKey(_ arg0: Int32) -> String
 
+  /// Java method `getOutputStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.io.OutputStream java.net.URLConnection.getOutputStream() throws java.io.IOException
+  /// ```
   @JavaMethod
-  public func setDoInput(_ arg0: Bool)
+  open func getOutputStream() throws -> OutputStream!
 
+  /// Java method `setDoInput`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setDoInput(boolean)
+  /// ```
   @JavaMethod
-  public func getDoInput() -> Bool
+  open func setDoInput(_ arg0: Bool)
 
+  /// Java method `getDoInput`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URLConnection.getDoInput()
+  /// ```
   @JavaMethod
-  public func setDoOutput(_ arg0: Bool)
+  open func getDoInput() -> Bool
 
+  /// Java method `setDoOutput`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setDoOutput(boolean)
+  /// ```
   @JavaMethod
-  public func getDoOutput() -> Bool
+  open func setDoOutput(_ arg0: Bool)
 
+  /// Java method `getDoOutput`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URLConnection.getDoOutput()
+  /// ```
   @JavaMethod
-  public func setAllowUserInteraction(_ arg0: Bool)
+  open func getDoOutput() -> Bool
 
+  /// Java method `setAllowUserInteraction`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setAllowUserInteraction(boolean)
+  /// ```
   @JavaMethod
-  public func getAllowUserInteraction() -> Bool
+  open func setAllowUserInteraction(_ arg0: Bool)
 
+  /// Java method `getAllowUserInteraction`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URLConnection.getAllowUserInteraction()
+  /// ```
   @JavaMethod
-  public func getUseCaches() -> Bool
+  open func getAllowUserInteraction() -> Bool
 
+  /// Java method `getUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URLConnection.getUseCaches()
+  /// ```
   @JavaMethod
-  public func setIfModifiedSince(_ arg0: Int64)
+  open func getUseCaches() -> Bool
 
+  /// Java method `setIfModifiedSince`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setIfModifiedSince(long)
+  /// ```
   @JavaMethod
-  public func getIfModifiedSince() -> Int64
+  open func setIfModifiedSince(_ arg0: Int64)
 
+  /// Java method `getIfModifiedSince`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getIfModifiedSince()
+  /// ```
   @JavaMethod
-  public func setDefaultUseCaches(_ arg0: Bool)
+  open func getIfModifiedSince() -> Int64
 
+  /// Java method `setDefaultUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setDefaultUseCaches(boolean)
+  /// ```
   @JavaMethod
-  public func addRequestProperty(_ arg0: String, _ arg1: String)
+  open func setDefaultUseCaches(_ arg0: Bool)
 
+  /// Java method `addRequestProperty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.addRequestProperty(java.lang.String,java.lang.String)
+  /// ```
   @JavaMethod
-  public func getRequestProperty(_ arg0: String) -> String
+  open func addRequestProperty(_ arg0: String, _ arg1: String)
 
+  /// Java method `getRequestProperty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.getRequestProperty(java.lang.String)
+  /// ```
   @JavaMethod
-  public func toString() -> String
+  open func getRequestProperty(_ arg0: String) -> String
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URLConnection.toString()
+  /// ```
   @JavaMethod
-  public func connect()
+  open override func toString() -> String
 
+  /// Java method `getInputStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.io.InputStream java.net.URLConnection.getInputStream() throws java.io.IOException
+  /// ```
   @JavaMethod
-  public func getContent() -> JavaObject?
+  open func getInputStream() throws -> InputStream!
 
+  /// Java method `getContent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.net.URLConnection.getContent(java.lang.Class<?>[]) throws java.io.IOException
+  /// ```
   @JavaMethod
-  public func getContent(_ arg0: [JavaClass<JavaObject>?]) -> JavaObject?
+  open func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
 
+  /// Java method `getContent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.net.URLConnection.getContent() throws java.io.IOException
+  /// ```
   @JavaMethod
-  public func getDate() -> Int64
+  open func getContent() throws -> JavaObject!
 
+  /// Java method `connect`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.net.URLConnection.connect() throws java.io.IOException
+  /// ```
   @JavaMethod
-  public func setUseCaches(_ arg0: Bool)
+  open func connect() throws
 
+  /// Java method `getDate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getDate()
+  /// ```
   @JavaMethod
-  public func getLastModified() -> Int64
+  open func getDate() -> Int64
 
+  /// Java method `setUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setUseCaches(boolean)
+  /// ```
   @JavaMethod
-  public func getContentLength() -> Int32
+  open func setUseCaches(_ arg0: Bool)
 
+  /// Java method `getLastModified`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.net.URLConnection.getLastModified()
+  /// ```
   @JavaMethod
-  public func getURL() -> URL?
+  open func getLastModified() -> Int64
 
+  /// Java method `getContentLength`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URLConnection.getContentLength()
+  /// ```
   @JavaMethod
-  public func setRequestProperty(_ arg0: String, _ arg1: String)
+  open func getContentLength() -> Int32
 
+  /// Java method `getURL`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.net.URLConnection.getURL()
+  /// ```
   @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
+  open func getURL() -> JavaURL!
 
+  /// Java method `setRequestProperty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.net.URLConnection.setRequestProperty(java.lang.String,java.lang.String)
+  /// ```
   @JavaMethod
-  public func hashCode() -> Int32
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>?
-
-  @JavaMethod
-  public func notify()
-
-  @JavaMethod
-  public func notifyAll()
-
-  @JavaMethod
-  public func wait(_ arg0: Int64)
-
-  @JavaMethod
-  public func wait(_ arg0: Int64, _ arg1: Int32)
-
-  @JavaMethod
-  public func wait()
+  open func setRequestProperty(_ arg0: String, _ arg1: String)
 }
 extension JavaClass<URLConnection> {
-  @JavaMethod
+  /// Java method `getDefaultUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.net.URLConnection.getDefaultUseCaches(java.lang.String)
+  /// ```
+  @JavaStaticMethod
   public func getDefaultUseCaches(_ arg0: String) -> Bool
 
-  @JavaMethod
+  /// Java method `setDefaultAllowUserInteraction`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.net.URLConnection.setDefaultAllowUserInteraction(boolean)
+  /// ```
+  @JavaStaticMethod
   public func setDefaultAllowUserInteraction(_ arg0: Bool)
 
+  /// Java method `getDefaultAllowUserInteraction`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.net.URLConnection.getDefaultAllowUserInteraction()
+  /// ```
   @JavaStaticMethod
   public func getDefaultAllowUserInteraction() -> Bool
 
-  @JavaMethod
+  /// Java method `setDefaultUseCaches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.net.URLConnection.setDefaultUseCaches(java.lang.String,boolean)
+  /// ```
+  @JavaStaticMethod
   public func setDefaultUseCaches(_ arg0: String, _ arg1: Bool)
 
-  @JavaMethod
+  /// Java method `setDefaultRequestProperty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.net.URLConnection.setDefaultRequestProperty(java.lang.String,java.lang.String)
+  /// ```
+  @available(*, deprecated)
+  @JavaStaticMethod
   public func setDefaultRequestProperty(_ arg0: String, _ arg1: String)
 
-  @JavaMethod
+  /// Java method `getDefaultRequestProperty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.net.URLConnection.getDefaultRequestProperty(java.lang.String)
+  /// ```
+  @available(*, deprecated)
+  @JavaStaticMethod
   public func getDefaultRequestProperty(_ arg0: String) -> String
 
-  @JavaMethod
+  /// Java method `guessContentTypeFromName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.net.URLConnection.guessContentTypeFromName(java.lang.String)
+  /// ```
+  @JavaStaticMethod
   public func guessContentTypeFromName(_ arg0: String) -> String
+
+  /// Java method `guessContentTypeFromStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.net.URLConnection.guessContentTypeFromStream(java.io.InputStream) throws java.io.IOException
+  /// ```
+  @JavaStaticMethod
+  public func guessContentTypeFromStream(_ arg0: InputStream?) throws -> String
 }

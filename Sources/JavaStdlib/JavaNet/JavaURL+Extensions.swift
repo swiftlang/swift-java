@@ -16,19 +16,22 @@ import Foundation
 import SwiftJava
 import SwiftJavaJNICore
 
-public typealias SwiftJavaFoundationURL = Foundation.URL
+extension JavaURL {
+  @JavaMethod
+  public func toURI() throws -> URI!
+}
 
-extension SwiftJavaFoundationURL {
-  public static func fromJava(_ url: URL) throws -> SwiftJavaFoundationURL {
-    guard let converted = SwiftJavaFoundationURL(string: try url.toURI().toString()) else {
-      throw SwiftJavaConversionError("Failed to convert \(URL.self) to \(SwiftJavaFoundationURL.self)")
+extension URL {
+  public static func fromJava(_ url: JavaURL) throws -> URL {
+    guard let converted = URL(string: try url.toURI().toString()) else {
+      throw SwiftJavaConversionError("Failed to convert \(JavaURL.self) to \(URL.self)")
     }
     return converted
   }
 }
 
-extension URL {
-  public static func fromSwift(_ url: SwiftJavaFoundationURL) throws -> URL {
-    try URL(url.absoluteString)
+extension JavaURL {
+  public static func fromSwift(_ url: URL) throws -> JavaURL {
+    try JavaURL(url.absoluteString)
   }
 }

@@ -47,10 +47,10 @@ class BasicRuntimeTests: XCTestCase {
     XCTAssertEqual(environment.pointee?.pointee.GetObjectRefType(environment, sneakyJavaThis), JNIInvalidRefType)
 
     // 'super' and 'as' don't require allocating a new holder.
-    let url = try URL("http://swift.org", environment: environment)
+    let url = try JavaURL("http://swift.org", environment: environment)
     let superURL: JavaObject = url
     XCTAssert(url.javaHolder === superURL.javaHolder)
-    let urlAgain = superURL.as(URL.self)!
+    let urlAgain = superURL.as(JavaURL.self)!
     XCTAssert(url.javaHolder === urlAgain.javaHolder)
   }
 
@@ -58,7 +58,7 @@ class BasicRuntimeTests: XCTestCase {
     let environment = try jvm.environment()
 
     do {
-      _ = try URL("bad url", environment: environment)
+      _ = try JavaURL("bad url", environment: environment)
     } catch {
       XCTAssertEqual(String(describing: error), "java.net.MalformedURLException: no protocol: bad url")
     }
@@ -89,7 +89,7 @@ class BasicRuntimeTests: XCTestCase {
 
   func testCrossThreadAccess() async throws {
     let environment = try jvm.environment()
-    let url = try URL("https://swift.org", environment: environment)
+    let url = try JavaURL("https://swift.org", environment: environment)
     let string = await Task.detached {
       // This should be called on a different thread
       url.toString()
