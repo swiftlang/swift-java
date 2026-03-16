@@ -59,6 +59,9 @@ enum SwiftType: Equatable {
   /// `[key: value]`
   indirect case dictionary(key: SwiftType, value: SwiftType)
 
+  /// `Set<element>`
+  indirect case set(element: SwiftType)
+
   static var void: Self {
     .tuple([])
   }
@@ -67,7 +70,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].type.asNominalType : nil
-    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array, .dictionary: nil
+    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array, .dictionary, .set: nil
     }
   }
 
@@ -111,7 +114,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary:
+    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
       return false
     }
   }
@@ -158,7 +161,7 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque, .composite: true
-    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array, .dictionary: false
+    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array, .dictionary, .set: false
     }
   }
 
@@ -187,6 +190,8 @@ extension SwiftType: CustomStringConvertible {
       return "[\(type)]"
     case .dictionary(let key, let value):
       return "[\(key): \(value)]"
+    case .set(let element):
+      return "Set<\(element)>"
     }
   }
 }

@@ -485,6 +485,15 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(swiftType)
+            }
+            return try translateSetParameter(
+              elementType: genericArgs[0],
+              parameterName: parameterName
+            )
+
           case .foundationDate, .essentialsDate:
             break // Handled as wrapped struct
 
@@ -587,6 +596,12 @@ extension JNISwift2JavaGenerator {
         return try translateDictionaryParameter(
           keyType: keyType,
           valueType: valueType,
+          parameterName: parameterName
+        )
+
+      case .set(let elementType):
+        return try translateSetParameter(
+          elementType: elementType,
           parameterName: parameterName
         )
 
@@ -889,6 +904,14 @@ extension JNISwift2JavaGenerator {
               valueType: genericArgs[1]
             )
 
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(swiftType)
+            }
+            return try translateSetResult(
+              elementType: genericArgs[0]
+            )
+
           case .foundationDate, .essentialsDate:
             // Handled as wrapped struct
             break
@@ -972,6 +995,11 @@ extension JNISwift2JavaGenerator {
         return try translateDictionaryResult(
           keyType: keyType,
           valueType: valueType
+        )
+
+      case .set(let elementType):
+        return try translateSetResult(
+          elementType: elementType
         )
 
       case .tuple(let elements) where !elements.isEmpty:
@@ -1291,6 +1319,36 @@ extension JNISwift2JavaGenerator {
         javaType: dictType,
         outParameters: [],
         conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType)
+      )
+    }
+
+    func translateSetParameter(
+      elementType: SwiftType,
+      parameterName: String
+    ) throws -> TranslatedParameter {
+      let elementJavaType = try javaTypeForDictionaryComponent(elementType)
+      let setType = JavaType.swiftSet(elementJavaType)
+
+      return TranslatedParameter(
+        parameter: JavaParameter(name: parameterName, type: setType),
+        conversion: .method(
+          .requireNonNull(.placeholder, message: "\(parameterName) must not be null"),
+          function: "$memoryAddress",
+          arguments: []
+        )
+      )
+    }
+
+    func translateSetResult(
+      elementType: SwiftType
+    ) throws -> TranslatedResult {
+      let elementJavaType = try javaTypeForDictionaryComponent(elementType)
+      let setType = JavaType.swiftSet(elementJavaType)
+
+      return TranslatedResult(
+        javaType: setType,
+        outParameters: [],
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, setType)
       )
     }
   }
@@ -1788,5 +1846,8 @@ extension JNISwift2JavaGenerator {
 
     /// Dictionary type requires exactly two generic type arguments (key and value).
     case dictionaryRequiresKeyAndValueTypes(SwiftType)
+
+    /// Set type requires exactly one generic type argument (element).
+    case setRequiresElementType(SwiftType)
   }
 }

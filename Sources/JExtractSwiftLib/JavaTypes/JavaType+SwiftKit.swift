@@ -39,4 +39,9 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core.collections", name: "SwiftDictionaryMap", typeParameters: [K.boxedType, V.boxedType])
   }
 
+  /// The description of the type org.swift.swiftkit.core.collections.SwiftSet<E>
+  static func swiftSet(_ E: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core.collections", name: "SwiftSet", typeParameters: [E.boxedType])
+  }
+
 }

@@ -50,6 +50,7 @@ enum JNIJavaTypeTranslator {
       .essentialsData, .essentialsDataProtocol,
       .array,
       .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       return nil
@@ -75,6 +76,7 @@ enum JNIJavaTypeTranslator {
       .essentialsData, .essentialsDataProtocol,
       .array,
       .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil
@@ -100,6 +102,7 @@ enum JNIJavaTypeTranslator {
       .essentialsData, .essentialsDataProtocol,
       .array,
       .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil

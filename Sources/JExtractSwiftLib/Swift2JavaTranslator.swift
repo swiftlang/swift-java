@@ -170,6 +170,8 @@ extension Swift2JavaTranslator {
         return check(ty)
       case .dictionary(let key, let value):
         return check(key) || check(value)
+      case .set(let element):
+        return check(element)
       }
     }
 
