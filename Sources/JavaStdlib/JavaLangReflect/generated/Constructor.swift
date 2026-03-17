@@ -118,7 +118,7 @@ open class Constructor<T: AnyJavaObject>: Executable {
   /// ```java
   /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.Constructor.getAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open override func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `getDeclaredAnnotations`.

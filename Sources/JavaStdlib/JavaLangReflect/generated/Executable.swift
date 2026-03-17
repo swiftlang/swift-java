@@ -73,7 +73,7 @@ open class Executable: AccessibleObject {
   /// ```java
   /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.Executable.getAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open override func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `getAnnotationsByType`.

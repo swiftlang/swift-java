@@ -489,7 +489,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class Something: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "M!")
+        @JavaMethod(typeErasedResult: "M!", typeErasedResultBound: Map<JavaObject, JavaObject>?.self)
         open func putIn<M: AnyJavaObject>(_ arg0: M?) -> M!
         """,
       ]

@@ -134,16 +134,24 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 ///
 /// In order to mark a generic return type you must indicate it to the @JavaMethod macro like this:
 /// ```swift
-/// // Java: class Test<T> { public <T> get(); }
+/// // Java: class Test<T> { public T get(); }
 /// @JavaMethod(typeErasedResult: "T!")
 /// func get() -> T!
 /// ```
 /// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object`
 /// returning method signature, and then, convert the result to the expected `T` type on the Swift side.
+///
+/// If the return type is a bounded type parameter, specify the bound type instead of `java.lang.Object`:
+/// ```swift
+/// // Java: class Test<T extends Animal> { public T get(); }
+/// @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Animal?.self)
+/// func get() -> T!
+/// ```
 @attached(body)
-public macro JavaMethod(
+public macro JavaMethod<ResultBoundType: JavaValue>(
   _ javaMethodName: String? = nil,
-  typeErasedResult: String? = nil
+  typeErasedResult: String? = nil,
+  typeErasedResultBound: ResultBoundType.Type = JavaObject?.self
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Attached macro that turns a Swift method on JavaClass into one that wraps

@@ -162,7 +162,9 @@ func assertWrapJavaOutput(
       "Expected chunk: \n" + "\(expectedChunk.yellow)" + "\n" + "not found in:\n" + "\(swiftCompleteOutputText)"
     XCTAssertTrue(
       checkAgainstText.contains(checkAgainstExpectedChunk),
-      "\(failureMessage)"
+      "\(failureMessage)",
+      file: file,
+      line: line
     )
   }
 }
