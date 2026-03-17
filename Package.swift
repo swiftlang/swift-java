@@ -363,7 +363,11 @@ let package = Package(
     .testTarget(
       name: "SwiftJavaToolLibTests",
       dependencies: [
-        "SwiftJavaToolLib"
+        "SwiftJavaToolLib",
+        "SwiftJavaConfigurationShared",
+      ],
+      exclude: [
+        "SimpleJavaProject",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)

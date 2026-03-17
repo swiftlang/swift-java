@@ -1,0 +1,34 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            groupId = 'com.example'
+            artifactId = 'hello-world'
+            version = '1.0.0'
+        }
+    }
+    repositories {
+        maven {
+            name = 'local'
+            url = project.hasProperty('repoDir') ? uri(project.property('repoDir')) : layout.buildDirectory.dir('repo')
+        }
+    }
+}
