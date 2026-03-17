@@ -15,17 +15,10 @@
 import ArgumentParser
 import Foundation
 import JavaUtilJar
-import Subprocess
 import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftJavaToolLib
-
-#if canImport(System)
-import System
-#else
-@preconcurrency import SystemPackage
-#endif
 
 typealias Configuration = SwiftJavaConfigurationShared.Configuration
 
@@ -71,9 +64,7 @@ extension SwiftJava.ResolveCommand {
     }
 
     if dependenciesToResolve.isEmpty {
-      print(
-        "[warn][swift-java] Attempted to 'resolve' dependencies but no dependencies specified in swift-java.config or command input!"
-      )
+      log.warning("Attempted to 'resolve' dependencies but no dependencies specified in swift-java.config or command input!")
       return
     }
 
@@ -107,7 +98,7 @@ extension SwiftJava.ResolveCommand {
     dependencies: [JavaDependencyDescriptor]
   ) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
-    print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
+    log.debug("Resolve and fetch dependencies for: \(deps)")
 
     let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
       .appendingPathComponent(".build")
@@ -115,14 +106,10 @@ extension SwiftJava.ResolveCommand {
     let dependenciesClasspath = await resolveDependencies(workDir: workDir, dependencies: dependencies)
     let classpathEntries = dependenciesClasspath.split(separator: ":")
 
-    print(
-      "[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ",
-      terminator: ""
-    )
-    print("done.".green)
+    log.info("Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count)")
 
     for entry in classpathEntries {
-      print("[info][swift-java] Classpath entry: \(entry)")
+      log.info("Classpath entry: \(entry)")
     }
 
     return ResolvedDependencyClasspath(for: dependencies, classpath: dependenciesClasspath)
@@ -132,100 +119,22 @@ extension SwiftJava.ResolveCommand {
   ///
   /// - Parameter dependencies: maven-style dependencies to resolve
   /// - Returns: Colon-separated classpath
-  func resolveDependencies(workDir: URL, dependencies: [JavaDependencyDescriptor]) async -> String {
-    print("Create directory: \(workDir.absoluteString)")
+  func resolveDependencies(
+    workDir: URL,
+    dependencies: [JavaDependencyDescriptor],
+    mavenRepositories: [MavenRepositoryDescriptor]? = nil
+  ) async -> String {
+    log.debug("Create directory: \(workDir.absoluteString)")
 
-    let resolverDir: URL
+    var resolveConfig = SwiftJavaConfigurationShared.Configuration()
+    resolveConfig.dependencies = dependencies
+    resolveConfig.mavenRepositories = mavenRepositories
+
     do {
-      resolverDir = try createTemporaryDirectory(in: workDir)
+      return try await JavaDependencyResolver.resolve(config: resolveConfig, workDir: workDir)
     } catch {
-      fatalError("Unable to create temp directory at: \(workDir.absoluteString)! \(error)")
+      fatalError("Failed to resolve dependencies: \(error)")
     }
-    defer {
-      try? FileManager.default.removeItem(at: resolverDir)
-    }
-
-    // We try! because it's easier to track down errors like this than when we bubble up the errors,
-    // and don't get great diagnostics or backtraces due to how swiftpm plugin tools are executed.
-
-    try! copyGradlew(to: resolverDir)
-
-    try! printGradleProject(directory: resolverDir, dependencies: dependencies)
-
-    if #available(macOS 15, *) {
-      let process = try! await Subprocess.run(
-        .path(FilePath(resolverDir.appendingPathComponent("gradlew").path)),
-        arguments: [
-          "--no-daemon",
-          "--rerun-tasks",
-          "\(printRuntimeClasspathTaskName)",
-        ],
-        workingDirectory: Optional(FilePath(resolverDir.path)),
-        // TODO: we could move to stream processing the outputs
-        output: .string(limit: Int.max, encoding: UTF8.self), // Don't limit output, we know it will be reasonable size
-        error: .string(limit: Int.max, encoding: UTF8.self) // Don't limit output, we know it will be reasonable size
-      )
-
-      let outString = process.standardOutput ?? ""
-      let errString = process.standardError ?? ""
-
-      let classpathOutput: String
-      if let found = outString.split(separator: "\n").first(where: { $0.hasPrefix(self.SwiftJavaClasspathPrefix) }) {
-        classpathOutput = String(found)
-      } else if let found = errString.split(separator: "\n").first(where: {
-        $0.hasPrefix(self.SwiftJavaClasspathPrefix)
-      }) {
-        classpathOutput = String(found)
-      } else {
-        let suggestDisablingSandbox =
-          "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'."
-        fatalError(
-          "Gradle output had no SWIFT_JAVA_CLASSPATH! \(suggestDisablingSandbox). \n"
-            + "Command was: \(CommandLine.arguments.joined(separator: " ").bold)\n"
-            + "Output was: <<<\(outString)>>>;\n" + "Err was: <<<\(errString)>>>"
-        )
-      }
-
-      return String(classpathOutput.dropFirst(SwiftJavaClasspathPrefix.count))
-    } else {
-      // Subprocess is unavailable
-      fatalError("Subprocess is unavailable yet required to execute `gradlew` subprocess. Please update to macOS 15+")
-    }
-  }
-
-  /// Creates Gradle project files (build.gradle, settings.gradle.kts) in temporary directory.
-  func printGradleProject(directory: URL, dependencies: [JavaDependencyDescriptor]) throws {
-    let buildGradle =
-      directory
-      .appendingPathComponent("build.gradle", isDirectory: false)
-
-    let buildGradleText =
-      """
-      plugins { id 'java-library' }
-      repositories { mavenCentral() }
-
-      dependencies {
-        \(dependencies.map({ dep in "implementation(\"\(dep.descriptionGradleStyle)\")" }).joined(separator: ",\n"))
-      }
-
-      tasks.register("printRuntimeClasspath") {
-          def runtimeClasspath = sourceSets.main.runtimeClasspath
-          inputs.files(runtimeClasspath)
-          doLast {
-              println("\(SwiftJavaClasspathPrefix)${runtimeClasspath.asPath}")
-          }
-      }
-      """
-    try buildGradleText.write(to: buildGradle, atomically: true, encoding: .utf8)
-
-    let settingsGradle =
-      directory
-      .appendingPathComponent("settings.gradle.kts", isDirectory: false)
-    let settingsGradleText =
-      """
-      rootProject.name = "swift-java-resolve-temp-project"
-      """
-    try settingsGradleText.write(to: settingsGradle, atomically: true, encoding: .utf8)
   }
 
   /// Creates {MySwiftModule}.swift.classpath in the --output-directory.
@@ -247,7 +156,7 @@ extension SwiftJava.ResolveCommand {
     let contents = resolvedClasspath.classpath
 
     let filename = "\(swiftModule).swift-java.classpath"
-    print("[debug][swift-java] Write resolved dependencies to: \(outputDirectory)/\(filename)")
+    log.debug("Write resolved dependencies to: \(outputDirectory)/\(filename)")
 
     // Write the file
     try writeContents(
@@ -262,60 +171,6 @@ extension SwiftJava.ResolveCommand {
     let components = artifactID.split(whereSeparator: { $0 == "-" })
     let camelCased = components.map { $0.capitalized }.joined()
     return camelCased
-  }
-
-  // copy gradlew & gradle.bat from root, throws error if there is no gradle setup.
-  func copyGradlew(to resolverWorkDirectory: URL) throws {
-    var searchDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-
-    while searchDir.pathComponents.count > 1 {
-      let gradlewFile = searchDir.appendingPathComponent("gradlew")
-      let gradlewExists = FileManager.default.fileExists(atPath: gradlewFile.path)
-      guard gradlewExists else {
-        searchDir = searchDir.deletingLastPathComponent()
-        continue
-      }
-
-      let gradlewBatFile = searchDir.appendingPathComponent("gradlew.bat")
-      let gradlewBatExists = FileManager.default.fileExists(atPath: gradlewFile.path)
-
-      let gradleDir = searchDir.appendingPathComponent("gradle")
-      let gradleDirExists = FileManager.default.fileExists(atPath: gradleDir.path)
-      guard gradleDirExists else {
-        searchDir = searchDir.deletingLastPathComponent()
-        continue
-      }
-
-      // TODO: gradle.bat as well
-      try? FileManager.default.copyItem(
-        at: gradlewFile,
-        to: resolverWorkDirectory.appendingPathComponent("gradlew")
-      )
-      if gradlewBatExists {
-        try? FileManager.default.copyItem(
-          at: gradlewBatFile,
-          to: resolverWorkDirectory.appendingPathComponent("gradlew.bat")
-        )
-      }
-      try? FileManager.default.copyItem(
-        at: gradleDir,
-        to: resolverWorkDirectory.appendingPathComponent("gradle")
-      )
-      return
-    }
-  }
-
-  func createTemporaryDirectory(in directory: URL) throws -> URL {
-    let uuid = UUID().uuidString
-    let resolverDirectoryURL = directory.appendingPathComponent("swift-java-dependencies-\(uuid)")
-
-    try FileManager.default.createDirectory(
-      at: resolverDirectoryURL,
-      withIntermediateDirectories: true,
-      attributes: nil
-    )
-
-    return resolverDirectoryURL
   }
 
 }

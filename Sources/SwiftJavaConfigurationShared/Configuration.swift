@@ -100,6 +100,10 @@ public struct Configuration: Codable {
   // Java dependencies we need to fetch for this target.
   public var dependencies: [JavaDependencyDescriptor]?
 
+  /// Custom Maven repositories to use when resolving dependencies.
+  /// If not set, defaults to mavenCentral().
+  public var mavenRepositories: [MavenRepositoryDescriptor]?
+
   public init() {
   }
 
@@ -151,6 +155,93 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 
   struct JavaDependencyDescriptorError: Error {
     let message: String
+  }
+}
+
+// ==== -----------------------------------------------------------------------
+// MARK: MavenRepositoryDescriptor
+
+/// Describes a Maven-style repository for dependency resolution.
+///
+/// Supported types based on https://docs.gradle.org/current/userguide/supported_repository_types.html:
+/// - `maven(url:artifactUrls:)` — A custom Maven repository at the given URL
+/// - `mavenCentral` — Maven Central repository
+/// - `mavenLocal(includeGroups:)` — Local Maven cache (~/.m2/repository)
+/// - `google` — Google's Maven repository
+public enum MavenRepositoryDescriptor: Hashable, Codable {
+  case maven(url: String, artifactUrls: [String]? = nil)
+  case mavenCentral
+  case mavenLocal(includeGroups: [String]? = nil)
+  case google
+
+  enum CodingKeys: String, CodingKey {
+    case type
+    case url
+    case artifactUrls
+    case includeGroups
+  }
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let type = try container.decode(String.self, forKey: .type)
+    switch type {
+    case "maven":
+      let url = try container.decode(String.self, forKey: .url)
+      let artifactUrls = try container.decodeIfPresent([String].self, forKey: .artifactUrls)
+      self = .maven(url: url, artifactUrls: artifactUrls)
+    case "mavenCentral":
+      self = .mavenCentral
+    case "mavenLocal":
+      let includeGroups = try container.decodeIfPresent([String].self, forKey: .includeGroups)
+      self = .mavenLocal(includeGroups: includeGroups)
+    case "google":
+      self = .google
+    default:
+      throw DecodingError.dataCorruptedError(
+        forKey: .type, in: container,
+        debugDescription: "Unknown repository type: '\(type)'. Supported: maven, mavenCentral, mavenLocal, google"
+      )
+    }
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    switch self {
+    case .maven(let url, let artifactUrls):
+      try container.encode("maven", forKey: .type)
+      try container.encode(url, forKey: .url)
+      try container.encodeIfPresent(artifactUrls, forKey: .artifactUrls)
+    case .mavenCentral:
+      try container.encode("mavenCentral", forKey: .type)
+    case .mavenLocal(let includeGroups):
+      try container.encode("mavenLocal", forKey: .type)
+      try container.encodeIfPresent(includeGroups, forKey: .includeGroups)
+    case .google:
+      try container.encode("google", forKey: .type)
+    }
+  }
+
+  /// Render this repository as Gradle DSL.
+  public var gradleDSL: String {
+    switch self {
+    case .maven(let url, let artifactUrls):
+      var result = "maven {"
+      result += "\n      url = uri(\"\(url)\")"
+      if let artifactUrls, !artifactUrls.isEmpty {
+        result += "\n      artifactUrls = [\(artifactUrls.map { "\"\($0)\"" }.joined(separator: ", "))]"
+      }
+      result += "\n    }"
+      return result
+    case .mavenCentral:
+      return "mavenCentral()"
+    case .mavenLocal(let includeGroups):
+      if let includeGroups, !includeGroups.isEmpty {
+        return "mavenLocal {\n      content {\n        \(includeGroups.map { "includeGroup(\"\($0)\")" }.joined(separator: "\n        "))\n      }\n    }"
+      }
+      return "mavenLocal()"
+    case .google:
+      return "google()"
+    }
   }
 }
 
