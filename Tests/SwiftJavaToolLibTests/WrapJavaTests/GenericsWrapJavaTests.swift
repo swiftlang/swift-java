@@ -63,7 +63,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class ExampleSimpleClass: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "KeyType!")
+        @JavaMethod(typeErasedResult: "KeyType!", typeErasedResultBound: JavaObject?.self)
         open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType!
         """,
       ]
@@ -102,7 +102,7 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(typeErasedResult: "KeyType!")
+        @JavaMethod(typeErasedResult: "KeyType!", typeErasedResultBound: JavaObject?.self)
         open func getGeneric<KeyType: AnyJavaObject>() -> KeyType!
         """
       ]
@@ -200,11 +200,11 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(typeErasedResult: "T!")
+        @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
         open func getClassGeneric() -> T!
         """,
         """
-        @JavaMethod(typeErasedResult: "M!")
+        @JavaMethod(typeErasedResult: "M!", typeErasedResultBound: JavaObject?.self)
         open func getMethodGeneric<M: AnyJavaObject>() -> M!
         """,
         """
@@ -377,7 +377,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class Kappa<T: AnyJavaObject>: JavaObject {
         """,
         """
-          @JavaMethod(typeErasedResult: "T!")
+          @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
           open func get() -> T!
         }
         """,
@@ -416,7 +416,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
         """,
         """
-        @JavaStaticMethod(typeErasedResult: "T!")
+        @JavaStaticMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
         public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
         """,
       ]
@@ -489,7 +489,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class Something: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "M!")
+        @JavaMethod(typeErasedResult: "M!", typeErasedResultBound: Map<JavaObject, JavaObject>?.self)
         open func putIn<M: AnyJavaObject>(_ arg0: M?) -> M!
         """,
       ]
