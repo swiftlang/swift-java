@@ -996,7 +996,7 @@ extension JavaClassTranslator {
           preferValueTypes: true,
           outerOptional: .nonoptional
         )
-        // `getSwiftTypeNameAsString` does not includes generic parameters for non parameterized type
+        // `getSwiftTypeNameAsString` does not include generic parameters for non parameterized type
         if let returnClass = returnType.as(JavaClass<JavaObject>.self) {
           let typeParameters = returnClass.getTypeParameters()
           if !typeParameters.isEmpty {
