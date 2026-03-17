@@ -155,11 +155,7 @@ extension AnyJavaObject {
   ) throws -> Result {
     // Retrieve the method that performs this call, then package the values and
     // call it.
-    // Size the frame to 1 ref per argument (strings/objects each need 1;
-    // primitives need 0, so this slightly over-estimates) plus 1 for the result ref.
     let jniMethod = Result.jniMethodCall(in: environment)
-    environment.interface.PushLocalFrame(environment, Int32(countArgs(repeat each args) + 2))
-    defer { environment.interface.PopLocalFrame(environment, nil) }
     let jniArgs = getJValues(repeat each args, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
       jniMethod(environment, this, method, jniArgs)
@@ -225,10 +221,7 @@ extension AnyJavaObject {
   ) throws {
     // Retrieve the method that performs this call, then package the arguments
     // and call it.
-    // Size the frame to 1 ref per argument; no result ref needed for void calls.
     let jniMethod = environment.interface.CallVoidMethodA!
-    environment.interface.PushLocalFrame(environment, Int32(countArgs(repeat each args) + 1))
-    defer { environment.interface.PopLocalFrame(environment, nil) }
     let jniArgs = getJValues(repeat each args, in: environment)
     try environment.translatingJNIExceptions {
       jniMethod(environment, this, method, jniArgs)
@@ -278,16 +271,10 @@ extension AnyJavaObject {
         in: environment
       )
 
-      // Retrieve the constructor, then map the arguments and call it. Use a local
-      // frame so args are freed; promote the new object to the outer frame
-      // via PopLocalFrame(result).
-      // Size the frame to 1 ref per argument; result is promoted via PopLocalFrame(newObj).
-      environment.interface.PushLocalFrame(environment, Int32(countArgs(repeat each arguments) + 1))
       let jniArgs = getJValues(repeat each arguments, in: environment)
-      let newObj = try environment.translatingJNIExceptions {
+      return try environment.translatingJNIExceptions {
         environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
       }!
-      return environment.interface.PopLocalFrame(environment, newObj)!
     }
   }
 
@@ -321,9 +308,6 @@ extension AnyJavaObject {
 
       let fieldID = getJNIFieldID(fieldName, fieldType: fieldType)!
       let jniMethod = FieldType.jniFieldSet(in: environment)
-      // Frame of 2: 1 for the field value's local ref, 1 buffer.
-      environment.interface.PushLocalFrame(environment, 2)
-      defer { environment.interface.PopLocalFrame(environment, nil) }
       jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
     }
   }
@@ -355,12 +339,7 @@ extension JavaClass {
       )
     }!
 
-    // Retrieve the method that performs this call, then package the values and
-    // call it.
-    // Size the frame to 1 ref per argument plus 1 for the result ref.
     let jniMethod = Result.jniStaticMethodCall(in: environment)
-    environment.interface.PushLocalFrame(environment, Int32(countArgs(repeat each arguments) + 2))
-    defer { environment.interface.PopLocalFrame(environment, nil) }
     let jniArgs = getJValues(repeat each arguments, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
       jniMethod(environment, thisClass, methodID, jniArgs)
@@ -393,11 +372,7 @@ extension JavaClass {
       )
     }!
 
-    // Retrieve the method that performs this call
-    // Size the frame to 1 ref per argument; no result ref needed for void calls.
     let jniMethod = environment.interface.CallStaticVoidMethodA
-    environment.interface.PushLocalFrame(environment, Int32(countArgs(repeat each arguments) + 1))
-    defer { environment.interface.PopLocalFrame(environment, nil) }
     let jniArgs = getJValues(repeat each arguments, in: environment)
     try environment.translatingJNIExceptions {
       jniMethod!(environment, thisClass, methodID, jniArgs)
