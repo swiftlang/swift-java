@@ -102,7 +102,7 @@ public struct Configuration: Codable {
 
   /// Custom Maven repositories to use when resolving dependencies.
   /// If not set, defaults to mavenCentral().
-  public var repositories: [JavaRepositoryDescriptor]?
+  public var mavenRepositories: [MavenRepositoryDescriptor]?
 
   public init() {
   }
@@ -159,7 +159,7 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 }
 
 // ==== -----------------------------------------------------------------------
-// MARK: JavaRepositoryDescriptor
+// MARK: MavenRepositoryDescriptor
 
 /// Describes a Maven-style repository for dependency resolution.
 ///
@@ -168,7 +168,7 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 /// - `mavenCentral` — Maven Central repository
 /// - `mavenLocal(includeGroups:)` — Local Maven cache (~/.m2/repository)
 /// - `google` — Google's Maven repository
-public enum JavaRepositoryDescriptor: Hashable, Codable {
+public enum MavenRepositoryDescriptor: Hashable, Codable {
   case maven(url: String, artifactUrls: [String]? = nil)
   case mavenCentral
   case mavenLocal(includeGroups: [String]? = nil)

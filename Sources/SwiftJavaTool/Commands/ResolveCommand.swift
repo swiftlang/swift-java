@@ -122,22 +122,18 @@ extension SwiftJava.ResolveCommand {
   func resolveDependencies(
     workDir: URL,
     dependencies: [JavaDependencyDescriptor],
-    repositories: [JavaRepositoryDescriptor]? = nil
+    mavenRepositories: [MavenRepositoryDescriptor]? = nil
   ) async -> String {
     log.debug("Create directory: \(workDir.absoluteString)")
 
     var resolveConfig = SwiftJavaConfigurationShared.Configuration()
     resolveConfig.dependencies = dependencies
-    resolveConfig.repositories = repositories
+    resolveConfig.mavenRepositories = mavenRepositories
 
-    if #available(macOS 15, *) {
-      do {
-        return try await JavaDependencyResolver.resolve(config: resolveConfig, workDir: workDir)
-      } catch {
-        fatalError("Failed to resolve dependencies: \(error)")
-      }
-    } else {
-      fatalError("Subprocess is unavailable yet required to execute `gradlew` subprocess. Please update to macOS 15+")
+    do {
+      return try await JavaDependencyResolver.resolve(config: resolveConfig, workDir: workDir)
+    } catch {
+      fatalError("Failed to resolve dependencies: \(error)")
     }
   }
 

@@ -13,8 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-@testable import SwiftJavaConfigurationShared
-@testable import SwiftJavaToolLib
+import SwiftJavaConfigurationShared
+import SwiftJavaToolLib
 import XCTest
 
 // ==== -----------------------------------------------------------------------
@@ -86,7 +86,6 @@ final class JavaDependencyResolverTests: XCTestCase {
   }
 
   /// Test that we can resolve a dependency from a local Maven repository.
-  @available(macOS 15, *)
   func test_resolveFromLocalRepo() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
@@ -99,7 +98,7 @@ final class JavaDependencyResolverTests: XCTestCase {
     config.dependencies = [
       JavaDependencyDescriptor(groupID: "com.example", artifactID: "hello-world", version: "1.0.0")
     ]
-    config.repositories = [
+    config.mavenRepositories = [
       .maven(url: repoDir.path),
     ]
 
@@ -115,7 +114,6 @@ final class JavaDependencyResolverTests: XCTestCase {
   }
 
   /// Test that resolving a dependency that does not exist in the repo fails.
-  @available(macOS 15, *)
   func test_resolveNonExistentDependency_fails() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
@@ -129,7 +127,7 @@ final class JavaDependencyResolverTests: XCTestCase {
       JavaDependencyDescriptor(groupID: "com.nonexistent", artifactID: "missing-lib", version: "1.0.0")
     ]
     // Only look in our local repo — should fail since com.nonexistent doesn't exist
-    config.repositories = [
+    config.mavenRepositories = [
       .maven(url: repoDir.path),
     ]
 
@@ -149,7 +147,6 @@ final class JavaDependencyResolverTests: XCTestCase {
   }
 
   /// Test that resolving with includeGroups filter works.
-  @available(macOS 15, *)
   func test_resolveFromLocalRepo_withIncludeGroupsFilter() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
@@ -164,7 +161,7 @@ final class JavaDependencyResolverTests: XCTestCase {
     ]
     // Use maven with the local repo path + includeGroups on mavenLocal won't help here,
     // but we can still test that the config round-trips correctly
-    config.repositories = [
+    config.mavenRepositories = [
       .maven(url: repoDir.path),
     ]
 
@@ -180,13 +177,11 @@ final class JavaDependencyResolverTests: XCTestCase {
     let config = Configuration()
     let workDir = FileManager.default.temporaryDirectory
 
-    if #available(macOS 15, *) {
-      do {
-        _ = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
-        XCTFail("Expected noDependencies error")
-      } catch JavaDependencyResolverError.noDependencies {
-        // Expected
-      }
+    do {
+      _ = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
+      XCTFail("Expected noDependencies error")
+    } catch JavaDependencyResolverError.noDependencies {
+      // Expected
     }
   }
 }

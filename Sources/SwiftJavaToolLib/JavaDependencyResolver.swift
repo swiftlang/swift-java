@@ -43,7 +43,6 @@ public struct JavaDependencyResolver {
   ///   - config: Configuration containing dependencies and optional repositories.
   ///   - workDir: Working directory for creating the temporary Gradle project.
   /// - Returns: Colon-separated classpath string of resolved dependencies.
-  @available(macOS 15, *)
   public static func resolve(
     config: SwiftJavaConfigurationShared.Configuration,
     workDir: URL
@@ -62,7 +61,7 @@ public struct JavaDependencyResolver {
     try writeGradleProject(
       directory: resolverDir,
       dependencies: dependencies,
-      repositories: config.repositories
+      repositories: config.mavenRepositories
     )
 
     return try await runGradle(in: resolverDir)
@@ -75,7 +74,7 @@ public struct JavaDependencyResolver {
   static func writeGradleProject(
     directory: URL,
     dependencies: [JavaDependencyDescriptor],
-    repositories: [JavaRepositoryDescriptor]?
+    repositories: [MavenRepositoryDescriptor]?
   ) throws {
     let repositoriesBlock: String
     if let repos = repositories, !repos.isEmpty {
@@ -120,7 +119,7 @@ public struct JavaDependencyResolver {
   /// Generate the Gradle build file content as a string (for testing).
   public static func generateBuildGradle(
     dependencies: [JavaDependencyDescriptor],
-    repositories: [JavaRepositoryDescriptor]?
+    repositories: [MavenRepositoryDescriptor]?
   ) -> String {
     let repositoriesBlock: String
     if let repos = repositories, !repos.isEmpty {
@@ -156,7 +155,6 @@ public struct JavaDependencyResolver {
   // ==== -------------------------------------------------------------------
   // MARK: Gradle execution
 
-  @available(macOS 15, *)
   static func runGradle(in resolverDir: URL) async throws -> String {
     let process = try await Subprocess.run(
       .path(FilePath(resolverDir.appendingPathComponent("gradlew").path)),
