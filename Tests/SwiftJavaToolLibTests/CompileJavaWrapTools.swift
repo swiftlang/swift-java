@@ -163,7 +163,8 @@ func assertWrapJavaOutput(
     XCTAssertTrue(
       checkAgainstText.contains(checkAgainstExpectedChunk),
       "\(failureMessage)",
-      file: file, line: line
+      file: file,
+      line: line
     )
   }
 }
