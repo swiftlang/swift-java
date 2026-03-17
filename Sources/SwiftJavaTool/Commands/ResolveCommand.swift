@@ -64,9 +64,7 @@ extension SwiftJava.ResolveCommand {
     }
 
     if dependenciesToResolve.isEmpty {
-      print(
-        "[warn][swift-java] Attempted to 'resolve' dependencies but no dependencies specified in swift-java.config or command input!"
-      )
+      log.warning("Attempted to 'resolve' dependencies but no dependencies specified in swift-java.config or command input!")
       return
     }
 
@@ -100,7 +98,7 @@ extension SwiftJava.ResolveCommand {
     dependencies: [JavaDependencyDescriptor]
   ) async throws -> ResolvedDependencyClasspath {
     let deps = dependencies.map { $0.descriptionGradleStyle }
-    print("[debug][swift-java] Resolve and fetch dependencies for: \(deps)")
+    log.debug("Resolve and fetch dependencies for: \(deps)")
 
     let workDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
       .appendingPathComponent(".build")
@@ -108,14 +106,10 @@ extension SwiftJava.ResolveCommand {
     let dependenciesClasspath = await resolveDependencies(workDir: workDir, dependencies: dependencies)
     let classpathEntries = dependenciesClasspath.split(separator: ":")
 
-    print(
-      "[info][swift-java] Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count), ",
-      terminator: ""
-    )
-    print("done.".green)
+    log.info("Resolved classpath for \(deps.count) dependencies of '\(swiftModule)', classpath entries: \(classpathEntries.count)")
 
     for entry in classpathEntries {
-      print("[info][swift-java] Classpath entry: \(entry)")
+      log.info("Classpath entry: \(entry)")
     }
 
     return ResolvedDependencyClasspath(for: dependencies, classpath: dependenciesClasspath)
@@ -130,7 +124,7 @@ extension SwiftJava.ResolveCommand {
     dependencies: [JavaDependencyDescriptor],
     repositories: [JavaRepositoryDescriptor]? = nil
   ) async -> String {
-    print("Create directory: \(workDir.absoluteString)")
+    log.debug("Create directory: \(workDir.absoluteString)")
 
     var resolveConfig = SwiftJavaConfigurationShared.Configuration()
     resolveConfig.dependencies = dependencies
@@ -138,7 +132,7 @@ extension SwiftJava.ResolveCommand {
 
     if #available(macOS 15, *) {
       do {
-        return try await JavaResolver.resolve(config: resolveConfig, workDir: workDir)
+        return try await JavaDependencyResolver.resolve(config: resolveConfig, workDir: workDir)
       } catch {
         fatalError("Failed to resolve dependencies: \(error)")
       }
@@ -166,7 +160,7 @@ extension SwiftJava.ResolveCommand {
     let contents = resolvedClasspath.classpath
 
     let filename = "\(swiftModule).swift-java.classpath"
-    print("[debug][swift-java] Write resolved dependencies to: \(outputDirectory)/\(filename)")
+    log.debug("Write resolved dependencies to: \(outputDirectory)/\(filename)")
 
     // Write the file
     try writeContents(

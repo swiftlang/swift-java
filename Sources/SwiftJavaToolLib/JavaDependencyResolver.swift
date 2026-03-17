@@ -23,13 +23,13 @@ import System
 #endif
 
 // ==== -----------------------------------------------------------------------
-// MARK: JavaResolver
+// MARK: JavaDependencyResolver
 
 /// Resolves Java/Maven dependencies using Gradle, with support for custom repositories.
 ///
 /// The resolver creates a temporary Gradle project, runs dependency resolution,
 /// and returns the resulting classpath.
-public struct JavaResolver {
+public struct JavaDependencyResolver {
 
   static let SwiftJavaClasspathPrefix = "SWIFT_JAVA_CLASSPATH:"
   static let printRuntimeClasspathTaskName = "printRuntimeClasspath"
@@ -50,7 +50,7 @@ public struct JavaResolver {
   ) async throws -> String {
     let dependencies = config.dependencies ?? []
     guard !dependencies.isEmpty else {
-      throw JavaResolverError.noDependencies
+      throw JavaDependencyResolverError.noDependencies
     }
 
     let resolverDir = try createTemporaryDirectory(in: workDir)
@@ -179,7 +179,7 @@ public struct JavaResolver {
       return String(found.dropFirst(SwiftJavaClasspathPrefix.count))
     }
 
-    throw JavaResolverError.gradleFailed(
+    throw JavaDependencyResolverError.gradleFailed(
       message: "Gradle output had no SWIFT_JAVA_CLASSPATH. "
         + "It may be that the Sandbox has prevented dependency fetching, please re-run with '--disable-sandbox'.\n"
         + "Output: \(outString)\nErr: \(errString)"
@@ -243,7 +243,7 @@ public struct JavaResolver {
 // ==== -----------------------------------------------------------------------
 // MARK: Errors
 
-public enum JavaResolverError: Error, CustomStringConvertible {
+public enum JavaDependencyResolverError: Error, CustomStringConvertible {
   case noDependencies
   case gradleFailed(message: String)
 
