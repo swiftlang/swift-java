@@ -141,16 +141,10 @@ public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = fal
 /// This allows the macro to form a call into the get() method, which at runtime, will have an `java.lang.Object`
 /// returning method signature, and then, convert the result to the expected `T` type on the Swift side.
 @attached(body)
-public macro JavaMethod(
+public macro JavaMethod<ResultBoundType: JavaValue>(
   _ javaMethodName: String? = nil,
-  typeErasedResult: String? = nil
-) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
-
-@attached(body)
-public macro JavaMethod<Result: JavaValue>(
-  _ javaMethodName: String? = nil,
-  typeErasedResult: String,
-  typeErasedResultBound: Result.Type,
+  typeErasedResult: String? = nil,
+  typeErasedResultBound: ResultBoundType.Type = JavaObject?.self
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
 /// Attached macro that turns a Swift method on JavaClass into one that wraps
