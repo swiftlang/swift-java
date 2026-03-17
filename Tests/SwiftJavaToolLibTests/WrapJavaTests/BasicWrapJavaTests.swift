@@ -272,7 +272,7 @@ final class BasicWrapJavaTests: XCTestCase {
           /// ```java
           /// public abstract ValueType com.example.CallMe.apply(ValueType,ValueType)
           /// ```
-          @JavaMethod(typeErasedResult: "ValueType!", typeErasedResultBound: JavaObject?.self)
+          @JavaMethod(typeErasedResult: "ValueType!")
             public func apply(_ arg0: ValueType?, _ arg1: ValueType?) -> ValueType!
           }
         """

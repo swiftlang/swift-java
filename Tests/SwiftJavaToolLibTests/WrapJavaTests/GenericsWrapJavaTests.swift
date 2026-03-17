@@ -63,7 +63,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class ExampleSimpleClass: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "KeyType!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "KeyType!")
         open func getGeneric<KeyType: AnyJavaObject>(_ arg0: Item<KeyType>?) -> KeyType!
         """,
       ]
@@ -102,7 +102,7 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(typeErasedResult: "KeyType!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "KeyType!")
         open func getGeneric<KeyType: AnyJavaObject>() -> KeyType!
         """
       ]
@@ -200,11 +200,11 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "T!")
         open func getClassGeneric() -> T!
         """,
         """
-        @JavaMethod(typeErasedResult: "M!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "M!")
         open func getMethodGeneric<M: AnyJavaObject>() -> M!
         """,
         """
@@ -377,7 +377,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class Kappa<T: AnyJavaObject>: JavaObject {
         """,
         """
-          @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+          @JavaMethod(typeErasedResult: "T!")
           open func get() -> T!
         }
         """,
@@ -416,7 +416,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
         """,
         """
-        @JavaStaticMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+        @JavaStaticMethod(typeErasedResult: "T!")
         public func nonNull<T: AnyJavaObject>(_ arg0: T?) -> T! where ObjectType == Optional<T>
         """,
       ]

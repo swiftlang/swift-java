@@ -48,7 +48,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         public struct MyFunction<T: AnyJavaObject, R: AnyJavaObject> {
         """,
         """
-        @JavaMethod(typeErasedResult: "R!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "R!")
         public func apply(_ arg0: T?) -> R!
         """,
         """
@@ -56,7 +56,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         public struct MyUnaryOperator<T: AnyJavaObject> {
         """,
         """
-        @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "T!")
         public func apply(_ arg0: T?) -> T!
         """,
       ]
@@ -90,7 +90,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         open class ClassFunction<T: AnyJavaObject, R: AnyJavaObject>: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "R!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "R!")
         open func apply(_ arg0: T?) -> R!
         """,
         """
@@ -98,7 +98,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         open class ClassUnaryOperator<T: AnyJavaObject>: ClassFunction<T, T> {
         """,
         """
-        @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "T!")
         open override func apply(_ arg0: T?) -> T!
         """,
       ]

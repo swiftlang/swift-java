@@ -270,7 +270,7 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaObjects {
         """,
         """
-        @JavaStaticMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+        @JavaStaticMethod(typeErasedResult: "T!")
         public func requireNonNull<T: AnyJavaObject>(_ arg0: T?, _ arg1: MySupplier<JavaString>?) -> T
         """,
       ]
@@ -544,7 +544,7 @@ class Java2SwiftTests: XCTestCase {
         public struct MyJavaIntFunction<R: AnyJavaObject> {
         """,
         """
-        @JavaMethod(typeErasedResult: "R!", typeErasedResultBound: JavaObject?.self)
+        @JavaMethod(typeErasedResult: "R!")
         public func apply(_ arg0: Int32) -> R!
         """,
       ]

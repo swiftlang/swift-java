@@ -73,7 +73,7 @@ open class Constructor<T: AnyJavaObject>: Executable {
   /// ```java
   /// public T java.lang.reflect.Constructor.newInstance(java.lang.Object...) throws java.lang.InstantiationException,java.lang.IllegalAccessException,java.lang.IllegalArgumentException,java.lang.reflect.InvocationTargetException
   /// ```
-  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
+  @JavaMethod(typeErasedResult: "T!")
   open func newInstance(_ arg0: [JavaObject?]) throws -> T!
 
   /// Java method `getParameterTypes`.
