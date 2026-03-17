@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,21 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-
-#if os(Windows)
-let PATH_SEPARATOR = "\\"
+#if canImport(FoundationEssentials)
+import FoundationEssentials
 #else
-let PATH_SEPARATOR = "/"
+import Foundation
 #endif
 
+// ==== -----------------------------------------------------------------------
+// MARK: CodePrinter
+
 public struct CodePrinter {
-  var contents: String = ""
+  public var contents: String = ""
 
-  var verbose: Bool = false
-  let log = Logger(label: "printer", logLevel: .info)
+  public var verbose: Bool = false
 
-  var indentationDepth: Int = 0 {
+  public var indentationDepth: Int = 0 {
     didSet {
       indentationText = String(repeating: indentationPart, count: indentationDepth)
     }
@@ -40,7 +40,7 @@ public struct CodePrinter {
   }
   public var indentationText: String = ""
   /// If true, next print() should starts with indentation.
-  var atNewline = true
+  public var atNewline = true
 
   public static func toString(_ block: (inout CodePrinter) throws -> Void) rethrows -> String {
     var printer = CodePrinter()
@@ -48,7 +48,7 @@ public struct CodePrinter {
     return printer.finalize()
   }
 
-  var mode: PrintMode
+  public var mode: PrintMode
   public enum PrintMode {
     case accumulateAll
     case flushToFileOnWrite
@@ -57,14 +57,14 @@ public struct CodePrinter {
     self.mode = mode
   }
 
-  mutating func append(_ text: String) {
+  public mutating func append(_ text: String) {
     contents.append(text)
     if self.verbose {
       Swift.print(text, terminator: "")
     }
   }
 
-  mutating func append<S>(contentsOf text: S)
+  public mutating func append<S>(contentsOf text: S)
   where S: Sequence, S.Element == Character {
     contents.append(contentsOf: text)
     if self.verbose {
@@ -168,7 +168,6 @@ public struct CodePrinter {
     print(text, .continue)
   }
 
-  // TODO: remove this in real mode, this just helps visually while working on it
   public mutating func printSeparator(_ text: String) {
     assert(!text.contains(where: \.isNewline))
     print(
@@ -182,20 +181,16 @@ public struct CodePrinter {
   }
 
   public mutating func finalize() -> String {
-    // assert(indentationDepth == 0, "Finalize CodePrinter with non-zero indentationDepth. Text was: \(contents)") // FIXME: do this
     defer { contents = "" }
-
     return contents
   }
 
   public mutating func indent(file: String = #fileID, line: UInt = #line, function: String = #function) {
     indentationDepth += 1
-    log.trace("Indent => \(indentationDepth)", file: file, line: line, function: function)
   }
 
   public mutating func outdent(file: String = #fileID, line: UInt = #line, function: String = #function) {
     indentationDepth -= 1
-    log.trace("Outdent => \(indentationDepth)", file: file, line: line, function: function)
     assert(indentationDepth >= 0, "Outdent beyond zero at [\(file):\(line)](\(function))")
   }
 
@@ -207,8 +202,10 @@ public struct CodePrinter {
     Swift.print("// CodePrinter.dump @ \(file):\(line)")
     Swift.print(contents)
   }
-
 }
+
+// ==== -----------------------------------------------------------------------
+// MARK: PrinterTerminator
 
 public enum PrinterTerminator: String {
   case newLine = "\n"
@@ -235,17 +232,32 @@ public enum PrinterTerminator: String {
   }
 }
 
+// ==== -----------------------------------------------------------------------
+// MARK: PATH_SEPARATOR
+
+#if os(Windows)
+public let PATH_SEPARATOR = "\\"
+#else
+public let PATH_SEPARATOR = "/"
+#endif
+
+// ==== -----------------------------------------------------------------------
+// MARK: CodePrinter + writeContents
+
 extension CodePrinter {
 
-  /// - Returns: the output path of the generated file, if any (i.e. not in accumulate in memory mode)
-  package mutating func writeContents(
+  /// Write the accumulated contents to a file in the given output directory.
+  ///
+  /// - Returns: the output path of the generated file, if any (i.e. not in accumulate-in-memory mode)
+  public mutating func writeContents(
     outputDirectory _outputDirectory: String,
     javaPackagePath: String?,
     filename _filename: String
   ) throws -> URL? {
-
-    // We handle 'filename' that has a path, since that simplifies passing paths from root output directory enourmously.
-    // This just moves the directory parts into the output directory part in order for us to create the sub-directories.
+    // We handle 'filename' that has a path, since that simplifies passing
+    // paths from root output directory enormously. This just moves the
+    // directory parts into the output directory part in order for us to
+    // create the sub-directories.
     let outputDirectory: String
     let filename: String
     if _filename.contains(PATH_SEPARATOR) {
@@ -260,8 +272,9 @@ extension CodePrinter {
     }
 
     guard self.mode != .accumulateAll else {
-      // if we're accumulating everything, we don't want to finalize/flush any contents
-      // let's mark that this is where a write would have happened though:
+      // if we're accumulating everything, we don't want to finalize/flush
+      // any contents; let's mark that this is where a write would have
+      // happened though:
       print("// ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
       return nil
     }
@@ -281,15 +294,12 @@ extension CodePrinter {
     }
 
     let targetDirectory = [outputDirectory, javaPackagePath].compactMap { $0 }.joined(separator: PATH_SEPARATOR)
-    log.debug("Prepare target directory: '\(targetDirectory)' for file \(filename.bold)")
     do {
       try FileManager.default.createDirectory(
         atPath: targetDirectory,
         withIntermediateDirectories: true
       )
     } catch {
-      // log and throw since it can be confusing what the reason for failing the write was otherwise
-      log.warning("Failed to create directory: \(targetDirectory)")
       throw error
     }
 

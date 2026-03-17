@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import Foundation
 import Subprocess
 import SwiftJavaConfigurationShared
@@ -61,7 +62,7 @@ public struct JavaDependencyResolver {
     try writeGradleProject(
       directory: resolverDir,
       dependencies: dependencies,
-      repositories: config.mavenRepositories
+      repositories: config.mavenRepositories ?? [.mavenCentral]
     )
 
     return try await runGradle(in: resolverDir)
@@ -74,39 +75,9 @@ public struct JavaDependencyResolver {
   static func writeGradleProject(
     directory: URL,
     dependencies: [JavaDependencyDescriptor],
-    repositories: [MavenRepositoryDescriptor]?
+    repositories: [MavenRepositoryDescriptor] = [.mavenCentral]
   ) throws {
-    let repositoriesBlock: String
-    if let repos = repositories, !repos.isEmpty {
-      repositoriesBlock = repos.map { "    \($0.gradleDSL)" }.joined(separator: "\n")
-    } else {
-      repositoriesBlock = "    mavenCentral()"
-    }
-
-    let depsBlock =
-      dependencies
-      .map { "    implementation(\"\($0.descriptionGradleStyle)\")" }
-      .joined(separator: "\n")
-
-    let buildGradleText = """
-      plugins { id 'java-library' }
-      repositories {
-      \(repositoriesBlock)
-      }
-
-      dependencies {
-      \(depsBlock)
-      }
-
-      tasks.register("\(printRuntimeClasspathTaskName)") {
-          def runtimeClasspath = sourceSets.main.runtimeClasspath
-          inputs.files(runtimeClasspath)
-          doLast {
-              println("\(SwiftJavaClasspathPrefix)${runtimeClasspath.asPath}")
-          }
-      }
-      """
-
+    let buildGradleText = printBuildGradle(dependencies: dependencies, repositories: repositories)
     let buildGradle = directory.appendingPathComponent("build.gradle", isDirectory: false)
     try buildGradleText.write(to: buildGradle, atomically: true, encoding: .utf8)
 
@@ -117,41 +88,41 @@ public struct JavaDependencyResolver {
     try settingsGradleText.write(to: settingsGradle, atomically: true, encoding: .utf8)
   }
 
-  /// Generate the Gradle build file content as a string (for testing).
-  public static func generateBuildGradle(
+  /// Generate the Gradle build file content as a string.
+  public static func printBuildGradle(
     dependencies: [JavaDependencyDescriptor],
-    repositories: [MavenRepositoryDescriptor]?
+    repositories: [MavenRepositoryDescriptor]
   ) -> String {
-    let repositoriesBlock: String
-    if let repos = repositories, !repos.isEmpty {
-      repositoriesBlock = repos.map { "    \($0.gradleDSL)" }.joined(separator: "\n")
-    } else {
-      repositoriesBlock = "    mavenCentral()"
+    var p = CodePrinter()
+    p.indentationPart = "    "
+
+    p.print("plugins { id 'java-library' }")
+
+    p.printBraceBlock("repositories") { p in
+      for repo in repositories {
+        p.print(repo.gradleDSL)
+      }
     }
 
-    let depsBlock =
-      dependencies
-      .map { "    implementation(\"\($0.descriptionGradleStyle)\")" }
-      .joined(separator: "\n")
+    p.println()
 
-    return """
-      plugins { id 'java-library' }
-      repositories {
-      \(repositoriesBlock)
+    p.printBraceBlock("dependencies") { p in
+      for dep in dependencies {
+        p.print("implementation(\"\(dep.descriptionGradleStyle)\")")
       }
+    }
 
-      dependencies {
-      \(depsBlock)
-      }
+    p.println()
 
-      tasks.register("\(printRuntimeClasspathTaskName)") {
-          def runtimeClasspath = sourceSets.main.runtimeClasspath
-          inputs.files(runtimeClasspath)
-          doLast {
-              println("\(SwiftJavaClasspathPrefix)${runtimeClasspath.asPath}")
-          }
+    p.printBraceBlock("tasks.register(\"\(printRuntimeClasspathTaskName)\")") { p in
+      p.print("def runtimeClasspath = sourceSets.main.runtimeClasspath")
+      p.print("inputs.files(runtimeClasspath)")
+      p.printBraceBlock("doLast") { p in
+        p.print("println(\"\(SwiftJavaClasspathPrefix)${runtimeClasspath.asPath}\")")
       }
-      """
+    }
+
+    return p.finalize()
   }
 
   // ==== -------------------------------------------------------------------

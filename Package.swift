@@ -264,6 +264,10 @@ let package = Package(
     ),
 
     .target(
+      name: "CodePrinting"
+    ),
+
+    .target(
       name: "SwiftJavaToolLib",
       dependencies: [
         .product(name: "Logging", package: "swift-log"),
@@ -277,6 +281,7 @@ let package = Package(
         "JavaNet",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
+        "CodePrinting",
         .product(name: "Subprocess", package: "swift-subprocess"),
       ],
       swiftSettings: [
@@ -324,6 +329,7 @@ let package = Package(
         .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
+        "CodePrinting",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
@@ -385,7 +391,8 @@ let package = Package(
     .testTarget(
       name: "JExtractSwiftTests",
       dependencies: [
-        "JExtractSwiftLib"
+        "JExtractSwiftLib",
+        "CodePrinting",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)

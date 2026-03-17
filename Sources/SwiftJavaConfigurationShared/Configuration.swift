@@ -226,18 +226,25 @@ public enum MavenRepositoryDescriptor: Hashable, Codable {
   public var gradleDSL: String {
     switch self {
     case .maven(let url, let artifactUrls):
-      var result = "maven {"
-      result += "\n      url = uri(\"\(url)\")"
+      var result = "maven {\n"
+      result += "    url = uri(\"\(url)\")\n"
       if let artifactUrls, !artifactUrls.isEmpty {
-        result += "\n      artifactUrls = [\(artifactUrls.map { "\"\($0)\"" }.joined(separator: ", "))]"
+        result += "    artifactUrls = [\(artifactUrls.map { "\"\($0)\"" }.joined(separator: ", "))]\n"
       }
-      result += "\n    }"
+      result += "}"
       return result
     case .mavenCentral:
       return "mavenCentral()"
     case .mavenLocal(let includeGroups):
       if let includeGroups, !includeGroups.isEmpty {
-        return "mavenLocal {\n      content {\n        \(includeGroups.map { "includeGroup(\"\($0)\")" }.joined(separator: "\n        "))\n      }\n    }"
+        var result = "mavenLocal {\n"
+        result += "    content {\n"
+        for group in includeGroups {
+          result += "        includeGroup(\"\(group)\")\n"
+        }
+        result += "    }\n"
+        result += "}"
+        return result
       }
       return "mavenLocal()"
     case .google:
