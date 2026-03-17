@@ -198,7 +198,8 @@ public enum MavenRepositoryDescriptor: Hashable, Codable {
       self = .google
     default:
       throw DecodingError.dataCorruptedError(
-        forKey: .type, in: container,
+        forKey: .type,
+        in: container,
         debugDescription: "Unknown repository type: '\(type)'. Supported: maven, mavenCentral, mavenLocal, google"
       )
     }

@@ -367,7 +367,7 @@ let package = Package(
         "SwiftJavaConfigurationShared",
       ],
       exclude: [
-        "SimpleJavaProject",
+        "SimpleJavaProject"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)

@@ -83,7 +83,8 @@ public struct JavaDependencyResolver {
       repositoriesBlock = "    mavenCentral()"
     }
 
-    let depsBlock = dependencies
+    let depsBlock =
+      dependencies
       .map { "    implementation(\"\($0.descriptionGradleStyle)\")" }
       .joined(separator: "\n")
 
@@ -128,7 +129,8 @@ public struct JavaDependencyResolver {
       repositoriesBlock = "    mavenCentral()"
     }
 
-    let depsBlock = dependencies
+    let depsBlock =
+      dependencies
       .map { "    implementation(\"\($0.descriptionGradleStyle)\")" }
       .joined(separator: "\n")
 

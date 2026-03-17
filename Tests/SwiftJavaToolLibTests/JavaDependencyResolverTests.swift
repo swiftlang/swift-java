@@ -108,7 +108,7 @@ final class JavaDependencyResolverTests: XCTestCase {
       JavaDependencyDescriptor(groupID: "com.example", artifactID: "hello-world", version: "1.0.0")
     ]
     config.mavenRepositories = [
-      .maven(url: repoDir.path),
+      .maven(url: repoDir.path)
     ]
 
     let workDir = tempDir.appendingPathComponent("work")
@@ -137,7 +137,7 @@ final class JavaDependencyResolverTests: XCTestCase {
     ]
     // Only look in our local repo, should fail since com.nonexistent doesn't exist
     config.mavenRepositories = [
-      .maven(url: repoDir.path),
+      .maven(url: repoDir.path)
     ]
 
     let workDir = tempDir.appendingPathComponent("work")
@@ -171,7 +171,7 @@ final class JavaDependencyResolverTests: XCTestCase {
     // Use maven with the local repo path + includeGroups on mavenLocal won't help here,
     // but we can still test that the config round-trips correctly
     config.mavenRepositories = [
-      .maven(url: repoDir.path),
+      .maven(url: repoDir.path)
     ]
 
     let workDir = tempDir.appendingPathComponent("work")
