@@ -988,7 +988,14 @@ extension JavaClassTranslator {
         parameters.append("\"init\"")
       }
       if hasTypeEraseGenericResultType {
-        parameters.append("typeErasedResult: \"\(resultType)\"")
+        let boundType = try translator.getSwiftTypeNameAsString(
+          method: javaMethod,
+          javaMethod.getReturnType().as(Type.self),
+          substitution: substitution,
+          preferValueTypes: true,
+          outerOptional: .optional
+        )
+        parameters.append(#"typeErasedResult: "\#(resultType)", typeErasedResultBound: \#(boundType).self"#)
       }
       // TODO: generic parameters?
 

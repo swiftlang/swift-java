@@ -146,6 +146,13 @@ public macro JavaMethod(
   typeErasedResult: String? = nil
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
+@attached(body)
+public macro JavaMethod<Result: JavaValue>(
+  _ javaMethodName: String? = nil,
+  typeErasedResult: String,
+  typeErasedResultBound: Result.Type,
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
+
 /// Attached macro that turns a Swift method on JavaClass into one that wraps
 /// a Java static method on the underlying Java class object.
 ///

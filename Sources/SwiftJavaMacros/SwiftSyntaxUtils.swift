@@ -29,3 +29,15 @@ extension FunctionParameterSyntax {
     return firstName.text
   }
 }
+
+extension AttributeSyntax.Arguments {
+  func firstExpr(label: String?) -> ExprSyntax? {
+    if case let .argumentList(arguments) = self,
+      let element = arguments.first(where: { $0.label?.text == label })
+    {
+      element.expression
+    } else {
+      nil
+    }
+  }
+}

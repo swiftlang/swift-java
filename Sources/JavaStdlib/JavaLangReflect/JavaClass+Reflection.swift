@@ -49,4 +49,8 @@ extension JavaClass {
 
   @JavaMethod
   public func getAnnotations() -> [Annotation?]
+
+  public func `as`(_: Type.Type) -> Type {
+    Type(javaHolder: javaHolder)
+  }
 }

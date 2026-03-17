@@ -53,10 +53,8 @@ extension JavaMethodMacro: BodyMacro {
     var resultStatements: [CodeBlockItemSyntax] = []
 
     let funcName =
-      if case .argumentList(let arguments) = node.arguments,
-        let argument = arguments.first,
-        argument.label?.text != "typeErasedResult",
-        let stringLiteral = argument.expression.as(StringLiteralExprSyntax.self),
+      if let expression = node.arguments?.firstExpr(label: nil),
+        let stringLiteral = expression.as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(funcNameSegment)? = stringLiteral.segments.first
       {
@@ -91,10 +89,8 @@ extension JavaMethodMacro: BodyMacro {
     }
 
     let genericResultType: String? =
-      if case let .argumentList(arguments) = node.arguments,
-        let element = arguments.first(where: { $0.label?.text == "typeErasedResult" }),
-        let stringLiteral = element.expression
-          .as(StringLiteralExprSyntax.self),
+      if let expression = node.arguments?.firstExpr(label: "typeErasedResult"),
+        let stringLiteral = expression.as(StringLiteralExprSyntax.self),
         stringLiteral.segments.count == 1,
         case let .stringSegment(wrapperName)? = stringLiteral.segments.first
       {
@@ -110,6 +106,13 @@ extension JavaMethodMacro: BodyMacro {
         nil
       }
 
+    let typeErasedResultBound: String? =
+      if let expression = node.arguments?.firstExpr(label: "typeErasedResultBound") {
+        expression.trimmedDescription
+      } else {
+        nil
+      }
+
     // Determine the result type
     let resultType: String =
       if let returnClause = funcDecl.signature.returnClause {
@@ -117,7 +120,7 @@ extension JavaMethodMacro: BodyMacro {
           // we need to type-erase the signature, because on JVM level generics are erased and we'd otherwise
           // form a signature with the "concrete" type, which would not match the real byte-code level signature
           // of the method we're trying to call -- which would result in a MethodNotFound exception.
-          ", resultType: /*type-erased:\(genericResultType)*/JavaObject?.self"
+          ", resultType: /*type-erased:\(genericResultType)*/\(typeErasedResultBound ?? "JavaObject?.self")"
         } else {
           ", resultType: \(returnClause.type.typeReferenceString).self"
         }
