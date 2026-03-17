@@ -28,7 +28,7 @@ open class AccessibleObject: JavaObject {
   /// ```java
   /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.AccessibleObject.getAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `getAnnotationsByType`.
@@ -55,7 +55,7 @@ open class AccessibleObject: JavaObject {
   /// ```java
   /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.AccessibleObject.getDeclaredAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `getDeclaredAnnotationsByType`.

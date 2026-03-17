@@ -73,7 +73,7 @@ open class Constructor<T: AnyJavaObject>: Executable {
   /// ```java
   /// public T java.lang.reflect.Constructor.newInstance(java.lang.Object...) throws java.lang.InstantiationException,java.lang.IllegalAccessException,java.lang.IllegalArgumentException,java.lang.reflect.InvocationTargetException
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: JavaObject?.self)
   open func newInstance(_ arg0: [JavaObject?]) throws -> T!
 
   /// Java method `getParameterTypes`.
@@ -118,7 +118,7 @@ open class Constructor<T: AnyJavaObject>: Executable {
   /// ```java
   /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.Constructor.getAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod(typeErasedResult: "T!")
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open override func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `getDeclaredAnnotations`.
