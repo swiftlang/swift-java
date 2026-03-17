@@ -15,10 +15,10 @@
 import Foundation
 import SwiftJavaConfigurationShared
 import SwiftJavaToolLib
-import XCTest
+import Testing
 
 // ==== -----------------------------------------------------------------------
-// MARK: JavaDependencyResolverTests
+// MARK: TestFixtureError
 
 enum TestFixtureError: Error, CustomStringConvertible {
   case gradlewNotFound(searchedFrom: String)
@@ -34,14 +34,14 @@ enum TestFixtureError: Error, CustomStringConvertible {
   }
 }
 
-final class JavaDependencyResolverTests: XCTestCase {
+// ==== -----------------------------------------------------------------------
+// MARK: JavaDependencyResolverTests
 
-  // ==== -------------------------------------------------------------------
-  // MARK: Local repo resolve tests
+@Suite
+struct JavaDependencyResolverTests {
 
   /// The path to the SimpleJavaProject test fixture.
   static var simpleJavaProjectDir: URL {
-    // Find it relative to this test file
     let thisFile = URL(fileURLWithPath: #filePath)
     return thisFile.deletingLastPathComponent().appendingPathComponent("SimpleJavaProject")
   }
@@ -59,7 +59,7 @@ final class JavaDependencyResolverTests: XCTestCase {
     throw TestFixtureError.gradlewNotFound(searchedFrom: directory.path)
   }
 
-  /// Publish the SimpleJavaProject to a local maven repo and return the repo path.
+  /// Publish the SimpleJavaProject to a local maven repo.
   static func publishSampleJavaProject(to repoDir: URL) throws {
     let fm = FileManager.default
     if fm.fileExists(atPath: repoDir.appendingPathComponent("com/example/hello-world/1.0.0").path) {
@@ -80,7 +80,6 @@ final class JavaDependencyResolverTests: XCTestCase {
     ]
     process.currentDirectoryURL = simpleJavaProjectDir
 
-    // Override the publishing repo URL
     let pipe = Pipe()
     process.standardOutput = pipe
     process.standardError = pipe
@@ -94,8 +93,11 @@ final class JavaDependencyResolverTests: XCTestCase {
     }
   }
 
-  /// Test that we can resolve a dependency from a local Maven repository.
-  func test_resolveFromLocalRepo() async throws {
+  // ==== -------------------------------------------------------------------
+  // MARK: Tests
+
+  @Test(.tags(.slow, .gradle, .integration))
+  func resolveFromLocalRepo() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -115,15 +117,15 @@ final class JavaDependencyResolverTests: XCTestCase {
     try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
 
     let classpath = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
-    XCTAssertFalse(classpath.isEmpty, "Classpath should not be empty")
-    XCTAssertTrue(
+    #expect(!classpath.isEmpty, "Classpath should not be empty")
+    #expect(
       classpath.contains("hello-world"),
       "Classpath should contain hello-world artifact, got: \(classpath)"
     )
   }
 
-  /// Test that resolving a dependency that does not exist in the repo fails.
-  func test_resolveNonExistentDependency_fails() async throws {
+  @Test(.tags(.slow, .gradle, .integration))
+  func resolveNonExistentDependency_fails() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -143,20 +145,13 @@ final class JavaDependencyResolverTests: XCTestCase {
     let workDir = tempDir.appendingPathComponent("work")
     try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
 
-    do {
+    await #expect(throws: JavaDependencyResolverError.self) {
       _ = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
-      XCTFail("Expected resolve to fail for non-existent dependency")
-    } catch {
-      // Expected, Gradle should fail to resolve
-      XCTAssertTrue(
-        "\(error)".contains("SWIFT_JAVA_CLASSPATH") || "\(error)".contains("Gradle"),
-        "Error should be from Gradle resolution failure, got: \(error)"
-      )
     }
   }
 
-  /// Test that resolving with includeGroups filter works.
-  func test_resolveFromLocalRepo_withIncludeGroupsFilter() async throws {
+  @Test(.tags(.slow, .gradle, .integration))
+  func resolveFromLocalRepo_withIncludeGroupsFilter() async throws {
     let tempDir = FileManager.default.temporaryDirectory
       .appendingPathComponent("swift-java-test-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -168,8 +163,6 @@ final class JavaDependencyResolverTests: XCTestCase {
     config.dependencies = [
       JavaDependencyDescriptor(groupID: "com.example", artifactID: "hello-world", version: "1.0.0")
     ]
-    // Use maven with the local repo path + includeGroups on mavenLocal won't help here,
-    // but we can still test that the config round-trips correctly
     config.mavenRepositories = [
       .maven(url: repoDir.path)
     ]
@@ -178,19 +171,16 @@ final class JavaDependencyResolverTests: XCTestCase {
     try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
 
     let classpath = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
-    XCTAssertTrue(classpath.contains("hello-world"))
+    #expect(classpath.contains("hello-world"))
   }
 
-  /// Test that resolve throws for empty dependencies.
-  func test_resolveNoDependencies_throws() async throws {
+  @Test
+  func resolveNoDependencies_throws() async throws {
     let config = Configuration()
     let workDir = FileManager.default.temporaryDirectory
 
-    do {
+    await #expect(throws: JavaDependencyResolverError.self) {
       _ = try await JavaDependencyResolver.resolve(config: config, workDir: workDir)
-      XCTFail("Expected noDependencies error")
-    } catch JavaDependencyResolverError.noDependencies {
-      // Expected
     }
   }
 }

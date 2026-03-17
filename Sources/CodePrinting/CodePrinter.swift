@@ -115,7 +115,7 @@ public struct CodePrinter {
     line: UInt = #line
   ) {
     for part in parts {
-      guard part.trimmingCharacters(in: .whitespacesAndNewlines).count != 0 else {
+      guard !part.allSatisfy(\.isWhitespace) else {
         continue
       }
 
@@ -262,9 +262,7 @@ extension CodePrinter {
     let filename: String
     if _filename.contains(PATH_SEPARATOR) {
       let parts = _filename.split(separator: PATH_SEPARATOR)
-      outputDirectory = _outputDirectory.appending(PATH_SEPARATOR).appending(
-        parts.dropLast().joined(separator: PATH_SEPARATOR)
-      )
+      outputDirectory = _outputDirectory + PATH_SEPARATOR + parts.dropLast().joined(separator: PATH_SEPARATOR)
       filename = "\(parts.last!)"
     } else {
       outputDirectory = _outputDirectory
@@ -303,7 +301,7 @@ extension CodePrinter {
       throw error
     }
 
-    let outputPath = Foundation.URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename)
+    let outputPath = URL(fileURLWithPath: targetDirectory).appendingPathComponent(filename)
     try contents.write(
       to: outputPath,
       atomically: true,
