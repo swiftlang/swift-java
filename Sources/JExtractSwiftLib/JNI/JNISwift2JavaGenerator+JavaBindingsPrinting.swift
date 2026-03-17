@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import Foundation
 import OrderedCollections
 import SwiftJavaJNICore

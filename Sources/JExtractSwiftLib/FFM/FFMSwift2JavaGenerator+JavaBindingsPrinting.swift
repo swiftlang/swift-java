@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {

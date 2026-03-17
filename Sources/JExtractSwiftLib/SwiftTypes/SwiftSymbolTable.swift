@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftSyntax
 
 package protocol SwiftSymbolTableProtocol {

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftSyntax
 
 enum TranslatedDocumentation {
