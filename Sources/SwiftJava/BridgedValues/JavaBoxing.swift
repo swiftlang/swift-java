@@ -336,3 +336,51 @@ final class SwiftDictionaryBox<K: JavaBoxable & Hashable, V: JavaBoxable>: AnySw
     return result
   }
 }
+
+// ==== -----------------------------------------------------------------------
+// MARK: SwiftSetBox (type-erased base + generic subclass)
+
+/// Non-generic base class for set boxes, allowing dispatch
+/// from @_cdecl JNI functions without knowing the concrete element type.
+///
+/// Note: This must be a class (not a protocol) because instances are stored
+/// via `Unmanaged` in a raw pointer passed across the JNI boundary.
+class AnySwiftSetBox {
+  func size() -> Int { fatalError("abstract") }
+  func contains(element: jobject?, environment: JNIEnvironment) -> Bool { fatalError("abstract") }
+  func toArray(environment: JNIEnvironment) -> jobject? { fatalError("abstract") }
+  func setAsAny() -> Any { fatalError("abstract") }
+}
+
+/// Generic subclass that wraps a concrete `Set<E>` Swift set.
+final class SwiftSetBox<E: JavaBoxable & Hashable>: AnySwiftSetBox {
+  let set: Set<E>
+
+  init(_ set: Set<E>) {
+    self.set = set
+  }
+
+  override func size() -> Int {
+    set.count
+  }
+
+  override func setAsAny() -> Any {
+    set
+  }
+
+  override func contains(element: jobject?, environment: JNIEnvironment) -> Bool {
+    let swiftElement = E.fromJavaObject(element, in: environment)
+    return set.contains(swiftElement)
+  }
+
+  override func toArray(environment: JNIEnvironment) -> jobject? {
+    let elements = Array(set)
+    let objectClass = environment.interface.FindClass(environment, "java/lang/Object")
+    let result = environment.interface.NewObjectArray(environment, jsize(elements.count), objectClass, nil)
+    for (i, element) in elements.enumerated() {
+      let javaElement = element.toJavaObject(in: environment)
+      environment.interface.SetObjectArrayElement(environment, result, jsize(i), javaElement)
+    }
+    return result
+  }
+}

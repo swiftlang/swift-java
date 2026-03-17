@@ -127,6 +127,15 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(type)
+            }
+            return try translateSetParameter(
+              elementType: genericArgs[0],
+              parameterName: parameterName
+            )
+
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
@@ -321,6 +330,12 @@ extension JNISwift2JavaGenerator {
         return try translateDictionaryParameter(
           keyType: keyType,
           valueType: valueType,
+          parameterName: parameterName
+        )
+
+      case .set(let elementType):
+        return try translateSetParameter(
+          elementType: elementType,
           parameterName: parameterName
         )
 
@@ -656,7 +671,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -688,7 +703,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -720,6 +735,15 @@ extension JNISwift2JavaGenerator {
             return try translateDictionaryResult(
               keyType: genericArgs[0],
               valueType: genericArgs[1],
+              resultName: resultName
+            )
+
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(swiftResult.type)
+            }
+            return try translateSetResult(
+              elementType: genericArgs[0],
               resultName: resultName
             )
 
@@ -799,6 +823,12 @@ extension JNISwift2JavaGenerator {
         return try translateDictionaryResult(
           keyType: keyType,
           valueType: valueType,
+          resultName: resultName
+        )
+
+      case .set(let elementType):
+        return try translateSetResult(
+          elementType: elementType,
           resultName: resultName
         )
 
@@ -1005,6 +1035,35 @@ extension JNISwift2JavaGenerator {
         conversion: .method(
           .placeholder,
           function: "dictionaryGetJNIValue",
+          arguments: [("in", .constant("environment"))]
+        ),
+        outParameters: []
+      )
+    }
+
+    func translateSetParameter(
+      elementType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      NativeParameter(
+        parameters: [
+          JavaParameter(name: parameterName, type: .long)
+        ],
+        conversion: .initFromJNI(.placeholder, swiftType: .set(element: elementType)),
+        indirectConversion: nil,
+        conversionCheck: nil
+      )
+    }
+
+    func translateSetResult(
+      elementType: SwiftType,
+      resultName: String
+    ) throws -> NativeResult {
+      NativeResult(
+        javaType: .long,
+        conversion: .method(
+          .placeholder,
+          function: "setGetJNIValue",
           arguments: [("in", .constant("environment"))]
         ),
         outParameters: []

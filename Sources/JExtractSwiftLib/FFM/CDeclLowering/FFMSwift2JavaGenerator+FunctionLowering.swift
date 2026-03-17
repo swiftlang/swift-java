@@ -438,6 +438,9 @@ struct CdeclLowering {
 
     case .dictionary:
       throw LoweringError.unhandledType(type)
+
+    case .set:
+      throw LoweringError.unhandledType(type)
     }
   }
 
@@ -530,7 +533,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
 
-    case .function, .metatype, .optional, .composite, .array, .dictionary:
+    case .function, .metatype, .optional, .composite, .array, .dictionary, .set:
       throw LoweringError.unhandledType(.optional(wrappedType))
     }
   }
@@ -632,7 +635,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -835,7 +838,7 @@ struct CdeclLowering {
         )
       )
 
-    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array, .dictionary:
+    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array, .dictionary, .set:
       throw LoweringError.unhandledType(type)
     }
   }
