@@ -316,23 +316,23 @@ struct JNIProtocolTests {
         extension SwiftJavaSomeProtocolWrapper {
           public func method() {
             let environment$ = try! JavaVirtualMachine.shared().environment()
-            environment$.interface.PushLocalFrame(environment$, 4)
-            defer { environment$.interface.PopLocalFrame(environment$, nil) }
-            _javaSomeProtocolInterface.method()
+            try! environment$.withLocalFrame(capacity: 4) {
+              _javaSomeProtocolInterface.method()
+            }
           }
           public func withObject(c: SomeClass) -> SomeClass {
             let environment$ = try! JavaVirtualMachine.shared().environment()
-            environment$.interface.PushLocalFrame(environment$, 6)
-            defer { environment$.interface.PopLocalFrame(environment$, nil) }
-            let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
-            let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
-            cPointer.initialize(to: c)
-            guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer))), JavaSwiftArena.defaultAutoArena) else {
-              fatalError("Upcall to withObject unexpectedly returned nil")
+            return try! environment$.withLocalFrame(capacity: 6) {
+              let cClass = try! JavaClass<JavaSomeClass>(environment: JavaVirtualMachine.shared().environment())
+              let cPointer = UnsafeMutablePointer<SomeClass>.allocate(capacity: 1)
+              cPointer.initialize(to: c)
+              guard let unwrapped$ = _javaSomeProtocolInterface.withObject(cClass.wrapMemoryAddressUnsafe(Int64(Int(bitPattern: cPointer))), JavaSwiftArena.defaultAutoArena) else {
+                fatalError("Upcall to withObject unexpectedly returned nil")
+              }
+              let result$MemoryAddress$ = unwrapped$.as(JavaJNISwiftInstance.self)!.memoryAddress()
+              let result$Pointer = UnsafeMutablePointer<SomeClass>(bitPattern: Int(result$MemoryAddress$))!
+              return result$Pointer.pointee
             }
-            let result$MemoryAddress$ = unwrapped$.as(JavaJNISwiftInstance.self)!.memoryAddress()
-            let result$Pointer = UnsafeMutablePointer<SomeClass>(bitPattern: Int(result$MemoryAddress$))!
-            return result$Pointer.pointee
           }
         }
         """,
