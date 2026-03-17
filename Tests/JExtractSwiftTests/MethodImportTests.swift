@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
@@ -228,10 +229,10 @@ final class MethodImportTests {
          * public func globalReturnClass() -> MySwiftClass
          * }
          */
-        public static MySwiftClass globalReturnClass(AllocatingSwiftArena swiftArena$) {
-          MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+        public static MySwiftClass globalReturnClass(AllocatingSwiftArena swiftArena) {
+          MemorySegment _result = swiftArena.allocate(MySwiftClass.$LAYOUT);
           swiftjava___FakeModule_globalReturnClass.call(_result);
-          return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
+          return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena);
         }
         """
     )
@@ -405,10 +406,10 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena$) {
-            MemorySegment _result = swiftArena$.allocate(MySwiftClass.$LAYOUT);
+        public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena) {
+            MemorySegment _result = swiftArena.allocate(MySwiftClass.$LAYOUT);
             swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
-            return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena$);
+            return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena);
         }
         """
     )
@@ -450,10 +451,10 @@ final class MethodImportTests {
          * public init(len: Swift.Int, cap: Swift.Int)
          * }
          */
-        public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena$) {
-            MemorySegment _result = swiftArena$.allocate(MySwiftStruct.$LAYOUT);
+        public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena) {
+            MemorySegment _result = swiftArena.allocate(MySwiftStruct.$LAYOUT);
             swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
-            return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena$);
+            return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena);
         }
         """
     )

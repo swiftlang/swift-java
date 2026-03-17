@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import JavaUtil
 @_spi(Testing) import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaToolLib
@@ -128,7 +129,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        public func toArray(_ arg0: MyJavaIntFunction<JavaArray>?) -> [T?]
+        public func toArray<T: AnyJavaObject>(_ arg0: MyJavaIntFunction<JavaArray>?) -> [T?]
         """,
       ]
     )
@@ -467,6 +468,66 @@ class Java2SwiftTests: XCTestCase {
     )
   }
 
+  func testSuperTypeHasCovariantOverride() throws {
+    /// `Appendable` defines `Appendable append(char c)`.
+    /// `Writer` implements it as `Writer append(char c)`.
+    /// `PrintWriter` overrides it as `PrintWriter append(char c)`.
+    /// Other overrides are redundant and would cause a compilation error in Swift.
+    try assertTranslatedClass(
+      PrintWriter.self,
+      swiftTypeName: "PrintWriter",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.Appendable": SwiftTypeName(module: "SwiftJava", name: "Appendable"),
+        "java.io.Writer": SwiftTypeName(module: "SwiftJava", name: "Writer"),
+      ],
+      expectedChunks: [
+        "import SwiftJava",
+        """
+        @JavaClass("java.io.PrintWriter")
+        open class PrintWriter: Writer {
+        """,
+        """
+        @JavaMethod
+        open override func append(_ arg0: UInt16) -> PrintWriter!
+        """,
+      ],
+      unexpectedChunks: [
+        """
+        @JavaMethod
+        open func append(_ arg0: UInt16) throws -> Appendable!
+        """,
+        """
+        @JavaMethod
+        open override func append(_ arg0: UInt16) throws -> Writer!
+        """,
+      ]
+    )
+  }
+
+  func testGenericSuperclassNotMapped() throws {
+    // ArrayDeque<E> extends AbstractCollection<E>
+    // If AbstractCollection is not mapped, it should fall back to JavaObject
+    try assertTranslatedClass(
+      ArrayDeque<JavaObject>.self,
+      swiftTypeName: "ArrayDeque",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.util.Deque": SwiftTypeName(module: "SwiftJava", name: "Deque"),
+        "java.util.ArrayDeque": SwiftTypeName(module: "JavaUtil", name: "ArrayDeque"),
+      ],
+      expectedChunks: [
+        "import SwiftJava",
+        """
+        @JavaClass("java.util.ArrayDeque", implements: Deque<JavaObject>.self)
+        open class ArrayDeque<E: AnyJavaObject>: JavaObject {
+        """,
+      ]
+    )
+  }
+
   func testJavaInterfaceAsClassNOT() throws {
     try assertTranslatedClass(
       MyJavaIntFunction<JavaObject>.self,
@@ -552,7 +613,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         @JavaMethod
-        open override func getDeclaringClass() -> JavaClass<T>!
+        open func getDeclaringClass() -> JavaClass<T>!
         """,
       ]
     )
@@ -653,6 +714,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
   translatedClasses: [String: SwiftTypeName] = [:],
   nestedClasses: [String: [JavaClass<JavaObject>]] = [:],
   expectedChunks: [String],
+  unexpectedChunks: [String] = [],
   file: StaticString = #filePath,
   line: UInt = #line
 ) throws {
@@ -704,6 +766,18 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
         file: file,
         line: line
       )
+    }
+
+    for unexpectedChunk in unexpectedChunks {
+      let normalizedUnexpectedChunk = normalizeWhitespace(unexpectedChunk)
+
+      if normalizedSwiftFileText.contains(normalizedUnexpectedChunk) {
+        XCTFail(
+          "Unexpected chunk:\n---\n\(unexpectedChunk.yellow)\n---\nfound in:\n===\n\(swiftFileText)\n===",
+          file: file,
+          line: line
+        )
+      }
     }
   }
 }

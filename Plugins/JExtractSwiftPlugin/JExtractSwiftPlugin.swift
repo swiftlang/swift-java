@@ -139,7 +139,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       arguments += [
         "--generated-java-sources-list-file-output", javaSourcesListFileName,
       ]
-      jextractOutputFiles += [javaSourcesFile]
+      // NOTE: javaSourcesFile is intentionally NOT added to jextractOutputFiles.
+      // Adding a non-Swift file as a build command output causes SPM to bundle it
+      // as a module resource, which triggers resource_bundle_accessor.swift generation
+      // and pulls in Foundation.Bundle. The file is still written by the tool as a
+      // side-effect; the java-callbacks-build command reads it by its known path.
     }
 
     commands += [
@@ -148,7 +152,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         executable: toolURL,
         arguments: arguments,
         inputFiles: [configFile] + swiftFiles,
-        outputFiles: jextractOutputFiles
+        outputFiles: jextractOutputFiles,
       )
     ]
 
@@ -188,85 +192,48 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       ?? swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
     log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
 
-    commands += [
-      .buildCommand(
-        displayName: "Build SwiftKitCore using Gradle (Java)",
-        executable: gradleExecutable,
-        arguments: [
-          ":SwiftKitCore:build",
-          "--project-dir", swiftJavaDirectory.path(percentEncoded: false),
-          "--gradle-user-home", gradleUserHomePath,
-          "--configure-on-demand",
-          "--no-daemon",
-        ],
-        environment: gradlewEnvironment,
-        inputFiles: [swiftJavaDirectory],
-        outputFiles: [swiftKitCoreClassPath]
-      )
-    ]
-
-    // Compile the jextracted sources
     let javaHome = URL(filePath: findJavaHome())
-
-    commands += [
-      .buildCommand(
-        displayName: "Build extracted Java sources",
-        executable:
-          javaHome
-          .appending(path: "bin")
-          .appending(path: self.javacName),
-        arguments: [
-          "@\(javaSourcesFile.path(percentEncoded: false))",
-          "-d", javaCompiledClassesURL.path(percentEncoded: false),
-          "-parameters",
-          "-classpath", swiftKitCoreClassPath.path(percentEncoded: false),
-        ],
-        inputFiles: [javaSourcesFile, swiftKitCoreClassPath],
-        outputFiles: [javaCompiledClassesURL]
-      )
-    ]
-
-    // Run `configure` to extract a swift-java config to use for wrap-java
-    let swiftJavaConfigURL = context.pluginWorkDirectoryURL.appending(path: "swift-java.config")
-
-    commands += [
-      .buildCommand(
-        displayName: "Output swift-java.config that contains all extracted Java sources",
-        executable: toolURL,
-        arguments: [
-          "configure",
-          "--output-directory", context.pluginWorkDirectoryURL.path(percentEncoded: false),
-          "--cp", javaCompiledClassesURL.path(percentEncoded: false),
-          "--swift-module", sourceModule.name,
-          "--swift-type-prefix", "Java",
-        ],
-        inputFiles: [javaCompiledClassesURL],
-        outputFiles: [swiftJavaConfigURL]
-      )
-    ]
+    let javacPath =
+      javaHome
+      .appending(path: "bin")
+      .appending(path: self.javacName)
 
     let singleSwiftFileOutputName = "WrapJavaGenerated.swift"
+    let javaCallbacksSwiftOutput = outputSwiftDirectory.appending(path: singleSwiftFileOutputName)
 
-    // In the end we can run wrap-java on the previous inputs
-    var wrapJavaArguments = [
-      "wrap-java",
+    // Combine gradle + javac + configure + wrap-java into a single command that
+    // declares only a Swift file as its output. This avoids SPM treating any
+    // intermediate artifact (Gradle output directories, compiled .class files,
+    // swift-java.config) as module resources, which would trigger
+    // resource_bundle_accessor.swift generation and pull Foundation.Bundle into
+    // the target binary.
+    //
+    // inputFiles includes the Swift outputs from jextract so that SPM knows
+    // this command must run after jextract finishes.
+    var javaCallbacksArguments = [
+      "java-callbacks-build",
+      "--swift-java-tool", toolURL.path(percentEncoded: false),
+      "--gradle-executable", gradleExecutable.path(percentEncoded: false),
+      "--gradle-project-dir", swiftJavaDirectory.path(percentEncoded: false),
+      "--gradle-user-home", gradleUserHomePath,
+      "--javac", javacPath.path(percentEncoded: false),
+      "--java-sources-list", javaSourcesFile.path(percentEncoded: false),
+      "--java-output-directory", javaCompiledClassesURL.path(percentEncoded: false),
+      "--swift-kit-core-classpath", swiftKitCoreClassPath.path(percentEncoded: false),
       "--swift-module", sourceModule.name,
+      "--swift-type-prefix", "Java",
       "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
-      "--config", swiftJavaConfigURL.path(percentEncoded: false),
-      "--cp", swiftKitCoreClassPath.path(percentEncoded: false),
       "--single-swift-file-output", singleSwiftFileOutputName,
     ]
-
-    // Add any dependent config files as arguments
-    wrapJavaArguments += dependentConfigFilesArguments
+    javaCallbacksArguments += dependentConfigFilesArguments
 
     commands += [
       .buildCommand(
-        displayName: "Wrap compiled Java sources using wrap-java",
+        displayName: "Build SwiftKitCore, compile Java callbacks, and generate Swift wrappers",
         executable: toolURL,
-        arguments: wrapJavaArguments,
-        inputFiles: [swiftJavaConfigURL, swiftKitCoreClassPath],
-        outputFiles: [outputSwiftDirectory.appending(path: singleSwiftFileOutputName)]
+        arguments: javaCallbacksArguments,
+        inputFiles: outputSwiftFiles + [swiftJavaDirectory],
+        outputFiles: [javaCallbacksSwiftOutput],
       )
     ]
 

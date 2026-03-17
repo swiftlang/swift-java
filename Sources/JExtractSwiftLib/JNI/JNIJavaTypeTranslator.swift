@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 enum JNIJavaTypeTranslator {
 
@@ -49,6 +49,8 @@ enum JNIJavaTypeTranslator {
       .foundationData, .foundationDataProtocol,
       .essentialsData, .essentialsDataProtocol,
       .array,
+      .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       return nil
@@ -73,6 +75,8 @@ enum JNIJavaTypeTranslator {
       .foundationData, .foundationDataProtocol,
       .essentialsData, .essentialsDataProtocol,
       .array,
+      .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil
@@ -97,6 +101,8 @@ enum JNIJavaTypeTranslator {
       .foundationData, .foundationDataProtocol,
       .essentialsData, .essentialsDataProtocol,
       .array,
+      .dictionary,
+      .set,
       .foundationDate, .essentialsDate,
       .foundationUUID, .essentialsUUID:
       nil

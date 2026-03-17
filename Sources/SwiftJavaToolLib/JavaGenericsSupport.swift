@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import JavaLangReflect
-import JavaTypes
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
@@ -41,7 +41,7 @@ func getGenericJavaTypeOriginInfo(_ type: Type?, from method: Method) -> [Generi
     return [] // it's not a generic type, no "origin" of the use to detect
   }
 
-  var methodTypeVars = method.getTypeParameters()
+  var methodTypeVars = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
 
   // TODO: also handle nested classes here...
   var classTypeVars = method.getDeclaringClass().getTypeParameters()
@@ -108,4 +108,69 @@ func isTypeErased(_ type: Type?) -> Bool {
   }
 
   return false
+}
+
+/// Handles generic type substitution by mapping type variables of ancestor classes
+/// to actual types provided in 'extends' or 'implements' clauses.
+struct SubstitutionMap {
+  private struct MapKey: Hashable {
+    var declaringClassName: String
+    var typeVariableName: String
+  }
+  private var mapping: [MapKey: Type] = [:]
+
+  init(startingFrom javaClass: JavaClass<JavaObject>) {
+    buildSubstitutionMap(for: javaClass)
+  }
+
+  private mutating func buildSubstitutionMap(for currentClass: JavaClass<JavaObject>) {
+    var genericParents: [Type] = currentClass.getGenericInterfaces().compactMap { $0 }
+    if let genericSuperclass = currentClass.getGenericSuperclass() {
+      genericParents.append(genericSuperclass)
+    }
+
+    for genericParent in genericParents {
+      guard let parameterizedParent = genericParent.as(ParameterizedType.self) else {
+        // If the parent is not parameterized, still check its ancestors recursively
+        if let rawParent = genericParent.as(JavaClass<JavaObject>.self) {
+          buildSubstitutionMap(for: rawParent)
+        }
+        continue
+      }
+      guard let rawParent = parameterizedParent.getRawType()?.as(JavaClass<JavaObject>.self) else {
+        continue
+      }
+
+      let typeParameters = rawParent.getTypeParameters()
+      let actualTypeArguments = parameterizedParent.getActualTypeArguments()
+
+      for (typeParam, actualArg) in zip(typeParameters, actualTypeArguments) {
+        guard let typeParam, let actualArg else { continue }
+
+        let key = MapKey(
+          declaringClassName: rawParent.getName(),
+          typeVariableName: typeParam.getName()
+        )
+        mapping[key] = actualArg
+      }
+
+      buildSubstitutionMap(for: rawParent)
+    }
+  }
+
+  func resolve(_ type: Type) -> Type? {
+    if let typeVar = type.as(TypeVariable<GenericDeclaration>.self),
+      let declClass = typeVar.getGenericDeclaration().as(JavaClass<JavaObject>.self)
+    {
+      let key = MapKey(
+        declaringClassName: declClass.getName(),
+        typeVariableName: typeVar.getName()
+      )
+      if let substituted = mapping[key] {
+        // Recursively resolve if the substituted type is also a type variable.
+        return resolve(substituted) ?? substituted
+      }
+    }
+    return nil
+  }
 }

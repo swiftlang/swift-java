@@ -14,11 +14,11 @@
 
 import Foundation
 import JavaLangReflect
-import JavaTypes
 import Logging
 import SwiftBasicFormat
 import SwiftJava
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
@@ -66,6 +66,11 @@ package class JavaTranslator {
   /// methods will be implemented in Swift.
   package var swiftNativeImplementations: Set<String> = []
 
+  /// Parsed Android `api-versions.xml` data, if available.
+  /// When set, the translator will emit `@available(Android ...)` attributes
+  /// based on API-level introduction, deprecation, and removal data.
+  package var androidAPIVersions: AndroidAPIVersions?
+
   /// The set of nested classes that we should traverse from the given class,
   /// indexed by the name of the class.
   ///
@@ -109,7 +114,7 @@ extension JavaTranslator {
   /// Default set of modules that will always be imported.
   private static let defaultImportedSwiftModules: Set<String> = [
     "SwiftJava",
-    "CSwiftJavaJNI",
+    "SwiftJavaJNICore",
   ]
 }
 
@@ -130,6 +135,7 @@ extension JavaTranslator {
 
   func getSwiftReturnTypeNameAsString(
     method: JavaLangReflect.Method,
+    substitution: SubstitutionMap?,
     preferValueTypes: Bool,
     outerOptional: OptionalKind
   ) throws -> String {
@@ -140,6 +146,7 @@ extension JavaTranslator {
     return try getSwiftTypeNameAsString(
       method: method,
       genericReturnType!,
+      substitution: substitution,
       preferValueTypes: preferValueTypes,
       outerOptional: outerOptional
     )
@@ -149,13 +156,18 @@ extension JavaTranslator {
   func getSwiftTypeNameAsString(
     method: JavaLangReflect.Method? = nil,
     _ javaType: Type,
+    substitution: SubstitutionMap?,
     preferValueTypes: Bool,
-    outerOptional: OptionalKind
+    outerOptional: OptionalKind,
+    eraseTypeArguments: Bool = false
   ) throws -> String {
+    // Replace if it is a type variable and we have a substitution for it.
+    let javaType = substitution?.resolve(javaType) ?? javaType
+
     // Replace type variables with their bounds.
     if let typeVariable = javaType.as(TypeVariable<GenericDeclaration>.self),
       typeVariable.getBounds().count == 1,
-      let bound = typeVariable.getBounds()[0]
+      typeVariable.getBounds()[0] != nil
     {
       return outerOptional.adjustTypeName(typeVariable.getName())
     }
@@ -168,6 +180,7 @@ extension JavaTranslator {
       // Replace a wildcard type with its first bound.
       return try getSwiftTypeNameAsString(
         bound,
+        substitution: substitution,
         preferValueTypes: preferValueTypes,
         outerOptional: outerOptional
       )
@@ -178,6 +191,7 @@ extension JavaTranslator {
       if preferValueTypes {
         let elementType = try getSwiftTypeNameAsString(
           arrayType.getGenericComponentType()!,
+          substitution: substitution,
           preferValueTypes: preferValueTypes,
           outerOptional: .optional
         )
@@ -198,6 +212,7 @@ extension JavaTranslator {
       if let rawJavaType = parameterizedType.getRawType() {
         var rawSwiftType = try getSwiftTypeNameAsString(
           rawJavaType,
+          substitution: substitution,
           preferValueTypes: false,
           outerOptional: outerOptional
         )
@@ -212,19 +227,24 @@ extension JavaTranslator {
 
         let typeArguments: [String] = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
           guard let typeArg else { return nil }
+          if eraseTypeArguments {
+            return "JavaObject"
+          }
 
           let mappedSwiftName = try getSwiftTypeNameAsString(
             method: method,
             typeArg,
+            substitution: substitution,
             preferValueTypes: false,
             outerOptional: .nonoptional
           )
 
           // FIXME: improve the get instead...
-          if mappedSwiftName == nil || mappedSwiftName == "JavaObject" {
+          if mappedSwiftName == "JavaObject" {
             // Try to salvage it, is it perhaps a type parameter?
             if let method {
-              if method.getTypeParameters().contains(where: { $0?.getTypeName() == typeArg.getTypeName() }) {
+              let typeParameters = method.getTypeParameters() as [TypeVariable<JavaLangReflect.Method>?]
+              if typeParameters.contains(where: { $0?.getTypeName() == typeArg.getTypeName() }) {
                 return typeArg.getTypeName()
               }
             }

@@ -41,26 +41,17 @@ extension Type {
     return self
   }
 
-  /// Determine whether this type is equivalent to or a subtype of the other
-  /// type.
-  func isEqualTo(_ other: Type, file: String = #file, line: Int = #line, function: String = #function) -> Bool {
+  /// Determine whether this type is equivalent to the other type.
+  func isEqualTo(_ other: Type) -> Bool {
     if self.javaHolder.object == other.javaHolder.object {
       return true
-    }
-
-    // First, adjust types to their bounds, if we need to.
-    var anyAdjusted: Bool = false
-    let adjustedSelf = self.adjustToJavaBounds(adjusted: &anyAdjusted)
-    let adjustedOther = other.adjustToJavaBounds(adjusted: &anyAdjusted)
-    if anyAdjusted {
-      return adjustedSelf.isEqualTo(adjustedOther)
     }
 
     // If both are classes, check for equivalence.
     if let selfClass = self.as(JavaClass<JavaObject>.self),
       let otherClass = other.as(JavaClass<JavaObject>.self)
     {
-      return selfClass.equals(otherClass.as(JavaObject.self))
+      return selfClass.equals(otherClass)
     }
 
     // If both are arrays, check that their component types are equivalent.
@@ -128,6 +119,22 @@ extension Type {
       }
 
       return selfClass.isSubclass(of: otherClass)
+    }
+
+    if let selfType = self.as(ParameterizedType.self),
+      let otherType = other.as(ParameterizedType.self)
+    {
+      if !selfType.getRawType().isEqualToOrSubtypeOf(otherType.getRawType()) {
+        return false
+      }
+
+      if selfType.getActualTypeArguments().allTypesEqual(otherType.getActualTypeArguments()) {
+        return true
+      }
+
+      // Even where Java allows subtyping (e.g., Box<?> from Box<T>),
+      // this cannot be a subtype relationship in Swift.
+      return false
     }
 
     // Anything object-like is a subclass of java.lang.Object

@@ -33,6 +33,12 @@ extension JavaClass {
   public func getFields() -> [Field?]
 
   @JavaMethod
+  public func getGenericInterfaces() -> [Type?]
+
+  @JavaMethod
+  public func getGenericSuperclass() -> Type!
+
+  @JavaMethod
   public func getConstructors() -> [Constructor<ObjectType>?]
 
   @JavaMethod
@@ -42,8 +48,9 @@ extension JavaClass {
   public func getTypeParameters() -> [TypeVariable<JavaClass<JavaObject>>?]
 
   @JavaMethod
-  public func getGenericInterfaces() -> [Type?]
-
-  @JavaMethod
   public func getAnnotations() -> [Annotation?]
+
+  public func `as`(_: Type.Type) -> Type {
+    Type(javaHolder: javaHolder)
+  }
 }

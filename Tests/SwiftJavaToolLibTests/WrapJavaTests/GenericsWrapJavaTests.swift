@@ -51,8 +51,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Pair")
@@ -137,8 +137,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Item")
@@ -176,7 +176,9 @@ final class GenericsWrapJavaTests: XCTestCase {
         public <M> M getMethodGeneric() { return null; }
 
         public <M> Map<T, M> getMixedGeneric() { return null; }
-        
+
+        public <M> M[] getMethodGenericArray() { return null; }
+
         public String getNonGeneric() { return null; }
 
         public List<T> getParameterizedClassGeneric() { return null; }
@@ -211,6 +213,10 @@ final class GenericsWrapJavaTests: XCTestCase {
         """,
         """
         @JavaMethod
+        open func getMethodGenericArray<M: AnyJavaObject>() -> [M?] 
+        """,
+        """
+        @JavaMethod
         open func getNonGeneric() -> String
         """,
         """
@@ -224,6 +230,81 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaMethod
         open func getGenericArray() -> [T?]
+        """,
+      ]
+    )
+  }
+
+  func test_Java2Swift_parameterTypes_generic() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      // Mini decls in order to avoid warnings about some funcs we're not yet importing cleanly
+      final class List<T> {}
+      final class Map<T, U> {}
+      final class Number {}
+
+      class GenericClass<T> {
+        public void setClassGeneric(T v) { }
+        
+        public <M> void setMethodGeneric(M v) { }
+
+        public <M> void setMixedGeneric(Map<T, M> v) { }
+
+        public <M> void setMethodGenericArray(M[] v) { }
+
+        public void setNonGeneric(String v) { }
+
+        public void setParameterizedClassGeneric(List<T> v) { }
+        
+        public void setWildcard(List<? super Number> v) { }
+        
+        public void setGenericArray(T[] v) { }
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Map",
+        "com.example.List",
+        "com.example.Number",
+        "com.example.GenericClass",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func setClassGeneric(_ arg0: T?)
+        """,
+        """
+        @JavaMethod
+        open func setMethodGeneric<M: AnyJavaObject>(_ arg0: M?)
+        """,
+        """
+        @JavaMethod
+        open func setMixedGeneric<M: AnyJavaObject>(_ arg0: Map<T, M>?)
+        """,
+        """
+        @JavaMethod
+        open func setMethodGenericArray<M: AnyJavaObject>(_ arg0: [M?]) 
+        """,
+        """
+        @JavaMethod
+        open func setNonGeneric(_ arg0: String)
+        """,
+        """
+        @JavaMethod
+        open func setParameterizedClassGeneric(_ arg0: List<T>?)
+        """,
+        """
+        @JavaMethod
+        open func setWildcard(_ arg0: List<JavaObject>?)
+        """,
+        """
+        @JavaMethod
+        open func setGenericArray(_ arg0: [T?])
         """,
       ]
     )
@@ -255,8 +336,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.ByteArray")
@@ -288,8 +369,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        import CSwiftJavaJNI
         import SwiftJava
+        import SwiftJavaJNICore
         """,
         """
         @JavaClass("com.example.Kappa")
@@ -333,7 +414,6 @@ final class GenericsWrapJavaTests: XCTestCase {
         """
         @JavaStaticMethod
         public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> Optional<T>! where ObjectType == Optional<T>
-        }
         """,
         """
         @JavaStaticMethod(typeErasedResult: "T!")
@@ -409,7 +489,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         open class Something: JavaObject {
         """,
         """
-        @JavaMethod(typeErasedResult: "M!")
+        @JavaMethod(typeErasedResult: "M!", typeErasedResultBound: Map<JavaObject, JavaObject>?.self)
         open func putIn<M: AnyJavaObject>(_ arg0: M?) -> M!
         """,
       ]
@@ -451,4 +531,29 @@ final class GenericsWrapJavaTests: XCTestCase {
     )
   }
 
+  func testWrapJavaGenericSuperInterface() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      interface Collection<E> { }
+
+      interface Set<E> extends Collection<E> { }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.Collection",
+        "com.example.Set",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.Set", extends: Collection<JavaObject>.self)
+        public struct Set<E: AnyJavaObject> {
+        """
+      ]
+    )
+  }
 }

@@ -40,6 +40,7 @@ struct JNIEnumTests {
 
         import org.swift.swiftkit.core.*;
         import org.swift.swiftkit.core.util.*;
+        import org.swift.swiftkit.core.collections.*;
         import java.util.*;
         import java.util.concurrent.atomic.AtomicBoolean;
         import org.swift.swiftkit.core.annotations.*;
@@ -79,26 +80,25 @@ struct JNIEnumTests {
         }
         """,
         """
-        private static native void $destroy(long selfPointer);
-        """,
-        """
         @Override
         public Runnable $createDestroyFunction() {
-        long self$ = this.$memoryAddress();
-        if (CallTraces.TRACE_DOWNCALLS) {
-          CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
-              "this", this,
-              "self", self$);
-        }
-        return new Runnable() {
-          @Override
-          public void run() {
-            if (CallTraces.TRACE_DOWNCALLS) {
-              CallTraces.traceDowncall("MyEnum.$destroy", "self", self$);
-            }
-            MyEnum.$destroy(self$);
+          long self$ = this.$memoryAddress();
+          long selfType$ = this.$typeMetadataAddress();
+          if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
+                "this", this,
+                "self", self$);
           }
-        };
+          return new Runnable() {
+            @Override
+            public void run() {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall("MyEnum.$destroy", "self", self$);
+              }
+              SwiftObjects.destroy(self$, selfType$);
+            }
+          };
+        }
         """,
       ]
     )
@@ -110,7 +110,7 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .java,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public enum Discriminator {
@@ -121,11 +121,9 @@ struct JNIEnumTests {
         """,
         """
         public Discriminator getDiscriminator() {
-          return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];
+          var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());
+          return Discriminator.values()[raw];
         }
-        """,
-        """
-        private static native int $getDiscriminator(long self);
         """,
       ]
     )
@@ -140,13 +138,13 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyEnum__00024getDiscriminator__J")
-        public func Java_com_example_swift_MyEnum__00024getDiscriminator__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint {
-          ...
-          switch (self$.pointee) {
-            case .first: return 0
-            case .second: return 1
-            case .third: return 2
+        extension MyEnum: _RawDiscriminatorRepresentable {
+          public var _rawDiscriminator: Int32 {
+            switch self {
+              case .first: return 0
+              case .second: return 1
+              case .third: return 2
+            }
           }
         }
         """
@@ -204,18 +202,18 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static MyEnum first(SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$first(), swiftArena$);
+        public static MyEnum first(SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$first(), swiftArena);
         }
         """,
         """
-        public static MyEnum second(java.lang.String arg0, SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$second(arg0), swiftArena$);
+        public static MyEnum second(java.lang.String arg0, SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$second(arg0), swiftArena);
         }
         """,
         """
-        public static MyEnum third(long x, int y, SwiftArena swiftArena$) {
-          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$third(x, y), swiftArena$);
+        public static MyEnum third(long x, int y, SwiftArena swiftArena) {
+          return MyEnum.wrapMemoryAddressUnsafe(MyEnum.$third(x, y), swiftArena);
         }
         """,
       ]
@@ -236,7 +234,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -245,7 +243,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
         """
@@ -254,7 +252,7 @@ struct JNIEnumTests {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment), y: Int32(fromJNI: y, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNIValue(in: environment)
+          return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
       ]
@@ -309,31 +307,31 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
-        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
-          guard case .second(let _0) = self$.pointee else {
-            fatalError("Expected enum case 'second', but was '\\(self$.pointee)'!")
+          guard case .second(let _0) = selfPointer$.pointee else {
+            fatalError("Expected enum case 'second', but was '\\(selfPointer$.pointee)'!")
           }
           let cache$ = _JNI_MyEnum.myEnumSecondCache
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(Ljava/lang/String;)V")
           let constructorID$ = cache$[method$]
-          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNIValue(in: environment) ?? nil)]
+          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNILocalRefValue(in: environment) ?? nil)]
           return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsThird__J")
-        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jobject? {
+        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
-          guard case .third(let x, let y) = self$.pointee else {
-            fatalError("Expected enum case 'third', but was '\\(self$.pointee)'!")
+          guard case .third(let x, let y) = selfPointer$.pointee else {
+            fatalError("Expected enum case 'third', but was '\\(selfPointer$.pointee)'!")
           }
           let cache$ = _JNI_MyEnum.myEnumThirdCache
           let class$ = cache$.javaClass
           let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(JI)V")
           let constructorID$ = cache$[method$]
-          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNIValue(in: environment)), jvalue(i: y.getJNIValue(in: environment))]
+          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNILocalRefValue(in: environment)), jvalue(i: y.getJNILocalRefValue(in: environment))]
           return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,

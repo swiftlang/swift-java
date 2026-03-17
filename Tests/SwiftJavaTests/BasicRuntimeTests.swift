@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JavaNet
+import JavaUtil
 import SwiftJava
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
@@ -46,10 +47,10 @@ class BasicRuntimeTests: XCTestCase {
     XCTAssertEqual(environment.pointee?.pointee.GetObjectRefType(environment, sneakyJavaThis), JNIInvalidRefType)
 
     // 'super' and 'as' don't require allocating a new holder.
-    let url = try URL("http://swift.org", environment: environment)
+    let url = try URI("http://swift.org", environment: environment).toURL()!
     let superURL: JavaObject = url
     XCTAssert(url.javaHolder === superURL.javaHolder)
-    let urlAgain = superURL.as(URL.self)!
+    let urlAgain = superURL.as(JavaURL.self)!
     XCTAssert(url.javaHolder === urlAgain.javaHolder)
   }
 
@@ -57,9 +58,9 @@ class BasicRuntimeTests: XCTestCase {
     let environment = try jvm.environment()
 
     do {
-      _ = try URL("bad url", environment: environment)
+      _ = try URI("bad url", environment: environment)
     } catch {
-      XCTAssertEqual(String(describing: error), "java.net.MalformedURLException: no protocol: bad url")
+      XCTAssertEqual(String(describing: error), "java.net.URISyntaxException: Illegal character in path at index 3: bad url")
     }
   }
 
@@ -88,13 +89,36 @@ class BasicRuntimeTests: XCTestCase {
 
   func testCrossThreadAccess() async throws {
     let environment = try jvm.environment()
-    let url = try URL("https://swift.org", environment: environment)
+    let url = try URI("https://swift.org", environment: environment).toURL()!
     let string = await Task.detached {
       // This should be called on a different thread
       url.toString()
     }.value
 
     XCTAssertEqual(string, "https://swift.org")
+  }
+
+  func testListIterator() throws {
+    let environment = try jvm.environment()
+
+    let javaList = try XCTUnwrap(ArrayList<JavaInteger>(environment: environment).as(List<JavaInteger>.self))
+    _ = javaList.add(JavaInteger(0, environment: environment))
+    _ = javaList.add(JavaInteger(1, environment: environment))
+    _ = javaList.add(JavaInteger(2, environment: environment))
+
+    XCTAssertEqual(javaList.map { $0.intValue() }, [0, 1, 2])
+  }
+
+  func testJavaOptional() throws {
+    let environment = try jvm.environment()
+
+    let value = JavaInteger(42, environment: environment)
+    let javaOptional = Optional.some(value).toJavaOptional()
+    if javaOptional.isPresent() {
+      XCTAssertEqual(javaOptional.get().intValue(), 42)
+    } else {
+      XCTFail("javaOptional is empty")
+    }
   }
 }
 

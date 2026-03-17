@@ -37,6 +37,7 @@ struct SwiftJava: AsyncParsableCommand {
       ResolveCommand.self,
       WrapJavaCommand.self,
       JExtractCommand.self,
+      JavaCallbacksBuildCommand.self,
     ]
   )
 

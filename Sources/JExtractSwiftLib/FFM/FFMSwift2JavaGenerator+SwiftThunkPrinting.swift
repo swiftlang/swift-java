@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftSyntax
 import SwiftSyntaxBuilder
 

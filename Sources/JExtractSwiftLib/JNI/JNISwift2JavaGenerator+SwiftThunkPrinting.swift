@@ -12,7 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import CodePrinting
+import SwiftJavaJNICore
 import SwiftSyntax
 
 #if canImport(FoundationEssentials)
@@ -171,30 +172,41 @@ extension JNISwift2JavaGenerator {
     }
 
     printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
-      var upcallArguments = zip(
-        function.originalFunctionSignature.parameters,
-        function.parameterConversions
-      ).map { param, conversion in
-        // Wrap-java does not extract parameter names, so no labels
-        conversion.render(&printer, param.parameterName!)
-      }
-
-      // If the underlying translated method requires
-      // a SwiftArena, we pass in the global arena
-      if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        upcallArguments.append("JavaSwiftArena.defaultAutoArena")
-      }
-
-      let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
-      let javaUpcall =
-        "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
-
       let resultType = function.originalFunctionSignature.result.type
-      let result = function.resultConversion.render(&printer, javaUpcall)
-      if resultType.isVoid {
-        printer.print(result)
-      } else {
-        printer.print("return \(result)")
+      let returnStmt = !resultType.isVoid ? "return " : ""
+      // If the protocol function is non-throwing, we have no option but to force try.
+      // The error thrown by `withLocalFrame` is an OOM error anyway.
+      let withLocalFrameTryKeyword = function.originalFunctionSignature.isThrowing ? "try" : "try!"
+
+      // Push a local JNI frame so refs created during this upcall are freed on exit.
+      // When called from a Swift async context (e.g. cooperative thread pool) there is
+      // no enclosing JNI frame, so refs would otherwise accumulate indefinitely. When
+      // called from a Java-initiated native call there is already a frame, but pushing
+      // a sub-frame still frees refs earlier and prevents overflow within a single call.
+      let paramCount = function.originalFunctionSignature.parameters.count
+      let estimatedRefCount = paramCount * 2 + 4
+      printer.print("let environment$ = try! JavaVirtualMachine.shared().environment()")
+      printer.printBraceBlock("\(returnStmt)\(withLocalFrameTryKeyword) environment$.withLocalFrame(capacity: \(estimatedRefCount))") { printer in
+        var upcallArguments = zip(
+          function.originalFunctionSignature.parameters,
+          function.parameterConversions
+        ).map { param, conversion in
+          // Wrap-java does not extract parameter names, so no labels
+          conversion.render(&printer, param.parameterName!)
+        }
+
+        // If the underlying translated method requires
+        // a SwiftArena, we pass in the global arena
+        if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
+          upcallArguments.append("JavaSwiftArena.defaultAutoArena")
+        }
+
+        let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
+        let javaUpcall =
+          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+
+        let result = function.resultConversion.render(&printer, javaUpcall)
+        printer.print("\(returnStmt)\(result)")
       }
     }
   }
@@ -259,7 +271,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if type.swiftNominal.kind == .enum {
-      printEnumDiscriminator(&printer, type)
+      printEnumRawDiscriminator(&printer, type)
       printer.println()
 
       if !type.swiftNominal.isGeneric {
@@ -283,7 +295,6 @@ extension JNISwift2JavaGenerator {
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
-    printDestroyFunctionThunk(&printer, type)
   }
 
   private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
@@ -294,51 +305,14 @@ extension JNISwift2JavaGenerator {
     try printSwiftInterfaceWrapper(&printer, protocolWrapper)
   }
 
-  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printEnumRawDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     if type.cases.isEmpty {
       return
     }
 
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    var parameters = [selfPointerParam]
-    if type.swiftNominal.isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
-    }
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$getDiscriminator",
-      parentName: type.swiftNominal.name,
-      parameters: parameters,
-      resultType: .int
-    ) { printer in
-      if type.swiftNominal.isGeneric {
-        let knownTypes = SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
-        let discriminatorFunctionSignature = SwiftFunctionSignature(
-          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
-          parameters: [],
-          result: .init(convention: .direct, type: knownTypes.int),
-          effectSpecifiers: [],
-          genericParameters: [],
-          genericRequirements: []
-        )
-        printFunctionOpenerCall(
-          &printer,
-          .init(
-            module: swiftModuleName,
-            swiftDecl: DeclSyntax("func getDiscriminator() -> Int"),
-            name: "getDiscriminator",
-            apiKind: .function,
-            functionSignature: discriminatorFunctionSignature
-          )
-        )
-      } else {
-        let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
-          &printer,
-          swiftParentName: type.swiftNominal.name,
-          selfPointerParam
-        )
-        printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
+    printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): _RawDiscriminatorRepresentable") { printer in
+      printer.printBraceBlock("public var _rawDiscriminator: Int32") { printer in
+        printer.printBraceBlock("switch self") { printer in
           for (idx, enumCase) in type.cases.enumerated() {
             printer.print("case .\(enumCase.name): return \(idx)")
           }
@@ -391,7 +365,7 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
         &printer,
-        "self"
+        "selfPointer"
       )
       let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
         parameter.name ?? "_\(idx)"
@@ -598,10 +572,10 @@ extension JNISwift2JavaGenerator {
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
-      case .instance(let swiftSelf):
+      case .instance:
         nativeSignature.selfParameter!.conversion.render(
           &printer,
-          swiftSelf.parameterName ?? "self"
+          "selfPointer"
         )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
@@ -622,14 +596,6 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
-
-    case .synthesizedFunction(let function):
-      switch function {
-      case .toString:
-        result = "String(describing: \(callee))"
-      case .toDebugString:
-        result = "String(reflecting: \(callee))"
-      }
 
     case .enumCase:
       let downcallArguments = zip(
@@ -784,7 +750,7 @@ extension JNISwift2JavaGenerator {
       // Generated by swift-java
 
       import SwiftJava
-      import CSwiftJavaJNI
+      import SwiftJavaJNICore
       import SwiftJavaRuntimeSupport
 
       """
@@ -811,55 +777,6 @@ extension JNISwift2JavaGenerator {
         return Int64(Int(bitPattern: metadataPointer)).getJNIValue(in: environment)
         """
       )
-    }
-  }
-
-  /// Prints the implementation of the destroy function.
-  private func printDestroyFunctionThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    var parameters = [selfPointerParam]
-    if type.swiftNominal.isGeneric {
-      parameters.append(JavaParameter(name: "selfType", type: .long))
-    }
-
-    printCDecl(
-      &printer,
-      javaMethodName: "$destroy",
-      parentName: type.swiftNominal.qualifiedName,
-      parameters: parameters,
-      resultType: .void
-    ) { printer in
-      if type.swiftNominal.isGeneric {
-        let destroyFunctionSignature = SwiftFunctionSignature(
-          selfParameter: .instance(SwiftParameter(convention: .byValue, parameterName: "selfPointer", type: type.swiftType)),
-          parameters: [],
-          result: .void,
-          effectSpecifiers: [],
-          genericParameters: [],
-          genericRequirements: []
-        )
-        printFunctionOpenerCall(
-          &printer,
-          .init(
-            module: swiftModuleName,
-            swiftDecl: DeclSyntax("func destroy()"),
-            name: "destroy",
-            apiKind: .function,
-            functionSignature: destroyFunctionSignature
-          )
-        )
-      } else {
-        let parentName = type.qualifiedName
-        let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-        // Deinitialize the pointer allocated (which will call the VWT destroy method)
-        // then deallocate the memory.
-        printer.print(
-          """
-          \(selfVar).deinitialize(count: 1)
-          \(selfVar).deallocate()
-          """
-        )
-      }
     }
   }
 
@@ -933,7 +850,7 @@ extension JNISwift2JavaGenerator {
     }
     let nativeSignature = translatedDecl.nativeFunctionSignature
 
-    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfType")
+    let selfType = nativeSignature.selfTypeParameter!.conversion.render(&printer, "selfTypePointer")
     let openerName = openerProtocolName(for: parentNominalType.nominalTypeDecl)
     printer.print("let openerType = \(selfType) as! (any \(openerName).Type)")
 
@@ -1008,12 +925,6 @@ extension JNISwift2JavaGenerator {
       for method in type.methods {
         printFunctionDecl(&printer, decl: method, skipMethodBody: true)
       }
-
-      if type.swiftNominal.kind == .enum {
-        printer.print("static func _getDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint")
-      }
-
-      printer.print("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)")
     }
     printer.println()
     printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
@@ -1026,32 +937,6 @@ extension JNISwift2JavaGenerator {
         if method.isStatic { continue }
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
-
-      if type.swiftNominal.kind == .enum {
-        printer.printBraceBlock("static func _getDiscriminator(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jint") { printer in
-          let selfPointer = self.printSelfJLongToUnsafeMutablePointer(
-            &printer,
-            swiftParentName: "Self",
-            JavaParameter(name: "selfPointer", type: .long)
-          )
-          printer.printBraceBlock("switch (\(selfPointer).pointee)") { printer in
-            for (idx, enumCase) in type.cases.enumerated() {
-              printer.print("case .\(enumCase.name): return \(idx)")
-            }
-          }
-        }
-      }
-
-      printer.printBraceBlock("static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong)") { printer in
-        printer.print(#"assert(selfPointer != 0, "self memory address was null")"#)
-        printer.print("let selfBits$ = Int(Int64(fromJNI: selfPointer, in: environment))")
-        printer.print("let self$ = UnsafeMutablePointer<Self>(bitPattern: selfBits$)")
-        printer.printBraceBlock("guard let self$ else") { printer in
-          printer.print("fatalError(\"self memory address was null in call to \\(#function)!\")")
-        }
-        printer.print("self$.deinitialize(count: 1)")
-        printer.print("self$.deallocate()")
-      }
     }
   }
 
@@ -1063,16 +948,16 @@ extension JNISwift2JavaGenerator {
     swiftParentName: String,
     _ selfPointerParam: JavaParameter
   ) -> String {
-    let newSelfParamName = "self$"
+    let newSelfParamName = "selfPointer$"
     printer.print(
       """
       guard let env$ = environment else {
         fatalError("Missing JNIEnv in downcall to \\(#function)")
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
-      let selfBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
-      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfBits$) else {
-        fatalError("self memory address was null in call to \\(#function)!")
+      let selfPointerBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfPointerBits$) else {
+        fatalError("selfPointer memory address was null in call to \\(#function)!")
       }
       """
     )

@@ -163,9 +163,9 @@ struct SwiftDocumentationParsingTests {
            * public func f() -> MyClass
            * }
            *
-           * @param swiftArena$ the arena that the the returned object will be attached to
+           * @param swiftArena the arena that the the returned object will be attached to
            */
-          public static MyClass f(SwiftArena swiftArena$) {
+          public static MyClass f(SwiftArena swiftArena) {
           """
         ]
       ),
@@ -181,9 +181,9 @@ struct SwiftDocumentationParsingTests {
            * public func f() -> MyClass
            * }
            *
-           * @param swiftArena$ the arena that will manage the lifetime and allocation of Swift objects
+           * @param swiftArena the arena that will manage the lifetime and allocation of Swift objects
            */
-          public static MyClass f(AllocatingSwiftArena swiftArena$)
+          public static MyClass f(AllocatingSwiftArena swiftArena)
           """
         ]
       ),

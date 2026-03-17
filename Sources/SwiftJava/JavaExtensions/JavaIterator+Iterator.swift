@@ -15,10 +15,10 @@
 extension JavaIterator: IteratorProtocol {
   public typealias Element = E
 
-  public func next() -> E? {
+  @_implements(IteratorProtocol,next())
+  public mutating func swiftNext() -> E? {
     if hasNext() {
-      let nextResult: JavaObject? = next()
-      return nextResult.map { $0.as(E.self)! }
+      return next() as E
     }
 
     return nil

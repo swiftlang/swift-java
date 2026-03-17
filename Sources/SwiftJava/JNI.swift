@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 
 /// A type that represents the shared JNI environment
 /// used to share any global JNI variables.
@@ -32,9 +32,7 @@ package final class JNI {
 
   init(fromVM javaVM: JavaVirtualMachine) {
     // Update the global JavaVM
-    JavaVirtualMachine.sharedJVM.withLock {
-      $0 = javaVM
-    }
+    JavaVirtualMachine.setSharedJVM(javaVM)
     let environment = try! javaVM.environment()
     do {
       let clazz = try JavaClass<JavaThread>(environment: environment)

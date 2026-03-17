@@ -46,6 +46,8 @@ public final class _JNIMethodIDCache: Sendable {
         fatalError("Method \(method.signature) with signature \(method.signature) not found in class \(className)")
       }
     }
+    // clazz is still needed by GetMethodID above; delete the local ref only after reduce completes.
+    environment.interface.DeleteLocalRef(environment, clazz)
   }
 
   public subscript(_ method: Method) -> jmethodID? {

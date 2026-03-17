@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import CodePrinting
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 extension JNISwift2JavaGenerator {
 
@@ -49,10 +50,10 @@ extension JNISwift2JavaGenerator {
       // Lower the self parameter.
       let nativeSelf: NativeParameter? =
         switch functionSignature.selfParameter {
-        case .instance(let selfParameter):
+        case .instance(_, let swiftType):
           try translateParameter(
-            type: selfParameter.type,
-            parameterName: selfParameter.parameterName ?? "self",
+            type: swiftType,
+            parameterName: "selfPointer",
             methodName: methodName,
             parentName: parentName,
             genericParameters: functionSignature.genericParameters,
@@ -68,7 +69,7 @@ extension JNISwift2JavaGenerator {
         {
           try translateParameter(
             type: .metatype(selfType),
-            parameterName: "selfType",
+            parameterName: "selfTypePointer",
             methodName: methodName,
             parentName: parentName,
             genericParameters: functionSignature.genericParameters,
@@ -116,6 +117,25 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
             return try translateArrayParameter(elementType: elementType, parameterName: parameterName)
+
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(type)
+            }
+            return try translateDictionaryParameter(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1],
+              parameterName: parameterName
+            )
+
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(type)
+            }
+            return try translateSetParameter(
+              elementType: genericArgs[0],
+              parameterName: parameterName
+            )
 
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
@@ -307,6 +327,19 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName
         )
 
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryParameter(
+          keyType: keyType,
+          valueType: valueType,
+          parameterName: parameterName
+        )
+
+      case .set(let elementType):
+        return try translateSetParameter(
+          elementType: elementType,
+          parameterName: parameterName
+        )
+
       case .metatype:
         return NativeParameter(
           parameters: [
@@ -317,9 +350,52 @@ extension JNISwift2JavaGenerator {
           conversionCheck: nil
         )
 
+      case .tuple(let elements) where !elements.isEmpty:
+        return try translateTupleParameter(
+          elements: elements,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+
       case .tuple, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
+    }
+
+    func translateTupleParameter(
+      elements: [SwiftTupleElement],
+      parameterName: String,
+      methodName: String,
+      parentName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> NativeParameter {
+      var allJNIParameters: [JavaParameter] = []
+      var elementConversions: [(label: String?, conversion: NativeSwiftConversionStep)] = []
+
+      for (idx, element) in elements.enumerated() {
+        let elementParamName = "\(parameterName)_\(idx)"
+        let elementNative = try translateParameter(
+          type: element.type,
+          parameterName: elementParamName,
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        allJNIParameters.append(contentsOf: elementNative.parameters)
+        elementConversions.append((label: element.label, conversion: elementNative.conversion))
+      }
+
+      return NativeParameter(
+        parameters: allJNIParameters,
+        conversion: .tupleConstruct(elements: elementConversions),
+        indirectConversion: nil,
+        conversionCheck: nil
+      )
     }
 
     func translateProtocolParameter(
@@ -596,7 +672,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -628,7 +704,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array:
+      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -652,6 +728,25 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
             return try translateArrayResult(elementType: elementType, resultName: resultName)
+
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(swiftResult.type)
+            }
+            return try translateDictionaryResult(
+              keyType: genericArgs[0],
+              valueType: genericArgs[1],
+              resultName: resultName
+            )
+
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(swiftResult.type)
+            }
+            return try translateSetResult(
+              elementType: genericArgs[0],
+              resultName: resultName
+            )
 
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
@@ -725,8 +820,84 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayResult(elementType: elementType, resultName: resultName)
 
+      case .dictionary(let keyType, let valueType):
+        return try translateDictionaryResult(
+          keyType: keyType,
+          valueType: valueType,
+          resultName: resultName
+        )
+
+      case .set(let elementType):
+        return try translateSetResult(
+          elementType: elementType,
+          resultName: resultName
+        )
+
+      case .tuple(let elements) where !elements.isEmpty:
+        return try translateTupleResult(elements: elements, resultName: resultName)
+
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+      }
+    }
+
+    func translateTupleResult(
+      elements: [SwiftTupleElement],
+      resultName: String
+    ) throws -> NativeResult {
+      var outParameters: [JavaParameter] = []
+      var destructureElements: [(index: Int, label: String?, conversion: NativeSwiftConversionStep, outParamName: String, javaType: JavaType)] = []
+
+      for (idx, element) in elements.enumerated() {
+        let outParamName = "\(resultName)_\(idx)$"
+
+        // Get the JNI type for this element
+        let elementResult = try translateElementResult(type: element.type)
+
+        outParameters.append(
+          JavaParameter(name: outParamName, type: .array(elementResult.javaType))
+        )
+
+        destructureElements.append(
+          (
+            index: idx,
+            label: element.label,
+            conversion: elementResult.conversion,
+            outParamName: outParamName,
+            javaType: elementResult.javaType
+          )
+        )
+      }
+
+      return NativeResult(
+        javaType: .void,
+        conversion: .tupleDestructure(elements: destructureElements),
+        outParameters: outParameters
+      )
+    }
+
+    /// Translate a single element type for use in tuple result destructuring.
+    private func translateElementResult(type: SwiftType) throws -> (javaType: JavaType, conversion: NativeSwiftConversionStep) {
+      switch type {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+            javaType.implementsJavaValue
+          else {
+            throw JavaTranslationError.unsupportedSwiftType(type)
+          }
+          return (javaType: javaType, conversion: .getJNIValue(.placeholder))
+        }
+
+        guard !nominalType.isSwiftJavaWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(type)
+        }
+
+        // JExtract class: allocate and return pointer
+        return (javaType: .long, conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: "element", swiftType: type)))
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
 
@@ -839,6 +1010,66 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(elementType)
       }
     }
+
+    func translateDictionaryParameter(
+      keyType: SwiftType,
+      valueType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      NativeParameter(
+        parameters: [
+          JavaParameter(name: parameterName, type: .long)
+        ],
+        conversion: .initFromJNI(.placeholder, swiftType: .dictionary(key: keyType, value: valueType)),
+        indirectConversion: nil,
+        conversionCheck: nil
+      )
+    }
+
+    func translateDictionaryResult(
+      keyType: SwiftType,
+      valueType: SwiftType,
+      resultName: String
+    ) throws -> NativeResult {
+      NativeResult(
+        javaType: .long,
+        conversion: .method(
+          .placeholder,
+          function: "dictionaryGetJNIValue",
+          arguments: [("in", .constant("environment"))]
+        ),
+        outParameters: []
+      )
+    }
+
+    func translateSetParameter(
+      elementType: SwiftType,
+      parameterName: String
+    ) throws -> NativeParameter {
+      NativeParameter(
+        parameters: [
+          JavaParameter(name: parameterName, type: .long)
+        ],
+        conversion: .initFromJNI(.placeholder, swiftType: .set(element: elementType)),
+        indirectConversion: nil,
+        conversionCheck: nil
+      )
+    }
+
+    func translateSetResult(
+      elementType: SwiftType,
+      resultName: String
+    ) throws -> NativeResult {
+      NativeResult(
+        javaType: .long,
+        conversion: .method(
+          .placeholder,
+          function: "setGetJNIValue",
+          arguments: [("in", .constant("environment"))]
+        ),
+        outParameters: []
+      )
+    }
   }
 
   struct NativeFunctionSignature {
@@ -870,6 +1101,12 @@ extension JNISwift2JavaGenerator {
 
     /// Out parameters for populating the indirect return values.
     var outParameters: [JavaParameter]
+
+    init(javaType: JavaType, conversion: NativeSwiftConversionStep, outParameters: [JavaParameter]) {
+      self.javaType = javaType
+      self.conversion = conversion.localRefOutermostJNIValue()
+      self.outParameters = outParameters
+    }
   }
 
   /// Describes how to convert values between Java types and Swift through JNI
@@ -884,6 +1121,10 @@ extension JNISwift2JavaGenerator {
 
     /// `value.getJNIValue(in:)`
     indirect case getJNIValue(NativeSwiftConversionStep)
+
+    /// `value.getJNILocalRefValue(in:)` — used only in return positions of
+    /// @_cdecl functions to ensure the local ref survives ARC destruction.
+    indirect case getJNILocalRefValue(NativeSwiftConversionStep)
 
     /// `value.getJValue(in:)`
     indirect case getJValue(NativeSwiftConversionStep)
@@ -989,6 +1230,25 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(inner)`
     indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
+    /// Constructs a Swift tuple from individually-converted elements.
+    /// E.g. `(label0: conv0, conv1)` for `(label0: Int, String)`
+    indirect case tupleConstruct(elements: [(label: String?, conversion: NativeSwiftConversionStep)])
+
+    /// Destructures a Swift tuple result and writes each element to an out-parameter.
+    indirect case tupleDestructure(elements: [(index: Int, label: String?, conversion: NativeSwiftConversionStep, outParamName: String, javaType: JavaType)])
+
+    /// Promotes the outermost `.getJNIValue` to `.getJNILocalRefValue`.
+    /// Used for `@_cdecl` return positions to ensure the local ref survives
+    /// ARC destruction of temporary `JavaObject`s.
+    func localRefOutermostJNIValue() -> NativeSwiftConversionStep {
+      switch self {
+      case .getJNIValue(let inner):
+        return .getJNILocalRefValue(inner)
+      default:
+        return self
+      }
+    }
+
     /// Returns the conversion string applied to the placeholder.
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
@@ -1006,6 +1266,10 @@ extension JNISwift2JavaGenerator {
       case .getJNIValue(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).getJNIValue(in: environment)"
+
+      case .getJNILocalRefValue(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "\(inner).getJNILocalRefValue(in: environment)"
 
       case .getJValue(let inner):
         let inner = inner.render(&printer, placeholder)
@@ -1180,6 +1444,7 @@ extension JNISwift2JavaGenerator {
           """
           let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
           let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+          environment.interface.DeleteLocalRef(environment, class$)
           let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
           """
         )
@@ -1512,6 +1777,38 @@ extension JNISwift2JavaGenerator {
       case .labelessInitializer(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(\(inner))"
+
+      case .tupleConstruct(let elements):
+        let parts = elements.enumerated().map { idx, element in
+          let converted = element.conversion.render(&printer, "\(placeholder)_\(idx)")
+          if let label = element.label {
+            return "\(label): \(converted)"
+          } else {
+            return converted
+          }
+        }
+        return "(\(parts.joined(separator: ", ")))"
+
+      case .tupleDestructure(let elements):
+        let tupleVar = "tupleResult$"
+        printer.print("let \(tupleVar) = \(placeholder)")
+        for element in elements {
+          let accessor = element.label ?? "\(element.index)"
+          let converted = element.conversion.render(&printer, "\(tupleVar).\(accessor)")
+          if element.javaType.isPrimitive {
+            let setMethodName = element.javaType.jniSetArrayRegionMethodName
+            printer.print("var element_\(element.index)_jni$ = \(converted)")
+            printer.print(
+              "environment.interface.\(setMethodName)(environment, \(element.outParamName), 0, 1, &element_\(element.index)_jni$)"
+            )
+          } else {
+            printer.print("let element_\(element.index)_jni$ = \(converted)")
+            printer.print(
+              "environment.interface.SetObjectArrayElement(environment, \(element.outParamName), 0, element_\(element.index)_jni$)"
+            )
+          }
+        }
+        return ""
       }
     }
   }

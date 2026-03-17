@@ -12,9 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import Foundation
-import JavaTypes
 import OrderedCollections
+import SwiftJavaJNICore
 
 // MARK: Defaults
 
@@ -23,6 +24,7 @@ extension JNISwift2JavaGenerator {
   static let defaultJavaImports: [String] = [
     "org.swift.swiftkit.core.*",
     "org.swift.swiftkit.core.util.*",
+    "org.swift.swiftkit.core.collections.*",
     "java.util.*",
     "java.util.concurrent.atomic.AtomicBoolean",
 
@@ -295,6 +297,20 @@ extension JNISwift2JavaGenerator {
 
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
+
+      printer.print(
+        """
+        public String toString() {
+          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+
+        public String toDebugString() {
+          return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        """
+      )
+      printer.println()
+
       printDestroyFunction(&printer, decl)
     }
   }
@@ -394,17 +410,9 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    // TODO: Consider whether all of these "utility" functions can be printed using our existing printing logic.
-    if decl.swiftNominal.isGeneric {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long self, long selfType);")
-    } else {
-      printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
-        printer.print("return Discriminator.values()[$getDiscriminator(this.$memoryAddress())];")
-      }
-      printer.print("private static native int $getDiscriminator(long self);")
+    printer.printBraceBlock("public Discriminator getDiscriminator()") { printer in
+      printer.print("var raw = SwiftObjects.getRawDiscriminator(this.$memoryAddress(), this.$typeMetadataAddress());")
+      printer.print("return Discriminator.values()[raw];")
     }
   }
 
@@ -420,14 +428,14 @@ extension JNISwift2JavaGenerator {
       self.translatedEnumCase(for: $0)
     }.contains(where: \.requiresSwiftArena)
 
-    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena$" : ""))") { printer in
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
       printer.print("Discriminator discriminator = this.getDiscriminator();")
       printer.printBraceBlock("switch (discriminator)") { printer in
         for enumCase in decl.cases {
           guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
             continue
           }
-          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena$" : ""
+          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
           printer.print(
             "case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
           )
@@ -620,7 +628,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if translatedSignature.requiresSwiftArena {
-      parameters.append("SwiftArena swiftArena$")
+      parameters.append("SwiftArena swiftArena")
     }
     if let importedFunc {
       TranslatedDocumentation.printDocumentation(
@@ -717,20 +725,10 @@ extension JNISwift2JavaGenerator {
       }
     } else {
       printer.print("private static native long $typeMetadataAddressDowncall();")
-
-      let funcName = "$typeMetadataAddress"
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
-        printer.print(
-          """
-          long self$ = this.$memoryAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
-                "this", this,
-                "self", self$);
-          }
-          """
-        )
+        // INFO: We are omitting `CallTraces.traceDowncall` here.
+        // It internally calls `toString`, which in turn calls `$typeMetadataAddress`, creating an infinite loop.
         printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
       }
     }
@@ -738,21 +736,14 @@ extension JNISwift2JavaGenerator {
 
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let isGeneric = type.swiftNominal.isGeneric
-    if isGeneric {
-      printer.print("private static native void $destroy(long selfPointer, long selfType);")
-    } else {
-      printer.print("private static native void $destroy(long selfPointer);")
-    }
-
     let funcName = "$createDestroyFunction"
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
       printer.print("long self$ = this.$memoryAddress();")
-      if isGeneric {
+      printer.print("long selfType$ = this.$typeMetadataAddress();")
+      if type.swiftNominal.isGeneric {
         printer.print(
           """
-          long selfType$ = this.$typeMetadataAddress();
           if (CallTraces.TRACE_DOWNCALLS) {
             CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
                 "this", this,
@@ -765,7 +756,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
               }
-              \(type.swiftNominal.name).$destroy(self$, selfType$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """
@@ -784,7 +775,7 @@ extension JNISwift2JavaGenerator {
               if (CallTraces.TRACE_DOWNCALLS) {
                 CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
               }
-              \(type.swiftNominal.name).$destroy(self$);
+              SwiftObjects.destroy(self$, selfType$);
             }
           };
           """
@@ -837,10 +828,10 @@ extension JNISwift2JavaGenerator {
        * @param instant The source timestamp to convert.
        * @return A date derived from the input instant with microsecond precision.
        */
-      public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena$) {
+      public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena) {
         Objects.requireNonNull(instant, "Instant cannot be null");
         double timeIntervalSince1970 = instant.getEpochSecond() + (instant.getNano() / 1_000_000_000.0);
-        return Date.init(timeIntervalSince1970, swiftArena$);
+        return Date.init(timeIntervalSince1970, swiftArena);
       }
       """
     )
@@ -853,12 +844,12 @@ extension JNISwift2JavaGenerator {
        * Creates a new Swift @{link Data} instance from a byte array.
        *
        * @param bytes The byte array to copy into the Data
-       * @param swiftArena$ The arena for memory management
+       * @param swiftArena The arena for memory management
        * @return A new Data instance containing a copy of the bytes
        */
-      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {
+      public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena) {
         Objects.requireNonNull(bytes, "bytes cannot be null");
-        return Data.init(bytes, swiftArena$);
+        return Data.init(bytes, swiftArena);
       }
       """
     )

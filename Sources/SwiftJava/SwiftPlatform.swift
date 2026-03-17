@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 
 /// Helpers for forming platform specific directory names and paths.
 public struct SwiftPlatform {

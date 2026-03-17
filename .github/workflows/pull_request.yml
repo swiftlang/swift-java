@@ -184,33 +184,28 @@ jobs:
         run: swift test --disable-experimental-swift-testing
 
   build-swift-android:
-    name: Sample SwiftJavaExtractJNISampleApp (Android) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}} android:${{matrix.sdk_triple}})
-    runs-on: ubuntu-latest
+    name: Sample SwiftJavaExtractJNISampleApp (Android) (swift:${{ matrix.swift_version }} android:${{matrix.sdk_triple}} NDK:${{matrix.ndk_version}})
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['nightly-main']
+        swift_version: ['nightly-main', 'nightly-6.3']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
-        sdk_triple: ['x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
-        ndk_version: ['r27d']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
+        sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
+        ndk_version: ['r27d', 'r28c']
     steps:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
-          JAVA_HOME_17: ${{ env.JAVA_HOME_17 }}
-          JAVA_HOME_25: ${{ env.JAVA_HOME_25 }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
           apt-get -q update && apt-get -yq install curl
           cd Samples/SwiftJavaExtractJNISampleApp
-          curl -s --retry 3 https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/install-and-build-with-sdk.sh | \
-          bash -s -- --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
+          curl -L -O --retry 3 https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/install-and-build-with-sdk.sh
+          perl -pi -e "s#(download_and_extract_toolchain \".ANDROID_SDK_TAG\"\))#\1\n        PATH=\\\$(dirname \\\$SWIFT_EXECUTABLE_FOR_ANDROID_SDK):\\\$PATH\n        echo \"path is now \\\$PATH\"#" install-and-build-with-sdk.sh
+          chmod 500 install-and-build-with-sdk.sh
+          ./install-and-build-with-sdk.sh --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
 
   verify-samples:
     name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
@@ -268,3 +263,21 @@ jobs:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: "Verify sample ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
+
+  linkage-test:
+    name: Linkage test (jammy swift:6.2)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk_vendor: ['corretto']
+    container:
+      image: swift:6.2-jammy
+    steps:
+      - uses: actions/checkout@v6
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Run linkage test
+        run: ./scripts/run-linkage-test.sh
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}

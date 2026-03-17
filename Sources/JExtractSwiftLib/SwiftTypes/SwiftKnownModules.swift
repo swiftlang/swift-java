@@ -98,6 +98,10 @@ private let swiftSourceFile: SourceFileSyntax = """
 
   public struct Array<Element> {}
 
+  public struct Dictionary<Key, Value> {}
+
+  public struct Set<Element> {}
+
   // FIXME: Support 'typealias Void = ()'
   public struct Void {}
 

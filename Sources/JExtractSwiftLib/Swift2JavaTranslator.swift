@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import JavaTypes
 import SwiftBasicFormat
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 import SwiftParser
 import SwiftSyntax
 
@@ -155,7 +155,7 @@ extension Swift2JavaTranslator {
       case .optional(let ty):
         return check(ty)
       case .tuple(let tuple):
-        return tuple.contains(where: check)
+        return tuple.contains(where: { check($0.type) })
       case .function(let fn):
         return check(fn.resultType) || fn.parameters.contains(where: { check($0.type) })
       case .metatype(let ty):
@@ -168,6 +168,10 @@ extension Swift2JavaTranslator {
         return false
       case .array(let ty):
         return check(ty)
+      case .dictionary(let key, let value):
+        return check(key) || check(value)
+      case .set(let element):
+        return check(element)
       }
     }
 

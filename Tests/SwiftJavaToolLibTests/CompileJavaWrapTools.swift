@@ -19,46 +19,13 @@ import Subprocess
 @_spi(Testing) import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
-import SwiftJavaToolLib
 import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/issues/43
 
-private func createTemporaryDirectory(in directory: Foundation.URL) throws -> Foundation.URL {
-  let uuid = UUID().uuidString
-  let resolverDirectoryURL = directory.appendingPathComponent("swift-java-testing-\(uuid)")
-
-  try FileManager.default.createDirectory(at: resolverDirectoryURL, withIntermediateDirectories: true, attributes: nil)
-
-  return resolverDirectoryURL
-}
+@testable import SwiftJavaToolLib
 
 /// Returns the directory that should be added to the classpath of the JVM to analyze the sources.
 func compileJava(_ sourceText: String) async throws -> Foundation.URL {
-  let sourceFile = try TempFile.create(suffix: "java", sourceText)
-
-  let classesDirectory = try createTemporaryDirectory(in: FileManager.default.temporaryDirectory)
-
-  let javacProcess = try await Subprocess.run(
-    .path(.init("\(javaHome)" + "/bin/javac")),
-    arguments: [
-      "-d", classesDirectory.path, // output directory for .class files
-      sourceFile.path,
-    ],
-    output: .string(limit: Int.max, encoding: UTF8.self),
-    error: .string(limit: Int.max, encoding: UTF8.self)
-  )
-
-  // Check if compilation was successful
-  guard javacProcess.terminationStatus.isSuccess else {
-    let outString = javacProcess.standardOutput ?? ""
-    let errString = javacProcess.standardError ?? ""
-    fatalError(
-      "javac '\(sourceFile)' failed (\(javacProcess.terminationStatus));\n" + "OUT: \(outString)\n"
-        + "ERROR: \(errString)"
-    )
-  }
-
-  print("Compiled java sources to: \(classesDirectory)")
-  return classesDirectory
+  try await CompileJavaTool.compileJava(sourceText)
 }
 
 func withJavaTranslator(
@@ -93,7 +60,10 @@ func withJavaTranslator(
 /// each of the expected "chunks" of text.
 func assertWrapJavaOutput(
   javaClassNames: [String],
+  classNameMappings: [String: String] = [:],
   classpath: [Foundation.URL],
+  makeJar: Bool = false,
+  androidAPIVersions: AndroidAPIVersions? = nil,
   assert assertBody: (JavaTranslator) throws -> Void = { _ in },
   expectedChunks: [String],
   function: String = #function,
@@ -117,8 +87,29 @@ func assertWrapJavaOutput(
     environment: environment,
     translateAsClass: true
   )
+  translator.androidAPIVersions = androidAPIVersions
 
-  let classpathJavaURLs = classpath.map({ try! URL.init("\($0)/") }) // we MUST have a trailing slash for JVM to consider it a search directory
+  let classpathJavaURLs: [JavaURL]
+  if makeJar {
+    // Convert each classpath directory into a JAR and use those as classpath entries
+    classpathJavaURLs = classpath.map { classpathDir in
+      let jarFile = classpathDir.deletingLastPathComponent()
+        .appendingPathComponent("test-\(UUID().uuidString).jar")
+      // Synchronously create the JAR using Process
+      let process = Process()
+      process.executableURL = Foundation.URL(fileURLWithPath: "\(javaHome)/bin/jar")
+      process.arguments = ["cf", jarFile.path, "-C", classpathDir.path, "."]
+      try! process.run()
+      process.waitUntilExit()
+      guard process.terminationStatus == 0 else {
+        fatalError("jar failed with exit code \(process.terminationStatus)")
+      }
+      print("Created JAR: \(jarFile)")
+      return try! URI("\(jarFile)").toURL()
+    }
+  } else {
+    classpathJavaURLs = classpath.map({ try! URI("\($0)/").toURL() }) // we MUST have a trailing slash for JVM to consider it a search directory
+  }
   let classLoader = URLClassLoader(classpathJavaURLs, environment: environment)
 
   // FIXME: deduplicate this
@@ -137,8 +128,9 @@ func assertWrapJavaOutput(
     // TODO: especially because nested classes
     // WrapJavaCommand().<TODO>
 
-    let swiftUnqualifiedName = javaClassName.javaClassNameToCanonicalName
-      .defaultSwiftNameForJavaClass
+    let swiftUnqualifiedName =
+      classNameMappings[javaClassName]
+      ?? javaClassName.javaClassNameToCanonicalName.defaultSwiftNameForJavaClass
     translator.translatedClasses[javaClassName] =
       .init(module: nil, name: swiftUnqualifiedName)
 
@@ -170,7 +162,9 @@ func assertWrapJavaOutput(
       "Expected chunk: \n" + "\(expectedChunk.yellow)" + "\n" + "not found in:\n" + "\(swiftCompleteOutputText)"
     XCTAssertTrue(
       checkAgainstText.contains(checkAgainstExpectedChunk),
-      "\(failureMessage)"
+      "\(failureMessage)",
+      file: file,
+      line: line
     )
   }
 }

@@ -14,6 +14,19 @@
 
 import SwiftSyntax
 
+/// An element of a Swift tuple type, preserving the optional label.
+struct SwiftTupleElement: Equatable, CustomStringConvertible {
+  var label: String?
+  var type: SwiftType
+
+  var description: String {
+    if let label {
+      return "\(label): \(type)"
+    }
+    return "\(type)"
+  }
+}
+
 /// Describes a type in the Swift type system.
 enum SwiftType: Equatable {
   case nominal(SwiftNominalType)
@@ -28,8 +41,8 @@ enum SwiftType: Equatable {
   /// `<type>?`
   indirect case optional(SwiftType)
 
-  /// `(<type>, <type>)`
-  case tuple([SwiftType])
+  /// `(<label>: <type>, <label>: <type>)`
+  case tuple([SwiftTupleElement])
 
   /// `any <type>`
   indirect case existential(SwiftType)
@@ -43,6 +56,12 @@ enum SwiftType: Equatable {
   /// `[type]`
   indirect case array(SwiftType)
 
+  /// `[key: value]`
+  indirect case dictionary(key: SwiftType, value: SwiftType)
+
+  /// `Set<element>`
+  indirect case set(element: SwiftType)
+
   static var void: Self {
     .tuple([])
   }
@@ -50,8 +69,8 @@ enum SwiftType: Equatable {
   var asNominalType: SwiftNominalType? {
     switch self {
     case .nominal(let nominal): nominal
-    case .tuple(let elements): elements.count == 1 ? elements[0].asNominalType : nil
-    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array: nil
+    case .tuple(let elements): elements.count == 1 ? elements[0].type.asNominalType : nil
+    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array, .dictionary, .set: nil
     }
   }
 
@@ -95,7 +114,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array:
+    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
       return false
     }
   }
@@ -142,7 +161,7 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque, .composite: true
-    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array: false
+    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array, .dictionary, .set: false
     }
   }
 
@@ -169,6 +188,10 @@ extension SwiftType: CustomStringConvertible {
       return types.map(\.description).joined(separator: " & ")
     case .array(let type):
       return "[\(type)]"
+    case .dictionary(let key, let value):
+      return "[\(key): \(value)]"
+    case .set(let element):
+      return "Set<\(element)>"
     }
   }
 }
@@ -236,7 +259,7 @@ extension SwiftType {
   init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     switch type.as(TypeSyntaxEnum.self) {
     case .classRestrictionType,
-      .dictionaryType, .missingType, .namedOpaqueReturnType,
+      .missingType, .namedOpaqueReturnType,
       .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
       throw TypeTranslationError.unimplementedType(type)
 
@@ -346,7 +369,10 @@ extension SwiftType {
     case .tupleType(let tupleType):
       self = try .tuple(
         tupleType.elements.map { element in
-          try SwiftType(element.type, lookupContext: lookupContext)
+          SwiftTupleElement(
+            label: element.firstName?.text,
+            type: try SwiftType(element.type, lookupContext: lookupContext)
+          )
         }
       )
 
@@ -367,6 +393,11 @@ extension SwiftType {
     case .arrayType(let arrayType):
       let elementType = try SwiftType(arrayType.element, lookupContext: lookupContext)
       self = .array(elementType)
+
+    case .dictionaryType(let dictType):
+      let keyType = try SwiftType(dictType.key, lookupContext: lookupContext)
+      let valueType = try SwiftType(dictType.value, lookupContext: lookupContext)
+      self = .dictionary(key: keyType, value: valueType)
     }
   }
 

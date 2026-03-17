@@ -89,7 +89,7 @@ public class ProtocolTest {
         }
 
         @Override
-        public StorageItem load(SwiftArena swiftArena$) {
+        public StorageItem load(SwiftArena swiftArena) {
             return item;
         }
 

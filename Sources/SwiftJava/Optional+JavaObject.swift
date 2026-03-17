@@ -12,10 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
-import JavaTypes
+import SwiftJavaJNICore
 
-extension Optional: JavaValue where Wrapped: AnyJavaObject {
+extension Optional: @retroactive JavaValue where Wrapped: AnyJavaObject {
   public typealias JNIType = jobject?
 
   public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \.l }
@@ -23,6 +22,20 @@ extension Optional: JavaValue where Wrapped: AnyJavaObject {
   public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
     switch self {
     case let value?: value.javaThis
+    case nil: nil
+    }
+  }
+
+  public func getJNILocalRefValue(in environment: JNIEnvironment) -> JNIType {
+    switch self {
+    case let value?:
+      // Create a new local ref so it survives when returned from a JNI call.
+      //
+      // When a JavaObject is used as a return value from a JNI call,
+      // the Swift JavaObjectHolder holding the global reference to the java heap object
+      // may be destroyed before the JVM can read the returned reference, so we need to
+      // make a local ref so that the reference survives the return.
+      environment.interface.NewLocalRef(environment, value.javaThis)
     case nil: nil
     }
   }

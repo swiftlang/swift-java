@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import SwiftSyntax
 
 package protocol SwiftSymbolTableProtocol {
@@ -176,12 +177,13 @@ extension SwiftSymbolTable {
         continue
       }
 
-      // Try to print only on main module from relation chain as it has every other module.
-      guard
-        !mainSymbolSourceModules.isDisjoint(with: alternativeModules.moduleNames)
-          || alternativeModules.isMainSourceOfSymbols
-      else {
-        if !alternativeModules.isMainSourceOfSymbols {
+      // Only the main source of symbols emits the conditional import block.
+      // Secondary modules (e.g. FoundationEssentials when Foundation is the main source)
+      // are skipped when their main source is already present, because the main source's
+      // block already covers the import. If no main source is present, fall back to a
+      // plain import so the module is still imported.
+      guard alternativeModules.isMainSourceOfSymbols else {
+        if mainSymbolSourceModules.isDisjoint(with: alternativeModules.moduleNames) {
           printer.print("import \(module)")
         }
         continue

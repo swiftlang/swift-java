@@ -141,14 +141,39 @@ extension JavaImplementationMacro: PeerMacro {
         } ?? ""
 
       let swiftName = memberFunc.name.text
+
+      // If @JavaMethod has a name argument (e.g., @JavaMethod("$size")), use it as the JNI method name.
+      // Otherwise, fall back to the Swift function name.
+      let jniMethodName: String = {
+        guard
+          let javaMethodAttr = attributes.compactMap({ attr -> AttributeSyntax? in
+            guard case .attribute(let attribute) = attr,
+              attribute.attributeName.trimmedDescription == "JavaMethod"
+            else {
+              return nil
+            }
+            return attribute
+          }).first,
+          case .argumentList(let args) = javaMethodAttr.arguments,
+          let firstArg = args.first,
+          firstArg.label == nil || firstArg.label?.text == "javaMethodName",
+          let stringLiteral = firstArg.expression.as(StringLiteralExprSyntax.self),
+          stringLiteral.segments.count == 1,
+          case let .stringSegment(nameSegment)? = stringLiteral.segments.first
+        else {
+          return swiftName
+        }
+        return nameSegment.content.text
+      }()
+
       let escapedClassName = className.split(separator: ".").map { String($0).escapedJNIIdentifier }.joined(separator: "_")
-      let cName = "Java_" + escapedClassName + "_" + swiftName.escapedJNIIdentifier
+      let cName = "Java_" + escapedClassName + "_" + jniMethodName.escapedJNIIdentifier
       let innerBody: CodeBlockItemListSyntax
       let isThrowing = memberFunc.signature.effectSpecifiers?.throwsClause != nil
       let tryClause: String = isThrowing ? "try " : ""
       let getJNIValue: String =
         returnType != nil
-        ? "\n  .getJNIValue(in: environment)"
+        ? "\n  .getJNILocalRefValue(in: environment)"
         : ""
       let swiftTypeName = extensionDecl.extendedType.trimmedDescription
       if isStatic {

@@ -59,7 +59,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Computed properties: `var` (incl. `throws`)                                          | ✅ / TODO | ✅   |
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
 | Arrays: `[UInt8]`, `[MyType]`, `Array<Int64>` etc                                    | ❌        | ✅   |
-| Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ❌   |
+| Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ✅   |
 | Generic type: `struct S<T>`                                                          | ❌        | ✅   |
 | Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
 | Static functions or properties in generic type                                       | ❌        | ❌   | 
@@ -110,7 +110,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 
 > tip: The list of features may be incomplete, please file an issue if something is unclear or should be clarified in this table.
 
-## Detailed feature support discussion
+## Detailed jextract feature support discussion
 
 ### Unsigned integers
 
@@ -175,6 +175,16 @@ Swift methods which pass or accept the Foundation `Data` type are extracted usin
 which offers utility methods to efficiently copy the underlying native data into a java byte array (`[byte]`).
 
 Unlike the FFM mode, a true zero-copy `withUnsafeBytes` is not available.
+
+### Collections
+
+SwiftJava automatically handles collections crossing the language boundary in the most efficient way possible.
+
+### Swift Dictionary as `java.util.Map`
+
+When extracting Swift methods which accept or return a Swift dictionary (often spelled as `[Key: Value]`), jextract (in JNI mode) will convert the return type to a `SwiftDictionaryMap<Key, Value>` Java type.
+
+The `SwiftDictionaryMap` wrapper type refers to the actual Swift dictionary value on the Swift heap and does not copy it out into the Java heap, unless explicitly copied using the `SwiftDictionaryMap::toJava` method.
 
 ### Enums
 

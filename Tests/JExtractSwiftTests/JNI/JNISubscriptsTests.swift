@@ -51,25 +51,15 @@ struct JNISubscriptsTests {
           return MyStruct.$getSubscript(this.$memoryAddress());
         """,
         """
-        private static native double $getSubscript(long self);
+        private static native double $getSubscript(long selfPointer);
         """,
         """
         public void setSubscript(double newValue) {
           MyStruct.$setSubscript(newValue, this.$memoryAddress());
         """,
         """
-        private static native void $setSubscript(double newValue, long self);
+        private static native void $setSubscript(double newValue, long selfPointer);
         """,
-      ]
-    )
-    try assertOutput(
-      input: noParamsSubscriptSource,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
-        private static native void $destroy(long selfPointer);
-        """
       ]
     )
   }
@@ -87,14 +77,14 @@ struct JNISubscriptsTests {
 
         """,
         """
-        private static native int $getSubscript(int index, long self);
+        private static native int $getSubscript(int index, long selfPointer);
         """,
         """
         public void setSubscript(int index, int newValue) {
           MyStruct.$setSubscript(index, newValue, this.$memoryAddress());
         """,
         """
-         private static native void $setSubscript(int index, int newValue, long self);
+         private static native void $setSubscript(int index, int newValue, long selfPointer);
         """,
       ]
     )
@@ -109,25 +99,25 @@ struct JNISubscriptsTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__J")
-        public func Java_com_example_swift_MyStruct__00024getSubscript__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jdouble {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024getSubscript__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return self$.pointee[].getJNIValue(in: environment)
+          return selfPointer$.pointee[].getJNILocalRefValue(in: environment)
         """,
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__DJ")
-        public func Java_com_example_swift_MyStruct__00024setSubscript__DJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jdouble, self: jlong) {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024setSubscript__DJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jdouble, selfPointer: jlong) {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          self$.pointee[] = Double(fromJNI: newValue, in: environment)
+          selfPointer$.pointee[] = Double(fromJNI: newValue, in: environment)
         """,
       ]
     )
@@ -142,25 +132,25 @@ struct JNISubscriptsTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__IJ")
-        public func Java_com_example_swift_MyStruct__00024getSubscript__IJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, self: jlong) -> jint {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024getSubscript__IJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, selfPointer: jlong) -> jint {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          return self$.pointee[Int32(fromJNI: index, in: environment)].getJNIValue(in: environment)
+          return selfPointer$.pointee[Int32(fromJNI: index, in: environment)].getJNILocalRefValue(in: environment)
         """,
         """
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__IIJ")
-        public func Java_com_example_swift_MyStruct__00024setSubscript__IIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, newValue: jint, self: jlong) {
-          assert(self != 0, "self memory address was null")
-          let selfBits$ = Int(Int64(fromJNI: self, in: environment))
-          let self$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfBits$)
-          guard let self$ else {
-            fatalError("self memory address was null in call to \\(#function)!")
+        public func Java_com_example_swift_MyStruct__00024setSubscript__IIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, newValue: jint, selfPointer: jlong) {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
-          self$.pointee[Int32(fromJNI: index, in: environment)] = Int32(fromJNI: newValue, in: environment)
+          selfPointer$.pointee[Int32(fromJNI: index, in: environment)] = Int32(fromJNI: newValue, in: environment)
         """,
       ]
     )

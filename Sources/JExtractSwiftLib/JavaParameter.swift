@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 
 /// Represent a parameter in Java code.
 struct JavaParameter {
@@ -41,6 +41,14 @@ struct JavaParameter {
         javaType.isPrimitive
       case .generic(let name, let extends):
         false
+      }
+    }
+
+    /// Returns the concrete JavaType, or `.class` for generics.
+    var javaType: JavaType {
+      switch self {
+      case .concrete(let type): type
+      case .generic: .class(package: "java.lang", name: "Object")
       }
     }
 

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
 import SwiftJavaConfigurationShared
+import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(
@@ -367,11 +367,11 @@ extension FFMSwift2JavaGenerator {
 
       // 'self'
       let selfParameter: TranslatedParameter?
-      if case .instance(let swiftSelf) = swiftSignature.selfParameter {
+      if case .instance(let convention, let swiftType) = swiftSignature.selfParameter {
         selfParameter = try self.translateParameter(
-          type: swiftSelf.type,
-          convention: swiftSelf.convention,
-          parameterName: swiftSelf.parameterName ?? "self",
+          type: swiftType,
+          convention: convention,
+          parameterName: "self",
           loweredParam: loweredFunctionSignature.selfParameter!,
           methodName: methodName,
           genericParameters: swiftSignature.genericParameters,
@@ -594,6 +594,12 @@ extension FFMSwift2JavaGenerator {
 
       case .array:
         throw JavaTranslationError.unhandledType(swiftType)
+
+      case .dictionary:
+        throw JavaTranslationError.unhandledType(swiftType)
+
+      case .set:
+        throw JavaTranslationError.unhandledType(swiftType)
       }
     }
 
@@ -671,7 +677,7 @@ extension FFMSwift2JavaGenerator {
       case .tuple(let tuple):
         if tuple.count == 1 {
           return try translateOptionalParameter(
-            wrappedType: tuple[0],
+            wrappedType: tuple[0].type,
             convention: convention,
             parameterName: parameterName,
             loweredParam: loweredParam,
@@ -825,7 +831,7 @@ extension FFMSwift2JavaGenerator {
           )
         )
 
-      case .genericParameter, .optional, .function, .existential, .opaque, .composite, .array:
+      case .genericParameter, .optional, .function, .existential, .opaque, .composite, .array, .dictionary, .set:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 
@@ -897,7 +903,7 @@ extension FFMSwift2JavaGenerator {
     /// Similar to 'method', however for a property i.e. without adding the '()' after the name
     indirect case property(JavaConversionStep, propertyName: String)
 
-    /// Call 'new \(Type)(\(placeholder), swiftArena$)'.
+    /// Call 'new \(Type)(\(placeholder), swiftArena)'.
     indirect case constructSwiftValue(JavaConversionStep, JavaType)
 
     /// Construct the type using the placeholder as arguments.

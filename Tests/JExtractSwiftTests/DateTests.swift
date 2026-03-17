@@ -77,7 +77,7 @@ struct DateTests {
         /* expected Java chunks */
         [
           """
-          public static Date returnDate(SwiftArena swiftArena$) {
+          public static Date returnDate(SwiftArena swiftArena) {
           """
         ],
         /* expected Swift chunks */
@@ -127,13 +127,13 @@ struct DateTests {
           public final class Date implements JNISwiftInstance {
           """,
           """
-          public static Date init(double timeIntervalSince1970, SwiftArena swiftArena$) {
+          public static Date init(double timeIntervalSince1970, SwiftArena swiftArena) {
           """,
           """
           public double getTimeIntervalSince1970() {
           """,
           """
-          public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena$) {
+          public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena) {
           """,
           """
           public java.time.Instant toInstant() {
@@ -147,7 +147,7 @@ struct DateTests {
           """,
           """
           @_cdecl("Java_com_example_swift_Date__00024getTimeIntervalSince1970__J")
-          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, self: jlong) -> jdouble {
+          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
           """,
         ]
       )

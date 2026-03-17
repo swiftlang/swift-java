@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CSwiftJavaJNI
+import SwiftJavaJNICore
 
 /// Stores a reference to a Java object, managing it as a global reference so
 /// that the Java virtual machine will not move or deallocate the object
@@ -26,6 +26,12 @@ public final class JavaObjectHolder {
   public init(object: jobject, environment: JNIEnvironment) {
     self.object = environment.interface.NewGlobalRef(environment, object)
     self.environment = environment
+
+    // If we are taking over a local ref, let's delete that.
+    let refType = environment.interface.GetObjectRefType(environment, object)
+    if refType == JNILocalRefType {
+      environment.interface.DeleteLocalRef(environment, object)
+    }
   }
 
   /// Forget this Java object, meaning that it is no longer used from anywhere

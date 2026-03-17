@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JavaTypes
+import SwiftJavaJNICore
 import SwiftSyntax
 
 extension FFMSwift2JavaGenerator {
@@ -95,11 +95,11 @@ struct CdeclLowering {
     // Lower the self parameter.
     let loweredSelf: LoweredParameter? =
       switch signature.selfParameter {
-      case .instance(let selfParameter):
+      case .instance(let convention, let swiftType):
         try lowerParameter(
-          selfParameter.type,
-          convention: selfParameter.convention,
-          parameterName: selfParameter.parameterName ?? "self",
+          swiftType,
+          convention: convention,
+          parameterName: "self",
           genericParameters: signature.genericParameters,
           genericRequirements: signature.genericRequirements
         )
@@ -325,7 +325,7 @@ struct CdeclLowering {
     case .tuple(let tuple):
       if tuple.count == 1 {
         return try lowerParameter(
-          tuple[0],
+          tuple[0].type,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
@@ -341,7 +341,7 @@ struct CdeclLowering {
         // FIXME: Use tuple element label.
         let cdeclName = "\(parameterName)_\(idx)"
         let lowered = try lowerParameter(
-          element,
+          element.type,
           convention: convention,
           parameterName: cdeclName,
           genericParameters: genericParameters,
@@ -435,6 +435,12 @@ struct CdeclLowering {
 
     case .array:
       throw LoweringError.unhandledType(type)
+
+    case .dictionary:
+      throw LoweringError.unhandledType(type)
+
+    case .set:
+      throw LoweringError.unhandledType(type)
     }
   }
 
@@ -518,7 +524,7 @@ struct CdeclLowering {
     case .tuple(let tuple):
       if tuple.count == 1 {
         return try lowerOptionalParameter(
-          tuple[0],
+          tuple[0].type,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
@@ -527,7 +533,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(.optional(wrappedType))
 
-    case .function, .metatype, .optional, .composite, .array:
+    case .function, .metatype, .optional, .composite, .array, .dictionary, .set:
       throw LoweringError.unhandledType(.optional(wrappedType))
     }
   }
@@ -629,7 +635,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array:
+    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -697,8 +703,8 @@ struct CdeclLowering {
           let isMutable = knownType == .unsafeMutableBufferPointer
           return try lowerResult(
             .tuple([
-              isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
-              knownTypes.int,
+              SwiftTupleElement(label: nil, type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
+              SwiftTupleElement(label: nil, type: knownTypes.int),
             ]),
             outParameterName: outParameterName
           )
@@ -755,14 +761,14 @@ struct CdeclLowering {
 
     case .tuple(let tuple):
       if tuple.count == 1 {
-        return try lowerResult(tuple[0], outParameterName: outParameterName)
+        return try lowerResult(tuple[0].type, outParameterName: outParameterName)
       }
 
       var parameters: [SwiftParameter] = []
       var conversions: [ConversionStep] = []
       for (idx, element) in tuple.enumerated() {
         let outName = "\(outParameterName)_\(idx)"
-        let lowered = try lowerResult(element, outParameterName: outName)
+        let lowered = try lowerResult(element.type, outParameterName: outName)
 
         // Convert direct return values to typed mutable pointers.
         // E.g. (Int8, Int8) is lowered to '_ result_0: UnsafePointer<Int8>, _ result_1: UnsafePointer<Int8>'
@@ -832,7 +838,7 @@ struct CdeclLowering {
         )
       )
 
-    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array:
+    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array, .dictionary, .set:
       throw LoweringError.unhandledType(type)
     }
   }
@@ -949,10 +955,10 @@ extension LoweredFunctionSignature {
 
     let selfExpr: ExprSyntax?
     switch original.selfParameter {
-    case .instance(let swiftSelf):
+    case .instance:
       // Raise the 'self' from cdecl parameters.
       selfExpr = self.selfParameter!.conversion.asExprSyntax(
-        placeholder: swiftSelf.parameterName ?? "self",
+        placeholder: "self",
         bodyItems: &bodyItems
       )
     case .staticMethod(let selfType), .initializer(let selfType):
@@ -992,14 +998,6 @@ extension LoweredFunctionSignature {
         }
         .joined(separator: ", ")
       resultExpr = "\(callee)(\(raw: arguments))"
-
-    case .synthesizedFunction(let function):
-      switch function {
-      case .toString:
-        resultExpr = "String(describing: \(callee))"
-      case .toDebugString:
-        resultExpr = "String(reflecting: \(callee))"
-      }
 
     case .getter:
       assert(paramExprs.isEmpty)

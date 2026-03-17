@@ -212,10 +212,10 @@ final class DataImportTests {
          * public func returnData() -> Data
          * }
          */
-        public static Data returnData(AllocatingSwiftArena swiftArena$) {
-          MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
+        public static Data returnData(AllocatingSwiftArena swiftArena) {
+          MemorySegment _result = swiftArena.allocate(Data.$LAYOUT);
           swiftjava_SwiftModule_returnData.call(_result);
-          return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
+          return Data.wrapMemoryAddressUnsafe(_result, swiftArena);
         }
         """,
 
@@ -254,10 +254,10 @@ final class DataImportTests {
          * public init(bytes: UnsafeRawPointer, count: Int)
          * }
          */
-        public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena$) {
-          MemorySegment _result = swiftArena$.allocate(Data.$LAYOUT);
+        public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena) {
+          MemorySegment _result = swiftArena.allocate(Data.$LAYOUT);
           swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, _result);
-          return Data.wrapMemoryAddressUnsafe(_result, swiftArena$);
+          return Data.wrapMemoryAddressUnsafe(_result, swiftArena);
         }
         """,
 
@@ -522,7 +522,7 @@ final class DataImportTests {
       .java,
       expectedChunks: [
         """
-        public static Data returnData(SwiftArena swiftArena$) {
+        public static Data returnData(SwiftArena swiftArena) {
         """
       ]
     )
@@ -556,7 +556,7 @@ final class DataImportTests {
         "public final class Data implements JNISwiftInstance, DataProtocol {",
         "public long getCount() {",
 
-        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena$) {",
+        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena) {",
 
         "public byte[] toByteArray() {",
         "private static native byte[] $toByteArray(long selfPointer);",
