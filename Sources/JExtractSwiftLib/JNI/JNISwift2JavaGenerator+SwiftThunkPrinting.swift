@@ -171,30 +171,41 @@ extension JNISwift2JavaGenerator {
     }
 
     printer.printBraceBlock(function.swiftDecl.signatureString) { printer in
-      var upcallArguments = zip(
-        function.originalFunctionSignature.parameters,
-        function.parameterConversions
-      ).map { param, conversion in
-        // Wrap-java does not extract parameter names, so no labels
-        conversion.render(&printer, param.parameterName!)
-      }
-
-      // If the underlying translated method requires
-      // a SwiftArena, we pass in the global arena
-      if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
-        upcallArguments.append("JavaSwiftArena.defaultAutoArena")
-      }
-
-      let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
-      let javaUpcall =
-        "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
-
       let resultType = function.originalFunctionSignature.result.type
-      let result = function.resultConversion.render(&printer, javaUpcall)
-      if resultType.isVoid {
-        printer.print(result)
-      } else {
-        printer.print("return \(result)")
+      let returnStmt = !resultType.isVoid ? "return " : ""
+      // If the protocol function is non-throwing, we have no option but to force try.
+      // The error thrown by `withLocalFrame` is an OOM error anyway.
+      let withLocalFrameTryKeyword = function.originalFunctionSignature.isThrowing ? "try" : "try!"
+
+      // Push a local JNI frame so refs created during this upcall are freed on exit.
+      // When called from a Swift async context (e.g. cooperative thread pool) there is
+      // no enclosing JNI frame, so refs would otherwise accumulate indefinitely. When
+      // called from a Java-initiated native call there is already a frame, but pushing
+      // a sub-frame still frees refs earlier and prevents overflow within a single call.
+      let paramCount = function.originalFunctionSignature.parameters.count
+      let estimatedRefCount = paramCount * 2 + 4
+      printer.print("let environment$ = try! JavaVirtualMachine.shared().environment()")
+      printer.printBraceBlock("\(returnStmt)\(withLocalFrameTryKeyword) environment$.withLocalFrame(capacity: \(estimatedRefCount))") { printer in
+        var upcallArguments = zip(
+          function.originalFunctionSignature.parameters,
+          function.parameterConversions
+        ).map { param, conversion in
+          // Wrap-java does not extract parameter names, so no labels
+          conversion.render(&printer, param.parameterName!)
+        }
+
+        // If the underlying translated method requires
+        // a SwiftArena, we pass in the global arena
+        if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
+          upcallArguments.append("JavaSwiftArena.defaultAutoArena")
+        }
+
+        let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
+        let javaUpcall =
+          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+
+        let result = function.resultConversion.render(&printer, javaUpcall)
+        printer.print("\(returnStmt)\(result)")
       }
     }
   }

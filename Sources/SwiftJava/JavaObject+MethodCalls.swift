@@ -108,6 +108,7 @@ extension AnyJavaObject {
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return try environment.translatingJNIExceptions {
       try Self.javaMethodLookup(
@@ -131,6 +132,7 @@ extension AnyJavaObject {
     let thisClass = try environment.translatingJNIExceptions {
       environment.interface.GetObjectClass(environment, javaThis)
     }!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return try environment.translatingJNIExceptions {
       try Self.javaMethodLookup(
@@ -269,7 +271,6 @@ extension AnyJavaObject {
         in: environment
       )
 
-      // Retrieve the constructor, then map the arguments and call it.
       let jniArgs = getJValues(repeat each arguments, in: environment)
       return try environment.translatingJNIExceptions {
         environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
@@ -285,6 +286,7 @@ extension AnyJavaObject {
 
     // Retrieve the Java class instance from the object.
     let thisClass = environment.interface.GetObjectClass(environment, this)!
+    defer { environment.interface.DeleteLocalRef(environment, thisClass) }
 
     return environment.interface.GetFieldID(environment, thisClass, fieldName, FieldType.jniMangling)
   }
@@ -337,7 +339,6 @@ extension JavaClass {
       )
     }!
 
-    // Retrieve the method that performs this call, then
     let jniMethod = Result.jniStaticMethodCall(in: environment)
     let jniArgs = getJValues(repeat each arguments, in: environment)
     let jniResult = try environment.translatingJNIExceptions {
@@ -371,7 +372,6 @@ extension JavaClass {
       )
     }!
 
-    // Retrieve the method that performs this call, then
     let jniMethod = environment.interface.CallStaticVoidMethodA
     let jniArgs = getJValues(repeat each arguments, in: environment)
     try environment.translatingJNIExceptions {

@@ -54,6 +54,7 @@ extension JNIEnvironment {
       }
       return
     }
+    defer { self.interface.DeleteLocalRef(self, exceptionClass) }
 
     _ = interface.ThrowNew(self, exceptionClass, javaException.message ?? "")
   }

@@ -70,6 +70,7 @@ struct JNIClosureTests {
           SwiftModule.emptyClosure(closure: {
             let class$ = environment.interface.GetObjectClass(environment, closure)
             let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "()V")!
+            environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
@@ -127,6 +128,7 @@ struct JNIClosureTests {
           SwiftModule.closureWithArgumentsAndReturn(closure: { _0, _1 in
             let class$ = environment.interface.GetObjectClass(environment, closure)
             let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "(JZ)J")!
+            environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
             return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
