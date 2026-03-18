@@ -7,116 +7,192 @@ open class TreeMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-  @JavaMethod
-  open func remove(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.remove(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func remove(_ arg0: JavaObject?) -> V!
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.TreeMap.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
-  @JavaMethod
-  open func get(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.get(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func get(_ arg0: JavaObject?) -> V!
 
-  @JavaMethod
-  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  /// Java method `put`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.put(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func put(_ arg0: K?, _ arg1: V?) -> V!
 
+  /// Java method `values`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Collection<V> java.util.TreeMap.values()
+  /// ```
   @JavaMethod
-  open func values() -> JavaCollection<JavaObject>!
+  open func values() -> JavaCollection<V>!
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.TreeMap.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.TreeMap.clear()
+  /// ```
   @JavaMethod
   open func clear()
 
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.replace(K,V,V)
+  /// ```
   @JavaMethod
-  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
+  open func replace(_ arg0: K?, _ arg1: V?, _ arg2: V?) -> Bool
 
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.replace(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func replace(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `putIfAbsent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putIfAbsent(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putIfAbsent(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `keySet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Set<K> java.util.TreeMap.keySet()
+  /// ```
   @JavaMethod
-  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func keySet() -> JavaSet<K>!
 
-  @JavaMethod
-  open func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  open func containsKey(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  open func keySet() -> JavaSet<JavaObject>!
-
+  /// Java method `containsValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.containsValue(java.lang.Object)
+  /// ```
   @JavaMethod
   open func containsValue(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `containsKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.containsKey(java.lang.Object)
+  /// ```
   @JavaMethod
-  open func firstKey() -> JavaObject!
+  open func containsKey(_ arg0: JavaObject?) -> Bool
 
-  @JavaMethod
-  open func putFirst(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  /// Java method `firstKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.firstKey()
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func firstKey() -> K!
 
-  @JavaMethod
-  open func putLast(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  /// Java method `putFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putFirst(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putFirst(_ arg0: K?, _ arg1: V?) -> V!
 
-  @JavaMethod
-  open func lowerKey(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `putLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putLast(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putLast(_ arg0: K?, _ arg1: V?) -> V!
 
-  @JavaMethod
-  open func floorKey(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `lowerKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.lowerKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func lowerKey(_ arg0: K?) -> K!
 
-  @JavaMethod
-  open func ceilingKey(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `floorKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.floorKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func floorKey(_ arg0: K?) -> K!
 
-  @JavaMethod
-  open func higherKey(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `ceilingKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.ceilingKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func ceilingKey(_ arg0: K?) -> K!
 
-  @JavaMethod
-  open func lastKey() -> JavaObject!
-}
-extension TreeMap {
-  @JavaClass("java.util.AbstractMap$SimpleEntry")
-  open class SimpleEntry<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
-    @JavaMethod
-    @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
+  /// Java method `higherKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.higherKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func higherKey(_ arg0: K?) -> K!
 
-    @JavaMethod
-    open override func equals(_ arg0: JavaObject?) -> Bool
-
-    @JavaMethod
-    open override func toString() -> String
-
-    @JavaMethod
-    open override func hashCode() -> Int32
-
-    @JavaMethod
-    open func getValue() -> JavaObject!
-
-    @JavaMethod
-    open func getKey() -> JavaObject!
-
-    @JavaMethod
-    open func setValue(_ arg0: JavaObject?) -> JavaObject!
-  }
-}
-extension TreeMap {
-  @JavaClass("java.util.AbstractMap$SimpleImmutableEntry")
-  open class SimpleImmutableEntry<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
-    @JavaMethod
-    @_nonoverride public convenience init(_ arg0: JavaObject?, _ arg1: JavaObject?, environment: JNIEnvironment? = nil)
-
-    @JavaMethod
-    open override func equals(_ arg0: JavaObject?) -> Bool
-
-    @JavaMethod
-    open override func toString() -> String
-
-    @JavaMethod
-    open override func hashCode() -> Int32
-
-    @JavaMethod
-    open func getValue() -> JavaObject!
-
-    @JavaMethod
-    open func getKey() -> JavaObject!
-
-    @JavaMethod
-    open func setValue(_ arg0: JavaObject?) -> JavaObject!
-  }
+  /// Java method `lastKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.lastKey()
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func lastKey() -> K!
 }
