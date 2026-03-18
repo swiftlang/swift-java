@@ -10,6 +10,9 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
+
   /// Java method `remove`.
   ///
   /// ### Java method signature
@@ -91,6 +94,15 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.ArrayDeque.iterator()
+  /// ```
+  @JavaMethod
+  open func iterator() -> JavaIterator<E>!
+
   /// Java method `contains`.
   ///
   /// ### Java method signature
@@ -99,6 +111,15 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func contains(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.addAll(java.util.Collection<? extends E>)
+  /// ```
+  @JavaMethod
+  open func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
   /// Java method `peek`.
   ///
@@ -171,6 +192,24 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod(typeErasedResult: "E!")
   open func removeLast() -> E!
+
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.removeAll(java.util.Collection<?>)
+  /// ```
+  @JavaMethod
+  open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.retainAll(java.util.Collection<?>)
+  /// ```
+  @JavaMethod
+  open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
   /// Java method `poll`.
   ///
@@ -279,4 +318,13 @@ open class ArrayDeque<E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func removeLastOccurrence(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `descendingIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.ArrayDeque.descendingIterator()
+  /// ```
+  @JavaMethod
+  open func descendingIterator() -> JavaIterator<E>!
 }

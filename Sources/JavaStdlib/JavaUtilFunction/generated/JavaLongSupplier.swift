@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongSupplier")
 public struct JavaLongSupplier {
+  /// Java method `getAsLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long java.util.function.LongSupplier.getAsLong()
+  /// ```
   @JavaMethod
   public func getAsLong() -> Int64
 }

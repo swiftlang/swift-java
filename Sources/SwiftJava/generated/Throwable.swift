@@ -15,33 +15,93 @@ open class Throwable: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `printStackTrace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Throwable.printStackTrace()
+  /// ```
   @JavaMethod
   open func printStackTrace()
 
+  /// Java method `printStackTrace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Throwable.printStackTrace(java.io.PrintWriter)
+  /// ```
   @JavaMethod
-  open func printStackTrace(_ writer: PrintWriter?)
+  open func printStackTrace(_ arg0: PrintWriter?)
 
+  /// Java method `fillInStackTrace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.fillInStackTrace()
+  /// ```
   @JavaMethod
   open func fillInStackTrace() -> Throwable!
 
+  /// Java method `getCause`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.getCause()
+  /// ```
   @JavaMethod
   open func getCause() -> Throwable!
 
+  /// Java method `initCause`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.initCause(java.lang.Throwable)
+  /// ```
   @JavaMethod
   open func initCause(_ arg0: Throwable?) -> Throwable!
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Throwable.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `getMessage`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Throwable.getMessage()
+  /// ```
   @JavaMethod
   open func getMessage() -> String
 
+  /// Java method `getSuppressed`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final synchronized java.lang.Throwable[] java.lang.Throwable.getSuppressed()
+  /// ```
   @JavaMethod
   open func getSuppressed() -> [Throwable?]
 
+  /// Java method `getLocalizedMessage`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Throwable.getLocalizedMessage()
+  /// ```
   @JavaMethod
   open func getLocalizedMessage() -> String
 
+  /// Java method `addSuppressed`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final synchronized void java.lang.Throwable.addSuppressed(java.lang.Throwable)
+  /// ```
   @JavaMethod
   open func addSuppressed(_ arg0: Throwable?)
 }

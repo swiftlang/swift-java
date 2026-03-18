@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToDoubleBiFunction")
 public struct JavaToDoubleBiFunction<T: AnyJavaObject, U: AnyJavaObject> {
+  /// Java method `applyAsDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.util.function.ToDoubleBiFunction.applyAsDouble(T,U)
+  /// ```
   @JavaMethod
-  public func applyAsDouble(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Double
+  public func applyAsDouble(_ arg0: T?, _ arg1: U?) -> Double
 }

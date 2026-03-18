@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleSupplier")
 public struct JavaDoubleSupplier {
+  /// Java method `getAsDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.util.function.DoubleSupplier.getAsDouble()
+  /// ```
   @JavaMethod
   public func getAsDouble() -> Double
 }

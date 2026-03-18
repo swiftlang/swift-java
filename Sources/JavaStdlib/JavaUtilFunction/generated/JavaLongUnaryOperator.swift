@@ -4,16 +4,40 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongUnaryOperator")
 public struct JavaLongUnaryOperator {
+  /// Java method `applyAsLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long java.util.function.LongUnaryOperator.applyAsLong(long)
+  /// ```
   @JavaMethod
   public func applyAsLong(_ arg0: Int64) -> Int64
 
+  /// Java method `compose`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.compose(java.util.function.LongUnaryOperator)
+  /// ```
   @JavaMethod
-  public func compose(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator?
+  public func compose(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator!
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.andThen(java.util.function.LongUnaryOperator)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator?
+  public func andThen(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator!
 }
 extension JavaClass<JavaLongUnaryOperator> {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.identity()
+  /// ```
   @JavaStaticMethod
-  public func identity() -> JavaLongUnaryOperator?
+  public func identity() -> JavaLongUnaryOperator!
 }

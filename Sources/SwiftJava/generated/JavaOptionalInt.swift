@@ -3,31 +3,85 @@ import SwiftJavaJNICore
 
 @JavaClass("java.util.OptionalInt")
 open class JavaOptionalInt: JavaObject {
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalInt.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.OptionalInt.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.OptionalInt.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalInt.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
-  @JavaMethod
-  open func isPresent() -> Bool
-
+  /// Java method `orElse`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.OptionalInt.orElse(int)
+  /// ```
   @JavaMethod
   open func orElse(_ arg0: Int32) -> Int32
 
+  /// Java method `isPresent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalInt.isPresent()
+  /// ```
+  @JavaMethod
+  open func isPresent() -> Bool
+
+  /// Java method `orElseThrow`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.OptionalInt.orElseThrow()
+  /// ```
   @JavaMethod
   open func orElseThrow() -> Int32
 
+  /// Java method `getAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.OptionalInt.getAsInt()
+  /// ```
   @JavaMethod
   open func getAsInt() -> Int32
 }
 extension JavaClass<JavaOptionalInt> {
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.OptionalInt java.util.OptionalInt.of(int)
+  /// ```
   @JavaStaticMethod
   public func of(_ arg0: Int32) -> JavaOptionalInt!
 
@@ -35,6 +89,12 @@ extension JavaClass<JavaOptionalInt> {
     Optional(javaOptional: of(arg0))
   }
 
+  /// Java method `empty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.OptionalInt java.util.OptionalInt.empty()
+  /// ```
   @JavaStaticMethod
   public func empty() -> JavaOptionalInt!
 

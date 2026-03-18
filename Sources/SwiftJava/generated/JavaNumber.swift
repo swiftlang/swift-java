@@ -6,21 +6,57 @@ open class JavaNumber: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Number.byteValue()
+  /// ```
   @JavaMethod
   open func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Number.shortValue()
+  /// ```
   @JavaMethod
   open func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.lang.Number.intValue()
+  /// ```
   @JavaMethod
   open func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long java.lang.Number.longValue()
+  /// ```
   @JavaMethod
   open func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract float java.lang.Number.floatValue()
+  /// ```
   @JavaMethod
   open func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.lang.Number.doubleValue()
+  /// ```
   @JavaMethod
   open func doubleValue() -> Double
 }

@@ -3,27 +3,65 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Boolean")
 open class JavaBoolean: JavaObject {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Bool, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Boolean.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Boolean.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Boolean.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Boolean.compareTo(java.lang.Boolean)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaBoolean?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Boolean.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `booleanValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Boolean.booleanValue()
+  /// ```
   @JavaMethod
   open func booleanValue() -> Bool
 }
@@ -37,33 +75,93 @@ extension JavaClass<JavaBoolean> {
   @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaBoolean>!
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Boolean.toString(boolean)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Bool) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Boolean.hashCode(boolean)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Bool) -> Int32
 
+  /// Java method `getBoolean`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Boolean.getBoolean(java.lang.String)
+  /// ```
   @JavaStaticMethod
   public func getBoolean(_ arg0: String) -> Bool
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Boolean.compare(boolean,boolean)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Bool, _ arg1: Bool) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Boolean java.lang.Boolean.valueOf(java.lang.String)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) -> JavaBoolean!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Boolean java.lang.Boolean.valueOf(boolean)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Bool) -> JavaBoolean!
 
+  /// Java method `parseBoolean`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Boolean.parseBoolean(java.lang.String)
+  /// ```
   @JavaStaticMethod
   public func parseBoolean(_ arg0: String) -> Bool
 
+  /// Java method `logicalAnd`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Boolean.logicalAnd(boolean,boolean)
+  /// ```
   @JavaStaticMethod
   public func logicalAnd(_ arg0: Bool, _ arg1: Bool) -> Bool
 
+  /// Java method `logicalOr`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Boolean.logicalOr(boolean,boolean)
+  /// ```
   @JavaStaticMethod
   public func logicalOr(_ arg0: Bool, _ arg1: Bool) -> Bool
 
+  /// Java method `logicalXor`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Boolean.logicalXor(boolean,boolean)
+  /// ```
   @JavaStaticMethod
   public func logicalXor(_ arg0: Bool, _ arg1: Bool) -> Bool
 }

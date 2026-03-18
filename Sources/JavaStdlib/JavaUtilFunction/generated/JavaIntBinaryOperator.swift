@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntBinaryOperator")
 public struct JavaIntBinaryOperator {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
+  /// ```
   @JavaMethod
   public func applyAsInt(_ arg0: Int32, _ arg1: Int32) -> Int32
 }

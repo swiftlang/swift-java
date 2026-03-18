@@ -10,100 +10,301 @@ open class BitSet: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.BitSet.get(int)
+  /// ```
   @JavaMethod
   open func get(_ arg0: Int32) -> Bool
 
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.BitSet java.util.BitSet.get(int,int)
+  /// ```
   @JavaMethod
   open func get(_ arg0: Int32, _ arg1: Int32) -> BitSet!
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.BitSet.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `length`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.length()
+  /// ```
   @JavaMethod
   open func length() -> Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.BitSet.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.BitSet.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
-  @JavaMethod
-  open func clear(_ arg0: Int32, _ arg1: Int32)
-
-  @JavaMethod
-  open func clear()
-
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.clear(int)
+  /// ```
   @JavaMethod
   open func clear(_ arg0: Int32)
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.clear(int,int)
+  /// ```
+  @JavaMethod
+  open func clear(_ arg0: Int32, _ arg1: Int32)
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.clear()
+  /// ```
+  @JavaMethod
+  open func clear()
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.BitSet.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
-  @JavaMethod
-  open func set(_ arg0: Int32, _ arg1: Bool)
-
-  @JavaMethod
-  open func set(_ arg0: Int32)
-
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.set(int,int)
+  /// ```
   @JavaMethod
   open func set(_ arg0: Int32, _ arg1: Int32)
 
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.set(int,boolean)
+  /// ```
+  @JavaMethod
+  open func set(_ arg0: Int32, _ arg1: Bool)
+
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.set(int)
+  /// ```
+  @JavaMethod
+  open func set(_ arg0: Int32)
+
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.set(int,int,boolean)
+  /// ```
   @JavaMethod
   open func set(_ arg0: Int32, _ arg1: Int32, _ arg2: Bool)
 
-  @JavaMethod
-  open func flip(_ arg0: Int32, _ arg1: Int32)
-
+  /// Java method `flip`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.flip(int)
+  /// ```
   @JavaMethod
   open func flip(_ arg0: Int32)
 
+  /// Java method `flip`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.flip(int,int)
+  /// ```
   @JavaMethod
-  open func nextClearBit(_ arg0: Int32) -> Int32
+  open func flip(_ arg0: Int32, _ arg1: Int32)
 
-  @JavaMethod
-  open func or(_ arg0: BitSet?)
-
+  /// Java method `toByteArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte[] java.util.BitSet.toByteArray()
+  /// ```
   @JavaMethod
   open func toByteArray() -> [Int8]
 
+  /// Java method `nextClearBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.nextClearBit(int)
+  /// ```
+  @JavaMethod
+  open func nextClearBit(_ arg0: Int32) -> Int32
+
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.or(java.util.BitSet)
+  /// ```
+  @JavaMethod
+  open func or(_ arg0: BitSet?)
+
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.and(java.util.BitSet)
+  /// ```
   @JavaMethod
   open func and(_ arg0: BitSet?)
 
+  /// Java method `xor`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.xor(java.util.BitSet)
+  /// ```
   @JavaMethod
   open func xor(_ arg0: BitSet?)
 
+  /// Java method `andNot`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.BitSet.andNot(java.util.BitSet)
+  /// ```
   @JavaMethod
   open func andNot(_ arg0: BitSet?)
 
+  /// Java method `cardinality`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.cardinality()
+  /// ```
   @JavaMethod
   open func cardinality() -> Int32
 
+  /// Java method `nextSetBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.nextSetBit(int)
+  /// ```
   @JavaMethod
   open func nextSetBit(_ arg0: Int32) -> Int32
 
+  /// Java method `toLongArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long[] java.util.BitSet.toLongArray()
+  /// ```
   @JavaMethod
   open func toLongArray() -> [Int64]
 
+  /// Java method `previousSetBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.previousSetBit(int)
+  /// ```
   @JavaMethod
   open func previousSetBit(_ arg0: Int32) -> Int32
 
+  /// Java method `previousClearBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.BitSet.previousClearBit(int)
+  /// ```
   @JavaMethod
   open func previousClearBit(_ arg0: Int32) -> Int32
 
+  /// Java method `intersects`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.BitSet.intersects(java.util.BitSet)
+  /// ```
   @JavaMethod
   open func intersects(_ arg0: BitSet?) -> Bool
 }
 extension JavaClass<BitSet> {
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.BitSet java.util.BitSet.valueOf(long[])
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: [Int64]) -> BitSet!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.BitSet java.util.BitSet.valueOf(byte[])
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: [Int8]) -> BitSet!
+
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.BitSet java.util.BitSet.valueOf(java.nio.ByteBuffer)
+  /// ```
+  @JavaStaticMethod
+  public func valueOf(_ arg0: ByteBuffer?) -> BitSet!
 }

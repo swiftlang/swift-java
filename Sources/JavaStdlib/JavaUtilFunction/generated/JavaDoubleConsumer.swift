@@ -4,9 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleConsumer")
 public struct JavaDoubleConsumer {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.DoubleConsumer.accept(double)
+  /// ```
   @JavaMethod
   public func accept(_ arg0: Double)
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.DoubleConsumer java.util.function.DoubleConsumer.andThen(java.util.function.DoubleConsumer)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaDoubleConsumer?) -> JavaDoubleConsumer?
+  public func andThen(_ arg0: JavaDoubleConsumer?) -> JavaDoubleConsumer!
 }

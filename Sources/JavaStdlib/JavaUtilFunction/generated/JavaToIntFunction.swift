@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToIntFunction")
 public struct JavaToIntFunction<T: AnyJavaObject> {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.ToIntFunction.applyAsInt(T)
+  /// ```
   @JavaMethod
-  public func applyAsInt(_ arg0: JavaObject?) -> Int32
+  public func applyAsInt(_ arg0: T?) -> Int32
 }

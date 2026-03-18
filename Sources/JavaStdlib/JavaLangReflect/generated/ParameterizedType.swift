@@ -4,36 +4,39 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.ParameterizedType", extends: Type.self)
 public struct ParameterizedType {
+  /// Java method `getOwnerType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type java.lang.reflect.ParameterizedType.getOwnerType()
+  /// ```
   @JavaMethod
   public func getOwnerType() -> Type!
 
+  /// Java method `getRawType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type java.lang.reflect.ParameterizedType.getRawType()
+  /// ```
   @JavaMethod
   public func getRawType() -> Type!
 
+  /// Java method `getActualTypeArguments`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type[] java.lang.reflect.ParameterizedType.getActualTypeArguments()
+  /// ```
   @JavaMethod
   public func getActualTypeArguments() -> [Type?]
 
+  /// Java method `getTypeName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.lang.String java.lang.reflect.Type.getTypeName()
+  /// ```
   @JavaMethod
   public func getTypeName() -> String
-}
-
-extension ParameterizedType {
-
-  @JavaMethod
-  public func toString() -> String
-
-  @JavaMethod
-  public func getClass() -> JavaClass<JavaObject>!
-
-  @JavaMethod
-  public func equals(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  public func hashCode() -> Int32
-}
-
-extension ParameterizedType: CustomStringConvertible {
-  public var description: String {
-    toString()
-  }
 }

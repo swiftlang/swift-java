@@ -3,30 +3,84 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.ListIterator", extends: JavaIterator<JavaObject>.self)
 public struct ListIterator<E: AnyJavaObject> {
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.ListIterator.remove()
+  /// ```
   @JavaMethod
   public func remove()
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.ListIterator.add(E)
+  /// ```
   @JavaMethod
-  public func add(_ arg0: JavaObject?)
+  public func add(_ arg0: E?)
 
+  /// Java method `hasNext`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.ListIterator.hasNext()
+  /// ```
   @JavaMethod
   public func hasNext() -> Bool
 
-  @JavaMethod
-  public func next() -> JavaObject!
+  /// Java method `next`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.ListIterator.next()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func next() -> E!
 
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.ListIterator.set(E)
+  /// ```
   @JavaMethod
-  public func set(_ arg0: JavaObject?)
+  public func set(_ arg0: E?)
 
+  /// Java method `nextIndex`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.ListIterator.nextIndex()
+  /// ```
   @JavaMethod
   public func nextIndex() -> Int32
 
+  /// Java method `previousIndex`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.ListIterator.previousIndex()
+  /// ```
   @JavaMethod
   public func previousIndex() -> Int32
 
+  /// Java method `hasPrevious`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.ListIterator.hasPrevious()
+  /// ```
   @JavaMethod
   public func hasPrevious() -> Bool
 
-  @JavaMethod
-  public func previous() -> JavaObject!
+  /// Java method `previous`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.ListIterator.previous()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func previous() -> E!
 }

@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ObjIntConsumer")
 public struct JavaObjIntConsumer<T: AnyJavaObject> {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.ObjIntConsumer.accept(T,int)
+  /// ```
   @JavaMethod
-  public func accept(_ arg0: JavaObject?, _ arg1: Int32)
+  public func accept(_ arg0: T?, _ arg1: Int32)
 }

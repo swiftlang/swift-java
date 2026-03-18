@@ -7,18 +7,48 @@ open class Stack<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `empty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.Stack.empty()
+  /// ```
   @JavaMethod
   open func empty() -> Bool
 
-  @JavaMethod
-  open func peek() -> JavaObject!
+  /// Java method `peek`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized E java.util.Stack.peek()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func peek() -> E!
 
+  /// Java method `search`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized int java.util.Stack.search(java.lang.Object)
+  /// ```
   @JavaMethod
   open func search(_ arg0: JavaObject?) -> Int32
 
-  @JavaMethod
-  open func push(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `push`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.Stack.push(E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func push(_ arg0: E?) -> E!
 
-  @JavaMethod
-  open func pop() -> JavaObject!
+  /// Java method `pop`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized E java.util.Stack.pop()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func pop() -> E!
 }

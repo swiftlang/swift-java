@@ -3,45 +3,119 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Long")
 open class JavaLong: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int64, environment: JNIEnvironment? = nil)
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Long.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Long.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Long.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Long.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Long.compareTo(java.lang.Long)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaLong?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Long.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Long.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Long.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Long.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Long.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Long.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 
+  /// Java method `describeConstable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Optional<java.lang.Long> java.lang.Long.describeConstable()
+  /// ```
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaLong>!
 
@@ -65,123 +139,363 @@ extension JavaClass<JavaLong> {
   @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
+  /// Java method `numberOfLeadingZeros`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.numberOfLeadingZeros(long)
+  /// ```
   @JavaStaticMethod
   public func numberOfLeadingZeros(_ arg0: Int64) -> Int32
 
+  /// Java method `numberOfTrailingZeros`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.numberOfTrailingZeros(long)
+  /// ```
   @JavaStaticMethod
   public func numberOfTrailingZeros(_ arg0: Int64) -> Int32
 
+  /// Java method `bitCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.bitCount(long)
+  /// ```
   @JavaStaticMethod
   public func bitCount(_ arg0: Int64) -> Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toString(long)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int64) -> String
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toString(long,int)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int64, _ arg1: Int32) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.hashCode(long)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Int64) -> Int32
 
+  /// Java method `min`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.min(long,long)
+  /// ```
   @JavaStaticMethod
   public func min(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `max`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.max(long,long)
+  /// ```
   @JavaStaticMethod
   public func max(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `signum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.signum(long)
+  /// ```
   @JavaStaticMethod
   public func signum(_ arg0: Int64) -> Int32
 
+  /// Java method `expand`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.expand(long,long)
+  /// ```
   @JavaStaticMethod
   public func expand(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `compareUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.compareUnsigned(long,long)
+  /// ```
   @JavaStaticMethod
   public func compareUnsigned(_ arg0: Int64, _ arg1: Int64) -> Int32
 
+  /// Java method `divideUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.divideUnsigned(long,long)
+  /// ```
   @JavaStaticMethod
   public func divideUnsigned(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `remainderUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.remainderUnsigned(long,long)
+  /// ```
   @JavaStaticMethod
   public func remainderUnsigned(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `reverse`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.reverse(long)
+  /// ```
   @JavaStaticMethod
   public func reverse(_ arg0: Int64) -> Int64
 
+  /// Java method `reverseBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.reverseBytes(long)
+  /// ```
   @JavaStaticMethod
   public func reverseBytes(_ arg0: Int64) -> Int64
 
+  /// Java method `compress`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.compress(long,long)
+  /// ```
   @JavaStaticMethod
   public func compress(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `getLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.getLong(java.lang.String,java.lang.Long)
+  /// ```
   @JavaStaticMethod
   public func getLong(_ arg0: String, _ arg1: JavaLong?) -> JavaLong!
 
+  /// Java method `getLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.getLong(java.lang.String)
+  /// ```
   @JavaStaticMethod
   public func getLong(_ arg0: String) -> JavaLong!
 
+  /// Java method `getLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.getLong(java.lang.String,long)
+  /// ```
   @JavaStaticMethod
   public func getLong(_ arg0: String, _ arg1: Int64) -> JavaLong!
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Long.compare(long,long)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Int64, _ arg1: Int64) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.valueOf(long)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int64) -> JavaLong!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaLong!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.valueOf(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaLong!
 
+  /// Java method `toHexString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toHexString(long)
+  /// ```
   @JavaStaticMethod
   public func toHexString(_ arg0: Int64) -> String
 
+  /// Java method `decode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Long java.lang.Long.decode(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func decode(_ arg0: String) throws -> JavaLong!
 
+  /// Java method `sum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.sum(long,long)
+  /// ```
   @JavaStaticMethod
   public func sum(_ arg0: Int64, _ arg1: Int64) -> Int64
 
+  /// Java method `toUnsignedString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toUnsignedString(long)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedString(_ arg0: Int64) -> String
 
+  /// Java method `toUnsignedString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toUnsignedString(long,int)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedString(_ arg0: Int64, _ arg1: Int32) -> String
 
+  /// Java method `toOctalString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toOctalString(long)
+  /// ```
   @JavaStaticMethod
   public func toOctalString(_ arg0: Int64) -> String
 
+  /// Java method `toBinaryString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Long.toBinaryString(long)
+  /// ```
   @JavaStaticMethod
   public func toBinaryString(_ arg0: Int64) -> String
 
+  /// Java method `highestOneBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.highestOneBit(long)
+  /// ```
   @JavaStaticMethod
   public func highestOneBit(_ arg0: Int64) -> Int64
 
+  /// Java method `lowestOneBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.lowestOneBit(long)
+  /// ```
   @JavaStaticMethod
   public func lowestOneBit(_ arg0: Int64) -> Int64
 
+  /// Java method `rotateLeft`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.rotateLeft(long,int)
+  /// ```
   @JavaStaticMethod
   public func rotateLeft(_ arg0: Int64, _ arg1: Int32) -> Int64
 
+  /// Java method `rotateRight`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.rotateRight(long,int)
+  /// ```
   @JavaStaticMethod
   public func rotateRight(_ arg0: Int64, _ arg1: Int32) -> Int64
 
+  /// Java method `parseLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseLong(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseLong(_ arg0: String) throws -> Int64
 
+  /// Java method `parseLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseLong(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseLong(_ arg0: String, _ arg1: Int32) throws -> Int64
 
+  /// Java method `parseLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseLong(java.lang.CharSequence,int,int,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
 
+  /// Java method `parseUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseUnsignedLong(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedLong(_ arg0: String) throws -> Int64
 
+  /// Java method `parseUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseUnsignedLong(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedLong(_ arg0: String, _ arg1: Int32) throws -> Int64
 
+  /// Java method `parseUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Long.parseUnsignedLong(java.lang.CharSequence,int,int,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedLong(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int64
 }

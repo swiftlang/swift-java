@@ -3,42 +3,110 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Byte")
 open class JavaByte: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int8, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Byte.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Byte.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Byte.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Byte.compareTo(java.lang.Byte)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaByte?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Byte.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Byte.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Byte.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Byte.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Byte.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Byte.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Byte.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 }
@@ -58,39 +126,111 @@ extension JavaClass<JavaByte> {
   @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Byte.toString(byte)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int8) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Byte.hashCode(byte)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Int8) -> Int32
 
+  /// Java method `compareUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Byte.compareUnsigned(byte,byte)
+  /// ```
   @JavaStaticMethod
   public func compareUnsigned(_ arg0: Int8, _ arg1: Int8) -> Int32
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Byte.compare(byte,byte)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Int8, _ arg1: Int8) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Byte java.lang.Byte.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaByte!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Byte java.lang.Byte.valueOf(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaByte!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Byte java.lang.Byte.valueOf(byte)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int8) -> JavaByte!
 
+  /// Java method `decode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Byte java.lang.Byte.decode(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func decode(_ arg0: String) throws -> JavaByte!
 
+  /// Java method `toUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Byte.toUnsignedLong(byte)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int8) -> Int64
 
+  /// Java method `toUnsignedInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Byte.toUnsignedInt(byte)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedInt(_ arg0: Int8) -> Int32
 
+  /// Java method `parseByte`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static byte java.lang.Byte.parseByte(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseByte(_ arg0: String) throws -> Int8
 
+  /// Java method `parseByte`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static byte java.lang.Byte.parseByte(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseByte(_ arg0: String, _ arg1: Int32) throws -> Int8
 }

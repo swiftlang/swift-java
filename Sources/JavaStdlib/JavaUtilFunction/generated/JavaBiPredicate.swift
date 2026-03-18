@@ -4,23 +4,39 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiPredicate")
 public struct JavaBiPredicate<T: AnyJavaObject, U: AnyJavaObject> {
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.BiPredicate.test(T,U)
+  /// ```
   @JavaMethod
-  public func test(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
+  public func test(_ arg0: T?, _ arg1: U?) -> Bool
 
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.or(java.util.function.BiPredicate<? super T, ? super U>)
+  /// ```
   @JavaMethod
-  public func or(
-    _ arg0: JavaBiPredicate<JavaObject, JavaObject>?
-  ) -> JavaBiPredicate<
-    JavaObject, JavaObject
-  >?
+  public func or(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
 
+  /// Java method `negate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.negate()
+  /// ```
   @JavaMethod
-  public func and(
-    _ arg0: JavaBiPredicate<JavaObject, JavaObject>?
-  ) -> JavaBiPredicate<
-    JavaObject, JavaObject
-  >?
+  public func negate() -> JavaBiPredicate<T, U>!
 
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.and(java.util.function.BiPredicate<? super T, ? super U>)
+  /// ```
   @JavaMethod
-  public func negate() -> JavaBiPredicate<JavaObject, JavaObject>?
+  public func and(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
 }

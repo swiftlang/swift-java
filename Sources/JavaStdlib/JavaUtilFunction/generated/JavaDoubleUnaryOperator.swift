@@ -4,16 +4,40 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleUnaryOperator")
 public struct JavaDoubleUnaryOperator {
+  /// Java method `applyAsDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.util.function.DoubleUnaryOperator.applyAsDouble(double)
+  /// ```
   @JavaMethod
   public func applyAsDouble(_ arg0: Double) -> Double
 
+  /// Java method `compose`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.DoubleUnaryOperator java.util.function.DoubleUnaryOperator.compose(java.util.function.DoubleUnaryOperator)
+  /// ```
   @JavaMethod
-  public func compose(_ arg0: JavaDoubleUnaryOperator?) -> JavaDoubleUnaryOperator?
+  public func compose(_ arg0: JavaDoubleUnaryOperator?) -> JavaDoubleUnaryOperator!
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.DoubleUnaryOperator java.util.function.DoubleUnaryOperator.andThen(java.util.function.DoubleUnaryOperator)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaDoubleUnaryOperator?) -> JavaDoubleUnaryOperator?
+  public func andThen(_ arg0: JavaDoubleUnaryOperator?) -> JavaDoubleUnaryOperator!
 }
 extension JavaClass<JavaDoubleUnaryOperator> {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.function.DoubleUnaryOperator java.util.function.DoubleUnaryOperator.identity()
+  /// ```
   @JavaStaticMethod
-  public func identity() -> JavaDoubleUnaryOperator?
+  public func identity() -> JavaDoubleUnaryOperator!
 }

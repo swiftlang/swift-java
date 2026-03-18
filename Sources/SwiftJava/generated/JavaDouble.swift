@@ -3,48 +3,128 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Double")
 open class JavaDouble: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Double, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Double.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Double.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Double.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `isInfinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Double.isInfinite()
+  /// ```
   @JavaMethod
   open func isInfinite() -> Bool
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Double.compareTo(java.lang.Double)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaDouble?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Double.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Double.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Double.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Double.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Double.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Double.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Double.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 
+  /// Java method `describeConstable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Optional<java.lang.Double> java.lang.Double.describeConstable()
+  /// ```
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaDouble>!
 
@@ -52,6 +132,12 @@ open class JavaDouble: JavaNumber {
     Optional(javaOptional: describeConstable())
   }
 
+  /// Java method `isNaN`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Double.isNaN()
+  /// ```
   @JavaMethod
   open func isNaN() -> Bool
 }
@@ -92,51 +178,147 @@ extension JavaClass<JavaDouble> {
   @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaDouble>!
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Double.toString(double)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Double) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Double.hashCode(double)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Double) -> Int32
 
+  /// Java method `min`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static double java.lang.Double.min(double,double)
+  /// ```
   @JavaStaticMethod
   public func min(_ arg0: Double, _ arg1: Double) -> Double
 
+  /// Java method `max`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static double java.lang.Double.max(double,double)
+  /// ```
   @JavaStaticMethod
   public func max(_ arg0: Double, _ arg1: Double) -> Double
 
+  /// Java method `isInfinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Double.isInfinite(double)
+  /// ```
   @JavaStaticMethod
   public func isInfinite(_ arg0: Double) -> Bool
 
+  /// Java method `isFinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Double.isFinite(double)
+  /// ```
   @JavaStaticMethod
   public func isFinite(_ arg0: Double) -> Bool
 
+  /// Java method `doubleToRawLongBits`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native long java.lang.Double.doubleToRawLongBits(double)
+  /// ```
   @JavaStaticMethod
   public func doubleToRawLongBits(_ arg0: Double) -> Int64
 
+  /// Java method `doubleToLongBits`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Double.doubleToLongBits(double)
+  /// ```
   @JavaStaticMethod
   public func doubleToLongBits(_ arg0: Double) -> Int64
 
+  /// Java method `longBitsToDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native double java.lang.Double.longBitsToDouble(long)
+  /// ```
   @JavaStaticMethod
   public func longBitsToDouble(_ arg0: Int64) -> Double
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Double.compare(double,double)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Double, _ arg1: Double) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Double java.lang.Double.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaDouble!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Double java.lang.Double.valueOf(double)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Double) -> JavaDouble!
 
+  /// Java method `toHexString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Double.toHexString(double)
+  /// ```
   @JavaStaticMethod
   public func toHexString(_ arg0: Double) -> String
 
+  /// Java method `isNaN`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Double.isNaN(double)
+  /// ```
   @JavaStaticMethod
   public func isNaN(_ arg0: Double) -> Bool
 
+  /// Java method `sum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static double java.lang.Double.sum(double,double)
+  /// ```
   @JavaStaticMethod
   public func sum(_ arg0: Double, _ arg1: Double) -> Double
 
+  /// Java method `parseDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static double java.lang.Double.parseDouble(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseDouble(_ arg0: String) throws -> Double
 }

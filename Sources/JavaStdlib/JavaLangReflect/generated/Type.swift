@@ -4,15 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.Type")
 public struct Type {
+  /// Java method `getTypeName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.lang.String java.lang.reflect.Type.getTypeName()
+  /// ```
   @JavaMethod
   public func getTypeName() -> String
-
-  @JavaMethod
-  public func toString() -> String
-}
-
-extension Type: CustomStringConvertible {
-  public var description: String {
-    "JavaLangReflect.Type(\(self.toString()))"
-  }
 }

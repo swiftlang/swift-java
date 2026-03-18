@@ -13,56 +13,157 @@ open class HashMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-  @JavaMethod
-  open func remove(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.remove(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func remove(_ arg0: JavaObject?) -> V!
 
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashMap.remove(java.lang.Object,java.lang.Object)
+  /// ```
   @JavaMethod
   open func remove(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.HashMap.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
-  @JavaMethod
-  open func get(_ arg0: JavaObject?) -> JavaObject!
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.get(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func get(_ arg0: JavaObject?) -> V!
 
-  @JavaMethod
-  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  /// Java method `put`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.put(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func put(_ arg0: K?, _ arg1: V?) -> V!
 
+  /// Java method `values`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Collection<V> java.util.HashMap.values()
+  /// ```
   @JavaMethod
-  open func values() -> JavaCollection<JavaObject>!
+  open func values() -> JavaCollection<V>!
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.HashMap.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.HashMap.clear()
+  /// ```
   @JavaMethod
   open func clear()
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashMap.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
-  @JavaMethod
-  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.replace(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func replace(_ arg0: K?, _ arg1: V?) -> V!
 
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashMap.replace(K,V,V)
+  /// ```
   @JavaMethod
-  open func replace(_ arg0: JavaObject?, _ arg1: JavaObject?, _ arg2: JavaObject?) -> Bool
+  open func replace(_ arg0: K?, _ arg1: V?, _ arg2: V?) -> Bool
 
+  /// Java method `putIfAbsent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.putIfAbsent(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putIfAbsent(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `keySet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Set<K> java.util.HashMap.keySet()
+  /// ```
   @JavaMethod
-  open func putIfAbsent(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func keySet() -> JavaSet<K>!
 
-  @JavaMethod
-  open func containsKey(_ arg0: JavaObject?) -> Bool
-
-  @JavaMethod
-  open func keySet() -> JavaSet<JavaObject>!
-
+  /// Java method `containsValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashMap.containsValue(java.lang.Object)
+  /// ```
   @JavaMethod
   open func containsValue(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `containsKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashMap.containsKey(java.lang.Object)
+  /// ```
   @JavaMethod
-  open func getOrDefault(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+  open func containsKey(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `getOrDefault`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.HashMap.getOrDefault(java.lang.Object,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func getOrDefault(_ arg0: JavaObject?, _ arg1: V?) -> V!
 }
 extension JavaClass {
+  /// Java method `newHashMap`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <K,V> java.util.HashMap<K, V> java.util.HashMap.newHashMap(int)
+  /// ```
   @JavaStaticMethod
-  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<JavaObject, JavaObject>!
-  where ObjectType == HashMap<K, V>
+  public func newHashMap<K: AnyJavaObject, V: AnyJavaObject>(_ arg0: Int32) -> HashMap<K, V>! where ObjectType == HashMap<K, V>
 }

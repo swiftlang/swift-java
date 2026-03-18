@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongToDoubleFunction")
 public struct JavaLongToDoubleFunction {
+  /// Java method `applyAsDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.util.function.LongToDoubleFunction.applyAsDouble(long)
+  /// ```
   @JavaMethod
   public func applyAsDouble(_ arg0: Int64) -> Double
 }

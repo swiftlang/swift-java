@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ObjDoubleConsumer")
 public struct JavaObjDoubleConsumer<T: AnyJavaObject> {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.ObjDoubleConsumer.accept(T,double)
+  /// ```
   @JavaMethod
-  public func accept(_ arg0: JavaObject?, _ arg1: Double)
+  public func accept(_ arg0: T?, _ arg1: Double)
 }

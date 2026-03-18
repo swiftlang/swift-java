@@ -46,7 +46,7 @@ extension HelloSwift: HelloSwiftNativeMethods {
     _ = self.sayHelloBack(42)
 
     let predicate: JavaPredicate<JavaInteger> = self.lessThanTen()!
-    let value = predicate.test(JavaInteger(3).as(JavaObject.self))
+    let value = predicate.test(JavaInteger(3))
     print("Running a JavaPredicate from swift 3 < 10 = \(value)")
 
     let strings = doublesToStrings([3.14159, 2.71828])

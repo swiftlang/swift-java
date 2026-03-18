@@ -3,31 +3,85 @@ import SwiftJavaJNICore
 
 @JavaClass("java.util.OptionalLong")
 open class JavaOptionalLong: JavaObject {
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalLong.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.OptionalLong.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.OptionalLong.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalLong.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
-  @JavaMethod
-  open func isPresent() -> Bool
-
+  /// Java method `orElse`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.OptionalLong.orElse(long)
+  /// ```
   @JavaMethod
   open func orElse(_ arg0: Int64) -> Int64
 
+  /// Java method `isPresent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.OptionalLong.isPresent()
+  /// ```
+  @JavaMethod
+  open func isPresent() -> Bool
+
+  /// Java method `orElseThrow`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.OptionalLong.orElseThrow()
+  /// ```
   @JavaMethod
   open func orElseThrow() -> Int64
 
+  /// Java method `getAsLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.OptionalLong.getAsLong()
+  /// ```
   @JavaMethod
   open func getAsLong() -> Int64
 }
 extension JavaClass<JavaOptionalLong> {
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.OptionalLong java.util.OptionalLong.of(long)
+  /// ```
   @JavaStaticMethod
   public func of(_ arg0: Int64) -> JavaOptionalLong!
 
@@ -35,6 +89,12 @@ extension JavaClass<JavaOptionalLong> {
     Optional(javaOptional: of(arg0))
   }
 
+  /// Java method `empty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.OptionalLong java.util.OptionalLong.empty()
+  /// ```
   @JavaStaticMethod
   public func empty() -> JavaOptionalLong!
 

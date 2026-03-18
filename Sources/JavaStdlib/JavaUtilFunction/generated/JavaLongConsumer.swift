@@ -4,9 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongConsumer")
 public struct JavaLongConsumer {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.LongConsumer.accept(long)
+  /// ```
   @JavaMethod
   public func accept(_ arg0: Int64)
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongConsumer java.util.function.LongConsumer.andThen(java.util.function.LongConsumer)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaLongConsumer?) -> JavaLongConsumer?
+  public func andThen(_ arg0: JavaLongConsumer?) -> JavaLongConsumer!
 }

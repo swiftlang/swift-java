@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToIntBiFunction")
 public struct JavaToIntBiFunction<T: AnyJavaObject, U: AnyJavaObject> {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.ToIntBiFunction.applyAsInt(T,U)
+  /// ```
   @JavaMethod
-  public func applyAsInt(_ arg0: JavaObject?, _ arg1: JavaObject?) -> Int32
+  public func applyAsInt(_ arg0: T?, _ arg1: U?) -> Int32
 }
