@@ -14,14 +14,11 @@
 
 import SwiftJava
 
-extension JavaJNISwiftInstance {
-  @JavaMethod("$memoryAddress")
-  public func memoryAddress() -> Int64
-}
+extension Type: CustomStringConvertible {
+  @JavaMethod
+  public func toString() -> String
 
-extension JavaJNISwiftInstance: AnyJavaObjectWithCustomClassLoader {
-  public static func getJavaClassLoader(in environment: JNIEnvironment) throws -> JavaClassLoader! {
-    // OK to force unwrap, we are in a jextract environment.
-    JNI.shared!.applicationClassLoader
+  public var description: String {
+    "JavaLangReflect.Type(\(self.toString()))"
   }
 }
