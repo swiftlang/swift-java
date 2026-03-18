@@ -57,8 +57,8 @@ extension FFMSwift2JavaGenerator {
 
   enum OverflowCheckType {
     case none
-    case signedInt    // Int: -2147483648 to 2147483647
-    case unsignedInt  // UInt: 0 to 4294967295
+    case signedInt // Int: -2147483648 to 2147483647
+    case unsignedInt // UInt: 0 to 4294967295
   }
 
   /// Represent a Swift API result translated to Java.
