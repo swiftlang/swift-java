@@ -13,136 +13,21 @@ open class JarEntry: ZipEntry {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
+  /// Java method `getRealName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.jar.JarEntry.getRealName()
+  /// ```
   @JavaMethod
   open func getRealName() -> String
 
+  /// Java method `getAttributes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.jar.Attributes java.util.jar.JarEntry.getAttributes() throws java.io.IOException
+  /// ```
   @JavaMethod
   open func getAttributes() throws -> Attributes!
-}
-extension JavaClass<JarEntry> {
-  @JavaStaticField(isFinal: true)
-  public var STORED: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var DEFLATED: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var EXTSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var CENSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var LOCHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCVER: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCFLG: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCHOW: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCTIM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCNAM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCEXT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENVEM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENVER: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENFLG: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENHOW: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENTIM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENNAM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENEXT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENCOM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENDSK: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENATT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENATX: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENOFF: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSUB: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDTOT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDOFF: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDCOM: Int32
 }

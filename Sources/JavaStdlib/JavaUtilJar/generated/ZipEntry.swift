@@ -10,60 +10,174 @@ open class ZipEntry: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.zip.ZipEntry.getName()
+  /// ```
   @JavaMethod
   open func getName() -> String
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.zip.ZipEntry.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.zip.ZipEntry.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.zip.ZipEntry.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
+  /// Java method `getMethod`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.zip.ZipEntry.getMethod()
+  /// ```
   @JavaMethod
   open func getMethod() -> Int32
 
+  /// Java method `getSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getSize()
+  /// ```
   @JavaMethod
   open func getSize() -> Int64
 
+  /// Java method `isDirectory`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.zip.ZipEntry.isDirectory()
+  /// ```
   @JavaMethod
   open func isDirectory() -> Bool
 
+  /// Java method `getTime`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getTime()
+  /// ```
   @JavaMethod
   open func getTime() -> Int64
 
+  /// Java method `setTime`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setTime(long)
+  /// ```
   @JavaMethod
   open func setTime(_ arg0: Int64)
 
+  /// Java method `setSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setSize(long)
+  /// ```
   @JavaMethod
   open func setSize(_ arg0: Int64)
 
+  /// Java method `getCompressedSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getCompressedSize()
+  /// ```
   @JavaMethod
   open func getCompressedSize() -> Int64
 
+  /// Java method `setCompressedSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setCompressedSize(long)
+  /// ```
   @JavaMethod
   open func setCompressedSize(_ arg0: Int64)
 
+  /// Java method `setCrc`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setCrc(long)
+  /// ```
   @JavaMethod
   open func setCrc(_ arg0: Int64)
 
+  /// Java method `getCrc`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getCrc()
+  /// ```
   @JavaMethod
   open func getCrc() -> Int64
 
+  /// Java method `setMethod`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setMethod(int)
+  /// ```
   @JavaMethod
   open func setMethod(_ arg0: Int32)
 
+  /// Java method `setExtra`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setExtra(byte[])
+  /// ```
   @JavaMethod
   open func setExtra(_ arg0: [Int8])
 
+  /// Java method `getExtra`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte[] java.util.zip.ZipEntry.getExtra()
+  /// ```
   @JavaMethod
   open func getExtra() -> [Int8]
 
+  /// Java method `setComment`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setComment(java.lang.String)
+  /// ```
   @JavaMethod
   open func setComment(_ arg0: String)
 
+  /// Java method `getComment`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.zip.ZipEntry.getComment()
+  /// ```
   @JavaMethod
   open func getComment() -> String
 }
@@ -73,124 +187,4 @@ extension JavaClass<ZipEntry> {
 
   @JavaStaticField(isFinal: true)
   public var DEFLATED: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var EXTSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var CENSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSIG: Int64
-
-  @JavaStaticField(isFinal: true)
-  public var LOCHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDHDR: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCVER: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCFLG: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCHOW: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCTIM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCNAM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var LOCEXT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var EXTLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENVEM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENVER: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENFLG: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENHOW: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENTIM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENCRC: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENLEN: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENNAM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENEXT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENCOM: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENDSK: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENATT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENATX: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var CENOFF: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSUB: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDTOT: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDSIZ: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDOFF: Int32
-
-  @JavaStaticField(isFinal: true)
-  public var ENDCOM: Int32
 }
