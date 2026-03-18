@@ -123,6 +123,11 @@ extension FFMSwift2JavaGenerator {
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
+    self.currentDupeNames = DuplicateNames(
+      for: self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables,
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    )
+
     for thunk in stt.renderGlobalThunks() {
       printer.print(thunk)
       printer.println()
@@ -151,6 +156,11 @@ extension FFMSwift2JavaGenerator {
     )
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
+
+    self.currentDupeNames = DuplicateNames(
+      for: ty.initializers + ty.variables + ty.methods,
+      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    )
 
     for thunk in stt.renderThunks(forType: ty) {
       printer.print("\(thunk)")

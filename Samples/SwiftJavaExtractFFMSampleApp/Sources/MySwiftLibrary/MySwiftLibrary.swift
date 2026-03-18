@@ -101,6 +101,17 @@ public func globalReceiveOptional(o1: Int?, o2: (some DataProtocol)?) -> Int {
   }
 }
 
+// ==== -----------------------------------------------------------------------
+// MARK: Overloaded functions
+
+public func globalOverloaded(a: Int) {
+  p("globalOverloaded(a: \(a))")
+}
+
+public func globalOverloaded(b: Int) {
+  p("globalOverloaded(b: \(b))")
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

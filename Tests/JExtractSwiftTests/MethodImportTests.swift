@@ -476,4 +476,99 @@ final class MethodImportTests {
       "'Any' return type is not supported yet"
     )
   }
+
+  // ==== -------------------------------------------------------------------
+  // MARK: Overloaded method disambiguation
+
+  let overloaded_interfaceFile =
+    """
+    // swift-interface-format-version: 1.0
+    // swift-module-flags: -target arm64-apple-macosx15.0 -enable-objc-interop -enable-library-evolution -module-name OverloadModule
+    import Swift
+
+    public func takeValue(a: Swift.String) -> Swift.Int
+    public func takeValue(b: Swift.String) -> Swift.Int
+    public func uniqueFunc(x: Swift.Int) -> Swift.Int
+    public func overloaded(a: Swift.Int) -> Swift.Int
+    public func overloaded(a: Swift.String) -> Swift.Int
+
+    public class OverloadedClass {
+      public func bar(a: Swift.String)
+      public func bar(b: Swift.String)
+      public func unique(x: Swift.Int)
+      @objc deinit
+    }
+    """
+
+  @Test("Overloaded global functions get suffixed Java names")
+  func overloaded_global_functions_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm, .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long takeValue_a(java.lang.String a)",
+        "public static long takeValue_b(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("Non-overloaded functions keep clean names")
+  func non_overloaded_functions_clean_names() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm, .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long uniqueFunc(long x)",
+      ],
+      notExpectedChunks: [
+        "public static long uniqueFunc_x(",
+      ]
+    )
+  }
+
+  @Test("Same name but different types — no suffix needed")
+  func overloaded_different_types_no_suffix() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm, .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long overloaded(long a)",
+        "public static long overloaded(java.lang.String a)",
+      ],
+      notExpectedChunks: [
+        "public static long overloaded_a(",
+      ]
+    )
+  }
+
+  @Test("Overloaded methods on a type get suffixed Java names")
+  func overloaded_methods_on_type_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm, .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void bar_a(java.lang.String a)",
+        "public void bar_b(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("Non-overloaded method on a type keeps clean name")
+  func non_overloaded_method_on_type_clean_name() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm, .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void unique(long x)",
+      ],
+      notExpectedChunks: [
+        "public void unique_x(",
+      ]
+    )
+  }
 }

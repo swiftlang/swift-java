@@ -25,10 +25,11 @@ extension FFMSwift2JavaGenerator {
 
     let translated: TranslatedFunctionDecl?
     do {
-      let translation = JavaTranslation(
+      var translation = JavaTranslation(
         config: self.config,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
       )
+      translation.dupeNames = self.currentDupeNames
       translated = try translation.translate(decl)
     } catch {
       self.log.info("Failed to translate: '\(decl.swiftDecl.qualifiedNameForDebug)'; \(error)")
@@ -142,13 +143,67 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
+  // ==== -------------------------------------------------------------------
+  // MARK: Duplicate name detection
+
+  /// Detects Java method name conflicts caused by Swift overloads that differ
+  /// only in parameter labels. When a conflict is detected, the affected methods
+  /// get a suffix derived from their parameter labels (e.g. `takeValue_a`,
+  /// `takeValue_b`) so that Java can distinguish them.
+  struct DuplicateNames {
+    private var duplicates: Set<String> = []
+
+    init() {}
+
+    init(for methods: [ImportedFunc], knownTypes: SwiftKnownTypes) {
+      // Group methods by their Java base name.
+      var methodsByBaseName: [String: [ImportedFunc]] = [:]
+      for method in methods {
+        let baseName: String = switch method.apiKind {
+        case .getter, .subscriptGetter: method.javaGetterName
+        case .setter, .subscriptSetter: method.javaSetterName
+        case .function, .initializer, .enumCase: method.name
+        }
+        methodsByBaseName[baseName, default: []].append(method)
+      }
+
+      // For each group with 2+ methods, check if any two share the same
+      // Swift parameter types (which means identical Java parameter types).
+      let lowering = CdeclLowering(knownTypes: knownTypes)
+      for (baseName, group) in methodsByBaseName where group.count > 1 {
+        let translatableMethods = group.filter {
+          (try? lowering.lowerFunctionSignature($0.functionSignature)) != nil
+        }
+        var seenSignatures: Set<String> = []
+        for method in translatableMethods {
+          let key = method.functionSignature.parameters
+            .map { $0.type.description }
+            .joined(separator: ",")
+          if !seenSignatures.insert(key).inserted {
+            duplicates.insert(baseName)
+            break
+          }
+        }
+      }
+    }
+
+    func needsSuffix(for baseName: String) -> Bool {
+      duplicates.contains(baseName)
+    }
+  }
+
+  // ==== -------------------------------------------------------------------
+  // MARK: Java translation
+
   struct JavaTranslation {
     let config: Configuration
     var knownTypes: SwiftKnownTypes
+    var dupeNames: DuplicateNames
 
     init(config: Configuration, knownTypes: SwiftKnownTypes) {
       self.config = config
       self.knownTypes = knownTypes
+      self.dupeNames = DuplicateNames()
     }
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
@@ -156,12 +211,7 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let javaName =
-        switch decl.apiKind {
-        case .getter, .subscriptGetter: decl.javaGetterName
-        case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .initializer, .enumCase: decl.name
-        }
+      let javaName = makeJavaMethodName(decl)
 
       // Signature.
       let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)
@@ -267,6 +317,27 @@ extension FFMSwift2JavaGenerator {
         break
       }
       throw JavaTranslationError.unhandledType(type)
+    }
+
+    private func makeJavaMethodName(_ decl: ImportedFunc) -> String {
+      let baseName: String = switch decl.apiKind {
+      case .getter, .subscriptGetter: decl.javaGetterName
+      case .setter, .subscriptSetter: decl.javaSetterName
+      case .function, .initializer, .enumCase: decl.name
+      }
+      return baseName + makeMethodNameWithParamsSuffix(decl, baseName: baseName)
+    }
+
+    private func makeMethodNameWithParamsSuffix(_ decl: ImportedFunc, baseName: String) -> String {
+      switch decl.apiKind {
+      case .getter, .subscriptGetter, .setter, .subscriptSetter:
+        return ""
+      default:
+        guard dupeNames.needsSuffix(for: baseName) else { return "" }
+        return decl.functionSignature.parameters
+          .map { "_" + ($0.argumentLabel ?? "_") }
+          .joined()
+      }
     }
 
     /// Translate a Swift API signature to the user-facing Java API signature.
