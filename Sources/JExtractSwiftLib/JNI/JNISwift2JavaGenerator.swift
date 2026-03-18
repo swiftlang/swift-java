@@ -44,6 +44,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   var translatedEnumCases: [ImportedEnumCase: TranslatedEnumCase] = [:]
   var interfaceProtocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper] = [:]
 
+  /// Duplicate identifier tracking for the current batch of methods being generated.
+  var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
+
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
   ///

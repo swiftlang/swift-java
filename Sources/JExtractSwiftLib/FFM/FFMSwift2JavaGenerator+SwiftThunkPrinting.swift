@@ -123,9 +123,8 @@ extension FFMSwift2JavaGenerator {
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
-    self.currentDupeNames = DuplicateNames(
-      for: self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables,
-      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
     )
 
     for thunk in stt.renderGlobalThunks() {
@@ -157,9 +156,8 @@ extension FFMSwift2JavaGenerator {
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
-    self.currentDupeNames = DuplicateNames(
-      for: ty.initializers + ty.variables + ty.methods,
-      knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      ty.initializers + ty.variables + ty.methods
     )
 
     for thunk in stt.renderThunks(forType: ty) {
