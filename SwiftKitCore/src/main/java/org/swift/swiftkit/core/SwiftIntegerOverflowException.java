@@ -25,7 +25,13 @@ package org.swift.swiftkit.core;
  * @see <a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics#Int">Swift Int documentation</a>
  */
 public class SwiftIntegerOverflowException extends RuntimeException {
+    static final String BASE_MESSAGE = "Swift runtime has detected IntegerOverflow! Most probably you are running 32-bit application while using Swift's Int type.";
+
     public SwiftIntegerOverflowException() {
-        super("Swift runtime has detected IntegerOverflow! Most probably you are running 32-bit application while using Swift's Int type.");
+        super(BASE_MESSAGE);
+    }
+
+    public SwiftIntegerOverflowException(String message) {
+        super(BASE_MESSAGE + " " + message);
     }
 }

@@ -18,7 +18,7 @@ import SwiftJavaJNICore
 extension FFMSwift2JavaGenerator {
   package func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     guard let _ = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
@@ -38,7 +38,7 @@ extension FFMSwift2JavaGenerator {
   /// Print FFM Java binding descriptors for the imported Swift API.
   package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let translated = self.translatedDecl(for: decl)!
@@ -58,7 +58,7 @@ extension FFMSwift2JavaGenerator {
   package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
     _ cFunc: CFunction,
-    additionalContent: ((inout CodePrinter) -> Void)? = nil
+    additionalContent: ((inout CodePrinter) -> Void)? = nil,
   ) {
     printer.printBraceBlock(
       """
@@ -87,7 +87,7 @@ extension FFMSwift2JavaGenerator {
   func printFunctionDescriptorDefinition(
     _ printer: inout CodePrinter,
     _ resultType: CType,
-    _ parameters: [CParameter]
+    _ parameters: [CParameter],
   ) {
     printer.start("private static final FunctionDescriptor DESC = ")
 
@@ -113,7 +113,7 @@ extension FFMSwift2JavaGenerator {
 
   func printJavaBindingDowncallMethod(
     _ printer: inout CodePrinter,
-    _ cFunc: CFunction
+    _ cFunc: CFunction,
   ) {
     let returnTy = cFunc.resultType.javaType
     let maybeReturn = cFunc.resultType.isVoid ? "" : "return (\(returnTy)) "
@@ -157,7 +157,7 @@ extension FFMSwift2JavaGenerator {
   /// * Unnamed-struct parameter as a record. (unimplemented)
   func printParameterDescriptorClasses(
     _ printer: inout CodePrinter,
-    _ cFunc: CFunction
+    _ cFunc: CFunction,
   ) {
     for param in cFunc.parameters {
       switch param.type {
@@ -172,7 +172,7 @@ extension FFMSwift2JavaGenerator {
 
   func printUpcallParameterDescriptorClasses(
     _ printer: inout CodePrinter,
-    _ outCallback: OutCallback
+    _ outCallback: OutCallback,
   ) {
     let name = outCallback.name
     printFunctionPointerParameterDescriptorClass(&printer, name, outCallback.cFunc.functionType, impl: outCallback)
@@ -199,7 +199,7 @@ extension FFMSwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ name: String,
     _ cType: CType,
-    impl: OutCallback?
+    impl: OutCallback?,
   ) {
     let cResultType: CType
     let cParameterTypes: [CType]
@@ -267,7 +267,7 @@ extension FFMSwift2JavaGenerator {
   /// * User-facing functional interfaces.
   func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     let bindingDescriptorName = self.thunkNameRegistry.functionThunkName(decl: decl)
@@ -290,7 +290,7 @@ extension FFMSwift2JavaGenerator {
   func printJavaBindingWrapperFunctionTypeHelper(
     _ printer: inout CodePrinter,
     _ functionType: TranslatedFunctionType,
-    _ bindingDescriptorName: String
+    _ bindingDescriptorName: String,
   ) {
     let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isCompatibleWithC {
@@ -356,7 +356,7 @@ extension FFMSwift2JavaGenerator {
   /// with adding `SwiftArena.ofAuto()` at the end.
   package func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     let methodName = translated.name
@@ -382,14 +382,17 @@ extension FFMSwift2JavaGenerator {
       paramDecls.append("AllocatingSwiftArena swiftArena")
     }
 
+    let needsThrows = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none } || translatedSignature.result.needs32BitIntOverflowCheck != .none
+    let throwsClause = needsThrows ? " throws SwiftIntegerOverflowException" : ""
+
     TranslatedDocumentation.printDocumentation(
       importedFunc: decl,
       translatedDecl: translated,
-      in: &printer
+      in: &printer,
     )
     printer.printBraceBlock(
       """
-      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))
+      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))\(throwsClause)
       """
     ) { printer in
       if case .instance(_) = decl.functionSignature.selfParameter {
@@ -406,7 +409,7 @@ extension FFMSwift2JavaGenerator {
   /// This assumes that all the parameters are passed-in with appropriate names.
   package func printDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     //===  Part 1: prepare temporary arena if needed.
     let translatedSignature = self.translatedDecl(for: decl)!.translatedSignature
@@ -473,6 +476,30 @@ extension FFMSwift2JavaGenerator {
       )
     }
 
+    let hasOverflowChecks = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none }
+    if hasOverflowChecks {
+      printer.printBraceBlock("if (SwiftValueLayout.has32bitSwiftInt)") { printer in
+        for (i, parameter) in translatedSignature.parameters.enumerated() {
+          switch parameter.needs32BitIntOverflowCheck {
+          case .none:
+            break
+          case .signedInt:
+            let original = decl.functionSignature.parameters[i]
+            let parameterName = original.parameterName ?? "_\(i)"
+            printer.printBraceBlock("if (\(parameterName) < Integer.MIN_VALUE || \(parameterName) > Integer.MAX_VALUE)") { printer in
+              printer.print("throw new SwiftIntegerOverflowException(\"Parameter '\(parameterName)' overflow: \" + \(parameterName));")
+            }
+          case .unsignedInt:
+            let original = decl.functionSignature.parameters[i]
+            let parameterName = original.parameterName ?? "_\(i)"
+            printer.printBraceBlock("if (\(parameterName) < 0 || \(parameterName) > 0xFFFFFFFFL)") { printer in
+              printer.print("throw new SwiftIntegerOverflowException(\"Parameter '\(parameterName)' overflow: \" + \(parameterName));")
+            }
+          }
+        }
+      }
+    }
+
     //=== Part 3: Downcall.
     let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
 
@@ -499,16 +526,17 @@ extension FFMSwift2JavaGenerator {
       let result = translatedSignature.result.conversion.render(
         &printer,
         placeholder,
-        placeholderForDowncall: placeholderForDowncall
+        placeholderForDowncall: placeholderForDowncall,
       )
 
       if translatedSignature.result.javaResultType != .void {
         switch translatedSignature.result.conversion {
         case .initializeResultWithUpcall(_, let extractResult):
           printer.print("\(result);") // the result in the callback situation is a series of setup steps
-          printer.print("return \(extractResult.render(&printer, placeholder));") // extract the actual result
+          let extracted = extractResult.render(&printer, placeholder)
+          printReturnWithOverflowCheck(&printer, value: extracted, overflowCheck: translatedSignature.result.needs32BitIntOverflowCheck)
         default:
-          printer.print("return \(result);")
+          printReturnWithOverflowCheck(&printer, value: result, overflowCheck: translatedSignature.result.needs32BitIntOverflowCheck)
         }
       } else {
         printer.print("\(result);")
@@ -518,6 +546,38 @@ extension FFMSwift2JavaGenerator {
     if translatedSignature.requiresTemporaryArena {
       printer.outdent()
       printer.print("}")
+    }
+  }
+
+  /// Print a return statement with an optional 32-bit integer overflow check.
+  private func printReturnWithOverflowCheck(
+    _ printer: inout CodePrinter,
+    value: String,
+    overflowCheck: OverflowCheckType,
+  ) {
+    switch overflowCheck {
+    case .none:
+      printer.print("return \(value);")
+    case .signedInt:
+      let resultVar = "_result$checked"
+      printer.print("long \(resultVar) = \(value);")
+
+      printer.printBraceBlock("if (SwiftValueLayout.has32bitSwiftInt)") { printer in
+        printer.printBraceBlock("if (\(resultVar) < Integer.MIN_VALUE || \(resultVar) > Integer.MAX_VALUE)") { printer in
+          printer.print("throw new SwiftIntegerOverflowException(\"Return value overflow: \" + \(resultVar));")
+        }
+      }
+      printer.print("return \(resultVar);")
+    case .unsignedInt:
+      let resultVar = "_result$checked"
+      printer.print("long \(resultVar) = \(value);")
+
+      printer.printBraceBlock("if (SwiftValueLayout.has32bitSwiftInt)") { printer in
+        printer.printBraceBlock("if (\(resultVar) < 0 || \(resultVar) > 0xFFFFFFFFL)") { printer in
+          printer.print("throw new SwiftIntegerOverflowException(\"Return value overflow: \" + \(resultVar));")
+        }
+      }
+      printer.print("return \(resultVar);")
     }
   }
 
