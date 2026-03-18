@@ -93,6 +93,10 @@ extension JNISwift2JavaGenerator {
     printPackage(&printer)
     printImports(&printer)
 
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+    )
+
     printModuleClass(&printer) { printer in
       printer.print(
         """
@@ -123,6 +127,10 @@ extension JNISwift2JavaGenerator {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
+
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      decl.initializers + decl.variables + decl.methods
+    )
 
     switch decl.swiftNominal.kind {
     case .actor, .class, .enum, .struct:

@@ -27,7 +27,8 @@ extension FFMSwift2JavaGenerator {
     do {
       let translation = JavaTranslation(
         config: self.config,
-        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+        knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
+        javaIdentifiers: self.currentJavaIdentifiers
       )
       translated = try translation.translate(decl)
     } catch {
@@ -142,13 +143,18 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
+  // ==== -------------------------------------------------------------------
+  // MARK: Java translation
+
   struct JavaTranslation {
     let config: Configuration
     var knownTypes: SwiftKnownTypes
+    var javaIdentifiers: JavaIdentifierFactory
 
-    init(config: Configuration, knownTypes: SwiftKnownTypes) {
+    init(config: Configuration, knownTypes: SwiftKnownTypes, javaIdentifiers: JavaIdentifierFactory) {
       self.config = config
       self.knownTypes = knownTypes
+      self.javaIdentifiers = javaIdentifiers
     }
 
     func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
@@ -156,12 +162,7 @@ extension FFMSwift2JavaGenerator {
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
       // Name.
-      let javaName =
-        switch decl.apiKind {
-        case .getter, .subscriptGetter: decl.javaGetterName
-        case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .initializer, .enumCase: decl.name
-        }
+      let javaName = javaIdentifiers.makeJavaMethodName(decl)
 
       // Signature.
       let translatedSignature = try translate(loweredFunctionSignature: loweredSignature, methodName: javaName)

@@ -25,7 +25,8 @@ extension JNISwift2JavaGenerator {
       javaClassLookupTable: self.javaClassLookupTable,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
-      logger: self.logger
+      logger: self.logger,
+      javaIdentifiers: self.currentJavaIdentifiers
     )
   }
 
@@ -64,7 +65,8 @@ extension JNISwift2JavaGenerator {
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
         protocolWrappers: self.interfaceProtocolWrappers,
-        logger: self.logger
+        logger: self.logger,
+        javaIdentifiers: self.currentJavaIdentifiers
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -84,6 +86,7 @@ extension JNISwift2JavaGenerator {
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
+    var javaIdentifiers: JavaIdentifierFactory
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
@@ -226,12 +229,7 @@ extension JNISwift2JavaGenerator {
       let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
 
       // Name.
-      let javaName =
-        switch decl.apiKind {
-        case .getter, .subscriptGetter: decl.javaGetterName
-        case .setter, .subscriptSetter: decl.javaSetterName
-        case .function, .initializer, .enumCase: decl.name
-        }
+      let javaName = javaIdentifiers.makeJavaMethodName(decl)
 
       // Swift -> Java
       var translatedFunctionSignature = try translate(

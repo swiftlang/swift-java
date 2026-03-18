@@ -39,6 +39,9 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
 
+  /// Duplicate identifier tracking for the current batch of methods being generated.
+  var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
+
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
   ///
@@ -170,6 +173,10 @@ extension FFMSwift2JavaGenerator {
     printPackage(&printer)
     printImports(&printer)
 
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+    )
+
     printModuleClass(&printer) { printer in
 
       for decl in analysis.importedGlobalVariables {
@@ -188,6 +195,10 @@ extension FFMSwift2JavaGenerator {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
+
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      decl.initializers + decl.variables + decl.methods
+    )
 
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,

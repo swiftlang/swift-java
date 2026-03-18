@@ -476,4 +476,257 @@ final class MethodImportTests {
       "'Any' return type is not supported yet"
     )
   }
+
+  // ==== -------------------------------------------------------------------
+  // MARK: FFM overloaded method disambiguation
+
+  let overloaded_interfaceFile =
+    """
+    import Swift
+
+    public func takeValue(a: Swift.String) -> Swift.Int
+    public func takeValue(b: Swift.String) -> Swift.Int
+    public func uniqueFunc(x: Swift.Int) -> Swift.Int
+    public func overloaded(a: Swift.Int) -> Swift.Int
+    public func overloaded(a: Swift.String) -> Swift.Int
+
+    public class OverloadedClass {
+      public func bar(a: Swift.String)
+      public func bar(b: Swift.String)
+      public func unique(x: Swift.Int)
+    }
+    """
+
+  @Test("FFM: Overloaded global functions get suffixed Java names")
+  func ffm_overloaded_global_functions_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long takeValueA(java.lang.String a)",
+        "public static long takeValueB(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("FFM: Non-overloaded functions keep clean names")
+  func ffm_non_overloaded_functions_clean_names() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long uniqueFunc(long x)"
+      ],
+      notExpectedChunks: [
+        "public static long uniqueFunc_x("
+      ]
+    )
+  }
+
+  @Test("FFM: Same name but different types — no suffix needed")
+  func ffm_overloaded_different_types_no_suffix() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long overloaded(long a)",
+        "public static long overloaded(java.lang.String a)",
+      ],
+      notExpectedChunks: [
+        "public static long overloaded_a("
+      ]
+    )
+  }
+
+  @Test("FFM: Overloaded methods on a type get suffixed Java names")
+  func ffm_overloaded_methods_on_type_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void barA(java.lang.String a)",
+        "public void barB(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("FFM: Non-overloaded method on a type keeps clean name")
+  func ffm_non_overloaded_method_on_type_clean_name() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void unique(long x)"
+      ],
+      notExpectedChunks: [
+        "public void unique_x("
+      ]
+    )
+  }
+
+  let propertyMethodConflict_interfaceFile =
+    """
+    import Swift
+
+    public class MyClass {
+      public var name: Swift.Int { get }
+      public func getName() -> Swift.Int
+    }
+    """
+
+  @Test("FFM: Property getter and method with same Java name are disambiguated")
+  func ffm_property_getter_vs_method_conflict() throws {
+    try assertOutput(
+      input: propertyMethodConflict_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "ConflictModule",
+      expectedChunks: [
+        // Property getter keeps standard Java bean name
+        "public long getName()",
+        // Method gets a trailing underscore to avoid the conflict
+        "public long getName_()",
+      ]
+    )
+  }
+
+  let argumentLabel_interfaceFile =
+    """
+    import Swift
+
+    public func takeValue(outer name: Swift.String) -> Swift.Int
+    public func takeValue(another name: Swift.String) -> Swift.Int
+    """
+
+  @Test("FFM: Overloaded functions with argument labels use label for suffix")
+  func ffm_overloaded_argument_labels() throws {
+    try assertOutput(
+      input: argumentLabel_interfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "LabelModule",
+      expectedChunks: [
+        "public static long takeValueOuter(java.lang.String name)",
+        "public static long takeValueAnother(java.lang.String name)",
+      ]
+    )
+  }
+
+  // ==== -------------------------------------------------------------------
+  // MARK: JNI overloaded method disambiguation
+
+  @Test("JNI: Overloaded global functions get suffixed Java names")
+  func jni_overloaded_global_functions_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long takeValueA(java.lang.String a)",
+        "public static long takeValueB(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("JNI: Non-overloaded functions keep clean names")
+  func jni_non_overloaded_functions_clean_names() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long uniqueFunc(long x)"
+      ],
+      notExpectedChunks: [
+        "public static long uniqueFunc_x("
+      ]
+    )
+  }
+
+  @Test("JNI: Same name but different types — no suffix needed")
+  func jni_overloaded_different_types_no_suffix() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public static long overloaded(long a)",
+        "public static long overloaded(java.lang.String a)",
+      ],
+      notExpectedChunks: [
+        "public static long overloaded_a("
+      ]
+    )
+  }
+
+  @Test("JNI: Overloaded methods on a type get suffixed Java names")
+  func jni_overloaded_methods_on_type_suffixed() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void barA(java.lang.String a)",
+        "public void barB(java.lang.String b)",
+      ]
+    )
+  }
+
+  @Test("JNI: Non-overloaded method on a type keeps clean name")
+  func jni_non_overloaded_method_on_type_clean_name() throws {
+    try assertOutput(
+      input: overloaded_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: [
+        "public void unique(long x)"
+      ],
+      notExpectedChunks: [
+        "public void unique_x("
+      ]
+    )
+  }
+
+  @Test("JNI: Property getter and method with same Java name are disambiguated")
+  func jni_property_getter_vs_method_conflict() throws {
+    try assertOutput(
+      input: propertyMethodConflict_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "ConflictModule",
+      expectedChunks: [
+        "public long getName()",
+        "public long getName_()",
+      ]
+    )
+  }
+
+  @Test("JNI: Overloaded functions with argument labels use label for suffix")
+  func jni_overloaded_argument_labels() throws {
+    try assertOutput(
+      input: argumentLabel_interfaceFile,
+      .jni,
+      .java,
+      swiftModuleName: "LabelModule",
+      expectedChunks: [
+        "public static long takeValueOuter(java.lang.String name)",
+        "public static long takeValueAnother(java.lang.String name)",
+      ]
+    )
+  }
 }

@@ -123,6 +123,10 @@ extension FFMSwift2JavaGenerator {
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+    )
+
     for thunk in stt.renderGlobalThunks() {
       printer.print(thunk)
       printer.println()
@@ -151,6 +155,10 @@ extension FFMSwift2JavaGenerator {
     )
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
+
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      ty.initializers + ty.variables + ty.methods
+    )
 
     for thunk in stt.renderThunks(forType: ty) {
       printer.print("\(thunk)")

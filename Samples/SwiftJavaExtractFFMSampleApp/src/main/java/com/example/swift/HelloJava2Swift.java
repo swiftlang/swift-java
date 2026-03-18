@@ -101,6 +101,10 @@ public class HelloJava2Swift {
         }
 
 
+        // Overloaded functions with label-based disambiguation
+        MySwiftLibrary.globalOverloadedA(100);
+        MySwiftLibrary.globalOverloadedB(200);
+
         System.out.println("DONE.");
     }
 
