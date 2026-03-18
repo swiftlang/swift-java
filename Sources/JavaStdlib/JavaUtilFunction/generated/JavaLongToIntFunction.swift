@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongToIntFunction")
 public struct JavaLongToIntFunction {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
+  /// ```
   @JavaMethod
   public func applyAsInt(_ arg0: Int64) -> Int32
 }

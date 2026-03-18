@@ -4,13 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiConsumer")
 public struct JavaBiConsumer<T: AnyJavaObject, U: AnyJavaObject> {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.BiConsumer.accept(T,U)
+  /// ```
   @JavaMethod
-  public func accept(_ arg0: JavaObject?, _ arg1: JavaObject?)
+  public func accept(_ arg0: T?, _ arg1: U?)
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.BiConsumer<T, U> java.util.function.BiConsumer.andThen(java.util.function.BiConsumer<? super T, ? super U>)
+  /// ```
   @JavaMethod
-  public func andThen(
-    _ arg0: JavaBiConsumer<JavaObject, JavaObject>?
-  ) -> JavaBiConsumer<
-    JavaObject, JavaObject
-  >?
+  public func andThen(_ arg0: JavaBiConsumer<JavaObject, JavaObject>?) -> JavaBiConsumer<T, U>!
 }

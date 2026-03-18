@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Supplier")
 public struct JavaSupplier<T: AnyJavaObject> {
-  @JavaMethod
-  public func get() -> JavaObject?
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract T java.util.function.Supplier.get()
+  /// ```
+  @JavaMethod(typeErasedResult: "T!")
+  public func get() -> T!
 }

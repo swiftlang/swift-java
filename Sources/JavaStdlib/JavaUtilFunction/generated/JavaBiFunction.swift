@@ -4,13 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiFunction")
 public struct JavaBiFunction<T: AnyJavaObject, U: AnyJavaObject, R: AnyJavaObject> {
-  @JavaMethod
-  public func apply(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject?
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.BiFunction.apply(T,U)
+  /// ```
+  @JavaMethod(typeErasedResult: "R!")
+  public func apply(_ arg0: T?, _ arg1: U?) -> R!
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default <V> java.util.function.BiFunction<T, U, V> java.util.function.BiFunction.andThen(java.util.function.Function<? super R, ? extends V>)
+  /// ```
   @JavaMethod
-  public func andThen(
-    _ arg0: JavaFunction<JavaObject, JavaObject>?
-  ) -> JavaBiFunction<
-    JavaObject, JavaObject, JavaObject
-  >?
+  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaBiFunction<T, U, V>!
 }

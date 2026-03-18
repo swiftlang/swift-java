@@ -4,15 +4,39 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.annotation.Annotation")
 public struct Annotation {
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.lang.annotation.Annotation.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.String java.lang.annotation.Annotation.toString()
+  /// ```
   @JavaMethod
   public func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.lang.annotation.Annotation.hashCode()
+  /// ```
   @JavaMethod
   public func hashCode() -> Int32
 
+  /// Java method `annotationType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Class<? extends java.lang.annotation.Annotation> java.lang.annotation.Annotation.annotationType()
+  /// ```
   @JavaMethod
   public func annotationType() -> JavaClass<Annotation>!
 }

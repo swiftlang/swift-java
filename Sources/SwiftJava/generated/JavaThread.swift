@@ -9,93 +9,270 @@ open class JavaThread: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final java.lang.String java.lang.Thread.getName()
+  /// ```
   @JavaMethod
   open func getName() -> String
 
+  /// Java method `run`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Thread.run()
+  /// ```
   @JavaMethod
   open func run()
 
+  /// Java method `interrupt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Thread.interrupt()
+  /// ```
   @JavaMethod
   open func interrupt()
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Thread.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.lang.Object java.lang.Thread.clone() throws java.lang.CloneNotSupportedException
+  /// ```
   @JavaMethod
   open override func clone() throws -> JavaObject!
 
+  /// Java method `join`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.join(long,int) throws java.lang.InterruptedException
+  /// ```
   @JavaMethod
   open func join(_ arg0: Int64, _ arg1: Int32) throws
 
+  /// Java method `join`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.join() throws java.lang.InterruptedException
+  /// ```
   @JavaMethod
   open func join() throws
 
+  /// Java method `join`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.join(long) throws java.lang.InterruptedException
+  /// ```
   @JavaMethod
   open func join(_ arg0: Int64) throws
 
+  /// Java method `setContextClassLoader`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Thread.setContextClassLoader(java.lang.ClassLoader)
+  /// ```
   @JavaMethod
   open func setContextClassLoader(_ arg0: JavaClassLoader?)
 
+  /// Java method `setPriority`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.setPriority(int)
+  /// ```
   @JavaMethod
   open func setPriority(_ arg0: Int32)
 
+  /// Java method `setDaemon`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.setDaemon(boolean)
+  /// ```
   @JavaMethod
   open func setDaemon(_ arg0: Bool)
 
+  /// Java method `start`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Thread.start()
+  /// ```
   @JavaMethod
   open func start()
 
+  /// Java method `getPriority`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final int java.lang.Thread.getPriority()
+  /// ```
   @JavaMethod
   open func getPriority() -> Int32
 
+  /// Java method `isDaemon`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final boolean java.lang.Thread.isDaemon()
+  /// ```
   @JavaMethod
   open func isDaemon() -> Bool
 
+  /// Java method `getContextClassLoader`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.ClassLoader java.lang.Thread.getContextClassLoader()
+  /// ```
   @JavaMethod
   open func getContextClassLoader() -> JavaClassLoader!
 
+  /// Java method `isVirtual`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final boolean java.lang.Thread.isVirtual()
+  /// ```
   @JavaMethod
   open func isVirtual() -> Bool
 
+  /// Java method `isAlive`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final boolean java.lang.Thread.isAlive()
+  /// ```
   @JavaMethod
   open func isAlive() -> Bool
 
+  /// Java method `threadId`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final long java.lang.Thread.threadId()
+  /// ```
   @JavaMethod
   open func threadId() -> Int64
 
+  /// Java method `getUncaughtExceptionHandler`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Thread$UncaughtExceptionHandler java.lang.Thread.getUncaughtExceptionHandler()
+  /// ```
   @JavaMethod
   open func getUncaughtExceptionHandler() -> JavaThread.UncaughtExceptionHandler!
 
+  /// Java method `stop`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.stop()
+  /// ```
+  @available(*, deprecated)
   @JavaMethod
   open func stop()
 
+  /// Java method `isInterrupted`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Thread.isInterrupted()
+  /// ```
   @JavaMethod
   open func isInterrupted() -> Bool
 
+  /// Java method `setName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final synchronized void java.lang.Thread.setName(java.lang.String)
+  /// ```
   @JavaMethod
   open func setName(_ arg0: String)
 
+  /// Java method `checkAccess`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Thread.checkAccess()
+  /// ```
+  @available(*, deprecated)
   @JavaMethod
   open func checkAccess()
 
+  /// Java method `getId`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Thread.getId()
+  /// ```
+  @available(*, deprecated)
   @JavaMethod
   open func getId() -> Int64
 
+  /// Java method `setUncaughtExceptionHandler`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.Thread.setUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+  /// ```
   @JavaMethod
   open func setUncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?)
 }
 extension JavaThread {
   @JavaInterface("java.lang.Thread$Builder")
   public struct Builder {
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder java.lang.Thread$Builder.name(java.lang.String)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String) -> JavaThread.Builder!
 
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder java.lang.Thread$Builder.name(java.lang.String,long)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
 
+    /// Java method `uncaughtExceptionHandler`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder java.lang.Thread$Builder.uncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    /// ```
     @JavaMethod
     public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
 
+    /// Java method `inheritInheritableThreadLocals`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder java.lang.Thread$Builder.inheritInheritableThreadLocals(boolean)
+    /// ```
     @JavaMethod
     public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
@@ -103,74 +280,128 @@ extension JavaThread {
 extension JavaThread.Builder {
   @JavaInterface("java.lang.Thread$Builder$OfPlatform", extends: JavaThread.Builder.self)
   public struct OfPlatform {
-    @JavaMethod
-    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
-
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.name(java.lang.String,long)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfPlatform!
 
-    @JavaMethod
-    public func name(_ arg0: String) -> JavaThread.Builder!
-
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.name(java.lang.String)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String) -> JavaThread.Builder.OfPlatform!
 
+    /// Java method `priority`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.priority(int)
+    /// ```
     @JavaMethod
     public func priority(_ arg0: Int32) -> JavaThread.Builder.OfPlatform!
 
+    /// Java method `daemon`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public default java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.daemon()
+    /// ```
     @JavaMethod
     public func daemon() -> JavaThread.Builder.OfPlatform!
 
+    /// Java method `daemon`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.daemon(boolean)
+    /// ```
     @JavaMethod
     public func daemon(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
 
+    /// Java method `uncaughtExceptionHandler`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.uncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    /// ```
     @JavaMethod
     public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfPlatform!
 
-    @JavaMethod
-    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
-
+    /// Java method `stackSize`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.stackSize(long)
+    /// ```
     @JavaMethod
     public func stackSize(_ arg0: Int64) -> JavaThread.Builder.OfPlatform!
 
+    /// Java method `inheritInheritableThreadLocals`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfPlatform java.lang.Thread$Builder$OfPlatform.inheritInheritableThreadLocals(boolean)
+    /// ```
     @JavaMethod
     public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfPlatform!
-
-    @JavaMethod
-    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
 }
 extension JavaThread.Builder {
   @JavaInterface("java.lang.Thread$Builder$OfVirtual", extends: JavaThread.Builder.self)
   public struct OfVirtual {
-    @JavaMethod
-    public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder!
-
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfVirtual java.lang.Thread$Builder$OfVirtual.name(java.lang.String,long)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String, _ arg1: Int64) -> JavaThread.Builder.OfVirtual!
 
-    @JavaMethod
-    public func name(_ arg0: String) -> JavaThread.Builder!
-
+    /// Java method `name`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfVirtual java.lang.Thread$Builder$OfVirtual.name(java.lang.String)
+    /// ```
     @JavaMethod
     public func name(_ arg0: String) -> JavaThread.Builder.OfVirtual!
 
-    @JavaMethod
-    public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder!
-
+    /// Java method `uncaughtExceptionHandler`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfVirtual java.lang.Thread$Builder$OfVirtual.uncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    /// ```
     @JavaMethod
     public func uncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?) -> JavaThread.Builder.OfVirtual!
 
+    /// Java method `inheritInheritableThreadLocals`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract java.lang.Thread$Builder$OfVirtual java.lang.Thread$Builder$OfVirtual.inheritInheritableThreadLocals(boolean)
+    /// ```
     @JavaMethod
     public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder.OfVirtual!
-
-    @JavaMethod
-    public func inheritInheritableThreadLocals(_ arg0: Bool) -> JavaThread.Builder!
   }
 }
 extension JavaThread {
   @JavaInterface("java.lang.Thread$UncaughtExceptionHandler")
   public struct UncaughtExceptionHandler {
+    /// Java method `uncaughtException`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public abstract void java.lang.Thread$UncaughtExceptionHandler.uncaughtException(java.lang.Thread,java.lang.Throwable)
+    /// ```
     @JavaMethod
     public func uncaughtException(_ arg0: JavaThread?, _ arg1: Throwable?)
   }
@@ -185,45 +416,129 @@ extension JavaClass<JavaThread> {
   @JavaStaticField(isFinal: true)
   public var MAX_PRIORITY: Int32
 
+  /// Java method `currentThread`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native java.lang.Thread java.lang.Thread.currentThread()
+  /// ```
   @JavaStaticMethod
   public func currentThread() -> JavaThread!
 
+  /// Java method `onSpinWait`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.onSpinWait()
+  /// ```
   @JavaStaticMethod
   public func onSpinWait()
 
+  /// Java method `holdsLock`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native boolean java.lang.Thread.holdsLock(java.lang.Object)
+  /// ```
   @JavaStaticMethod
   public func holdsLock(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `interrupted`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Thread.interrupted()
+  /// ```
   @JavaStaticMethod
   public func interrupted() -> Bool
 
+  /// Java method `activeCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Thread.activeCount()
+  /// ```
   @JavaStaticMethod
   public func activeCount() -> Int32
 
+  /// Java method `enumerate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Thread.enumerate(java.lang.Thread[])
+  /// ```
   @JavaStaticMethod
   public func enumerate(_ arg0: [JavaThread?]) -> Int32
 
+  /// Java method `yield`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.yield()
+  /// ```
   @JavaStaticMethod
   public func yield()
 
+  /// Java method `sleep`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.sleep(long) throws java.lang.InterruptedException
+  /// ```
   @JavaStaticMethod
   public func sleep(_ arg0: Int64) throws
 
+  /// Java method `sleep`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.sleep(long,int) throws java.lang.InterruptedException
+  /// ```
   @JavaStaticMethod
   public func sleep(_ arg0: Int64, _ arg1: Int32) throws
 
+  /// Java method `ofPlatform`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Thread$Builder$OfPlatform java.lang.Thread.ofPlatform()
+  /// ```
   @JavaStaticMethod
   public func ofPlatform() -> JavaThread.Builder.OfPlatform!
 
+  /// Java method `ofVirtual`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Thread$Builder$OfVirtual java.lang.Thread.ofVirtual()
+  /// ```
   @JavaStaticMethod
   public func ofVirtual() -> JavaThread.Builder.OfVirtual!
 
+  /// Java method `dumpStack`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.dumpStack()
+  /// ```
   @JavaStaticMethod
   public func dumpStack()
 
+  /// Java method `setDefaultUncaughtExceptionHandler`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.Thread.setDefaultUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+  /// ```
   @JavaStaticMethod
   public func setDefaultUncaughtExceptionHandler(_ arg0: JavaThread.UncaughtExceptionHandler?)
 
+  /// Java method `getDefaultUncaughtExceptionHandler`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Thread$UncaughtExceptionHandler java.lang.Thread.getDefaultUncaughtExceptionHandler()
+  /// ```
   @JavaStaticMethod
   public func getDefaultUncaughtExceptionHandler() -> JavaThread.UncaughtExceptionHandler!
 }

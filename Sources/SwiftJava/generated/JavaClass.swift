@@ -265,6 +265,15 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func getResourceAsStream(_ arg0: String) -> InputStream!
 
+  /// Java method `getResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.lang.Class.getResource(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func getResource(_ arg0: String) -> JavaURL!
+
   /// Java method `getPackageName`.
   ///
   /// ### Java method signature
@@ -382,15 +391,6 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func asSubclass<U: AnyJavaObject>(_ arg0: JavaClass<U>?) -> JavaClass<U>!
 
-  /// Java method `getAnnotation`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <A extends java.lang.annotation.Annotation> A java.lang.Class.getAnnotation(java.lang.Class<A>)
-  /// ```
-  @JavaMethod(typeErasedResult: "A!")
-  open func getAnnotation<A: AnyJavaObject>(_ arg0: JavaClass<A>?) -> A!
-
   /// Java method `getAnnotationsByType`.
   ///
   /// ### Java method signature
@@ -399,15 +399,6 @@ open class JavaClass<T: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func getAnnotationsByType<A: AnyJavaObject>(_ arg0: JavaClass<A>?) -> [A?]
-
-  /// Java method `getDeclaredAnnotation`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <A extends java.lang.annotation.Annotation> A java.lang.Class.getDeclaredAnnotation(java.lang.Class<A>)
-  /// ```
-  @JavaMethod(typeErasedResult: "A!")
-  open func getDeclaredAnnotation<A: AnyJavaObject>(_ arg0: JavaClass<A>?) -> A!
 
   /// Java method `getDeclaredAnnotationsByType`.
   ///

@@ -4,9 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.GenericArrayType", extends: Type.self)
 public struct GenericArrayType {
+  /// Java method `getGenericComponentType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type java.lang.reflect.GenericArrayType.getGenericComponentType()
+  /// ```
   @JavaMethod
   public func getGenericComponentType() -> Type!
 
+  /// Java method `getTypeName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.lang.String java.lang.reflect.Type.getTypeName()
+  /// ```
   @JavaMethod
   public func getTypeName() -> String
 }

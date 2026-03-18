@@ -11,42 +11,108 @@ open class HashSet<E: AnyJavaObject>: JavaObject {
   @_nonoverride public convenience init(_ arg0: Int32, _ arg1: Float, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   open func remove(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.HashSet.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.HashSet.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.HashSet.clear()
+  /// ```
   @JavaMethod
   open func clear()
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.add(E)
+  /// ```
   @JavaMethod
-  open func add(_ arg0: JavaObject?) -> Bool
+  open func add(_ arg0: E?) -> Bool
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public <T> T[] java.util.HashSet.toArray(T[])
+  /// ```
   @JavaMethod
-  open func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  open func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object[] java.util.HashSet.toArray()
+  /// ```
   @JavaMethod
   open func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.HashSet.iterator()
+  /// ```
   @JavaMethod
-  open func iterator() -> JavaIterator<JavaObject>!
+  open func iterator() -> JavaIterator<E>!
 
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   open func contains(_ arg0: JavaObject?) -> Bool
 }
 extension JavaClass {
+  /// Java method `newHashSet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.HashSet<T> java.util.HashSet.newHashSet(int)
+  /// ```
   @JavaStaticMethod
-  public func newHashSet<E: AnyJavaObject>(_ arg0: Int32) -> HashSet<JavaObject>! where ObjectType == HashSet<E>
+  public func newHashSet<E: AnyJavaObject, T: AnyJavaObject>(_ arg0: Int32) -> HashSet<T>! where ObjectType == HashSet<E>
 }

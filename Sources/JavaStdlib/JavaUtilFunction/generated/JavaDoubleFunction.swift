@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleFunction")
 public struct JavaDoubleFunction<R: AnyJavaObject> {
-  @JavaMethod
-  public func apply(_ arg0: Double) -> JavaObject?
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.DoubleFunction.apply(double)
+  /// ```
+  @JavaMethod(typeErasedResult: "R!")
+  public func apply(_ arg0: Double) -> R!
 }

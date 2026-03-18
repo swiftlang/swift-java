@@ -4,63 +4,183 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.Queue", extends: JavaCollection<JavaObject>.self)
 public struct Queue<E: AnyJavaObject> {
-  @JavaMethod
-  public func remove() -> JavaObject!
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.Queue.remove()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func remove() -> E!
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Queue.add(E)
+  /// ```
   @JavaMethod
-  public func add(_ arg0: JavaObject?) -> Bool
+  public func add(_ arg0: E?) -> Bool
 
+  /// Java method `peek`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.Queue.peek()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func peek() -> E!
+
+  /// Java method `element`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.Queue.element()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func element() -> E!
+
+  /// Java method `poll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.Queue.poll()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func poll() -> E!
+
+  /// Java method `offer`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Queue.offer(E)
+  /// ```
   @JavaMethod
-  public func peek() -> JavaObject!
+  public func offer(_ arg0: E?) -> Bool
 
-  @JavaMethod
-  public func element() -> JavaObject!
-
-  @JavaMethod
-  public func poll() -> JavaObject!
-
-  @JavaMethod
-  public func offer(_ arg0: JavaObject?) -> Bool
-
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   public func remove(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.Collection.size()
+  /// ```
   @JavaMethod
   public func size() -> Int32
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.Collection.hashCode()
+  /// ```
   @JavaMethod
   public func hashCode() -> Int32
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.Collection.clear()
+  /// ```
   @JavaMethod
   public func clear()
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.isEmpty()
+  /// ```
   @JavaMethod
   public func isEmpty() -> Bool
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract <T> T[] java.util.Collection.toArray(T[])
+  /// ```
   @JavaMethod
-  public func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  public func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Object[] java.util.Collection.toArray()
+  /// ```
   @JavaMethod
   public func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.Iterator<E> java.util.Collection.iterator()
+  /// ```
   @JavaMethod
-  public func iterator() -> JavaIterator<JavaObject>!
+  public func iterator() -> JavaIterator<E>!
 
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   public func contains(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.addAll(java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  public func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  public func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.removeAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.retainAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `containsAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Collection.containsAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   public func containsAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 }

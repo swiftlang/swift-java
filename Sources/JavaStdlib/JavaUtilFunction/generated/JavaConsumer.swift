@@ -4,9 +4,21 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Consumer")
 public struct JavaConsumer<T: AnyJavaObject> {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.Consumer.accept(T)
+  /// ```
   @JavaMethod
-  public func accept(_ arg0: JavaObject?)
+  public func accept(_ arg0: T?)
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Consumer<T> java.util.function.Consumer.andThen(java.util.function.Consumer<? super T>)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaConsumer<JavaObject>?) -> JavaConsumer<JavaObject>?
+  public func andThen(_ arg0: JavaConsumer<JavaObject>?) -> JavaConsumer<T>!
 }

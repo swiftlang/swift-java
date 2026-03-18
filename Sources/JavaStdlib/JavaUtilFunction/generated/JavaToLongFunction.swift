@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToLongFunction")
 public struct JavaToLongFunction<T: AnyJavaObject> {
+  /// Java method `applyAsLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long java.util.function.ToLongFunction.applyAsLong(T)
+  /// ```
   @JavaMethod
-  public func applyAsLong(_ arg0: JavaObject?) -> Int64
+  public func applyAsLong(_ arg0: T?) -> Int64
 }

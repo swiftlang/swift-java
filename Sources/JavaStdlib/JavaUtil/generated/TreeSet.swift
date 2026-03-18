@@ -5,6 +5,9 @@ import SwiftJavaJNICore
 @JavaClass("java.util.TreeSet")
 open class TreeSet<E: AnyJavaObject>: JavaObject {
   @JavaMethod
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   /// Java method `remove`.
@@ -70,6 +73,15 @@ open class TreeSet<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func add(_ arg0: E?) -> Bool
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.TreeSet.iterator()
+  /// ```
+  @JavaMethod
+  open func iterator() -> JavaIterator<E>!
+
   /// Java method `contains`.
   ///
   /// ### Java method signature
@@ -87,6 +99,15 @@ open class TreeSet<E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod(typeErasedResult: "E!")
   open func last() -> E!
+
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeSet.addAll(java.util.Collection<? extends E>)
+  /// ```
+  @JavaMethod
+  open func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
   /// Java method `first`.
   ///
@@ -141,6 +162,15 @@ open class TreeSet<E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod(typeErasedResult: "E!")
   open func pollLast() -> E!
+
+  /// Java method `descendingIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.TreeSet.descendingIterator()
+  /// ```
+  @JavaMethod
+  open func descendingIterator() -> JavaIterator<E>!
 
   /// Java method `ceiling`.
   ///

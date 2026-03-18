@@ -3,42 +3,110 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Short")
 open class JavaShort: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int16, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Short.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Short.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Short.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Short.compareTo(java.lang.Short)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaShort?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Short.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Short.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Short.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Short.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Short.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Short.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Short.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 }
@@ -58,42 +126,120 @@ extension JavaClass<JavaShort> {
   @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Short.toString(short)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int16) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Short.hashCode(short)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Int16) -> Int32
 
+  /// Java method `compareUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Short.compareUnsigned(short,short)
+  /// ```
   @JavaStaticMethod
   public func compareUnsigned(_ arg0: Int16, _ arg1: Int16) -> Int32
 
+  /// Java method `reverseBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static short java.lang.Short.reverseBytes(short)
+  /// ```
   @JavaStaticMethod
   public func reverseBytes(_ arg0: Int16) -> Int16
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Short.compare(short,short)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Int16, _ arg1: Int16) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Short java.lang.Short.valueOf(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaShort!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Short java.lang.Short.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaShort!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Short java.lang.Short.valueOf(short)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int16) -> JavaShort!
 
+  /// Java method `decode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Short java.lang.Short.decode(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func decode(_ arg0: String) throws -> JavaShort!
 
+  /// Java method `toUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Short.toUnsignedLong(short)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int16) -> Int64
 
+  /// Java method `toUnsignedInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Short.toUnsignedInt(short)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedInt(_ arg0: Int16) -> Int32
 
+  /// Java method `parseShort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static short java.lang.Short.parseShort(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseShort(_ arg0: String) throws -> Int16
 
+  /// Java method `parseShort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static short java.lang.Short.parseShort(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseShort(_ arg0: String, _ arg1: Int32) throws -> Int16
 }

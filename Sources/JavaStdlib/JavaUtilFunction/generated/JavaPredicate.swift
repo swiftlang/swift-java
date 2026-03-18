@@ -4,27 +4,58 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Predicate")
 public struct JavaPredicate<T: AnyJavaObject> {
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.Predicate.test(T)
+  /// ```
   @JavaMethod
-  public func test(_ arg0: JavaObject?) -> Bool
+  public func test(_ arg0: T?) -> Bool
 
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.or(java.util.function.Predicate<? super T>)
+  /// ```
   @JavaMethod
-  public func or(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<JavaObject>?
+  public func or(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
 
+  /// Java method `negate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.negate()
+  /// ```
   @JavaMethod
-  public func and(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<JavaObject>?
+  public func negate() -> JavaPredicate<T>!
 
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.and(java.util.function.Predicate<? super T>)
+  /// ```
   @JavaMethod
-  public func negate() -> JavaPredicate<JavaObject>?
+  public func and(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
 }
 extension JavaClass {
+  /// Java method `isEqual`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.function.Predicate<T> java.util.function.Predicate.isEqual(java.lang.Object)
+  /// ```
   @JavaStaticMethod
-  public func not<T: AnyJavaObject>(
-    _ arg0: JavaPredicate<JavaObject>?
-  ) -> JavaPredicate<
-    JavaObject
-  >? where ObjectType == JavaPredicate<T>
+  public func isEqual<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaPredicate<T>! where ObjectType == JavaPredicate<T>
 
+  /// Java method `not`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.function.Predicate<T> java.util.function.Predicate.not(java.util.function.Predicate<? super T>)
+  /// ```
   @JavaStaticMethod
-  public func isEqual<T: AnyJavaObject>(_ arg0: JavaObject?) -> JavaPredicate<JavaObject>?
-  where ObjectType == JavaPredicate<T>
+  public func not<T: AnyJavaObject>(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>! where ObjectType == JavaPredicate<T>
 }

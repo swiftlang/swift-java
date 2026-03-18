@@ -5,7 +5,7 @@ import SwiftJavaJNICore
 @JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
 open class ArrayList<E: AnyJavaObject>: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
@@ -13,105 +13,309 @@ open class ArrayList<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   open func remove(_ arg0: JavaObject?) -> Bool
 
-  @JavaMethod
-  open func remove(_ arg0: Int32) -> JavaObject!
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.remove(int)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func remove(_ arg0: Int32) -> E!
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.ArrayList.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
-  @JavaMethod
-  open func get(_ arg0: Int32) -> JavaObject!
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.get(int)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func get(_ arg0: Int32) -> E!
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.ArrayList.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.ArrayList.clone()
+  /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.ArrayList.indexOf(java.lang.Object)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.clear()
+  /// ```
   @JavaMethod
   open func clear()
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.ArrayList.lastIndexOf(java.lang.Object)
+  /// ```
   @JavaMethod
   open func lastIndexOf(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.add(E)
+  /// ```
   @JavaMethod
-  open func add(_ arg0: JavaObject?) -> Bool
+  open func add(_ arg0: E?) -> Bool
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.add(int,E)
+  /// ```
   @JavaMethod
-  open func add(_ arg0: Int32, _ arg1: JavaObject?)
+  open func add(_ arg0: Int32, _ arg1: E?)
 
+  /// Java method `subList`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.List<E> java.util.ArrayList.subList(int,int)
+  /// ```
   @JavaMethod
-  open func subList(_ arg0: Int32, _ arg1: Int32) -> List<JavaObject>!
+  open func subList(_ arg0: Int32, _ arg1: Int32) -> List<E>!
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public <T> T[] java.util.ArrayList.toArray(T[])
+  /// ```
+  @JavaMethod
+  open func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
+
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object[] java.util.ArrayList.toArray()
+  /// ```
   @JavaMethod
   open func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.ArrayList.iterator()
+  /// ```
   @JavaMethod
-  open func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  open func iterator() -> JavaIterator<E>!
 
-  @JavaMethod
-  open func iterator() -> JavaIterator<JavaObject>!
-
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   open func contains(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.addAll(java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  open func addAll(_ arg0: Int32, _ arg1: JavaCollection<JavaObject>?) -> Bool
+  open func addAll(_ arg0: JavaCollection<E>?) -> Bool
 
+  /// Java method `addAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.addAll(int,java.util.Collection<? extends E>)
+  /// ```
   @JavaMethod
-  open func addAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func addAll(_ arg0: Int32, _ arg1: JavaCollection<E>?) -> Bool
 
-  @JavaMethod
-  open func set(_ arg0: Int32, _ arg1: JavaObject?) -> JavaObject!
-
-  @JavaMethod
-  open func ensureCapacity(_ arg0: Int32)
-
+  /// Java method `trimToSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.trimToSize()
+  /// ```
   @JavaMethod
   open func trimToSize()
 
-  @JavaMethod
-  open func getFirst() -> JavaObject!
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.set(int,E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func set(_ arg0: Int32, _ arg1: E?) -> E!
 
+  /// Java method `ensureCapacity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.ensureCapacity(int)
+  /// ```
   @JavaMethod
-  open func getLast() -> JavaObject!
+  open func ensureCapacity(_ arg0: Int32)
 
+  /// Java method `getFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.getFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func getFirst() -> E!
+
+  /// Java method `getLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.getLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func getLast() -> E!
+
+  /// Java method `addFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.addFirst(E)
+  /// ```
   @JavaMethod
-  open func addFirst(_ arg0: JavaObject?)
+  open func addFirst(_ arg0: E?)
 
+  /// Java method `addLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayList.addLast(E)
+  /// ```
   @JavaMethod
-  open func addLast(_ arg0: JavaObject?)
+  open func addLast(_ arg0: E?)
 
-  @JavaMethod
-  open func removeFirst() -> JavaObject!
+  /// Java method `removeFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.removeFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func removeFirst() -> E!
 
-  @JavaMethod
-  open func removeLast() -> JavaObject!
+  /// Java method `removeLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayList.removeLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func removeLast() -> E!
 
+  /// Java method `removeRange`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected void java.util.ArrayList.removeRange(int,int)
+  /// ```
   @JavaMethod
   open func removeRange(_ arg0: Int32, _ arg1: Int32)
 
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.removeAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayList.retainAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `listIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.ListIterator<E> java.util.ArrayList.listIterator(int)
+  /// ```
   @JavaMethod
-  open func listIterator(_ arg0: Int32) -> ListIterator<JavaObject>!
+  open func listIterator(_ arg0: Int32) -> ListIterator<E>!
 
+  /// Java method `listIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.ListIterator<E> java.util.ArrayList.listIterator()
+  /// ```
   @JavaMethod
-  open func listIterator() -> ListIterator<JavaObject>!
+  open func listIterator() -> ListIterator<E>!
 }

@@ -4,15 +4,39 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongPredicate")
 public struct JavaLongPredicate {
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.LongPredicate.test(long)
+  /// ```
   @JavaMethod
   public func test(_ arg0: Int64) -> Bool
 
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongPredicate java.util.function.LongPredicate.or(java.util.function.LongPredicate)
+  /// ```
   @JavaMethod
-  public func or(_ arg0: JavaLongPredicate?) -> JavaLongPredicate?
+  public func or(_ arg0: JavaLongPredicate?) -> JavaLongPredicate!
 
+  /// Java method `negate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongPredicate java.util.function.LongPredicate.negate()
+  /// ```
   @JavaMethod
-  public func and(_ arg0: JavaLongPredicate?) -> JavaLongPredicate?
+  public func negate() -> JavaLongPredicate!
 
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongPredicate java.util.function.LongPredicate.and(java.util.function.LongPredicate)
+  /// ```
   @JavaMethod
-  public func negate() -> JavaLongPredicate?
+  public func and(_ arg0: JavaLongPredicate?) -> JavaLongPredicate!
 }

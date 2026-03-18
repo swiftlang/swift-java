@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BooleanSupplier")
 public struct JavaBooleanSupplier {
+  /// Java method `getAsBoolean`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.BooleanSupplier.getAsBoolean()
+  /// ```
   @JavaMethod
   public func getAsBoolean() -> Bool
 }

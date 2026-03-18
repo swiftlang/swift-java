@@ -4,16 +4,40 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntUnaryOperator")
 public struct JavaIntUnaryOperator {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
+  /// ```
   @JavaMethod
   public func applyAsInt(_ arg0: Int32) -> Int32
 
+  /// Java method `compose`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.compose(java.util.function.IntUnaryOperator)
+  /// ```
   @JavaMethod
-  public func compose(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator?
+  public func compose(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator!
 
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.andThen(java.util.function.IntUnaryOperator)
+  /// ```
   @JavaMethod
-  public func andThen(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator?
+  public func andThen(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator!
 }
 extension JavaClass<JavaIntUnaryOperator> {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.identity()
+  /// ```
   @JavaStaticMethod
-  public func identity() -> JavaIntUnaryOperator?
+  public func identity() -> JavaIntUnaryOperator!
 }

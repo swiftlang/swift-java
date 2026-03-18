@@ -4,26 +4,22 @@ import SwiftJavaJNICore
 @JavaClass("java.lang.String", implements: CharSequence.self)
 open class JavaString: JavaObject {
   @JavaMethod
+  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: Charset?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
   @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: [Int8],
-    _ arg1: Int32,
-    _ arg2: Int32,
-    environment: JNIEnvironment? = nil
-  )
+  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Charset?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [Int8], environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: [UInt16],
-    _ arg1: Int32,
-    _ arg2: Int32,
-    environment: JNIEnvironment? = nil
-  )
+  @_nonoverride public convenience init(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [UInt16], environment: JNIEnvironment? = nil)
@@ -35,217 +31,584 @@ open class JavaString: JavaObject {
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: [Int8],
-    _ arg1: Int32,
-    _ arg2: Int32,
-    _ arg3: String,
-    environment: JNIEnvironment? = nil
-  ) throws
+  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: [Int8],
-    _ arg1: Int32,
-    _ arg2: Int32,
-    _ arg3: Int32,
-    environment: JNIEnvironment? = nil
-  )
+  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(
-    _ arg0: [Int32],
-    _ arg1: Int32,
-    _ arg2: Int32,
-    environment: JNIEnvironment? = nil
-  )
+  @_nonoverride public convenience init(_ arg0: [Int32], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `length`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.length()
+  /// ```
   @JavaMethod
   open func length() -> Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `getChars`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.String.getChars(int,int,char[],int)
+  /// ```
   @JavaMethod
   open func getChars(_ arg0: Int32, _ arg1: Int32, _ arg2: [UInt16], _ arg3: Int32)
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.compareTo(java.lang.String)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: String) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(java.lang.String,int)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: String, _ arg1: Int32) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(java.lang.String,int,int)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: String, _ arg1: Int32, _ arg2: Int32) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(int)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: Int32) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(int,int)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(int,int,int)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: Int32, _ arg1: Int32, _ arg2: Int32) -> Int32
 
+  /// Java method `indexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.indexOf(java.lang.String)
+  /// ```
   @JavaMethod
   open func indexOf(_ arg0: String) -> Int32
 
+  /// Java method `charAt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public char java.lang.String.charAt(int)
+  /// ```
   @JavaMethod
   open func charAt(_ arg0: Int32) -> UInt16
 
+  /// Java method `codePointAt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.codePointAt(int)
+  /// ```
   @JavaMethod
   open func codePointAt(_ arg0: Int32) -> Int32
 
+  /// Java method `codePointBefore`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.codePointBefore(int)
+  /// ```
   @JavaMethod
   open func codePointBefore(_ arg0: Int32) -> Int32
 
+  /// Java method `codePointCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.codePointCount(int,int)
+  /// ```
   @JavaMethod
   open func codePointCount(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `offsetByCodePoints`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.offsetByCodePoints(int,int)
+  /// ```
   @JavaMethod
   open func offsetByCodePoints(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `getBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte[] java.lang.String.getBytes(java.lang.String) throws java.io.UnsupportedEncodingException
+  /// ```
   @JavaMethod
   open func getBytes(_ arg0: String) throws -> [Int8]
 
+  /// Java method `getBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.String.getBytes(int,int,byte[],int)
+  /// ```
+  @available(*, deprecated)
   @JavaMethod
   open func getBytes(_ arg0: Int32, _ arg1: Int32, _ arg2: [Int8], _ arg3: Int32)
 
+  /// Java method `getBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte[] java.lang.String.getBytes()
+  /// ```
   @JavaMethod
   open func getBytes() -> [Int8]
 
+  /// Java method `getBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte[] java.lang.String.getBytes(java.nio.charset.Charset)
+  /// ```
+  @JavaMethod
+  open func getBytes(_ arg0: Charset?) -> [Int8]
+
+  /// Java method `contentEquals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.contentEquals(java.lang.CharSequence)
+  /// ```
   @JavaMethod
   open func contentEquals(_ arg0: CharSequence?) -> Bool
 
+  /// Java method `regionMatches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.regionMatches(int,java.lang.String,int,int)
+  /// ```
   @JavaMethod
   open func regionMatches(_ arg0: Int32, _ arg1: String, _ arg2: Int32, _ arg3: Int32) -> Bool
 
+  /// Java method `regionMatches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.regionMatches(boolean,int,java.lang.String,int,int)
+  /// ```
   @JavaMethod
   open func regionMatches(_ arg0: Bool, _ arg1: Int32, _ arg2: String, _ arg3: Int32, _ arg4: Int32) -> Bool
 
+  /// Java method `startsWith`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.startsWith(java.lang.String)
+  /// ```
   @JavaMethod
   open func startsWith(_ arg0: String) -> Bool
 
+  /// Java method `startsWith`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.startsWith(java.lang.String,int)
+  /// ```
   @JavaMethod
   open func startsWith(_ arg0: String, _ arg1: Int32) -> Bool
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.lastIndexOf(int)
+  /// ```
   @JavaMethod
   open func lastIndexOf(_ arg0: Int32) -> Int32
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.lastIndexOf(java.lang.String)
+  /// ```
   @JavaMethod
   open func lastIndexOf(_ arg0: String) -> Int32
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.lastIndexOf(java.lang.String,int)
+  /// ```
   @JavaMethod
   open func lastIndexOf(_ arg0: String, _ arg1: Int32) -> Int32
 
+  /// Java method `lastIndexOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.lastIndexOf(int,int)
+  /// ```
   @JavaMethod
   open func lastIndexOf(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `substring`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.substring(int,int)
+  /// ```
   @JavaMethod
   open func substring(_ arg0: Int32, _ arg1: Int32) -> String
 
+  /// Java method `substring`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.substring(int)
+  /// ```
   @JavaMethod
   open func substring(_ arg0: Int32) -> String
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.isEmpty()
+  /// ```
   @JavaMethod
   open func isEmpty() -> Bool
 
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.replace(java.lang.CharSequence,java.lang.CharSequence)
+  /// ```
   @JavaMethod
   open func replace(_ arg0: CharSequence?, _ arg1: CharSequence?) -> String
 
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.replace(char,char)
+  /// ```
   @JavaMethod
   open func replace(_ arg0: UInt16, _ arg1: UInt16) -> String
 
+  /// Java method `matches`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.matches(java.lang.String)
+  /// ```
   @JavaMethod
   open func matches(_ arg0: String) -> Bool
 
+  /// Java method `replaceFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.replaceFirst(java.lang.String,java.lang.String)
+  /// ```
   @JavaMethod
   open func replaceFirst(_ arg0: String, _ arg1: String) -> String
 
+  /// Java method `replaceAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.replaceAll(java.lang.String,java.lang.String)
+  /// ```
   @JavaMethod
   open func replaceAll(_ arg0: String, _ arg1: String) -> String
 
+  /// Java method `split`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String[] java.lang.String.split(java.lang.String)
+  /// ```
   @JavaMethod
   open func split(_ arg0: String) -> [String]
 
+  /// Java method `split`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String[] java.lang.String.split(java.lang.String,int)
+  /// ```
   @JavaMethod
   open func split(_ arg0: String, _ arg1: Int32) -> [String]
 
+  /// Java method `splitWithDelimiters`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String[] java.lang.String.splitWithDelimiters(java.lang.String,int)
+  /// ```
   @JavaMethod
   open func splitWithDelimiters(_ arg0: String, _ arg1: Int32) -> [String]
 
+  /// Java method `toLowerCase`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.toLowerCase()
+  /// ```
   @JavaMethod
   open func toLowerCase() -> String
 
+  /// Java method `toUpperCase`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.toUpperCase()
+  /// ```
   @JavaMethod
   open func toUpperCase() -> String
 
+  /// Java method `trim`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.trim()
+  /// ```
   @JavaMethod
   open func trim() -> String
 
+  /// Java method `strip`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.strip()
+  /// ```
   @JavaMethod
   open func strip() -> String
 
+  /// Java method `stripLeading`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.stripLeading()
+  /// ```
   @JavaMethod
   open func stripLeading() -> String
 
+  /// Java method `stripTrailing`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.stripTrailing()
+  /// ```
   @JavaMethod
   open func stripTrailing() -> String
 
+  /// Java method `repeat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.repeat(int)
+  /// ```
   @JavaMethod
   open func `repeat`(_ arg0: Int32) -> String
 
+  /// Java method `isBlank`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.isBlank()
+  /// ```
   @JavaMethod
   open func isBlank() -> Bool
 
+  /// Java method `toCharArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public char[] java.lang.String.toCharArray()
+  /// ```
   @JavaMethod
   open func toCharArray() -> [UInt16]
 
+  /// Java method `equalsIgnoreCase`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.equalsIgnoreCase(java.lang.String)
+  /// ```
   @JavaMethod
   open func equalsIgnoreCase(_ arg0: String) -> Bool
 
+  /// Java method `compareToIgnoreCase`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.String.compareToIgnoreCase(java.lang.String)
+  /// ```
   @JavaMethod
   open func compareToIgnoreCase(_ arg0: String) -> Int32
 
+  /// Java method `endsWith`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.endsWith(java.lang.String)
+  /// ```
   @JavaMethod
   open func endsWith(_ arg0: String) -> Bool
 
+  /// Java method `subSequence`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.CharSequence java.lang.String.subSequence(int,int)
+  /// ```
   @JavaMethod
   open func subSequence(_ arg0: Int32, _ arg1: Int32) -> CharSequence!
 
+  /// Java method `concat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.concat(java.lang.String)
+  /// ```
   @JavaMethod
   open func concat(_ arg0: String) -> String
 
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.String.contains(java.lang.CharSequence)
+  /// ```
   @JavaMethod
   open func contains(_ arg0: CharSequence?) -> Bool
 
+  /// Java method `indent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.indent(int)
+  /// ```
   @JavaMethod
   open func indent(_ arg0: Int32) -> String
 
+  /// Java method `stripIndent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.stripIndent()
+  /// ```
   @JavaMethod
   open func stripIndent() -> String
 
+  /// Java method `translateEscapes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.translateEscapes()
+  /// ```
   @JavaMethod
   open func translateEscapes() -> String
 
+  /// Java method `formatted`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.String.formatted(java.lang.Object...)
+  /// ```
   @JavaMethod
   open func formatted(_ arg0: [JavaObject?]) -> String
 
+  /// Java method `intern`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public native java.lang.String java.lang.String.intern()
+  /// ```
   @JavaMethod
   open func intern() -> String
 
+  /// Java method `describeConstable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Optional<java.lang.String> java.lang.String.describeConstable()
+  /// ```
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaString>!
 
@@ -254,42 +617,120 @@ open class JavaString: JavaObject {
   }
 }
 extension JavaClass<JavaString> {
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(java.lang.Object)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: JavaObject?) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(long)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int64) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(int)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int32) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(char)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: UInt16) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(char[],int,int)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(boolean)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Bool) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(double)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Double) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(char[])
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: [UInt16]) -> String
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.valueOf(float)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Float) -> String
 
+  /// Java method `join`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.join(java.lang.CharSequence,java.lang.CharSequence...)
+  /// ```
   @JavaStaticMethod
   public func join(_ arg0: CharSequence?, _ arg1: [CharSequence?]) -> String
 
+  /// Java method `format`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.format(java.lang.String,java.lang.Object...)
+  /// ```
   @JavaStaticMethod
   public func format(_ arg0: String, _ arg1: [JavaObject?]) -> String
 
+  /// Java method `copyValueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.copyValueOf(char[],int,int)
+  /// ```
   @JavaStaticMethod
   public func copyValueOf(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) -> String
 
+  /// Java method `copyValueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.String.copyValueOf(char[])
+  /// ```
   @JavaStaticMethod
   public func copyValueOf(_ arg0: [UInt16]) -> String
 }

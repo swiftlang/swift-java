@@ -147,6 +147,16 @@ open class File: JavaObject {
   @JavaMethod
   open func getPath() -> String
 
+  /// Java method `toURL`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.io.File.toURL() throws java.net.MalformedURLException
+  /// ```
+  @available(*, deprecated)
+  @JavaMethod
+  open func toURL() throws -> JavaURL!
+
   /// Java method `getAbsolutePath`.
   ///
   /// ### Java method signature

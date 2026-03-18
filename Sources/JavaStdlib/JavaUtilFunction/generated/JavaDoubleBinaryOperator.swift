@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleBinaryOperator")
 public struct JavaDoubleBinaryOperator {
+  /// Java method `applyAsDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract double java.util.function.DoubleBinaryOperator.applyAsDouble(double,double)
+  /// ```
   @JavaMethod
   public func applyAsDouble(_ arg0: Double, _ arg1: Double) -> Double
 }

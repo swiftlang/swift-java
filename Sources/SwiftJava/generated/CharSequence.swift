@@ -3,25 +3,67 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.CharSequence")
 public struct CharSequence {
+  /// Java method `length`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.lang.CharSequence.length()
+  /// ```
   @JavaMethod
   public func length() -> Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.String java.lang.CharSequence.toString()
+  /// ```
   @JavaMethod
   public func toString() -> String
 
+  /// Java method `getChars`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default void java.lang.CharSequence.getChars(int,int,char[],int)
+  /// ```
   @JavaMethod
   public func getChars(_ arg0: Int32, _ arg1: Int32, _ arg2: [UInt16], _ arg3: Int32)
 
+  /// Java method `charAt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract char java.lang.CharSequence.charAt(int)
+  /// ```
   @JavaMethod
   public func charAt(_ arg0: Int32) -> UInt16
 
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default boolean java.lang.CharSequence.isEmpty()
+  /// ```
   @JavaMethod
   public func isEmpty() -> Bool
 
+  /// Java method `subSequence`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.CharSequence java.lang.CharSequence.subSequence(int,int)
+  /// ```
   @JavaMethod
   public func subSequence(_ arg0: Int32, _ arg1: Int32) -> CharSequence!
 }
 extension JavaClass<CharSequence> {
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.CharSequence.compare(java.lang.CharSequence,java.lang.CharSequence)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: CharSequence?, _ arg1: CharSequence?) -> Int32
 }

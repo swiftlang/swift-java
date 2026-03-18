@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.LongBinaryOperator")
 public struct JavaLongBinaryOperator {
+  /// Java method `applyAsLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long java.util.function.LongBinaryOperator.applyAsLong(long,long)
+  /// ```
   @JavaMethod
   public func applyAsLong(_ arg0: Int64, _ arg1: Int64) -> Int64
 }

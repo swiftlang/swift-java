@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntSupplier")
 public struct JavaIntSupplier {
+  /// Java method `getAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.IntSupplier.getAsInt()
+  /// ```
   @JavaMethod
   public func getAsInt() -> Int32
 }

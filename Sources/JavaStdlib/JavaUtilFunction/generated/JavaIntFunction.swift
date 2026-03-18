@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntFunction")
 public struct JavaIntFunction<R: AnyJavaObject> {
-  @JavaMethod
-  public func apply(_ arg0: Int32) -> JavaObject?
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.IntFunction.apply(int)
+  /// ```
+  @JavaMethod(typeErasedResult: "R!")
+  public func apply(_ arg0: Int32) -> R!
 }

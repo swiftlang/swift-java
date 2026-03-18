@@ -3,51 +3,132 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Float")
 open class JavaFloat: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Double, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Float, environment: JNIEnvironment? = nil)
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Float.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Float.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Float.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `isInfinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Float.isInfinite()
+  /// ```
   @JavaMethod
   open func isInfinite() -> Bool
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Float.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Float.compareTo(java.lang.Float)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaFloat?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Float.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Float.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Float.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Float.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Float.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Float.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 
+  /// Java method `describeConstable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Optional<java.lang.Float> java.lang.Float.describeConstable()
+  /// ```
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaFloat>!
 
@@ -55,6 +136,12 @@ open class JavaFloat: JavaNumber {
     Optional(javaOptional: describeConstable())
   }
 
+  /// Java method `isNaN`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Float.isNaN()
+  /// ```
   @JavaMethod
   open func isNaN() -> Bool
 }
@@ -95,57 +182,165 @@ extension JavaClass<JavaFloat> {
   @JavaStaticField(isFinal: true)
   public var TYPE: JavaClass<JavaFloat>!
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Float.toString(float)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Float) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Float.hashCode(float)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Float) -> Int32
 
+  /// Java method `min`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static float java.lang.Float.min(float,float)
+  /// ```
   @JavaStaticMethod
   public func min(_ arg0: Float, _ arg1: Float) -> Float
 
+  /// Java method `max`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static float java.lang.Float.max(float,float)
+  /// ```
   @JavaStaticMethod
   public func max(_ arg0: Float, _ arg1: Float) -> Float
 
+  /// Java method `isInfinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Float.isInfinite(float)
+  /// ```
   @JavaStaticMethod
   public func isInfinite(_ arg0: Float) -> Bool
 
+  /// Java method `isFinite`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Float.isFinite(float)
+  /// ```
   @JavaStaticMethod
   public func isFinite(_ arg0: Float) -> Bool
 
+  /// Java method `floatToRawIntBits`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native int java.lang.Float.floatToRawIntBits(float)
+  /// ```
   @JavaStaticMethod
   public func floatToRawIntBits(_ arg0: Float) -> Int32
 
+  /// Java method `floatToIntBits`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Float.floatToIntBits(float)
+  /// ```
   @JavaStaticMethod
   public func floatToIntBits(_ arg0: Float) -> Int32
 
+  /// Java method `intBitsToFloat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native float java.lang.Float.intBitsToFloat(int)
+  /// ```
   @JavaStaticMethod
   public func intBitsToFloat(_ arg0: Int32) -> Float
 
+  /// Java method `float16ToFloat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static float java.lang.Float.float16ToFloat(short)
+  /// ```
   @JavaStaticMethod
   public func float16ToFloat(_ arg0: Int16) -> Float
 
+  /// Java method `floatToFloat16`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static short java.lang.Float.floatToFloat16(float)
+  /// ```
   @JavaStaticMethod
   public func floatToFloat16(_ arg0: Float) -> Int16
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Float.compare(float,float)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Float, _ arg1: Float) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Float java.lang.Float.valueOf(float)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Float) -> JavaFloat!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Float java.lang.Float.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaFloat!
 
+  /// Java method `toHexString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Float.toHexString(float)
+  /// ```
   @JavaStaticMethod
   public func toHexString(_ arg0: Float) -> String
 
+  /// Java method `isNaN`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static boolean java.lang.Float.isNaN(float)
+  /// ```
   @JavaStaticMethod
   public func isNaN(_ arg0: Float) -> Bool
 
+  /// Java method `sum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static float java.lang.Float.sum(float,float)
+  /// ```
   @JavaStaticMethod
   public func sum(_ arg0: Float, _ arg1: Float) -> Float
 
+  /// Java method `parseFloat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static float java.lang.Float.parseFloat(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseFloat(_ arg0: String) throws -> Float
 }

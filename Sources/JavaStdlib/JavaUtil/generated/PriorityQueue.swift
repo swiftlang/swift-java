@@ -5,10 +5,10 @@ import SwiftJavaJNICore
 @JavaClass("java.util.PriorityQueue")
 open class PriorityQueue<E: AnyJavaObject>: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: PriorityQueue<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: PriorityQueue<E>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JavaCollection<JavaObject>?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
@@ -16,42 +16,120 @@ open class PriorityQueue<E: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.remove(java.lang.Object)
+  /// ```
   @JavaMethod
   open func remove(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.PriorityQueue.size()
+  /// ```
   @JavaMethod
   open func size() -> Int32
 
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.PriorityQueue.clear()
+  /// ```
   @JavaMethod
   open func clear()
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.add(E)
+  /// ```
   @JavaMethod
-  open func add(_ arg0: JavaObject?) -> Bool
+  open func add(_ arg0: E?) -> Bool
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public <T> T[] java.util.PriorityQueue.toArray(T[])
+  /// ```
   @JavaMethod
-  open func toArray(_ arg0: [JavaObject?]) -> [JavaObject?]
+  open func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
 
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object[] java.util.PriorityQueue.toArray()
+  /// ```
   @JavaMethod
   open func toArray() -> [JavaObject?]
 
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.PriorityQueue.iterator()
+  /// ```
   @JavaMethod
-  open func iterator() -> JavaIterator<JavaObject>!
+  open func iterator() -> JavaIterator<E>!
 
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.contains(java.lang.Object)
+  /// ```
   @JavaMethod
   open func contains(_ arg0: JavaObject?) -> Bool
 
-  @JavaMethod
-  open func peek() -> JavaObject!
+  /// Java method `peek`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.PriorityQueue.peek()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func peek() -> E!
 
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.removeAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
+  /// Java method `retainAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.retainAll(java.util.Collection<?>)
+  /// ```
   @JavaMethod
   open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
 
-  @JavaMethod
-  open func poll() -> JavaObject!
+  /// Java method `poll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.PriorityQueue.poll()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func poll() -> E!
 
+  /// Java method `offer`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.PriorityQueue.offer(E)
+  /// ```
   @JavaMethod
-  open func offer(_ arg0: JavaObject?) -> Bool
+  open func offer(_ arg0: E?) -> Bool
 }

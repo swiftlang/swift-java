@@ -4,15 +4,39 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntPredicate")
 public struct JavaIntPredicate {
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.IntPredicate.test(int)
+  /// ```
   @JavaMethod
   public func test(_ arg0: Int32) -> Bool
 
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntPredicate java.util.function.IntPredicate.or(java.util.function.IntPredicate)
+  /// ```
   @JavaMethod
-  public func or(_ arg0: JavaIntPredicate?) -> JavaIntPredicate?
+  public func or(_ arg0: JavaIntPredicate?) -> JavaIntPredicate!
 
+  /// Java method `negate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntPredicate java.util.function.IntPredicate.negate()
+  /// ```
   @JavaMethod
-  public func and(_ arg0: JavaIntPredicate?) -> JavaIntPredicate?
+  public func negate() -> JavaIntPredicate!
 
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntPredicate java.util.function.IntPredicate.and(java.util.function.IntPredicate)
+  /// ```
   @JavaMethod
-  public func negate() -> JavaIntPredicate?
+  public func and(_ arg0: JavaIntPredicate?) -> JavaIntPredicate!
 }

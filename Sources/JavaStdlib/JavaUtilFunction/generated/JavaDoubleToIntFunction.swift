@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleToIntFunction")
 public struct JavaDoubleToIntFunction {
+  /// Java method `applyAsInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
+  /// ```
   @JavaMethod
   public func applyAsInt(_ arg0: Double) -> Int32
 }

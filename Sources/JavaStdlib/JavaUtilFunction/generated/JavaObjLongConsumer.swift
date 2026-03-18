@@ -4,6 +4,12 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ObjLongConsumer")
 public struct JavaObjLongConsumer<T: AnyJavaObject> {
+  /// Java method `accept`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void java.util.function.ObjLongConsumer.accept(T,long)
+  /// ```
   @JavaMethod
-  public func accept(_ arg0: JavaObject?, _ arg1: Int64)
+  public func accept(_ arg0: T?, _ arg1: Int64)
 }

@@ -3,45 +3,119 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.Integer")
 open class JavaInteger: JavaNumber {
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
+  @available(*, deprecated)
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Integer.equals(java.lang.Object)
+  /// ```
   @JavaMethod
   open override func equals(_ arg0: JavaObject?) -> Bool
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Integer.toString()
+  /// ```
   @JavaMethod
   open override func toString() -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Integer.hashCode()
+  /// ```
   @JavaMethod
   open override func hashCode() -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Integer.compareTo(java.lang.Object)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaObject?) -> Int32
 
+  /// Java method `compareTo`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Integer.compareTo(java.lang.Integer)
+  /// ```
   @JavaMethod
   open func compareTo(_ arg0: JavaInteger?) -> Int32
 
+  /// Java method `byteValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.Integer.byteValue()
+  /// ```
   @JavaMethod
   open override func byteValue() -> Int8
 
+  /// Java method `shortValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.Integer.shortValue()
+  /// ```
   @JavaMethod
   open override func shortValue() -> Int16
 
+  /// Java method `intValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.Integer.intValue()
+  /// ```
   @JavaMethod
   open override func intValue() -> Int32
 
+  /// Java method `longValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.Integer.longValue()
+  /// ```
   @JavaMethod
   open override func longValue() -> Int64
 
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public float java.lang.Integer.floatValue()
+  /// ```
   @JavaMethod
   open override func floatValue() -> Float
 
+  /// Java method `doubleValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public double java.lang.Integer.doubleValue()
+  /// ```
   @JavaMethod
   open override func doubleValue() -> Double
 
+  /// Java method `describeConstable`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Optional<java.lang.Integer> java.lang.Integer.describeConstable()
+  /// ```
   @JavaMethod
   open func describeConstable() -> JavaOptional<JavaInteger>!
 
@@ -65,126 +139,372 @@ extension JavaClass<JavaInteger> {
   @JavaStaticField(isFinal: true)
   public var BYTES: Int32
 
+  /// Java method `numberOfLeadingZeros`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.numberOfLeadingZeros(int)
+  /// ```
   @JavaStaticMethod
   public func numberOfLeadingZeros(_ arg0: Int32) -> Int32
 
+  /// Java method `numberOfTrailingZeros`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.numberOfTrailingZeros(int)
+  /// ```
   @JavaStaticMethod
   public func numberOfTrailingZeros(_ arg0: Int32) -> Int32
 
+  /// Java method `bitCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.bitCount(int)
+  /// ```
   @JavaStaticMethod
   public func bitCount(_ arg0: Int32) -> Int32
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toString(int)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int32) -> String
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toString(int,int)
+  /// ```
   @JavaStaticMethod
   public func toString(_ arg0: Int32, _ arg1: Int32) -> String
 
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.hashCode(int)
+  /// ```
   @JavaStaticMethod
   public func hashCode(_ arg0: Int32) -> Int32
 
+  /// Java method `min`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.min(int,int)
+  /// ```
   @JavaStaticMethod
   public func min(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `max`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.max(int,int)
+  /// ```
   @JavaStaticMethod
   public func max(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `signum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.signum(int)
+  /// ```
   @JavaStaticMethod
   public func signum(_ arg0: Int32) -> Int32
 
+  /// Java method `expand`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.expand(int,int)
+  /// ```
   @JavaStaticMethod
   public func expand(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `compareUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.compareUnsigned(int,int)
+  /// ```
   @JavaStaticMethod
   public func compareUnsigned(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `divideUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.divideUnsigned(int,int)
+  /// ```
   @JavaStaticMethod
   public func divideUnsigned(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `remainderUnsigned`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.remainderUnsigned(int,int)
+  /// ```
   @JavaStaticMethod
   public func remainderUnsigned(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `reverse`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.reverse(int)
+  /// ```
   @JavaStaticMethod
   public func reverse(_ arg0: Int32) -> Int32
 
+  /// Java method `reverseBytes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.reverseBytes(int)
+  /// ```
   @JavaStaticMethod
   public func reverseBytes(_ arg0: Int32) -> Int32
 
+  /// Java method `compress`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.compress(int,int)
+  /// ```
   @JavaStaticMethod
   public func compress(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `compare`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.compare(int,int)
+  /// ```
   @JavaStaticMethod
   public func compare(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.valueOf(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String) throws -> JavaInteger!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.valueOf(int)
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: Int32) -> JavaInteger!
 
+  /// Java method `valueOf`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.valueOf(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func valueOf(_ arg0: String, _ arg1: Int32) throws -> JavaInteger!
 
+  /// Java method `toHexString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toHexString(int)
+  /// ```
   @JavaStaticMethod
   public func toHexString(_ arg0: Int32) -> String
 
+  /// Java method `decode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.decode(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func decode(_ arg0: String) throws -> JavaInteger!
 
+  /// Java method `parseInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseInt(java.lang.CharSequence,int,int,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseInt(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int32
 
-  @JavaStaticMethod
-  public func parseInt(_ arg0: String, _ arg1: Int32) throws -> Int32
-
+  /// Java method `parseInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseInt(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseInt(_ arg0: String) throws -> Int32
 
+  /// Java method `parseInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseInt(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
-  public func highestOneBit(_ arg0: Int32) -> Int32
+  public func parseInt(_ arg0: String, _ arg1: Int32) throws -> Int32
 
+  /// Java method `toUnsignedLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static long java.lang.Integer.toUnsignedLong(int)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedLong(_ arg0: Int32) -> Int64
 
+  /// Java method `sum`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.sum(int,int)
+  /// ```
   @JavaStaticMethod
   public func sum(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `toUnsignedString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toUnsignedString(int)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedString(_ arg0: Int32) -> String
 
+  /// Java method `toUnsignedString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toUnsignedString(int,int)
+  /// ```
   @JavaStaticMethod
   public func toUnsignedString(_ arg0: Int32, _ arg1: Int32) -> String
 
+  /// Java method `parseUnsignedInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseUnsignedInt(java.lang.String,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedInt(_ arg0: String, _ arg1: Int32) throws -> Int32
 
+  /// Java method `parseUnsignedInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseUnsignedInt(java.lang.String) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedInt(_ arg0: String) throws -> Int32
 
+  /// Java method `parseUnsignedInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.parseUnsignedInt(java.lang.CharSequence,int,int,int) throws java.lang.NumberFormatException
+  /// ```
   @JavaStaticMethod
   public func parseUnsignedInt(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32, _ arg3: Int32) throws -> Int32
 
-  @JavaStaticMethod
-  public func getInteger(_ arg0: String, _ arg1: Int32) -> JavaInteger!
-
-  @JavaStaticMethod
-  public func getInteger(_ arg0: String) -> JavaInteger!
-
+  /// Java method `getInteger`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.getInteger(java.lang.String,java.lang.Integer)
+  /// ```
   @JavaStaticMethod
   public func getInteger(_ arg0: String, _ arg1: JavaInteger?) -> JavaInteger!
 
+  /// Java method `getInteger`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.getInteger(java.lang.String)
+  /// ```
+  @JavaStaticMethod
+  public func getInteger(_ arg0: String) -> JavaInteger!
+
+  /// Java method `getInteger`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.Integer java.lang.Integer.getInteger(java.lang.String,int)
+  /// ```
+  @JavaStaticMethod
+  public func getInteger(_ arg0: String, _ arg1: Int32) -> JavaInteger!
+
+  /// Java method `toOctalString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toOctalString(int)
+  /// ```
   @JavaStaticMethod
   public func toOctalString(_ arg0: Int32) -> String
 
+  /// Java method `toBinaryString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.lang.String java.lang.Integer.toBinaryString(int)
+  /// ```
   @JavaStaticMethod
   public func toBinaryString(_ arg0: Int32) -> String
 
+  /// Java method `highestOneBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.highestOneBit(int)
+  /// ```
+  @JavaStaticMethod
+  public func highestOneBit(_ arg0: Int32) -> Int32
+
+  /// Java method `lowestOneBit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.lowestOneBit(int)
+  /// ```
   @JavaStaticMethod
   public func lowestOneBit(_ arg0: Int32) -> Int32
 
+  /// Java method `rotateLeft`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.rotateLeft(int,int)
+  /// ```
   @JavaStaticMethod
   public func rotateLeft(_ arg0: Int32, _ arg1: Int32) -> Int32
 
+  /// Java method `rotateRight`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static int java.lang.Integer.rotateRight(int,int)
+  /// ```
   @JavaStaticMethod
   public func rotateRight(_ arg0: Int32, _ arg1: Int32) -> Int32
 }
