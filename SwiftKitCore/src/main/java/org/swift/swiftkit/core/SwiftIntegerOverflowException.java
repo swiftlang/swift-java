@@ -28,4 +28,8 @@ public class SwiftIntegerOverflowException extends RuntimeException {
     public SwiftIntegerOverflowException() {
         super("Swift runtime has detected IntegerOverflow! Most probably you are running 32-bit application while using Swift's Int type.");
     }
+
+    public SwiftIntegerOverflowException(String message) {
+        super(message);
+    }
 }
