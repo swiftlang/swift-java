@@ -191,7 +191,7 @@ extension FFMSwift2JavaGenerator {
           let translatedClosure = try translateFunctionType(name: paramName, swiftType: funcTy, cdeclType: cdeclTy)
           funcTypes.append(translatedClosure)
         case .tuple:
-          // TODO: Implement
+          // Tuple-typed closure parameters are not supported (same as JNI / lowering).
           break
         default:
           break
@@ -462,9 +462,27 @@ extension FFMSwift2JavaGenerator {
           conversion: .swiftValueSelfSegment(.placeholder)
         )
 
-      case .tuple:
-        // TODO: Implement.
-        throw JavaTranslationError.unhandledType(swiftType)
+      case .tuple([]):
+        return TranslatedParameter(
+          javaParameters: [
+            JavaParameter(
+              name: parameterName,
+              type: .void,
+              annotations: parameterAnnotations
+            )
+          ],
+          conversion: .placeholder
+        )
+
+      case .tuple(let elements):
+        return try translateTupleParameter(
+          elements: elements,
+          convention: convention,
+          parameterName: parameterName,
+          methodName: methodName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
 
       case .function:
         return TranslatedParameter(
@@ -537,6 +555,56 @@ extension FFMSwift2JavaGenerator {
       case .set:
         throw JavaTranslationError.unhandledType(swiftType)
       }
+    }
+
+    /// Tuple parameters: one `TupleN<…>` on the Java API; conversion reads `.$0`, `.$1`, … (mirrors JNI).
+    func translateTupleParameter(
+      elements: [SwiftTupleElement],
+      convention: SwiftParameterConvention,
+      parameterName: String,
+      methodName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> TranslatedParameter {
+      let lowering = CdeclLowering(knownTypes: knownTypes)
+      var elementJavaTypes: [JavaType] = []
+      var elementConversions: [JavaConversionStep] = []
+
+      for (idx, element) in elements.enumerated() {
+        let subLowered = try lowering.lowerParameter(
+          element.type,
+          convention: convention,
+          parameterName: "\(parameterName)_\(idx)",
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        let elementTranslated = try translateParameter(
+          type: element.type,
+          convention: convention,
+          parameterName: "\(parameterName)_\(idx)",
+          loweredParam: subLowered,
+          methodName: methodName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        guard elementTranslated.javaParameters.count == 1 else {
+          throw JavaTranslationError.unhandledType(element.type)
+        }
+        let extraction = JavaConversionStep.replacingPlaceholder(
+          elementTranslated.conversion,
+          placeholder: "\(parameterName).$\(idx)"
+        )
+        elementConversions.append(extraction)
+        elementJavaTypes.append(elementTranslated.javaParameters[0].type.javaType)
+      }
+
+      let javaType: JavaType = .tuple(elementTypes: elementJavaTypes)
+      return TranslatedParameter(
+        javaParameters: [
+          JavaParameter(name: parameterName, type: javaType)
+        ],
+        conversion: .commaSeparated(elementConversions)
+      )
     }
 
     /// Translate an Optional Swift API parameter to the user-facing Java API parameter.
@@ -722,9 +790,19 @@ extension FFMSwift2JavaGenerator {
           conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
         )
 
-      case .tuple:
-        // TODO: Implement.
-        throw JavaTranslationError.unhandledType(swiftType)
+      case .tuple([]):
+        return TranslatedResult(
+          javaResultType: .void,
+          annotations: resultAnnotations,
+          outParameters: [],
+          conversion: .placeholder
+        )
+
+      case .tuple(let elements):
+        return try translateTupleResult(
+          elements: elements,
+          resultAnnotations: resultAnnotations
+        )
 
       case .array(let wrapped) where wrapped == knownTypes.uint8:
         return TranslatedResult(
@@ -780,6 +858,59 @@ extension FFMSwift2JavaGenerator {
         throw JavaTranslationError.unhandledType(swiftType)
       }
 
+    }
+
+    /// Tuple results: indirect `MemorySegment` per element, then `new TupleN<…>(…)` (mirrors JNI out-arrays).
+    func translateTupleResult(
+      elements: [SwiftTupleElement],
+      resultAnnotations: [JavaAnnotation]
+    ) throws -> TranslatedResult {
+      var outParameters: [JavaParameter] = []
+      var tupleElements: [(outParamName: String, elementConversion: JavaConversionStep)] = []
+      var elementJavaTypes: [JavaType] = []
+
+      for (idx, element) in elements.enumerated() {
+        let (javaType, elementConversion) = try translateTupleElementResult(type: element.type)
+        outParameters.append(JavaParameter(name: "\(idx)", type: javaType))
+        tupleElements.append((outParamName: "_result_\(idx)", elementConversion: elementConversion))
+        elementJavaTypes.append(javaType)
+      }
+
+      let javaResultType: JavaType = .tuple(elementTypes: elementJavaTypes)
+      let fullTupleClassName = javaResultType.fullyQualifiedClassName!
+
+      return TranslatedResult(
+        javaResultType: javaResultType,
+        annotations: resultAnnotations,
+        outParameters: outParameters,
+        conversion: .tupleFromOutParams(
+          tupleClassName: "new \(fullTupleClassName)",
+          elements: tupleElements
+        )
+      )
+    }
+
+    /// Single tuple element for the Java result (mirrors JNI `translateTupleElementResult`).
+    private func translateTupleElementResult(type: SwiftType) throws -> (JavaType, JavaConversionStep) {
+      switch type {
+      case .nominal(let nominalType):
+        if nominalType.nominalTypeDecl.knownTypeKind != nil {
+          if let cType = try? CType(cdeclType: type) {
+            return (cType.javaType, .readMemorySegment(.placeholder, as: cType.javaType))
+          }
+          throw JavaTranslationError.unhandledType(type)
+        }
+
+        guard !nominalType.isSwiftJavaWrapper else {
+          throw JavaTranslationError.unhandledType(type)
+        }
+
+        let javaType: JavaType = .class(package: nil, name: nominalType.nominalTypeDecl.qualifiedName)
+        return (javaType, .wrapMemoryAddressUnsafe(.placeholder, javaType))
+
+      default:
+        throw JavaTranslationError.unhandledType(type)
+      }
     }
 
     func translate(
@@ -875,6 +1006,15 @@ extension FFMSwift2JavaGenerator {
 
     /// Refer an exploded argument suffixed with `_\(name)`.
     indirect case readMemorySegment(JavaConversionStep, as: JavaType)
+
+    /// Use `placeholder` as the root when rendering `inner` (same idea as JNI `replacingPlaceholder`).
+    indirect case replacingPlaceholder(JavaConversionStep, placeholder: String)
+
+    /// Build `org.swift.swiftkit.core.tuple.TupleN` from indirect `MemorySegment` out params (JNI `tupleFromOutParams`).
+    case tupleFromOutParams(
+      tupleClassName: String,
+      elements: [(outParamName: String, elementConversion: JavaConversionStep)]
+    )
 
     var isPlaceholder: Bool {
       if case .placeholder = self { true } else { false }

@@ -622,6 +622,12 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     case .commaSeparated(let list, _):
       return list.contains(where: { $0.requiresSwiftArena })
+
+    case .replacingPlaceholder(let inner, _):
+      return inner.requiresSwiftArena
+
+    case .tupleFromOutParams(_, let elements):
+      return elements.contains(where: { $0.elementConversion.requiresSwiftArena })
     }
   }
 
@@ -654,6 +660,12 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return inner.requiresTemporaryArena
     case .commaSeparated(let list, _):
       return list.contains(where: { $0.requiresTemporaryArena })
+
+    case .replacingPlaceholder(let inner, _):
+      return inner.requiresTemporaryArena
+
+    case .tupleFromOutParams(_, let elements):
+      return elements.contains(where: { $0.elementConversion.requiresTemporaryArena })
     }
   }
 
@@ -754,6 +766,19 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     case .readMemorySegment(let inner, let javaType):
       let inner = inner.render(&printer, placeholder)
       return "\(inner).get(\(ForeignValueLayout(javaType: javaType)!), 0)"
+
+    case .replacingPlaceholder(let inner, let root):
+      return inner.render(&printer, root, placeholderForDowncall: placeholderForDowncall)
+
+    case .tupleFromOutParams(let tupleClassName, let elements):
+      let args = elements.map { element in
+        element.elementConversion.render(
+          &printer,
+          element.outParamName,
+          placeholderForDowncall: placeholderForDowncall
+        )
+      }
+      return "\(tupleClassName)(\(args.joined(separator: ", ")))"
     }
   }
 }
