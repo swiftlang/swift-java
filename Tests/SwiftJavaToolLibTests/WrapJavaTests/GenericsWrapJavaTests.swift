@@ -149,7 +149,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         @JavaClass("com.example.Pair")
         open class Pair<Pair_First: AnyJavaObject, Pair_Second: AnyJavaObject>: JavaObject {
           public typealias First = Pair_First
-        
+
           public typealias Second = Pair_Second
         """,
         """
@@ -568,26 +568,26 @@ final class GenericsWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJava(
       """
       package com.example;
-      
+
+      class String {}
       abstract class AbstractMap<K, V> { }
-      
-      class TreeMap<K, V> extends AbstractMap<K, V> { }
+
+      class StringKeyMap<V> extends AbstractMap<String, V> { }
       """
     )
 
     try assertWrapJavaOutput(
       javaClassNames: [
+        "com.example.String",
         "com.example.AbstractMap",
-        "com.example.TreeMap",
+        "com.example.StringKeyMap",
       ],
       classpath: [classpathURL],
       expectedChunks: [
         """
-        @JavaInterface("com.example.TreeMap")
-        open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: AbstractMap<TreeMap_K, TreeMap_V> {
-          public typealias K = TreeMap_K
-        
-          public typealias V = TreeMap_V
+        @JavaClass("com.example.StringKeyMap")
+        open class StringKeyMap<StringKeyMap_V: AnyJavaObject>: AbstractMap<String, StringKeyMap_V> {
+          public typealias V = StringKeyMap_V
         """
       ]
     )

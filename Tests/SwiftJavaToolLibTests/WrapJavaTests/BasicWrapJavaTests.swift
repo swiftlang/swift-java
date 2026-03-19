@@ -267,7 +267,7 @@ final class BasicWrapJavaTests: XCTestCase {
         @JavaInterface("com.example.CallMe", extends: BiFunction<JavaObject, JavaObject, JavaObject>.self)
         public struct CallMe<CallMe_ValueType: AnyJavaObject> {
           public typealias ValueType = CallMe_ValueType
-        
+
           /// Java method `apply`.
           ///
           /// ### Java method signature

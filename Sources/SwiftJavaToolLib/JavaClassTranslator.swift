@@ -118,39 +118,47 @@ struct JavaClassTranslator {
     self.javaClass = javaClass
     self.translator = translator
     self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
-    self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
+    let swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
       fullName,
       preferValueTypes: false,
       escapeMemberNames: false
     )
+    self.swiftTypeName = swiftTypeName
 
     // Type parameters.
-    self.javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
+    let javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
+    self.javaTypeParameters = javaTypeParameters
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
     // Generic substitution.
-    self.substitution = SubstitutionMap(startingFrom: javaClass)
+    let substitution = SubstitutionMap(startingFrom: javaClass)
+    self.substitution = substitution
 
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
       var javaGenericSuperclass: Type? = javaClass.getGenericSuperclass()
       var swiftSuperclassName: String? = nil
-      var swiftSuperclassTypeArgs: [String] = []
+      var swiftSuperclassTypeArgs: [String]? = nil
       while let javaSuperclassNonOpt = javaSuperclass {
         do {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
-          if let javaGenericSuperclass = javaGenericSuperclass?.as(ParameterizedType.self) {
-            for typeArg in javaGenericSuperclass.getActualTypeArguments() {
-              let mappedSwiftName = try translator.getSwiftTypeNameAsString(
-                typeArg!,
+          swiftSuperclassTypeArgs = try javaGenericSuperclass?.as(ParameterizedType.self)?.getActualTypeArguments()
+            .compactMap { typeArg in
+              guard let typeArg else { return nil }
+
+              // When forwarding generics to the superclass
+              if javaTypeParameters.contains(where: { $0.getName() == typeArg.getTypeName() }) {
+                return "\(swiftTypeName.splitSwiftTypeName().name)_\(typeArg.getTypeName())"
+              }
+
+              return try translator.getSwiftTypeNameAsString(
+                typeArg,
                 substitution: substitution,
                 preferValueTypes: false,
                 outerOptional: .nonoptional
               )
-              swiftSuperclassTypeArgs.append(mappedSwiftName)
             }
-          }
           break
         } catch {
           translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
