@@ -112,19 +112,6 @@ struct JavaClassTranslator {
     swiftTypeName.splitSwiftTypeName().name
   }
 
-  /// The generic parameter clause for the Swift version of the Java class.
-  var genericParameters: [String] {
-    if javaTypeParameters.isEmpty {
-      return []
-    }
-
-    let genericParameters = javaTypeParameters.map { param in
-      "\(param.getName()): AnyJavaObject"
-    }
-
-    return genericParameters
-  }
-
   /// Prepare translation for the given Java class (or interface).
   init(javaClass: JavaClass<JavaObject>, translator: JavaTranslator) throws {
     let fullName = javaClass.getName()
@@ -433,8 +420,14 @@ extension JavaClassTranslator {
       }
     }
 
+    let genericParameterTypeAliases: [DeclSyntax] = javaTypeParameters
+      .map { param in
+        let name = TokenSyntax("\(raw: param.getName())")
+        return DeclSyntax("public typealias \(name) = \(raw: swiftInnermostTypeName)_\(name)")
+      }
+
     // Collect all of the members of this type.
-    let members = properties + enumDecls + initializers + instanceMethods
+    let members = genericParameterTypeAliases + properties + enumDecls + initializers + instanceMethods
 
     // Compute the "extends" clause for the superclass (of the struct
     // formulation) or the inheritance clause (for the class
@@ -470,6 +463,9 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
+    let genericParameters = javaTypeParameters.map { param in
+      "\(swiftInnermostTypeName)_\(param.getName()): AnyJavaObject"
+    }
     let genericParameterClause =
       if genericParameters.isEmpty {
         ""
@@ -559,7 +555,9 @@ extension JavaClassTranslator {
         return try renderMethod(
           method,
           implementedInSwift: /*FIXME:*/ false,
-          genericParameters: genericParameters,
+          genericParameters: javaTypeParameters.map { param in
+            "\(param.getName()): AnyJavaObject"
+          },
           whereClause: staticMemberWhereClause
         )
       } catch {
@@ -578,7 +576,7 @@ extension JavaClassTranslator {
 
     // Specify the specialization arguments when needed.
     let extSpecialization: String
-    if genericParameters.isEmpty {
+    if javaTypeParameters.isEmpty {
       extSpecialization = "<\(swiftTypeName)>"
     } else {
       extSpecialization = ""
