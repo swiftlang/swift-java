@@ -563,4 +563,33 @@ final class GenericsWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+  func testWrapJavaGenericSuperClass() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      
+      abstract class AbstractMap<K, V> { }
+      
+      class TreeMap<K, V> extends AbstractMap<K, V> { }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.AbstractMap",
+        "com.example.TreeMap",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.TreeMap")
+        open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: AbstractMap<TreeMap_K, TreeMap_V> {
+          public typealias K = TreeMap_K
+        
+          public typealias V = TreeMap_V
+        """
+      ]
+    )
+  }
 }
