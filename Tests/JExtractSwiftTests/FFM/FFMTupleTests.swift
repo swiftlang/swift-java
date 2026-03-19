@@ -43,7 +43,7 @@ struct FFMTupleTests {
             return new org.swift.swiftkit.core.tuple.Tuple2<>(_result_0.get(SwiftValueLayout.SWIFT_INT64, 0), _result_1.get(SwiftValueLayout.SWIFT_INT64, 0));
           }
         }
-        """,
+        """
       ]
     )
   }
@@ -60,7 +60,7 @@ struct FFMTupleTests {
         public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<Long, Long> arg) {
           swiftjava_SwiftModule_takePair__.call(arg.$0, arg.$1);
         }
-        """,
+        """
       ]
     )
   }
@@ -77,7 +77,7 @@ struct FFMTupleTests {
         """,
         """
             return new org.swift.swiftkit.core.tuple.Tuple2<>(_result_0.get(SwiftValueLayout.SWIFT_INT32, 0), _result_1.get(SwiftValueLayout.SWIFT_INT32, 0));
-        """,
+        """
       ]
     )
   }
@@ -94,7 +94,7 @@ struct FFMTupleTests {
         let _result = returnPair()
         _result_0.initialize(to: _result.0)
         _result_1.initialize(to: _result.1)
-        """,
+        """
       ]
     )
   }
@@ -109,7 +109,7 @@ struct FFMTupleTests {
       expectedChunks: [
         """
         takePair((arg_0, arg_1))
-        """,
+        """
       ]
     )
   }
@@ -126,7 +126,7 @@ struct FFMTupleTests {
         let _result = labeledTuple()
         _result_0.initialize(to: _result.0)
         _result_1.initialize(to: _result.1)
-        """,
+        """
       ]
     )
   }
