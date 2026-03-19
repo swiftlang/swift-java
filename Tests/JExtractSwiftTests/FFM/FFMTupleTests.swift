@@ -73,7 +73,7 @@ struct FFMTupleTests {
         """,
         """
             return new org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer>(_result_0.get(SwiftValueLayout.SWIFT_INT32, 0), _result_1.get(SwiftValueLayout.SWIFT_INT32, 0));
-        """
+        """,
       ]
     )
   }
