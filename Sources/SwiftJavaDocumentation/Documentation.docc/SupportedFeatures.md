@@ -65,7 +65,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Static functions or properties in generic type                                       | ❌        | ❌   | 
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
-| Tuples: `(Int, String)`, `(A, B, C)`                                                 | ❌        | ❌   |
+| Tuples: `(Int, String)`, `(A, B, C)`                                                 | ✅        | ✅   |
 | Protocols: `protocol`                                                                | ❌        | ✅   |
 | Protocols: `protocol` with associated types                                          | ❌        | ❌   |
 | Protocols static requirements: `static func`, `init(rawValue:)`                      | ❌        | ❌   |
