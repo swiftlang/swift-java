@@ -58,7 +58,8 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Stored properties: `var`, `let` (with `willSet`, `didSet`)                           | ✅        | ✅   |
 | Computed properties: `var` (incl. `throws`)                                          | ✅ / TODO | ✅   |
 | Async functions `func async` and properties: `var { get async {} }`                  | ❌        | ✅   |
-| Arrays: `[UInt8]`, `[MyType]`, `Array<Int64>` etc                                    | ❌        | ✅   |
+| Arrays: `[UInt8]`                                                                    | ✅        | ✅   |
+| Arrays: `[MyType]`, `Array<Int64>` etc                                               | ❌        | ✅   |
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ✅   |
 | Generic type: `struct S<T>`                                                          | ❌        | ✅   |
 | Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
