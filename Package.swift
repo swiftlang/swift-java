@@ -158,7 +158,6 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .enableUpcomingFeature("ImplicitOpenExistentials"),
-        .unsafeFlags(["-Xfrontend", "-sil-verify-none"], .when(configuration: .release)), // Workaround for https://github.com/swiftlang/swift/issues/84899
       ],
     ),
     .target(
