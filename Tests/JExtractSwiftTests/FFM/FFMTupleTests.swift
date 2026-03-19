@@ -15,10 +15,6 @@
 import JExtractSwiftLib
 import Testing
 
-/// FFM tuple binding tests, aligned with `JNITupleTests` where lowering allows it.
-///
-/// JNI uses `(Int64, String)` for `returnPair` / `takePair`; FFM `lowerResult` does not support
-/// `String` in tuple results yet, so those signatures use `(Int64, Int64)` here.
 @Suite
 struct FFMTupleTests {
   let source = """
@@ -40,7 +36,7 @@ struct FFMTupleTests {
             MemorySegment _result_0 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
             MemorySegment _result_1 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
             swiftjava_SwiftModule_returnPair.call(_result_0, _result_1);
-            return new org.swift.swiftkit.core.tuple.Tuple2<>(_result_0.get(SwiftValueLayout.SWIFT_INT64, 0), _result_1.get(SwiftValueLayout.SWIFT_INT64, 0));
+            return new org.swift.swiftkit.core.tuple.Tuple2<Long, Long>(_result_0.get(SwiftValueLayout.SWIFT_INT64, 0), _result_1.get(SwiftValueLayout.SWIFT_INT64, 0));
           }
         }
         """
@@ -76,7 +72,7 @@ struct FFMTupleTests {
         public static org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer> labeledTuple() {
         """,
         """
-            return new org.swift.swiftkit.core.tuple.Tuple2<>(_result_0.get(SwiftValueLayout.SWIFT_INT32, 0), _result_1.get(SwiftValueLayout.SWIFT_INT32, 0));
+            return new org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer>(_result_0.get(SwiftValueLayout.SWIFT_INT32, 0), _result_1.get(SwiftValueLayout.SWIFT_INT32, 0));
         """
       ]
     )
@@ -88,12 +84,15 @@ struct FFMTupleTests {
       input: source,
       .ffm,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        let _result = returnPair()
-        _result_0.initialize(to: _result.0)
-        _result_1.initialize(to: _result.1)
+        @_cdecl("swiftjava_SwiftModule_returnPair")
+        public func swiftjava_SwiftModule_returnPair(_ _result_0: UnsafeMutablePointer<Int64>, _ _result_1: UnsafeMutablePointer<Int64>) {
+          let _result = returnPair()
+          _result_0.initialize(to: _result.0)
+          _result_1.initialize(to: _result.1)
+        }
         """
       ]
     )
@@ -105,10 +104,13 @@ struct FFMTupleTests {
       input: source,
       .ffm,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        takePair((arg_0, arg_1))
+        @_cdecl("swiftjava_SwiftModule_takePair__")
+        public func swiftjava_SwiftModule_takePair__(_ arg_0: Int64, _ arg_1: Int64) {
+          takePair((arg_0, arg_1))
+        }
         """
       ]
     )
@@ -120,12 +122,15 @@ struct FFMTupleTests {
       input: source,
       .ffm,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        let _result = labeledTuple()
-        _result_0.initialize(to: _result.0)
-        _result_1.initialize(to: _result.1)
+        @_cdecl("swiftjava_SwiftModule_labeledTuple")
+        public func swiftjava_SwiftModule_labeledTuple(_ _result_0: UnsafeMutablePointer<Int32>, _ _result_1: UnsafeMutablePointer<Int32>) {
+          let _result = labeledTuple()
+          _result_0.initialize(to: _result.0)
+          _result_1.initialize(to: _result.1)
+        }
         """
       ]
     )

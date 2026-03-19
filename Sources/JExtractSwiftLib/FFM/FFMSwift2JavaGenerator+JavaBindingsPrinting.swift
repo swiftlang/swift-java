@@ -771,14 +771,11 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
       return inner.render(&printer, root, placeholderForDowncall: placeholderForDowncall)
 
     case .tupleFromOutParams(let tupleClassName, let elements):
-      var args: [String] = []
-      for element in elements {
-        args.append(
-          element.elementConversion.render(
-            &printer,
-            element.outParamName,
-            placeholderForDowncall: placeholderForDowncall
-          )
+      let args = elements.map { element in
+        element.elementConversion.render(
+          &printer,
+          element.outParamName,
+          placeholderForDowncall: placeholderForDowncall
         )
       }
       return "\(tupleClassName)(\(args.joined(separator: ", ")))"

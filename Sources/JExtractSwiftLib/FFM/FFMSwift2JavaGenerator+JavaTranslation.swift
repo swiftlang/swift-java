@@ -474,7 +474,7 @@ extension FFMSwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .tuple(let elements) where !elements.isEmpty:
+      case .tuple(let elements):
         return try translateTupleParameter(
           elements: elements,
           convention: convention,
@@ -483,9 +483,6 @@ extension FFMSwift2JavaGenerator {
           genericParameters: genericParameters,
           genericRequirements: genericRequirements
         )
-
-      case .tuple:
-        throw JavaTranslationError.unhandledType(swiftType)
 
       case .function:
         return TranslatedParameter(
@@ -801,14 +798,11 @@ extension FFMSwift2JavaGenerator {
           conversion: .placeholder
         )
 
-      case .tuple(let elements) where !elements.isEmpty:
+      case .tuple(let elements):
         return try translateTupleResult(
           elements: elements,
           resultAnnotations: resultAnnotations
         )
-
-      case .tuple:
-        throw JavaTranslationError.unhandledType(swiftType)
 
       case .array(let wrapped) where wrapped == knownTypes.uint8:
         return TranslatedResult(
@@ -866,12 +860,11 @@ extension FFMSwift2JavaGenerator {
 
     }
 
-    /// Tuple results: indirect `MemorySegment` per element, then `new TupleN<>(…)` (mirrors JNI out-arrays).
+    /// Tuple results: indirect `MemorySegment` per element, then `new TupleN<…>(…)` (mirrors JNI out-arrays).
     func translateTupleResult(
       elements: [SwiftTupleElement],
       resultAnnotations: [JavaAnnotation]
     ) throws -> TranslatedResult {
-      let arity = elements.count
       var outParameters: [JavaParameter] = []
       var tupleElements: [(outParamName: String, elementConversion: JavaConversionStep)] = []
       var elementJavaTypes: [JavaType] = []
@@ -884,14 +877,14 @@ extension FFMSwift2JavaGenerator {
       }
 
       let javaResultType: JavaType = .tuple(elementTypes: elementJavaTypes)
-      let fullTupleClassName = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
+      let fullTupleClassName = javaResultType.fullyQualifiedClassName!
 
       return TranslatedResult(
         javaResultType: javaResultType,
         annotations: resultAnnotations,
         outParameters: outParameters,
         conversion: .tupleFromOutParams(
-          tupleClassName: "new \(fullTupleClassName)<>",
+          tupleClassName: "new \(fullTupleClassName)",
           elements: tupleElements
         )
       )
