@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToLongBiFunction")
-public struct JavaToLongBiFunction<T: AnyJavaObject, U: AnyJavaObject> {
+public struct JavaToLongBiFunction<JavaToLongBiFunction_T: AnyJavaObject, JavaToLongBiFunction_U: AnyJavaObject> {
+  public typealias T = JavaToLongBiFunction_T
+
+  public typealias U = JavaToLongBiFunction_U
+
   /// Java method `applyAsLong`.
   ///
   /// ### Java method signature

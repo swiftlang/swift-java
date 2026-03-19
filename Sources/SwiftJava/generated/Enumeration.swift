@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.Enumeration")
-public struct Enumeration<E: AnyJavaObject> {
+public struct Enumeration<Enumeration_E: AnyJavaObject> {
+  public typealias E = Enumeration_E
+
   /// Java method `asIterator`.
   ///
   /// ### Java method signature

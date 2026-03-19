@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ObjDoubleConsumer")
-public struct JavaObjDoubleConsumer<T: AnyJavaObject> {
+public struct JavaObjDoubleConsumer<JavaObjDoubleConsumer_T: AnyJavaObject> {
+  public typealias T = JavaObjDoubleConsumer_T
+
   /// Java method `accept`.
   ///
   /// ### Java method signature

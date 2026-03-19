@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Function")
-public struct JavaFunction<T: AnyJavaObject, R: AnyJavaObject> {
+public struct JavaFunction<JavaFunction_T: AnyJavaObject, JavaFunction_R: AnyJavaObject> {
+  public typealias T = JavaFunction_T
+
+  public typealias R = JavaFunction_R
+
   /// Java method `apply`.
   ///
   /// ### Java method signature

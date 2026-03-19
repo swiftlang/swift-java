@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.PriorityQueue")
-open class PriorityQueue<E: AnyJavaObject>: JavaObject {
+open class PriorityQueue<PriorityQueue_E: AnyJavaObject>: JavaObject {
+  public typealias E = PriorityQueue_E
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: PriorityQueue<E>?, environment: JNIEnvironment? = nil)
 

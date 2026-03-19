@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BinaryOperator", extends: JavaBiFunction<JavaObject, JavaObject, JavaObject>.self)
-public struct JavaBinaryOperator<T: AnyJavaObject> {
+public struct JavaBinaryOperator<JavaBinaryOperator_T: AnyJavaObject> {
+  public typealias T = JavaBinaryOperator_T
+
   /// Java method `apply`.
   ///
   /// ### Java method signature

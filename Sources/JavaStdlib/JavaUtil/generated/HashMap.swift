@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.HashMap")
-open class HashMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
+open class HashMap<HashMap_K: AnyJavaObject, HashMap_V: AnyJavaObject>: JavaObject {
+  public typealias K = HashMap_K
+
+  public typealias V = HashMap_V
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 

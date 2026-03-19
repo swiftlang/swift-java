@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.HashSet", implements: JavaSet<JavaObject>.self)
-open class HashSet<E: AnyJavaObject>: JavaObject {
+open class HashSet<HashSet_E: AnyJavaObject>: JavaObject {
+  public typealias E = HashSet_E
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 

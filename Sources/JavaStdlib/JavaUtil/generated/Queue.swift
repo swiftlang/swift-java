@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.Queue", extends: JavaCollection<JavaObject>.self)
-public struct Queue<E: AnyJavaObject> {
+public struct Queue<Queue_E: AnyJavaObject> {
+  public typealias E = Queue_E
+
   /// Java method `remove`.
   ///
   /// ### Java method signature

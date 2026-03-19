@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaClass("java.util.Optional")
-open class JavaOptional<T: AnyJavaObject>: JavaObject {
+open class JavaOptional<JavaOptional_T: AnyJavaObject>: JavaObject {
+  public typealias T = JavaOptional_T
+
   /// Java method `get`.
   ///
   /// ### Java method signature

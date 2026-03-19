@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToLongFunction")
-public struct JavaToLongFunction<T: AnyJavaObject> {
+public struct JavaToLongFunction<JavaToLongFunction_T: AnyJavaObject> {
+  public typealias T = JavaToLongFunction_T
+
   /// Java method `applyAsLong`.
   ///
   /// ### Java method signature

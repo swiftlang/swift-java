@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.List")
-public struct List<E: AnyJavaObject> {
+public struct List<List_E: AnyJavaObject> {
+  public typealias E = List_E
+
   /// Java method `remove`.
   ///
   /// ### Java method signature

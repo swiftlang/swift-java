@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Consumer")
-public struct JavaConsumer<T: AnyJavaObject> {
+public struct JavaConsumer<JavaConsumer_T: AnyJavaObject> {
+  public typealias T = JavaConsumer_T
+
   /// Java method `accept`.
   ///
   /// ### Java method signature

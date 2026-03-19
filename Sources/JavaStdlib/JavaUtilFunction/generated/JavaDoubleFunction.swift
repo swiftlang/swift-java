@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoubleFunction")
-public struct JavaDoubleFunction<R: AnyJavaObject> {
+public struct JavaDoubleFunction<JavaDoubleFunction_R: AnyJavaObject> {
+  public typealias R = JavaDoubleFunction_R
+
   /// Java method `apply`.
   ///
   /// ### Java method signature

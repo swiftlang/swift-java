@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.ListIterator", extends: JavaIterator<JavaObject>.self)
-public struct ListIterator<E: AnyJavaObject> {
+public struct ListIterator<ListIterator_E: AnyJavaObject> {
+  public typealias E = ListIterator_E
+
   /// Java method `remove`.
   ///
   /// ### Java method signature

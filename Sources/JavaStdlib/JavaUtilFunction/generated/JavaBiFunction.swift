@@ -3,7 +3,13 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiFunction")
-public struct JavaBiFunction<T: AnyJavaObject, U: AnyJavaObject, R: AnyJavaObject> {
+public struct JavaBiFunction<JavaBiFunction_T: AnyJavaObject, JavaBiFunction_U: AnyJavaObject, JavaBiFunction_R: AnyJavaObject> {
+  public typealias T = JavaBiFunction_T
+
+  public typealias U = JavaBiFunction_U
+
+  public typealias R = JavaBiFunction_R
+
   /// Java method `apply`.
   ///
   /// ### Java method signature
