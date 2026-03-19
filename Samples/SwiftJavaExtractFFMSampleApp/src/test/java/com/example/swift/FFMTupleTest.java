@@ -30,14 +30,14 @@ public class FFMTupleTest {
 
     @Test
     void ffmTupleReturnPair_roundTrip() {
-        Tuple2<Long, Long> result = MySwiftLibrary.ffmTupleReturnPair();
-        assertEquals(42L, result.$0);
+        Tuple2<Integer, Long> result = MySwiftLibrary.ffmTupleReturnPair();
+        assertEquals(42, result.$0);
         assertEquals(43L, result.$1);
     }
 
     @Test
     void ffmTupleSumPair_acceptsTupleFromJava() {
-        long sum = MySwiftLibrary.ffmTupleSumPair(new Tuple2<>(5L, 7L));
+        long sum = MySwiftLibrary.ffmTupleSumPair(new Tuple2<>(5, 7L));
         assertEquals(12L, sum);
     }
 

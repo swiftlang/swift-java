@@ -66,13 +66,13 @@ public func getArray() -> [UInt8] {
   [1, 2, 3]
 }
 
-// Tuple round-trips for jextract FFM (homogeneous numeric pairs; see `FFMTupleTest` in the sample app).
-public func ffmTupleReturnPair() -> (Int64, Int64) {
+// Tuple round-trips for jextract FFM (see `FFMTupleTest` in the sample app).
+public func ffmTupleReturnPair() -> (Int32, Int64) {
   (42, 43)
 }
 
-public func ffmTupleSumPair(_ arg: (Int64, Int64)) -> Int64 {
-  arg.0 + arg.1
+public func ffmTupleSumPair(_ arg: (Int32, Int64)) -> Int64 {
+  Int64(arg.0) + arg.1
 }
 
 public func ffmTupleLabeledPair() -> (x: Int32, y: Int32) {
