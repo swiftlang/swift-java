@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToIntBiFunction")
-public struct JavaToIntBiFunction<T: AnyJavaObject, U: AnyJavaObject> {
+public struct JavaToIntBiFunction<JavaToIntBiFunction_T: AnyJavaObject, JavaToIntBiFunction_U: AnyJavaObject> {
+  public typealias T = JavaToIntBiFunction_T
+
+  public typealias U = JavaToIntBiFunction_U
+
   /// Java method `applyAsInt`.
   ///
   /// ### Java method signature

@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.ArrayList", implements: List<JavaObject>.self, RandomAccess.self)
-open class ArrayList<E: AnyJavaObject>: JavaObject {
+open class ArrayList<ArrayList_E: AnyJavaObject>: JavaObject {
+  public typealias E = ArrayList_E
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 

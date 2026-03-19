@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.lang.reflect.Constructor")
-open class Constructor<T: AnyJavaObject>: Executable {
+open class Constructor<Constructor_T: AnyJavaObject>: Executable {
+  public typealias T = Constructor_T
+
   /// Java method `getName`.
   ///
   /// ### Java method signature

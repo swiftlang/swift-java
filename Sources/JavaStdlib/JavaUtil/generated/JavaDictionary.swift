@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.Dictionary")
-open class JavaDictionary<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
+open class JavaDictionary<JavaDictionary_K: AnyJavaObject, JavaDictionary_V: AnyJavaObject>: JavaObject {
+  public typealias K = JavaDictionary_K
+
+  public typealias V = JavaDictionary_V
+
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 

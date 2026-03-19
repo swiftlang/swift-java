@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Supplier")
-public struct JavaSupplier<T: AnyJavaObject> {
+public struct JavaSupplier<JavaSupplier_T: AnyJavaObject> {
+  public typealias T = JavaSupplier_T
+
   /// Java method `get`.
   ///
   /// ### Java method signature

@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.Predicate")
-public struct JavaPredicate<T: AnyJavaObject> {
+public struct JavaPredicate<JavaPredicate_T: AnyJavaObject> {
+  public typealias T = JavaPredicate_T
+
   /// Java method `test`.
   ///
   /// ### Java method signature

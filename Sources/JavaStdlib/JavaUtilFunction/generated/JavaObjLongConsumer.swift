@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ObjLongConsumer")
-public struct JavaObjLongConsumer<T: AnyJavaObject> {
+public struct JavaObjLongConsumer<JavaObjLongConsumer_T: AnyJavaObject> {
+  public typealias T = JavaObjLongConsumer_T
+
   /// Java method `accept`.
   ///
   /// ### Java method signature

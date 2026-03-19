@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.Stack")
-open class Stack<E: AnyJavaObject>: JavaObject {
+open class Stack<Stack_E: AnyJavaObject>: JavaObject {
+  public typealias E = Stack_E
+
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 

@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.IntFunction")
-public struct JavaIntFunction<R: AnyJavaObject> {
+public struct JavaIntFunction<JavaIntFunction_R: AnyJavaObject> {
+  public typealias R = JavaIntFunction_R
+
   /// Java method `apply`.
   ///
   /// ### Java method signature

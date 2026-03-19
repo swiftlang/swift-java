@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.TypeVariable", extends: Type.self)
-public struct TypeVariable<D: AnyJavaObject> {
+public struct TypeVariable<TypeVariable_D: AnyJavaObject> {
+  public typealias D = TypeVariable_D
+
   /// Java method `getGenericDeclaration`.
   ///
   /// ### Java method signature

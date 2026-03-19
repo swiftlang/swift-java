@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.Set", extends: JavaCollection<JavaObject>.self)
-public struct JavaSet<E: AnyJavaObject> {
+public struct JavaSet<JavaSet_E: AnyJavaObject> {
+  public typealias E = JavaSet_E
+
   /// Java method `remove`.
   ///
   /// ### Java method signature

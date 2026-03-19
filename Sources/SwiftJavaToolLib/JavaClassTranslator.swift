@@ -112,58 +112,53 @@ struct JavaClassTranslator {
     swiftTypeName.splitSwiftTypeName().name
   }
 
-  /// The generic parameter clause for the Swift version of the Java class.
-  var genericParameters: [String] {
-    if javaTypeParameters.isEmpty {
-      return []
-    }
-
-    let genericParameters = javaTypeParameters.map { param in
-      "\(param.getName()): AnyJavaObject"
-    }
-
-    return genericParameters
-  }
-
   /// Prepare translation for the given Java class (or interface).
   init(javaClass: JavaClass<JavaObject>, translator: JavaTranslator) throws {
     let fullName = javaClass.getName()
     self.javaClass = javaClass
     self.translator = translator
     self.translateAsClass = translator.translateAsClass && !javaClass.isInterface()
-    self.swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
+    let swiftTypeName = try translator.getSwiftTypeNameFromJavaClassName(
       fullName,
       preferValueTypes: false,
       escapeMemberNames: false
     )
+    self.swiftTypeName = swiftTypeName
 
     // Type parameters.
-    self.javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
+    let javaTypeParameters = javaClass.getTypeParameters().compactMap { $0 }
+    self.javaTypeParameters = javaTypeParameters
     self.nestedClasses = translator.nestedClasses[fullName] ?? []
 
     // Generic substitution.
-    self.substitution = SubstitutionMap(startingFrom: javaClass)
+    let substitution = SubstitutionMap(startingFrom: javaClass)
+    self.substitution = substitution
 
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
       var javaGenericSuperclass: Type? = javaClass.getGenericSuperclass()
       var swiftSuperclassName: String? = nil
-      var swiftSuperclassTypeArgs: [String] = []
+      var swiftSuperclassTypeArgs: [String]? = nil
       while let javaSuperclassNonOpt = javaSuperclass {
         do {
           swiftSuperclassName = try translator.getSwiftTypeName(javaSuperclassNonOpt, preferValueTypes: false).swiftName
-          if let javaGenericSuperclass = javaGenericSuperclass?.as(ParameterizedType.self) {
-            for typeArg in javaGenericSuperclass.getActualTypeArguments() {
-              let mappedSwiftName = try translator.getSwiftTypeNameAsString(
-                typeArg!,
+          swiftSuperclassTypeArgs = try javaGenericSuperclass?.as(ParameterizedType.self)?.getActualTypeArguments()
+            .compactMap { typeArg in
+              guard let typeArg else { return nil }
+
+              // When forwarding generics to the superclass
+              if javaTypeParameters.contains(where: { $0.getName() == typeArg.getTypeName() }) {
+                return "\(swiftTypeName.splitSwiftTypeName().name)_\(typeArg.getTypeName())"
+              }
+
+              return try translator.getSwiftTypeNameAsString(
+                typeArg,
                 substitution: substitution,
                 preferValueTypes: false,
                 outerOptional: .nonoptional
               )
-              swiftSuperclassTypeArgs.append(mappedSwiftName)
             }
-          }
           break
         } catch {
           translator.logUntranslated("Unable to translate '\(fullName)' superclass: \(error)")
@@ -433,8 +428,16 @@ extension JavaClassTranslator {
       }
     }
 
+    let swiftGenericParameterNames = javaTypeParameters.map { param in
+      "\(swiftInnermostTypeName)_\(param.getName())"
+    }
+    let genericParameterTypeAliases: [DeclSyntax] = zip(javaTypeParameters, swiftGenericParameterNames)
+      .map { javaDecl, swiftName in
+        DeclSyntax("public typealias \(raw: javaDecl.getName()) = \(raw: swiftName)")
+      }
+
     // Collect all of the members of this type.
-    let members = properties + enumDecls + initializers + instanceMethods
+    let members = genericParameterTypeAliases + properties + enumDecls + initializers + instanceMethods
 
     // Compute the "extends" clause for the superclass (of the struct
     // formulation) or the inheritance clause (for the class
@@ -471,10 +474,10 @@ extension JavaClassTranslator {
     }
 
     let genericParameterClause =
-      if genericParameters.isEmpty {
+      if swiftGenericParameterNames.isEmpty {
         ""
       } else {
-        "<\(genericParameters.joined(separator: ", "))>"
+        "<\(swiftGenericParameterNames.map({ "\($0): AnyJavaObject" }).joined(separator: ", "))>"
       }
 
     // Emit the struct declaration describing the java class.
@@ -559,7 +562,9 @@ extension JavaClassTranslator {
         return try renderMethod(
           method,
           implementedInSwift: /*FIXME:*/ false,
-          genericParameters: genericParameters,
+          genericParameters: javaTypeParameters.map { param in
+            "\(param.getName()): AnyJavaObject"
+          },
           whereClause: staticMemberWhereClause
         )
       } catch {
@@ -578,7 +583,7 @@ extension JavaClassTranslator {
 
     // Specify the specialization arguments when needed.
     let extSpecialization: String
-    if genericParameters.isEmpty {
+    if javaTypeParameters.isEmpty {
       extSpecialization = "<\(swiftTypeName)>"
     } else {
       extSpecialization = ""

@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiConsumer")
-public struct JavaBiConsumer<T: AnyJavaObject, U: AnyJavaObject> {
+public struct JavaBiConsumer<JavaBiConsumer_T: AnyJavaObject, JavaBiConsumer_U: AnyJavaObject> {
+  public typealias T = JavaBiConsumer_T
+
+  public typealias U = JavaBiConsumer_U
+
   /// Java method `accept`.
   ///
   /// ### Java method signature

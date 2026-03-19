@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.Collection")
-public struct JavaCollection<E: AnyJavaObject> {
+public struct JavaCollection<JavaCollection_E: AnyJavaObject> {
+  public typealias E = JavaCollection_E
+
   /// Java method `remove`.
   ///
   /// ### Java method signature

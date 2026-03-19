@@ -71,7 +71,7 @@ class Java2SwiftTests: XCTestCase {
         "import SwiftJava",
         """
         @JavaClass("java.lang.Class", extends: JavaObject.self)
-        public struct MyJavaClass<T: AnyJavaObject> {
+        public struct MyJavaClass<MyJavaClass_T: AnyJavaObject> {
         """,
         """
         @JavaStaticMethod
@@ -522,7 +522,7 @@ class Java2SwiftTests: XCTestCase {
         "import SwiftJava",
         """
         @JavaClass("java.util.ArrayDeque", implements: Deque<JavaObject>.self)
-        open class ArrayDeque<E: AnyJavaObject>: JavaObject {
+        open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
         """,
       ]
     )
@@ -541,7 +541,7 @@ class Java2SwiftTests: XCTestCase {
         "import SwiftJava",
         """
         @JavaInterface("java.util.function.IntFunction")
-        public struct MyJavaIntFunction<R: AnyJavaObject> {
+        public struct MyJavaIntFunction<MyJavaIntFunction_R: AnyJavaObject> {
         """,
         """
         @JavaMethod(typeErasedResult: "R!")
@@ -601,7 +601,7 @@ class Java2SwiftTests: XCTestCase {
         "import JavaLangReflect",
         """
         @JavaClass("java.lang.reflect.Constructor")
-        open class Constructor<T: AnyJavaObject>: Executable {
+        open class Constructor<Constructor_T: AnyJavaObject>: Executable {
         """,
         """
         @JavaMethod

@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.ArrayDeque")
-open class ArrayDeque<E: AnyJavaObject>: JavaObject {
+open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
+  public typealias E = ArrayDeque_E
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 

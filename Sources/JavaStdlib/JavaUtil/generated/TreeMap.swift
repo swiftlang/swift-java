@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.TreeMap")
-open class TreeMap<K: AnyJavaObject, V: AnyJavaObject>: JavaObject {
+open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: JavaObject {
+  public typealias K = TreeMap_K
+
+  public typealias V = TreeMap_V
+
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 

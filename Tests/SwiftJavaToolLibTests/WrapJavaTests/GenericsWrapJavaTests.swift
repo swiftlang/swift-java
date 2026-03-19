@@ -56,7 +56,7 @@ final class GenericsWrapJavaTests: XCTestCase {
         """,
         """
         @JavaClass("com.example.Pair")
-        open class Pair<First: AnyJavaObject, Second: AnyJavaObject>: JavaObject {
+        open class Pair<Pair_First: AnyJavaObject, Pair_Second: AnyJavaObject>: JavaObject {
         """,
         """
         @JavaClass("com.example.ExampleSimpleClass")
@@ -142,11 +142,15 @@ final class GenericsWrapJavaTests: XCTestCase {
         """,
         """
         @JavaClass("com.example.Item")
-        open class Item<T: AnyJavaObject>: JavaObject {
+        open class Item<Item_T: AnyJavaObject>: JavaObject {
+          public typealias T = Item_T
         """,
         """
         @JavaClass("com.example.Pair")
-        open class Pair<First: AnyJavaObject, Second: AnyJavaObject>: JavaObject {
+        open class Pair<Pair_First: AnyJavaObject, Pair_Second: AnyJavaObject>: JavaObject {
+          public typealias First = Pair_First
+
+          public typealias Second = Pair_Second
         """,
         """
         @JavaClass("com.example.ExampleSimpleClass")
@@ -374,7 +378,8 @@ final class GenericsWrapJavaTests: XCTestCase {
         """,
         """
         @JavaClass("com.example.Kappa")
-        open class Kappa<T: AnyJavaObject>: JavaObject {
+        open class Kappa<Kappa_T: AnyJavaObject>: JavaObject {
+          public typealias T = Kappa_T
         """,
         """
           @JavaMethod(typeErasedResult: "T!")
@@ -406,7 +411,8 @@ final class GenericsWrapJavaTests: XCTestCase {
       expectedChunks: [
         """
         @JavaClass("com.example.Optional")
-        open class Optional<T: AnyJavaObject>: JavaObject {
+        open class Optional<Optional_T: AnyJavaObject>: JavaObject {
+          public typealias T = Optional_T
         """,
         """
         extension JavaClass {
@@ -551,7 +557,37 @@ final class GenericsWrapJavaTests: XCTestCase {
       expectedChunks: [
         """
         @JavaInterface("com.example.Set", extends: Collection<JavaObject>.self)
-        public struct Set<E: AnyJavaObject> {
+        public struct Set<Set_E: AnyJavaObject> {
+          public typealias E = Set_E
+        """
+      ]
+    )
+  }
+
+  func testWrapJavaGenericSuperClass() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class String {}
+      abstract class AbstractMap<K, V> { }
+
+      class StringKeyMap<V> extends AbstractMap<String, V> { }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.String",
+        "com.example.AbstractMap",
+        "com.example.StringKeyMap",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaClass("com.example.StringKeyMap")
+        open class StringKeyMap<StringKeyMap_V: AnyJavaObject>: AbstractMap<String, StringKeyMap_V> {
+          public typealias V = StringKeyMap_V
         """
       ]
     )

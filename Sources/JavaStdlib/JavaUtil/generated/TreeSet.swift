@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaClass("java.util.TreeSet")
-open class TreeSet<E: AnyJavaObject>: JavaObject {
+open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
+  public typealias E = TreeSet_E
+
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 

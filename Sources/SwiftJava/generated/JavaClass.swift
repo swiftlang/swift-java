@@ -2,7 +2,9 @@
 import SwiftJavaJNICore
 
 @JavaClass("java.lang.Class")
-open class JavaClass<T: AnyJavaObject>: JavaObject {
+open class JavaClass<JavaClass_T: AnyJavaObject>: JavaObject {
+  public typealias T = JavaClass_T
+
   /// Java method `getName`.
   ///
   /// ### Java method signature

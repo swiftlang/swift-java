@@ -3,7 +3,11 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.BiPredicate")
-public struct JavaBiPredicate<T: AnyJavaObject, U: AnyJavaObject> {
+public struct JavaBiPredicate<JavaBiPredicate_T: AnyJavaObject, JavaBiPredicate_U: AnyJavaObject> {
+  public typealias T = JavaBiPredicate_T
+
+  public typealias U = JavaBiPredicate_U
+
   /// Java method `test`.
   ///
   /// ### Java method signature

@@ -17,13 +17,13 @@ struct SwiftJavaParameterizedType {
   let name: String
   let typeArguments: [String]
 
-  init?(name: String?, typeArguments: [String]) {
+  init?(name: String?, typeArguments: [String]?) {
     guard let name else {
       return nil
     }
 
     self.name = name
-    self.typeArguments = typeArguments
+    self.typeArguments = typeArguments ?? []
   }
 
   func render() -> String {

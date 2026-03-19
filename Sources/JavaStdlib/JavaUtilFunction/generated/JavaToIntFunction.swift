@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.ToIntFunction")
-public struct JavaToIntFunction<T: AnyJavaObject> {
+public struct JavaToIntFunction<JavaToIntFunction_T: AnyJavaObject> {
+  public typealias T = JavaToIntFunction_T
+
   /// Java method `applyAsInt`.
   ///
   /// ### Java method signature

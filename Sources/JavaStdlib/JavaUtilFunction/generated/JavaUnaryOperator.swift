@@ -3,7 +3,9 @@ import SwiftJava
 import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.UnaryOperator", extends: JavaFunction<JavaObject, JavaObject>.self)
-public struct JavaUnaryOperator<T: AnyJavaObject> {
+public struct JavaUnaryOperator<JavaUnaryOperator_T: AnyJavaObject> {
+  public typealias T = JavaUnaryOperator_T
+
   /// Java method `apply`.
   ///
   /// ### Java method signature
