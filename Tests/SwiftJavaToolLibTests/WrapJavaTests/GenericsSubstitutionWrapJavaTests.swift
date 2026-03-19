@@ -45,7 +45,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
       expectedChunks: [
         """
         @JavaInterface("com.example.MyFunction")
-        public struct MyFunction<T: AnyJavaObject, R: AnyJavaObject> {
+        public struct MyFunction<MyFunction_T: AnyJavaObject, MyFunction_R: AnyJavaObject> {
         """,
         """
         @JavaMethod(typeErasedResult: "R!")
@@ -53,7 +53,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         """,
         """
         @JavaInterface("com.example.MyUnaryOperator", extends: MyFunction<JavaObject, JavaObject>.self)
-        public struct MyUnaryOperator<T: AnyJavaObject> {
+        public struct MyUnaryOperator<MyUnaryOperator_T: AnyJavaObject> {
         """,
         """
         @JavaMethod(typeErasedResult: "T!")
@@ -87,7 +87,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
       expectedChunks: [
         """
         @JavaClass("com.example.ClassFunction")
-        open class ClassFunction<T: AnyJavaObject, R: AnyJavaObject>: JavaObject {
+        open class ClassFunction<ClassFunction_T: AnyJavaObject, ClassFunction_R: AnyJavaObject>: JavaObject {
         """,
         """
         @JavaMethod(typeErasedResult: "R!")
@@ -95,7 +95,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         """,
         """
         @JavaClass("com.example.ClassUnaryOperator")
-        open class ClassUnaryOperator<T: AnyJavaObject>: ClassFunction<T, T> {
+        open class ClassUnaryOperator<ClassUnaryOperator_T: AnyJavaObject>: ClassFunction<T, T> {
         """,
         """
         @JavaMethod(typeErasedResult: "T!")

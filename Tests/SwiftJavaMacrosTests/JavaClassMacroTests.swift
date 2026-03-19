@@ -472,13 +472,15 @@ class JavaKitMacroTests: XCTestCase {
     assertMacroExpansion(
       """
       @JavaClass("java.util.ArrayList")
-      open class ArrayList<E: AnyJavaObject>: JavaObject {
+      open class ArrayList<ArrayList_E: AnyJavaObject>: JavaObject {
+        public typealias E = ArrayList_E 
         @JavaMethod
         open func add(_ arg0: E?) -> Bool
       }
       """,
       expandedSource: #"""
-        open class ArrayList<E: AnyJavaObject>: JavaObject {
+        open class ArrayList<ArrayList_E: AnyJavaObject>: JavaObject {
+          public typealias E = ArrayList_E 
           open func add(_ arg0: E?) -> Bool {
               let arg0$erased = arg0.map {
                   JavaObject(javaHolder: $0.javaHolder)
