@@ -428,10 +428,12 @@ extension JavaClassTranslator {
       }
     }
 
-    let genericParameterTypeAliases: [DeclSyntax] = javaTypeParameters
-      .map { param in
-        let name = TokenSyntax("\(raw: param.getName())")
-        return DeclSyntax("public typealias \(name) = \(raw: swiftInnermostTypeName)_\(name)")
+    let swiftGenericParameterNames = javaTypeParameters.map { param in
+      "\(swiftInnermostTypeName)_\(param.getName())"
+    }
+    let genericParameterTypeAliases: [DeclSyntax] = zip(javaTypeParameters, swiftGenericParameterNames)
+      .map { javaDecl, swiftName in
+        DeclSyntax("public typealias \(raw: javaDecl.getName()) = \(raw: swiftName)")
       }
 
     // Collect all of the members of this type.
@@ -471,14 +473,11 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
-    let genericParameters = javaTypeParameters.map { param in
-      "\(swiftInnermostTypeName)_\(param.getName()): AnyJavaObject"
-    }
     let genericParameterClause =
-      if genericParameters.isEmpty {
+      if swiftGenericParameterNames.isEmpty {
         ""
       } else {
-        "<\(genericParameters.joined(separator: ", "))>"
+        "<\(swiftGenericParameterNames.map({ "\($0): AnyJavaObject" }).joined(separator: ", "))>"
       }
 
     // Emit the struct declaration describing the java class.

@@ -95,7 +95,7 @@ final class GenericsSubstitutionWrapJavaTests: XCTestCase {
         """,
         """
         @JavaClass("com.example.ClassUnaryOperator")
-        open class ClassUnaryOperator<ClassUnaryOperator_T: AnyJavaObject>: ClassFunction<T, T> {
+        open class ClassUnaryOperator<ClassUnaryOperator_T: AnyJavaObject>: ClassFunction<ClassUnaryOperator_T, ClassUnaryOperator_T> {
         """,
         """
         @JavaMethod(typeErasedResult: "T!")
