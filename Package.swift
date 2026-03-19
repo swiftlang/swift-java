@@ -6,10 +6,9 @@ import PackageDescription
 
 let swiftJavaJNICoreDep: Package.Dependency
 if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
-  print("Using upstream 'swift-java-jni-core' from override path SWIFT_JAVA_JNI_CORE_PATH = \(localPath)")
   swiftJavaJNICoreDep = .package(path: localPath)
 } else {
-  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
+  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", from: "0.3.0")
 }
 
 let package = Package(
