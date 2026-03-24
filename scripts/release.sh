@@ -22,12 +22,18 @@
 # 4. After merge, prepares the next development snapshot
 #
 # Usage: ./scripts/release.sh
+#        ./scripts/release.sh --next   (skip to post-release steps)
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PACKAGE_SWIFT="$REPO_ROOT/Package.swift"
 MAIN_BRANCH="main"
+NEXT_ONLY=false
+
+if [[ "${1:-}" == "--next" ]]; then
+  NEXT_ONLY=true
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -59,6 +65,10 @@ read -r -p "Enter the version to release (current tag: $CURRENT_TAG): " RELEASE_
 if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   error "Invalid version format: '$RELEASE_VERSION'. Expected format: N.N.N"
 fi
+
+if [[ "$NEXT_ONLY" == true ]]; then
+  info "Skipping to post-release steps for ${BOLD}$RELEASE_VERSION${NC}..."
+else
 
 info "Preparing release ${BOLD}$RELEASE_VERSION${NC}"
 
@@ -140,26 +150,34 @@ git -C "$REPO_ROOT" commit -m "Preparing release $RELEASE_VERSION."
 info "Pushing branch '${RELEASE_BRANCH}' to origin..."
 git -C "$REPO_ROOT" push -u origin "$RELEASE_BRANCH"
 
+info "Switching back to '$MAIN_BRANCH'..."
+git -C "$REPO_ROOT" checkout "$MAIN_BRANCH"
+
 echo ""
 echo "============================================================"
 info "Release branch '${RELEASE_BRANCH}' has been pushed."
 echo ""
 echo -e "  Next steps:"
 echo -e "  1. Create a pull request for '${BOLD}${RELEASE_BRANCH}${NC}'"
-echo -e "  2. Get it reviewed and merged"
-echo -e "  3. Tag the merge commit on main: ${BOLD}git tag $RELEASE_VERSION && git push origin $RELEASE_VERSION${NC}"
-echo -e "  4. Create a GitHub release for the tag"
-echo -e "  5. Come back here and press Enter to prepare the next development snapshot"
+echo -e "  2. Qualify the release, tests should pass, do additional tests if necessary"
+echo -e "  3. Merge the pull request"
+echo -e "  4. Tag the merge commit on main:"
+echo -e "       ${BOLD}git tag -s $RELEASE_VERSION -m $RELEASE_VERSION${NC}"
+echo -e "       ${BOLD}git push origin $RELEASE_VERSION${NC}"
+echo -e "  5. Create a GitHub release for the tag"
+echo -e "  6. Come back here and press Enter to prepare the next development snapshot"
+echo -e "     Or run: ${BOLD}./scripts/release.sh --next${NC}"
 echo "============================================================"
 echo ""
 
 confirm "Once the release PR is merged AND the tag is created, press Enter to continue..."
 
+fi # end of release steps
+
 # ==== -----------------------------------------------------------------------
 # MARK: Prepare next development snapshot
 
-info "Switching back to '$MAIN_BRANCH' and pulling latest..."
-git -C "$REPO_ROOT" checkout "$MAIN_BRANCH"
+info "Pulling latest '$MAIN_BRANCH'..."
 git -C "$REPO_ROOT" pull --rebase origin "$MAIN_BRANCH"
 
 NEXT_DEV_BRANCH="prepare-next-development-from-$RELEASE_VERSION"
