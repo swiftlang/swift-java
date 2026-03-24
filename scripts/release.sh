@@ -145,7 +145,7 @@ info "Build succeeded."
 
 info "Creating release commit..."
 git -C "$REPO_ROOT" add "$PACKAGE_SWIFT"
-git -C "$REPO_ROOT" commit -m "Preparing release $RELEASE_VERSION."
+git -C "$REPO_ROOT" commit -m "Preparing release $RELEASE_VERSION"
 
 info "Pushing branch '${RELEASE_BRANCH}' to origin..."
 git -C "$REPO_ROOT" push -u origin "$RELEASE_BRANCH"
@@ -197,7 +197,7 @@ fi
 info "Package.swift updated for development."
 
 git -C "$REPO_ROOT" add "$PACKAGE_SWIFT"
-git -C "$REPO_ROOT" commit -m "Prepare next development cycle after $RELEASE_VERSION release."
+git -C "$REPO_ROOT" commit -m "Prepare next development cycle after $RELEASE_VERSION release"
 
 info "Pushing branch '${NEXT_DEV_BRANCH}' to origin..."
 git -C "$REPO_ROOT" push -u origin "$NEXT_DEV_BRANCH"
