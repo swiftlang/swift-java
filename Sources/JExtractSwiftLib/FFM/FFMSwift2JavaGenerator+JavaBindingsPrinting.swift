@@ -395,7 +395,7 @@ extension FFMSwift2JavaGenerator {
       \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))\(throwsClause)
       """
     ) { printer in
-      if case .instance(_) = decl.functionSignature.selfParameter {
+      if case .instance = decl.functionSignature.selfParameter {
         // Make sure the object has not been destroyed.
         printer.print("$ensureAlive();")
       }

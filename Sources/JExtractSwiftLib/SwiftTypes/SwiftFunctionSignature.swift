@@ -372,7 +372,7 @@ extension SwiftFunctionSignature {
     if decl.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
     }
-    if let asyncSpecifier = decl.effectSpecifiers?.asyncSpecifier {
+    if decl.effectSpecifiers?.asyncSpecifier != nil {
       effectSpecifiers.append(.async)
     }
     return effectSpecifiers

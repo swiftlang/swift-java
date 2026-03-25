@@ -354,7 +354,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   for case let fileURL as URL in enumerator {
     if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
       print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.path)")
-      if let contents = try? String(contentsOf: fileURL) {
+      if let contents = try? String(contentsOf: fileURL, encoding: .utf8) {
         let entries = contents.split(separator: ":").map(String.init)
         for entry in entries {
           print("[debug][swift-java] Classpath += \(entry)")
