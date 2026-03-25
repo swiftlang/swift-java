@@ -528,11 +528,28 @@ extension JNISwift2JavaGenerator {
           )
         }
 
+        let javaType = JavaType.class(
+          package: nil,
+          name: nominalTypeName,
+          typeParameters: try nominalType.genericArguments?.map { swiftType in
+            let translated = try translateParameter(
+              swiftType: swiftType,
+              parameterName: parameterName,
+              methodName: methodName,
+              parentName: parentName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements,
+              parameterPosition: parameterPosition
+            )
+            return translated.parameter.type.javaType.boxedType
+          } ?? []
+        )
+
         // We assume this is a JExtract class.
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .concrete(.class(package: nil, name: nominalTypeName)),
+            type: .concrete(javaType),
             annotations: parameterAnnotations
           ),
           conversion: .valueMemoryAddress(.placeholder)
@@ -948,7 +965,6 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
-        // We assume this is a JExtract class.
         let javaType = JavaType.class(
           package: nil,
           name: nominalType.nominalTypeDecl.qualifiedName,
@@ -958,6 +974,7 @@ extension JNISwift2JavaGenerator {
           } ?? []
         )
 
+        // We assume this is a JExtract class.
         if nominalType.nominalTypeDecl.isGeneric {
           return TranslatedResult(
             javaType: javaType,
@@ -1156,7 +1173,7 @@ extension JNISwift2JavaGenerator {
         }
 
         // We assume this is a JExtract class.
-        let returnType = JavaType.class(package: nil, name: "Optional<\(nominalTypeName)>")
+        let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: nominalTypeName)])
         return TranslatedResult(
           javaType: returnType,
           annotations: parameterAnnotations,
