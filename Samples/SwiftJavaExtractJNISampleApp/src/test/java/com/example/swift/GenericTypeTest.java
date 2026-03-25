@@ -25,11 +25,29 @@ public class GenericTypeTest {
         try (var arena = SwiftArena.ofConfined()) {
             MyID<String> stringId = MySwiftLibrary.makeStringID("Java", arena);
             assertEquals("Java", stringId.getDescription());
-            assertEquals("Java", MySwiftLibrary.takeStringValue(stringId));
+            assertEquals("Java", MyIDs.takeStringValue(stringId));
 
             MyID<Long> intId = MySwiftLibrary.makeIntID(42, arena);
             assertEquals("42", intId.getDescription());
-            assertEquals(42, MySwiftLibrary.takeIntValue(intId));
+            assertEquals(42, MyIDs.takeIntValue(intId));
+
+            Tuple2<MyID<String>, MyID<Long>> ids = MyIDs.makeIDs("Java", 42, arena);
+            assertEquals("Java", ids.$0.getDescription());
+            assertEquals("42", ids.$1.getDescription());
+            assertEquals("Java", MyIDs.takeValuesFromTuple(ids).$0);
+            assertEquals(42, MyIDs.takeValuesFromTuple(ids).$1);
+
+            // MyID<Boolean>[] boolIds = MyIDs.makeBoolIDArray(true, 3, arena);
+            // assertEquals(List.of(true, true, true), MyIDs.takeBoolValuesFromArray(boolIds));
+            
+            Optional<MyID<Double>> doubleIdOptional = MyIDs.makeDoubleIDOptional(42.195, arena);
+            assertTrue(doubleIdOptional.isPresent());
+            assertEquals(42.195, MyIDs.takeDoubleValueOptional(doubleIdOptional));
+            assertEquals(42.195, MyIDs.takeDoubleValue(doubleIdOptional.get()));
+
+            MyID<Optional<Long>> optionalIntId = MyIDs.makeOptionalIntID(42, arena);
+            assertEquals("Optional(42)", optionalIntId.getDescription());
+            assertEquals(42, MyIDs.takeOptionalIntValue(optionalIntId));
         }
     }
 
