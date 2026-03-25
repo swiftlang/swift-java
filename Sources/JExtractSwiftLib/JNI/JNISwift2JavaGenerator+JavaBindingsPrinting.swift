@@ -234,6 +234,11 @@ extension JNISwift2JavaGenerator {
         )
       }
       printer.println()
+      let genericClause = if decl.swiftNominal.isGeneric {
+        "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
+      } else {
+        ""
+      }
       printer.print(
         """
         /** 
@@ -245,12 +250,12 @@ extension JNISwift2JavaGenerator {
          *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
          * </ul>
          */
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
-          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
+        public static\(genericClause) \(decl.swiftNominal.name)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
+          return new \(decl.swiftNominal.name)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
         }
 
-        public static \(decl.swiftNominal.name) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
-          return new \(decl.swiftNominal.name)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static\(genericClause) \(decl.swiftNominal.name)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
+          return new \(decl.swiftNominal.name)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """
       )
@@ -384,8 +389,13 @@ extension JNISwift2JavaGenerator {
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
+    let genericClause = if decl.swiftNominal.isGeneric {
+      "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
+    } else {
+      ""
+    }
     printer.printBraceBlock(
-      "\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name) implements \(implementsClause)"
+      "\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name)\(genericClause) implements \(implementsClause)"
     ) { printer in
       body(&printer)
     }

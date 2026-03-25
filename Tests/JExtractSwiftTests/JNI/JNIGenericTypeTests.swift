@@ -32,6 +32,10 @@ struct JNIGenericTypeTests {
     public func makeStringID(_ value: String) -> MyID<String> {
       return MyID(value)
     }
+    
+    public func makeIntID(_ value: Int) -> MyID<Int> {
+      return MyID(value)
+    }
     """#
 
   @Test
@@ -43,18 +47,18 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public final class MyID implements JNISwiftInstance {
+        public final class MyID<T> implements JNISwiftInstance {
         """,
         """
         private MyID(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
         """,
         """
-        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
-          return new MyID(selfPointer, selfTypePointer, swiftArena);
+        public static<T> MyID<T> wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
+          return new MyID<T>(selfPointer, selfTypePointer, swiftArena);
         }
 
-        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
-          return new MyID(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static<T> MyID<T> wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
+          return new MyID<T>(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """,
         """
@@ -150,7 +154,7 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static MyID makeStringID(java.lang.String value, SwiftArena swiftArena) {
+        public static MyID<java.lang.String> makeStringID(java.lang.String value, SwiftArena swiftArena) {
           org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
           SwiftModule.$makeStringID(value, instance);
           return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
@@ -158,6 +162,16 @@ struct JNIGenericTypeTests {
         """,
         """
         private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
+        """,
+        """
+        public static MyID<java.lang.Long> makeIntID(long value, SwiftArena swiftArena) throws SwiftIntegerOverflowException {
+          org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+          SwiftModule.$makeIntID(value, instance);
+          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
+        }
+        """,
+        """
+        private static native void $makeIntID(long value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
         """,
       ]
     )

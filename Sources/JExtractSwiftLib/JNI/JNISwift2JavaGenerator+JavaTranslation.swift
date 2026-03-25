@@ -173,7 +173,7 @@ extension JNISwift2JavaGenerator {
             ),
           parameters: [],
           resultType: TranslatedResult(
-            javaType: .class(package: nil, name: "Optional<\(caseName)>"),
+            javaType: .class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: caseName)]),
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion
@@ -949,7 +949,14 @@ extension JNISwift2JavaGenerator {
         }
 
         // We assume this is a JExtract class.
-        let javaType = JavaType.class(package: nil, name: nominalType.nominalTypeDecl.qualifiedName)
+        let javaType = JavaType.class(
+          package: nil,
+          name: nominalType.nominalTypeDecl.qualifiedName,
+          typeParameters: try nominalType.genericArguments?.map { swiftType in
+            let translated = try translate(swiftResult: .init(convention: .direct, type: swiftType))
+            return translated.javaType.boxedType
+          } ?? []
+        )
 
         if nominalType.nominalTypeDecl.isGeneric {
           return TranslatedResult(
