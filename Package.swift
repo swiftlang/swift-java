@@ -8,7 +8,7 @@ let swiftJavaJNICoreDep: Package.Dependency
 if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
   swiftJavaJNICoreDep = .package(path: localPath)
 } else {
-  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", from: "0.4.0")
+  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
 }
 
 let package = Package(
