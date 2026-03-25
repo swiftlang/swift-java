@@ -187,10 +187,14 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     gradlewEnvironment[GradleUserHome] = gradleUserHomePath
     log("Forward environment: \(gradlewEnvironment)")
 
-    let gradleExecutable =
-      findExecutable(name: "gradle") // try using installed 'gradle' if available in PATH
-      ?? swiftJavaDirectory.appending(path: "gradlew") // fallback to calling ./gradlew if gradle is not installed
-    log("Detected 'gradle' executable (or gradlew fallback): \(gradleExecutable)")
+    let gradlewURL = swiftJavaDirectory.appending(path: "gradlew")
+    let gradleExecutable: URL
+    if FileManager.default.isExecutableFile(atPath: gradlewURL.path(percentEncoded: false)) {
+      gradleExecutable = gradlewURL // prefer the wrapper to ensure the correct Gradle version is used
+    } else {
+      gradleExecutable = findExecutable(name: "gradle") ?? gradlewURL // fallback to system gradle
+    }
+    log("Detected gradle executable: \(gradleExecutable)")
 
     let javaHome = URL(filePath: findJavaHome())
     let javacPath =
