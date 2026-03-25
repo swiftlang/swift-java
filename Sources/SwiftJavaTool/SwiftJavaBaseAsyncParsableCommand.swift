@@ -169,10 +169,10 @@ extension SwiftJavaBaseAsyncParsableCommand {
       earlyConfig = try readConfiguration(configPath: configURL)
     } else if let moduleBaseDir {
       print("[debug][swift-java] Load config from module base directory: \(moduleBaseDir.path)")
-      earlyConfig = try readConfiguration(sourceDir: moduleBaseDir.path)
+      earlyConfig = try readConfiguration(sourceDir: moduleBaseDir)
     } else if let inputSwift = commonOptions.inputSwift {
       print("[debug][swift-java] Load config from module swift input directory: \(inputSwift)")
-      earlyConfig = try readConfiguration(sourceDir: inputSwift)
+      earlyConfig = try readConfiguration(sourceDir: URL(fileURLWithPath: inputSwift))
     }
     var config: Configuration
     if let earlyConfig {

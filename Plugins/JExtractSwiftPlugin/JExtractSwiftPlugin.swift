@@ -34,21 +34,19 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // so we cannot eliminate this deprecation warning.
     for dependency in target.dependencies {
       switch dependency {
-      case .target(let t):
-        t.sourceModule
-      case .product(let p):
-        p.sourceModules
+      case .target, .product:
+        break
       @unknown default:
         fatalError("Unknown target dependency type: \(dependency)")
       }
     }
 
-    let sourceDir = target.directory.string
+    let sourceDir = target.directoryURL
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = URL(filePath: sourceDir).appending(path: "swift-java.config")
-    let configuration = try readConfiguration(sourceDir: "\(sourceDir)")
+    let configFile = sourceDir.appending(path: "swift-java.config")
+    let configuration = try readConfiguration(sourceDir: sourceDir)
 
     // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
     // that is common in JVM ecosystem
@@ -61,7 +59,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       /*subcommand=*/"jextract",
       "--config", configFile.path(percentEncoded: false),
       "--swift-module", sourceModule.name,
-      "--input-swift", sourceDir,
+      "--input-swift", sourceDir.path(percentEncoded: false),
       "--output-java", outputJavaDirectory.path(percentEncoded: false),
       "--output-swift", outputSwiftDirectory.path(percentEncoded: false),
       // since SwiftPM requires all "expected" files do end up being written
@@ -93,7 +91,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       }
 
       let sourceFilePath = sourceFileURL.path
-      guard sourceFilePath.starts(with: sourceDir) else {
+      guard sourceFilePath.starts(with: sourceDir.path) else {
         fatalError("Could not get relative path for source file \(sourceFilePath)")
       }
       let outputURL = outputSwiftDirectory
@@ -117,7 +115,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       "[swift-java-plugin] Output swift files:\n - \(outputSwiftFiles.map({$0.absoluteString}).joined(separator: "\n - "))"
     )
 
-    var jextractOutputFiles = outputSwiftFiles
+    let jextractOutputFiles = outputSwiftFiles
 
     // If the developer has enabled java callbacks in the configuration (default is false)
     // and we are running in JNI mode, we will run additional phases in this build plugin
@@ -259,7 +257,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     func _searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
-      let dependencyURL = URL(filePath: target.directory.string)
+      let dependencyURL = target.directoryURL
 
       // Look for a config file within this target.
       let dependencyConfigURL =
@@ -305,7 +303,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   private func findSwiftJavaDirectory(for target: any Target) -> URL? {
     for dependency in target.dependencies {
       switch dependency {
-      case .target(let target):
+      case .target:
         continue
 
       case .product(let product):

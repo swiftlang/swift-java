@@ -46,7 +46,7 @@ func findJavaHome() -> String {
 }
 
 func getSwiftJavaConfigPath(target: Target) -> String? {
-  let configPath = URL(fileURLWithPath: target.directory.string).appending(component: "swift-java.config").path()
+  let configPath = target.directoryURL.appending(component: "swift-java.config").path()
 
   if FileManager.default.fileExists(atPath: configPath) {
     return configPath

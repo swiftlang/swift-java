@@ -30,7 +30,7 @@ struct JavaCompilerBuildToolPlugin: BuildToolPlugin {
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
-    let sourceDir = URL(filePath: target.directory.string)
+    let sourceDir = target.directoryURL
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.

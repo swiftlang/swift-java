@@ -253,12 +253,8 @@ public enum MavenRepositoryDescriptor: Hashable, Codable {
   }
 }
 
-public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
-  // Workaround since filePath is macOS 13
-  let sourcePath =
-    if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
-  let configPath = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
-
+public func readConfiguration(sourceDir: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
+  let configPath = sourceDir.appendingPathComponent("swift-java.config", isDirectory: false)
   return try readConfiguration(configPath: configPath, file: file, line: line)
 }
 

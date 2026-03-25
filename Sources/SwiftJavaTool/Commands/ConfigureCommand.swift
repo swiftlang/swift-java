@@ -96,7 +96,7 @@ extension SwiftJava.ConfigureCommand {
       return (false, .init())
     case .amend:
       let configPath = actualOutputDirectory
-      guard let config = try readConfiguration(sourceDir: configPath.path) else {
+      guard let config = try readConfiguration(sourceDir: configPath) else {
         return (false, .init())
       }
       return (true, config)
