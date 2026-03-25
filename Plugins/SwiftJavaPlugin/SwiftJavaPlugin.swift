@@ -36,7 +36,8 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = sourceDir
+    let configFile =
+      sourceDir
       .appending(path: SwiftJavaConfigFileName)
     let config = try readConfiguration(sourceDir: sourceDir) ?? Configuration()
 
