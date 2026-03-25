@@ -223,7 +223,7 @@ extension JNISwift2JavaGenerator {
         printer.print("fatalError()")
       }
 
-      if let setter = variable.setter {
+      if variable.setter != nil {
         printer.printBraceBlock("set") { printer in
           printer.print("fatalError()")
         }

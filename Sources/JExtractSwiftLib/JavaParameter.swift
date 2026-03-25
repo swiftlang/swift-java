@@ -39,7 +39,7 @@ struct JavaParameter {
       switch self {
       case .concrete(let javaType):
         javaType.isPrimitive
-      case .generic(let name, let extends):
+      case .generic:
         false
       }
     }

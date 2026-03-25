@@ -100,20 +100,21 @@ class BasicRuntimeTests: XCTestCase {
 
   func testListIterator() throws {
     let environment = try jvm.environment()
+    let integerClass = try JavaClass<JavaInteger>(environment: environment)
 
     let javaList = try XCTUnwrap(ArrayList<JavaInteger>(environment: environment).as(List<JavaInteger>.self))
-    _ = javaList.add(JavaInteger(0, environment: environment))
-    _ = javaList.add(JavaInteger(1, environment: environment))
-    _ = javaList.add(JavaInteger(2, environment: environment))
+    _ = javaList.add(integerClass.valueOf(0))
+    _ = javaList.add(integerClass.valueOf(1))
+    _ = javaList.add(integerClass.valueOf(2))
 
     XCTAssertEqual(javaList.map { $0.intValue() }, [0, 1, 2])
   }
 
   func testJavaOptional() throws {
     let environment = try jvm.environment()
+    let integerClass = try JavaClass<JavaInteger>(environment: environment)
 
-    let value = JavaInteger(42, environment: environment)
-    let javaOptional = Optional.some(value).toJavaOptional()
+    let javaOptional = Optional.some(integerClass.valueOf(42)).toJavaOptional()
     if javaOptional.isPresent() {
       XCTAssertEqual(javaOptional.get().intValue(), 42)
     } else {

@@ -32,24 +32,24 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
     // so we cannot eliminate this deprecation warning.
-    let sourceDir = target.directory.string
+    let sourceDir = target.directoryURL
 
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
-    let configFile = URL(filePath: sourceDir)
+    let configFile =
+      sourceDir
       .appending(path: SwiftJavaConfigFileName)
     let config = try readConfiguration(sourceDir: sourceDir) ?? Configuration()
 
     log("Config on path: \(configFile.path(percentEncoded: false))")
     log("Config was: \(config)")
-    var javaDependencies = config.dependencies ?? []
 
     /// Find the manifest files from other swift-java executions in any targets
     /// this target depends on.
     var dependentConfigFiles: [(String, URL)] = []
     func searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
-      let dependencyURL = URL(filePath: target.directory.string)
+      let dependencyURL = target.directoryURL
 
       // Look for a config file within this target.
       let dependencyConfigURL =

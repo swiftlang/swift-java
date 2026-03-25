@@ -135,15 +135,6 @@ public final class ImportedFunc: ImportedDecl, CustomStringConvertible {
     functionSignature.selfParameter?.selfType
   }
 
-  /// If this function type uses types that require any additional `import` statements,
-  /// these would be exported here.
-  var additionalJavaImports: Set<String> {
-    var imports: Set<String> = []
-    //    imports += self.functionSignature.parameters.flatMap { $0.additionalJavaImports }
-    //    imports += self.functionSignature.result.additionalJavaImports
-    return imports
-  }
-
   var isStatic: Bool {
     if case .staticMethod = functionSignature.selfParameter {
       return true

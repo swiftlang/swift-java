@@ -253,12 +253,8 @@ public enum MavenRepositoryDescriptor: Hashable, Codable {
   }
 }
 
-public func readConfiguration(sourceDir: String, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
-  // Workaround since filePath is macOS 13
-  let sourcePath =
-    if sourceDir.hasPrefix("file://") { sourceDir } else { "file://" + sourceDir }
-  let configPath = URL(string: sourcePath)!.appendingPathComponent("swift-java.config", isDirectory: false)
-
+public func readConfiguration(sourceDir: URL, file: String = #fileID, line: UInt = #line) throws -> Configuration? {
+  let configPath = sourceDir.appendingPathComponent("swift-java.config", isDirectory: false)
   return try readConfiguration(configPath: configPath, file: file, line: line)
 }
 
@@ -354,7 +350,7 @@ public func findSwiftJavaClasspaths(in basePath: String = FileManager.default.cu
   for case let fileURL as URL in enumerator {
     if fileURL.lastPathComponent.hasSuffix(".swift-java.classpath") {
       print("[debug][swift-java] Constructing classpath with entries from: \(fileURL.path)")
-      if let contents = try? String(contentsOf: fileURL) {
+      if let contents = try? String(contentsOf: fileURL, encoding: .utf8) {
         let entries = contents.split(separator: ":").map(String.init)
         for entry in entries {
           print("[debug][swift-java] Classpath += \(entry)")
