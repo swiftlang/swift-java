@@ -355,7 +355,11 @@ extension JNISwift2JavaGenerator {
         exceptions.append(.integerOverflow)
       }
 
-      let resultType = try translate(swiftResult: functionSignature.result)
+      let resultType = try translate(
+        swiftResult: functionSignature.result,
+        genericParameters: functionSignature.genericParameters,
+        genericRequirements: functionSignature.genericRequirements
+      )
 
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
@@ -462,7 +466,9 @@ extension JNISwift2JavaGenerator {
             }
             return try translateOptionalParameter(
               wrappedType: genericArgs[0],
-              parameterName: parameterName
+              parameterName: parameterName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .array:
@@ -471,7 +477,9 @@ extension JNISwift2JavaGenerator {
             }
             return try translateArrayParameter(
               elementType: elementType,
-              parameterName: parameterName
+              parameterName: parameterName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .dictionary:
@@ -481,7 +489,9 @@ extension JNISwift2JavaGenerator {
             return try translateDictionaryParameter(
               keyType: genericArgs[0],
               valueType: genericArgs[1],
-              parameterName: parameterName
+              parameterName: parameterName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .set:
@@ -490,7 +500,9 @@ extension JNISwift2JavaGenerator {
             }
             return try translateSetParameter(
               elementType: genericArgs[0],
-              parameterName: parameterName
+              parameterName: parameterName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .foundationDate, .essentialsDate:
@@ -532,16 +544,11 @@ extension JNISwift2JavaGenerator {
           package: nil,
           name: nominalTypeName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
-            let translated = try translateParameter(
-              swiftType: swiftType,
-              parameterName: parameterName,
-              methodName: methodName,
-              parentName: parentName,
+            try translateGenericTypeParameter(
+              swiftType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements,
-              parameterPosition: parameterPosition
+              genericRequirements: genericRequirements
             )
-            return translated.parameter.type.javaType.boxedType
           } ?? []
         )
 
@@ -574,7 +581,9 @@ extension JNISwift2JavaGenerator {
       case .optional(let wrapped):
         return try translateOptionalParameter(
           wrappedType: wrapped,
-          parameterName: parameterName
+          parameterName: parameterName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .opaque(let proto), .existential(let proto):
@@ -585,7 +594,9 @@ extension JNISwift2JavaGenerator {
         return try translateProtocolParameter(
           protocolType: proto,
           parameterName: parameterName,
-          javaGenericName: "_T\(parameterPosition)"
+          javaGenericName: "_T\(parameterPosition)",
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .genericParameter(let generic):
@@ -596,7 +607,9 @@ extension JNISwift2JavaGenerator {
           return try translateProtocolParameter(
             protocolType: concreteTy,
             parameterName: parameterName,
-            javaGenericName: generic.name
+            javaGenericName: generic.name,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
           )
         }
 
@@ -605,20 +618,26 @@ extension JNISwift2JavaGenerator {
       case .array(let elementType):
         return try translateArrayParameter(
           elementType: elementType,
-          parameterName: parameterName
+          parameterName: parameterName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .dictionary(let keyType, let valueType):
         return try translateDictionaryParameter(
           keyType: keyType,
           valueType: valueType,
-          parameterName: parameterName
+          parameterName: parameterName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .set(let elementType):
         return try translateSetParameter(
           elementType: elementType,
-          parameterName: parameterName
+          parameterName: parameterName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .metatype:
@@ -757,21 +776,27 @@ extension JNISwift2JavaGenerator {
     func translateProtocolParameter(
       protocolType: SwiftType,
       parameterName: String,
-      javaGenericName: String
+      javaGenericName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       switch protocolType {
       case .nominal:
         return try translateProtocolParameter(
           protocolTypes: [protocolType],
           parameterName: parameterName,
-          javaGenericName: javaGenericName
+          javaGenericName: javaGenericName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .composite(let types):
         return try translateProtocolParameter(
           protocolTypes: types,
           parameterName: parameterName,
-          javaGenericName: javaGenericName
+          javaGenericName: javaGenericName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       default:
@@ -782,17 +807,16 @@ extension JNISwift2JavaGenerator {
     private func translateProtocolParameter(
       protocolTypes: [SwiftType],
       parameterName: String,
-      javaGenericName: String
+      javaGenericName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       let javaProtocolTypes = try protocolTypes.map {
-        switch $0 {
-        case .nominal(let nominalType):
-          let nominalTypeName = nominalType.nominalTypeDecl.name
-          return JavaType.class(package: nil, name: nominalTypeName)
-
-        default:
-          throw JavaTranslationError.unsupportedSwiftType($0)
-        }
+        try translateGenericTypeParameter(
+          $0,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
       }
 
       // We just pass down the jobject
@@ -808,13 +832,15 @@ extension JNISwift2JavaGenerator {
 
     func translateOptionalParameter(
       wrappedType swiftType: SwiftType,
-      parameterName: String
+      parameterName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.name
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           switch knownType {
@@ -870,14 +896,19 @@ extension JNISwift2JavaGenerator {
         }
 
         // Assume JExtract imported class
+        let javaType = try translateGenericTypeParameter(
+          swiftType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: nil, name: "Optional<\(nominalTypeName)>"),
+            type: .class(package: nil, name: "Optional", typeParameters: [javaType]),
             annotations: parameterAnnotations
           ),
           conversion: .method(
-            .method(.placeholder, function: "map", arguments: [.constant("\(nominalType)::$memoryAddress")]),
+            .method(.placeholder, function: "map", arguments: [.constant("\(javaType)::$memoryAddress")]),
             function: "orElse",
             arguments: [.constant("0L")]
           )
@@ -887,7 +918,12 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(swiftResult: SwiftResult, resultName: String = "result") throws -> TranslatedResult {
+    func translate(
+      swiftResult: SwiftResult,
+      resultName: String = "result",
+      genericParameters: [SwiftGenericParameterDeclaration] = [],
+      genericRequirements: [SwiftGenericRequirement] = []
+    ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
 
       // If the result type should cause any annotations on the method, include them here.
@@ -901,14 +937,21 @@ extension JNISwift2JavaGenerator {
             guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
-            return try translateOptionalResult(wrappedType: genericArgs[0], resultName: resultName)
+            return try translateOptionalResult(
+              wrappedType: genericArgs[0],
+              resultName: resultName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
 
           case .array:
             guard let elementType = nominalType.genericArguments?.first else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
             return try translateArrayResult(
-              elementType: elementType
+              elementType: elementType,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .dictionary:
@@ -917,7 +960,9 @@ extension JNISwift2JavaGenerator {
             }
             return try translateDictionaryResult(
               keyType: genericArgs[0],
-              valueType: genericArgs[1]
+              valueType: genericArgs[1],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .set:
@@ -925,7 +970,9 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.setRequiresElementType(swiftType)
             }
             return try translateSetResult(
-              elementType: genericArgs[0]
+              elementType: genericArgs[0],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
             )
 
           case .foundationDate, .essentialsDate:
@@ -969,8 +1016,11 @@ extension JNISwift2JavaGenerator {
           package: nil,
           name: nominalType.nominalTypeDecl.qualifiedName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
-            let translated = try translate(swiftResult: .init(convention: .direct, type: swiftType))
-            return translated.javaType.boxedType
+            try translateGenericTypeParameter(
+              swiftType,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
           } ?? []
         )
 
@@ -1007,35 +1057,201 @@ extension JNISwift2JavaGenerator {
         return TranslatedResult(javaType: .void, outParameters: [], conversion: .placeholder)
 
       case .optional(let wrapped):
-        return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
+        return try translateOptionalResult(
+          wrappedType: wrapped,
+          resultName: resultName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
 
       case .array(let elementType):
         return try translateArrayResult(
-          elementType: elementType
+          elementType: elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .dictionary(let keyType, let valueType):
         return try translateDictionaryResult(
           keyType: keyType,
-          valueType: valueType
+          valueType: valueType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .set(let elementType):
         return try translateSetResult(
-          elementType: elementType
+          elementType: elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
         )
 
       case .tuple(let elements) where !elements.isEmpty:
-        return try translateTupleResult(elements: elements, resultName: resultName)
+        return try translateTupleResult(
+          elements: elements,
+          resultName: resultName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
 
+    private func translateGenericTypeParameter(
+      _ swiftType: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> JavaType {
+      switch swiftType {
+      case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
+
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          switch knownType {
+          case .optional:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            let wrappedType = try translateGenericTypeParameter(
+              genericArgs[0],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            return .class(package: "java.util", name: "Optional", typeParameters: [wrappedType])
+
+          case .array:
+            guard let elementType = nominalType.genericArguments?.first else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            let elementJavaType = try translateGenericTypeParameter(
+              elementType,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            return .array(elementJavaType)
+
+          case .dictionary:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 2 else {
+              throw JavaTranslationError.dictionaryRequiresKeyAndValueTypes(swiftType)
+            }
+            let keyJavaType = try translateGenericTypeParameter(
+              genericArgs[0],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            let valueJavaType = try translateGenericTypeParameter(
+              genericArgs[1],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            return .swiftDictionaryMap(keyJavaType, valueJavaType)
+
+          case .set:
+            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
+              throw JavaTranslationError.setRequiresElementType(swiftType)
+            }
+            let elementJavaType = try translateGenericTypeParameter(
+              genericArgs[0],
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            return .swiftSet(elementJavaType)
+
+          case .foundationUUID, .essentialsUUID:
+            return .javaUtilUUID
+
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            return javaType.boxedType
+          }
+        }
+
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return javaType
+        }
+
+        // We assume this is a JExtract class.
+        let typeParameters = try nominalType.genericArguments?.map { swiftType in
+          try translateGenericTypeParameter(
+            swiftType,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
+          )
+        } ?? []
+
+        return .class(
+          package: nil,
+          name: nominalTypeName,
+          typeParameters: typeParameters
+        )
+
+      case .genericParameter(let generic):
+        if let concreteTy = swiftType.typeIn(
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        ) {
+          return try translateGenericTypeParameter(
+            concreteTy,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
+          )
+        }
+        return .class(package: nil, name: generic.name)
+
+      case .optional(let wrapped):
+        let wrappedType = try translateGenericTypeParameter(
+          wrapped,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        return .class(package: "java.util", name: "Optional", typeParameters: [wrappedType])
+
+      case .array(let elementType):
+        let elementJavaType = try translateGenericTypeParameter(
+          elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        return .array(elementJavaType)
+
+      case .dictionary(let keyType, let valueType):
+        let keyJavaType = try translateGenericTypeParameter(
+          keyType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        let valueJavaType = try translateGenericTypeParameter(
+          valueType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        return .swiftDictionaryMap(keyJavaType, valueJavaType)
+
+      case .set(let elementType):
+        let elementJavaType = try translateGenericTypeParameter(
+          elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        return .swiftSet(elementJavaType)
+
+      case .metatype, .tuple, .function, .existential, .opaque, .composite:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
     func translateTupleResult(
       elements: [SwiftTupleElement],
-      resultName: String = "result"
+      resultName: String = "result",
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
       let arity = elements.count
       var outParameters: [OutParameter] = []
@@ -1047,7 +1263,11 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Determine the Java type for this element
-        let (javaType, elementConversion) = try translateTupleElementResult(type: element.type)
+        let (javaType, elementConversion) = try translateTupleElementResult(
+          type: element.type,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
         let arrayType: JavaType = .array(javaType)
 
         outParameters.append(
@@ -1075,7 +1295,11 @@ extension JNISwift2JavaGenerator {
     }
 
     /// Translate a single element type for tuple results on the Java side.
-    private func translateTupleElementResult(type: SwiftType) throws -> (JavaType, JavaNativeConversionStep) {
+    private func translateTupleElementResult(
+      type: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> (JavaType, JavaNativeConversionStep) {
       switch type {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
@@ -1086,13 +1310,16 @@ extension JNISwift2JavaGenerator {
           return (javaType, .placeholder)
         }
 
-        let nominalTypeName = nominalType.nominalTypeDecl.name
         guard !nominalType.isSwiftJavaWrapper else {
           throw JavaTranslationError.unsupportedSwiftType(type)
         }
 
+        let javaType = try translateGenericTypeParameter(
+          type,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
         // JExtract class: wrap memory address
-        let javaType: JavaType = .class(package: nil, name: nominalTypeName)
         return (.long, .constructSwiftValue(.placeholder, javaType))
 
       default:
@@ -1102,7 +1329,9 @@ extension JNISwift2JavaGenerator {
 
     func translateOptionalResult(
       wrappedType swiftType: SwiftType,
-      resultName: String = "result"
+      resultName: String = "result",
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
       let discriminatorName = "\(resultName)$_discriminator$"
 
@@ -1110,8 +1339,6 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.name
-
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           switch knownType {
           case .foundationDate, .essentialsDate:
@@ -1173,7 +1400,12 @@ extension JNISwift2JavaGenerator {
         }
 
         // We assume this is a JExtract class.
-        let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: nominalTypeName)])
+        let javaType = try translateGenericTypeParameter(
+          swiftType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
         return TranslatedResult(
           javaType: returnType,
           annotations: parameterAnnotations,
@@ -1184,7 +1416,7 @@ extension JNISwift2JavaGenerator {
             discriminatorName: .combinedName(component: "discriminator$"),
             optionalClass: "Optional",
             javaType: .long,
-            toValue: .wrapMemoryAddressUnsafe(.placeholder, .class(package: nil, name: nominalTypeName)),
+            toValue: .wrapMemoryAddressUnsafe(.placeholder, javaType),
             resultName: resultName
           )
         )
@@ -1196,14 +1428,14 @@ extension JNISwift2JavaGenerator {
 
     func translateArrayParameter(
       elementType: SwiftType,
-      parameterName: String
+      parameterName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
 
       switch elementType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
-
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
             throw JavaTranslationError.unsupportedSwiftType(elementType)
@@ -1219,18 +1451,23 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 
+        let javaType = try translateGenericTypeParameter(
+          elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
         // Assume JExtract imported class
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .array(.class(package: nil, name: nominalTypeName)),
+            type: .array(javaType),
             annotations: parameterAnnotations
           ),
           conversion: .method(
             .method(
               .arraysStream(.requireNonNull(.placeholder, message: "\(parameterName) must not be null")),
               function: "mapToLong",
-              arguments: [.constant("\(nominalTypeName)::$memoryAddress")]
+              arguments: [.constant("\(javaType)::$memoryAddress")]
             ),
             function: "toArray",
             arguments: []
@@ -1243,14 +1480,14 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateArrayResult(
-      elementType: SwiftType
+      elementType: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
       let annotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
 
       switch elementType {
       case .nominal(let nominalType):
-        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
-
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
             throw JavaTranslationError.unsupportedSwiftType(elementType)
@@ -1268,10 +1505,14 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(elementType)
         }
 
-        let objectType = JavaType.class(package: nil, name: nominalTypeName)
+        let javaType = try translateGenericTypeParameter(
+          elementType,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
         // We assume this is a JExtract class.
         return TranslatedResult(
-          javaType: .array(objectType),
+          javaType: .array(javaType),
           annotations: annotations,
           outParameters: [],
           conversion: .method(
@@ -1281,12 +1522,12 @@ extension JNISwift2JavaGenerator {
               arguments: [
                 .lambda(
                   args: ["pointer"],
-                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), objectType)
+                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), javaType)
                 )
               ]
             ),
             function: "toArray",
-            arguments: [.constant("\(objectType)[]::new")]
+            arguments: [.constant("\(javaType)[]::new")]
           )
         )
 
@@ -1295,29 +1536,35 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func javaTypeForDictionaryComponent(_ swiftType: SwiftType) throws -> JavaType {
-      switch swiftType {
-      case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(swiftType)
-          }
-          return javaType
-        }
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
-
-      default:
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
-      }
+    func javaTypeForDictionaryComponent(
+      _ swiftType: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
+    ) throws -> JavaType {
+      try translateGenericTypeParameter(
+        swiftType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
     }
 
     func translateDictionaryParameter(
       keyType: SwiftType,
       valueType: SwiftType,
-      parameterName: String
+      parameterName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
-      let keyJavaType = try javaTypeForDictionaryComponent(keyType)
-      let valueJavaType = try javaTypeForDictionaryComponent(valueType)
+      let keyJavaType = try javaTypeForDictionaryComponent(
+        keyType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
+      let valueJavaType = try javaTypeForDictionaryComponent(
+        valueType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
       let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
 
       return TranslatedParameter(
@@ -1332,10 +1579,20 @@ extension JNISwift2JavaGenerator {
 
     func translateDictionaryResult(
       keyType: SwiftType,
-      valueType: SwiftType
+      valueType: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
-      let keyJavaType = try javaTypeForDictionaryComponent(keyType)
-      let valueJavaType = try javaTypeForDictionaryComponent(valueType)
+      let keyJavaType = try javaTypeForDictionaryComponent(
+        keyType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
+      let valueJavaType = try javaTypeForDictionaryComponent(
+        valueType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
       let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
 
       return TranslatedResult(
@@ -1347,9 +1604,15 @@ extension JNISwift2JavaGenerator {
 
     func translateSetParameter(
       elementType: SwiftType,
-      parameterName: String
+      parameterName: String,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedParameter {
-      let elementJavaType = try javaTypeForDictionaryComponent(elementType)
+      let elementJavaType = try javaTypeForDictionaryComponent(
+        elementType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
       let setType = JavaType.swiftSet(elementJavaType)
 
       return TranslatedParameter(
@@ -1363,9 +1626,15 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateSetResult(
-      elementType: SwiftType
+      elementType: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
-      let elementJavaType = try javaTypeForDictionaryComponent(elementType)
+      let elementJavaType = try javaTypeForDictionaryComponent(
+        elementType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements
+      )
       let setType = JavaType.swiftSet(elementJavaType)
 
       return TranslatedResult(
