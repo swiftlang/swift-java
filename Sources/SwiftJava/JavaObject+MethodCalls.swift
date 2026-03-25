@@ -153,15 +153,16 @@ extension AnyJavaObject {
     method: jmethodID,
     args: repeat each Param
   ) throws -> Result {
-    // Retrieve the method that performs this call, then package the values and
-    // call it.
+    // Wrap arg creation, the call, and result conversion in a local frame so
+    // that jstring/jarray local refs created by getJValues are freed on exit.
     let jniMethod = Result.jniMethodCall(in: environment)
-    let jniArgs = getJValues(repeat each args, in: environment)
-    let jniResult = try environment.translatingJNIExceptions {
-      jniMethod(environment, this, method, jniArgs)
+    return try environment.withLocalFrame(capacity: countArgs(repeat each args) + 1) {
+      let jniArgs = getJValues(repeat each args, in: environment)
+      let jniResult = try environment.translatingJNIExceptions {
+        jniMethod(environment, this, method, jniArgs)
+      }
+      return Result(fromJNI: jniResult, in: environment)
     }
-
-    return Result(fromJNI: jniResult, in: environment)
   }
 
   /// Call a Java method with the given name and arguments, which must be of the correct
@@ -219,12 +220,14 @@ extension AnyJavaObject {
     method: jmethodID,
     args: repeat each Param
   ) throws {
-    // Retrieve the method that performs this call, then package the arguments
-    // and call it.
+    // Wrap arg creation and the call in a local frame so that jstring/jarray
+    // local refs created by getJValues are freed on exit.
     let jniMethod = environment.interface.CallVoidMethodA!
-    let jniArgs = getJValues(repeat each args, in: environment)
-    try environment.translatingJNIExceptions {
-      jniMethod(environment, this, method, jniArgs)
+    try environment.withLocalFrame(capacity: countArgs(repeat each args) + 1) {
+      let jniArgs = getJValues(repeat each args, in: environment)
+      try environment.translatingJNIExceptions {
+        jniMethod(environment, this, method, jniArgs)
+      }
     }
   }
 
@@ -271,9 +274,16 @@ extension AnyJavaObject {
         in: environment
       )
 
-      let jniArgs = getJValues(repeat each arguments, in: environment)
-      return try environment.translatingJNIExceptions {
-        environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
+      // Wrap arg creation and the constructor call in a local frame, promoting
+      // the new object's local ref to the outer frame so the caller can wrap
+      // it in a JavaObjectHolder (which will then delete that promoted ref).
+      return try environment.withLocalFramePromotingResult(
+        capacity: countArgs(repeat each arguments) + 1
+      ) {
+        let jniArgs = getJValues(repeat each arguments, in: environment)
+        return try environment.translatingJNIExceptions {
+          environment.interface.NewObjectA!(environment, thisClass, methodID, jniArgs)
+        }!
       }!
     }
   }
@@ -308,7 +318,9 @@ extension AnyJavaObject {
 
       let fieldID = getJNIFieldID(fieldName, fieldType: fieldType)!
       let jniMethod = FieldType.jniFieldSet(in: environment)
-      jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
+      try! environment.withLocalFrame(capacity: 1) {
+        jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
+      }
     }
   }
 }
@@ -340,12 +352,13 @@ extension JavaClass {
     }!
 
     let jniMethod = Result.jniStaticMethodCall(in: environment)
-    let jniArgs = getJValues(repeat each arguments, in: environment)
-    let jniResult = try environment.translatingJNIExceptions {
-      jniMethod(environment, thisClass, methodID, jniArgs)
+    return try environment.withLocalFrame(capacity: countArgs(repeat each arguments) + 1) {
+      let jniArgs = getJValues(repeat each arguments, in: environment)
+      let jniResult = try environment.translatingJNIExceptions {
+        jniMethod(environment, thisClass, methodID, jniArgs)
+      }
+      return Result(fromJNI: jniResult, in: environment)
     }
-
-    return Result(fromJNI: jniResult, in: environment)
   }
 
   /// Call a Java static method with the given name and arguments, which must be
@@ -373,9 +386,11 @@ extension JavaClass {
     }!
 
     let jniMethod = environment.interface.CallStaticVoidMethodA
-    let jniArgs = getJValues(repeat each arguments, in: environment)
-    try environment.translatingJNIExceptions {
-      jniMethod!(environment, thisClass, methodID, jniArgs)
+    try environment.withLocalFrame(capacity: countArgs(repeat each arguments) + 1) {
+      let jniArgs = getJValues(repeat each arguments, in: environment)
+      try environment.translatingJNIExceptions {
+        jniMethod!(environment, thisClass, methodID, jniArgs)
+      }
     }
   }
 
@@ -403,7 +418,9 @@ extension JavaClass {
 
       let fieldID = getJNIStaticFieldID(fieldName, fieldType: fieldType)!
       let jniMethod = FieldType.jniStaticFieldSet(in: environment)
-      jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
+      try! environment.withLocalFrame(capacity: 1) {
+        jniMethod(environment, javaThis, fieldID, newValue.getJNIValue(in: environment))
+      }
     }
   }
 }
