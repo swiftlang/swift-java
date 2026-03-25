@@ -245,9 +245,8 @@ extension SwiftNominalType: CustomStringConvertible {
 }
 
 extension SwiftNominalType {
-  // TODO: Better way to detect Java wrapped classes.
   var isSwiftJavaWrapper: Bool {
-    nominalTypeDecl.name.hasPrefix("Java")
+    nominalTypeDecl.syntax?.attributes.contains(where: \.isJava) ?? false
   }
 
   var isProtocol: Bool {

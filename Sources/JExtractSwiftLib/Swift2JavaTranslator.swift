@@ -208,7 +208,7 @@ extension Swift2JavaTranslator {
   /// Returns a source file that contains all the available dependency classes.
   private func buildDependencyClassesSourceFile() -> SwiftJavaInputFile {
     let contents = self.dependenciesClasses.map {
-      "public class \($0) {}"
+      "@JavaClass public class \($0) {}"
     }
     .joined(separator: "\n")
 

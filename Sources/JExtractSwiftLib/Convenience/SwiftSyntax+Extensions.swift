@@ -134,7 +134,7 @@ extension AttributeListSyntax.Element {
       // FIXME: Handle #if.
       return false
     }
-    let attrName = attr.attributeName.description
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
     switch attrName {
     case "JavaClass", "JavaInterface", "JavaField", "JavaStaticField", "JavaMethod", "JavaStaticMethod",
       "JavaImplementation":
