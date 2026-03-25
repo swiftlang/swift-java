@@ -33,8 +33,8 @@ struct JNIGenericTypeTests {
       return MyID(value)
     }
     
-    public func makeIntID(_ value: Int) -> MyID<Int> {
-      return MyID(value)
+    public func takeIntID(_ value: MyID<Int>) -> Int {
+      return value.rawValue
     }
     """#
 
@@ -164,14 +164,12 @@ struct JNIGenericTypeTests {
         private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
         """,
         """
-        public static MyID<java.lang.Long> makeIntID(long value, SwiftArena swiftArena) throws SwiftIntegerOverflowException {
-          org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
-          SwiftModule.$makeIntID(value, instance);
-          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
+        public static long takeIntID(MyID<java.lang.Long> value) {
+          return SwiftModule.$takeIntID(value.$memoryAddress());
         }
         """,
         """
-        private static native void $makeIntID(long value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
+        private static native long $takeIntID(long value);
         """,
       ]
     )
@@ -196,6 +194,18 @@ struct JNIGenericTypeTests {
           let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
           environment.interface.SetLongField(environment, out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
           return
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeIntID__J")
+        public func Java_com_example_swift_SwiftModule__00024takeIntID__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jlong) -> jlong {
+          assert(value != 0, "value memory address was null")
+          let valueBits$ = Int(Int64(fromJNI: value, in: environment))
+          let value$ = UnsafeMutablePointer<MyID<Int>>(bitPattern: valueBits$)
+          guard let value$ else {
+            fatalError("value memory address was null in call to \\(#function)!")
+          }
+          return Int64(SwiftModule.takeIntID(value$.pointee)).getJNILocalRefValue(in: environment)
         }
         """
       ]
