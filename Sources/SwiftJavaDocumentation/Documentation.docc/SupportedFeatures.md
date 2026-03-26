@@ -374,7 +374,6 @@ or set the `asyncFuncMode` configuration value in `swift-java.config`
 > Note: Generic types are currently only supported in JNI mode. 
 
 Support for generic types is still work-in-progress and limited.
-The generated Java classes do not have generic signatures.
 Any members containing type parameters (such as T) are not exported.
 
 ```swift
@@ -404,11 +403,11 @@ public func makeIntID() -> MyID<Int> {
 will be exported as
 
 ```java
-public final class MyID implements JNISwiftInstance {
+public final class MyID<T> implements JNISwiftInstance {
     public String getDescription();
 }
 
 public final class MySwiftLibrary {
-    public static MyID makeIntID();
+    public static MyID<java.lang.Long> makeIntID();
 } 
 ```

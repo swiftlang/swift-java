@@ -32,6 +32,10 @@ struct JNIGenericTypeTests {
     public func makeStringID(_ value: String) -> MyID<String> {
       return MyID(value)
     }
+
+    public func takeIntID(_ value: MyID<Int>) -> Int {
+      return value.rawValue
+    }
     """#
 
   @Test
@@ -43,18 +47,18 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public final class MyID implements JNISwiftInstance {
+        public final class MyID<T> implements JNISwiftInstance {
         """,
         """
         private MyID(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
         """,
         """
-        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
-          return new MyID(selfPointer, selfTypePointer, swiftArena);
+        public static<T> MyID<T> wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
+          return new MyID<T>(selfPointer, selfTypePointer, swiftArena);
         }
 
-        public static MyID wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
-          return new MyID(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static<T> MyID<T> wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer) {
+          return new MyID<T>(selfPointer, selfTypePointer, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """,
         """
@@ -150,7 +154,7 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static MyID makeStringID(java.lang.String value, SwiftArena swiftArena) {
+        public static MyID<java.lang.String> makeStringID(java.lang.String value, SwiftArena swiftArena) {
           org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
           SwiftModule.$makeStringID(value, instance);
           return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
@@ -158,6 +162,14 @@ struct JNIGenericTypeTests {
         """,
         """
         private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
+        """,
+        """
+        public static long takeIntID(MyID<java.lang.Long> value) {
+          return SwiftModule.$takeIntID(value.$memoryAddress());
+        }
+        """,
+        """
+        private static native long $takeIntID(long value);
         """,
       ]
     )
@@ -183,7 +195,19 @@ struct JNIGenericTypeTests {
           environment.interface.SetLongField(environment, out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
           return
         }
+        """,
         """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024takeIntID__J")
+        public func Java_com_example_swift_SwiftModule__00024takeIntID__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jlong) -> jlong {
+          assert(value != 0, "value memory address was null")
+          let valueBits$ = Int(Int64(fromJNI: value, in: environment))
+          let value$ = UnsafeMutablePointer<MyID<Int>>(bitPattern: valueBits$)
+          guard let value$ else {
+            fatalError("value memory address was null in call to \\(#function)!")
+          }
+          return Int64(SwiftModule.takeIntID(value$.pointee)).getJNILocalRefValue(in: environment)
+        }
+        """,
       ]
     )
   }
