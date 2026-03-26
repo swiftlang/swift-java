@@ -1159,6 +1159,12 @@ extension JNISwift2JavaGenerator {
             )
             return .swiftSet(elementJavaType)
 
+          case .foundationDate, .essentialsDate:
+            return .class(package: nil, name: "Date")
+
+          case .foundationData, .essentialsData:
+            return .class(package: nil, name: "Data")
+
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID
 

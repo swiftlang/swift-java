@@ -44,4 +44,8 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core.collections", name: "SwiftSet", typeParameters: [E.boxedType])
   }
 
+  /// A container for receiving Swift generic instances.
+  static var _OutSwiftGenericInstance: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
+  }
 }
