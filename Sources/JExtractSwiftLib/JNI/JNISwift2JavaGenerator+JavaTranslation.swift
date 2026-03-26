@@ -1184,13 +1184,14 @@ extension JNISwift2JavaGenerator {
         }
 
         // We assume this is a JExtract class.
-        let typeParameters = try nominalType.genericArguments?.map { swiftType in
-          try translateGenericTypeParameter(
-            swiftType,
-            genericParameters: genericParameters,
-            genericRequirements: genericRequirements
-          )
-        } ?? []
+        let typeParameters =
+          try nominalType.genericArguments?.map { swiftType in
+            try translateGenericTypeParameter(
+              swiftType,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+          } ?? []
 
         return .class(
           package: nil,

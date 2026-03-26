@@ -32,7 +32,7 @@ struct JNIGenericTypeTests {
     public func makeStringID(_ value: String) -> MyID<String> {
       return MyID(value)
     }
-    
+
     public func takeIntID(_ value: MyID<Int>) -> Int {
       return value.rawValue
     }
@@ -207,7 +207,7 @@ struct JNIGenericTypeTests {
           }
           return Int64(SwiftModule.takeIntID(value$.pointee)).getJNILocalRefValue(in: environment)
         }
-        """
+        """,
       ]
     )
   }

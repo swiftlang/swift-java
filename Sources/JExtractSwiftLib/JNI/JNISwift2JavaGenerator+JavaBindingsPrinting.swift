@@ -234,11 +234,12 @@ extension JNISwift2JavaGenerator {
         )
       }
       printer.println()
-      let genericClause = if decl.swiftNominal.isGeneric {
-        "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
-      } else {
-        ""
-      }
+      let genericClause =
+        if decl.swiftNominal.isGeneric {
+          "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
+        } else {
+          ""
+        }
       printer.print(
         """
         /** 
@@ -389,11 +390,12 @@ extension JNISwift2JavaGenerator {
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
-    let genericClause = if decl.swiftNominal.isGeneric {
-      "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
-    } else {
-      ""
-    }
+    let genericClause =
+      if decl.swiftNominal.isGeneric {
+        "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
+      } else {
+        ""
+      }
     printer.printBraceBlock(
       "\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name)\(genericClause) implements \(implementsClause)"
     ) { printer in
