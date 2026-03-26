@@ -23,11 +23,11 @@ public class GenericTypeTest {
     @Test
     void genericTypeValueRoundtrip() {
         try (var arena = SwiftArena.ofConfined()) {
-            var stringId = MySwiftLibrary.makeStringID("Java", arena);
+            MyID<String> stringId = MySwiftLibrary.makeStringID("Java", arena);
             assertEquals("Java", stringId.getDescription());
             assertEquals("Java", MySwiftLibrary.takeStringValue(stringId));
 
-            var intId = MySwiftLibrary.makeIntID(42, arena);
+            MyID<Long> intId = MySwiftLibrary.makeIntID(42, arena);
             assertEquals("42", intId.getDescription());
             assertEquals(42, MySwiftLibrary.takeIntValue(intId));
         }
@@ -36,8 +36,8 @@ public class GenericTypeTest {
     @Test
     void genericTypeProperty() {
         try (var arena = SwiftArena.ofConfined()) {
-            var intId = MySwiftLibrary.makeIntID(42, arena);
-            var entity = MyEntity.init(intId, "name", arena);
+            MyID<Long> intId = MySwiftLibrary.makeIntID(42, arena);
+            MyEntity entity = MyEntity.init(intId, "name", arena);
             assertEquals("42", entity.getId(arena).getDescription());
         }
     }
@@ -45,7 +45,7 @@ public class GenericTypeTest {
     @Test
     void genericEnum() {
         try (var arena = SwiftArena.ofConfined()) {
-            var value = MySwiftLibrary.makeIntGenericEnum(arena);
+            GenericEnum<Long> value = MySwiftLibrary.makeIntGenericEnum(arena);
             switch (value.getCase()) {
                 case GenericEnum.Foo _ -> assertTrue(value.getAsFoo().isPresent());
                 case GenericEnum.Bar _ -> assertTrue(value.getAsBar().isPresent());
