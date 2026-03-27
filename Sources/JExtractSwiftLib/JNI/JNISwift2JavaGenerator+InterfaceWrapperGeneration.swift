@@ -195,24 +195,18 @@ extension JNISwift2JavaGenerator {
 
       switch type {
       case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = nominalType.asKnownType {
           switch knownType {
-          case .optional:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .optional(let wrapped):
             return try translateOptionalParameter(
               name: parameterName,
-              wrappedType: genericArgs[0]
+              wrappedType: wrapped
             )
 
-          case .array:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .array(let element):
             return try translateArrayParameter(
               name: parameterName,
-              elementType: genericArgs[0]
+              elementType: element
             )
 
           default:
@@ -282,22 +276,16 @@ extension JNISwift2JavaGenerator {
 
       switch type {
       case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = nominalType.asKnownType {
           switch knownType {
-          case .optional:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .optional(let wrapped):
             return try self.translateOptionalResult(
-              wrappedType: genericArgs[0],
+              wrappedType: wrapped,
               methodName: methodName
             )
 
-          case .array:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
-            return try self.translateArrayResult(elementType: genericArgs[0])
+          case .array(let element):
+            return try self.translateArrayResult(elementType: element)
 
           default:
             throw JavaTranslationError.unsupportedSwiftType(type)
@@ -468,15 +456,15 @@ extension SwiftType {
   var isDirectlyTranslatedToWrapJava: Bool {
     switch self {
     case .nominal(let swiftNominalType):
-      guard let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind else {
+      guard let knownType = swiftNominalType.asKnownType else {
         return false
       }
       switch knownType {
       case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double,
         .string, .void:
         return true
-      case .array where swiftNominalType.genericArguments?.count == 1:
-        return swiftNominalType.genericArguments![0].isDirectlyTranslatedToWrapJava
+      case .array(let element):
+        return element.isDirectlyTranslatedToWrapJava
       default:
         return false
       }

@@ -176,19 +176,16 @@ struct CdeclLowering {
       )
 
     case .nominal(let nominal):
-      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+      if let knownType = nominal.asKnownType {
         if convention == .inout {
           // FIXME: Support non-trivial 'inout' for builtin types.
           throw LoweringError.inoutNotSupported(type)
         }
         switch knownType {
-        case .unsafePointer, .unsafeMutablePointer:
-          guard let genericArgs = type.asNominalType?.genericArguments, genericArgs.count == 1 else {
-            throw LoweringError.unhandledType(type)
-          }
+        case .unsafePointer(let pointee), .unsafeMutablePointer(let pointee):
           // Typed pointers are mapped down to their raw forms in cdecl entry
           // points. These can be passed through directly.
-          let isMutable = knownType == .unsafeMutablePointer
+          let isMutable = knownType.kind == .unsafeMutablePointer
           return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
@@ -197,15 +194,12 @@ struct CdeclLowering {
                 type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
               )
             ],
-            conversion: .typedPointer(.placeholder, swiftType: genericArgs[0])
+            conversion: .typedPointer(.placeholder, swiftType: pointee)
           )
 
-        case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
-            throw LoweringError.unhandledType(type)
-          }
+        case .unsafeBufferPointer(let element), .unsafeMutableBufferPointer(let element):
           // Typed pointers are lowered to (raw-pointer, count) pair.
-          let isMutable = knownType == .unsafeMutableBufferPointer
+          let isMutable = knownType.kind == .unsafeMutableBufferPointer
           return LoweredParameter(
             cdeclParameters: [
               SwiftParameter(
@@ -226,7 +220,7 @@ struct CdeclLowering {
                   label: "start",
                   argument: .typedPointer(
                     .explodedComponent(.placeholder, component: "pointer"),
-                    swiftType: genericArgs[0]
+                    swiftType: element
                   )
                 ),
                 LabeledArgument(
@@ -268,12 +262,9 @@ struct CdeclLowering {
             )
           )
 
-        case .optional:
-          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1 else {
-            throw LoweringError.unhandledType(type)
-          }
+        case .optional(let wrapped):
           return try lowerOptionalParameter(
-            genericArgs[0],
+            wrapped,
             convention: convention,
             parameterName: parameterName,
             genericParameters: genericParameters,
@@ -282,31 +273,23 @@ struct CdeclLowering {
 
         case .string:
           // 'String' is passed in by C string. i.e. 'UnsafePointer<Int8>' ('const uint8_t *')
-          if knownType == .string {
-            return LoweredParameter(
-              cdeclParameters: [
-                SwiftParameter(
-                  convention: .byValue,
-                  parameterName: parameterName,
-                  type: knownTypes.unsafePointer(knownTypes.int8)
-                )
-              ],
-              conversion: .initialize(
-                type,
-                arguments: [
-                  LabeledArgument(label: "cString", argument: .placeholder)
-                ]
+          return LoweredParameter(
+            cdeclParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: parameterName,
+                type: knownTypes.unsafePointer(knownTypes.int8)
               )
+            ],
+            conversion: .initialize(
+              type,
+              arguments: [
+                LabeledArgument(label: "cString", argument: .placeholder)
+              ]
             )
-          }
+          )
 
-        case .array:
-          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1,
-                genericArgs[0] == knownTypes.uint8
-          else {
-            throw LoweringError.unhandledType(type)
-          }
-
+        case .array(let element) where element == knownTypes.uint8:
           // Lower an array as 'address' raw pointer and 'count' integer
           let cdeclParameters = [
             SwiftParameter(

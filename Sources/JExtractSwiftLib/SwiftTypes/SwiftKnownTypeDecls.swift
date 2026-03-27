@@ -108,6 +108,46 @@ enum SwiftKnownType: Equatable {
     case .essentialsUUID: self = .essentialsUUID
     }
   }
+
+  var kind: SwiftKnownTypeDeclKind {
+    switch self {
+    case .bool: .bool
+    case .int: .int
+    case .uint: .uint
+    case .int8: .int8
+    case .uint8: .uint8
+    case .int16: .int16
+    case .uint16: .uint16
+    case .int32: .int32
+    case .uint32: .uint32
+    case .int64: .int64
+    case .uint64: .uint64
+    case .float: .float
+    case .double: .double
+    case .unsafeRawPointer: .unsafeRawPointer
+    case .unsafeRawBufferPointer: .unsafeRawBufferPointer
+    case .unsafeMutableRawPointer: .unsafeMutableRawPointer
+    case .unsafeMutableRawBufferPointer: .unsafeMutableRawBufferPointer
+    case .unsafePointer: .unsafePointer
+    case .unsafeMutablePointer: .unsafeMutablePointer
+    case .unsafeBufferPointer: .unsafeBufferPointer
+    case .unsafeMutableBufferPointer: .unsafeMutableBufferPointer
+    case .optional: .optional
+    case .void: .void
+    case .string: .string
+    case .array: .array
+    case .dictionary: .dictionary
+    case .set: .set
+    case .foundationDataProtocol: .foundationDataProtocol
+    case .essentialsDataProtocol: .essentialsDataProtocol
+    case .foundationData: .foundationData
+    case .essentialsData: .essentialsData
+    case .foundationDate: .foundationDate
+    case .essentialsDate: .essentialsDate
+    case .foundationUUID: .foundationUUID
+    case .essentialsUUID: .essentialsUUID
+    }
+  }
 }
 
 extension SwiftKnownType {

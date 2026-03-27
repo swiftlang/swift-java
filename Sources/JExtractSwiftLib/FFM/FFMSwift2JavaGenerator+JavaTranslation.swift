@@ -436,21 +436,21 @@ extension FFMSwift2JavaGenerator {
               conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
-          case .array(let element) where element == knownTypes.uint8 :
+          case .array(let element) where element == knownTypes.uint8:
             return TranslatedParameter(
               javaParameters: [
                 JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations)
               ],
               conversion:
-                  .commaSeparated([
-                    .call(
-                      .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
-                      base: .temporaryArena,
-                      function: "allocateFrom",
-                      withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
-                    ),
-                    .property(.placeholder, propertyName: "length"),
-                  ])
+                .commaSeparated([
+                  .call(
+                    .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
+                    base: .temporaryArena,
+                    function: "allocateFrom",
+                    withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
+                  ),
+                  .property(.placeholder, propertyName: "length"),
+                ])
             )
 
           case .foundationData, .essentialsData:
@@ -748,10 +748,10 @@ extension FFMSwift2JavaGenerator {
             // FIXME: Implement
             throw JavaTranslationError.unhandledType(swiftType)
 
-          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8 :
+          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8:
             return TranslatedResult(
               javaResultType:
-                  .array(.byte),
+                .array(.byte),
               annotations: [.unsigned],
               outParameters: [], // no out parameters, but we do an "out" callback
               outCallback: OutCallback(

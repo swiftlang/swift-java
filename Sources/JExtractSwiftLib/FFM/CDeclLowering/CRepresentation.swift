@@ -24,12 +24,12 @@ extension CType {
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
-      if let primitiveCType = nominalType.nominalTypeDecl.knownTypeKind?.primitiveCType {
-        self = primitiveCType
-        return
-      }
-
       if let knownType = nominalType.asKnownType {
+        if let primitiveCType = knownType.primitiveCType {
+          self = primitiveCType
+          return
+        }
+
         switch knownType {
         case .optional(let wrapped) where wrapped.isPointer:
           try self.init(cdeclType: wrapped)
