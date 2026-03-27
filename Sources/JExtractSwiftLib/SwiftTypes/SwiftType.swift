@@ -156,13 +156,13 @@ extension SwiftType: CustomStringConvertible {
   var description: String {
     switch self {
     case .nominal(let nominal):
-      if nominal.parent?.description == "Swift" {
-        switch nominal.nominalTypeDecl.name {
-        case SwiftNominalType.optionalTypeSugarName where nominal.genericArguments?.count == 1:
+      if let sugarName = nominal.sugarName {
+        switch sugarName {
+        case .optional where nominal.genericArguments?.count == 1:
           return "\(nominal.genericArguments![0])?"
-        case SwiftNominalType.arrayTypeSugarName where nominal.genericArguments?.count == 1:
+        case .array where nominal.genericArguments?.count == 1:
           return "[\(nominal.genericArguments![0])]"
-        case SwiftNominalType.dictionaryTypeSugarName where nominal.genericArguments?.count == 2:
+        case .dictionary where nominal.genericArguments?.count == 2:
           return "[\(nominal.genericArguments![0]): \(nominal.genericArguments![1])]"
         default:
           break
@@ -225,10 +225,6 @@ struct SwiftNominalType: Equatable {
 
     return nil
   }
-
-  static let arrayTypeSugarName = "[]"
-  static let dictionaryTypeSugarName = "[:]"
-  static let optionalTypeSugarName = "?"
 
   package var asKnownType: SwiftKnownType? {
     nominalTypeDecl.knownTypeKind.flatMap {
