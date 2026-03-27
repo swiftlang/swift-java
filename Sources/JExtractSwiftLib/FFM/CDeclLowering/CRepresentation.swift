@@ -24,24 +24,24 @@ extension CType {
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
-      if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-        if let primitiveCType = knownType.primitiveCType {
-          self = primitiveCType
-          return
-        }
+      if let primitiveCType = nominalType.nominalTypeDecl.knownTypeKind?.primitiveCType {
+        self = primitiveCType
+        return
+      }
 
+      if let knownType = nominalType.asKnownType {
         switch knownType {
-        case .optional where nominalType.genericArguments?.count == 1 && nominalType.genericArguments![0].isPointer:
-          try self.init(cdeclType: nominalType.genericArguments![0])
+        case .optional(let wrapped) where wrapped.isPointer:
+          try self.init(cdeclType: wrapped)
           return
 
-        case .unsafePointer where nominalType.genericArguments?.count == 1:
+        case .unsafePointer(let pointee):
           self = .pointer(
-            .qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0]))
+            .qualified(const: true, volatile: false, type: try CType(cdeclType: pointee))
           )
           return
-        case .unsafeMutablePointer where nominalType.genericArguments?.count == 1:
-          self = .pointer(try CType(cdeclType: nominalType.genericArguments![0]))
+        case .unsafeMutablePointer(let pointee):
+          self = .pointer(try CType(cdeclType: pointee))
           return
         default:
           break

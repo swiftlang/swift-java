@@ -14,7 +14,7 @@
 
 import SwiftSyntax
 
-enum SwiftKnownType {
+enum SwiftKnownType: Equatable {
   case bool
   case int
   case uint
@@ -52,6 +52,109 @@ enum SwiftKnownType {
   case essentialsDate
   case foundationUUID
   case essentialsUUID
+
+  init?(kind: SwiftKnownTypeDeclKind, genericArguments: [SwiftType]?) {
+    switch kind {
+    case .bool: self = .bool
+    case .int: self = .int
+    case .uint: self = .uint
+    case .int8: self = .int8
+    case .uint8: self = .uint8
+    case .int16: self = .int16
+    case .uint16: self = .uint16
+    case .int32: self = .int32
+    case .uint32: self = .uint32
+    case .int64: self = .int64
+    case .uint64: self = .uint64
+    case .float: self = .float
+    case .double: self = .double
+    case .unsafeRawPointer: self = .unsafeRawPointer
+    case .unsafeRawBufferPointer: self = .unsafeRawBufferPointer
+    case .unsafeMutableRawPointer: self = .unsafeMutableRawPointer
+    case .unsafeMutableRawBufferPointer: self = .unsafeMutableRawBufferPointer
+    case .unsafePointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafePointer(arg)
+    case .unsafeMutablePointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeMutablePointer(arg)
+    case .unsafeBufferPointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeBufferPointer(arg)
+    case .unsafeMutableBufferPointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeMutableBufferPointer(arg)
+    case .optional:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .optional(arg)
+    case .void: self = .void
+    case .string: self = .string
+    case .array:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .array(arg)
+    case .dictionary:
+      guard let key = genericArguments?.first, let value = genericArguments?.dropFirst().first else { return nil }
+      self = .dictionary(key, value)
+    case .set:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .set(arg)
+    case .foundationDataProtocol: self = .foundationDataProtocol
+    case .essentialsDataProtocol: self = .essentialsDataProtocol
+    case .foundationData: self = .foundationData
+    case .essentialsData: self = .essentialsData
+    case .foundationDate: self = .foundationDate
+    case .essentialsDate: self = .essentialsDate
+    case .foundationUUID: self = .foundationUUID
+    case .essentialsUUID: self = .essentialsUUID
+    }
+  }
+}
+
+extension SwiftKnownType {
+  var isPointer: Bool {
+    switch self {
+    case .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer:
+      return true
+    default:
+      return false
+    }
+  }
+
+  var primitiveCType: CType? {
+    switch self {
+    case .bool: .integral(.bool)
+    case .int: .integral(.ptrdiff_t)
+    case .uint: .integral(.size_t)
+    case .int8: .integral(.signed(bits: 8))
+    case .uint8: .integral(.unsigned(bits: 8))
+    case .int16: .integral(.signed(bits: 16))
+    case .uint16: .integral(.unsigned(bits: 16))
+    case .int32: .integral(.signed(bits: 32))
+    case .uint32: .integral(.unsigned(bits: 32))
+    case .int64: .integral(.signed(bits: 64))
+    case .uint64: .integral(.unsigned(bits: 64))
+    case .float: .floating(.float)
+    case .double: .floating(.double)
+    case .unsafeMutableRawPointer: .pointer(.void)
+    case .unsafeRawPointer:
+      .pointer(
+        .qualified(const: true, volatile: false, type: .void)
+      )
+    case .void: .void
+    default:
+      nil
+    }
+  }
+
+  var isDirectlyTranslatedToWrapJava: Bool {
+    switch self {
+    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string,
+      .void:
+      return true
+    default:
+      return false
+    }
+  }
 }
 
 enum SwiftKnownTypeDeclKind: String, Hashable {

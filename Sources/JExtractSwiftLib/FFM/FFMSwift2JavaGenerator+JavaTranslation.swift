@@ -390,7 +390,7 @@ extension FFMSwift2JavaGenerator {
         )
 
       case .nominal(let swiftNominalType):
-        if let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = swiftNominalType.asKnownType {
           if convention == .inout {
             // FIXME: Support non-trivial 'inout' for builtin types.
             throw JavaTranslationError.inoutNotSupported(swiftType)
@@ -414,12 +414,9 @@ extension FFMSwift2JavaGenerator {
               ])
             )
 
-          case .optional:
-            guard let genericArgs = swiftNominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unhandledType(swiftType)
-            }
+          case .optional(let wrapped):
             return try translateOptionalParameter(
-              wrappedType: genericArgs[0],
+              wrappedType: wrapped,
               convention: convention,
               parameterName: parameterName,
               loweredParam: loweredParam,
@@ -439,7 +436,7 @@ extension FFMSwift2JavaGenerator {
               conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
-          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8 :
+          case .array(let element) where element == knownTypes.uint8 :
             return TranslatedParameter(
               javaParameters: [
                 JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations)

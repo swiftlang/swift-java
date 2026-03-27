@@ -229,6 +229,12 @@ struct SwiftNominalType: Equatable {
   static let arrayTypeSugarName = "[]"
   static let dictionaryTypeSugarName = "[:]"
   static let optionalTypeSugarName = "?"
+
+  package var asKnownType: SwiftKnownType? {
+    nominalTypeDecl.knownTypeKind.flatMap {
+      SwiftKnownType(kind: $0, genericArguments: genericArguments)
+    }
+  }
 }
 
 extension SwiftNominalType: CustomStringConvertible {
