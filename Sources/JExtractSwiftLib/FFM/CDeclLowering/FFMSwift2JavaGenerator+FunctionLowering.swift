@@ -658,11 +658,11 @@ struct CdeclLowering {
 
     case .nominal(let nominal):
       // Types from the Swift standard library that we know about.
-      if let knownType = nominal.nominalTypeDecl.knownTypeKind {
+      if let knownType = nominal.asKnownType {
         switch knownType {
         case .unsafePointer, .unsafeMutablePointer:
           // Typed pointers are lowered to corresponding raw forms.
-          let isMutable = knownType == .unsafeMutablePointer
+          let isMutable = knownType.kind == .unsafeMutablePointer
           let resultType: SwiftType = isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
           return LoweredResult(
             cdeclResultType: resultType,
@@ -672,7 +672,7 @@ struct CdeclLowering {
 
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
           // Typed pointers are lowered to (raw-pointer, count) pair.
-          let isMutable = knownType == .unsafeMutableBufferPointer
+          let isMutable = knownType.kind == .unsafeMutableBufferPointer
           return try lowerResult(
             .tuple([
               SwiftTupleElement(label: nil, type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
@@ -683,7 +683,7 @@ struct CdeclLowering {
 
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
           // pointer buffers are lowered to (raw-pointer, count) pair.
-          let isMutable = knownType == .unsafeMutableRawBufferPointer
+          let isMutable = knownType.kind == .unsafeMutableRawBufferPointer
           return LoweredResult(
             cdeclResultType: .void,
             cdeclOutParameters: makeBufferIndirectReturnParameters(outParameterName, isMutable: isMutable),
@@ -712,7 +712,7 @@ struct CdeclLowering {
           // Not supported at this point.
           throw LoweringError.unhandledType(type)
 
-        case .array where nominal.genericArguments?.count == 1 && nominal.genericArguments![0] == knownTypes.uint8 :
+        case .array(let element) where element == knownTypes.uint8:
           let resultName = "_result"
 
           return LoweredResult(
@@ -732,17 +732,17 @@ struct CdeclLowering {
                   arguments: [
                     .init(
                       argument:
-                          .closureLowering(
-                            parameters: [.placeholder],
-                            result: .method(
-                              base: "\(outParameterName)_initialize",
-                              methodName: nil, // just `(...)` apply the closure
-                              arguments: [
-                                .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
-                                .init(label: nil, argument: .member(.constant("_0"), member: "count")),
-                              ]
-                            )
+                        .closureLowering(
+                          parameters: [.placeholder],
+                          result: .method(
+                            base: "\(outParameterName)_initialize",
+                            methodName: nil, // just `(...)` apply the closure
+                            arguments: [
+                              .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
+                              .init(label: nil, argument: .member(.constant("_0"), member: "count")),
+                            ]
                           )
+                        )
                     )
                   ]
                 )

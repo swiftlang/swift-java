@@ -23,7 +23,7 @@ func getTypeAnnotations(swiftType: SwiftType, config: Configuration) -> [JavaAnn
   }
 
   switch swiftType.asNominalType?.asKnownType {
-  case .array(let element) where element.isUnsignedInteger :
+  case .array(let element) where element.isUnsignedInteger:
     return [JavaAnnotation.unsigned]
   default:
     return []

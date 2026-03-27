@@ -96,12 +96,13 @@ extension SwiftFunctionSignature {
       lookupContext: lookupContext
     )
 
-    let type: SwiftType = if node.optionalMark != nil {
-      SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
-        .optionalSugar(enclosingType)
-    }  else {
-      enclosingType
-    }
+    let type: SwiftType =
+      if node.optionalMark != nil {
+        SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+          .optionalSugar(enclosingType)
+      } else {
+        enclosingType
+      }
 
     self.init(
       selfParameter: .initializer(enclosingType),
