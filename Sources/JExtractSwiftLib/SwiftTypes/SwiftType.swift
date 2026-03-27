@@ -191,7 +191,6 @@ extension SwiftType: CustomStringConvertible {
 
 struct SwiftNominalType: Equatable {
   indirect enum Parent: Equatable {
-    case module(String)
     case nominal(SwiftNominalType)
   }
 
@@ -201,25 +200,26 @@ struct SwiftNominalType: Equatable {
     case dictionary
   }
 
-  var parent: Parent?
+  private var storedParent: Parent?
   var sugarName: SugarName?
   var nominalTypeDecl: SwiftNominalTypeDeclaration
   var genericArguments: [SwiftType]?
 
   init(
-    parent: Parent? = nil,
+    parent: SwiftNominalType? = nil,
     sugarName: SugarName? = nil,
     nominalTypeDecl: SwiftNominalTypeDeclaration,
     genericArguments: [SwiftType]? = nil
   ) {
-    self.parent = parent ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
+    self.storedParent =
+      parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
     self.sugarName = sugarName
     self.nominalTypeDecl = nominalTypeDecl
     self.genericArguments = genericArguments
   }
 
-  var parentAsNominal: SwiftNominalType? {
-    if case .nominal(let parent) = parent ?? .none {
+  var parent: SwiftNominalType? {
+    if case .nominal(let parent) = storedParent ?? .none {
       return parent
     }
 
@@ -263,8 +263,6 @@ extension SwiftNominalType: CustomStringConvertible {
 extension SwiftNominalType.Parent: CustomStringConvertible {
   var description: String {
     switch self {
-    case .module(let moduleName):
-      return moduleName
     case .nominal(let nominal):
       return nominal.description
     }
@@ -458,7 +456,7 @@ extension SwiftType {
     if let nominalDecl = typeDecl as? SwiftNominalTypeDeclaration {
       self = .nominal(
         SwiftNominalType(
-          parent: parent?.asNominalType.map { .nominal($0) },
+          parent: parent?.asNominalType,
           nominalTypeDecl: nominalDecl,
           genericArguments: genericArguments
         )
@@ -486,7 +484,7 @@ extension SwiftType {
 
     self = .nominal(
       SwiftNominalType(
-        parent: parent?.asNominalType.map { .nominal($0) },
+        parent: parent?.asNominalType,
         nominalTypeDecl: nominalTypeDecl,
         genericArguments: nil
       )
