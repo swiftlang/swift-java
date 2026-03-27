@@ -155,20 +155,7 @@ extension SwiftType: CustomStringConvertible {
 
   var description: String {
     switch self {
-    case .nominal(let nominal):
-      if let sugarName = nominal.sugarName {
-        switch sugarName {
-        case .optional where nominal.genericArguments?.count == 1:
-          return "\(nominal.genericArguments![0])?"
-        case .array where nominal.genericArguments?.count == 1:
-          return "[\(nominal.genericArguments![0])]"
-        case .dictionary where nominal.genericArguments?.count == 2:
-          return "[\(nominal.genericArguments![0]): \(nominal.genericArguments![1])]"
-        default:
-          break
-        }
-      }
-      return nominal.description
+    case .nominal(let nominal): return nominal.description
     case .genericParameter(let genericParam): return genericParam.name
     case .function(let functionType): return functionType.description
     case .metatype(let instanceType):
