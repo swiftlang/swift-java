@@ -295,12 +295,6 @@ extension JNISwift2JavaGenerator {
           conversionCheck: nil
         )
 
-      case .optional(let wrapped):
-        return try translateOptionalParameter(
-          wrappedType: wrapped,
-          parameterName: parameterName
-        )
-
       case .opaque(let proto), .existential(let proto):
         return try translateProtocolParameter(
           protocolType: proto,
@@ -320,25 +314,6 @@ extension JNISwift2JavaGenerator {
         }
 
         throw JavaTranslationError.unsupportedSwiftType(type)
-
-      case .array(let elementType):
-        return try translateArrayParameter(
-          elementType: elementType,
-          parameterName: parameterName
-        )
-
-      case .dictionary(let keyType, let valueType):
-        return try translateDictionaryParameter(
-          keyType: keyType,
-          valueType: valueType,
-          parameterName: parameterName
-        )
-
-      case .set(let elementType):
-        return try translateSetParameter(
-          elementType: elementType,
-          parameterName: parameterName
-        )
 
       case .metatype:
         return NativeParameter(
@@ -672,7 +647,7 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
+      case .function, .metatype, .tuple, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -704,7 +679,7 @@ extension JNISwift2JavaGenerator {
         // Custom types are not supported yet.
         throw JavaTranslationError.unsupportedSwiftType(type)
 
-      case .function, .metatype, .optional, .tuple, .existential, .opaque, .genericParameter, .composite, .array, .dictionary, .set:
+      case .function, .metatype, .tuple, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -814,25 +789,6 @@ extension JNISwift2JavaGenerator {
           outParameters: []
         )
 
-      case .optional(let wrapped):
-        return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
-
-      case .array(let elementType):
-        return try translateArrayResult(elementType: elementType, resultName: resultName)
-
-      case .dictionary(let keyType, let valueType):
-        return try translateDictionaryResult(
-          keyType: keyType,
-          valueType: valueType,
-          resultName: resultName
-        )
-
-      case .set(let elementType):
-        return try translateSetResult(
-          elementType: elementType,
-          resultName: resultName
-        )
-
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(elements: elements, resultName: resultName)
 
@@ -911,7 +867,7 @@ extension JNISwift2JavaGenerator {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
             javaType.implementsJavaValue
           else {
-            throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+            throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
           }
 
           return NativeResult(
@@ -922,7 +878,7 @@ extension JNISwift2JavaGenerator {
         }
 
         guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+          throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
         }
 
         // Assume JExtract imported class
@@ -948,7 +904,7 @@ extension JNISwift2JavaGenerator {
         )
 
       default:
-        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+        throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
       }
     }
 
@@ -969,21 +925,21 @@ extension JNISwift2JavaGenerator {
             parameters: [
               JavaParameter(name: parameterName, type: .array(javaType))
             ],
-            conversion: .initFromJNI(.placeholder, swiftType: .array(elementType)),
+            conversion: .initFromJNI(.placeholder, swiftType: knownTypes.arraySugar(elementType)),
             indirectConversion: nil,
             conversionCheck: nil
           )
         }
 
         guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+          throw JavaTranslationError.unsupportedSwiftType(knownTypes.arraySugar(elementType))
         }
 
         // Assume JExtract wrapped class
         return NativeParameter(
           parameters: [JavaParameter(name: parameterName, type: .array(.long))],
           conversion: .method(
-            .initFromJNI(.placeholder, swiftType: .array(self.knownTypes.int64)),
+            .initFromJNI(.placeholder, swiftType: knownTypes.arraySugar(self.knownTypes.int64)),
             function: "map",
             arguments: [
               (
@@ -1020,7 +976,7 @@ extension JNISwift2JavaGenerator {
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .initFromJNI(.placeholder, swiftType: .dictionary(key: keyType, value: valueType)),
+        conversion: .initFromJNI(.placeholder, swiftType: knownTypes.dictionarySugar(keyType, valueType)),
         indirectConversion: nil,
         conversionCheck: nil
       )
@@ -1050,7 +1006,7 @@ extension JNISwift2JavaGenerator {
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .initFromJNI(.placeholder, swiftType: .set(element: elementType)),
+        conversion: .initFromJNI(.placeholder, swiftType: knownTypes.set(elementType)),
         indirectConversion: nil,
         conversionCheck: nil
       )

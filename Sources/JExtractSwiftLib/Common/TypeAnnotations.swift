@@ -19,7 +19,9 @@ import SwiftJavaJNICore
 /// in Java sources when the corresponding Java type is rendered.
 func getTypeAnnotations(swiftType: SwiftType, config: Configuration) -> [JavaAnnotation] {
   switch swiftType {
-  case .array(let wrapped) where wrapped.isUnsignedInteger:
+  case .nominal(let nominal) where
+    nominal.nominalTypeDecl.knownTypeKind == .array
+    && nominal.genericArguments![0].isUnsignedInteger:
     return [JavaAnnotation.unsigned]
   case _ where swiftType.isUnsignedInteger:
     return [JavaAnnotation.unsigned]

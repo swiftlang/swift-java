@@ -31,6 +31,10 @@ extension CType {
         }
 
         switch knownType {
+        case .optional where nominalType.genericArguments?.count == 1 && nominalType.genericArguments![0].isPointer:
+          try self.init(cdeclType: nominalType.genericArguments![0])
+          return
+
         case .unsafePointer where nominalType.genericArguments?.count == 1:
           self = .pointer(
             .qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0]))
@@ -67,10 +71,7 @@ extension CType {
     case .tuple([]):
       self = .void
 
-    case .optional(let wrapped) where wrapped.isPointer:
-      try self.init(cdeclType: wrapped)
-
-    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite, .array, .dictionary, .set:
+    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }

@@ -38,9 +38,6 @@ enum SwiftType: Equatable {
   /// `<type>.Type`
   indirect case metatype(SwiftType)
 
-  /// `<type>?`
-  indirect case optional(SwiftType)
-
   /// `(<label>: <type>, <label>: <type>)`
   case tuple([SwiftTupleElement])
 
@@ -53,15 +50,6 @@ enum SwiftType: Equatable {
   /// `type1` & `type2`
   indirect case composite([SwiftType])
 
-  /// `[type]`
-  indirect case array(SwiftType)
-
-  /// `[key: value]`
-  indirect case dictionary(key: SwiftType, value: SwiftType)
-
-  /// `Set<element>`
-  indirect case set(element: SwiftType)
-
   static var void: Self {
     .tuple([])
   }
@@ -70,7 +58,7 @@ enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].type.asNominalType : nil
-    case .genericParameter, .function, .metatype, .optional, .existential, .opaque, .composite, .array, .dictionary, .set: nil
+    case .genericParameter, .function, .metatype, .existential, .opaque, .composite: nil
     }
   }
 
@@ -114,7 +102,7 @@ enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
+    case .genericParameter, .tuple, .existential, .opaque, .composite:
       return false
     }
   }
@@ -161,13 +149,26 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque, .composite: true
-    case .genericParameter, .metatype, .nominal, .optional, .tuple, .array, .dictionary, .set: false
+    case .genericParameter, .metatype, .nominal, .tuple: false
     }
   }
 
   var description: String {
     switch self {
-    case .nominal(let nominal): return nominal.description
+    case .nominal(let nominal):
+      if nominal.parent?.description == "Swift" {
+        switch nominal.nominalTypeDecl.name {
+        case SwiftNominalType.optionalTypeSugarName where nominal.genericArguments?.count == 1:
+          return "\(nominal.genericArguments![0])?"
+        case SwiftNominalType.arrayTypeSugarName where nominal.genericArguments?.count == 1:
+          return "[\(nominal.genericArguments![0])]"
+        case SwiftNominalType.dictionaryTypeSugarName where nominal.genericArguments?.count == 2:
+          return "[\(nominal.genericArguments![0]): \(nominal.genericArguments![1])]"
+        default:
+          break
+        }
+      }
+      return nominal.description
     case .genericParameter(let genericParam): return genericParam.name
     case .function(let functionType): return functionType.description
     case .metatype(let instanceType):
@@ -176,8 +177,6 @@ extension SwiftType: CustomStringConvertible {
         instanceTypeStr = "(\(instanceTypeStr))"
       }
       return "\(instanceTypeStr).Type"
-    case .optional(let wrappedType):
-      return "\(wrappedType.description)?"
     case .tuple(let elements):
       return "(\(elements.map(\.description).joined(separator: ", ")))"
     case .existential(let constraintType):
@@ -186,43 +185,50 @@ extension SwiftType: CustomStringConvertible {
       return "some \(constraintType)"
     case .composite(let types):
       return types.map(\.description).joined(separator: " & ")
-    case .array(let type):
-      return "[\(type)]"
-    case .dictionary(let key, let value):
-      return "[\(key): \(value)]"
-    case .set(let element):
-      return "Set<\(element)>"
     }
   }
 }
 
 struct SwiftNominalType: Equatable {
   indirect enum Parent: Equatable {
+    case module(String)
     case nominal(SwiftNominalType)
   }
 
-  private var storedParent: Parent?
+  enum SugarName: Equatable {
+    case optional
+    case array
+    case dictionary
+  }
+
+  var parent: Parent?
+  var sugarName: SugarName?
   var nominalTypeDecl: SwiftNominalTypeDeclaration
   var genericArguments: [SwiftType]?
 
   init(
-    parent: SwiftNominalType? = nil,
+    parent: Parent? = nil,
+    sugarName: SugarName? = nil,
     nominalTypeDecl: SwiftNominalTypeDeclaration,
     genericArguments: [SwiftType]? = nil
   ) {
-    self.storedParent =
-      parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
+    self.parent = parent ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
+    self.sugarName = sugarName
     self.nominalTypeDecl = nominalTypeDecl
     self.genericArguments = genericArguments
   }
 
-  var parent: SwiftNominalType? {
-    if case .nominal(let parent) = storedParent ?? .none {
+  var parentAsNominal: SwiftNominalType? {
+    if case .nominal(let parent) = parent ?? .none {
       return parent
     }
 
     return nil
   }
+
+  static let arrayTypeSugarName = "[]"
+  static let dictionaryTypeSugarName = "[:]"
+  static let optionalTypeSugarName = "?"
 }
 
 extension SwiftNominalType: CustomStringConvertible {
@@ -234,13 +240,32 @@ extension SwiftNominalType: CustomStringConvertible {
       resultString = ""
     }
 
-    resultString += nominalTypeDecl.name
-
-    if let genericArguments {
-      resultString += "<\(genericArguments.map(\.description).joined(separator: ", "))>"
+    switch sugarName {
+    case .none:
+      resultString += nominalTypeDecl.name
+      if let genericArguments {
+        resultString += "<\(genericArguments.map(\.description).joined(separator: ", "))>"
+      }
+    case .some(.optional):
+      resultString += "\(genericArguments![0])?"
+    case .some(.array):
+      resultString += "[\(genericArguments![0])]"
+    case .some(.dictionary):
+      resultString += "[\(genericArguments![0]): \(genericArguments![1])]"
     }
 
     return resultString
+  }
+}
+
+extension SwiftNominalType.Parent: CustomStringConvertible {
+  var description: String {
+    switch self {
+    case .module(let moduleName):
+      return moduleName
+    case .nominal(let nominal):
+      return nominal.description
+    }
   }
 }
 
@@ -256,6 +281,10 @@ extension SwiftNominalType {
 
 extension SwiftType {
   init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
+    var knownTypes: SwiftKnownTypes {
+      SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
+    }
+
     switch type.as(TypeSyntaxEnum.self) {
     case .classRestrictionType,
       .missingType, .namedOpaqueReturnType,
@@ -324,7 +353,7 @@ extension SwiftType {
       )
 
     case .implicitlyUnwrappedOptionalType(let optionalType):
-      self = .optional(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
+      self = knownTypes.optionalSugar(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .memberType(let memberType):
       // If the parent type isn't a known module, translate it.
@@ -363,7 +392,7 @@ extension SwiftType {
       self = .metatype(try SwiftType(metatypeType.baseType, lookupContext: lookupContext))
 
     case .optionalType(let optionalType):
-      self = .optional(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
+      self = knownTypes.optionalSugar(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .tupleType(let tupleType):
       self = try .tuple(
@@ -391,12 +420,12 @@ extension SwiftType {
 
     case .arrayType(let arrayType):
       let elementType = try SwiftType(arrayType.element, lookupContext: lookupContext)
-      self = .array(elementType)
+      self = knownTypes.arraySugar(elementType)
 
     case .dictionaryType(let dictType):
       let keyType = try SwiftType(dictType.key, lookupContext: lookupContext)
       let valueType = try SwiftType(dictType.value, lookupContext: lookupContext)
-      self = .dictionary(key: keyType, value: valueType)
+      self = knownTypes.dictionarySugar(keyType, valueType)
     }
   }
 
@@ -427,7 +456,7 @@ extension SwiftType {
     if let nominalDecl = typeDecl as? SwiftNominalTypeDeclaration {
       self = .nominal(
         SwiftNominalType(
-          parent: parent?.asNominalType,
+          parent: parent?.asNominalType.map { .nominal($0) },
           nominalTypeDecl: nominalDecl,
           genericArguments: genericArguments
         )
@@ -455,7 +484,7 @@ extension SwiftType {
 
     self = .nominal(
       SwiftNominalType(
-        parent: parent?.asNominalType,
+        parent: parent?.asNominalType.map { .nominal($0) },
         nominalTypeDecl: nominalTypeDecl,
         genericArguments: nil
       )

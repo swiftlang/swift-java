@@ -245,7 +245,7 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_pointer",
-                type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
                 convention: .byValue,
@@ -299,6 +299,51 @@ struct CdeclLowering {
               )
             )
           }
+
+        case .array:
+          guard let genericArgs = nominal.genericArguments, genericArgs.count == 1,
+                genericArgs[0] == knownTypes.uint8
+          else {
+            throw LoweringError.unhandledType(type)
+          }
+
+          // Lower an array as 'address' raw pointer and 'count' integer
+          let cdeclParameters = [
+            SwiftParameter(
+              convention: .byValue,
+              parameterName: "\(parameterName)_pointer",
+              type: knownTypes.unsafeRawPointer
+            ),
+            SwiftParameter(
+              convention: .byValue,
+              parameterName: "\(parameterName)_count",
+              type: knownTypes.int
+            ),
+          ]
+
+          let bufferPointerInit = ConversionStep.initialize(
+            knownTypes.unsafeRawBufferPointer,
+            arguments: [
+              LabeledArgument(
+                label: "start",
+                argument: .explodedComponent(.placeholder, component: "pointer")
+              ),
+              LabeledArgument(
+                label: "count",
+                argument: .explodedComponent(.placeholder, component: "count")
+              ),
+            ]
+          )
+
+          let arrayInit = ConversionStep.initialize(
+            type,
+            arguments: [LabeledArgument(argument: bufferPointerInit)]
+          )
+
+          return LoweredParameter(
+            cdeclParameters: cdeclParameters,
+            conversion: arrayInit
+          )
 
         case .foundationData, .essentialsData:
           break
@@ -382,64 +427,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(type)
 
-    case .optional(let wrapped):
-      return try lowerOptionalParameter(
-        wrapped,
-        convention: convention,
-        parameterName: parameterName,
-        genericParameters: genericParameters,
-        genericRequirements: genericRequirements
-      )
-
     case .composite:
-      throw LoweringError.unhandledType(type)
-
-    case .array(let wrapped) where wrapped == knownTypes.uint8:
-      // Lower an array as 'address' raw pointer and 'count' integer
-      let cdeclParameters = [
-        SwiftParameter(
-          convention: .byValue,
-          parameterName: "\(parameterName)_pointer",
-          type: knownTypes.unsafeRawPointer
-        ),
-        SwiftParameter(
-          convention: .byValue,
-          parameterName: "\(parameterName)_count",
-          type: knownTypes.int
-        ),
-      ]
-
-      let bufferPointerInit = ConversionStep.initialize(
-        knownTypes.unsafeRawBufferPointer,
-        arguments: [
-          LabeledArgument(
-            label: "start",
-            argument: .explodedComponent(.placeholder, component: "pointer")
-          ),
-          LabeledArgument(
-            label: "count",
-            argument: .explodedComponent(.placeholder, component: "count")
-          ),
-        ]
-      )
-
-      let arrayInit = ConversionStep.initialize(
-        type,
-        arguments: [LabeledArgument(argument: bufferPointerInit)]
-      )
-
-      return LoweredParameter(
-        cdeclParameters: cdeclParameters,
-        conversion: arrayInit
-      )
-
-    case .array:
-      throw LoweringError.unhandledType(type)
-
-    case .dictionary:
-      throw LoweringError.unhandledType(type)
-
-    case .set:
       throw LoweringError.unhandledType(type)
     }
   }
@@ -462,7 +450,7 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .optional(knownTypes.unsafePointer(wrappedType))
+            type: knownTypes.optionalSugar(knownTypes.unsafePointer(wrappedType))
           )
         ],
         conversion: .pointee(.optionalChain(.placeholder))
@@ -476,20 +464,20 @@ struct CdeclLowering {
         case .foundationData, .essentialsData:
           break
         case .unsafeRawPointer, .unsafeMutableRawPointer:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         case .unsafePointer, .unsafeMutablePointer:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         case .void, .string:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         case .foundationDataProtocol, .essentialsDataProtocol:
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
-          throw LoweringError.unhandledType(.optional(wrappedType))
+          throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
         }
       }
 
@@ -499,7 +487,7 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: .optional(knownTypes.unsafeRawPointer)
+            type: knownTypes.optionalSugar(knownTypes.unsafeRawPointer)
           )
         ],
         conversion: .pointee(.typedPointer(.optionalChain(.placeholder), swiftType: wrappedType))
@@ -519,7 +507,7 @@ struct CdeclLowering {
           genericRequirements: genericRequirements
         )
       }
-      throw LoweringError.unhandledType(.optional(wrappedType))
+      throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
 
     case .tuple(let tuple):
       if tuple.count == 1 {
@@ -531,10 +519,10 @@ struct CdeclLowering {
           genericRequirements: genericRequirements
         )
       }
-      throw LoweringError.unhandledType(.optional(wrappedType))
+      throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
 
-    case .function, .metatype, .optional, .composite, .array, .dictionary, .set:
-      throw LoweringError.unhandledType(.optional(wrappedType))
+    case .function, .metatype, .composite:
+      throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
     }
   }
 
@@ -610,7 +598,7 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_pointer",
-                type: .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
               ),
               SwiftParameter(
                 convention: .byValue,
@@ -635,11 +623,12 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .array, .dictionary, .set:
+    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
   }
+
 
   /// Create "out" parameter names when we're returning an array-like result.
   fileprivate func makeBufferIndirectReturnParameters(_ outParameterName: String, isMutable: Bool) -> [SwiftParameter] {
@@ -648,7 +637,7 @@ struct CdeclLowering {
         convention: .byValue,
         parameterName: "\(outParameterName)_pointer",
         type: knownTypes.unsafeMutablePointer(
-          .optional(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+          knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
         )
       ),
       SwiftParameter(
@@ -740,6 +729,45 @@ struct CdeclLowering {
           // Not supported at this point.
           throw LoweringError.unhandledType(type)
 
+        case .array where nominal.genericArguments?.count == 1 && nominal.genericArguments![0] == knownTypes.uint8 :
+          let resultName = "_result"
+
+          return LoweredResult(
+            cdeclResultType: .void, // we call into the _result_initialize instead
+            cdeclOutParameters: [
+              SwiftParameter(
+                convention: .byValue,
+                parameterName: "\(outParameterName)_initialize",
+                type: knownTypes.functionInitializeByteBuffer
+              )
+            ],
+            conversion: .aggregate(
+              [
+                .method(
+                  base: resultName,
+                  methodName: "withUnsafeBufferPointer",
+                  arguments: [
+                    .init(
+                      argument:
+                          .closureLowering(
+                            parameters: [.placeholder],
+                            result: .method(
+                              base: "\(outParameterName)_initialize",
+                              methodName: nil, // just `(...)` apply the closure
+                              arguments: [
+                                .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
+                                .init(label: nil, argument: .member(.constant("_0"), member: "count")),
+                              ]
+                            )
+                          )
+                    )
+                  ]
+                )
+              ],
+              name: resultName
+            )
+          )
+
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
           throw LoweringError.unhandledType(type)
@@ -799,46 +827,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName)
       )
 
-    case .array(let wrapped) where wrapped == knownTypes.uint8:
-      let resultName = "_result"
-
-      return LoweredResult(
-        cdeclResultType: .void, // we call into the _result_initialize instead
-        cdeclOutParameters: [
-          SwiftParameter(
-            convention: .byValue,
-            parameterName: "\(outParameterName)_initialize",
-            type: knownTypes.functionInitializeByteBuffer
-          )
-        ],
-        conversion: .aggregate(
-          [
-            .method(
-              base: resultName,
-              methodName: "withUnsafeBufferPointer",
-              arguments: [
-                .init(
-                  argument:
-                    .closureLowering(
-                      parameters: [.placeholder],
-                      result: .method(
-                        base: "\(outParameterName)_initialize",
-                        methodName: nil, // just `(...)` apply the closure
-                        arguments: [
-                          .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
-                          .init(label: nil, argument: .member(.constant("_0"), member: "count")),
-                        ]
-                      )
-                    )
-                )
-              ]
-            )
-          ],
-          name: resultName
-        )
-      )
-
-    case .genericParameter, .function, .optional, .existential, .opaque, .composite, .array, .dictionary, .set:
+    case .genericParameter, .function, .existential, .opaque, .composite:
       throw LoweringError.unhandledType(type)
     }
   }

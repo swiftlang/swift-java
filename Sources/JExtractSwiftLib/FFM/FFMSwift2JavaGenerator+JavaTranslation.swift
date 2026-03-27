@@ -439,6 +439,23 @@ extension FFMSwift2JavaGenerator {
               conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
             )
 
+          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8 :
+            return TranslatedParameter(
+              javaParameters: [
+                JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations)
+              ],
+              conversion:
+                  .commaSeparated([
+                    .call(
+                      .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
+                      base: .temporaryArena,
+                      function: "allocateFrom",
+                      withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
+                    ),
+                    .property(.placeholder, propertyName: "length"),
+                  ])
+            )
+
           case .foundationData, .essentialsData:
             break
 
@@ -515,44 +532,7 @@ extension FFMSwift2JavaGenerator {
         // Otherwise, not supported yet.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .optional(let wrapped):
-        return try translateOptionalParameter(
-          wrappedType: wrapped,
-          convention: convention,
-          parameterName: parameterName,
-          loweredParam: loweredParam,
-          methodName: methodName,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements
-        )
-
       case .composite:
-        throw JavaTranslationError.unhandledType(swiftType)
-
-      case .array(let wrapped) where wrapped == knownTypes.uint8:
-        return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations)
-          ],
-          conversion:
-            .commaSeparated([
-              .call(
-                .commaSeparated([.constant("ValueLayout.JAVA_BYTE"), .placeholder]),
-                base: .temporaryArena,
-                function: "allocateFrom",
-                withArena: false // this would pass the arena as last argument, but instead we make a call on the arena
-              ),
-              .property(.placeholder, propertyName: "length"),
-            ])
-        )
-
-      case .array:
-        throw JavaTranslationError.unhandledType(swiftType)
-
-      case .dictionary:
-        throw JavaTranslationError.unhandledType(swiftType)
-
-      case .set:
         throw JavaTranslationError.unhandledType(swiftType)
       }
     }
@@ -631,7 +611,7 @@ extension FFMSwift2JavaGenerator {
           case .short: ("Optional<Short>", "toOptionalSegmentShort")
           case .float: ("Optional<Float>", "toOptionalSegmentFloat")
           default:
-            throw JavaTranslationError.unhandledType(.optional(swiftType))
+            throw JavaTranslationError.unhandledType(known: .optional(swiftType))
           }
         return TranslatedParameter(
           javaParameters: [
@@ -650,7 +630,7 @@ extension FFMSwift2JavaGenerator {
           case .essentialsData, .essentialsDataProtocol:
             break
           default:
-            throw JavaTranslationError.unhandledType(.optional(swiftType))
+            throw JavaTranslationError.unhandledType(known: .optional(swiftType))
           }
         }
 
@@ -677,7 +657,7 @@ extension FFMSwift2JavaGenerator {
             genericRequirements: genericRequirements
           )
         }
-        throw JavaTranslationError.unhandledType(.optional(swiftType))
+        throw JavaTranslationError.unhandledType(known: .optional(swiftType))
       case .tuple(let tuple):
         if tuple.count == 1 {
           return try translateOptionalParameter(
@@ -690,9 +670,9 @@ extension FFMSwift2JavaGenerator {
             genericRequirements: genericRequirements
           )
         }
-        throw JavaTranslationError.unhandledType(.optional(swiftType))
+        throw JavaTranslationError.unhandledType(known: .optional(swiftType))
       default:
-        throw JavaTranslationError.unhandledType(.optional(swiftType))
+        throw JavaTranslationError.unhandledType(known: .optional(swiftType))
       }
     }
 
@@ -770,6 +750,57 @@ extension FFMSwift2JavaGenerator {
           case .string:
             // FIXME: Implement
             throw JavaTranslationError.unhandledType(swiftType)
+
+          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8 :
+            return TranslatedResult(
+              javaResultType:
+                  .array(.byte),
+              annotations: [.unsigned],
+              outParameters: [], // no out parameters, but we do an "out" callback
+              outCallback: OutCallback(
+                name: "$_result_initialize",
+                members: [
+                  "byte[] result = null"
+                ],
+                parameters: [
+                  JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+                  JavaParameter(name: "count", type: .long),
+                ],
+                cFunc: CFunction(
+                  resultType: .void,
+                  name: "apply",
+                  parameters: [
+                    CParameter(type: .pointer(.void)),
+                    CParameter(type: .integral(.size_t)),
+                  ],
+                  isVariadic: false
+                ),
+                body:
+                  "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
+              ),
+              conversion: .initializeResultWithUpcall(
+                [
+                  .introduceVariable(
+                    name: "_result_initialize",
+                    initializeWith: .javaNew(
+                      .commaSeparated(
+                        [
+                          // We need to refer to the nested class that is created for this function.
+                          // The class that contains all the related functional interfaces is called the same
+                          // as the downcall function, so we use the thunk name to find this class/
+                          .placeholderForSwiftThunkName, .constant("$_result_initialize.Function$Impl()"),
+                        ],
+                        separator: "."
+                      )
+                    )
+                  ),
+                  // .constant("var  = new \(.placeholderForDowncallThunkName).."),
+                  .placeholderForDowncall, // perform the downcall here
+                ],
+                extractResult: .property(.constant("_result_initialize"), propertyName: "result")
+              )
+            )
+
           default:
             throw JavaTranslationError.unhandledType(swiftType)
           }
@@ -804,57 +835,7 @@ extension FFMSwift2JavaGenerator {
           resultAnnotations: resultAnnotations
         )
 
-      case .array(let wrapped) where wrapped == knownTypes.uint8:
-        return TranslatedResult(
-          javaResultType:
-            .array(.byte),
-          annotations: [.unsigned],
-          outParameters: [], // no out parameters, but we do an "out" callback
-          outCallback: OutCallback(
-            name: "$_result_initialize",
-            members: [
-              "byte[] result = null"
-            ],
-            parameters: [
-              JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
-              JavaParameter(name: "count", type: .long),
-            ],
-            cFunc: CFunction(
-              resultType: .void,
-              name: "apply",
-              parameters: [
-                CParameter(type: .pointer(.void)),
-                CParameter(type: .integral(.size_t)),
-              ],
-              isVariadic: false
-            ),
-            body:
-              "this.result = _0.reinterpret(_1).toArray(ValueLayout.JAVA_BYTE); // copy native Swift array to Java heap array"
-          ),
-          conversion: .initializeResultWithUpcall(
-            [
-              .introduceVariable(
-                name: "_result_initialize",
-                initializeWith: .javaNew(
-                  .commaSeparated(
-                    [
-                      // We need to refer to the nested class that is created for this function.
-                      // The class that contains all the related functional interfaces is called the same
-                      // as the downcall function, so we use the thunk name to find this class/
-                      .placeholderForSwiftThunkName, .constant("$_result_initialize.Function$Impl()"),
-                    ],
-                    separator: "."
-                  )
-                )
-              ),
-              // .constant("var  = new \(.placeholderForDowncallThunkName).."),
-              .placeholderForDowncall, // perform the downcall here
-            ],
-            extractResult: .property(.constant("_result_initialize"), propertyName: "result")
-          )
-        )
-
-      case .genericParameter, .optional, .function, .existential, .opaque, .composite, .array, .dictionary, .set:
+      case .genericParameter, .function, .existential, .opaque, .composite:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 
@@ -1122,4 +1103,5 @@ extension CType {
 enum JavaTranslationError: Error {
   case inoutNotSupported(SwiftType, file: String = #file, line: Int = #line)
   case unhandledType(SwiftType, file: String = #file, line: Int = #line)
+  case unhandledType(known: SwiftKnownType, file: String = #file, line: Int = #line)
 }

@@ -14,6 +14,46 @@
 
 import SwiftSyntax
 
+enum SwiftKnownType {
+  case bool
+  case int
+  case uint
+  case int8
+  case uint8
+  case int16
+  case uint16
+  case int32
+  case uint32
+  case int64
+  case uint64
+  case float
+  case double
+  case unsafeRawPointer
+  case unsafeRawBufferPointer
+  case unsafeMutableRawPointer
+  case unsafeMutableRawBufferPointer
+  case unsafePointer(_ pointee: SwiftType)
+  case unsafeMutablePointer(_ pointee: SwiftType)
+  case unsafeBufferPointer(_ element: SwiftType)
+  case unsafeMutableBufferPointer(_ element: SwiftType)
+  case optional(_ wrapped: SwiftType)
+  case void
+  case string
+  case array(_ element: SwiftType)
+  case dictionary(_ key: SwiftType, _ value: SwiftType)
+  case set(_ element: SwiftType)
+
+  // Foundation
+  case foundationDataProtocol
+  case essentialsDataProtocol
+  case foundationData
+  case essentialsData
+  case foundationDate
+  case essentialsDate
+  case foundationUUID
+  case essentialsUUID
+}
+
 enum SwiftKnownTypeDeclKind: String, Hashable {
   // Swift
   case bool = "Swift.Bool"
