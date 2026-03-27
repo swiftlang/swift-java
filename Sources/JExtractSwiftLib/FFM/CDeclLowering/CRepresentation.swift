@@ -128,8 +128,6 @@ extension SwiftKnownTypeDeclKind {
       .pointer(
         .qualified(const: true, volatile: false, type: .void)
       )
-    case .array:
-      .pointer(.qualified(const: false, volatile: false, type: .void))
     case .void: .void
     default:
       nil // Since we know the set of all primitives, we can safely assume all others are not primitive
