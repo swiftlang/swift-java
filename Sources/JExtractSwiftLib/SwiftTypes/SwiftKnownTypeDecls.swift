@@ -150,53 +150,6 @@ enum SwiftKnownType: Equatable {
   }
 }
 
-extension SwiftKnownType {
-  var isPointer: Bool {
-    switch self {
-    case .unsafeRawPointer, .unsafeMutableRawPointer, .unsafePointer, .unsafeMutablePointer:
-      return true
-    default:
-      return false
-    }
-  }
-
-  var primitiveCType: CType? {
-    switch self {
-    case .bool: .integral(.bool)
-    case .int: .integral(.ptrdiff_t)
-    case .uint: .integral(.size_t)
-    case .int8: .integral(.signed(bits: 8))
-    case .uint8: .integral(.unsigned(bits: 8))
-    case .int16: .integral(.signed(bits: 16))
-    case .uint16: .integral(.unsigned(bits: 16))
-    case .int32: .integral(.signed(bits: 32))
-    case .uint32: .integral(.unsigned(bits: 32))
-    case .int64: .integral(.signed(bits: 64))
-    case .uint64: .integral(.unsigned(bits: 64))
-    case .float: .floating(.float)
-    case .double: .floating(.double)
-    case .unsafeMutableRawPointer: .pointer(.void)
-    case .unsafeRawPointer:
-      .pointer(
-        .qualified(const: true, volatile: false, type: .void)
-      )
-    case .void: .void
-    default:
-      nil
-    }
-  }
-
-  var isDirectlyTranslatedToWrapJava: Bool {
-    switch self {
-    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string,
-      .void:
-      return true
-    default:
-      return false
-    }
-  }
-}
-
 enum SwiftKnownTypeDeclKind: String, Hashable {
   // Swift
   case bool = "Swift.Bool"

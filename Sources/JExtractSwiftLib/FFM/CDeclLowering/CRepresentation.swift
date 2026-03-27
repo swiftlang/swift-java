@@ -25,7 +25,7 @@ extension CType {
     switch cdeclType {
     case .nominal(let nominalType):
       if let knownType = nominalType.asKnownType {
-        if let primitiveCType = knownType.primitiveCType {
+        if let primitiveCType = knownType.kind.primitiveCType {
           self = primitiveCType
           return
         }

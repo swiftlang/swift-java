@@ -715,7 +715,7 @@ extension FFMSwift2JavaGenerator {
         )
 
       case .nominal(let swiftNominalType):
-        if let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = swiftNominalType.asKnownType {
           switch knownType {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedResult(
@@ -748,7 +748,7 @@ extension FFMSwift2JavaGenerator {
             // FIXME: Implement
             throw JavaTranslationError.unhandledType(swiftType)
 
-          case .array where swiftNominalType.genericArguments?.count == 1 && swiftNominalType.genericArguments![0] == knownTypes.uint8:
+          case .array(let element) where element == knownTypes.uint8:
             return TranslatedResult(
               javaResultType:
                 .array(.byte),
