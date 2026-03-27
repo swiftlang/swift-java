@@ -210,7 +210,7 @@ extension JavaImplementationMacro: PeerMacro {
       exposedMembers.append(
         """
         @_cdecl(\(literal: cName))
-        func \(context.makeUniqueName(swiftName))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
+        public func \(context.makeUniqueName(swiftName))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
         \(body)
         }
         """
