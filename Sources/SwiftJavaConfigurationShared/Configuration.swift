@@ -67,6 +67,14 @@ public struct Configuration: Codable {
 
   public var generatedJavaSourcesListFileOutput: String?
 
+  /// If set, JExtract (JNI mode) will write a linker export list in lld
+  /// ``--dynamic-list`` format to this path, containing all generated JNI
+  /// ``@_cdecl`` entry-point symbols. Pass this file to the linker via
+  /// ``-Xlinker --dynamic-list=<path>`` together with
+  /// ``-Xlinker --gc-sections`` to enable precise dead-code elimination of
+  /// unused Swift code in the final shared library.
+  public var linkerExportListOutput: String?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.

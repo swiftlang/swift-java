@@ -98,6 +98,16 @@ extension SwiftJava {
 
     @Option(help: "If specified, JExtract will output to this file a list of paths to all generated Java source files")
     var generatedJavaSourcesListFileOutput: String?
+
+    @Option(
+      help: """
+        If specified, JExtract (JNI mode) will write a linker export list in lld --dynamic-list
+        format to this path. The file contains every generated JNI @_cdecl entry-point symbol
+        and can be passed to the linker to enable dead-code elimination of unreachable Swift code:
+          -Xlinker --dynamic-list=<path>  -Xlinker --gc-sections
+        """
+    )
+    var linkerExportListOutput: String?
   }
 }
 
@@ -116,6 +126,7 @@ extension SwiftJava.JExtractCommand {
     configure(&config.memoryManagementMode, overrideWith: self.memoryManagementMode)
     configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
     configure(&config.generatedJavaSourcesListFileOutput, overrideWith: self.generatedJavaSourcesListFileOutput)
+    configure(&config.linkerExportListOutput, overrideWith: self.linkerExportListOutput)
 
     try checkModeCompatibility(config: config)
 

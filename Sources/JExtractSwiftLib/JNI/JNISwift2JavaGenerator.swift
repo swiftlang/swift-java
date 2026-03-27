@@ -39,6 +39,11 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry = ThunkNameRegistry()
 
+  /// Accumulates every ``@_cdecl`` symbol name emitted during thunk printing.
+  /// Written to a linker export list after generation when
+  /// ``Configuration/linkerExportListOutput`` is set.
+  var generatedCDeclSymbolNames: [String] = []
+
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ImportedFunc: TranslatedFunctionDecl] = [:]
   var translatedEnumCases: [ImportedEnumCase: TranslatedEnumCase] = [:]
@@ -103,6 +108,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   func generate() throws {
     try writeSwiftThunkSources()
     try writeExportedJavaSources()
+    try writeLinkerExportList()
 
     let pendingFileCount = self.expectedOutputSwiftFileNames.count
     if pendingFileCount > 0 {

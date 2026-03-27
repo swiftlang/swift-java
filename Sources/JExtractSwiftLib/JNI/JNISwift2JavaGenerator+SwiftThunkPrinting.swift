@@ -119,6 +119,39 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  /// Writes a linker export list in lld ``--dynamic-list`` format to the path
+  /// specified by ``Configuration/linkerExportListOutput``, listing every JNI
+  /// ``@_cdecl`` symbol generated during this run.
+  ///
+  /// Pass the resulting file to the linker with:
+  /// ```
+  /// -Xlinker --dynamic-list=<path>  -Xlinker --gc-sections
+  /// ```
+  /// This lets lld treat only the JNI entry points as roots during link-time
+  /// dead-code elimination, removing unreachable Swift code from SPM
+  /// dependencies and the Swift standard library.
+  func writeLinkerExportList() throws {
+    guard let outputPath = config.linkerExportListOutput else {
+      return
+    }
+    guard !generatedCDeclSymbolNames.isEmpty else {
+      return
+    }
+
+    let symbolLines = generatedCDeclSymbolNames
+      .sorted()
+      .map { "  \($0);" }
+      .joined(separator: "\n")
+    let contents = "{\n\(symbolLines)\n};\n"
+
+    try contents.write(
+      toFile: outputPath,
+      atomically: true,
+      encoding: .utf8
+    )
+    logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
+  }
+
   private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
       for enumCase in type.cases {
@@ -721,6 +754,8 @@ extension JNISwift2JavaGenerator {
       + javaMethodName.escapedJNIIdentifier
       + "__"
       + jniSignature.escapedJNIIdentifier
+
+    self.generatedCDeclSymbolNames.append(cName)
 
     let translatedParameters = parameters.map {
       "\($0.name): \($0.type.jniTypeName)"
