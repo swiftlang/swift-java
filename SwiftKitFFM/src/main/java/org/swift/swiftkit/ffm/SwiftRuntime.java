@@ -405,6 +405,16 @@ public class SwiftRuntime {
         return arena.allocateFrom(str);
     }
 
+    /**
+     * Read a heap-allocated C string into a Java String, then free the native memory.
+     */
+    public static String fromCString(MemorySegment cStr) {
+        if (cStr.equals(MemorySegment.NULL)) return null;
+        String result = cStr.reinterpret(Long.MAX_VALUE).getString(0);
+        cFree(cStr);
+        return result;
+    }
+
     public static MemorySegment toOptionalSegmentInt(OptionalInt opt, Arena arena) {
         return opt.isPresent() ? arena.allocateFrom(ValueLayout.JAVA_INT, opt.getAsInt()) : MemorySegment.NULL;
     }

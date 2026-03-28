@@ -54,6 +54,27 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_globalMakeString() {
+        String result = MySwiftLibrary.globalMakeString();
+        assertEquals("Hello from Swift!", result);
+    }
+
+    @Test
+    void call_globalStringIdentity() {
+        String input = "round-trip test!";
+        String result = MySwiftLibrary.globalStringIdentity(input);
+        assertEquals(input, result);
+    }
+
+    @Test
+    void call_globalStringIdentity_empty() {
+        String result = MySwiftLibrary.globalStringIdentity("");
+        assertEquals("", result);
+    }
+
+
+
+    @Test
     @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
     void call_globalCallMeRunnable() {

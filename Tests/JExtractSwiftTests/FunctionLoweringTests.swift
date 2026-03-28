@@ -535,4 +535,20 @@ final class FunctionLoweringTests {
       expectedCFunction: "void c_value(const void *newValue, const void *self)"
     )
   }
+
+  @Test("Lowering String return")
+  func lowerStringReturn() throws {
+    try assertLoweredFunction(
+      """
+      func bar() -> String { }
+      """,
+      expectedCDecl: """
+        @_cdecl("c_bar")
+        public func c_bar() -> UnsafeMutablePointer<Int8> {
+          return _swiftjava_stringToCString(bar())
+        }
+        """,
+      expectedCFunction: "int8_t *c_bar(void)"
+    )
+  }
 }
