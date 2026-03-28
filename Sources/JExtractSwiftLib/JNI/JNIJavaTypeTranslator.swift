@@ -52,7 +52,8 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID:
+      .foundationUUID, .essentialsUUID,
+      .swiftJavaError:
       return nil
     }
   }
@@ -78,7 +79,8 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID:
+      .foundationUUID, .essentialsUUID,
+      .swiftJavaError:
       nil
     }
   }
@@ -104,7 +106,8 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID:
+      .foundationUUID, .essentialsUUID,
+      .swiftJavaError:
       nil
     }
   }

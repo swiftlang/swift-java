@@ -131,6 +131,7 @@ extension FFMSwift2JavaGenerator {
     var selfParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
+    var isThrowing: Bool = false
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from
@@ -333,7 +334,8 @@ extension FFMSwift2JavaGenerator {
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
-        result: result
+        result: result,
+        isThrowing: loweredFunctionSignature.isThrowing
       )
     }
 
@@ -1007,6 +1009,9 @@ extension FFMSwift2JavaGenerator.TranslatedFunctionSignature {
   /// Whether or not if the down-calling requires temporary "Arena" which is
   /// only used during the down-calling.
   var requiresTemporaryArena: Bool {
+    if self.isThrowing {
+      return true
+    }
     if self.parameters.contains(where: { $0.conversion.requiresTemporaryArena }) {
       return true
     }

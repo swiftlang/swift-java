@@ -190,6 +190,9 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case foundationUUID = "Foundation.UUID"
   case essentialsUUID = "FoundationEssentials.UUID"
 
+  // SwiftRuntimeFunctions
+  case swiftJavaError = "SwiftRuntimeFunctions.SwiftJavaError"
+
   var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue
     let period = qualified.firstIndex(of: ".")!

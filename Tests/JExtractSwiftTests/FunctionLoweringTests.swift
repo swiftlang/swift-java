@@ -536,6 +536,70 @@ final class FunctionLoweringTests {
     )
   }
 
+  @Test("Lowering throwing void function")
+  func lowerThrowingVoidFunction() throws {
+    try assertLoweredFunction(
+      """
+      func foo() throws { }
+      """,
+      expectedCDecl: """
+        @_cdecl("c_foo")
+        public func c_foo(_ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+          do {
+            try foo()
+          } catch {
+            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+          }
+        }
+        """,
+      expectedCFunction: "void c_foo(void **_errorOut)"
+    )
+  }
+
+  @Test("Lowering throwing function with direct return")
+  func lowerThrowingDirectReturn() throws {
+    try assertLoweredFunction(
+      """
+      func foo(x: Int) throws -> Int { }
+      """,
+      expectedCDecl: """
+        @_cdecl("c_foo")
+        public func c_foo(_ x: Int, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> Int {
+          do {
+            return try foo(x: x)
+          } catch {
+            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            return 0
+          }
+        }
+        """,
+      expectedCFunction: "ptrdiff_t c_foo(ptrdiff_t x, void **_errorOut)"
+    )
+  }
+
+  @Test("Lowering throwing function with indirect return")
+  func lowerThrowingIndirectReturn() throws {
+    try assertLoweredFunction(
+      """
+      func foo() throws -> MyStruct { }
+      """,
+      sourceFile: """
+        struct MyStruct { }
+        """,
+      expectedCDecl: """
+        @_cdecl("c_foo")
+        public func c_foo(_ _result: UnsafeMutableRawPointer, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+          do {
+            try _result.assumingMemoryBound(to: MyStruct.self).initialize(to: foo())
+          } catch {
+            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+          }
+        }
+        """,
+      expectedCFunction: "void c_foo(void *_result, void **_errorOut)"
+    )
+  }
+
   @Test("Lowering String return")
   func lowerStringReturn() throws {
     try assertLoweredFunction(
@@ -549,6 +613,50 @@ final class FunctionLoweringTests {
         }
         """,
       expectedCFunction: "int8_t *c_bar(void)"
+    )
+  }
+
+  @Test("Lowering throwing function with class return")
+  func lowerThrowingClassReturn() throws {
+    try assertLoweredFunction(
+      """
+      func foo() throws -> MyClass { }
+      """,
+      sourceFile: """
+        class MyClass { }
+        """,
+      expectedCDecl: """
+        @_cdecl("c_foo")
+        public func c_foo(_ _result: UnsafeMutableRawPointer, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+          do {
+            try _result.assumingMemoryBound(to: MyClass.self).initialize(to: foo())
+          } catch {
+            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+          }
+        }
+        """,
+      expectedCFunction: "void c_foo(void *_result, void **_errorOut)"
+    )
+  }
+
+  @Test("Lowering throwing function with String return")
+  func lowerThrowingStringReturn() throws {
+    try assertLoweredFunction(
+      """
+      func foo() throws -> String { }
+      """,
+      expectedCDecl: """
+        @_cdecl("c_foo")
+        public func c_foo(_ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> UnsafeMutablePointer<Int8>? {
+          do {
+            return try _swiftjava_stringToCString(foo())
+          } catch {
+            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            return nil
+          }
+        }
+        """,
+      expectedCFunction: "int8_t *c_foo(void **_errorOut)"
     )
   }
 }

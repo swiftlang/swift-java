@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.ffm.SwiftJavaError;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -93,6 +94,47 @@ public class MySwiftLibraryTest {
 
         MySwiftLibrary.globalCallMeRunnable(countDownLatch::countDown);
         assertEquals(0, countDownLatch.getCount());
+    }
+
+    // ==== ----------------------------------------------------------------
+    // Throwing functions
+
+    @Test
+    void call_globalThrowingVoid_noThrow() throws SwiftJavaError {
+        MySwiftLibrary.globalThrowingVoid(false);
+    }
+
+    @Test
+    void call_globalThrowingVoid_throws() {
+        assertThrows(SwiftJavaError.class, () -> {
+            MySwiftLibrary.globalThrowingVoid(true);
+        });
+    }
+
+    @Test
+    void call_globalThrowingReturn_noThrow() throws SwiftJavaError {
+        long result = MySwiftLibrary.globalThrowingReturn(false);
+        assertEquals(42, result);
+    }
+
+    @Test
+    void call_globalThrowingReturn_throws() {
+        assertThrows(SwiftJavaError.class, () -> {
+            MySwiftLibrary.globalThrowingReturn(true);
+        });
+    }
+
+    @Test
+    void call_globalThrowingString_noThrow() throws SwiftJavaError {
+        String result = MySwiftLibrary.globalThrowingString(false);
+        assertEquals("Hello from throwing Swift!", result);
+    }
+
+    @Test
+    void call_globalThrowingString_throws() {
+        assertThrows(SwiftJavaError.class, () -> {
+            MySwiftLibrary.globalThrowingString(true);
+        });
     }
 
 }

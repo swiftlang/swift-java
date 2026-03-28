@@ -118,19 +118,42 @@ struct CdeclLowering {
       )
     }
 
+    var isThrowing = false
     for effect in signature.effectSpecifiers {
-      // Prohibit any effects for now.
-      throw LoweringError.effectNotSupported(effect)
+      switch effect {
+      case .throws:
+        isThrowing = true
+      case .async:
+        throw LoweringError.effectNotSupported(effect)
+      }
     }
 
     // Lower the result.
     let loweredResult = try lowerResult(signature.result.type)
 
+    // If the function throws, create an error out parameter
+    let errorOutParameter: LoweredParameter? =
+      if isThrowing {
+        LoweredParameter(
+          cdeclParameters: [
+            SwiftParameter(
+              convention: .byValue,
+              parameterName: "_errorOut",
+              type: knownTypes.unsafeMutablePointer(.optional(knownTypes.unsafeMutableRawPointer))
+            )
+          ],
+          conversion: .placeholder
+        )
+      } else {
+        nil
+      }
+
     return LoweredFunctionSignature(
       original: signature,
       selfParameter: loweredSelf,
       parameters: loweredParameters,
-      result: loweredResult
+      result: loweredResult,
+      errorOutParameter: errorOutParameter
     )
   }
 
@@ -887,6 +910,9 @@ public struct LoweredFunctionSignature: Equatable {
   var selfParameter: LoweredParameter?
   var parameters: [LoweredParameter]
   var result: LoweredResult
+  var errorOutParameter: LoweredParameter?
+
+  var isThrowing: Bool { errorOutParameter != nil }
 
   var allLoweredParameters: [SwiftParameter] {
     var all: [SwiftParameter] = []
@@ -900,14 +926,27 @@ public struct LoweredFunctionSignature: Equatable {
     }
     // Out parameters.
     all += result.cdeclOutParameters
+    // Error out parameter (always last)
+    if let errorOutParameter {
+      all += errorOutParameter.cdeclParameters
+    }
     return all
   }
 
   var cdeclSignature: SwiftFunctionSignature {
-    SwiftFunctionSignature(
+    // When throwing with a non-void pointer return, make the return type
+    // optional so the catch block can return nil (nullable pointer in C)
+    let cdeclResultType: SwiftType
+    if isThrowing && result.cdeclResultType.isPointer {
+      cdeclResultType = .optional(result.cdeclResultType)
+    } else {
+      cdeclResultType = result.cdeclResultType
+    }
+
+    return SwiftFunctionSignature(
       selfParameter: nil,
       parameters: allLoweredParameters,
-      result: SwiftResult(convention: .direct, type: result.cdeclResultType),
+      result: SwiftResult(convention: .direct, type: cdeclResultType),
       effectSpecifiers: [],
       genericParameters: [],
       genericRequirements: []
@@ -925,7 +964,10 @@ extension LoweredFunctionSignature {
   ) -> FunctionDeclSyntax {
 
     let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
-    let returnClause = !result.cdeclResultType.isVoid ? " -> \(result.cdeclResultType.description)" : ""
+    let cdeclReturnType: SwiftType = isThrowing && result.cdeclResultType.isPointer
+      ? .optional(result.cdeclResultType)
+      : result.cdeclResultType
+    let returnClause = !cdeclReturnType.isVoid ? " -> \(cdeclReturnType.description)" : ""
 
     var loweredCDecl = try! FunctionDeclSyntax(
       """
@@ -1016,10 +1058,47 @@ extension LoweredFunctionSignature {
       )
 
       if let loweredResult {
-        bodyItems.append(!result.cdeclResultType.isVoid ? "return \(loweredResult)" : "\(loweredResult)")
+        let tryKeyword: String = isThrowing ? "try " : ""
+        if !result.cdeclResultType.isVoid {
+          bodyItems.append("return \(raw: tryKeyword)\(loweredResult)")
+        } else {
+          bodyItems.append("\(raw: tryKeyword)\(loweredResult)")
+        }
       }
     } else {
-      bodyItems.append("\(resultExpr)")
+      bodyItems.append(isThrowing ? "try \(resultExpr)" : "\(resultExpr)")
+    }
+
+    // If throwing, wrap body in do/catch.
+    if isThrowing {
+      let doBody = bodyItems.map { item in
+        item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
+      }
+
+      // The outer code applies 2-space indent only to the first token (`do`).
+      // Pre-indent catch-related lines by 2 spaces so they align correctly.
+      let doStmt: StmtSyntax
+      let dummyReturn = result.cdeclResultType.isPointer ? "nil" : "0"
+      if !result.cdeclResultType.isVoid {
+        doStmt = """
+              do {\(CodeBlockItemListSyntax(doBody))
+                } catch {
+                  _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+                  return \(raw: dummyReturn)
+                }
+              """
+      } else {
+        doStmt = """
+              do {\(CodeBlockItemListSyntax(doBody))
+                } catch {
+                  _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+                }
+              """
+      }
+
+      bodyItems = [
+        CodeBlockItemSyntax(item: .stmt(doStmt))
+      ]
     }
 
     loweredCDecl.body!.statements = CodeBlockItemListSyntax {
