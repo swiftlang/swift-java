@@ -157,9 +157,12 @@ struct JNIClassTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024method__")
         public func Java_com_example_swift_MyClass__00024method__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           MyClass.method()
@@ -214,9 +217,12 @@ struct JNIClassTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024init__JJ")
         public func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
@@ -226,6 +232,9 @@ struct JNIClassTests {
         }
         """,
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024init__")
         public func Java_com_example_swift_MyClass__00024init__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
@@ -269,9 +278,12 @@ struct JNIClassTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
         public func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -318,9 +330,12 @@ struct JNIClassTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024copy__J")
         public func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -370,9 +385,12 @@ struct JNIClassTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_MyClass__00024isEqual__JJ")
         public func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, selfPointer: jlong) -> jboolean {
           assert(other != 0, "other memory address was null")

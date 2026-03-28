@@ -33,6 +33,9 @@ struct UUIDTests {
         /* expected Swift chunks */
         [
           """
+          #if compiler(>=6.3)
+          @used
+          #endif
           @_cdecl("Java_com_example_swift_SwiftModule__00024acceptUUID__Ljava_lang_String_2")
           public func Java_com_example_swift_SwiftModule__00024acceptUUID__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, uuid: jstring?) {
             let uuid_string$ = String(fromJNI: uuid, in: environment)
@@ -91,6 +94,9 @@ struct UUIDTests {
         /* expected Swift chunks */
         [
           """
+          #if compiler(>=6.3)
+          @used
+          #endif
           @_cdecl("Java_com_example_swift_SwiftModule__00024returnUUID__")
           public func Java_com_example_swift_SwiftModule__00024returnUUID__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
             return SwiftModule.returnUUID().uuidString.getJNILocalRefValue(in: environment)

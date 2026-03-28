@@ -59,10 +59,13 @@ struct JNIJavaKitTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J")
         public func Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, javaLong: jobject?, javaInteger: jobject?, int: jlong) {
           guard let javaLong_unwrapped$ = javaLong else {

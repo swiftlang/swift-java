@@ -44,9 +44,12 @@ struct JNISetTest {
       input: "public func f() -> Set<String> {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__")
         public func Java_com_example_swift_SwiftModule__00024f__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           return SwiftModule.f().setGetJNIValue(in: environment)
@@ -82,9 +85,12 @@ struct JNISetTest {
       input: "public func f(set: Set<String>) {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong) {
           SwiftModule.f(set: Set<String>(fromJNI: set, in: environment))
@@ -120,9 +126,12 @@ struct JNISetTest {
       input: "public func f(set: Set<String>) -> Set<String> {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong) -> jlong {
           return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment)).setGetJNIValue(in: environment)
@@ -215,9 +224,12 @@ struct JNISetTest {
       input: "public func f(a: Set<String>, b: Set<Int64>) {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JJ")
         public func Java_com_example_swift_SwiftModule__00024f__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, a: jlong, b: jlong) {
           SwiftModule.f(a: Set<String>(fromJNI: a, in: environment), b: Set<Int64>(fromJNI: b, in: environment))
@@ -256,9 +268,12 @@ struct JNISetTest {
       input: "public func f(set: Set<String>, element: String) -> Set<String> {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2")
         public func Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong, element: jstring?) -> jlong {
           return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment), element: String(fromJNI: element, in: environment)).setGetJNIValue(in: environment)

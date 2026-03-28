@@ -62,9 +62,12 @@ struct JNIClosureTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2")
         public func Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.emptyClosure(closure: {
@@ -120,9 +123,12 @@ struct JNIClosureTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2")
         public func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.closureWithArgumentsAndReturn(closure: { _0, _1 in

@@ -101,10 +101,11 @@ extension SwiftJava {
 
     @Option(
       help: """
-        If specified, JExtract (JNI mode) will write a linker export list in lld --dynamic-list
-        format to this path. The file contains every generated JNI @_cdecl entry-point symbol
-        and can be passed to the linker to enable dead-code elimination of unreachable Swift code:
-          -Xlinker --dynamic-list=<path>  -Xlinker --gc-sections
+        If specified, JExtract (JNI mode) will write a linker version script to this path. \
+        The file lists every generated JNI @_cdecl entry-point symbol as a global export \
+        and hides all other symbols with local: *, enabling dead-code elimination of \
+        unreachable Swift code:
+          -Xlinker --version-script=<path>
         """
     )
     var linkerExportListOutput: String?

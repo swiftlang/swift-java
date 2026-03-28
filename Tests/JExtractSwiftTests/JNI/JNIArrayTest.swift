@@ -44,9 +44,12 @@ struct JNIArrayTest {
       input: "public func f(array: Array<UInt8>) -> Array<UInt8> {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
         public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
           return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
@@ -82,9 +85,12 @@ struct JNIArrayTest {
       input: "public func f(array: [UInt8]) -> [UInt8] {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3B")
         public func Java_com_example_swift_SwiftModule__00024f___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) -> jbyteArray? {
           return SwiftModule.f(array: [UInt8](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
@@ -120,9 +126,12 @@ struct JNIArrayTest {
       input: "public func f(array: [Int64]) -> [Int64] {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3J")
         public func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? {
           return SwiftModule.f(array: [Int64](fromJNI: array, in: environment)).getJNILocalRefValue(in: environment)
@@ -167,9 +176,12 @@ struct JNIArrayTest {
         """,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f___3J")
         public func Java_com_example_swift_SwiftModule__00024f___3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jlongArray?) -> jlongArray? {
           return SwiftModule.f(array: [Int64](fromJNI: array, in: environment).map( { (pointer$) in

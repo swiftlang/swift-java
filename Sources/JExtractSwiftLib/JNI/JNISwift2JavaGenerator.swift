@@ -40,7 +40,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   var thunkNameRegistry = ThunkNameRegistry()
 
   /// Accumulates every ``@_cdecl`` symbol name emitted during thunk printing.
-  /// Written to a linker export list after generation when
+  /// Written to a linker version script after generation when
   /// ``Configuration/linkerExportListOutput`` is set.
   var generatedCDeclSymbolNames: [String] = []
 

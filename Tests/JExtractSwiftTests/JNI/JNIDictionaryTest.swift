@@ -44,9 +44,12 @@ struct JNIDictionaryTest {
       input: "public func f() -> [String: Int64] {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__")
         public func Java_com_example_swift_SwiftModule__00024f__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           return SwiftModule.f().dictionaryGetJNIValue(in: environment)
@@ -82,9 +85,12 @@ struct JNIDictionaryTest {
       input: "public func f(dict: [String: Int64]) {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) {
           SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment))
@@ -120,9 +126,12 @@ struct JNIDictionaryTest {
       input: "public func f(dict: [String: Int64]) -> [String: Int64] {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
           return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
@@ -158,9 +167,12 @@ struct JNIDictionaryTest {
       input: "public func f(dict: Dictionary<String, Int64>) -> Dictionary<String, Int64> {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
           return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
@@ -270,9 +282,12 @@ struct JNIDictionaryTest {
       input: "public func f(a: [String: Int64], b: [String: Bool]) {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JJ")
         public func Java_com_example_swift_SwiftModule__00024f__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, a: jlong, b: jlong) {
           SwiftModule.f(a: [String: Int64](fromJNI: a, in: environment), b: [String: Bool](fromJNI: b, in: environment))
@@ -311,9 +326,12 @@ struct JNIDictionaryTest {
       input: "public func f(dict: [String: Int64], key: String, value: Int64) -> [String: Int64] {}",
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2J")
         public func Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong, key: jstring?, value: jlong) -> jlong {
           return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment), key: String(fromJNI: key, in: environment), value: Int64(fromJNI: value, in: environment)).dictionaryGetJNIValue(in: environment)

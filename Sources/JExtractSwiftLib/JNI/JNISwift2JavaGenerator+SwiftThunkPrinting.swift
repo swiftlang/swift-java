@@ -119,16 +119,18 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  /// Writes a linker export list in lld ``--dynamic-list`` format to the path
-  /// specified by ``Configuration/linkerExportListOutput``, listing every JNI
-  /// ``@_cdecl`` symbol generated during this run.
+  /// Writes a linker version script to the path specified by
+  /// ``Configuration/linkerExportListOutput``, listing every JNI ``@_cdecl``
+  /// symbol generated during this run as global exports and hiding everything
+  /// else with `local: *`.
   ///
   /// Pass the resulting file to the linker with:
   /// ```
-  /// -Xlinker --dynamic-list=<path>  -Xlinker --gc-sections
+  /// -Xlinker --version-script=<path>
   /// ```
   /// This lets lld treat only the JNI entry points as roots during link-time
-  /// dead-code elimination, removing unreachable Swift code from SPM
+  /// dead-code elimination and hides all internal Swift symbols from the
+  /// dynamic symbol table, removing unreachable Swift code from SPM
   /// dependencies and the Swift standard library.
   func writeLinkerExportList() throws {
     guard let outputPath = config.linkerExportListOutput else {
@@ -142,7 +144,7 @@ extension JNISwift2JavaGenerator {
       .sorted()
       .map { "  \($0);" }
       .joined(separator: "\n")
-    let contents = "{\n\(symbolLines)\n};\n"
+    let contents = "{\nglobal:\n\(symbolLines)\nlocal: *;\n};\n"
 
     try contents.write(
       toFile: outputPath,
@@ -771,6 +773,9 @@ extension JNISwift2JavaGenerator {
     // TODO: Think about function overloads
     printer.printBraceBlock(
       """
+      #if compiler(>=6.3)
+      @used
+      #endif
       @_cdecl("\(cName)")
       public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """

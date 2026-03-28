@@ -51,6 +51,9 @@ package final class JNI {
   }
 }
 
+#if compiler(>=6.3)
+@used
+#endif
 @_cdecl("JNI_OnLoad")
 public func SwiftJava_JNI_OnLoad(javaVM: JavaVMPointer, reserved: UnsafeMutableRawPointer) -> jint {
   JNI.shared = JNI(fromVM: JavaVirtualMachine(adoptingJVM: javaVM))
