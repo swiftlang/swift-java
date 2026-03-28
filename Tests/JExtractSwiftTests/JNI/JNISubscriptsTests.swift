@@ -98,9 +98,6 @@ struct JNISubscriptsTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__J")
         public func Java_com_example_swift_MyStruct__00024getSubscript__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -112,9 +109,6 @@ struct JNISubscriptsTests {
           return selfPointer$.pointee[].getJNILocalRefValue(in: environment)
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__DJ")
         public func Java_com_example_swift_MyStruct__00024setSubscript__DJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jdouble, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -137,9 +131,6 @@ struct JNISubscriptsTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__IJ")
         public func Java_com_example_swift_MyStruct__00024getSubscript__IJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, selfPointer: jlong) -> jint {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -151,9 +142,6 @@ struct JNISubscriptsTests {
           return selfPointer$.pointee[Int32(fromJNI: index, in: environment)].getJNILocalRefValue(in: environment)
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__IIJ")
         public func Java_com_example_swift_MyStruct__00024setSubscript__IIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, index: jint, newValue: jint, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")

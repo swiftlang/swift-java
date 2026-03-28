@@ -72,39 +72,27 @@ struct JNINestedTypesTests {
       input: source1,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_A__00024typeMetadataAddressDowncall__")
         public func Java_com_example_swift_A__00024typeMetadataAddressDowncall__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           ...
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_A_00024B__00024typeMetadataAddressDowncall__")
         public func Java_com_example_swift_A_00024B__00024typeMetadataAddressDowncall__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           ...
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_A_00024B_00024C__00024typeMetadataAddressDowncall__")
         public func Java_com_example_swift_A_00024B_00024C__00024typeMetadataAddressDowncall__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           ...
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_A_00024B_00024C__00024h__JJ")
         public func Java_com_example_swift_A_00024B_00024C__00024h__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jlong, selfPointer: jlong) {
           ...

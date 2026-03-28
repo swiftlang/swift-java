@@ -25,7 +25,7 @@ struct JNIAsyncTests {
       input: "public func asyncVoid() async",
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         /**
@@ -56,12 +56,9 @@ struct JNIAsyncTests {
       input: "public func asyncVoid() async",
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
@@ -104,7 +101,7 @@ struct JNIAsyncTests {
       input: "public func async() async throws",
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         /**
@@ -135,12 +132,9 @@ struct JNIAsyncTests {
       input: "public func async() async throws",
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
@@ -197,7 +191,7 @@ struct JNIAsyncTests {
       input: "public func async(i: Int64) async -> Int64",
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         /**
@@ -228,12 +222,9 @@ struct JNIAsyncTests {
       input: "public func async(i: Int64) async -> Int64",
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_future: jobject?) {
           let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
@@ -283,7 +274,7 @@ struct JNIAsyncTests {
         """,
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         /**
@@ -318,12 +309,9 @@ struct JNIAsyncTests {
         """,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
           assert(c != 0, "c memory address was null")
@@ -383,7 +371,7 @@ struct JNIAsyncTests {
         """,
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public static java.util.concurrent.CompletableFuture<java.lang.String> async(java.lang.String s) {
@@ -410,12 +398,9 @@ struct JNIAsyncTests {
         """,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_future: jobject?) {
           let s = environment.interface.NewGlobalRef(environment, s)
@@ -449,7 +434,7 @@ struct JNIAsyncTests {
       config: config,
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public static java.util.concurrent.Future<MyClass> async(MyClass c, SwiftArena swiftArena) {
@@ -482,12 +467,9 @@ struct JNIAsyncTests {
       config: config,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SimpleCompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
           ...

@@ -143,12 +143,9 @@ struct JNIStructTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024init__JJ")
         public func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
@@ -192,12 +189,9 @@ struct JNIStructTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024doSomething__JJ")
         public func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")

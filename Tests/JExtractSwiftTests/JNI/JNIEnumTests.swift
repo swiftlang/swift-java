@@ -226,12 +226,9 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024first__")
         public func Java_com_example_swift_MyEnum__00024first__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
@@ -241,9 +238,6 @@ struct JNIEnumTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2")
         public func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
@@ -253,9 +247,6 @@ struct JNIEnumTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024third__JI")
         public func Java_com_example_swift_MyEnum__00024third__JI(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
@@ -312,12 +303,9 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
         public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
@@ -333,9 +321,6 @@ struct JNIEnumTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsThird__J")
         public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...

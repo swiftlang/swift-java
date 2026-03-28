@@ -129,20 +129,8 @@ struct JNIGenericTypeTests {
           }
           ...
         }
-        """#
-      ]
-    )
-
-    try assertOutput(
-      input: genericFile,
-      .jni,
-      .swift,
-      detectChunkByInitialLines: 4,
-      expectedChunks: [
+        """#,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyID__00024getDescription__JJ")
         public func Java_com_example_swift_MyID__00024getDescription__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
           let selfTypePointerBits$ = Int(Int64(fromJNI: selfTypePointer, in: environment))
@@ -152,8 +140,8 @@ struct JNIGenericTypeTests {
           let openerType = unsafeBitCast(selfTypePointer$, to: Any.Type.self) as! (any _SwiftModule_MyID_opener.Type)
           return openerType._get_description(environment: environment, thisClass: thisClass, selfPointer: selfPointer)
         }
-        """
-      ],
+        """,
+      ]
     )
   }
 
@@ -163,7 +151,7 @@ struct JNIGenericTypeTests {
       input: genericFile,
       .jni,
       .java,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public static MyID<java.lang.String> makeStringID(java.lang.String value, SwiftArena swiftArena) {
@@ -193,12 +181,9 @@ struct JNIGenericTypeTests {
       input: genericFile,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
         public func Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, out: jobject?) {
           let result$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)

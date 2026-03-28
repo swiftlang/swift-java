@@ -66,13 +66,10 @@ struct JNIOptionalTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__BJ")
         public func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
           let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment) : nil).map {
@@ -119,13 +116,10 @@ struct JNIOptionalTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B")
         public func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jstring?, result_discriminator$: jbyteArray?) -> jstring? {
           let result$: jstring?
@@ -180,13 +174,10 @@ struct JNIOptionalTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3B")
         public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
           let argBits$ = Int(Int64(fromJNI: arg, in: environment))
@@ -244,13 +235,10 @@ struct JNIOptionalTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2")
         public func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
           SwiftModule.optionalJavaKitClass(arg.map {

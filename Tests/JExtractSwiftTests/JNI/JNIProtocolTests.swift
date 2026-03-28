@@ -131,9 +131,6 @@ struct JNIProtocolTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?, y: jobject?) {
           let xswiftObject$: (SomeProtocol)
@@ -199,7 +196,7 @@ struct JNIProtocolTests {
       config: config,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         final class _SwiftModule_takeGeneric_s_Wrapper: SwiftJavaSomeProtocolWrapper {
@@ -210,9 +207,6 @@ struct JNIProtocolTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jobject?) {
           let sswiftObject$: (SomeProtocol)
@@ -258,7 +252,7 @@ struct JNIProtocolTests {
       config: config,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         final class _SwiftModule_takeComposite_x_Wrapper: SwiftJavaSomeProtocolWrapper, SwiftJavaBWrapper {
@@ -271,9 +265,6 @@ struct JNIProtocolTests {
         }
         """,
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?) {
           let xswiftObject$: (SomeProtocol & B)

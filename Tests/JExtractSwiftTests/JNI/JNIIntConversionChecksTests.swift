@@ -63,9 +63,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024init__J")
         public func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, normalInt: jlong) -> jlong {
           let normalInt$indirect = Int64(fromJNI: normalInt, in: environment)
@@ -92,9 +89,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024init__J")
         public func Java_com_example_swift_MyStruct__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, unsignedInt: jlong) -> jlong {
           let unsignedInt$indirect = UInt64(fromJNI: unsignedInt, in: environment)
@@ -121,9 +115,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ")
         public func Java_com_example_swift_MyStruct__00024setUnsignedInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
           let newValue$indirect = UInt64(fromJNI: newValue, in: environment)
@@ -153,9 +144,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024getUnsignedInt__J")
         public func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
@@ -177,9 +165,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024setNormalInt__JJ")
         public func Java_com_example_swift_MyStruct__00024setNormalInt__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
         let newValue$indirect = Int64(fromJNI: newValue, in: environment)
@@ -209,9 +194,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
         public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, selfPointer: jlong) -> jlong {
           let arg$indirect = Int64(fromJNI: arg, in: environment)
@@ -241,9 +223,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__JJ")
         public func Java_com_example_swift_MyStruct__00024dummyFunc__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, selfPointer: jlong) -> jlong {
           let arg$indirect = UInt64(fromJNI: arg, in: environment)
@@ -272,9 +251,6 @@ struct JNIIntConversionChecksTests {
       .swift,
       expectedChunks: [
         """
-        #if compiler(>=6.3)
-        @used
-        #endif
         @_cdecl("Java_com_example_swift_MyEnum__00024secondCase__J")
         public func Java_com_example_swift_MyEnum__00024secondCase__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jlong) -> jlong {
           let arg0$indirect = UInt64(fromJNI: arg0, in: environment)
