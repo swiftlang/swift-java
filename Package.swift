@@ -134,7 +134,7 @@ let package = Package(
       dependencies: [
         "SwiftJava",
         "SwiftJavaRuntimeSupport",
-        "SwiftRuntimeFunctions",
+        "SwiftRuntimeFunctions"
       ]
     ),
 
@@ -391,6 +391,16 @@ let package = Package(
       dependencies: [
         "JExtractSwiftLib",
         "CodePrinting",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .testTarget(
+      name: "SwiftRuntimeFunctionsTests",
+      dependencies: [
+        "SwiftRuntimeFunctions",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)

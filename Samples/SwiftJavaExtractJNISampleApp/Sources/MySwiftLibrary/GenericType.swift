@@ -30,6 +30,14 @@ public func makeStringID(_ value: String) -> MyID<String> {
   MyID(value)
 }
 
+public func takeIntValue(from value: MyID<Int>) -> Int {
+  value.rawValue
+}
+
+public func takeStringValue(from value: MyID<String>) -> String {
+  value.rawValue
+}
+
 public struct MyEntity {
   public var id: MyID<Int>
   public var name: String
