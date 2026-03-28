@@ -200,7 +200,7 @@ class JavaImplementationMacroTests: XCTestCase {
             // cleanup
           }
         }
-        
+
         #if compiler(>=6.3)
         @used
         #endif
@@ -209,7 +209,7 @@ class JavaImplementationMacroTests: XCTestCase {
           return SwiftDictionaryMapJava._size(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
           .getJNILocalRefValue(in: environment)
         }
-        
+
         #if compiler(>=6.3)
         @used
         #endif

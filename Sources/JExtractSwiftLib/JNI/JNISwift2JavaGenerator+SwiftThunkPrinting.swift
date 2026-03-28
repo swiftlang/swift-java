@@ -140,7 +140,8 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    let symbolLines = generatedCDeclSymbolNames
+    let symbolLines =
+      generatedCDeclSymbolNames
       .sorted()
       .map { "  \($0);" }
       .joined(separator: "\n")

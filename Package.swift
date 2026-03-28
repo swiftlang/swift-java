@@ -134,7 +134,7 @@ let package = Package(
       dependencies: [
         "SwiftJava",
         "SwiftJavaRuntimeSupport",
-        "SwiftRuntimeFunctions"
+        "SwiftRuntimeFunctions",
       ]
     ),
 
@@ -400,7 +400,7 @@ let package = Package(
     .testTarget(
       name: "SwiftRuntimeFunctionsTests",
       dependencies: [
-        "SwiftRuntimeFunctions",
+        "SwiftRuntimeFunctions"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
