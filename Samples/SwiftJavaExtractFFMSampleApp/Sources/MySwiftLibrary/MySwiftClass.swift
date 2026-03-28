@@ -46,6 +46,10 @@ public class MySwiftClass {
     12
   }
 
+  public func describe() -> String {
+    "MySwiftClass(len: \(len), cap: \(cap))"
+  }
+
   public func makeRandomIntMethod() -> Int {
     Int.random(in: 1..<256)
   }

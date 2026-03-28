@@ -115,6 +115,17 @@ public func globalReceiveOptional(o1: Int?, o2: (some DataProtocol)?) -> Int {
 }
 
 // ==== -----------------------------------------------------------------------
+// MARK: String returns
+
+public func globalMakeString() -> String {
+  "Hello from Swift!"
+}
+
+public func globalStringIdentity(string: String) -> String {
+  string
+}
+
+// ==== -----------------------------------------------------------------------
 // MARK: Overloaded functions
 
 public func globalOverloaded(a: Int) {
