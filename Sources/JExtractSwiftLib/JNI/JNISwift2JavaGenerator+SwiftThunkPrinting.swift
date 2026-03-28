@@ -144,7 +144,14 @@ extension JNISwift2JavaGenerator {
       .sorted()
       .map { "  \($0);" }
       .joined(separator: "\n")
-    let contents = "{\nglobal:\n\(symbolLines)\nlocal: *;\n};\n"
+    let contents =
+      """
+      {
+        global:
+        \(symbolLines)
+        local: *;
+      };"
+      """
 
     try contents.write(
       toFile: outputPath,
