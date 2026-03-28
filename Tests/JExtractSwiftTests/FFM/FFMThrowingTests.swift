@@ -32,15 +32,15 @@ struct FFMThrowingTests {
       expectedChunks: [
         """
         @_cdecl("swiftjava_SwiftModule_throwingVoid")
-        public func swiftjava_SwiftModule_throwingVoid(_ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+        public func swiftjava_SwiftModule_throwingVoid(_ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
           do {
             try throwingVoid()
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
           }
         }
         """
-      ]
+      ],
     )
   }
 
@@ -54,16 +54,16 @@ struct FFMThrowingTests {
       expectedChunks: [
         """
         @_cdecl("swiftjava_SwiftModule_throwingReturn_x")
-        public func swiftjava_SwiftModule_throwingReturn_x(_ x: Int64, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> Int64 {
+        public func swiftjava_SwiftModule_throwingReturn_x(_ x: Int64, _ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> Int64 {
           do {
             return try throwingReturn(x: x)
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
             return 0
           }
         }
         """
-      ]
+      ],
     )
   }
 
@@ -73,21 +73,51 @@ struct FFMThrowingTests {
       input: throwingSource,
       .ffm,
       .java,
-      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static void throwingVoid() throws SwiftJavaError {
+        /**
+         * {@snippet lang=c :
+         * void swiftjava_SwiftModule_throwingVoid(void **result$throws)
+         * }
+         */
+        private static class swiftjava_SwiftModule_throwingVoid {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* result$throws: */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            SwiftModule.findOrThrow("swiftjava_SwiftModule_throwingVoid");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static void call(java.lang.foreign.MemorySegment result$throws) {
+            try {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(result$throws);
+              }
+              HANDLE.invokeExact(result$throws);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+        }
         """,
         """
-        MemorySegment _errorOut = arena$.allocate(ValueLayout.ADDRESS);
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func throwingVoid() throws
+         * }
+         */
+        public static void throwingVoid() throws SwiftJavaErrorException {
+          try(var arena$ = Arena.ofConfined()) {
+            MemorySegment result$throws = arena$.allocate(ValueLayout.ADDRESS);
+            result$throws.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);
+            swiftjava_SwiftModule_throwingVoid.call(result$throws);
+            if (!result$throws.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)) {
+              throw new SwiftJavaErrorException(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());
+            }
+          }
+        }
         """,
-        """
-        _errorOut.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);
-        """,
-        """
-        if (!_errorOut.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)) {
-        """,
-      ]
+      ],
     )
   }
 
@@ -97,18 +127,54 @@ struct FFMThrowingTests {
       input: throwingSource,
       .ffm,
       .java,
-      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static long throwingReturn(long x) throws SwiftJavaError {
+        /**
+         * {@snippet lang=c :
+         * int64_t swiftjava_SwiftModule_throwingReturn_x(int64_t x, void **result$throws)
+         * }
+         */
+        private static class swiftjava_SwiftModule_throwingReturn_x {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_INT64,
+            /* x: */SwiftValueLayout.SWIFT_INT64,
+            /* result$throws: */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            SwiftModule.findOrThrow("swiftjava_SwiftModule_throwingReturn_x");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static long call(long x, java.lang.foreign.MemorySegment result$throws) {
+            try {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(x, result$throws);
+              }
+              return (long) HANDLE.invokeExact(x, result$throws);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+        }
         """,
         """
-        MemorySegment _errorOut = arena$.allocate(ValueLayout.ADDRESS);
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func throwingReturn(x: Int64) throws -> Int64
+         * }
+         */
+        public static long throwingReturn(long x) throws SwiftJavaErrorException {
+          try(var arena$ = Arena.ofConfined()) {
+            MemorySegment result$throws = arena$.allocate(ValueLayout.ADDRESS);
+            result$throws.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);
+            var result$ = (long) swiftjava_SwiftModule_throwingReturn_x.call(x, result$throws);
+            if (!result$throws.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)) {
+              throw new SwiftJavaErrorException(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());
+            }
+            return result$;
+          }
+        }
         """,
-        """
-        if (!_errorOut.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)) {
-        """,
-      ]
+      ],
     )
   }
 
@@ -130,7 +196,7 @@ struct FFMThrowingTests {
           return _swiftjava_stringToCString(greeting())
         }
         """
-      ]
+      ],
     )
   }
 
@@ -142,12 +208,42 @@ struct FFMThrowingTests {
       .java,
       expectedChunks: [
         """
-        public static java.lang.String greeting() {
+        /**
+         * {@snippet lang=c :
+         * int8_t *swiftjava_SwiftModule_greeting(void)
+         * }
+         */
+        private static class swiftjava_SwiftModule_greeting {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            /* -> */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            SwiftModule.findOrThrow("swiftjava_SwiftModule_greeting");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static java.lang.foreign.MemorySegment call() {
+            try {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall();
+              }
+              return (java.lang.foreign.MemorySegment) HANDLE.invokeExact();
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+        }
         """,
         """
-        return SwiftRuntime.fromCString(
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func greeting() -> String
+         * }
+         */
+        public static java.lang.String greeting() {
+          return SwiftStrings.fromCString(swiftjava_SwiftModule_greeting.call());
+        }
         """,
-      ]
+      ],
     )
   }
 }

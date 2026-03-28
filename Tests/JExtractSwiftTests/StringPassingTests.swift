@@ -66,13 +66,13 @@ final class StringPassingTests {
          */
         public static long writeString(java.lang.String string) throws SwiftIntegerOverflowException {
             try(var arena$ = Arena.ofConfined()) {
-                long _result$checked = swiftjava___FakeModule_writeString_string.call(SwiftRuntime.toCString(string, arena$));
+                long result$checked = swiftjava___FakeModule_writeString_string.call(SwiftStrings.toCString(string, arena$));
                 if (SwiftValueLayout.has32bitSwiftInt) {
-                    if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
-                        throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+                    if (result$checked < Integer.MIN_VALUE || result$checked > Integer.MAX_VALUE) {
+                        throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
                     }
                 }
-                return _result$checked;
+                return result$checked;
             }
         }
         """,

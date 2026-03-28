@@ -11,27 +11,27 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 JAVA_OUTPUT="${REPO_ROOT}/SwiftKitFFM/src/main/java"
 JAVA_PACKAGE="org.swift.swiftkit.ffm.generated"
 
-# Declare types to generate: TYPE_NAME SWIFT_MODULE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
+# Declare types to generate: SWIFT_MODULE FILTER_INCLUDE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
 TYPES=(
-  "SwiftJavaError  SwiftRuntimeFunctions  Sources/SwiftRuntimeFunctions  Sources/SwiftRuntimeFunctions/generated"
+  "SwiftRuntimeFunctions  SwiftJavaError  Sources/SwiftRuntimeFunctions  Sources/SwiftRuntimeFunctions/generated"
 )
 
 for entry in "${TYPES[@]}"; do
-  read -r TYPE MODULE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
+  read -r MODULE FILTER INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
 
-  echo "==> Generating ${TYPE} (module: ${MODULE})..."
+  echo "==> Generating ${FILTER} (module: ${MODULE})..."
 
   xcrun swift run swift-java jextract \
     --mode ffm \
-    --single-type "$TYPE" \
+    --filter-include "$FILTER" \
     --swift-module "$MODULE" \
     --input-swift "${REPO_ROOT}/${INPUT_SWIFT}" \
     --output-swift "${REPO_ROOT}/${OUTPUT_SWIFT}" \
     --output-java "$JAVA_OUTPUT" \
     --java-package "$JAVA_PACKAGE"
 
-  echo "  Swift thunks: ${OUTPUT_SWIFT}/${TYPE}+SwiftJava.swift"
-  echo "  Java class:   SwiftKitFFM/src/main/java/$(echo "$JAVA_PACKAGE" | tr '.' '/')/${TYPE}.java"
+  echo "  Swift thunks: ${OUTPUT_SWIFT}/"
+  echo "  Java output:  SwiftKitFFM/src/main/java/$(echo "$JAVA_PACKAGE" | tr '.' '/')/"
 done
 
 echo "==> Done."

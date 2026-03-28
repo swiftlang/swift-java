@@ -213,9 +213,9 @@ final class DataImportTests {
          * }
          */
         public static Data returnData(AllocatingSwiftArena swiftArena) {
-          MemorySegment _result = swiftArena.allocate(Data.$LAYOUT);
-          swiftjava_SwiftModule_returnData.call(_result);
-          return Data.wrapMemoryAddressUnsafe(_result, swiftArena);
+          MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
+          swiftjava_SwiftModule_returnData.call(result$);
+          return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """,
 
@@ -255,14 +255,14 @@ final class DataImportTests {
          * }
          */
         public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena) throws SwiftIntegerOverflowException {
-          MemorySegment _result = swiftArena.allocate(Data.$LAYOUT);
+          MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
           if (SwiftValueLayout.has32bitSwiftInt) {
             if (count < Integer.MIN_VALUE || count > Integer.MAX_VALUE) {
               throw new SwiftIntegerOverflowException("Parameter 'count' overflow: " + count);
             }
           }
-          swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, _result);
-          return Data.wrapMemoryAddressUnsafe(_result, swiftArena);
+          swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, result$);
+          return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """,
 
@@ -302,13 +302,13 @@ final class DataImportTests {
          */
         public long getCount() throws SwiftIntegerOverflowException {
           $ensureAlive();
-          long _result$checked = swiftjava_SwiftModule_Data_count$get.call(this.$memorySegment());
+          long result$checked = swiftjava_SwiftModule_Data_count$get.call(this.$memorySegment());
           if (SwiftValueLayout.has32bitSwiftInt) {
-            if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
-              throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+            if (result$checked < Integer.MIN_VALUE || result$checked > Integer.MAX_VALUE) {
+              throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
             }
           }
-          return _result$checked;
+          return result$checked;
         }
         """,
 

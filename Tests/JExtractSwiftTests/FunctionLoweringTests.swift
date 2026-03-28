@@ -30,7 +30,7 @@ final class FunctionLoweringTests {
           f(x: x, y: y, z: UnsafeBufferPointer<Bool>(start: z_pointer.assumingMemoryBound(to: Bool.self), count: z_count))
         }
         """,
-      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z_pointer, ptrdiff_t z_count)"
+      expectedCFunction: "void c_f(ptrdiff_t x, float y, const void *z_pointer, ptrdiff_t z_count)",
     )
   }
 
@@ -46,7 +46,7 @@ final class FunctionLoweringTests {
           return f(t: (t_0, (t_1_0, t_1_1)), z: z)
         }
         """,
-      expectedCFunction: "ptrdiff_t c_f(ptrdiff_t t_0, float t_1_0, double t_1_1, const ptrdiff_t *z)"
+      expectedCFunction: "ptrdiff_t c_f(ptrdiff_t t_0, float t_1_0, double t_1_1, const ptrdiff_t *z)",
     )
   }
 
@@ -63,7 +63,7 @@ final class FunctionLoweringTests {
         """,
       expectedCFunction: """
         void c_takeString(const int8_t *str)
-        """
+        """,
     )
   }
 
@@ -82,7 +82,7 @@ final class FunctionLoweringTests {
           shift(point: &point.assumingMemoryBound(to: Point.self).pointee, by: (delta_0, delta_1))
         }
         """,
-      expectedCFunction: "void c_shift(void *point, double delta_0, double delta_1)"
+      expectedCFunction: "void c_shift(void *point, double delta_0, double delta_1)",
     )
   }
 
@@ -102,7 +102,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
         }
         """,
-      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)"
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)",
     )
   }
 
@@ -122,7 +122,7 @@ final class FunctionLoweringTests {
           self.assumingMemoryBound(to: Point.self).pointee.shift(by: (delta_0, delta_1))
         }
         """,
-      expectedCFunction: "void c_shift(double delta_0, double delta_1, void *self)"
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, void *self)",
     )
   }
 
@@ -142,7 +142,7 @@ final class FunctionLoweringTests {
           self.assumingMemoryBound(to: Point.self).pointee.shift(by: (delta_0, delta_1))
         }
         """,
-      expectedCFunction: "void c_shift(double delta_0, double delta_1, const void *self)"
+      expectedCFunction: "void c_shift(double delta_0, double delta_1, const void *self)",
     )
   }
 
@@ -162,7 +162,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Point.self).initialize(to: Point.scaledUnit(by: value))
         }
         """,
-      expectedCFunction: "void c_scaledUnit(double value, void *_result)"
+      expectedCFunction: "void c_scaledUnit(double value, void *_result)",
     )
 
     try assertLoweredFunction(
@@ -179,7 +179,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Person.self).initialize(to: Person.randomPerson(seed: seed))
         }
         """,
-      expectedCFunction: "void c_randomPerson(double seed, void *_result)"
+      expectedCFunction: "void c_randomPerson(double seed, void *_result)",
     )
   }
 
@@ -199,7 +199,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Point.self).initialize(to: Point(scaledBy: value))
         }
         """,
-      expectedCFunction: "void c_init(double value, void *_result)"
+      expectedCFunction: "void c_init(double value, void *_result)",
     )
 
     try assertLoweredFunction(
@@ -216,7 +216,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Person.self).initialize(to: Person(seed: seed))
         }
         """,
-      expectedCFunction: "void c_init(double seed, void *_result)"
+      expectedCFunction: "void c_init(double seed, void *_result)",
     )
   }
 
@@ -232,7 +232,7 @@ final class FunctionLoweringTests {
           f(t: unsafeBitCast(t, to: Int.self))
         }
         """,
-      expectedCFunction: "void c_f(const void *t)"
+      expectedCFunction: "void c_f(const void *t)",
     )
 
     try assertLoweredFunction(
@@ -245,7 +245,7 @@ final class FunctionLoweringTests {
           return unsafeBitCast(f(), to: UnsafeRawPointer.self)
         }
         """,
-      expectedCFunction: "const void *c_f(void)"
+      expectedCFunction: "const void *c_f(void)",
     )
   }
 
@@ -265,7 +265,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Point.self).initialize(to: self.assumingMemoryBound(to: Point.self).pointee.shifted(by: (delta_0, delta_1)))
         }
         """,
-      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)"
+      expectedCFunction: "void c_shifted(double delta_0, double delta_1, const void *self, void *_result)",
     )
   }
 
@@ -284,7 +284,7 @@ final class FunctionLoweringTests {
           return UnsafeRawPointer(getPointer())
         }
         """,
-      expectedCFunction: "const void *c_getPointer(void)"
+      expectedCFunction: "const void *c_getPointer(void)",
     )
   }
 
@@ -307,7 +307,7 @@ final class FunctionLoweringTests {
           _result_1_1.assumingMemoryBound(to: Point.self).initialize(to: _result_1.1)
         }
         """,
-      expectedCFunction: "void c_getTuple(ptrdiff_t *_result_0, float *_result_1_0, void *_result_1_1)"
+      expectedCFunction: "void c_getTuple(ptrdiff_t *_result_0, float *_result_1_0, void *_result_1_1)",
     )
   }
 
@@ -328,7 +328,7 @@ final class FunctionLoweringTests {
           _result_1.initialize(to: _result.1)
         }
         """,
-      expectedCFunction: "void c_getBufferPointer(void **_result_0, ptrdiff_t *_result_1)"
+      expectedCFunction: "void c_getBufferPointer(void **_result_0, ptrdiff_t *_result_1)",
     )
   }
 
@@ -347,7 +347,7 @@ final class FunctionLoweringTests {
         }
         """,
       expectedCFunction:
-        "void c_swapRawBufferPointer(const void *buffer_pointer, ptrdiff_t buffer_count, void **_result_pointer, ptrdiff_t *_result_count)"
+        "void c_swapRawBufferPointer(const void *buffer_pointer, ptrdiff_t buffer_count, void **_result_pointer, ptrdiff_t *_result_count)",
     )
   }
 
@@ -365,7 +365,7 @@ final class FunctionLoweringTests {
           })
         }
         """,
-      expectedCFunction: "void c_withBuffer(ptrdiff_t (*body)(const void *, ptrdiff_t))"
+      expectedCFunction: "void c_withBuffer(ptrdiff_t (*body)(const void *, ptrdiff_t))",
     )
   }
 
@@ -381,7 +381,7 @@ final class FunctionLoweringTests {
           doSomething(body: body)
         }
         """,
-      expectedCFunction: "void c_doSomething(void (*body)(void))"
+      expectedCFunction: "void c_doSomething(void (*body)(void))",
     )
   }
 
@@ -399,7 +399,7 @@ final class FunctionLoweringTests {
           doSomething(body: body)
         }
         """,
-      expectedCFunction: "void c_doSomething(double (*body)(int32_t))"
+      expectedCFunction: "void c_doSomething(double (*body)(int32_t))",
     )
   }
 
@@ -421,7 +421,7 @@ final class FunctionLoweringTests {
         """,
       expectedCFunction: """
         void c_fn(const ptrdiff_t *a1, const ptrdiff_t *a2, const void *a3, const void *a4)
-        """
+        """,
     )
   }
 
@@ -442,7 +442,7 @@ final class FunctionLoweringTests {
         """,
       expectedCFunction: """
         void c_fn(const void *x, const void *y)
-        """
+        """,
     )
   }
 
@@ -464,7 +464,7 @@ final class FunctionLoweringTests {
           _result.assumingMemoryBound(to: Point.self).initialize(to: value)
         }
         """,
-      expectedCFunction: "void c_value(void *_result)"
+      expectedCFunction: "void c_value(void *_result)",
     )
   }
 
@@ -486,7 +486,7 @@ final class FunctionLoweringTests {
           value = newValue.assumingMemoryBound(to: Point.self).pointee
         }
         """,
-      expectedCFunction: "void c_value(const void *newValue)"
+      expectedCFunction: "void c_value(const void *newValue)",
     )
   }
 
@@ -509,7 +509,7 @@ final class FunctionLoweringTests {
           return self.assumingMemoryBound(to: Point.self).pointee.value
         }
         """,
-      expectedCFunction: "ptrdiff_t c_value(const void *self)"
+      expectedCFunction: "ptrdiff_t c_value(const void *self)",
     )
   }
 
@@ -532,7 +532,7 @@ final class FunctionLoweringTests {
           self.assumingMemoryBound(to: Point.self).pointee.value = newValue.assumingMemoryBound(to: Point.self).pointee
         }
         """,
-      expectedCFunction: "void c_value(const void *newValue, const void *self)"
+      expectedCFunction: "void c_value(const void *newValue, const void *self)",
     )
   }
 
@@ -544,15 +544,15 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
         @_cdecl("c_foo")
-        public func c_foo(_ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+        public func c_foo(_ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
           do {
             try foo()
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
           }
         }
         """,
-      expectedCFunction: "void c_foo(void **_errorOut)"
+      expectedCFunction: "void c_foo(void **result$throws)",
     )
   }
 
@@ -564,16 +564,16 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
         @_cdecl("c_foo")
-        public func c_foo(_ x: Int, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> Int {
+        public func c_foo(_ x: Int, _ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> Int {
           do {
             return try foo(x: x)
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
             return 0
           }
         }
         """,
-      expectedCFunction: "ptrdiff_t c_foo(ptrdiff_t x, void **_errorOut)"
+      expectedCFunction: "ptrdiff_t c_foo(ptrdiff_t x, void **result$throws)",
     )
   }
 
@@ -588,15 +588,15 @@ final class FunctionLoweringTests {
         """,
       expectedCDecl: """
         @_cdecl("c_foo")
-        public func c_foo(_ _result: UnsafeMutableRawPointer, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+        public func c_foo(_ _result: UnsafeMutableRawPointer, _ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
           do {
             try _result.assumingMemoryBound(to: MyStruct.self).initialize(to: foo())
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
           }
         }
         """,
-      expectedCFunction: "void c_foo(void *_result, void **_errorOut)"
+      expectedCFunction: "void c_foo(void *_result, void **result$throws)",
     )
   }
 
@@ -612,7 +612,7 @@ final class FunctionLoweringTests {
           return _swiftjava_stringToCString(bar())
         }
         """,
-      expectedCFunction: "int8_t *c_bar(void)"
+      expectedCFunction: "int8_t *c_bar(void)",
     )
   }
 
@@ -627,15 +627,15 @@ final class FunctionLoweringTests {
         """,
       expectedCDecl: """
         @_cdecl("c_foo")
-        public func c_foo(_ _result: UnsafeMutableRawPointer, _ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
+        public func c_foo(_ _result: UnsafeMutableRawPointer, _ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) {
           do {
             try _result.assumingMemoryBound(to: MyClass.self).initialize(to: foo())
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
           }
         }
         """,
-      expectedCFunction: "void c_foo(void *_result, void **_errorOut)"
+      expectedCFunction: "void c_foo(void *_result, void **result$throws)",
     )
   }
 
@@ -647,16 +647,16 @@ final class FunctionLoweringTests {
       """,
       expectedCDecl: """
         @_cdecl("c_foo")
-        public func c_foo(_ _errorOut: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> UnsafeMutablePointer<Int8>? {
+        public func c_foo(_ result$throws: UnsafeMutablePointer<UnsafeMutableRawPointer?>) -> UnsafeMutablePointer<Int8>? {
           do {
             return try _swiftjava_stringToCString(foo())
           } catch {
-            _errorOut.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
             return nil
           }
         }
         """,
-      expectedCFunction: "int8_t *c_foo(void **_errorOut)"
+      expectedCFunction: "int8_t *c_foo(void **result$throws)",
     )
   }
 }

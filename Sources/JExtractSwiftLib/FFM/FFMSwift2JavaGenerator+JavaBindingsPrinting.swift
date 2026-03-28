@@ -45,7 +45,7 @@ extension FFMSwift2JavaGenerator {
     // 'try!' because we know 'loweredSignature' can be described with C.
     let cFunc = try! translated.loweredSignature.cFunctionDecl(cName: thunkName)
 
-    printJavaBindingDescriptorClass(&printer, cFunc) { printer in
+    printJavaBindingDescriptorClass(&printer, cFunc, symbolLookup: currentSymbolLookup) { printer in
       if let outCallback = translated.translatedSignature.result.outCallback {
         self.printUpcallParameterDescriptorClasses(&printer, outCallback)
       } else { // FIXME: not an "else"
@@ -58,8 +58,10 @@ extension FFMSwift2JavaGenerator {
   package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
     _ cFunc: CFunction,
+    symbolLookup: SymbolLookupTarget = .module,
     additionalContent: ((inout CodePrinter) -> Void)? = nil,
   ) {
+    let lookup = symbolLookup.javaClassName(moduleName: self.swiftModuleName)
     printer.printBraceBlock(
       """
       /**
@@ -74,7 +76,7 @@ extension FFMSwift2JavaGenerator {
       printer.print(
         """
         private static final MemorySegment ADDR =
-          \(self.swiftModuleName).findOrThrow("\(cFunc.name)");
+          \(lookup).findOrThrow("\(cFunc.name)");
         private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
         """
       )
@@ -382,15 +384,14 @@ extension FFMSwift2JavaGenerator {
       paramDecls.append("AllocatingSwiftArena swiftArena")
     }
 
-    let needsThrows = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none } || translatedSignature.result.needs32BitIntOverflowCheck != .none
     var throwsClauses: [String] = []
-    // If a Swift function is 'throws' we throw a checked error for the Java side.
-    // TODO: When we support typed throws on Swift side we'll want to throw the right type here instead.
+    // If a Swift function is 'throws' we throw a checked error for the Java side
+    // TODO: When we support typed throws on Swift side we'll want to throw the right type here instead
     if translatedSignature.isThrowing {
-      throwsClauses.append("SwiftJavaError")
+      throwsClauses.append(JavaType.swiftJavaErrorException.simpleClassName)
     }
-    if needsThrows {
-      throwsClauses.append("SwiftIntegerOverflowException")
+    if translatedSignature.canThrowSwiftIntegerOverflowException {
+      throwsClauses.append(JavaType.swiftIntegerOverflowException.simpleClassName)
     }
     let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: ", "))"
 
@@ -464,7 +465,7 @@ extension FFMSwift2JavaGenerator {
         }
 
       // FIXME: use trailing$ convention
-      let varName = outParameter.name.isEmpty ? "_result" : "_result_" + outParameter.name
+      let varName = outParameter.name.isEmpty ? "result$" : "result$_" + outParameter.name
 
       printer.print(
         "MemorySegment \(varName) = \(arena).allocate(\(memoryLayout));"
@@ -475,9 +476,7 @@ extension FFMSwift2JavaGenerator {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
 
     if let outCallback = translatedSignature.result.outCallback {
-      let funcName = outCallback.name
-      assert(funcName.first == "$", "OutCallback names must start with $")
-      let varName = funcName.dropFirst()
+      let varName = outCallback.name
       downCallArguments.append(
         """
         \(thunkName).\(outCallback.name).toUpcallStub(\(varName), arena$)
@@ -487,9 +486,9 @@ extension FFMSwift2JavaGenerator {
 
     // Error out parameter for throwing functions.
     if translatedSignature.isThrowing {
-      printer.print("MemorySegment _errorOut = arena$.allocate(ValueLayout.ADDRESS);")
-      printer.print("_errorOut.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);")
-      downCallArguments.append("_errorOut")
+      printer.print("MemorySegment result$throws = arena$.allocate(ValueLayout.ADDRESS);")
+      printer.print("result$throws.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);")
+      downCallArguments.append("result$throws")
     }
 
     let hasOverflowChecks = translatedSignature.parameters.contains { $0.needs32BitIntOverflowCheck != .none }
@@ -522,8 +521,8 @@ extension FFMSwift2JavaGenerator {
     /// Helper to emit the error check after a downcall
     func printErrorCheck(_ printer: inout CodePrinter) {
       guard translatedSignature.isThrowing else { return }
-      printer.printIfBlock("!_errorOut.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)") { printer in
-        printer.print("throw new SwiftJavaError(_errorOut.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());")
+      printer.printIfBlock("!result$throws.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)") { printer in
+        printer.print("throw new \(JavaType.swiftJavaErrorException.simpleClassName)(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());")
       }
     }
 
@@ -537,7 +536,7 @@ extension FFMSwift2JavaGenerator {
       let placeholderForDowncall: String?
 
       if let outCallback = translatedSignature.result.outCallback {
-        placeholder = "\(outCallback.name)" // the result will be read out from the _result_initialize java class
+        placeholder = "\(outCallback.name)" // the result will be read out from the result$initialize java class
         placeholderForDowncall = "\(downCall)"
       } else if translatedSignature.result.outParameters.isEmpty {
         if translatedSignature.isThrowing {
@@ -545,9 +544,9 @@ extension FFMSwift2JavaGenerator {
           // so we can check the error pointer between them.
           let cResultType = self.translatedDecl(for: decl)!.loweredSignature.result.cdeclResultType
           let javaResultType = (try? CType(cdeclType: cResultType))?.javaType ?? .javaForeignMemorySegment
-          printer.print("var _result = (\(javaResultType)) \(downCall);")
+          printer.print("var result$ = (\(javaResultType)) \(downCall);")
           printErrorCheck(&printer)
-          placeholder = "_result"
+          placeholder = "result$"
         } else {
           placeholder = downCall
         }
@@ -557,7 +556,7 @@ extension FFMSwift2JavaGenerator {
         printer.print("\(downCall);")
         printErrorCheck(&printer)
         placeholderForDowncall = nil
-        placeholder = "_result"
+        placeholder = "result$"
       }
       let result = translatedSignature.result.conversion.render(
         &printer,
@@ -595,7 +594,7 @@ extension FFMSwift2JavaGenerator {
     case .none:
       printer.print("return \(value);")
     case .signedInt:
-      let resultVar = "_result$checked"
+      let resultVar = "result$checked"
       printer.print("long \(resultVar) = \(value);")
 
       printer.printIfBlock("SwiftValueLayout.has32bitSwiftInt") { printer in
@@ -605,7 +604,7 @@ extension FFMSwift2JavaGenerator {
       }
       printer.print("return \(resultVar);")
     case .unsignedInt:
-      let resultVar = "_result$checked"
+      let resultVar = "result$checked"
       printer.print("long \(resultVar) = \(value);")
 
       printer.printIfBlock("SwiftValueLayout.has32bitSwiftInt") { printer in
@@ -811,7 +810,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
         element.elementConversion.render(
           &printer,
           element.outParamName,
-          placeholderForDowncall: placeholderForDowncall
+          placeholderForDowncall: placeholderForDowncall,
         )
       }
       return "\(tupleClassName)(\(args.joined(separator: ", ")))"

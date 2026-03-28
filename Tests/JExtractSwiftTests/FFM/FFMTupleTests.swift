@@ -33,10 +33,10 @@ struct FFMTupleTests {
         """
         public static org.swift.swiftkit.core.tuple.Tuple2<Long, Long> returnPair() {
           try(var arena$ = Arena.ofConfined()) {
-            MemorySegment _result_0 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
-            MemorySegment _result_1 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
-            swiftjava_SwiftModule_returnPair.call(_result_0, _result_1);
-            return new org.swift.swiftkit.core.tuple.Tuple2<Long, Long>(_result_0.get(SwiftValueLayout.SWIFT_INT64, 0), _result_1.get(SwiftValueLayout.SWIFT_INT64, 0));
+            MemorySegment result$_0 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            MemorySegment result$_1 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            swiftjava_SwiftModule_returnPair.call(result$_0, result$_1);
+            return new org.swift.swiftkit.core.tuple.Tuple2<Long, Long>(result$_0.get(SwiftValueLayout.SWIFT_INT64, 0), result$_1.get(SwiftValueLayout.SWIFT_INT64, 0));
           }
         }
         """
@@ -72,7 +72,7 @@ struct FFMTupleTests {
         public static org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer> labeledTuple() {
         """,
         """
-            return new org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer>(_result_0.get(SwiftValueLayout.SWIFT_INT32, 0), _result_1.get(SwiftValueLayout.SWIFT_INT32, 0));
+            return new org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer>(result$_0.get(SwiftValueLayout.SWIFT_INT32, 0), result$_1.get(SwiftValueLayout.SWIFT_INT32, 0));
         """,
       ]
     )
