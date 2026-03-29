@@ -39,7 +39,8 @@ struct SwiftSymbolTableSuite {
         .init(syntax: sourceFile1, path: "Fake.swift"),
         .init(syntax: sourceFile2, path: "Fake2.swift"),
       ],
-      log: Logger(label: "swift-java", logLevel: .critical)
+      config: nil,
+      log: Logger(label: "swift-java", logLevel: .critical),
     )
 
     let x = try #require(symbolTable.lookupType("X", parent: nil))
@@ -68,7 +69,7 @@ struct SwiftSymbolTableSuite {
       expectedChunks: [
         "public static MyValue fullyQualifiedType(",
         "public static Data fullyQualifiedType2(",
-      ]
+      ],
     )
   }
 
@@ -88,7 +89,7 @@ struct SwiftSymbolTableSuite {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "public static MyModule.MyValue fullyQualifiedType("
-      ]
+      ],
     )
   }
 }

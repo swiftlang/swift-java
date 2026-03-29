@@ -78,7 +78,7 @@ extension Swift2JavaTranslator {
     AnalysisResult(
       importedTypes: self.importedTypes,
       importedGlobalVariables: self.importedGlobalVariables,
-      importedGlobalFuncs: self.importedGlobalFuncs
+      importedGlobalFuncs: self.importedGlobalFuncs,
     )
   }
 
@@ -117,12 +117,12 @@ extension Swift2JavaTranslator {
         visitor.visit(
           nominalDecl: dataDecl.syntax!.asNominal!,
           in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift"
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift",
         )
         visitor.visit(
           nominalDecl: dataProtocolDecl.syntax!.asNominal!,
           in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift"
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift",
         )
       }
     }
@@ -133,7 +133,7 @@ extension Swift2JavaTranslator {
         visitor.visit(
           nominalDecl: dateDecl.syntax!.asNominal!,
           in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift"
+          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift",
         )
       }
     }
@@ -145,7 +145,8 @@ extension Swift2JavaTranslator {
     let symbolTable = SwiftSymbolTable.setup(
       moduleName: self.swiftModuleName,
       inputs + [dependenciesSource],
-      log: self.log
+      config: self.config,
+      log: self.log,
     )
     self.lookupContext = SwiftTypeLookupContext(symbolTable: symbolTable)
   }
@@ -225,7 +226,7 @@ extension Swift2JavaTranslator {
   /// Try to resolve the given nominal declaration node into its imported representation.
   func importedNominalType(
     _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
-    parent: ImportedNominalType?
+    parent: ImportedNominalType?,
   ) -> ImportedNominalType? {
     if !nominalNode.shouldExtract(config: config, log: log, in: parent) {
       return nil
@@ -249,9 +250,12 @@ extension Swift2JavaTranslator {
     }
 
     // Whether to import this extension?
-    guard swiftNominalDecl.moduleName == self.swiftModuleName else {
+    let isFromThisModule = swiftNominalDecl.moduleName == self.swiftModuleName
+    let isFromStubbedModule = config.hasImportedModuleStub(moduleOfNominal: swiftNominalDecl.moduleName)
+    guard isFromThisModule || isFromStubbedModule else {
       return nil
     }
+
     guard swiftNominalDecl.syntax!.shouldExtract(config: config, log: log, in: nil) else {
       return nil
     }
@@ -266,12 +270,6 @@ extension Swift2JavaTranslator {
       return alreadyImported
     }
 
-    // Apply type-name filters (patterns with `.`)
-    guard shouldJExtractType(qualifiedName: fullName, config: config) else {
-      log.info("Skipping type (filtered out): \(fullName)")
-      return nil
-    }
-
     let importedNominal = try? ImportedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
 
     importedTypes[fullName] = importedNominal
@@ -279,7 +277,7 @@ extension Swift2JavaTranslator {
   }
 }
 
-// ==== ----------------------------------------------------------------------------------------------------------------
+// ==== -----------------------------------------------------------------------
 // MARK: Errors
 
 public struct Swift2JavaTranslatorError: Error {

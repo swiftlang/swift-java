@@ -13,6 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftJavaConfigurationShared
+import SwiftParser
 import SwiftSyntax
 
 package protocol SwiftSymbolTableProtocol {
@@ -66,7 +68,8 @@ extension SwiftSymbolTable {
   package static func setup(
     moduleName: String,
     _ inputFiles: some Collection<SwiftJavaInputFile>,
-    log: Logger
+    config: Configuration?,
+    log: Logger,
   ) -> SwiftSymbolTable {
 
     // Prepare imported modules.
@@ -90,12 +93,36 @@ extension SwiftSymbolTable {
       }
     }
 
+    // Load stub type declarations for imported modules from config.
+    // This enables types from external modules (e.g. extension targets) to be
+    // resolved in the symbol table without scanning their actual source.
+    if let stubs = config?.importedModuleStubs {
+      for (stubModuleName, declarations) in stubs {
+        if importedModules[stubModuleName] == nil {
+          let source = declarations.joined(separator: "\n")
+          let sourceFile = Parser.parse(source: source)
+          var stubBuilder = SwiftParsedModuleSymbolTableBuilder(
+            moduleName: stubModuleName,
+            importedModules: ["Swift": importedModules["Swift"]!],
+          )
+          stubBuilder.handle(sourceFile: sourceFile, sourceFilePath: "\(stubModuleName)_stub.swift")
+          let stubModule = stubBuilder.finalize()
+          importedModules[stubModuleName] = stubModule
+          log.info("Loaded module stub for '\(stubModuleName)' with \(declarations.count) declaration(s), top-level types: \(stubModule.topLevelTypes.keys.sorted())")
+        } else {
+          log.info("Module '\(stubModuleName)' already known, skipping stub")
+        }
+      }
+    } else {
+      log.debug("No importedModuleStubs in config")
+    }
+
     // FIXME: Support granular lookup context (file, type context).
 
     var builder = SwiftParsedModuleSymbolTableBuilder(
       moduleName: moduleName,
       importedModules: importedModules,
-      log: log
+      log: log,
     )
     // First, register top-level and nested nominal types to the symbol table.
     for sourceFile in inputFiles {
