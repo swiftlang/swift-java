@@ -75,6 +75,18 @@ public struct Configuration: Codable {
   /// library.
   public var linkerExportListOutput: String?
 
+  /// Include only Swift source files or types matching these patterns during jextract.
+  /// File-path patterns (containing `/`): matched against relative file paths
+  /// (including `.swift` extension). Supports `*` and `**` wildcards.
+  /// Type-name patterns (containing `.`): matched against qualified type names
+  /// (e.g. `Something.Other` for nested types).
+  /// Plain names match both
+  public var swiftFilterInclude: [String]?
+
+  /// Exclude Swift source files or types matching these patterns during jextract.
+  /// Same pattern syntax as swiftFilterInclude
+  public var swiftFilterExclude: [String]?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
@@ -95,11 +107,11 @@ public struct Configuration: Codable {
   // Generate class files suitable for the specified Java SE release.
   public var targetCompatibility: JavaVersion?
 
-  /// Filter input Java types by their package prefix if set.
-  public var filterInclude: [String]?
+  /// Filter input Java types by their package prefix if set
+  public var javaFilterInclude: [String]?
 
-  /// Exclude input Java types by their package prefix or exact match.
-  public var filterExclude: [String]?
+  /// Exclude input Java types by their package prefix or exact match
+  public var javaFilterExclude: [String]?
 
   public var singleSwiftFileOutput: String?
 

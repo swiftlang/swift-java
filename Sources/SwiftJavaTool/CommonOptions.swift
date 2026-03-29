@@ -65,16 +65,6 @@ extension SwiftJava {
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
     var logLevel: JExtractSwiftLib.Logger.Level = .info
 
-    @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
-    var filterInclude: [String] = []
-
-    @Option(
-      name: .long,
-      help:
-        "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format."
-    )
-    var filterExclude: [String] = []
-
     @Option(help: "A path to a custom swift-java.config to use")
     var config: String? = nil
   }

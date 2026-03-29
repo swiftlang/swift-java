@@ -19,19 +19,19 @@ extension SwiftJava {
     "java.lang.Enum$EnumDesc",
   ]
 
-  static func shouldImport(javaCanonicalName: String, commonOptions: SwiftJava.CommonOptions) -> Bool {
+  static func shouldImport(javaCanonicalName: String, filterInclude: [String], filterExclude: [String]) -> Bool {
     if SwiftJava.ExcludedJDKTypes.contains(javaCanonicalName) {
       return false
     }
 
-    if !commonOptions.filterInclude.isEmpty {
-      let anyIncludeMatches = commonOptions.filterInclude.contains(where: { javaCanonicalName.hasPrefix($0) })
+    if !filterInclude.isEmpty {
+      let anyIncludeMatches = filterInclude.contains(where: { javaCanonicalName.hasPrefix($0) })
       guard anyIncludeMatches else {
         return false
       }
     }
 
-    for exclude in commonOptions.filterExclude {
+    for exclude in filterExclude {
       if javaCanonicalName.hasPrefix(exclude) {
         return false
       }

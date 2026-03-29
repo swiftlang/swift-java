@@ -66,6 +66,16 @@ extension SwiftJava {
 
     @Option(help: "A prefix that will be added to the names of the Swift types")
     var swiftTypePrefix: String?
+
+    @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
+    var filterInclude: [String] = []
+
+    @Option(
+      name: .long,
+      help:
+        "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format."
+    )
+    var filterExclude: [String] = []
   }
 }
 
@@ -114,11 +124,11 @@ extension SwiftJava.ConfigureCommand {
     log.info("Run: emit configuration...")
     var (amendExistingConfig, config) = try getBaseConfigurationForWrite()
 
-    if !self.commonOptions.filterInclude.isEmpty {
-      log.debug("Generate Java->Swift type mappings. Active include filters: \(self.commonOptions.filterInclude)")
-    } else if let filters = config.filterInclude, !filters.isEmpty {
+    if !self.filterInclude.isEmpty {
+      log.debug("Generate Java->Swift type mappings. Active include filters: \(self.filterInclude)")
+    } else if let filters = config.javaFilterInclude, !filters.isEmpty {
       // take the package filter from the configuration file
-      self.commonOptions.filterInclude = filters
+      self.filterInclude = filters
     } else {
       log.debug("Generate Java->Swift type mappings. No package include filter applied.")
     }
@@ -226,7 +236,7 @@ extension SwiftJava.ConfigureCommand {
         .dropLast(".class".count)
     )
 
-    guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, commonOptions: self.commonOptions) else {
+    guard SwiftJava.shouldImport(javaCanonicalName: javaCanonicalName, filterInclude: self.filterInclude, filterExclude: self.filterExclude) else {
       log.info("Skip importing class: \(javaCanonicalName) due to include/exclude filters")
       return
     }

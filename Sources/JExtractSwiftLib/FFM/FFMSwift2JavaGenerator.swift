@@ -79,6 +79,17 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
           return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
         }
       )
+      // Also include filtered-out files so SwiftPM gets the empty outputs it expects
+      for path in translator.filteredOutPaths {
+        guard let fileName = path.split(separator: PATH_SEPARATOR).last else {
+          continue
+        }
+        if fileName.hasSuffix(".swift") {
+          self.expectedOutputSwiftFileNames.insert(
+            String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
+          )
+        }
+      }
       self.expectedOutputSwiftFileNames.insert("\(translator.swiftModuleName)Module+SwiftJava.swift")
       self.expectedOutputSwiftFileNames.insert("Foundation+SwiftJava.swift")
     } else {
