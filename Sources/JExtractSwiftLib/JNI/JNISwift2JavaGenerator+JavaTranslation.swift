@@ -984,15 +984,15 @@ extension JNISwift2JavaGenerator {
           return TranslatedResult(
             javaType: javaType,
             annotations: resultAnnotations,
-            outParameters: [.init(name: "instance", type: ._OutSwiftGenericInstance, allocation: .new)],
+            outParameters: [.init(name: resultName, type: ._OutSwiftGenericInstance, allocation: .new)],
             conversion: .aggregate(
               variable: nil,
               [
-                .print(.placeholder),
+//                .print(.placeholder),
                 .wrapMemoryAddressUnsafe(
                   .commaSeparated([
-                    .member(.constant("instance"), field: "selfPointer"),
-                    .member(.constant("instance"), field: "selfTypePointer"),
+                    .member(.constant(resultName), field: "selfPointer"),
+                    .member(.constant(resultName), field: "selfTypePointer"),
                   ]),
                   javaType
                 ),
@@ -1158,19 +1158,32 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Determine the Java type for this element
-        let (javaType, elementConversion) = try translateTupleElementResult(
-          type: element.type,
+        let elementResult = try translate(
+          swiftResult: .init(convention: .indirect, type: element.type),
+          resultName: outParamName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements
         )
-        let arrayType: JavaType = .array(javaType)
 
-        outParameters.append(
-          OutParameter(name: outParamName, type: arrayType, allocation: .newArray(javaType, size: 1))
-        )
+//        let (javaType, elementConversion) = try translateTupleElementResult(
+//          type: element.type,
+//          genericParameters: genericParameters,
+//          genericRequirements: genericRequirements
+//        )
+        let arrayType: JavaType = .array(elementResult.javaType)
+
+        if elementResult.outParameters.isEmpty {
+          // Use the array as an output parameter instead of a return value.
+          outParameters.append(
+            OutParameter(name: outParamName, type: arrayType, allocation: .newArray(elementResult.javaType, size: 1))
+          )
+          elementConversions.append(elementResult.conversion)
+        } else {
+          outParameters.append(contentsOf: elementResult.outParameters)
+          elementConversions.append(.placeToVar(elementResult.conversion, name: "\(resultName)_\(idx)"))
+        }
         elementOutParamNames.append(outParamName)
-        elementConversions.append(elementConversion)
-        elementJavaTypes.append(javaType)
+        elementJavaTypes.append(elementResult.javaType)
       }
 
       let javaResultType: JavaType = .tuple(elementTypes: elementJavaTypes)
@@ -1189,42 +1202,42 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    /// Translate a single element type for tuple results on the Java side.
-    private func translateTupleElementResult(
-      type: SwiftType,
-      genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
-    ) throws -> (JavaType, JavaNativeConversionStep) {
-      switch type {
-      case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(type)
-          }
-          // Primitives: just read from array
-          return (javaType, .placeholder)
-        }
-
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(type)
-        }
-
-        let javaType = try translateGenericTypeParameter(
-          type,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements
-        )
-        // JExtract class: wrap memory address
-        return (.long, .constructSwiftValue(.placeholder, javaType))
-
-      default:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-      }
-    }
+//    /// Translate a single element type for tuple results on the Java side.
+//    private func translateTupleElementResult(
+//      type: SwiftType,
+//      genericParameters: [SwiftGenericParameterDeclaration],
+//      genericRequirements: [SwiftGenericRequirement]
+//    ) throws -> (JavaType, JavaNativeConversionStep) {
+//      switch type {
+//      case .nominal(let nominalType):
+//        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+//          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+//            throw JavaTranslationError.unsupportedSwiftType(type)
+//          }
+//          // Primitives: just read from array
+//          return (javaType, .placeholder)
+//        }
+//
+//        guard !nominalType.isSwiftJavaWrapper else {
+//          throw JavaTranslationError.unsupportedSwiftType(type)
+//        }
+//
+//        let javaType = try translateGenericTypeParameter(
+//          type,
+//          genericParameters: genericParameters,
+//          genericRequirements: genericRequirements
+//        )
+//        // JExtract class: wrap memory address
+//        return (.long, .constructSwiftValue(.placeholder, javaType))
+//
+//      default:
+//        throw JavaTranslationError.unsupportedSwiftType(type)
+//      }
+//    }
 
     func translateOptionalResult(
       wrappedType swiftType: SwiftType,
-      resultName: String = "result",
+      resultName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> TranslatedResult {
@@ -1279,9 +1292,8 @@ extension JNISwift2JavaGenerator {
                   OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
                 ],
                 conversion: .toOptionalFromIndirectReturn(
-                  discriminatorName: .combinedName(component: "discriminator$"),
+                  discriminatorName: .constant(discriminatorName),
                   optionalClass: optionalClass,
-                  javaType: javaType,
                   toValue: .placeholder,
                   resultName: resultName
                 )
@@ -1300,18 +1312,29 @@ extension JNISwift2JavaGenerator {
           genericParameters: genericParameters,
           genericRequirements: genericRequirements
         )
+
+        let wrappedValueResult = try translate(
+          swiftResult: SwiftResult(convention: .direct, type: swiftType),
+          resultName: resultName + "Wrapped$",
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+        )
+        let wrappedResultVariable = JavaNativeConversionStep.placeToVar(
+          wrappedValueResult.conversion,
+          name: resultName + "Wrapped"
+        )
+
         let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
         return TranslatedResult(
           javaType: returnType,
           annotations: parameterAnnotations,
           outParameters: [
             OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
-          ],
+          ] + wrappedValueResult.outParameters,
           conversion: .toOptionalFromIndirectReturn(
-            discriminatorName: .combinedName(component: "discriminator$"),
+            discriminatorName: .constant(discriminatorName),
             optionalClass: "Optional",
-            javaType: .long,
-            toValue: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            toValue: wrappedResultVariable,
             resultName: resultName
           )
         )
@@ -1422,7 +1445,7 @@ extension JNISwift2JavaGenerator {
               ]
             ),
             function: "toArray",
-            arguments: [.constant("\(javaType)[]::new")]
+            arguments: [.constant("\(javaType.className!)[]::new")]
           )
         )
 
@@ -1736,22 +1759,16 @@ extension JNISwift2JavaGenerator {
     static func toOptionalFromIndirectReturn(
       discriminatorName: JavaNativeConversionStep,
       optionalClass: String,
-      javaType: JavaType,
       toValue valueConversion: JavaNativeConversionStep,
       resultName: String
     ) -> JavaNativeConversionStep {
-      .aggregate(
-        variable: (name: "\(resultName)$", type: javaType),
-        [
-          .ternary(
-            .equals(
-              .subscriptOf(discriminatorName, arguments: [.constant("0")]),
-              .constant("1")
-            ),
-            thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
-            elseExp: .method(.constant(optionalClass), function: "empty")
-          )
-        ]
+      .ternary(
+        .equals(
+          .subscriptOf(discriminatorName, arguments: [.constant("0")]),
+          .constant("1")
+        ),
+        thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
+        elseExp: .method(.constant(optionalClass), function: "empty")
       )
     }
 
@@ -1778,6 +1795,8 @@ extension JNISwift2JavaGenerator {
     /// Constructs a TupleN from out-parameter arrays.
     /// E.g. `new Tuple2<>(result_0$[0], result_1$[0])`
     case tupleFromOutParams(tupleClassName: String, elements: [(outParamName: String, elementConversion: JavaNativeConversionStep)])
+
+    indirect case placeToVar(JavaNativeConversionStep, name: String)
 
     /// `Arrays.stream(args)`
     static func arraysStream(_ argument: JavaNativeConversionStep) -> JavaNativeConversionStep {
@@ -1810,15 +1829,23 @@ extension JNISwift2JavaGenerator {
 
       case .constructSwiftValue(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "new \(javaType.className!)(\(inner), swiftArena)"
+        return "new \(javaType)(\(inner), swiftArena)"
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        guard case .class(_, let className, let typeParameters) = javaType else {
+          fatalError("\(javaType) is not class.")
+        }
+        let genericClause = if !typeParameters.isEmpty {
+          "<\(typeParameters.map(\.description).joined(separator: ", "))>"
+        } else {
+          ""
+        }
+        return "\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        return "new \(javaType.className!)(\(inner))"
+        return "new \(javaType)(\(inner))"
 
       case .call(let inner, let function):
         let inner = inner.render(&printer, placeholder)
@@ -1939,6 +1966,11 @@ extension JNISwift2JavaGenerator {
           args.append(converted)
         }
         return "\(tupleClassName)(\(args.joined(separator: ", ")))"
+
+      case .placeToVar(let inner, let name):
+        let inner = inner.render(&printer, placeholder)
+        printer.print("var \(name) = \(inner);")
+        return name
       }
     }
 
@@ -2004,6 +2036,9 @@ extension JNISwift2JavaGenerator {
 
       case .tupleFromOutParams(_, let elements):
         return elements.contains(where: { $0.elementConversion.requiresSwiftArena })
+
+      case .placeToVar(let inner, _):
+        return inner.requiresSwiftArena
       }
     }
   }

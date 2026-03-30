@@ -14,8 +14,10 @@
 
 package com.example.swift;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
+import org.swift.swiftkit.core.tuple.Tuple2;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,11 +25,11 @@ public class GenericTypeTest {
     @Test
     void genericTypeValueRoundtrip() {
         try (var arena = SwiftArena.ofConfined()) {
-            MyID<String> stringId = MySwiftLibrary.makeStringID("Java", arena);
+            MyID<String> stringId = MyIDs.makeStringID("Java", arena);
             assertEquals("Java", stringId.getDescription());
             assertEquals("Java", MyIDs.takeStringValue(stringId));
 
-            MyID<Long> intId = MySwiftLibrary.makeIntID(42, arena);
+            MyID<Long> intId = MyIDs.makeIntID(42, arena);
             assertEquals("42", intId.getDescription());
             assertEquals(42, MyIDs.takeIntValue(intId));
 
@@ -54,7 +56,7 @@ public class GenericTypeTest {
     @Test
     void genericTypeProperty() {
         try (var arena = SwiftArena.ofConfined()) {
-            MyID<Long> intId = MySwiftLibrary.makeIntID(42, arena);
+            MyID<Long> intId = MyIDs.makeIntID(42, arena);
             MyEntity entity = MyEntity.init(intId, "name", arena);
             assertEquals("42", entity.getId(arena).getDescription());
         }

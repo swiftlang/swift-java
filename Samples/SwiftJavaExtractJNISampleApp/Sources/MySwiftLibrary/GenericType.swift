@@ -47,19 +47,19 @@ public enum MyIDs {
     (tuple.0.rawValue, tuple.1.rawValue)
   }
 
-  public static func makeBoolIDArray(_ value: Bool, length: Int) -> [MyID<Bool>] {
-    Array(repeating: MyID(value), count: length)
-  }
+  // public static func makeBoolIDArray(_ value: Bool, length: Int) -> [MyID<Bool>] {
+  //   Array(repeating: MyID(value), count: length)
+  // }
 
-  public static func takeBoolValues(from ids: [MyID<Bool>]) -> [Bool] {
-    ids.map { $0.rawValue }
-  }
+  // public static func takeBoolValues(from ids: [MyID<Bool>]) -> [Bool] {
+  //   ids.map { $0.rawValue }
+  // }
 
-  public static func makeIntIDOptional(_ value: Int) -> MyID<Int>? {
+  public static func makeDoubleIDOptional(_ value: Double) -> MyID<Double>? {
     MyID(value)
   }
-
-  public static func takeIntValueOptional(from id: MyID<Int>?) -> Int? {
+  
+  public static func takeDoubleValueOptional(from id: MyID<Double>?) -> Double? {
     id?.rawValue
   }
 
