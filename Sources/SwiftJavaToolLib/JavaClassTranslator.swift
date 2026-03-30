@@ -290,7 +290,7 @@ extension JavaClassTranslator {
   /// Only look at public and protected methods here.
   private func shouldExtract(method: Method, config: Configuration) -> Bool {
     // Check exclude filters, if they're applicable to methods:
-    for exclude in config.filterExclude ?? [] where exclude.contains("#") {
+    for exclude in config.javaFilterExclude ?? [] where exclude.contains("#") {
       let split = exclude.split(separator: "#")
       guard split.count == 2 else {
         self.log.warning("Malformed method exclude filter, must have only one '#' marker: \(exclude)")

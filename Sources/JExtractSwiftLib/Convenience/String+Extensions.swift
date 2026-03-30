@@ -66,6 +66,15 @@ extension String {
     .joined()
   }
 
+  /// If the string ends with `.swift`, return it without that suffix;
+  /// otherwise return self unchanged
+  func dropSwiftFileSuffix() -> String {
+    if hasSuffix(".swift") {
+      return String(dropLast(".swift".count))
+    }
+    return self
+  }
+
   /// Looks up self as a SwiftJava wrapped class name and converts it
   /// into a `JavaType.class` if it exists in `lookupTable`.
   func parseJavaClassFromSwiftJavaName(in lookupTable: [String: String]) -> JavaType? {

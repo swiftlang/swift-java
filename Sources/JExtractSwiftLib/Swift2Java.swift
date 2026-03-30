@@ -53,12 +53,26 @@ public struct SwiftToJava {
 
     let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
 
+    let hasFilters =
+      !(config.swiftFilterInclude ?? []).isEmpty || !(config.swiftFilterExclude ?? []).isEmpty
+
     // Register files to the translator.
     let fileManager = FileManager.default
     for file in allFiles {
       guard canExtract(from: file) else {
         continue
       }
+
+      // Apply jextract include/exclude filters if configured
+      if hasFilters {
+        let relativePath = computeRelativePath(file: file, inputPaths: inputPaths)
+        guard shouldJExtractFile(relativePath: relativePath, config: config) else {
+          log.info("Skipping file (filtered out): \(file.path)")
+          translator.filteredOutPaths.append(file.path)
+          continue
+        }
+      }
+
       guard let data = fileManager.contents(atPath: file.path) else {
         continue
       }
@@ -122,6 +136,24 @@ public struct SwiftToJava {
     }
 
     return true
+  }
+
+  /// Compute a relative path (sans `.swift` extension) for a file against the
+  /// input paths, suitable for jextract filter matching
+  func computeRelativePath(file: URL, inputPaths: [URL]) -> String {
+    let filePath = file.standardizedFileURL.path
+
+    for inputPath in inputPaths {
+      let basePath = inputPath.standardizedFileURL.path
+      let baseWithSlash = basePath.hasSuffix("/") ? basePath : basePath + "/"
+      if filePath.hasPrefix(baseWithSlash) {
+        let relative = String(filePath.dropFirst(baseWithSlash.count))
+        return relative
+      }
+    }
+
+    // Fallback: just the filename
+    return file.lastPathComponent
   }
 
 }

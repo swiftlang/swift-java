@@ -34,6 +34,11 @@ public final class Swift2JavaTranslator {
 
   var inputs: [SwiftJavaInputFile] = []
 
+  /// File paths that were skipped by swift filters but still need empty output
+  /// files written (when --write-empty-files is set) so SwiftPM doesn't
+  /// complain about missing declared outputs
+  var filteredOutPaths: [String] = []
+
   /// A list of used Swift class names that live in dependencies, e.g. `JavaInteger`
   package var dependenciesClasses: [String] = []
 
@@ -259,6 +264,12 @@ extension Swift2JavaTranslator {
 
     if let alreadyImported = importedTypes[fullName] {
       return alreadyImported
+    }
+
+    // Apply type-name filters (patterns with `.`)
+    guard shouldJExtractType(qualifiedName: fullName, config: config) else {
+      log.info("Skipping type (filtered out): \(fullName)")
+      return nil
     }
 
     let importedNominal = try? ImportedNominalType(swiftNominal: nominal, lookupContext: lookupContext)

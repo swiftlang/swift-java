@@ -62,6 +62,16 @@ extension SwiftJava {
     @Option(help: "If specified, a single Swift file will be generated containing all the generated code")
     var singleSwiftFileOutput: String?
 
+    @Option(name: .long, help: "While scanning a classpath, inspect ONLY types included in these packages")
+    var filterInclude: [String] = []
+
+    @Option(
+      name: .long,
+      help:
+        "While scanning a classpath, skip types which match the filter prefix. You can exclude specific methods by using the `com.example.MyClass#method` format."
+    )
+    var filterExclude: [String] = []
+
     @Option(name: .customLong("android-api-version-file"), help: "Path to Android api-versions.xml for generating @available attributes based on API level data")
     var androidAPIVersionFile: String?
   }
@@ -70,9 +80,9 @@ extension SwiftJava {
 extension SwiftJava.WrapJavaCommand {
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
-    print("self.commonOptions.filterInclude = \(self.commonOptions.filterInclude)")
-    configure(&config.filterInclude, append: self.commonOptions.filterInclude)
-    configure(&config.filterExclude, append: self.commonOptions.filterExclude)
+    print("self.filterInclude = \(self.filterInclude)")
+    configure(&config.javaFilterInclude, append: self.filterInclude)
+    configure(&config.javaFilterExclude, append: self.filterExclude)
     configure(&config.singleSwiftFileOutput, overrideWith: self.singleSwiftFileOutput)
 
     // Get base classpath configuration for this target and configuration
@@ -137,8 +147,8 @@ extension SwiftJava.WrapJavaCommand {
       translateAsClass: true
     )
 
-    log.info("Active include filters: \(config.filterInclude ?? [])")
-    log.info("Active exclude filters: \(config.filterExclude ?? [])")
+    log.info("Active include filters: \(config.javaFilterInclude ?? [])")
+    log.info("Active exclude filters: \(config.javaFilterExclude ?? [])")
 
     // Keep track of all of the Java classes that will have
     // Swift-native implementations.
@@ -355,7 +365,7 @@ extension SwiftJava.WrapJavaCommand {
 
   private func shouldImportJavaClass(_ javaClassName: String, config: Configuration) -> Bool {
     // If we have an inclusive filter, import only types from it
-    if let includes = config.filterInclude, !includes.isEmpty {
+    if let includes = config.javaFilterInclude, !includes.isEmpty {
       let anyIncludeFilterMatched = includes.contains { include in
         if javaClassName.starts(with: include) {
           // TODO: lower to trace level
@@ -372,7 +382,7 @@ extension SwiftJava.WrapJavaCommand {
       }
     }
     // If we have an exclude filter, check for it as well
-    for exclude in config.filterExclude ?? [] {
+    for exclude in config.javaFilterExclude ?? [] {
       if javaClassName.starts(with: exclude) {
         log.info("Skip Java type: \(javaClassName) (does match exclude filter: \(exclude))")
         return false

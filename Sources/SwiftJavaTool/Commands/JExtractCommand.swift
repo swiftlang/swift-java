@@ -109,6 +109,27 @@ extension SwiftJava {
         """
     )
     var linkerExportListOutput: String?
+
+    @Option(
+      name: .long,
+      help: """
+        Include only Swift source files matching these patterns during jextract. \
+        Patterns are matched against relative file paths (without .swift extension). \
+        Supports * (single-segment wildcard) and ** (recursive wildcard). \
+        Example: --filter-include 'Models/**'
+        """
+    )
+    var filterInclude: [String] = []
+
+    @Option(
+      name: .long,
+      help: """
+        Exclude Swift source files matching these patterns during jextract. \
+        Same pattern syntax as --filter-include. \
+        Example: --filter-exclude 'Internal/*'
+        """
+    )
+    var filterExclude: [String] = []
   }
 }
 
@@ -128,6 +149,8 @@ extension SwiftJava.JExtractCommand {
     configure(&config.asyncFuncMode, overrideWith: self.asyncFuncMode)
     configure(&config.generatedJavaSourcesListFileOutput, overrideWith: self.generatedJavaSourcesListFileOutput)
     configure(&config.linkerExportListOutput, overrideWith: self.linkerExportListOutput)
+    configure(&config.swiftFilterInclude, append: self.filterInclude)
+    configure(&config.swiftFilterExclude, append: self.filterExclude)
 
     try checkModeCompatibility(config: config)
 
