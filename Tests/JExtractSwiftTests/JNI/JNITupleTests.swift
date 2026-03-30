@@ -56,9 +56,9 @@ struct JNITupleTests {
       expectedChunks: [
         """
         let tupleResult$ = SwiftModule.returnPair()
-        var element_0_jni$ = tupleResult$.0.getJNIValue(in: environment)
+        var element_0_jni$ = tupleResult$.0.getJNILocalRefValue(in: environment)
         environment.interface.SetLongArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
-        let element_1_jni$ = tupleResult$.1.getJNIValue(in: environment)
+        let element_1_jni$ = tupleResult$.1.getJNILocalRefValue(in: environment)
         environment.interface.SetObjectArrayElement(environment, result_1$, 0, element_1_jni$)
         """
       ]
@@ -127,9 +127,9 @@ struct JNITupleTests {
       expectedChunks: [
         """
         let tupleResult$ = SwiftModule.labeledTuple()
-        var element_0_jni$ = tupleResult$.x.getJNIValue(in: environment)
+        var element_0_jni$ = tupleResult$.x.getJNILocalRefValue(in: environment)
         environment.interface.SetIntArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
-        var element_1_jni$ = tupleResult$.y.getJNIValue(in: environment)
+        var element_1_jni$ = tupleResult$.y.getJNILocalRefValue(in: environment)
         environment.interface.SetIntArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
         """
       ]

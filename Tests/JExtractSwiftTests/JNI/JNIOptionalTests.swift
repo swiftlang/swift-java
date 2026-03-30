@@ -184,10 +184,10 @@ struct JNIOptionalTests {
           let arg$ = UnsafeMutablePointer<MyClass>(bitPattern: argBits$)
           let result$: jlong
           if let innerResult$ = SwiftModule.optionalClass(arg$?.pointee) {
-            let _result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
-            _result$.initialize(to: innerResult$)
-            let _resultBits$ = Int64(Int(bitPattern: _result$))
-            result$ = _resultBits$.getJNIValue(in: environment)
+            let resultWrapped$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
+            resultWrapped$.initialize(to: innerResult$)
+            let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
+            result$ = resultWrappedBits$.getJNILocalRefValue(in: environment)
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }

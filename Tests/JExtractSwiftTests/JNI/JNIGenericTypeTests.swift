@@ -155,13 +155,13 @@ struct JNIGenericTypeTests {
       expectedChunks: [
         """
         public static MyID<java.lang.String> makeStringID(java.lang.String value, SwiftArena swiftArena) {
-          org.swift.swiftkit.core._OutSwiftGenericInstance instance = new org.swift.swiftkit.core._OutSwiftGenericInstance();
-          SwiftModule.$makeStringID(value, instance);
-          return MyID.wrapMemoryAddressUnsafe(instance.selfPointer, instance.selfTypePointer, swiftArena);
+          org.swift.swiftkit.core._OutSwiftGenericInstance result = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+          SwiftModule.$makeStringID(value, result);
+          return MyID.<java.lang.String>wrapMemoryAddressUnsafe(result.selfPointer, result.selfTypePointer, swiftArena);
         }
         """,
         """
-        private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core._OutSwiftGenericInstance out);
+        private static native void $makeStringID(java.lang.String value, org.swift.swiftkit.core._OutSwiftGenericInstance resultOut);
         """,
         """
         public static long takeIntID(MyID<java.lang.Long> value) {
@@ -185,14 +185,16 @@ struct JNIGenericTypeTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
-        public func Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, out: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024makeStringID__Ljava_lang_String_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, resultOut: jobject?) {
           let result$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
           result$.initialize(to: SwiftModule.makeStringID(String(fromJNI: value, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
-          environment.interface.SetLongField(environment, out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, resultBits$.getJNIValue(in: environment))
-          let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
-          let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-          environment.interface.SetLongField(environment, out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          do {
+            environment.interface.SetLongField(environment, resultOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, resultBits$.getJNIValue(in: environment))
+            let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
+            let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+            environment.interface.SetLongField(environment, resultOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          }
           return
         }
         """,
