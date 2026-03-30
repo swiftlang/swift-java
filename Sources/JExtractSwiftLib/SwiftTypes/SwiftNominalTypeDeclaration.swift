@@ -169,6 +169,16 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 }
 
+extension SwiftNominalTypeDeclaration: CustomStringConvertible {
+  package var description: String {
+    if isGeneric {
+      "\(qualifiedName)<\(genericParameters.map(\.name).joined(separator: ", "))>"
+    } else {
+      qualifiedName
+    }
+  }
+}
+
 package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
   let syntax: GenericParameterSyntax
 

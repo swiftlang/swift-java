@@ -14,6 +14,142 @@
 
 import SwiftSyntax
 
+enum SwiftKnownType: Equatable {
+  case bool
+  case int
+  case uint
+  case int8
+  case uint8
+  case int16
+  case uint16
+  case int32
+  case uint32
+  case int64
+  case uint64
+  case float
+  case double
+  case unsafeRawPointer
+  case unsafeRawBufferPointer
+  case unsafeMutableRawPointer
+  case unsafeMutableRawBufferPointer
+  case unsafePointer(_ pointee: SwiftType)
+  case unsafeMutablePointer(_ pointee: SwiftType)
+  case unsafeBufferPointer(_ element: SwiftType)
+  case unsafeMutableBufferPointer(_ element: SwiftType)
+  case optional(_ wrapped: SwiftType)
+  case void
+  case string
+  case array(_ element: SwiftType)
+  case dictionary(_ key: SwiftType, _ value: SwiftType)
+  case set(_ element: SwiftType)
+
+  // Foundation
+  case foundationDataProtocol
+  case essentialsDataProtocol
+  case foundationData
+  case essentialsData
+  case foundationDate
+  case essentialsDate
+  case foundationUUID
+  case essentialsUUID
+
+  init?(kind: SwiftKnownTypeDeclKind, genericArguments: [SwiftType]?) {
+    switch kind {
+    case .bool: self = .bool
+    case .int: self = .int
+    case .uint: self = .uint
+    case .int8: self = .int8
+    case .uint8: self = .uint8
+    case .int16: self = .int16
+    case .uint16: self = .uint16
+    case .int32: self = .int32
+    case .uint32: self = .uint32
+    case .int64: self = .int64
+    case .uint64: self = .uint64
+    case .float: self = .float
+    case .double: self = .double
+    case .unsafeRawPointer: self = .unsafeRawPointer
+    case .unsafeRawBufferPointer: self = .unsafeRawBufferPointer
+    case .unsafeMutableRawPointer: self = .unsafeMutableRawPointer
+    case .unsafeMutableRawBufferPointer: self = .unsafeMutableRawBufferPointer
+    case .unsafePointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafePointer(arg)
+    case .unsafeMutablePointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeMutablePointer(arg)
+    case .unsafeBufferPointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeBufferPointer(arg)
+    case .unsafeMutableBufferPointer:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .unsafeMutableBufferPointer(arg)
+    case .optional:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .optional(arg)
+    case .void: self = .void
+    case .string: self = .string
+    case .array:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .array(arg)
+    case .dictionary:
+      guard let key = genericArguments?.first, let value = genericArguments?.dropFirst().first else { return nil }
+      self = .dictionary(key, value)
+    case .set:
+      guard let arg = genericArguments?.first else { return nil }
+      self = .set(arg)
+    case .foundationDataProtocol: self = .foundationDataProtocol
+    case .essentialsDataProtocol: self = .essentialsDataProtocol
+    case .foundationData: self = .foundationData
+    case .essentialsData: self = .essentialsData
+    case .foundationDate: self = .foundationDate
+    case .essentialsDate: self = .essentialsDate
+    case .foundationUUID: self = .foundationUUID
+    case .essentialsUUID: self = .essentialsUUID
+    }
+  }
+
+  var kind: SwiftKnownTypeDeclKind {
+    switch self {
+    case .bool: .bool
+    case .int: .int
+    case .uint: .uint
+    case .int8: .int8
+    case .uint8: .uint8
+    case .int16: .int16
+    case .uint16: .uint16
+    case .int32: .int32
+    case .uint32: .uint32
+    case .int64: .int64
+    case .uint64: .uint64
+    case .float: .float
+    case .double: .double
+    case .unsafeRawPointer: .unsafeRawPointer
+    case .unsafeRawBufferPointer: .unsafeRawBufferPointer
+    case .unsafeMutableRawPointer: .unsafeMutableRawPointer
+    case .unsafeMutableRawBufferPointer: .unsafeMutableRawBufferPointer
+    case .unsafePointer: .unsafePointer
+    case .unsafeMutablePointer: .unsafeMutablePointer
+    case .unsafeBufferPointer: .unsafeBufferPointer
+    case .unsafeMutableBufferPointer: .unsafeMutableBufferPointer
+    case .optional: .optional
+    case .void: .void
+    case .string: .string
+    case .array: .array
+    case .dictionary: .dictionary
+    case .set: .set
+    case .foundationDataProtocol: .foundationDataProtocol
+    case .essentialsDataProtocol: .essentialsDataProtocol
+    case .foundationData: .foundationData
+    case .essentialsData: .essentialsData
+    case .foundationDate: .foundationDate
+    case .essentialsDate: .essentialsDate
+    case .foundationUUID: .foundationUUID
+    case .essentialsUUID: .essentialsUUID
+    }
+  }
+}
+
 enum SwiftKnownTypeDeclKind: String, Hashable {
   // Swift
   case bool = "Swift.Bool"

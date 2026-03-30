@@ -151,9 +151,12 @@ extension Swift2JavaTranslator {
     func check(_ type: SwiftType) -> Bool {
       switch type {
       case .nominal(let nominal):
+        if let genericArguments = nominal.genericArguments {
+          if genericArguments.contains(where: check) {
+            return true
+          }
+        }
         return predicate(nominal.nominalTypeDecl)
-      case .optional(let ty):
-        return check(ty)
       case .tuple(let tuple):
         return tuple.contains(where: { check($0.type) })
       case .function(let fn):
@@ -166,12 +169,6 @@ extension Swift2JavaTranslator {
         return types.contains(where: check)
       case .genericParameter:
         return false
-      case .array(let ty):
-        return check(ty)
-      case .dictionary(let key, let value):
-        return check(key) || check(value)
-      case .set(let element):
-        return check(element)
       }
     }
 

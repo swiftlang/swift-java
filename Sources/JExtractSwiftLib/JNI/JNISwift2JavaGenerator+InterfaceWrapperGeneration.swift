@@ -195,24 +195,18 @@ extension JNISwift2JavaGenerator {
 
       switch type {
       case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = nominalType.asKnownType {
           switch knownType {
-          case .optional:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .optional(let wrapped):
             return try translateOptionalParameter(
               name: parameterName,
-              wrappedType: genericArgs[0]
+              wrappedType: wrapped
             )
 
-          case .array:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .array(let element):
             return try translateArrayParameter(
               name: parameterName,
-              elementType: genericArgs[0]
+              elementType: element
             )
 
           default:
@@ -230,21 +224,6 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .optional(let wrappedType):
-        return try translateOptionalParameter(
-          name: parameterName,
-          wrappedType: wrappedType
-        )
-
-      case .array(let elementType):
-        return try translateArrayParameter(name: parameterName, elementType: elementType)
-
-      case .dictionary:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-
-      case .set:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-
       case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
@@ -253,6 +232,15 @@ extension JNISwift2JavaGenerator {
     private func translateArrayParameter(name: String, elementType: SwiftType) throws -> UpcallConversionStep {
       switch elementType {
       case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          switch knownType {
+          case .optional, .array, .dictionary, .set:
+            throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
+          default:
+            break
+          }
+        }
+
         // We assume this is a JExtracted type
         return .map(
           .placeholder,
@@ -263,8 +251,8 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .array, .dictionary, .set, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
-        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple:
+        throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
       }
     }
 
@@ -288,22 +276,16 @@ extension JNISwift2JavaGenerator {
 
       switch type {
       case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+        if let knownType = nominalType.asKnownType {
           switch knownType {
-          case .optional:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
+          case .optional(let wrapped):
             return try self.translateOptionalResult(
-              wrappedType: genericArgs[0],
+              wrappedType: wrapped,
               methodName: methodName
             )
 
-          case .array:
-            guard let genericArgs = nominalType.genericArguments, genericArgs.count == 1 else {
-              throw JavaTranslationError.unsupportedSwiftType(type)
-            }
-            return try self.translateArrayResult(elementType: genericArgs[0])
+          case .array(let element):
+            return try self.translateArrayResult(elementType: element)
 
           default:
             throw JavaTranslationError.unsupportedSwiftType(type)
@@ -325,18 +307,6 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .optional(let wrappedType):
-        return try self.translateOptionalResult(wrappedType: wrappedType, methodName: methodName)
-
-      case .array(let elementType):
-        return try self.translateArrayResult(elementType: elementType)
-
-      case .dictionary:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-
-      case .set:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-
       case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
@@ -345,6 +315,15 @@ extension JNISwift2JavaGenerator {
     private func translateArrayResult(elementType: SwiftType) throws -> UpcallConversionStep {
       switch elementType {
       case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          switch knownType {
+          case .optional, .array, .dictionary, .set:
+            throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
+          default:
+            break
+          }
+        }
+
         // We assume this is a JExtracted type
         return .map(
           .placeholder,
@@ -355,8 +334,8 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .array, .dictionary, .set, .composite, .existential, .function, .genericParameter, .metatype, .opaque, .optional, .tuple:
-        throw JavaTranslationError.unsupportedSwiftType(.array(elementType))
+      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple:
+        throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
       }
     }
 
@@ -477,21 +456,20 @@ extension SwiftType {
   var isDirectlyTranslatedToWrapJava: Bool {
     switch self {
     case .nominal(let swiftNominalType):
-      guard let knownType = swiftNominalType.nominalTypeDecl.knownTypeKind else {
+      guard let knownType = swiftNominalType.asKnownType else {
         return false
       }
       switch knownType {
       case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double,
         .string, .void:
         return true
+      case .array(let element):
+        return element.isDirectlyTranslatedToWrapJava
       default:
         return false
       }
 
-    case .array(let elementType):
-      return elementType.isDirectlyTranslatedToWrapJava
-
-    case .genericParameter, .function, .metatype, .optional, .tuple, .existential, .opaque, .composite, .dictionary, .set:
+    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
       return false
     }
   }

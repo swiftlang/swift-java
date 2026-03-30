@@ -104,6 +104,45 @@ struct SwiftKnownTypes {
     )
   }
 
+  func optionalSugar(_ wrappedType: SwiftType) -> SwiftType {
+    .nominal(
+      SwiftNominalType(
+        sugarName: .optional,
+        nominalTypeDecl: symbolTable[.optional],
+        genericArguments: [wrappedType]
+      )
+    )
+  }
+
+  func arraySugar(_ elementType: SwiftType) -> SwiftType {
+    .nominal(
+      SwiftNominalType(
+        sugarName: .array,
+        nominalTypeDecl: symbolTable[.array],
+        genericArguments: [elementType]
+      )
+    )
+  }
+
+  func dictionarySugar(_ keyType: SwiftType, _ valueType: SwiftType) -> SwiftType {
+    .nominal(
+      SwiftNominalType(
+        sugarName: .dictionary,
+        nominalTypeDecl: symbolTable[.dictionary],
+        genericArguments: [keyType, valueType]
+      )
+    )
+  }
+
+  func set(_ elementType: SwiftType) -> SwiftType {
+    .nominal(
+      SwiftNominalType(
+        nominalTypeDecl: symbolTable[.set],
+        genericArguments: [elementType]
+      )
+    )
+  }
+
   /// Returns the known representative concrete type if there is one for the
   /// given protocol kind. E.g. `String` for `StringProtocol`
   func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftType? {

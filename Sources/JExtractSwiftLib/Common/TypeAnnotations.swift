@@ -18,10 +18,12 @@ import SwiftJavaJNICore
 /// Determine if the given type needs any extra annotations that should be included
 /// in Java sources when the corresponding Java type is rendered.
 func getTypeAnnotations(swiftType: SwiftType, config: Configuration) -> [JavaAnnotation] {
-  switch swiftType {
-  case .array(let wrapped) where wrapped.isUnsignedInteger:
+  if swiftType.isUnsignedInteger {
     return [JavaAnnotation.unsigned]
-  case _ where swiftType.isUnsignedInteger:
+  }
+
+  switch swiftType.asNominalType?.asKnownType {
+  case .array(let element) where element.isUnsignedInteger:
     return [JavaAnnotation.unsigned]
   default:
     return []

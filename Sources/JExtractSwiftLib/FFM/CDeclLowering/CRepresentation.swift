@@ -24,20 +24,24 @@ extension CType {
   init(cdeclType: SwiftType) throws {
     switch cdeclType {
     case .nominal(let nominalType):
-      if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-        if let primitiveCType = knownType.primitiveCType {
+      if let knownType = nominalType.asKnownType {
+        if let primitiveCType = knownType.kind.primitiveCType {
           self = primitiveCType
           return
         }
 
         switch knownType {
-        case .unsafePointer where nominalType.genericArguments?.count == 1:
+        case .optional(let wrapped) where wrapped.isPointer:
+          try self.init(cdeclType: wrapped)
+          return
+
+        case .unsafePointer(let pointee):
           self = .pointer(
-            .qualified(const: true, volatile: false, type: try CType(cdeclType: nominalType.genericArguments![0]))
+            .qualified(const: true, volatile: false, type: try CType(cdeclType: pointee))
           )
           return
-        case .unsafeMutablePointer where nominalType.genericArguments?.count == 1:
-          self = .pointer(try CType(cdeclType: nominalType.genericArguments![0]))
+        case .unsafeMutablePointer(let pointee):
+          self = .pointer(try CType(cdeclType: pointee))
           return
         default:
           break
@@ -67,10 +71,7 @@ extension CType {
     case .tuple([]):
       self = .void
 
-    case .optional(let wrapped) where wrapped.isPointer:
-      try self.init(cdeclType: wrapped)
-
-    case .genericParameter, .metatype, .optional, .tuple, .opaque, .existential, .composite, .array, .dictionary, .set:
+    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
@@ -127,8 +128,6 @@ extension SwiftKnownTypeDeclKind {
       .pointer(
         .qualified(const: true, volatile: false, type: .void)
       )
-    case .array:
-      .pointer(.qualified(const: false, volatile: false, type: .void))
     case .void: .void
     default:
       nil // Since we know the set of all primitives, we can safely assume all others are not primitive
