@@ -792,7 +792,6 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Get the JNI type for this element
-//        let elementResult = try translateElementResult(type: element.type)
         let elementResult = try translate(
           swiftResult: .init(convention: .indirect, type: element.type),
           resultName: outParamName
@@ -824,31 +823,6 @@ extension JNISwift2JavaGenerator {
         outParameters: outParameters
       )
     }
-
-//    /// Translate a single element type for use in tuple result destructuring.
-//    private func translateElementResult(type: SwiftType) throws -> (javaType: JavaType, conversion: NativeSwiftConversionStep) {
-//      switch type {
-//      case .nominal(let nominalType):
-//        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-//          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-//            javaType.implementsJavaValue
-//          else {
-//            throw JavaTranslationError.unsupportedSwiftType(type)
-//          }
-//          return (javaType: javaType, conversion: .getJNIValue(.placeholder))
-//        }
-//
-//        guard !nominalType.isSwiftJavaWrapper else {
-//          throw JavaTranslationError.unsupportedSwiftType(type)
-//        }
-//
-//        // JExtract class: allocate and return pointer
-//        return (javaType: .long, conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: "element", swiftType: type)))
-//
-//      default:
-//        throw JavaTranslationError.unsupportedSwiftType(type)
-//      }
-//    }
 
     func translateArrayResult(
       elementType: SwiftType,
