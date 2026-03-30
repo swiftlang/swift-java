@@ -14,7 +14,7 @@ if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
 let package = Package(
   name: "swift-java",
   platforms: [
-    .macOS(.v15)
+    .macOS(.v13)
   ],
   products: [
     // ==== SwiftJava (i.e. calling Java directly Swift utilities)
