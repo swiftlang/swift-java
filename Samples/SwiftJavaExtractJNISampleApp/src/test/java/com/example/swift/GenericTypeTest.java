@@ -45,12 +45,12 @@ public class GenericTypeTest {
             
             Optional<MyID<Double>> doubleIdOptional = MyIDs.makeDoubleIDOptional(42.195, arena);
             assertTrue(doubleIdOptional.isPresent());
-            assertEquals(42.195, MyIDs.takeDoubleValueOptional(doubleIdOptional));
-            assertEquals(42.195, MyIDs.takeDoubleValue(doubleIdOptional.get()));
+            assertEquals(42.195, MyIDs.takeDoubleValueOptional(doubleIdOptional).getAsDouble());
+            assertEquals(42.195, MyIDs.takeDoubleValue(doubleIdOptional.get())); // ensure wrapped value is alive
 
             MyID<Optional<Long>> optionalIntId = MyIDs.makeOptionalIntID(OptionalLong.of(42L), arena);
             assertEquals("Optional(42)", optionalIntId.getDescription());
-            assertEquals(42, MyIDs.takeOptionalIntValue(optionalIntId));
+            assertEquals(42, MyIDs.takeOptionalIntValue(optionalIntId).getAsLong());
         }
     }
 

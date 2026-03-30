@@ -701,7 +701,7 @@ extension JNISwift2JavaGenerator {
         conversion: .aggregate(
           variable: nil,
           [
-            .print(.placeholder), // Make the downcall
+//            .print(.placeholder), // Make the downcall
             .method(
               .constant("future$"),
               function: "thenApply",
@@ -988,7 +988,7 @@ extension JNISwift2JavaGenerator {
             conversion: .aggregate(
               variable: nil,
               [
-//                .print(.placeholder),
+//                .print(.placeholder), // make the downcall
                 .wrapMemoryAddressUnsafe(
                   .commaSeparated([
                     .member(.constant(resultName), field: "selfPointer"),
@@ -1170,10 +1170,11 @@ extension JNISwift2JavaGenerator {
 //          genericParameters: genericParameters,
 //          genericRequirements: genericRequirements
 //        )
-        let arrayType: JavaType = .array(elementResult.javaType)
 
+        elementOutParamNames.append(outParamName)
         if elementResult.outParameters.isEmpty {
           // Use the array as an output parameter instead of a return value.
+          let arrayType: JavaType = .array(elementResult.javaType)
           outParameters.append(
             OutParameter(name: outParamName, type: arrayType, allocation: .newArray(elementResult.javaType, size: 1))
           )
@@ -1182,7 +1183,6 @@ extension JNISwift2JavaGenerator {
           outParameters.append(contentsOf: elementResult.outParameters)
           elementConversions.append(.placeToVar(elementResult.conversion, name: "\(resultName)_\(idx)"))
         }
-        elementOutParamNames.append(outParamName)
         elementJavaTypes.append(elementResult.javaType)
       }
 
@@ -1196,7 +1196,7 @@ extension JNISwift2JavaGenerator {
         javaType: javaResultType,
         outParameters: outParameters,
         conversion: .tupleFromOutParams(
-          tupleClassName: "new \(fullTupleClassName)<>",
+          tupleClassName: fullTupleClassName,
           elements: tupleElements
         )
       )
@@ -1294,6 +1294,7 @@ extension JNISwift2JavaGenerator {
                 conversion: .toOptionalFromIndirectReturn(
                   discriminatorName: .constant(discriminatorName),
                   optionalClass: optionalClass,
+                  nativeResultJavaType: javaType,
                   toValue: .placeholder,
                   resultName: resultName
                 )
@@ -1319,10 +1320,13 @@ extension JNISwift2JavaGenerator {
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
         )
-        let wrappedResultVariable = JavaNativeConversionStep.placeToVar(
-          wrappedValueResult.conversion,
-          name: resultName + "Wrapped"
-        )
+
+        // FIXME: Using NativeJavaTranslation results directly is more accurate
+        let nativeResultJavaType: JavaType = if wrappedValueResult.outParameters.isEmpty {
+          .long
+        } else {
+          .void
+        }
 
         let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
         return TranslatedResult(
@@ -1334,7 +1338,8 @@ extension JNISwift2JavaGenerator {
           conversion: .toOptionalFromIndirectReturn(
             discriminatorName: .constant(discriminatorName),
             optionalClass: "Optional",
-            toValue: wrappedResultVariable,
+            nativeResultJavaType: nativeResultJavaType,
+            toValue: wrappedValueResult.conversion,
             resultName: resultName
           )
         )
@@ -1759,16 +1764,22 @@ extension JNISwift2JavaGenerator {
     static func toOptionalFromIndirectReturn(
       discriminatorName: JavaNativeConversionStep,
       optionalClass: String,
+      nativeResultJavaType: JavaType,
       toValue valueConversion: JavaNativeConversionStep,
       resultName: String
     ) -> JavaNativeConversionStep {
-      .ternary(
-        .equals(
-          .subscriptOf(discriminatorName, arguments: [.constant("0")]),
-          .constant("1")
-        ),
-        thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
-        elseExp: .method(.constant(optionalClass), function: "empty")
+      .aggregate(
+        variable: nativeResultJavaType.isVoid ? nil : (name: "\(resultName)$", type: nativeResultJavaType),
+        [
+          .ternary(
+            .equals(
+              .subscriptOf(discriminatorName, arguments: [.constant("0")]),
+              .constant("1")
+            ),
+            thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
+            elseExp: .method(.constant(optionalClass), function: "empty")
+          ),
+        ]
       )
     }
 
@@ -1958,14 +1969,12 @@ extension JNISwift2JavaGenerator {
         return #"Objects.requireNonNull(\#(inner), "\#(message)")"#
 
       case .tupleFromOutParams(let tupleClassName, let elements):
-        // Execute the native call first (the placeholder is the downcall expression)
-        printer.print("\(placeholder);")
         var args: [String] = []
         for element in elements {
           let converted = element.elementConversion.render(&printer, "\(element.outParamName)[0]")
           args.append(converted)
         }
-        return "\(tupleClassName)(\(args.joined(separator: ", ")))"
+        return "new \(tupleClassName)<>(\(args.joined(separator: ", ")))"
 
       case .placeToVar(let inner, let name):
         let inner = inner.render(&printer, placeholder)
