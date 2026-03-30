@@ -209,8 +209,11 @@ extension JavaImplementationMacro: PeerMacro {
 
       exposedMembers.append(
         """
+        #if compiler(>=6.3)
+        @used
+        #endif
         @_cdecl(\(literal: cName))
-        func \(context.makeUniqueName(swiftName))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
+        public func \(context.makeUniqueName(swiftName))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
         \(body)
         }
         """

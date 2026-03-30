@@ -117,6 +117,17 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     let jextractOutputFiles = outputSwiftFiles
 
+    // In JNI mode, emit a linker version script so the linker can DCE unused Swift code.
+    // Placed in the plugin work directory root
+    // NOTE: intentionally NOT added to jextractOutputFiles — SPM would otherwise treat
+    // the .map file as a resource and force-link Foundation as a side effect.
+    if configuration?.effectiveMode == .jni {
+      let linkerExportListFile = context.pluginWorkDirectoryURL.appending(path: "swift-java-jni-exports.map")
+      arguments += [
+        "--linker-export-list-output", linkerExportListFile.path(percentEncoded: false),
+      ]
+    }
+
     // If the developer has enabled java callbacks in the configuration (default is false)
     // and we are running in JNI mode, we will run additional phases in this build plugin
     // to generate Swift wrappers using wrap-java that can be used to callback to Java.

@@ -32,6 +32,18 @@ public func _swiftjava_swift_retainCount(object: UnsafeMutableRawPointer) -> Int
 @_silgen_name("swift_isUniquelyReferenced")
 public func _swiftjava_swift_isUniquelyReferenced(object: UnsafeMutableRawPointer) -> Bool
 
+/// Copies a Swift String to a heap-allocated NULL-terminated C string.
+/// The caller (Java FFM) must call free() on the returned pointer.
+public func _swiftjava_stringToCString(_ string: String) -> UnsafeMutablePointer<CChar> {
+  var string = string
+  return string.withUTF8 { utf8 in
+    let buffer = UnsafeMutablePointer<CChar>.allocate(capacity: utf8.count + 1)
+    UnsafeMutableRawPointer(buffer).copyMemory(from: utf8.baseAddress!, byteCount: utf8.count)
+    buffer[utf8.count] = 0
+    return buffer
+  }
+}
+
 @_alwaysEmitIntoClient @_transparent
 func _swiftjava_withHeapObject<R>(
   of object: AnyObject,

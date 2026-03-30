@@ -396,5 +396,15 @@ let package = Package(
         .swiftLanguageMode(.v5)
       ]
     ),
+
+    .testTarget(
+      name: "SwiftRuntimeFunctionsTests",
+      dependencies: [
+        "SwiftRuntimeFunctions"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
   ]
 )

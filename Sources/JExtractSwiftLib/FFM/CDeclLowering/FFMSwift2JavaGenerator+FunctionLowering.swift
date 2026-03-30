@@ -708,7 +708,19 @@ struct CdeclLowering {
         case .foundationData, .essentialsData:
           break
 
-        case .string, .optional:
+        case .string:
+          // String returned as heap-allocated C string (caller frees).
+          return LoweredResult(
+            cdeclResultType: knownTypes.unsafeMutablePointer(knownTypes.int8),
+            cdeclOutParameters: [],
+            conversion: .method(
+              base: "_swiftjava_stringToCString",
+              methodName: nil,
+              arguments: [.init(label: nil, argument: .placeholder)]
+            )
+          )
+
+        case .optional:
           // Not supported at this point.
           throw LoweringError.unhandledType(type)
 

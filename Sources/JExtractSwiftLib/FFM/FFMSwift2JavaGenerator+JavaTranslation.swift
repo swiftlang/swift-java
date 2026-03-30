@@ -745,8 +745,12 @@ extension FFMSwift2JavaGenerator {
             // FIXME: Implement
             throw JavaTranslationError.unhandledType(swiftType)
           case .string:
-            // FIXME: Implement
-            throw JavaTranslationError.unhandledType(swiftType)
+            return TranslatedResult(
+              javaResultType: .javaLangString,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .call(.placeholder, function: "SwiftRuntime.fromCString", withArena: false)
+            )
 
           case .array(let element) where element == knownTypes.uint8:
             return TranslatedResult(

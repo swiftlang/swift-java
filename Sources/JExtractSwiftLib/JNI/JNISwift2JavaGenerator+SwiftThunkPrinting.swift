@@ -119,6 +119,49 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  /// Writes a linker version script to the path specified by
+  /// ``Configuration/linkerExportListOutput``, listing every JNI ``@_cdecl``
+  /// symbol generated during this run as global exports and hiding everything
+  /// else with `local: *`.
+  ///
+  /// Pass the resulting file to the linker with:
+  /// ```
+  /// -Xlinker --version-script=<path>
+  /// ```
+  /// This lets lld treat only the JNI entry points as roots during link-time
+  /// dead-code elimination and hides all internal Swift symbols from the
+  /// dynamic symbol table, removing unreachable Swift code from SPM
+  /// dependencies and the Swift standard library.
+  func writeLinkerExportList() throws {
+    guard let outputPath = config.linkerExportListOutput else {
+      return
+    }
+    guard !generatedCDeclSymbolNames.isEmpty else {
+      return
+    }
+
+    let symbolLines =
+      generatedCDeclSymbolNames
+      .sorted()
+      .map { "  \($0);" }
+      .joined(separator: "\n")
+    let contents =
+      """
+      {
+        global:
+        \(symbolLines)
+        local: *;
+      };"
+      """
+
+    try contents.write(
+      toFile: outputPath,
+      atomically: true,
+      encoding: .utf8
+    )
+    logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
+  }
+
   private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
       for enumCase in type.cases {
@@ -722,6 +765,8 @@ extension JNISwift2JavaGenerator {
       + "__"
       + jniSignature.escapedJNIIdentifier
 
+    self.generatedCDeclSymbolNames.append(cName)
+
     let translatedParameters = parameters.map {
       "\($0.name): \($0.type.jniTypeName)"
     }
@@ -736,6 +781,9 @@ extension JNISwift2JavaGenerator {
     // TODO: Think about function overloads
     printer.printBraceBlock(
       """
+      #if compiler(>=6.3)
+      @used
+      #endif
       @_cdecl("\(cName)")
       public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """

@@ -59,6 +59,15 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void test_MySwiftClass_describe() {
+        try(var arena = AllocatingSwiftArena.ofConfined()) {
+            MySwiftClass o = MySwiftClass.init(12, 42, arena);
+            var got = o.describe();
+            assertEquals("MySwiftClass(len: 12, cap: 42)", got);
+        }
+    }
+
+    @Test
     @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_len() {
         try(var arena = AllocatingSwiftArena.ofConfined()) {
