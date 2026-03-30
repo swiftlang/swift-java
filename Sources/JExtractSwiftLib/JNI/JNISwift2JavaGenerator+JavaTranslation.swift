@@ -1154,8 +1154,9 @@ extension JNISwift2JavaGenerator {
         )
 
         elementOutParamNames.append(outParamName)
+        // FIXME: More accurate determination of whether the result is direct or indirect
         if elementResult.outParameters.isEmpty {
-          // Use the array as an output parameter instead of a return value.
+          // Convert direct result to indirect result
           let arrayType: JavaType = .array(elementResult.javaType)
           outParameters.append(
             OutParameter(name: outParamName, type: arrayType, allocation: .newArray(elementResult.javaType, size: 1))
@@ -1270,7 +1271,7 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-        // FIXME: Using NativeJavaTranslation results directly is more accurate
+        // FIXME: More accurate JavaType using NativeJavaTranslation results directly
         let nativeResultJavaType: JavaType = if wrappedValueResult.outParameters.isEmpty {
           .long
         } else {
