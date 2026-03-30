@@ -795,7 +795,6 @@ extension FFMSwift2JavaGenerator {
                       )
                     )
                   ),
-                  // .constant("var  = new \(.placeholderForDowncallThunkName).."),
                   .placeholderForDowncall, // perform the downcall here
                 ],
                 extractResult: .property(.constant("_result_initialize"), propertyName: "result")
