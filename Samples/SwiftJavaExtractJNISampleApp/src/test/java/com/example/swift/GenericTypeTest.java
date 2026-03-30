@@ -15,6 +15,7 @@
 package com.example.swift;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
 import org.swift.swiftkit.core.tuple.Tuple2;
@@ -47,7 +48,7 @@ public class GenericTypeTest {
             assertEquals(42.195, MyIDs.takeDoubleValueOptional(doubleIdOptional));
             assertEquals(42.195, MyIDs.takeDoubleValue(doubleIdOptional.get()));
 
-            MyID<Optional<Long>> optionalIntId = MyIDs.makeOptionalIntID(42, arena);
+            MyID<Optional<Long>> optionalIntId = MyIDs.makeOptionalIntID(OptionalLong.of(42L), arena);
             assertEquals("Optional(42)", optionalIntId.getDescription());
             assertEquals(42, MyIDs.takeOptionalIntValue(optionalIntId));
         }

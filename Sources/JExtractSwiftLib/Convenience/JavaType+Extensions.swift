@@ -164,18 +164,31 @@ extension JavaType {
   /// The boxed class name for this type, suitable for use as a generic type argument.
   var boxedName: String {
     switch self {
-    case .boolean: "Boolean"
-    case .byte: "Byte"
-    case .char: "Character"
-    case .short: "Short"
-    case .int: "Integer"
-    case .long: "Long"
-    case .float: "Float"
-    case .double: "Double"
-    case .void: "Void"
-    case .javaLangString: "String"
-    case .class(_, let name, _): name
-    case .array: description
+    case .boolean: return "Boolean"
+    case .byte: return "Byte"
+    case .char: return "Character"
+    case .short: return "Short"
+    case .int: return "Integer"
+    case .long: return "Long"
+    case .float: return "Float"
+    case .double: return "Double"
+    case .void: return "Void"
+    case .javaLangString: return "String"
+    case .class(let package, let name, let typeParameters):
+      let packageClause: String =
+      if let package {
+        "\(package)."
+      } else {
+        ""
+      }
+      let genericClause: String =
+      if !typeParameters.isEmpty {
+        "<\(typeParameters.map(\.boxedName).joined(separator: ", "))>"
+      } else {
+        ""
+      }
+      return "\(packageClause)\(name)\(genericClause)"
+    case .array: return description
     }
   }
 }
