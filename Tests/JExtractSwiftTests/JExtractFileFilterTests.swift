@@ -12,9 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
+
+@testable import JExtractSwiftLib
 
 // ==== -----------------------------------------------------------------------
 // MARK: File-path matching tests
@@ -254,13 +255,13 @@ struct JExtractFileFilterTests {
   @Test("jextract filters round-trip through JSON config")
   func filtersFromJSON() throws {
     let json = """
-    {
-      "javaPackage": "com.example.swift",
-      "mode": "jni",
-      "swiftFilterInclude": ["Models/**", "Something.Other"],
-      "swiftFilterExclude": ["Models/Internal*"]
-    }
-    """
+      {
+        "javaPackage": "com.example.swift",
+        "mode": "jni",
+        "swiftFilterInclude": ["Models/**", "Something.Other"],
+        "swiftFilterExclude": ["Models/Internal*"]
+      }
+      """
     let config = try readConfiguration(string: json, configPath: nil)
     #expect(config != nil)
     #expect(config?.swiftFilterInclude == ["Models/**", "Something.Other"])
@@ -270,11 +271,11 @@ struct JExtractFileFilterTests {
   @Test("Config without filters has nil filter fields")
   func noFiltersInJSON() throws {
     let json = """
-    {
-      "javaPackage": "com.example.swift",
-      "mode": "jni"
-    }
-    """
+      {
+        "javaPackage": "com.example.swift",
+        "mode": "jni"
+      }
+      """
     let config = try readConfiguration(string: json, configPath: nil)
     #expect(config != nil)
     #expect(config?.swiftFilterInclude == nil)
@@ -284,11 +285,11 @@ struct JExtractFileFilterTests {
   @Test("jextract and wrap-java filters are independent in config")
   func independentFilters() throws {
     let json = """
-    {
-      "swiftFilterInclude": ["Models/**"],
-      "javaFilterInclude": ["org.apache.commons"]
-    }
-    """
+      {
+        "swiftFilterInclude": ["Models/**"],
+        "javaFilterInclude": ["org.apache.commons"]
+      }
+      """
     let config = try #require(try readConfiguration(string: json, configPath: nil))
     #expect(config.swiftFilterInclude == ["Models/**"])
     #expect(config.javaFilterInclude == ["org.apache.commons"])

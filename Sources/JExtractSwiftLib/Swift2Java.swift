@@ -54,8 +54,7 @@ public struct SwiftToJava {
     let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
 
     let hasFilters =
-      !(config.swiftFilterInclude ?? []).isEmpty ||
-      !(config.swiftFilterExclude ?? []).isEmpty
+      !(config.swiftFilterInclude ?? []).isEmpty || !(config.swiftFilterExclude ?? []).isEmpty
 
     // Register files to the translator.
     let fileManager = FileManager.default
