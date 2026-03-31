@@ -118,7 +118,7 @@ let package = Package(
   ],
   dependencies: [
     swiftJavaJNICoreDep,
-    .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
