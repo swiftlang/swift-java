@@ -25,19 +25,19 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 JAVA_OUTPUT="${REPO_ROOT}/SwiftKitFFM/src/main/java"
 JAVA_PACKAGE="org.swift.swiftkit.ffm.generated"
 
-# Declare types to generate: SWIFT_MODULE FILTER_INCLUDE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
+# Declare types to generate: SWIFT_MODULE SINGLE_TYPE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
 TYPES=(
   "SwiftRuntimeFunctions  SwiftJavaError  Sources/SwiftRuntimeFunctions  Sources/SwiftRuntimeFunctions/generated"
 )
 
 for entry in "${TYPES[@]}"; do
-  read -r MODULE FILTER INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
+  read -r MODULE SINGLE_TYPE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
 
-  echo "==> Generating ${FILTER} (module: ${MODULE})..."
+  echo "==> Generating ${SINGLE_TYPE} (module: ${MODULE})..."
 
   xcrun swift run swift-java jextract \
     --mode ffm \
-    --filter-include "$FILTER" \
+    --single-type "$SINGLE_TYPE" \
     --swift-module "$MODULE" \
     --input-swift "${REPO_ROOT}/${INPUT_SWIFT}" \
     --output-swift "${REPO_ROOT}/${OUTPUT_SWIFT}" \

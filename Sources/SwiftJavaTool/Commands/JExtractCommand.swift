@@ -34,7 +34,7 @@ extension SwiftJava {
   struct JExtractCommand: SwiftJavaBaseAsyncParsableCommand, HasCommonOptions {
     static let configuration = CommandConfiguration(
       commandName: "jextract", // TODO: wrap-swift?
-      abstract: "Wrap Swift functions and types with Java bindings, making them available to be called from Java"
+      abstract: "Wrap Swift functions and types with Java bindings, making them available to be called from Java",
     )
 
     @OptionGroup var commonOptions: SwiftJava.CommonOptions
@@ -61,7 +61,7 @@ extension SwiftJava {
     @Flag(
       inversion: .prefixedNo,
       help:
-        "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary."
+        "Some build systems require an output to be present when it was 'expected', even if empty. This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.",
     )
     var writeEmptyFiles: Bool?
 
@@ -92,7 +92,7 @@ extension SwiftJava {
     @Flag(
       inversion: .prefixedNo,
       help:
-        "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode."
+        "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode.",
     )
     var enableJavaCallbacks: Bool?
 
@@ -117,7 +117,7 @@ extension SwiftJava {
         Patterns are matched against relative file paths (without .swift extension). \
         Supports * (single-segment wildcard) and ** (recursive wildcard). \
         Example: --filter-include 'Models/**'
-        """
+        """,
     )
     var filterInclude: [String] = []
 
@@ -127,9 +127,12 @@ extension SwiftJava {
         Exclude Swift source files matching these patterns during jextract. \
         Same pattern syntax as --filter-include. \
         Example: --filter-exclude 'Internal/*'
-        """
+        """,
     )
     var filterExclude: [String] = []
+
+    @Option(help: "If specified, only generate bindings for this single Swift type name")
+    var singleType: String?
   }
 }
 
@@ -151,6 +154,7 @@ extension SwiftJava.JExtractCommand {
     configure(&config.linkerExportListOutput, overrideWith: self.linkerExportListOutput)
     configure(&config.swiftFilterInclude, append: self.filterInclude)
     configure(&config.swiftFilterExclude, append: self.filterExclude)
+    configure(&config.singleType, overrideWith: self.singleType)
 
     try checkModeCompatibility(config: config)
 
@@ -196,7 +200,7 @@ struct IncompatibleModeError: Error {
 extension SwiftJava.JExtractCommand {
   func jextractSwift(
     config: Configuration,
-    dependentConfigs: [Configuration]
+    dependentConfigs: [Configuration],
   ) throws {
     try SwiftToJava(config: config, dependentConfigs: dependentConfigs).run()
   }

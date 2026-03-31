@@ -46,29 +46,37 @@ extension FFMSwift2JavaGenerator {
   }
 
   package func writeSwiftThunkSources(printer: inout CodePrinter) throws {
-    let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
-    let moduleFilename = "\(moduleFilenameBase).swift"
-    do {
-      log.debug("Printing contents: \(moduleFilename)")
+    // Skip global thunks when generating for a single type
+    if config.singleType == nil {
+      let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
+      let moduleFilename = "\(moduleFilenameBase).swift"
+      do {
+        log.debug("Printing contents: \(moduleFilename)")
 
-      try printGlobalSwiftThunkSources(&printer)
+        try printGlobalSwiftThunkSources(&printer)
 
-      if let outputFile = try printer.writeContents(
-        outputDirectory: self.swiftOutputDirectory,
-        javaPackagePath: nil,
-        filename: moduleFilename,
-      ) {
-        log.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
-        self.expectedOutputSwiftFileNames.remove(moduleFilename)
+        if let outputFile = try printer.writeContents(
+          outputDirectory: self.swiftOutputDirectory,
+          javaPackagePath: nil,
+          filename: moduleFilename,
+        ) {
+          log.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
+          self.expectedOutputSwiftFileNames.remove(moduleFilename)
+        }
+      } catch {
+        log.warning("Failed to write to Swift thunks: \(moduleFilename)")
       }
-    } catch {
-      log.warning("Failed to write to Swift thunks: \(moduleFilename)")
     }
 
     // === All types
     // We have to write all types to their corresponding output file that matches the file they were declared in,
     // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
-    let filteredTypes = self.analysis.importedTypes
+    let filteredTypes: [String: ImportedNominalType]
+    if let singleType = config.singleType {
+      filteredTypes = self.analysis.importedTypes.filter { $0.key == singleType }
+    } else {
+      filteredTypes = self.analysis.importedTypes
+    }
 
     for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
       grouping: filteredTypes,
