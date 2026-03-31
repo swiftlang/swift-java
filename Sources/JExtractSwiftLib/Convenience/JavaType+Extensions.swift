@@ -175,7 +175,7 @@ extension JavaType {
     case .void: return "Void"
     case .javaLangString: return "String"
     case .class(let package, let name, let typeParameters):
-      let packageClause: String =
+      let packagePart: String =
         if let package {
           "\(package)."
         } else {
@@ -187,7 +187,7 @@ extension JavaType {
         } else {
           ""
         }
-      return "\(packageClause)\(name)\(genericClause)"
+      return "\(packagePart)\(name)\(genericClause)"
     case .array: return description
     }
   }
