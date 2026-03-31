@@ -87,6 +87,44 @@ public struct Configuration: Codable {
   /// Same pattern syntax as swiftFilterInclude
   public var swiftFilterExclude: [String]?
 
+  /// Stub type declarations for imported modules whose source is not available
+  /// to the jextract tool. Keyed by module name, values are arrays of Swift
+  /// declaration strings that will be parsed as if they belonged to that module.
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "importedModuleStubs": {
+  ///     "ExternalModule": [
+  ///       "public enum Outer {}",
+  ///       "public struct Config {}"
+  ///     ]
+  ///   }
+  /// }
+  /// ```
+  public var importedModuleStubs: [String: [String]]?
+
+  /// Whether the given module name has stub declarations configured
+  public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
+    importedModuleStubs?.keys.contains(moduleName) ?? false
+  }
+
+  /// Monomorphization entries for generic types, mapping a qualified Swift type
+  /// name to a concrete specialization with a custom Java-facing name.
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "monomorphize": {
+  ///     "Tank": {
+  ///       "javaName": "FishTank",
+  ///       "typeArgs": {"Element": "Fish"}
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  public var monomorphize: [String: MonomorphizeEntry]?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
@@ -220,7 +258,7 @@ public enum MavenRepositoryDescriptor: Hashable, Codable {
       throw DecodingError.dataCorruptedError(
         forKey: .type,
         in: container,
-        debugDescription: "Unknown repository type: '\(type)'. Supported: maven, mavenCentral, mavenLocal, google"
+        debugDescription: "Unknown repository type: '\(type)'. Supported: maven, mavenCentral, mavenLocal, google",
       )
     }
   }
@@ -302,7 +340,7 @@ public func readConfiguration(
   string: String,
   configPath: URL?,
   file: String = #fileID,
-  line: UInt = #line
+  line: UInt = #line,
 ) throws -> Configuration? {
   guard let configData = string.data(using: .utf8) else {
     return nil
@@ -319,7 +357,7 @@ public func readConfiguration(
       error: error,
       text: string,
       file: file,
-      line: line
+      line: line,
     )
   }
 }
@@ -423,6 +461,23 @@ public struct ConfigurationError: Error {
     self.text = text
     self.file = file
     self.line = line
+  }
+}
+
+// ==== -----------------------------------------------------------------------
+// MARK: MonomorphizeEntry
+
+/// Configuration entry for monomorphizing a generic type into a concrete Java class
+public struct MonomorphizeEntry: Codable, Sendable {
+  /// Mapping from generic parameter name to concrete type (e.g. {"T": "Fish"})
+  public var typeArgs: [String: String]
+
+  /// The Java-facing class name (e.g. "FishTank")
+  public var javaName: String
+
+  public init(typeArgs: [String: String], javaName: String) {
+    self.typeArgs = typeArgs
+    self.javaName = javaName
   }
 }
 
