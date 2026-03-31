@@ -22,12 +22,12 @@ extension FFMSwift2JavaGenerator {
   @_spi(Testing)
   public func lowerFunctionSignature(
     _ decl: FunctionDeclSyntax,
-    enclosingType: TypeSyntax? = nil
+    enclosingType: TypeSyntax? = nil,
   ) throws -> LoweredFunctionSignature {
     let signature = try SwiftFunctionSignature(
       decl,
       enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
-      lookupContext: lookupContext
+      lookupContext: lookupContext,
     )
     return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
   }
@@ -38,12 +38,12 @@ extension FFMSwift2JavaGenerator {
   @_spi(Testing)
   public func lowerFunctionSignature(
     _ decl: InitializerDeclSyntax,
-    enclosingType: TypeSyntax? = nil
+    enclosingType: TypeSyntax? = nil,
   ) throws -> LoweredFunctionSignature {
     let signature = try SwiftFunctionSignature(
       decl,
       enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
-      lookupContext: lookupContext
+      lookupContext: lookupContext,
     )
 
     return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
@@ -56,7 +56,7 @@ extension FFMSwift2JavaGenerator {
   public func lowerFunctionSignature(
     _ decl: VariableDeclSyntax,
     isSet: Bool,
-    enclosingType: TypeSyntax? = nil
+    enclosingType: TypeSyntax? = nil,
   ) throws -> LoweredFunctionSignature? {
     let supportedAccessors = decl.supportedAccessorKinds(binding: decl.bindings.first!)
     guard supportedAccessors.contains(isSet ? .set : .get) else {
@@ -67,7 +67,7 @@ extension FFMSwift2JavaGenerator {
       decl,
       isSet: isSet,
       enclosingType: try enclosingType.map { try SwiftType($0, lookupContext: lookupContext) },
-      lookupContext: lookupContext
+      lookupContext: lookupContext,
     )
     return try CdeclLowering(symbolTable: lookupContext.symbolTable).lowerFunctionSignature(signature)
   }
@@ -101,7 +101,7 @@ struct CdeclLowering {
           convention: convention,
           parameterName: "self",
           genericParameters: signature.genericParameters,
-          genericRequirements: signature.genericRequirements
+          genericRequirements: signature.genericRequirements,
         )
       case nil, .initializer(_), .staticMethod(_):
         nil
@@ -114,23 +114,56 @@ struct CdeclLowering {
         convention: param.convention,
         parameterName: param.parameterName ?? "_\(index)",
         genericParameters: signature.genericParameters,
-        genericRequirements: signature.genericRequirements
+        genericRequirements: signature.genericRequirements,
       )
     }
 
+    var isThrowing = false
     for effect in signature.effectSpecifiers {
-      // Prohibit any effects for now.
-      throw LoweringError.effectNotSupported(effect)
+      switch effect {
+      case .throws:
+        isThrowing = true
+      case .async:
+        throw LoweringError.effectNotSupported(effect)
+      }
     }
 
     // Lower the result.
     let loweredResult = try lowerResult(signature.result.type)
 
+    // If the function throws, create an error out parameter
+    let errorOutParameter: LoweredParameter? =
+      if isThrowing {
+        LoweredParameter(
+          cdeclParameters: [
+            SwiftParameter(
+              convention: .byValue,
+              parameterName: "result$throws",
+              type: knownTypes.unsafeMutablePointer(knownTypes.optionalSugar(knownTypes.unsafeMutableRawPointer)),
+            )
+          ],
+          conversion: .placeholder,
+        )
+      } else {
+        nil
+      }
+
+    // When throwing with a non-void pointer return, make the return type
+    // optional so the catch block can return nil (nullable pointer in C)
+    let cdeclReturnTypeForThunk: SwiftType
+    if isThrowing && loweredResult.cdeclResultType.isPointer {
+      cdeclReturnTypeForThunk = knownTypes.optionalSugar(loweredResult.cdeclResultType)
+    } else {
+      cdeclReturnTypeForThunk = loweredResult.cdeclResultType
+    }
+
     return LoweredFunctionSignature(
       original: signature,
       selfParameter: loweredSelf,
       parameters: loweredParameters,
-      result: loweredResult
+      result: loweredResult,
+      errorOutParameter: errorOutParameter,
+      cdeclReturnTypeForThunk: cdeclReturnTypeForThunk,
     )
   }
 
@@ -149,7 +182,7 @@ struct CdeclLowering {
     convention: SwiftParameterConvention,
     parameterName: String,
     genericParameters: [SwiftGenericParameterDeclaration],
-    genericRequirements: [SwiftGenericRequirement]
+    genericRequirements: [SwiftGenericRequirement],
   ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, we just
     // return it.
@@ -157,7 +190,7 @@ struct CdeclLowering {
       if convention != .inout {
         return LoweredParameter(
           cdeclParameters: [SwiftParameter(convention: .byValue, parameterName: parameterName, type: type)],
-          conversion: .placeholder
+          conversion: .placeholder,
         )
       }
     }
@@ -169,10 +202,10 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: knownTypes.unsafeRawPointer
+            type: knownTypes.unsafeRawPointer,
           )
         ],
-        conversion: .unsafeCastPointer(.placeholder, swiftType: instanceType)
+        conversion: .unsafeCastPointer(.placeholder, swiftType: instanceType),
       )
 
     case .nominal(let nominal):
@@ -191,10 +224,10 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: parameterName,
-                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
+                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
               )
             ],
-            conversion: .typedPointer(.placeholder, swiftType: pointee)
+            conversion: .typedPointer(.placeholder, swiftType: pointee),
           )
 
         case .unsafeBufferPointer(let element), .unsafeMutableBufferPointer(let element):
@@ -205,12 +238,12 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_pointer",
-                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
+                type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
               ),
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_count",
-                type: knownTypes.int
+                type: knownTypes.int,
               ),
             ],
             conversion: .initialize(
@@ -220,15 +253,15 @@ struct CdeclLowering {
                   label: "start",
                   argument: .typedPointer(
                     .explodedComponent(.placeholder, component: "pointer"),
-                    swiftType: element
-                  )
+                    swiftType: element,
+                  ),
                 ),
                 LabeledArgument(
                   label: "count",
-                  argument: .explodedComponent(.placeholder, component: "count")
+                  argument: .explodedComponent(.placeholder, component: "count"),
                 ),
-              ]
-            )
+              ],
+            ),
           )
 
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
@@ -239,12 +272,12 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_pointer",
-                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
               ),
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_count",
-                type: knownTypes.int
+                type: knownTypes.int,
               ),
             ],
             conversion: .initialize(
@@ -252,14 +285,14 @@ struct CdeclLowering {
               arguments: [
                 LabeledArgument(
                   label: "start",
-                  argument: .explodedComponent(.placeholder, component: "pointer")
+                  argument: .explodedComponent(.placeholder, component: "pointer"),
                 ),
                 LabeledArgument(
                   label: "count",
-                  argument: .explodedComponent(.placeholder, component: "count")
+                  argument: .explodedComponent(.placeholder, component: "count"),
                 ),
-              ]
-            )
+              ],
+            ),
           )
 
         case .optional(let wrapped):
@@ -268,7 +301,7 @@ struct CdeclLowering {
             convention: convention,
             parameterName: parameterName,
             genericParameters: genericParameters,
-            genericRequirements: genericRequirements
+            genericRequirements: genericRequirements,
           )
 
         case .string:
@@ -278,15 +311,15 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: parameterName,
-                type: knownTypes.unsafePointer(knownTypes.int8)
+                type: knownTypes.unsafePointer(knownTypes.int8),
               )
             ],
             conversion: .initialize(
               type,
               arguments: [
                 LabeledArgument(label: "cString", argument: .placeholder)
-              ]
-            )
+              ],
+            ),
           )
 
         case .array(let element) where element == knownTypes.uint8:
@@ -295,12 +328,12 @@ struct CdeclLowering {
             SwiftParameter(
               convention: .byValue,
               parameterName: "\(parameterName)_pointer",
-              type: knownTypes.unsafeRawPointer
+              type: knownTypes.unsafeRawPointer,
             ),
             SwiftParameter(
               convention: .byValue,
               parameterName: "\(parameterName)_count",
-              type: knownTypes.int
+              type: knownTypes.int,
             ),
           ]
 
@@ -309,26 +342,30 @@ struct CdeclLowering {
             arguments: [
               LabeledArgument(
                 label: "start",
-                argument: .explodedComponent(.placeholder, component: "pointer")
+                argument: .explodedComponent(.placeholder, component: "pointer"),
               ),
               LabeledArgument(
                 label: "count",
-                argument: .explodedComponent(.placeholder, component: "count")
+                argument: .explodedComponent(.placeholder, component: "count"),
               ),
-            ]
+            ],
           )
 
           let arrayInit = ConversionStep.initialize(
             type,
-            arguments: [LabeledArgument(argument: bufferPointerInit)]
+            arguments: [LabeledArgument(argument: bufferPointerInit)],
           )
 
           return LoweredParameter(
             cdeclParameters: cdeclParameters,
-            conversion: arrayInit
+            conversion: arrayInit,
           )
 
         case .foundationData, .essentialsData:
+          break
+
+        case .swiftJavaError:
+          // SwiftJavaError is a class — treat as arbitrary nominal type below
           break
 
         default:
@@ -344,10 +381,10 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
+            type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer,
           )
         ],
-        conversion: .pointee(.typedPointer(.placeholder, swiftType: type))
+        conversion: .pointee(.typedPointer(.placeholder, swiftType: type)),
       )
 
     case .tuple(let tuple):
@@ -357,7 +394,7 @@ struct CdeclLowering {
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
       }
       if convention == .inout {
@@ -373,7 +410,7 @@ struct CdeclLowering {
           convention: convention,
           parameterName: cdeclName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
         parameters.append(contentsOf: lowered.cdeclParameters)
@@ -388,24 +425,24 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: loweredTy
+            type: loweredTy,
           )
         ],
-        conversion: conversion
+        conversion: conversion,
       )
 
     case .opaque, .existential, .genericParameter:
       if let concreteTy = type.representativeConcreteTypeIn(
         knownTypes: knownTypes,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       ) {
         return try lowerParameter(
           concreteTy,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
       }
       throw LoweringError.unhandledType(type)
@@ -424,7 +461,7 @@ struct CdeclLowering {
     convention: SwiftParameterConvention,
     parameterName: String,
     genericParameters: [SwiftGenericParameterDeclaration],
-    genericRequirements: [SwiftGenericRequirement]
+    genericRequirements: [SwiftGenericRequirement],
   ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, lower it to 'UnsafePointer<T>?'
     if let _ = try? CType(cdeclType: wrappedType) {
@@ -433,10 +470,10 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: knownTypes.optionalSugar(knownTypes.unsafePointer(wrappedType))
+            type: knownTypes.optionalSugar(knownTypes.unsafePointer(wrappedType)),
           )
         ],
-        conversion: .pointee(.optionalChain(.placeholder))
+        conversion: .pointee(.optionalChain(.placeholder)),
       )
     }
 
@@ -470,24 +507,24 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: knownTypes.optionalSugar(knownTypes.unsafeRawPointer)
+            type: knownTypes.optionalSugar(knownTypes.unsafeRawPointer),
           )
         ],
-        conversion: .pointee(.typedPointer(.optionalChain(.placeholder), swiftType: wrappedType))
+        conversion: .pointee(.typedPointer(.optionalChain(.placeholder), swiftType: wrappedType)),
       )
 
     case .existential, .opaque, .genericParameter:
       if let concreteTy = wrappedType.representativeConcreteTypeIn(
         knownTypes: knownTypes,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       ) {
         return try lowerOptionalParameter(
           concreteTy,
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
       }
       throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
@@ -499,7 +536,7 @@ struct CdeclLowering {
           convention: convention,
           parameterName: parameterName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
       }
       throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
@@ -524,7 +561,7 @@ struct CdeclLowering {
       let loweredParam = try lowerClosureParameter(
         parameter.type,
         convention: parameter.convention,
-        parameterName: parameterName
+        parameterName: parameterName,
       )
       parameters.append(contentsOf: loweredParam.cdeclParameters)
       parameterConversions.append(loweredParam.conversion)
@@ -545,14 +582,14 @@ struct CdeclLowering {
     return (
       type: .function(SwiftFunctionType(convention: .c, parameters: parameters, resultType: resultType)),
       conversion: isCompatibleWithC
-        ? .placeholder : .closureLowering(parameters: parameterConversions, result: resultConversion)
+        ? .placeholder : .closureLowering(parameters: parameterConversions, result: resultConversion),
     )
   }
 
   func lowerClosureParameter(
     _ type: SwiftType,
     convention: SwiftParameterConvention,
-    parameterName: String
+    parameterName: String,
   ) throws -> LoweredParameter {
     // If there is a 1:1 mapping between this Swift type and a C type, we just
     // return it.
@@ -562,10 +599,10 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: type
+            type: type,
           )
         ],
-        conversion: .placeholder
+        conversion: .placeholder,
       )
     }
 
@@ -581,18 +618,18 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_pointer",
-                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
+                type: knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
               ),
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(parameterName)_count",
-                type: knownTypes.int
+                type: knownTypes.int,
               ),
             ],
             conversion: .tuplify([
               .member(.placeholder, member: "baseAddress"),
               .member(.placeholder, member: "count"),
-            ])
+            ]),
           )
 
         case .foundationData, .essentialsData:
@@ -621,12 +658,12 @@ struct CdeclLowering {
         parameterName: "\(outParameterName)_pointer",
         type: knownTypes.unsafeMutablePointer(
           knownTypes.optionalSugar(isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer)
-        )
+        ),
       ),
       SwiftParameter(
         convention: .byValue,
         parameterName: "\(outParameterName)_count",
-        type: knownTypes.unsafeMutablePointer(knownTypes.int)
+        type: knownTypes.unsafeMutablePointer(knownTypes.int),
       ),
     ]
   }
@@ -638,7 +675,7 @@ struct CdeclLowering {
   ///   - outParameterName: If the type is lowered to a indirect return, this parameter name should be used.
   func lowerResult(
     _ type: SwiftType,
-    outParameterName: String = "_result"
+    outParameterName: String = "_result",
   ) throws -> LoweredResult {
     // If there is a 1:1 mapping between this Swift type and a C type, we just
     // return it.
@@ -653,7 +690,7 @@ struct CdeclLowering {
       return LoweredResult(
         cdeclResultType: knownTypes.unsafeRawPointer,
         cdeclOutParameters: [],
-        conversion: .unsafeCastPointer(.placeholder, swiftType: knownTypes.unsafeRawPointer)
+        conversion: .unsafeCastPointer(.placeholder, swiftType: knownTypes.unsafeRawPointer),
       )
 
     case .nominal(let nominal):
@@ -667,7 +704,7 @@ struct CdeclLowering {
           return LoweredResult(
             cdeclResultType: resultType,
             cdeclOutParameters: [],
-            conversion: .initialize(resultType, arguments: [LabeledArgument(argument: .placeholder)])
+            conversion: .initialize(resultType, arguments: [LabeledArgument(argument: .placeholder)]),
           )
 
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
@@ -678,7 +715,7 @@ struct CdeclLowering {
               SwiftTupleElement(label: nil, type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
               SwiftTupleElement(label: nil, type: knownTypes.int),
             ]),
-            outParameterName: outParameterName
+            outParameterName: outParameterName,
           )
 
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
@@ -691,15 +728,15 @@ struct CdeclLowering {
               [
                 .populatePointer(
                   name: "\(outParameterName)_pointer",
-                  to: .member(.placeholder, member: "baseAddress")
+                  to: .member(.placeholder, member: "baseAddress"),
                 ),
                 .populatePointer(
                   name: "\(outParameterName)_count",
-                  to: .member(.placeholder, member: "count")
+                  to: .member(.placeholder, member: "count"),
                 ),
               ],
-              name: outParameterName
-            )
+              name: outParameterName,
+            ),
           )
 
         case .void:
@@ -716,8 +753,8 @@ struct CdeclLowering {
             conversion: .method(
               base: "_swiftjava_stringToCString",
               methodName: nil,
-              arguments: [.init(label: nil, argument: .placeholder)]
-            )
+              arguments: [.init(label: nil, argument: .placeholder)],
+            ),
           )
 
         case .optional:
@@ -733,7 +770,7 @@ struct CdeclLowering {
               SwiftParameter(
                 convention: .byValue,
                 parameterName: "\(outParameterName)_initialize",
-                type: knownTypes.functionInitializeByteBuffer
+                type: knownTypes.functionInitializeByteBuffer,
               )
             ],
             conversion: .aggregate(
@@ -752,15 +789,15 @@ struct CdeclLowering {
                             arguments: [
                               .init(label: nil, argument: .member(.constant("_0"), member: "baseAddress!")),
                               .init(label: nil, argument: .member(.constant("_0"), member: "count")),
-                            ]
-                          )
+                            ],
+                          ),
                         )
                     )
-                  ]
+                  ],
                 )
               ],
-              name: resultName
-            )
+              name: resultName,
+            ),
           )
 
         default:
@@ -776,10 +813,10 @@ struct CdeclLowering {
           SwiftParameter(
             convention: .byValue,
             parameterName: outParameterName,
-            type: knownTypes.unsafeMutableRawPointer
+            type: knownTypes.unsafeMutableRawPointer,
           )
         ],
-        conversion: .populatePointer(name: outParameterName, assumingType: type, to: .placeholder)
+        conversion: .populatePointer(name: outParameterName, assumingType: type, to: .placeholder),
       )
 
     case .tuple(let tuple):
@@ -800,13 +837,13 @@ struct CdeclLowering {
           let parameter = SwiftParameter(
             convention: .byValue,
             parameterName: parameterName,
-            type: knownTypes.unsafeMutablePointer(lowered.cdeclResultType)
+            type: knownTypes.unsafeMutablePointer(lowered.cdeclResultType),
           )
           parameters.append(parameter)
           conversions.append(
             .populatePointer(
               name: parameterName,
-              to: lowered.conversion
+              to: lowered.conversion,
             )
           )
         } else {
@@ -819,7 +856,7 @@ struct CdeclLowering {
       return LoweredResult(
         cdeclResultType: .void,
         cdeclOutParameters: parameters,
-        conversion: .tupleExplode(conversions, name: outParameterName)
+        conversion: .tupleExplode(conversions, name: outParameterName),
       )
 
     case .genericParameter, .function, .existential, .opaque, .composite:
@@ -834,7 +871,7 @@ struct CdeclLowering {
   @_spi(Testing)
   public func cdeclToCFunctionLowering(
     _ cdeclSignature: SwiftFunctionSignature,
-    cName: String
+    cName: String,
   ) -> CFunction {
     try! CFunction(cdeclSignature: cdeclSignature, cName: cName)
   }
@@ -887,6 +924,14 @@ public struct LoweredFunctionSignature: Equatable {
   var selfParameter: LoweredParameter?
   var parameters: [LoweredParameter]
   var result: LoweredResult
+  var errorOutParameter: LoweredParameter?
+
+  /// The cdecl return type for the thunk. When the function is throwing and
+  /// returns a pointer, this is the optional-wrapped version of
+  /// `result.cdeclResultType` so the catch block can return nil
+  var cdeclReturnTypeForThunk: SwiftType
+
+  var isThrowing: Bool { errorOutParameter != nil }
 
   var allLoweredParameters: [SwiftParameter] {
     var all: [SwiftParameter] = []
@@ -900,6 +945,10 @@ public struct LoweredFunctionSignature: Equatable {
     }
     // Out parameters.
     all += result.cdeclOutParameters
+    // Error out parameter (always last)
+    if let errorOutParameter {
+      all += errorOutParameter.cdeclParameters
+    }
     return all
   }
 
@@ -907,10 +956,10 @@ public struct LoweredFunctionSignature: Equatable {
     SwiftFunctionSignature(
       selfParameter: nil,
       parameters: allLoweredParameters,
-      result: SwiftResult(convention: .direct, type: result.cdeclResultType),
+      result: SwiftResult(convention: .direct, type: cdeclReturnTypeForThunk),
       effectSpecifiers: [],
       genericParameters: [],
-      genericRequirements: []
+      genericRequirements: [],
     )
   }
 }
@@ -921,11 +970,12 @@ extension LoweredFunctionSignature {
   package func cdeclThunk(
     cName: String,
     swiftAPIName: String,
-    as apiKind: SwiftAPIKind
+    as apiKind: SwiftAPIKind,
   ) -> FunctionDeclSyntax {
 
     let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
-    let returnClause = !result.cdeclResultType.isVoid ? " -> \(result.cdeclResultType.description)" : ""
+    let cdeclReturnType = cdeclReturnTypeForThunk
+    let returnClause = !cdeclReturnType.isVoid ? " -> \(cdeclReturnType.description)" : ""
 
     var loweredCDecl = try! FunctionDeclSyntax(
       """
@@ -943,7 +993,7 @@ extension LoweredFunctionSignature {
       // Raise the 'self' from cdecl parameters.
       selfExpr = self.selfParameter!.conversion.asExprSyntax(
         placeholder: "self",
-        bodyItems: &bodyItems
+        bodyItems: &bodyItems,
       )
     case .staticMethod(let selfType), .initializer(let selfType):
       selfExpr = "\(raw: selfType.description)"
@@ -955,7 +1005,7 @@ extension LoweredFunctionSignature {
     let paramExprs = parameters.enumerated().map { idx, param in
       param.conversion.asExprSyntax(
         placeholder: original.parameters[idx].parameterName ?? "_\(idx)",
-        bodyItems: &bodyItems
+        bodyItems: &bodyItems,
       )!
     }
 
@@ -1009,17 +1059,44 @@ extension LoweredFunctionSignature {
     }
 
     // Lower the result.
+    let tryKeyword: String = isThrowing ? "try " : ""
     if !original.result.type.isVoid {
       let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(
         placeholder: resultExpr.description,
-        bodyItems: &bodyItems
+        bodyItems: &bodyItems,
       )
 
       if let loweredResult {
-        bodyItems.append(!result.cdeclResultType.isVoid ? "return \(loweredResult)" : "\(loweredResult)")
+        let returnKeyword = !result.cdeclResultType.isVoid ? "return " : ""
+        bodyItems.append("\(raw: returnKeyword)\(raw: tryKeyword)\(loweredResult)")
       }
     } else {
-      bodyItems.append("\(resultExpr)")
+      bodyItems.append("\(raw: tryKeyword)\(resultExpr)")
+    }
+
+    // If throwing, wrap body in do/catch.
+    if isThrowing {
+      let doBody = bodyItems.map { item in
+        item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
+      }
+
+      let dummyReturnStmt: String
+      if !result.cdeclResultType.isVoid {
+        let dummyReturn = result.cdeclResultType.isPointer ? "nil" : "0"
+        dummyReturnStmt = "\n    return \(dummyReturn)"
+      } else {
+        dummyReturnStmt = ""
+      }
+      let doStmt: StmtSyntax = """
+        do {\(CodeBlockItemListSyntax(doBody))
+          } catch {
+            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()\(raw: dummyReturnStmt)
+          }
+        """
+
+      bodyItems = [
+        CodeBlockItemSyntax(item: .stmt(doStmt))
+      ]
     }
 
     loweredCDecl.body!.statements = CodeBlockItemListSyntax {

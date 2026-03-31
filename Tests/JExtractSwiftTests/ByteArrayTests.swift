@@ -103,7 +103,7 @@ final class ByteArrayTests {
            * void (void *, size_t)
            * }
            */
-          private static class $_result_initialize {
+          private static class result$initialize {
             @FunctionalInterface
             public interface Function {
               void apply(java.lang.foreign.MemorySegment _0, long _1);
@@ -134,9 +134,9 @@ final class ByteArrayTests {
           @Unsigned
           public static byte[] returnArray() {
             try(var arena$ = Arena.ofConfined()) {
-              var _result_initialize = new swiftjava_SwiftModule_returnArray.$_result_initialize.Function$Impl();
-              swiftjava_SwiftModule_returnArray.call(swiftjava_SwiftModule_returnArray.$_result_initialize.toUpcallStub(_result_initialize, arena$));
-              return _result_initialize.result;
+              var result$initialize = new swiftjava_SwiftModule_returnArray.result$initialize.Function$Impl();
+              swiftjava_SwiftModule_returnArray.call(swiftjava_SwiftModule_returnArray.result$initialize.toUpcallStub(result$initialize, arena$));
+              return result$initialize.result;
             }
           }
           """,

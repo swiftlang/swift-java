@@ -351,13 +351,13 @@ final class UnsignedNumberTests {
                 throw new SwiftIntegerOverflowException("Parameter 'second' overflow: " + second);
               }
             }
-            long _result$checked = swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
+            long result$checked = swiftjava_SwiftModule_unsignedLong_first_second.call(first, second);
             if (SwiftValueLayout.has32bitSwiftInt) {
-              if (_result$checked < 0 || _result$checked > 0xFFFFFFFFL) {
-                throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+              if (result$checked < 0 || result$checked > 0xFFFFFFFFL) {
+                throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
               }
             }
-            return _result$checked;
+            return result$checked;
           }
           """,
         ]

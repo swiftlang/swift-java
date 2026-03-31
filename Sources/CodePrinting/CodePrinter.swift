@@ -107,6 +107,16 @@ public struct CodePrinter {
     print("}", .sloc, function: function, file: file, line: line)
   }
 
+  public mutating func printIfBlock(
+    _ condition: Any,
+    function: String = #function,
+    file: String = #fileID,
+    line: UInt = #line,
+    body: (inout CodePrinter) throws -> Void
+  ) rethrows {
+    try printBraceBlock("if (\(condition))", function: function, file: file, line: line, body: body)
+  }
+
   public mutating func printParts(
     _ parts: String...,
     terminator: PrinterTerminator = .newLine,

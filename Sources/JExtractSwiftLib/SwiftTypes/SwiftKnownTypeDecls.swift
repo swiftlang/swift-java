@@ -53,6 +53,9 @@ enum SwiftKnownType: Equatable {
   case foundationUUID
   case essentialsUUID
 
+  // SwiftRuntimeFunctions
+  case swiftJavaError
+
   init?(kind: SwiftKnownTypeDeclKind, genericArguments: [SwiftType]?) {
     switch kind {
     case .bool: self = .bool
@@ -106,6 +109,7 @@ enum SwiftKnownType: Equatable {
     case .essentialsDate: self = .essentialsDate
     case .foundationUUID: self = .foundationUUID
     case .essentialsUUID: self = .essentialsUUID
+    case .swiftJavaError: self = .swiftJavaError
     }
   }
 
@@ -146,6 +150,7 @@ enum SwiftKnownType: Equatable {
     case .essentialsDate: .essentialsDate
     case .foundationUUID: .foundationUUID
     case .essentialsUUID: .essentialsUUID
+    case .swiftJavaError: .swiftJavaError
     }
   }
 }
@@ -189,6 +194,9 @@ enum SwiftKnownTypeDeclKind: String, Hashable {
   case essentialsDate = "FoundationEssentials.Date"
   case foundationUUID = "Foundation.UUID"
   case essentialsUUID = "FoundationEssentials.UUID"
+
+  // SwiftRuntimeFunctions
+  case swiftJavaError = "SwiftRuntimeFunctions.SwiftJavaError"
 
   var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue

@@ -73,10 +73,10 @@ extension FFMSwift2JavaGenerator {
     ///
     /// 'JavaParameter.name' is the suffix for the receiver variable names. For example
     ///
-    ///   var _result_pointer = MemorySegment.allocate(...)
-    ///   var _result_count = MemorySegment.allocate(...)
-    ///   downCall(_result_pointer, _result_count)
-    ///   return constructResult(_result_pointer, _result_count)
+    ///   var result$_pointer = MemorySegment.allocate(...)
+    ///   var result$_count = MemorySegment.allocate(...)
+    ///   downCall(result$_pointer, result$_count)
+    ///   return constructResult(result$_pointer, result$_count)
     ///
     /// This case, there're two out parameter, named '_pointer' and '_count'.
     var outParameters: [JavaParameter]
@@ -88,9 +88,9 @@ extension FFMSwift2JavaGenerator {
     /// After the call is made, we may need to further extact the result from the called-back-into
     /// Java function class, for example:
     ///
-    ///   var _result_initialize = new $result_initialize.Function();
-    ///   downCall($result_initialize.toUpcallHandle(_result_initialize, arena))
-    ///   return _result_initialize.result
+    ///   var result$initialize = new result$initialize.Function();
+    ///   downCall(result$initialize.toUpcallHandle(result$initialize, arena))
+    ///   return result$initialize.result
     ///
     var outCallback: OutCallback?
 
@@ -131,6 +131,14 @@ extension FFMSwift2JavaGenerator {
     var selfParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
+    var isThrowing: Bool = false
+
+    /// Whether any parameter or the result requires a 32-bit integer overflow check,
+    /// which means the Java method must declare `throws SwiftIntegerOverflowException`
+    var canThrowSwiftIntegerOverflowException: Bool {
+      parameters.contains { $0.needs32BitIntOverflowCheck != .none }
+        || result.needs32BitIntOverflowCheck != .none
+    }
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from
@@ -333,7 +341,8 @@ extension FFMSwift2JavaGenerator {
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
-        result: result
+        result: result,
+        isThrowing: loweredFunctionSignature.isThrowing
       )
     }
 
@@ -433,7 +442,7 @@ extension FFMSwift2JavaGenerator {
                   type: .javaLangString
                 )
               ],
-              conversion: .call(.placeholder, function: "SwiftRuntime.toCString", withArena: true)
+              conversion: .call(.placeholder, function: "SwiftStrings.toCString", withArena: true)
             )
 
           case .array(let element) where element == knownTypes.uint8:
@@ -454,6 +463,10 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
+            break
+
+          case .swiftJavaError:
+            // SwiftJavaError is a class — treat as arbitrary nominal type below
             break
 
           default:
@@ -749,7 +762,7 @@ extension FFMSwift2JavaGenerator {
               javaResultType: .javaLangString,
               annotations: resultAnnotations,
               outParameters: [],
-              conversion: .call(.placeholder, function: "SwiftRuntime.fromCString", withArena: false)
+              conversion: .call(.placeholder, function: "SwiftStrings.fromCString", withArena: false)
             )
 
           case .array(let element) where element == knownTypes.uint8:
@@ -759,7 +772,7 @@ extension FFMSwift2JavaGenerator {
               annotations: [.unsigned],
               outParameters: [], // no out parameters, but we do an "out" callback
               outCallback: OutCallback(
-                name: "$_result_initialize",
+                name: "result$initialize",
                 members: [
                   "byte[] result = null"
                 ],
@@ -782,14 +795,14 @@ extension FFMSwift2JavaGenerator {
               conversion: .initializeResultWithUpcall(
                 [
                   .introduceVariable(
-                    name: "_result_initialize",
+                    name: "result$initialize",
                     initializeWith: .javaNew(
                       .commaSeparated(
                         [
                           // We need to refer to the nested class that is created for this function.
                           // The class that contains all the related functional interfaces is called the same
                           // as the downcall function, so we use the thunk name to find this class/
-                          .placeholderForSwiftThunkName, .constant("$_result_initialize.Function$Impl()"),
+                          .placeholderForSwiftThunkName, .constant("result$initialize.Function$Impl()"),
                         ],
                         separator: "."
                       )
@@ -797,7 +810,7 @@ extension FFMSwift2JavaGenerator {
                   ),
                   .placeholderForDowncall, // perform the downcall here
                 ],
-                extractResult: .property(.constant("_result_initialize"), propertyName: "result")
+                extractResult: .property(.constant("result$initialize"), propertyName: "result")
               )
             )
 
@@ -853,7 +866,7 @@ extension FFMSwift2JavaGenerator {
       for (idx, element) in elements.enumerated() {
         let (javaType, elementConversion) = try translateTupleElementResult(type: element.type)
         outParameters.append(JavaParameter(name: "\(idx)", type: javaType))
-        tupleElements.append((outParamName: "_result_\(idx)", elementConversion: elementConversion))
+        tupleElements.append((outParamName: "result$_\(idx)", elementConversion: elementConversion))
         elementJavaTypes.append(javaType)
       }
 
@@ -933,7 +946,7 @@ extension FFMSwift2JavaGenerator {
     /// The result of the function will be initialized with a callback to Java (an upcall).
     ///
     /// The `extractResult` is used for the actual `return ...` statement, because we need to extract
-    /// the return value from the called back into class, e.g. `return _result_initialize.result`.
+    /// the return value from the called back into class, e.g. `return result$initialize.result`.
     indirect case initializeResultWithUpcall([JavaConversionStep], extractResult: JavaConversionStep)
 
     /// 'value.$memorySegment()'
@@ -1007,6 +1020,9 @@ extension FFMSwift2JavaGenerator.TranslatedFunctionSignature {
   /// Whether or not if the down-calling requires temporary "Arena" which is
   /// only used during the down-calling.
   var requiresTemporaryArena: Bool {
+    if self.isThrowing {
+      return true
+    }
     if self.parameters.contains(where: { $0.conversion.requiresTemporaryArena }) {
       return true
     }

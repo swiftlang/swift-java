@@ -192,7 +192,7 @@ final class MethodImportTests {
          */
         public static void globalTakeIntLongString(int i32, long l, java.lang.String s) {
             try(var arena$ = Arena.ofConfined()) {
-                swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.call(i32, l, SwiftRuntime.toCString(s, arena$));
+                swiftjava___FakeModule_globalTakeIntLongString_i32_l_s.call(i32, l, SwiftStrings.toCString(s, arena$));
             }
         }
         """
@@ -235,9 +235,9 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftClass globalReturnClass(AllocatingSwiftArena swiftArena) {
-          MemorySegment _result = swiftArena.allocate(MySwiftClass.$LAYOUT);
-          swiftjava___FakeModule_globalReturnClass.call(_result);
-          return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena);
+          MemorySegment result$ = swiftArena.allocate(MySwiftClass.$LAYOUT);
+          swiftjava___FakeModule_globalReturnClass.call(result$);
+          return MySwiftClass.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """
     )
@@ -280,10 +280,10 @@ final class MethodImportTests {
          */
         public static java.lang.foreign.MemorySegment swapRawBufferPointer(java.lang.foreign.MemorySegment buffer) {
           try(var arena$ = Arena.ofConfined()) {
-            MemorySegment _result_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
-            MemorySegment _result_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
-            swiftjava___FakeModule_swapRawBufferPointer_buffer.call(buffer, buffer.byteSize(), _result_pointer, _result_count);
-            return _result_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(_result_count.get(SwiftValueLayout.SWIFT_INT64, 0));
+            MemorySegment result$_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegment result$_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            swiftjava___FakeModule_swapRawBufferPointer_buffer.call(buffer, buffer.byteSize(), result$_pointer, result$_count);
+            return result$_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(result$_count.get(SwiftValueLayout.SWIFT_INT64, 0));
           }
         }
         """
@@ -370,13 +370,13 @@ final class MethodImportTests {
          */
         public long makeInt() throws SwiftIntegerOverflowException {
             $ensureAlive();
-            long _result$checked = swiftjava___FakeModule_MySwiftClass_makeInt.call(this.$memorySegment());
+            long result$checked = swiftjava___FakeModule_MySwiftClass_makeInt.call(this.$memorySegment());
             if (SwiftValueLayout.has32bitSwiftInt) {
-                if (_result$checked < Integer.MIN_VALUE || _result$checked > Integer.MAX_VALUE) {
-                    throw new SwiftIntegerOverflowException("Return value overflow: " + _result$checked);
+                if (result$checked < Integer.MIN_VALUE || result$checked > Integer.MAX_VALUE) {
+                    throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
                 }
             }
-            return _result$checked;
+            return result$checked;
         }
         """
     )
@@ -418,7 +418,7 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftClass init(long len, long cap, AllocatingSwiftArena swiftArena) throws SwiftIntegerOverflowException {
-            MemorySegment _result = swiftArena.allocate(MySwiftClass.$LAYOUT);
+            MemorySegment result$ = swiftArena.allocate(MySwiftClass.$LAYOUT);
             if (SwiftValueLayout.has32bitSwiftInt) {
                 if (len < Integer.MIN_VALUE || len > Integer.MAX_VALUE) {
                     throw new SwiftIntegerOverflowException("Parameter 'len' overflow: " + len);
@@ -427,8 +427,8 @@ final class MethodImportTests {
                     throw new SwiftIntegerOverflowException("Parameter 'cap' overflow: " + cap);
                 }
             }
-            swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, _result)
-            return MySwiftClass.wrapMemoryAddressUnsafe(_result, swiftArena);
+            swiftjava___FakeModule_MySwiftClass_init_len_cap.call(len, cap, result$)
+            return MySwiftClass.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """
     )
@@ -471,7 +471,7 @@ final class MethodImportTests {
          * }
          */
         public static MySwiftStruct init(long len, long cap, AllocatingSwiftArena swiftArena) throws SwiftIntegerOverflowException {
-            MemorySegment _result = swiftArena.allocate(MySwiftStruct.$LAYOUT);
+            MemorySegment result$ = swiftArena.allocate(MySwiftStruct.$LAYOUT);
             if (SwiftValueLayout.has32bitSwiftInt) {
                 if (len < Integer.MIN_VALUE || len > Integer.MAX_VALUE) {
                     throw new SwiftIntegerOverflowException("Parameter 'len' overflow: " + len);
@@ -480,8 +480,8 @@ final class MethodImportTests {
                     throw new SwiftIntegerOverflowException("Parameter 'cap' overflow: " + cap);
                 }
             }
-            swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, _result)
-            return MySwiftStruct.wrapMemoryAddressUnsafe(_result, swiftArena);
+            swiftjava___FakeModule_MySwiftStruct_init_len_cap.call(len, cap, result$)
+            return MySwiftStruct.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """
     )

@@ -126,6 +126,33 @@ public func globalStringIdentity(string: String) -> String {
 }
 
 // ==== -----------------------------------------------------------------------
+// MARK: Throwing functions
+
+public struct SwiftExampleError: Error {
+  public let message: String
+}
+
+public func globalThrowingVoid(doThrow: Bool) throws {
+  if doThrow {
+    throw SwiftExampleError(message: "expected error in globalThrowingVoid")
+  }
+}
+
+public func globalThrowingReturn(doThrow: Bool) throws -> Int {
+  if doThrow {
+    throw SwiftExampleError(message: "expected error in globalThrowingReturn")
+  }
+  return 42
+}
+
+public func globalThrowingString(doThrow: Bool) throws -> String {
+  if doThrow {
+    throw SwiftExampleError(message: "expected error in globalThrowingString")
+  }
+  return "Hello from throwing Swift!"
+}
+
+// ==== -----------------------------------------------------------------------
 // MARK: Overloaded functions
 
 public func globalOverloaded(a: Int) {

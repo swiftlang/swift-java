@@ -1895,7 +1895,7 @@ extension JNISwift2JavaGenerator {
 
       case .ifStatement(let cond, let thenExp, let elseExp):
         let cond = cond.render(&printer, placeholder)
-        printer.printBraceBlock("if (\(cond))") { printer in
+        printer.printIfBlock("\(cond)") { printer in
           printer.print(thenExp.render(&printer, placeholder))
         }
         if let elseExp {

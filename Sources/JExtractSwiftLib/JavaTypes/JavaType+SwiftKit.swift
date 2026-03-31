@@ -48,4 +48,25 @@ extension JavaType {
   static var _OutSwiftGenericInstance: JavaType {
     .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
   }
+
+  // ==== -------------------------------------------------------------------
+  // MARK: Exception types
+
+  /// The Java exception type for the Swift error wrapper
+  static var swiftJavaErrorException: JavaType {
+    .class(package: "org.swift.swiftkit.ffm.generated", name: "SwiftJavaErrorException")
+  }
+
+  /// The Java exception type for integer overflow checks
+  static var swiftIntegerOverflowException: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SwiftIntegerOverflowException")
+  }
+
+  /// Extract the simple class name from a `.class` JavaType
+  var simpleClassName: String {
+    switch self {
+    case .class(_, let name, _): name
+    default: fatalError("simpleClassName is only available for .class types, was: \(self)")
+    }
+  }
 }
