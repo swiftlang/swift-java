@@ -67,6 +67,9 @@ public struct Configuration: Codable {
 
   public var generatedJavaSourcesListFileOutput: String?
 
+  /// If set, only generate bindings for this single Swift type name
+  public var singleType: String?
+
   /// If set, JExtract (JNI mode) will write a linker version script to this
   /// path, listing all generated JNI ``@_cdecl`` entry-point symbols as
   /// global exports and hiding everything else with `local: *`. Pass this

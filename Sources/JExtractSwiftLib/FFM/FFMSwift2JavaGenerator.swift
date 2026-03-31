@@ -168,8 +168,15 @@ extension FFMSwift2JavaGenerator {
 
   /// Every imported public type becomes a public class in its own file in Java.
   package func writeExportedJavaSources(printer: inout CodePrinter) throws {
-    let typesToExport = analysis.importedTypes
-      .sorted(by: { $0.key < $1.key })
+    let typesToExport: [(key: String, value: ImportedNominalType)]
+    if let singleType = config.singleType {
+      typesToExport = analysis.importedTypes
+        .filter { $0.key == singleType }
+        .sorted(by: { $0.key < $1.key })
+    } else {
+      typesToExport = analysis.importedTypes
+        .sorted(by: { $0.key < $1.key })
+    }
 
     for (_, ty) in typesToExport {
       let javaName = javaClassName(for: ty)
@@ -186,16 +193,19 @@ extension FFMSwift2JavaGenerator {
       }
     }
 
-    let filename = "\(self.swiftModuleName).java"
-    log.debug("Printing contents: \(filename)")
-    printModule(&printer)
+    // Skip the module-level .java file when generating for a single type
+    if config.singleType == nil {
+      let filename = "\(self.swiftModuleName).java"
+      log.debug("Printing contents: \(filename)")
+      printModule(&printer)
 
-    if let outputFile = try printer.writeContents(
-      outputDirectory: javaOutputDirectory,
-      javaPackagePath: javaPackagePath,
-      filename: filename,
-    ) {
-      log.info("Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
+      if let outputFile = try printer.writeContents(
+        outputDirectory: javaOutputDirectory,
+        javaPackagePath: javaPackagePath,
+        filename: filename,
+      ) {
+        log.info("Generated: \((self.swiftModuleName + ".java").bold) (at \(outputFile.absoluteString))")
+      }
     }
   }
 }
