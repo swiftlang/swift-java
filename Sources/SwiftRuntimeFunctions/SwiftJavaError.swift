@@ -31,4 +31,3 @@ public final class SwiftJavaError {
     unsafeBitCast(type(of: underlying), to: UnsafeRawPointer.self)
   }
 }
-
