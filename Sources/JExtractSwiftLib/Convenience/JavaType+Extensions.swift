@@ -176,17 +176,17 @@ extension JavaType {
     case .javaLangString: return "String"
     case .class(let package, let name, let typeParameters):
       let packageClause: String =
-      if let package {
-        "\(package)."
-      } else {
-        ""
-      }
+        if let package {
+          "\(package)."
+        } else {
+          ""
+        }
       let genericClause: String =
-      if !typeParameters.isEmpty {
-        "<\(typeParameters.map(\.boxedName).joined(separator: ", "))>"
-      } else {
-        ""
-      }
+        if !typeParameters.isEmpty {
+          "<\(typeParameters.map(\.boxedName).joined(separator: ", "))>"
+        } else {
+          ""
+        }
       return "\(packageClause)\(name)\(genericClause)"
     case .array: return description
     }

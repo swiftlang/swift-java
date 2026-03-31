@@ -1272,11 +1272,12 @@ extension JNISwift2JavaGenerator {
         )
 
         // FIXME: More accurate JavaType using NativeJavaTranslation results directly
-        let nativeResultJavaType: JavaType = if wrappedValueResult.outParameters.isEmpty {
-          .long
-        } else {
-          .void
-        }
+        let nativeResultJavaType: JavaType =
+          if wrappedValueResult.outParameters.isEmpty {
+            .long
+          } else {
+            .void
+          }
 
         let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
         return TranslatedResult(
@@ -1728,7 +1729,7 @@ extension JNISwift2JavaGenerator {
             ),
             thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
             elseExp: .method(.constant(optionalClass), function: "empty")
-          ),
+          )
         ]
       )
     }
@@ -1797,11 +1798,12 @@ extension JNISwift2JavaGenerator {
         guard case .class(_, let className, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
         }
-        let genericClause = if !typeParameters.isEmpty {
-          "<\(typeParameters.map(\.description).joined(separator: ", "))>"
-        } else {
-          ""
-        }
+        let genericClause =
+          if !typeParameters.isEmpty {
+            "<\(typeParameters.map(\.description).joined(separator: ", "))>"
+          } else {
+            ""
+          }
         return "\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):

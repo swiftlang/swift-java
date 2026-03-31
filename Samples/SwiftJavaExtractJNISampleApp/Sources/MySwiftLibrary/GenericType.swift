@@ -58,7 +58,7 @@ public enum MyIDs {
   public static func makeDoubleIDOptional(_ value: Double) -> MyID<Double>? {
     MyID(value)
   }
-  
+
   public static func takeDoubleValueOptional(from id: MyID<Double>?) -> Double? {
     id?.rawValue
   }
@@ -70,7 +70,7 @@ public enum MyIDs {
   public static func makeOptionalIntID(_ value: Int?) -> MyID<Int?> {
     MyID(value)
   }
-  
+
   public static func takeOptionalIntValue(from id: MyID<Int?>) -> Int? {
     id.rawValue
   }
