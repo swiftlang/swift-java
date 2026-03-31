@@ -8,7 +8,7 @@
 import CodePrinting
 import SwiftSyntax
 
-enum TranslatedDocumentation {
+enum TranslatedKotlinDocumentation {
   static func printDocumentation(
     importedFunc: ImportedFunc,
     translatedDecl: Swift2KotlinGenerator.TranslatedFunctionDecl,

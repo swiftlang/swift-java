@@ -31,3 +31,5 @@ if (!(settings.providers.gradleProperty("skipSamples").orNull.toBoolean())) {
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+include("Samples:SwiftJavaExtractKotlinSampleApp")

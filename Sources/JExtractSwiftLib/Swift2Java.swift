@@ -86,6 +86,16 @@ public struct SwiftToJava {
     try translator.analyze()
 
     switch config.effectiveMode {
+      
+    case .kotlin:
+      try Swift2KotlinGenerator(
+        config: self.config,
+        translator: translator,
+        kotlinPackage: config.javaPackage ?? "",
+        swiftOutputDirectory: outputSwiftDirectory,
+        kotlinOutputDirectory: outputJavaDirectory
+      ).generate()
+      
     case .ffm:
       let generator = FFMSwift2JavaGenerator(
         config: self.config,
