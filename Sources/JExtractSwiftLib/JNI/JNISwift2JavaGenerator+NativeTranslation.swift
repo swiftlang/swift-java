@@ -162,7 +162,11 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
 
-            let indirectCheck = JNIJavaTypeTranslator.checkStep(for: knownType.kind, from: knownTypes)
+            let indirectCheck = JNIJavaTypeTranslator.checkStep(
+              parameterType: knownType.kind,
+              parameterName: parameterName,
+              from: knownTypes
+            )
 
             return NativeParameter(
               parameters: [
@@ -439,6 +443,12 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
 
+            let indirectCheck = JNIJavaTypeTranslator.checkStep(
+              parameterType: knownType,
+              parameterName: valueName,
+              from: knownTypes
+            )
+
             return NativeParameter(
               parameters: [
                 JavaParameter(name: discriminatorName, type: .byte),
@@ -449,7 +459,7 @@ extension JNISwift2JavaGenerator {
                 discriminatorName: discriminatorName,
                 valueName: valueName
               ),
-              conversionCheck: nil
+              conversionCheck: indirectCheck
             )
           }
         }
@@ -1700,13 +1710,13 @@ extension JNISwift2JavaGenerator {
   }
 
   enum NativeSwiftConversionCheck {
-    case check32BitIntOverflow(typeWithMinAndMax: SwiftType)
+    case check32BitIntOverflow(parameterName: String, typeWithMinAndMax: SwiftType)
 
     // Returns the check string
     func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
       switch self {
-      case .check32BitIntOverflow(let minMaxSource):
-        return "\(placeholder) >= \(minMaxSource).min && \(placeholder) <= \(minMaxSource).max"
+      case .check32BitIntOverflow(let parameterName, let minMaxSource):
+        return "\(parameterName) >= \(minMaxSource).min && \(parameterName) <= \(minMaxSource).max"
       }
     }
   }

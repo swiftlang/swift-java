@@ -55,6 +55,12 @@ struct JNIIntConversionChecksTests {
       case secondCase(UInt)
     }
     """
+  private let optionalFuncSource = """
+    public struct MyStruct {
+      public func dummyFunc(arg: Int?) {
+      }
+    }
+    """
 
   @Test func generatesInitWithSignedCheck() throws {
     try assertOutput(
@@ -261,6 +267,35 @@ struct JNIIntConversionChecksTests {
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """
+      ]
+    )
+  }
+
+  @Test func generatesOptionalFuncWithUnsignedCheck() throws {
+    try assertOutput(
+      input: optionalFuncSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 3,
+      expectedChunks: [
+        #"""
+        @_cdecl("Java_com_example_swift_MyStruct__00024dummyFunc__BJJ")
+        public func Java_com_example_swift_MyStruct__00024dummyFunc__BJJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong, selfPointer: jlong) {
+          #if _pointerBitWidth(_32)
+          guard arg_value >= Int32.min && arg_value <= Int32.max else {
+            environment.throwJavaException(javaException: .integerOverflow)
+            return
+          }
+          #endif
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
+          let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \(#function)!")
+          }
+          selfPointer$.pointee.dummyFunc(arg: arg_discriminator == 1 ? Int(fromJNI: arg_value, in: environment) : nil)
+        }
+        """#
       ]
     )
   }
