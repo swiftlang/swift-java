@@ -631,7 +631,7 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
       )
       return false
     }
-    guard !attributes.contains(where: { $0.isJava }) else {
+    guard !attributes.contains(where: { $0.isSwiftJavaMacro }) else {
       log.debug("Skip import '\(self.qualifiedNameForDebug)': is Java")
       return false
     }
