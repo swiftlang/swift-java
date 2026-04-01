@@ -207,7 +207,7 @@ struct JNIGenericTypeTests {
           guard let value$ else {
             fatalError("value memory address was null in call to \\(#function)!")
           }
-          return Int64(SwiftModule.takeIntID(value$.pointee)).getJNILocalRefValue(in: environment)
+          return SwiftModule.takeIntID(value$.pointee).getJNILocalRefValue(in: environment)
         }
         """,
       ]
