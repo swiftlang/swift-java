@@ -144,20 +144,18 @@ struct SwiftKnownTypes {
   }
 
   /// Returns the known representative concrete type if there is one for the
-  /// given protocol kind. E.g. `String` for `StringProtocol`
+  /// given protocol kind. E.g. `Data` for `DataProtocol`
   func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftType? {
-    switch knownProtocol {
-    case .foundationDataProtocol: return self.foundationData
-    case .essentialsDataProtocol: return self.essentialsData
-    default: return nil
-    }
+    guard let kind = Self.representativeType(of: knownProtocol) else { return nil }
+    return .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[kind]))
   }
 
-  /// Returns true if the given protocol kind has a representative concrete type
-  static func hasRepresentativeType(_ knownProtocol: SwiftKnownTypeDeclKind) -> Bool {
+  /// Returns the representative concrete type kind for a protocol, if one exists
+  static func representativeType(of knownProtocol: SwiftKnownTypeDeclKind) -> SwiftKnownTypeDeclKind? {
     switch knownProtocol {
-    case .foundationDataProtocol, .essentialsDataProtocol: return true
-    default: return false
+    case .foundationDataProtocol: return .foundationData
+    case .essentialsDataProtocol: return .essentialsData
+    default: return nil
     }
   }
 }
