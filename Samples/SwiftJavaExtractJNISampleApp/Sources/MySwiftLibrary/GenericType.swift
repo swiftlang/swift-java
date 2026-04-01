@@ -59,11 +59,11 @@ public enum MyIDs {
     value.rawValue
   }
 
-  public static func makeOptionalIntID(_ value: Int?) -> MyID<Int?> {
+  public static func makeOptionalStringID(_ value: String?) -> MyID<String?> {
     MyID(value)
   }
 
-  public static func takeOptionalIntValue(from id: MyID<Int?>) -> Int? {
+  public static func takeOptionalStringValue(from id: MyID<String?>) -> String? {
     id.rawValue
   }
 }

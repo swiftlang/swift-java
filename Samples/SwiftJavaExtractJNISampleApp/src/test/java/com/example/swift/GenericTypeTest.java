@@ -40,17 +40,14 @@ public class GenericTypeTest {
             assertEquals("Java", MyIDs.takeValuesFromTuple(ids).$0);
             assertEquals(42, MyIDs.takeValuesFromTuple(ids).$1);
 
-            // MyID<Boolean>[] boolIds = MyIDs.makeBoolIDArray(true, 3, arena);
-            // assertEquals(List.of(true, true, true), MyIDs.takeBoolValuesFromArray(boolIds));
-            
             Optional<MyID<Double>> doubleIdOptional = MyIDs.makeDoubleIDOptional(42.195, arena);
             assertTrue(doubleIdOptional.isPresent());
             assertEquals(42.195, MyIDs.takeDoubleValueOptional(doubleIdOptional).getAsDouble());
             assertEquals(42.195, MyIDs.takeDoubleValue(doubleIdOptional.get())); // ensure wrapped value is alive
 
-            MyID<Optional<Long>> optionalIntId = MyIDs.makeOptionalIntID(OptionalLong.of(42L), arena);
-            assertEquals("Optional(42)", optionalIntId.getDescription());
-            assertEquals(42, MyIDs.takeOptionalIntValue(optionalIntId).getAsLong());
+            MyID<Optional<String>> optionalStringId = MyIDs.makeOptionalStringID(Optional.of("Java"), arena);
+            assertEquals("Optional(\"Java\")", optionalStringId.getDescription());
+            assertEquals("Java", MyIDs.takeOptionalStringValue(optionalStringId).get());
         }
     }
 
