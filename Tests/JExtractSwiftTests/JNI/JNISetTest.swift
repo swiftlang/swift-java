@@ -28,7 +28,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.String> f(SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return SwiftSet.<java.lang.String>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """,
         """
@@ -104,7 +104,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.String> f(org.swift.swiftkit.core.collections.SwiftSet<java.lang.String> set, SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(set, "set must not be null").$memoryAddress()), swiftArena);
+          return SwiftSet.<java.lang.String>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(set, "set must not be null").$memoryAddress()), swiftArena);
         }
         """,
         """
@@ -145,7 +145,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.Long> f(SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return SwiftSet.<java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -162,7 +162,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.Boolean> f(SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return SwiftSet.<java.lang.Boolean>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -179,7 +179,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.Double> f(SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return SwiftSet.<java.lang.Double>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -240,7 +240,7 @@ struct JNISetTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftSet<java.lang.String> f(org.swift.swiftkit.core.collections.SwiftSet<java.lang.String> set, java.lang.String element, SwiftArena swiftArena) {
-          return SwiftSet.wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(set, "set must not be null").$memoryAddress(), element), swiftArena);
+          return SwiftSet.<java.lang.String>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(set, "set must not be null").$memoryAddress(), element), swiftArena);
         }
         """,
         """

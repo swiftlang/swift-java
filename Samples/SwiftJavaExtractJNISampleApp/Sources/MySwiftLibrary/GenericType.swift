@@ -22,20 +22,50 @@ public struct MyID<T> {
   }
 }
 
-public func makeIntID(_ value: Int) -> MyID<Int> {
-  MyID(value)
-}
+public enum MyIDs {
+  public static func makeIntID(_ value: Int) -> MyID<Int> {
+    MyID(value)
+  }
 
-public func makeStringID(_ value: String) -> MyID<String> {
-  MyID(value)
-}
+  public static func takeIntValue(from value: MyID<Int>) -> Int {
+    value.rawValue
+  }
 
-public func takeIntValue(from value: MyID<Int>) -> Int {
-  value.rawValue
-}
+  public static func makeStringID(_ value: String) -> MyID<String> {
+    MyID(value)
+  }
 
-public func takeStringValue(from value: MyID<String>) -> String {
-  value.rawValue
+  public static func takeStringValue(from value: MyID<String>) -> String {
+    value.rawValue
+  }
+
+  public static func makeIDs(_ stringValue: String, _ intValue: Int) -> (MyID<String>, MyID<Int>) {
+    (MyID(stringValue), MyID(intValue))
+  }
+
+  public static func takeValuesFromTuple(_ tuple: (MyID<String>, MyID<Int>)) -> (String, Int) {
+    (tuple.0.rawValue, tuple.1.rawValue)
+  }
+
+  public static func makeDoubleIDOptional(_ value: Double) -> MyID<Double>? {
+    MyID(value)
+  }
+
+  public static func takeDoubleValueOptional(from id: MyID<Double>?) -> Double? {
+    id?.rawValue
+  }
+
+  public static func takeDoubleValue(from value: MyID<Double>) -> Double {
+    value.rawValue
+  }
+
+  public static func makeOptionalStringID(_ value: String?) -> MyID<String?> {
+    MyID(value)
+  }
+
+  public static func takeOptionalStringValue(from id: MyID<String?>) -> String? {
+    id.rawValue
+  }
 }
 
 public struct MyEntity {

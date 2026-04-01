@@ -732,7 +732,13 @@ extension JNISwift2JavaGenerator {
     if translatedFunctionSignature.resultType.javaType.isVoid {
       printer.print("\(downcall);")
     } else {
-      let result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
+      let result: String
+      if translatedDecl.nativeFunctionSignature.result.javaType.isVoid {
+        printer.print("\(downcall);")
+        result = translatedFunctionSignature.resultType.conversion.render(&printer, "")
+      } else {
+        result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
+      }
       printer.print("return \(result);")
     }
   }
