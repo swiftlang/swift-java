@@ -641,35 +641,14 @@ final class DataImportTests {
       input: text,
       .jni,
       .swift,
-      detectChunkByInitialLines: 2,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public func Java_com_example_swift_SwiftModule__00024processData__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jobject?) -> jlong {
-          let dataswiftObject$: (DataProtocol)
-          let datapointer$ = environment.interface.CallLongMethodA(environment, data, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
-          let datatypeMetadata$ = environment.interface.CallLongMethodA(environment, data, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
-          guard let datapointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: datatypeMetadata$, in: environment))) else {
-            fatalError("datatypeMetadata$ memory address was null")
-          }
-          let datapointer$DynamicType$: Any.Type = unsafeBitCast(datapointer$TypeMetadataPointer$, to: Any.Type.self)
-          guard let datapointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: datapointer$, in: environment))) else {
-            fatalError("datapointer$ memory address was null")
-          }
-          #if hasFeature(ImplicitOpenExistentials)
-          let datapointer$Existential$ = datapointer$RawPointer$.load(as: datapointer$DynamicType$) as! any (DataProtocol)
-          #else
-          func datapointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (DataProtocol) {
-            datapointer$RawPointer$.load(as: ty) as! any (DataProtocol)
-          }
-          let datapointer$Existential$ = _openExistential(datapointer$DynamicType$, do: datapointer$DoLoad)
-          #endif
-          dataswiftObject$ = datapointer$Existential$
-          let result$ = UnsafeMutablePointer<MyResult>.allocate(capacity: 1)
-          result$.initialize(to: SwiftModule.processData(data: dataswiftObject$))
-          let resultBits$ = Int64(Int(bitPattern: result$))
-          return resultBits$.getJNILocalRefValue(in: environment)
-        }
+        """,
         """
+          result$.initialize(to: SwiftModule.processData(data: dataswiftObject$))
+        """,
       ]
     )
   }
@@ -686,51 +665,14 @@ final class DataImportTests {
       input: text,
       .jni,
       .swift,
-      detectChunkByInitialLines: 2,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public func Java_com_example_swift_SwiftModule__00024verify__Ljava_lang_Object_2Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, first: jobject?, second: jobject?) -> jboolean {
-          let firstswiftObject$: (DataProtocol)
-          let firstpointer$ = environment.interface.CallLongMethodA(environment, first, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
-          let firsttypeMetadata$ = environment.interface.CallLongMethodA(environment, first, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
-          guard let firstpointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: firsttypeMetadata$, in: environment))) else {
-            fatalError("firsttypeMetadata$ memory address was null")
-          }
-          let firstpointer$DynamicType$: Any.Type = unsafeBitCast(firstpointer$TypeMetadataPointer$, to: Any.Type.self)
-          guard let firstpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: firstpointer$, in: environment))) else {
-            fatalError("firstpointer$ memory address was null")
-          }
-          #if hasFeature(ImplicitOpenExistentials)
-          let firstpointer$Existential$ = firstpointer$RawPointer$.load(as: firstpointer$DynamicType$) as! any (DataProtocol)
-          #else
-          func firstpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (DataProtocol) {
-            firstpointer$RawPointer$.load(as: ty) as! any (DataProtocol)
-          }
-          let firstpointer$Existential$ = _openExistential(firstpointer$DynamicType$, do: firstpointer$DoLoad)
-          #endif
-          firstswiftObject$ = firstpointer$Existential$
-          let secondswiftObject$: (DataProtocol)
-          let secondpointer$ = environment.interface.CallLongMethodA(environment, second, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
-          let secondtypeMetadata$ = environment.interface.CallLongMethodA(environment, second, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
-          guard let secondpointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: secondtypeMetadata$, in: environment))) else {
-            fatalError("secondtypeMetadata$ memory address was null")
-          }
-          let secondpointer$DynamicType$: Any.Type = unsafeBitCast(secondpointer$TypeMetadataPointer$, to: Any.Type.self)
-          guard let secondpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: secondpointer$, in: environment))) else {
-            fatalError("secondpointer$ memory address was null")
-          }
-          #if hasFeature(ImplicitOpenExistentials)
-          let secondpointer$Existential$ = secondpointer$RawPointer$.load(as: secondpointer$DynamicType$) as! any (DataProtocol)
-          #else
-          func secondpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (DataProtocol) {
-            secondpointer$RawPointer$.load(as: ty) as! any (DataProtocol)
-          }
-          let secondpointer$Existential$ = _openExistential(secondpointer$DynamicType$, do: secondpointer$DoLoad)
-          #endif
-          secondswiftObject$ = secondpointer$Existential$
-          return SwiftModule.verify(first: firstswiftObject$, second: secondswiftObject$).getJNILocalRefValue(in: environment)
-        }
+        """,
         """
+          return SwiftModule.verify(first: firstswiftObject$, second: secondswiftObject$).getJNILocalRefValue(in: environment)
+        """,
       ]
     )
   }
