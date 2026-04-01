@@ -570,7 +570,6 @@ extension JNISwift2JavaGenerator {
 
     // Regular parameters.
     var arguments: [String] = [String]()
-    var indirectVariables: [(name: String, lowered: String)] = []
     var int32OverflowChecks: [String] = []
 
     for (idx, parameter) in nativeSignature.parameters.enumerated() {
@@ -578,26 +577,14 @@ extension JNISwift2JavaGenerator {
       let lowered = parameter.conversion.render(&printer, javaParameterName)
       arguments.append(lowered)
 
-      parameter.indirectConversion.flatMap {
-        indirectVariables.append((javaParameterName, $0.render(&printer, javaParameterName)))
-      }
-
       switch parameter.conversionCheck {
       case .check32BitIntOverflow:
         int32OverflowChecks.append(
-          parameter.conversionCheck!.render(
-            &printer,
-            JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName)
-          )
+          parameter.conversionCheck!.render(&printer, javaParameterName)
         )
       case nil:
         break
       }
-    }
-
-    // Make indirect variables
-    for (name, lowered) in indirectVariables {
-      printer.print("let \(JNISwift2JavaGenerator.indirectVariableName(for: name)) = \(lowered)")
     }
 
     if !int32OverflowChecks.isEmpty {

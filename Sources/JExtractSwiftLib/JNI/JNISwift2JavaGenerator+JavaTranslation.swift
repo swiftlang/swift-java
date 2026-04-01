@@ -185,7 +185,6 @@ extension JNISwift2JavaGenerator {
           selfParameter: NativeParameter(
             parameters: [JavaParameter(name: "selfPointer", type: .long)],
             conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
-            indirectConversion: nil,
             conversionCheck: nil
           ),
           selfTypeParameter: !isGenericParent
@@ -193,7 +192,6 @@ extension JNISwift2JavaGenerator {
             : .init(
               parameters: [JavaParameter(name: "selfTypePointer", type: .long)],
               conversion: .extractMetatypeValue(.placeholder),
-              indirectConversion: nil,
               conversionCheck: nil
             ),
           parameters: [],

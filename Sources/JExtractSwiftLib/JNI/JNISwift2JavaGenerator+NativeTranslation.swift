@@ -152,7 +152,6 @@ extension JNISwift2JavaGenerator {
                 ),
                 placeholder: .initFromJNI(.placeholder, swiftType: self.knownTypes.string)
               ),
-              indirectConversion: nil,
               conversionCheck: nil
             )
 
@@ -163,23 +162,15 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(type)
             }
 
-            let indirectStepType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
-              for: knownType.kind,
-              from: knownTypes
-            )
             let indirectCheck = JNIJavaTypeTranslator.checkStep(for: knownType.kind, from: knownTypes)
 
             return NativeParameter(
               parameters: [
                 JavaParameter(name: parameterName, type: javaType)
               ],
-              conversion: indirectStepType != nil
-                ? .labelessAssignmentOfVariable(.placeholder, swiftType: type)
-                : .initFromJNI(.placeholder, swiftType: type),
-              indirectConversion: indirectStepType.flatMap { .initFromJNI(.placeholder, swiftType: $0) },
+              conversion: .initFromJNI(.placeholder, swiftType: type),
               conversionCheck: indirectCheck
             )
-
           }
         }
 
@@ -201,7 +192,6 @@ extension JNISwift2JavaGenerator {
               ),
               wrapperName: nominalTypeName
             ),
-            indirectConversion: nil,
             conversionCheck: nil
           )
         }
@@ -212,7 +202,6 @@ extension JNISwift2JavaGenerator {
             JavaParameter(name: parameterName, type: .long)
           ],
           conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type)),
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -222,7 +211,6 @@ extension JNISwift2JavaGenerator {
             JavaParameter(name: parameterName, type: .void)
           ],
           conversion: .placeholder,
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -250,7 +238,6 @@ extension JNISwift2JavaGenerator {
               syntheticFunction: syntheticFunction,
               closureName: parameterName
             ),
-            indirectConversion: nil,
             conversionCheck: nil
           )
         }
@@ -279,7 +266,6 @@ extension JNISwift2JavaGenerator {
             parameters: parameters,
             result: result
           ),
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -309,7 +295,6 @@ extension JNISwift2JavaGenerator {
             JavaParameter(name: parameterName, type: .long)
           ],
           conversion: .extractMetatypeValue(.placeholder),
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -356,7 +341,6 @@ extension JNISwift2JavaGenerator {
       return NativeParameter(
         parameters: allJNIParameters,
         conversion: .tupleConstruct(elements: elementConversions),
-        indirectConversion: nil,
         conversionCheck: nil
       )
     }
@@ -422,7 +406,6 @@ extension JNISwift2JavaGenerator {
           protocolTypes: protocolTypes,
           allowsJavaImplementations: allowsJavaImplementations
         ),
-        indirectConversion: nil,
         conversionCheck: nil
       )
     }
@@ -466,7 +449,6 @@ extension JNISwift2JavaGenerator {
                 discriminatorName: discriminatorName,
                 valueName: valueName
               ),
-              indirectConversion: nil,
               conversionCheck: nil
             )
           }
@@ -482,7 +464,6 @@ extension JNISwift2JavaGenerator {
               JavaParameter(name: parameterName, type: javaType)
             ],
             conversion: .optionalMap(.initializeSwiftJavaWrapper(.placeholder, wrapperName: nominalTypeName)),
-            indirectConversion: nil,
             conversionCheck: nil
           )
         }
@@ -499,7 +480,6 @@ extension JNISwift2JavaGenerator {
               )
             )
           ),
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -667,7 +647,6 @@ extension JNISwift2JavaGenerator {
               JavaParameter(name: parameterName, type: javaType)
             ],
             conversion: .getJValue(.placeholder),
-            indirectConversion: nil,
             conversionCheck: nil
           )
         }
@@ -725,22 +704,11 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
             }
 
-            if let indirectReturnType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
-              for: knownType.kind,
-              from: knownTypes
-            ) {
-              return NativeResult(
-                javaType: javaType,
-                conversion: .getJNIValue(.labelessInitializer(.placeholder, swiftType: indirectReturnType)),
-                outParameters: []
-              )
-            } else {
-              return NativeResult(
-                javaType: javaType,
-                conversion: .getJNIValue(.placeholder),
-                outParameters: []
-              )
-            }
+            return NativeResult(
+              javaType: javaType,
+              conversion: .getJNIValue(.placeholder),
+              outParameters: []
+            )
           }
         }
 
@@ -894,7 +862,6 @@ extension JNISwift2JavaGenerator {
               JavaParameter(name: parameterName, type: .array(javaType))
             ],
             conversion: .initFromJNI(.placeholder, swiftType: knownTypes.arraySugar(elementType)),
-            indirectConversion: nil,
             conversionCheck: nil
           )
         }
@@ -926,7 +893,6 @@ extension JNISwift2JavaGenerator {
               )
             ]
           ),
-          indirectConversion: nil,
           conversionCheck: nil
         )
 
@@ -945,7 +911,6 @@ extension JNISwift2JavaGenerator {
           JavaParameter(name: parameterName, type: .long)
         ],
         conversion: .initFromJNI(.placeholder, swiftType: knownTypes.dictionarySugar(keyType, valueType)),
-        indirectConversion: nil,
         conversionCheck: nil
       )
     }
@@ -975,7 +940,6 @@ extension JNISwift2JavaGenerator {
           JavaParameter(name: parameterName, type: .long)
         ],
         conversion: .initFromJNI(.placeholder, swiftType: knownTypes.set(elementType)),
-        indirectConversion: nil,
         conversionCheck: nil
       )
     }
@@ -1009,14 +973,11 @@ extension JNISwift2JavaGenerator {
     var parameters: [JavaParameter]
 
     /// Represents how to convert the JNI parameter to a Swift parameter
-    let conversion: NativeSwiftConversionStep
-
-    /// Represents swift type for conversion checks. This will introduce a new name$indirect variable used in required checks.
-    /// e.g Int64 for Int overflow check on 32-bit platforms
-    let indirectConversion: NativeSwiftConversionStep?
+    var conversion: NativeSwiftConversionStep
 
     /// Represents check operations executed in if/guard conditional block for check during conversion
-    let conversionCheck: NativeSwiftConversionCheck?
+    /// e.g Int64 for Int overflow check on 32-bit platforms
+    var conversionCheck: NativeSwiftConversionCheck?
   }
 
   struct NativeResult {
@@ -1145,14 +1106,9 @@ extension JNISwift2JavaGenerator {
     /// `{ (args) -> return body }`
     indirect case closure(args: [String] = [], body: NativeSwiftConversionStep)
 
-    indirect case labelessAssignmentOfVariable(NativeSwiftConversionStep, swiftType: SwiftType)
-
     indirect case aggregate(variable: String, [NativeSwiftConversionStep])
 
     indirect case replacingPlaceholder(NativeSwiftConversionStep, placeholder: NativeSwiftConversionStep)
-
-    /// `SwiftType(inner)`
-    indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
     /// Constructs a Swift tuple from individually-converted elements.
     /// E.g. `(label0: conv0, conv1)` for `(label0: Int, String)`
@@ -1694,9 +1650,6 @@ extension JNISwift2JavaGenerator {
         }
         return printer.finalize()
 
-      case .labelessAssignmentOfVariable(let name, let swiftType):
-        return "\(swiftType)(\(JNISwift2JavaGenerator.indirectVariableName(for: name.render(&printer, placeholder))))"
-
       case .aggregate(let variable, let steps):
         precondition(!steps.isEmpty, "Aggregate must contain steps")
         printer.print("let \(variable) = \(placeholder)")
@@ -1708,10 +1661,6 @@ extension JNISwift2JavaGenerator {
       case .replacingPlaceholder(let inner, let newPlaceholder):
         let newPlaceholder = newPlaceholder.render(&printer, placeholder)
         return inner.render(&printer, newPlaceholder)
-
-      case .labelessInitializer(let inner, let swiftType):
-        let inner = inner.render(&printer, placeholder)
-        return "\(swiftType)(\(inner))"
 
       case .tupleConstruct(let elements):
         let parts = elements.enumerated().map { idx, element in

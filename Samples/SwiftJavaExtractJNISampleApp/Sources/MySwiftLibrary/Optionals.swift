@@ -44,6 +44,10 @@ public func optionalLong(input: Int64?) -> Int64? {
   input
 }
 
+public func optionalPlatformDependentInt(input: Int?) -> Int? {
+  input
+}
+
 public func optionalFloat(input: Float?) -> Float? {
   input
 }

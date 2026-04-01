@@ -58,33 +58,6 @@ enum JNIJavaTypeTranslator {
     }
   }
 
-  static func indirectConversionStepSwiftType(
-    for knownKind: SwiftKnownTypeDeclKind,
-    from knownTypes: SwiftKnownTypes
-  ) -> SwiftType? {
-    switch knownKind {
-    case .int: knownTypes.int64
-    case .uint: knownTypes.uint64
-
-    case .bool, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64,
-      .float, .double, .void, .string,
-      .unsafeRawPointer, .unsafeMutableRawPointer,
-      .unsafePointer, .unsafeMutablePointer,
-      .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer,
-      .unsafeBufferPointer, .unsafeMutableBufferPointer,
-      .optional,
-      .foundationData, .foundationDataProtocol,
-      .essentialsData, .essentialsDataProtocol,
-      .array,
-      .dictionary,
-      .set,
-      .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID,
-      .swiftJavaError:
-      nil
-    }
-  }
-
   static func checkStep(
     for knownKind: SwiftKnownTypeDeclKind,
     from knownTypes: SwiftKnownTypes
