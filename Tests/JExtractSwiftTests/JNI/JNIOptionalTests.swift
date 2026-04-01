@@ -180,13 +180,13 @@ struct JNIOptionalTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3B")
         public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
-          let argBits$ = Int(Int64(fromJNI: arg, in: environment))
+          let argBits$ = Int(fromJNI: arg, in: environment)
           let arg$ = UnsafeMutablePointer<MyClass>(bitPattern: argBits$)
           let result$: jlong
           if let innerResult$ = SwiftModule.optionalClass(arg$?.pointee) {
             let resultWrapped$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
             resultWrapped$.initialize(to: innerResult$)
-            let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
+            let resultWrappedBits$ = Int(bitPattern: resultWrapped$)
             result$ = resultWrappedBits$.getJNILocalRefValue(in: environment)
             var flag$ = Int8(1)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)

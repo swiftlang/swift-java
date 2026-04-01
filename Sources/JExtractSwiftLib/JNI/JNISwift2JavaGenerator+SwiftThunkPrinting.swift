@@ -587,7 +587,6 @@ extension JNISwift2JavaGenerator {
 
     // Regular parameters.
     var arguments: [String] = [String]()
-    var indirectVariables: [(name: String, lowered: String)] = []
     var int32OverflowChecks: [String] = []
 
     for (idx, parameter) in nativeSignature.parameters.enumerated() {
@@ -595,26 +594,14 @@ extension JNISwift2JavaGenerator {
       let lowered = parameter.conversion.render(&printer, javaParameterName)
       arguments.append(lowered)
 
-      parameter.indirectConversion.flatMap {
-        indirectVariables.append((javaParameterName, $0.render(&printer, javaParameterName)))
-      }
-
       switch parameter.conversionCheck {
       case .check32BitIntOverflow:
         int32OverflowChecks.append(
-          parameter.conversionCheck!.render(
-            &printer,
-            JNISwift2JavaGenerator.indirectVariableName(for: javaParameterName),
-          )
+          parameter.conversionCheck!.render(&printer, "")
         )
       case nil:
         break
       }
-    }
-
-    // Make indirect variables
-    for (name, lowered) in indirectVariables {
-      printer.print("let \(JNISwift2JavaGenerator.indirectVariableName(for: name)) = \(lowered)")
     }
 
     if !int32OverflowChecks.isEmpty {
@@ -850,7 +837,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         let metadataPointer = unsafeBitCast(\(type.effectiveSwiftTypeName).self, to: UnsafeRawPointer.self)
-        return Int64(Int(bitPattern: metadataPointer)).getJNIValue(in: environment)
+        return Int(bitPattern: metadataPointer).getJNIValue(in: environment)
         """
       )
     }
@@ -1027,7 +1014,7 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       assert(selfPointer != 0, "selfPointer memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+      let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
       let selfPointer$ = UnsafeMutablePointer<\(concreteSwiftType)>(bitPattern: selfPointerBits$)
       guard let selfPointer$ else {
         fatalError("selfPointer memory address was null in call to \\(#function)!")
@@ -1052,7 +1039,7 @@ extension JNISwift2JavaGenerator {
         fatalError("Missing JNIEnv in downcall to \\(#function)")
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      let selfPointerBits$ = Int(fromJNI: \(selfPointerParam.name), in: env$)
       guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfPointerBits$) else {
         fatalError("selfPointer memory address was null in call to \\(#function)!")
       }

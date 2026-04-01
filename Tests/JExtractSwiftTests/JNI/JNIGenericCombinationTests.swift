@@ -83,11 +83,11 @@ struct JNIGenericCombinationTests {
             if let innerResult$ = SwiftModule.makeStringIDOptional(String(fromJNI: value, in: environment)) {
               let resultWrapped$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
               resultWrapped$.initialize(to: innerResult$)
-              let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
+              let resultWrappedBits$ = Int(bitPattern: resultWrapped$)
               do {
                environment.interface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, resultWrappedBits$.getJNIValue(in: environment))
                let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
-               let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+               let metadataPointerBits$ = Int(bitPattern: metadataPointer)
                environment.interface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
               }
               var flag$ = Int8(1)
@@ -135,7 +135,7 @@ struct JNIGenericCombinationTests {
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024takeStringIDOptional__J")
           public func Java_com_example_swift_SwiftModule__00024takeStringIDOptional__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jlong) {
-            let valueBits$ = Int(Int64(fromJNI: value, in: environment))
+            let valueBits$ = Int(fromJNI: value, in: environment)
             let value$ = UnsafeMutablePointer<MyID<String>>(bitPattern: valueBits$)
             SwiftModule.takeStringIDOptional(value$?.pointee)
           }
@@ -201,20 +201,20 @@ struct JNIGenericCombinationTests {
             let tupleResult$ = SwiftModule.makeIDs(String(fromJNI: stringValue, in: environment), Int64(fromJNI: intValue, in: environment))
             let result_0$$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
             result_0$$.initialize(to: tupleResult$.0)
-            let result_0$Bits$ = Int64(Int(bitPattern: result_0$$))
+            let result_0$Bits$ = Int(bitPattern: result_0$$)
             do {
               environment.interface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_0$Bits$.getJNIValue(in: environment))
               let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
-              let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+              let metadataPointerBits$ = Int(bitPattern: metadataPointer)
               environment.interface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             }
             let result_1$$ = UnsafeMutablePointer<MyID<Int64>>.allocate(capacity: 1)
             result_1$$.initialize(to: tupleResult$.1)
-            let result_1$Bits$ = Int64(Int(bitPattern: result_1$$))
+            let result_1$Bits$ = Int(bitPattern: result_1$$)
             do {
               environment.interface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_1$Bits$.getJNIValue(in: environment))
               let metadataPointer = unsafeBitCast(MyID<Int64>.self, to: UnsafeRawPointer.self)
-              let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+              let metadataPointerBits$ = Int(bitPattern: metadataPointer)
               environment.interface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             }
             return 
@@ -259,13 +259,13 @@ struct JNIGenericCombinationTests {
           @_cdecl("Java_com_example_swift_SwiftModule__00024takeValues__JJ_3Ljava_lang_String_2_3J")
           public func Java_com_example_swift_SwiftModule__00024takeValues__JJ_3Ljava_lang_String_2_3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, tuple_0: jlong, tuple_1: jlong, result_0$: jobjectArray?, result_1$: jlongArray?) {
             assert(tuple_0 != 0, "tuple_0 memory address was null")
-            let tuple_0Bits$ = Int(Int64(fromJNI: tuple_0, in: environment))
+            let tuple_0Bits$ = Int(fromJNI: tuple_0, in: environment)
             let tuple_0$ = UnsafeMutablePointer<MyID<String>>(bitPattern: tuple_0Bits$)
             guard let tuple_0$ else {
               fatalError("tuple_0 memory address was null in call to \(#function)!")
             }
             assert(tuple_1 != 0, "tuple_1 memory address was null")
-            let tuple_1Bits$ = Int(Int64(fromJNI: tuple_1, in: environment))
+            let tuple_1Bits$ = Int(fromJNI: tuple_1, in: environment)
             let tuple_1$ = UnsafeMutablePointer<MyID<Int64>>(bitPattern: tuple_1Bits$)
             guard let tuple_1$ else {
               fatalError("tuple_1 memory address was null in call to \(#function)!")

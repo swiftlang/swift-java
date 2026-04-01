@@ -150,7 +150,7 @@ struct JNIStructTests {
         public func Java_com_example_swift_MyStruct__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
           result$.initialize(to: MyStruct.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """
@@ -195,7 +195,7 @@ struct JNIStructTests {
         @_cdecl("Java_com_example_swift_MyStruct__00024doSomething__JJ")
         public func Java_com_example_swift_MyStruct__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")

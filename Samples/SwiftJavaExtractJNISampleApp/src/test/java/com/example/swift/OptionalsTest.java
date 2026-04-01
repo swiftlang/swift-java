@@ -64,6 +64,12 @@ public class OptionalsTest {
     }
 
     @Test
+    void optionalPlatformDependentInt() {
+        assertEquals(OptionalLong.empty(), MySwiftLibrary.optionalPlatformDependentInt(OptionalLong.empty()));
+        assertEquals(OptionalLong.of(123), MySwiftLibrary.optionalPlatformDependentInt(OptionalLong.of(123)));
+    }
+
+    @Test
     void optionalFloat() {
         assertEquals(Optional.empty(), MySwiftLibrary.optionalFloat(Optional.empty()));
         assertEquals(Optional.of(3.14f), MySwiftLibrary.optionalFloat(Optional.of(3.14f)));

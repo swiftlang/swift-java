@@ -137,7 +137,7 @@ struct JNIProtocolTests {
           if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             ...
             let xpointer$DynamicType$: Any.Type = unsafeBitCast(xpointer$TypeMetadataPointer$, to: Any.Type.self)
-            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
+            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(fromJNI: xpointer$, in: environment)) else {
               fatalError("xpointer$ memory address was null")
             }
             #if hasFeature(ImplicitOpenExistentials)
@@ -271,11 +271,11 @@ struct JNIProtocolTests {
           if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             let xpointer$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
             let xtypeMetadata$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
-            guard let xpointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: xtypeMetadata$, in: environment))) else {
+            guard let xpointer$TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(fromJNI: xtypeMetadata$, in: environment)) else {
               fatalError("xtypeMetadata$ memory address was null")
             }
             let xpointer$DynamicType$: Any.Type = unsafeBitCast(xpointer$TypeMetadataPointer$, to: Any.Type.self)
-            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
+            guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(fromJNI: xpointer$, in: environment)) else {
               fatalError("xpointer$ memory address was null")
             }
             #if hasFeature(ImplicitOpenExistentials)

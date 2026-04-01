@@ -221,7 +221,7 @@ struct JNIClassTests {
         public func Java_com_example_swift_MyClass__00024init__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jlong) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init(x: Int64(fromJNI: x, in: environment), y: Int64(fromJNI: y, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
@@ -230,7 +230,7 @@ struct JNIClassTests {
         public func Java_com_example_swift_MyClass__00024init__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: MyClass.init())
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
@@ -275,7 +275,7 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024doSomething__JJ")
         public func Java_com_example_swift_MyClass__00024doSomething__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, selfPointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
@@ -324,14 +324,14 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024copy__J")
         public func Java_com_example_swift_MyClass__00024copy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
           result$.initialize(to: selfPointer$.pointee.copy())
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """
@@ -376,13 +376,13 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024isEqual__JJ")
         public func Java_com_example_swift_MyClass__00024isEqual__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, other: jlong, selfPointer: jlong) -> jboolean {
           assert(other != 0, "other memory address was null")
-          let otherBits$ = Int(Int64(fromJNI: other, in: environment))
+          let otherBits$ = Int(fromJNI: other, in: environment)
           let other$ = UnsafeMutablePointer<MyClass>(bitPattern: otherBits$)
           guard let other$ else {
             fatalError("other memory address was null in call to \\(#function)!")
           }
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyClass>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")

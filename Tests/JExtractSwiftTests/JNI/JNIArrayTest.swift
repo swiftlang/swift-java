@@ -184,7 +184,7 @@ struct JNIArrayTest {
           )).map( { (object$) in
             let object$$ = UnsafeMutablePointer<MySwiftClass>.allocate(capacity: 1)
             object$$.initialize(to: object$)
-            let object$Bits$ = Int64(Int(bitPattern: object$$))
+            let object$Bits$ = Int(bitPattern: object$$)
             return object$Bits$
           }
           ).getJNILocalRefValue(in: environment)

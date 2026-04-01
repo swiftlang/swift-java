@@ -233,7 +233,7 @@ struct JNIEnumTests {
         public func Java_com_example_swift_MyEnum__00024first__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
@@ -242,7 +242,7 @@ struct JNIEnumTests {
         public func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
@@ -251,7 +251,7 @@ struct JNIEnumTests {
         public func Java_com_example_swift_MyEnum__00024third__JI(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.third(x: Int64(fromJNI: x, in: environment), y: Int32(fromJNI: y, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
         """,
