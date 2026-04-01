@@ -27,4 +27,3 @@ public func sumOfBytes(data: UnsafeRawBufferPointer) -> Int64 {
 public func bufferCount(data: UnsafeRawBufferPointer) -> Int64 {
   Int64(data.count)
 }
-
