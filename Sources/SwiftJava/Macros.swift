@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -192,3 +192,15 @@ public macro JavaStaticMethod(_ javaMethodName: String? = nil) =
 @attached(peer)
 public macro JavaImplementation(_ fullClassName: String) =
   #externalMacro(module: "SwiftJavaMacros", type: "JavaImplementationMacro")
+
+/// Marker macro that forces a Swift declaration to be exported to Java via jextract.
+///
+/// When applied to a `typealias`, it registers a specialization entry for generic types:
+/// ```swift
+/// @JavaExport public typealias FishTank = Tank<Fish>
+/// ```
+/// This tells jextract to generate a concrete `FishTank` Java class for `Tank<Fish>`,
+/// even if `Tank` was included in the `filterExclude` configuration.
+@attached(peer)
+public macro JavaExport() =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaExportMacro")

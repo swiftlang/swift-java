@@ -26,7 +26,8 @@ extension JNISwift2JavaGenerator {
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
-      javaIdentifiers: self.currentJavaIdentifiers
+      javaIdentifiers: self.currentJavaIdentifiers,
+      importedTypes: self.analysis.importedTypes,
     )
   }
 
@@ -66,7 +67,8 @@ extension JNISwift2JavaGenerator {
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
-        javaIdentifiers: self.currentJavaIdentifiers
+        javaIdentifiers: self.currentJavaIdentifiers,
+        importedTypes: self.analysis.importedTypes,
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -87,6 +89,7 @@ extension JNISwift2JavaGenerator {
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
     var javaIdentifiers: JavaIdentifierFactory
+    let importedTypes: [String: ImportedNominalType]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
       let nativeTranslation = NativeJavaTranslation(
@@ -95,7 +98,7 @@ extension JNISwift2JavaGenerator {
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
         protocolWrappers: self.protocolWrappers,
-        logger: self.logger
+        logger: self.logger,
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -106,7 +109,7 @@ extension JNISwift2JavaGenerator {
         methodName: methodName,
         parentName: parentName,
         genericParameters: [],
-        genericRequirements: []
+        genericRequirements: [],
       )
 
       let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
@@ -115,7 +118,7 @@ extension JNISwift2JavaGenerator {
         var translatedResult = try self.translate(swiftResult: result, resultName: resultName)
         translatedResult.conversion = .replacingPlaceholder(
           translatedResult.conversion,
-          placeholder: "$nativeParameters.\(resultName)"
+          placeholder: "$nativeParameters.\(resultName)",
         )
         let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: resultName)
         return (translated: translatedResult, native: nativeResult)
@@ -132,9 +135,9 @@ extension JNISwift2JavaGenerator {
         arguments: [
           .constructJavaClass(
             .commaSeparated(conversions.map(\.translated.conversion)),
-            .class(package: nil, name: caseName)
+            .class(package: nil, name: caseName),
           )
-        ]
+        ],
       )
       var exceptions: [JavaExceptionType] = []
 
@@ -159,17 +162,17 @@ extension JNISwift2JavaGenerator {
               [
                 .ifStatement(
                   .constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"),
-                  thenExp: .constant("return Optional.empty();")
+                  thenExp: .constant("return Optional.empty();"),
                 ),
                 .valueMemoryAddress(.placeholder),
               ]
-            )
+            ),
           ),
           selfTypeParameter: !isGenericParent
             ? nil
             : .init(
               parameter: JavaParameter(name: "selfTypePointer", type: .long),
-              conversion: .typeMetadataAddress(.placeholder)
+              conversion: .typeMetadataAddress(.placeholder),
             ),
           parameters: [],
           resultType: TranslatedResult(
@@ -177,30 +180,30 @@ extension JNISwift2JavaGenerator {
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion
-              : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion])
+              : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion]),
           ),
-          exceptions: exceptions
+          exceptions: exceptions,
         ),
         nativeFunctionSignature: NativeFunctionSignature(
           selfParameter: NativeParameter(
             parameters: [JavaParameter(name: "selfPointer", type: .long)],
             conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
-            conversionCheck: nil
+            conversionCheck: nil,
           ),
           selfTypeParameter: !isGenericParent
             ? nil
             : .init(
               parameters: [JavaParameter(name: "selfTypePointer", type: .long)],
               conversion: .extractMetatypeValue(.placeholder),
-              conversionCheck: nil
+              conversionCheck: nil,
             ),
           parameters: [],
           result: NativeResult(
             javaType: nativeParametersType,
             conversion: .placeholder,
-            outParameters: conversions.flatMap(\.native.outParameters)
-          )
-        )
+            outParameters: conversions.flatMap(\.native.outParameters),
+          ),
+        ),
       )
 
       return TranslatedEnumCase(
@@ -209,7 +212,7 @@ extension JNISwift2JavaGenerator {
         original: enumCase,
         translatedValues: translatedValues,
         parameterConversions: conversions,
-        getAsCaseFunction: getAsCaseFunction
+        getAsCaseFunction: getAsCaseFunction,
       )
     }
 
@@ -220,11 +223,18 @@ extension JNISwift2JavaGenerator {
         javaClassLookupTable: self.javaClassLookupTable,
         knownTypes: self.knownTypes,
         protocolWrappers: self.protocolWrappers,
-        logger: self.logger
+        logger: self.logger,
       )
 
       // Types with no parent will be outputted inside a "module" class.
-      let parentName = decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName
+      // For specialized types, use the Java-facing name as the parent scope
+      let parentName: String
+      if let parentNominal = decl.parentType?.asNominalType?.nominalTypeDecl {
+        let importedParent = importedTypes.values.first { $0.swiftNominal === parentNominal }
+        parentName = importedParent?.effectiveJavaName ?? parentNominal.qualifiedName
+      } else {
+        parentName = swiftModuleName
+      }
 
       // Name.
       let javaName = javaIdentifiers.makeJavaMethodName(decl)
@@ -233,14 +243,14 @@ extension JNISwift2JavaGenerator {
       var translatedFunctionSignature = try translate(
         functionSignature: decl.functionSignature,
         methodName: javaName,
-        parentName: parentName
+        parentName: parentName,
       )
       // Java -> Java (native)
       var nativeFunctionSignature = try nativeTranslation.translate(
         functionSignature: decl.functionSignature,
         translatedFunctionSignature: translatedFunctionSignature,
         methodName: javaName,
-        parentName: parentName
+        parentName: parentName,
       )
 
       // Closures.
@@ -253,7 +263,7 @@ extension JNISwift2JavaGenerator {
           let translatedClosure = try translateFunctionType(
             name: parameterName,
             swiftType: funcTy,
-            parentName: parentName
+            parentName: parentName,
           )
           funcTypes.append(translatedClosure)
         default:
@@ -267,7 +277,7 @@ extension JNISwift2JavaGenerator {
           translatedFunctionSignature: &translatedFunctionSignature,
           nativeFunctionSignature: &nativeFunctionSignature,
           originalFunctionSignature: decl.functionSignature,
-          mode: config.effectiveAsyncFuncMode
+          mode: config.effectiveAsyncFuncMode,
         )
       }
 
@@ -280,7 +290,7 @@ extension JNISwift2JavaGenerator {
         parentName: parentName,
         functionTypes: funcTypes,
         translatedFunctionSignature: translatedFunctionSignature,
-        nativeFunctionSignature: nativeFunctionSignature
+        nativeFunctionSignature: nativeFunctionSignature,
       )
     }
 
@@ -288,7 +298,7 @@ extension JNISwift2JavaGenerator {
     func translateFunctionType(
       name: String,
       swiftType: SwiftFunctionType,
-      parentName: String
+      parentName: String,
     ) throws -> TranslatedFunctionType {
       var translatedParams: [TranslatedParameter] = []
 
@@ -302,7 +312,7 @@ extension JNISwift2JavaGenerator {
             parentName: parentName,
             genericParameters: [],
             genericRequirements: [],
-            parameterPosition: nil
+            parameterPosition: nil,
           )
         )
       }
@@ -313,21 +323,21 @@ extension JNISwift2JavaGenerator {
         name: name,
         parameters: translatedParams,
         result: translatedResult,
-        swiftType: swiftType
+        swiftType: swiftType,
       )
     }
 
     func translate(
       functionSignature: SwiftFunctionSignature,
       methodName: String,
-      parentName: String
+      parentName: String,
     ) throws -> TranslatedFunctionSignature {
       let parameters = try translateParameters(
         functionSignature.parameters.map { ($0.parameterName, $0.type) },
         methodName: methodName,
         parentName: parentName,
         genericParameters: functionSignature.genericParameters,
-        genericRequirements: functionSignature.genericRequirements
+        genericRequirements: functionSignature.genericRequirements,
       )
 
       // 'self'
@@ -336,7 +346,7 @@ extension JNISwift2JavaGenerator {
         methodName: methodName,
         parentName: parentName,
         genericParameters: functionSignature.genericParameters,
-        genericRequirements: functionSignature.genericRequirements
+        genericRequirements: functionSignature.genericRequirements,
       )
 
       let selfTypeParameter = try self.translateSelfTypeParameter(
@@ -344,7 +354,7 @@ extension JNISwift2JavaGenerator {
         methodName: methodName,
         parentName: parentName,
         genericParameters: functionSignature.genericParameters,
-        genericRequirements: functionSignature.genericRequirements
+        genericRequirements: functionSignature.genericRequirements,
       )
 
       var exceptions: [JavaExceptionType] = []
@@ -356,7 +366,7 @@ extension JNISwift2JavaGenerator {
       let resultType = try translate(
         swiftResult: functionSignature.result,
         genericParameters: functionSignature.genericParameters,
-        genericRequirements: functionSignature.genericRequirements
+        genericRequirements: functionSignature.genericRequirements,
       )
 
       return TranslatedFunctionSignature(
@@ -364,7 +374,7 @@ extension JNISwift2JavaGenerator {
         selfTypeParameter: selfTypeParameter,
         parameters: parameters,
         resultType: resultType,
-        exceptions: exceptions
+        exceptions: exceptions,
       )
     }
 
@@ -373,7 +383,7 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> [TranslatedParameter] {
       try parameters.enumerated().map { idx, param in
         let parameterName = param.name ?? "arg\(idx)"
@@ -384,7 +394,7 @@ extension JNISwift2JavaGenerator {
           parentName: parentName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
-          parameterPosition: idx
+          parameterPosition: idx,
         )
       }
     }
@@ -394,7 +404,7 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter? {
       // 'self'
       if case .instance(_, let swiftType) = selfParameter {
@@ -405,7 +415,7 @@ extension JNISwift2JavaGenerator {
           parentName: parentName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
-          parameterPosition: nil
+          parameterPosition: nil,
         )
       } else {
         return nil
@@ -417,7 +427,7 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter? {
       guard let selfParameter else {
         return nil
@@ -432,7 +442,7 @@ extension JNISwift2JavaGenerator {
           parentName: parentName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
-          parameterPosition: nil
+          parameterPosition: nil,
         )
       } else {
         return nil
@@ -446,7 +456,7 @@ extension JNISwift2JavaGenerator {
       parentName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
-      parameterPosition: Int?
+      parameterPosition: Int?,
     ) throws -> TranslatedParameter {
 
       // If the result type should cause any annotations on the method, include them here.
@@ -463,7 +473,7 @@ extension JNISwift2JavaGenerator {
               wrappedType: wrapped,
               parameterName: parameterName,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .array(let elementType):
@@ -471,7 +481,7 @@ extension JNISwift2JavaGenerator {
               elementType: elementType,
               parameterName: parameterName,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .dictionary(let keyType, let valueType):
@@ -480,7 +490,7 @@ extension JNISwift2JavaGenerator {
               valueType: valueType,
               parameterName: parameterName,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .set(let elementType):
@@ -488,7 +498,7 @@ extension JNISwift2JavaGenerator {
               elementType: elementType,
               parameterName: parameterName,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .foundationDate, .essentialsDate:
@@ -500,7 +510,7 @@ extension JNISwift2JavaGenerator {
           case .foundationUUID, .essentialsUUID:
             return TranslatedParameter(
               parameter: JavaParameter(name: parameterName, type: .javaUtilUUID),
-              conversion: .method(.placeholder, function: "toString")
+              conversion: .method(.placeholder, function: "toString"),
             )
 
           default:
@@ -510,7 +520,7 @@ extension JNISwift2JavaGenerator {
 
             return TranslatedParameter(
               parameter: JavaParameter(name: parameterName, type: javaType, annotations: parameterAnnotations),
-              conversion: .placeholder
+              conversion: .placeholder,
             )
           }
         }
@@ -522,7 +532,7 @@ extension JNISwift2JavaGenerator {
 
           return TranslatedParameter(
             parameter: JavaParameter(name: parameterName, type: javaType, annotations: parameterAnnotations),
-            conversion: .placeholder
+            conversion: .placeholder,
           )
         }
 
@@ -533,9 +543,9 @@ extension JNISwift2JavaGenerator {
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
-          } ?? []
+          } ?? [],
         )
 
         // We assume this is a JExtract class.
@@ -543,15 +553,15 @@ extension JNISwift2JavaGenerator {
           parameter: JavaParameter(
             name: parameterName,
             type: .concrete(javaType),
-            annotations: parameterAnnotations
+            annotations: parameterAnnotations,
           ),
-          conversion: .valueMemoryAddress(.placeholder)
+          conversion: .valueMemoryAddress(.placeholder),
         )
 
       case .tuple([]):
         return TranslatedParameter(
           parameter: JavaParameter(name: parameterName, type: .void, annotations: parameterAnnotations),
-          conversion: .placeholder
+          conversion: .placeholder,
         )
 
       case .function:
@@ -559,9 +569,9 @@ extension JNISwift2JavaGenerator {
           parameter: JavaParameter(
             name: parameterName,
             type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
-            annotations: parameterAnnotations
+            annotations: parameterAnnotations,
           ),
-          conversion: .placeholder
+          conversion: .placeholder,
         )
 
       case .opaque(let proto), .existential(let proto):
@@ -574,20 +584,20 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName,
           javaGenericName: "_T\(parameterPosition)",
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
       case .genericParameter(let generic):
         if let concreteTy = swiftType.typeIn(
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         ) {
           return try translateProtocolParameter(
             protocolType: concreteTy,
             parameterName: parameterName,
             javaGenericName: generic.name,
             genericParameters: genericParameters,
-            genericRequirements: genericRequirements
+            genericRequirements: genericRequirements,
           )
         }
 
@@ -596,7 +606,7 @@ extension JNISwift2JavaGenerator {
       case .metatype:
         return TranslatedParameter(
           parameter: JavaParameter(name: parameterName, type: .long),
-          conversion: .typeMetadataAddress(.placeholder)
+          conversion: .typeMetadataAddress(.placeholder),
         )
 
       case .tuple(let elements) where !elements.isEmpty:
@@ -607,7 +617,7 @@ extension JNISwift2JavaGenerator {
           parentName: parentName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
-          parameterPosition: parameterPosition
+          parameterPosition: parameterPosition,
         )
 
       case .tuple, .composite:
@@ -622,7 +632,7 @@ extension JNISwift2JavaGenerator {
       parentName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
-      parameterPosition: Int?
+      parameterPosition: Int?,
     ) throws -> TranslatedParameter {
       var elementJavaTypes: [JavaType] = []
 
@@ -636,13 +646,13 @@ extension JNISwift2JavaGenerator {
           parentName: parentName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
-          parameterPosition: parameterPosition
+          parameterPosition: parameterPosition,
         )
 
         // Extract the element from the tuple using .$N field access
         let extraction = JavaNativeConversionStep.replacingPlaceholder(
           elementTranslated.conversion,
-          placeholder: "\(parameterName).$\(idx)"
+          placeholder: "\(parameterName).$\(idx)",
         )
         elementConversions.append(extraction)
         elementJavaTypes.append(elementTranslated.parameter.type.javaType)
@@ -653,9 +663,9 @@ extension JNISwift2JavaGenerator {
       return TranslatedParameter(
         parameter: JavaParameter(
           name: parameterName,
-          type: javaType
+          type: javaType,
         ),
-        conversion: .commaSeparated(elementConversions)
+        conversion: .commaSeparated(elementConversions),
       )
     }
 
@@ -663,7 +673,7 @@ extension JNISwift2JavaGenerator {
       translatedFunctionSignature: inout TranslatedFunctionSignature,
       nativeFunctionSignature: inout NativeFunctionSignature,
       originalFunctionSignature: SwiftFunctionSignature,
-      mode: JExtractAsyncFuncMode
+      mode: JExtractAsyncFuncMode,
     ) {
       // Update translated function
       let nativeFutureType: JavaType
@@ -688,7 +698,7 @@ extension JNISwift2JavaGenerator {
       let futureOutParameter = OutParameter(
         name: "future$",
         type: nativeFutureType,
-        allocation: .new
+        allocation: .new,
       )
 
       let result = translatedFunctionSignature.resultType
@@ -714,7 +724,7 @@ extension JNISwift2JavaGenerator {
         nativeFunctionSignature: nativeFunctionSignature,
         isThrowing: originalFunctionSignature.isThrowing,
         completeMethodID: completeMethodID,
-        completeExceptionallyMethodID: completeExceptionallyMethodID
+        completeExceptionallyMethodID: completeExceptionallyMethodID,
       )
       nativeFunctionSignature.result.javaType = .void
       nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
@@ -725,7 +735,7 @@ extension JNISwift2JavaGenerator {
       parameterName: String,
       javaGenericName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       switch protocolType {
       case .nominal:
@@ -734,7 +744,7 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName,
           javaGenericName: javaGenericName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
       case .composite(let types):
@@ -743,7 +753,7 @@ extension JNISwift2JavaGenerator {
           parameterName: parameterName,
           javaGenericName: javaGenericName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
       default:
@@ -756,13 +766,13 @@ extension JNISwift2JavaGenerator {
       parameterName: String,
       javaGenericName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       let javaProtocolTypes = try protocolTypes.map {
         try translateGenericTypeParameter(
           $0,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
       }
 
@@ -771,9 +781,9 @@ extension JNISwift2JavaGenerator {
         parameter: JavaParameter(
           name: parameterName,
           type: .generic(name: javaGenericName, extends: javaProtocolTypes),
-          annotations: []
+          annotations: [],
         ),
-        conversion: .placeholder
+        conversion: .placeholder,
       )
     }
 
@@ -781,7 +791,7 @@ extension JNISwift2JavaGenerator {
       wrappedType swiftType: SwiftType,
       parameterName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
 
@@ -813,12 +823,12 @@ extension JNISwift2JavaGenerator {
               parameter: JavaParameter(
                 name: parameterName,
                 type: JavaType(className: translatedClass),
-                annotations: parameterAnnotations
+                annotations: parameterAnnotations,
               ),
               conversion: .commaSeparated([
                 .isOptionalPresent,
                 .method(.placeholder, function: "orElse", arguments: [.constant(placeholderValue)]),
-              ])
+              ]),
             )
           }
         }
@@ -832,13 +842,13 @@ extension JNISwift2JavaGenerator {
             parameter: JavaParameter(
               name: parameterName,
               type: .class(package: nil, name: "Optional<\(javaType)>"),
-              annotations: parameterAnnotations
+              annotations: parameterAnnotations,
             ),
             conversion: .method(
               .placeholder,
               function: "orElse",
-              arguments: [.constant("null")]
-            )
+              arguments: [.constant("null")],
+            ),
           )
         }
 
@@ -846,19 +856,19 @@ extension JNISwift2JavaGenerator {
         let javaType = try translateGenericTypeParameter(
           swiftType,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
             type: .class(package: nil, name: "Optional", typeParameters: [javaType]),
-            annotations: parameterAnnotations
+            annotations: parameterAnnotations,
           ),
           conversion: .method(
             .method(.placeholder, function: "map", arguments: [.constant("\(javaType)::$memoryAddress")]),
             function: "orElse",
-            arguments: [.constant("0L")]
-          )
+            arguments: [.constant("0L")],
+          ),
         )
       default:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
@@ -869,7 +879,7 @@ extension JNISwift2JavaGenerator {
       swiftResult: SwiftResult,
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration] = [],
-      genericRequirements: [SwiftGenericRequirement] = []
+      genericRequirements: [SwiftGenericRequirement] = [],
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
 
@@ -888,7 +898,7 @@ extension JNISwift2JavaGenerator {
               wrappedType: genericArgs[0],
               resultName: resultName,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .array:
@@ -898,7 +908,7 @@ extension JNISwift2JavaGenerator {
             return try translateArrayResult(
               elementType: elementType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .dictionary:
@@ -909,7 +919,7 @@ extension JNISwift2JavaGenerator {
               keyType: genericArgs[0],
               valueType: genericArgs[1],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .set:
@@ -919,7 +929,7 @@ extension JNISwift2JavaGenerator {
             return try translateSetResult(
               elementType: genericArgs[0],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
 
           case .foundationDate, .essentialsDate:
@@ -937,8 +947,8 @@ extension JNISwift2JavaGenerator {
               conversion: .method(
                 .constant("java.util.UUID"),
                 function: "fromString",
-                arguments: [.placeholder]
-              )
+                arguments: [.placeholder],
+              ),
             )
 
           default:
@@ -950,7 +960,7 @@ extension JNISwift2JavaGenerator {
               javaType: javaType,
               annotations: resultAnnotations,
               outParameters: [],
-              conversion: .placeholder
+              conversion: .placeholder,
             )
           }
         }
@@ -966,9 +976,9 @@ extension JNISwift2JavaGenerator {
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
-          } ?? []
+          } ?? [],
         )
 
         // We assume this is a JExtract class.
@@ -990,7 +1000,7 @@ extension JNISwift2JavaGenerator {
             javaType: javaType,
             annotations: resultAnnotations,
             outParameters: [],
-            conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
+            conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
           )
         }
 
@@ -1002,7 +1012,7 @@ extension JNISwift2JavaGenerator {
           elements: elements,
           resultName: resultName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
@@ -1013,7 +1023,7 @@ extension JNISwift2JavaGenerator {
     private func translateGenericTypeParameter(
       _ swiftType: SwiftType,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> JavaType {
       switch swiftType {
       case .nominal(let nominalType):
@@ -1028,7 +1038,7 @@ extension JNISwift2JavaGenerator {
             let wrappedType = try translateGenericTypeParameter(
               genericArgs[0],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
             return .class(package: "java.util", name: "Optional", typeParameters: [wrappedType])
 
@@ -1039,7 +1049,7 @@ extension JNISwift2JavaGenerator {
             let elementJavaType = try translateGenericTypeParameter(
               elementType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
             return .array(elementJavaType)
 
@@ -1050,12 +1060,12 @@ extension JNISwift2JavaGenerator {
             let keyJavaType = try translateGenericTypeParameter(
               genericArgs[0],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
             let valueJavaType = try translateGenericTypeParameter(
               genericArgs[1],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
             return .swiftDictionaryMap(keyJavaType, valueJavaType)
 
@@ -1066,7 +1076,7 @@ extension JNISwift2JavaGenerator {
             let elementJavaType = try translateGenericTypeParameter(
               genericArgs[0],
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
             return .swiftSet(elementJavaType)
 
@@ -1100,25 +1110,25 @@ extension JNISwift2JavaGenerator {
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
-              genericRequirements: genericRequirements
+              genericRequirements: genericRequirements,
             )
           } ?? []
 
         return .class(
           package: nil,
           name: nominalTypeName,
-          typeParameters: typeParameters
+          typeParameters: typeParameters,
         )
 
       case .genericParameter(let generic):
         if let concreteTy = swiftType.typeIn(
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         ) {
           return try translateGenericTypeParameter(
             concreteTy,
             genericParameters: genericParameters,
-            genericRequirements: genericRequirements
+            genericRequirements: genericRequirements,
           )
         }
         return .class(package: nil, name: generic.name)
@@ -1132,7 +1142,7 @@ extension JNISwift2JavaGenerator {
       elements: [SwiftTupleElement],
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
       let arity = elements.count
       var outParameters: [OutParameter] = []
@@ -1148,7 +1158,7 @@ extension JNISwift2JavaGenerator {
           swiftResult: .init(convention: .indirect, type: element.type),
           resultName: outParamName,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
         elementOutParamNames.append(outParamName)
@@ -1183,11 +1193,44 @@ extension JNISwift2JavaGenerator {
       )
     }
 
+    /// Translate a single element type for tuple results on the Java side.
+    private func translateTupleElementResult(
+      type: SwiftType,
+      genericParameters: [SwiftGenericParameterDeclaration],
+      genericRequirements: [SwiftGenericRequirement],
+    ) throws -> (JavaType, JavaNativeConversionStep) {
+      switch type {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
+          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
+            throw JavaTranslationError.unsupportedSwiftType(type)
+          }
+          // Primitives: just read from array
+          return (javaType, .placeholder)
+        }
+
+        guard !nominalType.isSwiftJavaWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(type)
+        }
+
+        let javaType = try translateGenericTypeParameter(
+          type,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+        )
+        // JExtract class: wrap memory address
+        return (.long, .constructSwiftValue(.placeholder, javaType))
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(type)
+      }
+    }
+
     func translateOptionalResult(
       wrappedType swiftType: SwiftType,
       resultName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
       let discriminatorName = "\(resultName)$_discriminator$"
 
@@ -1227,8 +1270,8 @@ extension JNISwift2JavaGenerator {
                   resultName: resultName,
                   valueType: javaType,
                   valueSizeInBytes: nextIntergralTypeWithSpaceForByte.valueBytes,
-                  optionalType: optionalClass
-                )
+                  optionalType: optionalClass,
+                ),
               )
             } else {
               // Otherwise, we return the result as normal, but
@@ -1244,8 +1287,8 @@ extension JNISwift2JavaGenerator {
                   optionalClass: optionalClass,
                   nativeResultJavaType: javaType,
                   toValue: .placeholder,
-                  resultName: resultName
-                )
+                  resultName: resultName,
+                ),
               )
             }
           }
@@ -1259,7 +1302,7 @@ extension JNISwift2JavaGenerator {
         let javaType = try translateGenericTypeParameter(
           swiftType,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
 
         let wrappedValueResult = try translate(
@@ -1302,7 +1345,7 @@ extension JNISwift2JavaGenerator {
       elementType: SwiftType,
       parameterName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
 
@@ -1315,7 +1358,7 @@ extension JNISwift2JavaGenerator {
 
           return TranslatedParameter(
             parameter: JavaParameter(name: parameterName, type: .array(javaType), annotations: parameterAnnotations),
-            conversion: .requireNonNull(.placeholder, message: "\(parameterName) must not be null")
+            conversion: .requireNonNull(.placeholder, message: "\(parameterName) must not be null"),
           )
         }
 
@@ -1326,24 +1369,24 @@ extension JNISwift2JavaGenerator {
         let javaType = try translateGenericTypeParameter(
           elementType,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
         // Assume JExtract imported class
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
             type: .array(javaType),
-            annotations: parameterAnnotations
+            annotations: parameterAnnotations,
           ),
           conversion: .method(
             .method(
               .arraysStream(.requireNonNull(.placeholder, message: "\(parameterName) must not be null")),
               function: "mapToLong",
-              arguments: [.constant("\(javaType)::$memoryAddress")]
+              arguments: [.constant("\(javaType)::$memoryAddress")],
             ),
             function: "toArray",
-            arguments: []
-          )
+            arguments: [],
+          ),
         )
 
       default:
@@ -1354,7 +1397,7 @@ extension JNISwift2JavaGenerator {
     func translateArrayResult(
       elementType: SwiftType,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
       let annotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
 
@@ -1369,7 +1412,7 @@ extension JNISwift2JavaGenerator {
             javaType: .array(javaType),
             annotations: annotations,
             outParameters: [],
-            conversion: .placeholder
+            conversion: .placeholder,
           )
         }
 
@@ -1380,7 +1423,7 @@ extension JNISwift2JavaGenerator {
         let javaType = try translateGenericTypeParameter(
           elementType,
           genericParameters: genericParameters,
-          genericRequirements: genericRequirements
+          genericRequirements: genericRequirements,
         )
         // We assume this is a JExtract class.
         return TranslatedResult(
@@ -1394,9 +1437,9 @@ extension JNISwift2JavaGenerator {
               arguments: [
                 .lambda(
                   args: ["pointer"],
-                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), javaType)
+                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), javaType),
                 )
-              ]
+              ],
             ),
             function: "toArray",
             arguments: [.constant("\(javaType.className!)[]::new")]
@@ -1411,12 +1454,12 @@ extension JNISwift2JavaGenerator {
     func javaTypeForDictionaryComponent(
       _ swiftType: SwiftType,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> JavaType {
       try translateGenericTypeParameter(
         swiftType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
     }
 
@@ -1425,17 +1468,17 @@ extension JNISwift2JavaGenerator {
       valueType: SwiftType,
       parameterName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       let keyJavaType = try javaTypeForDictionaryComponent(
         keyType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let valueJavaType = try javaTypeForDictionaryComponent(
         valueType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
 
@@ -1444,8 +1487,8 @@ extension JNISwift2JavaGenerator {
         conversion: .method(
           .requireNonNull(.placeholder, message: "\(parameterName) must not be null"),
           function: "$memoryAddress",
-          arguments: []
-        )
+          arguments: [],
+        ),
       )
     }
 
@@ -1453,24 +1496,24 @@ extension JNISwift2JavaGenerator {
       keyType: SwiftType,
       valueType: SwiftType,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
       let keyJavaType = try javaTypeForDictionaryComponent(
         keyType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let valueJavaType = try javaTypeForDictionaryComponent(
         valueType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let dictType = JavaType.swiftDictionaryMap(keyJavaType, valueJavaType)
 
       return TranslatedResult(
         javaType: dictType,
         outParameters: [],
-        conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType)
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType),
       )
     }
 
@@ -1478,12 +1521,12 @@ extension JNISwift2JavaGenerator {
       elementType: SwiftType,
       parameterName: String,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
       let elementJavaType = try javaTypeForDictionaryComponent(
         elementType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let setType = JavaType.swiftSet(elementJavaType)
 
@@ -1492,27 +1535,27 @@ extension JNISwift2JavaGenerator {
         conversion: .method(
           .requireNonNull(.placeholder, message: "\(parameterName) must not be null"),
           function: "$memoryAddress",
-          arguments: []
-        )
+          arguments: [],
+        ),
       )
     }
 
     func translateSetResult(
       elementType: SwiftType,
       genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement]
+      genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
       let elementJavaType = try javaTypeForDictionaryComponent(
         elementType,
         genericParameters: genericParameters,
-        genericRequirements: genericRequirements
+        genericRequirements: genericRequirements,
       )
       let setType = JavaType.swiftSet(elementJavaType)
 
       return TranslatedResult(
         javaType: setType,
         outParameters: [],
-        conversion: .wrapMemoryAddressUnsafe(.placeholder, setType)
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, setType),
       )
     }
   }
@@ -1697,13 +1740,13 @@ extension JNISwift2JavaGenerator {
       resultName: String,
       valueType: JavaType,
       valueSizeInBytes: Int,
-      optionalType: String
+      optionalType: String,
     )
 
     indirect case ternary(
       JavaNativeConversionStep,
       thenExp: JavaNativeConversionStep,
-      elseExp: JavaNativeConversionStep
+      elseExp: JavaNativeConversionStep,
     )
 
     indirect case equals(JavaNativeConversionStep, JavaNativeConversionStep)
@@ -1715,7 +1758,7 @@ extension JNISwift2JavaGenerator {
       optionalClass: String,
       nativeResultJavaType: JavaType,
       toValue valueConversion: JavaNativeConversionStep,
-      resultName: String
+      resultName: String,
     ) -> JavaNativeConversionStep {
       .aggregate(
         variable: nativeResultJavaType.isVoid ? nil : (name: "\(resultName)$", type: nativeResultJavaType),
@@ -1723,12 +1766,12 @@ extension JNISwift2JavaGenerator {
           .ternary(
             .equals(
               .subscriptOf(discriminatorName, arguments: [.constant("0")]),
-              .constant("1")
+              .constant("1"),
             ),
             thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
-            elseExp: .method(.constant(optionalClass), function: "empty")
+            elseExp: .method(.constant(optionalClass), function: "empty"),
           )
-        ]
+        ],
       )
     }
 
@@ -1738,7 +1781,7 @@ extension JNISwift2JavaGenerator {
     indirect case ifStatement(
       JavaNativeConversionStep,
       thenExp: JavaNativeConversionStep,
-      elseExp: JavaNativeConversionStep? = nil
+      elseExp: JavaNativeConversionStep? = nil,
     )
 
     /// Access a member of the value
@@ -1831,7 +1874,7 @@ extension JNISwift2JavaGenerator {
         let resultName,
         let valueType,
         let valueSizeInBytes,
-        let optionalType
+        let optionalType,
       ):
         let combined = combined.render(&printer, placeholder)
         printer.print(
@@ -2007,7 +2050,7 @@ extension JNISwift2JavaGenerator {
     static func unsupportedSwiftType(
       _ type: SwiftType,
       _fileID: String = #fileID,
-      _line: Int = #line
+      _line: Int = #line,
     ) -> JavaTranslationError {
       .unsupportedSwiftType(type, fileID: _fileID, line: _line)
     }
@@ -2016,7 +2059,7 @@ extension JNISwift2JavaGenerator {
     static func unsupportedSwiftType(
       known type: SwiftKnownType,
       _fileID: String = #fileID,
-      _line: Int = #line
+      _line: Int = #line,
     ) -> JavaTranslationError {
       .unsupportedSwiftType(known: type, fileID: _fileID, line: _line)
     }

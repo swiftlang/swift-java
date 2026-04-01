@@ -14,9 +14,6 @@
 
 package org.swift.swiftkit.ffm;
 
-import org.swift.swiftkit.ffm.SwiftRuntime;
-import org.swift.swiftkit.ffm.SwiftValueLayout;
-
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -30,10 +27,6 @@ public final class SwiftAnyType {
     private final MemorySegment memorySegment;
 
     public SwiftAnyType(MemorySegment memorySegment) {
-//        if (SwiftKit.getSwiftInt(memorySegment, 0) > 0) {
-//            throw new IllegalArgumentException("A Swift Any.Type cannot be null!");
-//        }
-
         this.memorySegment = memorySegment.asReadOnly();
     }
 

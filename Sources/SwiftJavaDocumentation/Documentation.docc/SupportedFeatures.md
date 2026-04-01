@@ -63,6 +63,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ✅   |
 | Generic type: `struct S<T>`                                                          | ❌        | ✅   |
 | Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
+| Generic type specialization and conditional extensions: `struct S<T>{} extension S where T == Value {}`  | ✅        | ❌   |
 | Static functions or properties in generic type                                       | ❌        | ❌   | 
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |
@@ -411,3 +412,53 @@ public final class MySwiftLibrary {
     public static MyID<java.lang.Long> makeIntID();
 } 
 ```
+
+### Specializing generic types
+
+> Note: Generic specialization is currently only supported in JNI mode. 
+
+Because Swift's rich generics and extensions system, it is possible to encounter APIs which are not safely expressible in Java,
+such as conditional/constrained extensions on types when an element is of specific type.
+
+A common example of this is e.g. a container type which gains additional methods when the element is of some type, like this:
+
+```swift
+struct Box<Element> {
+    var name: String
+}
+```
+
+which is extended with a conditional `where` clause:
+
+```swift
+extension Box where Element == Fish {
+    func watchTheFish() { }
+}
+```
+
+This method is not available on any `Box` and therefore we cannot safely expose it on the Java `Box` wrapper type.
+
+It would be possible to expose it and check at runtime if the `Box.Element` is of the expected type, this however 
+would result in runtime throws and is not an ideal experience when developers primarily use some specific _specialize_
+types like the `FishBox`:
+
+```swift
+typealias FishBox = Box<Fish>
+```
+
+The jextract tool will automatically detect typealiases like this and perform _specialization_ on them, i.e. a new
+`FishBox` type will be exposed on the Java side, and it will have all matching extensions applied to it, i.e. it
+will have the `watchTheFish()` method available in a type-safe and always known to work correctly way.
+
+In other words, this results in a Java class like this:
+
+```java
+/// Specialization of `Fish<Box>`.
+public final class FishBox ... {
+
+    public void watchTheFish() { ... }
+}
+```
+
+> NOTE: Currently no helpers are available to convert between unspecialized types to specialized ones, but this can be offered 
+>       as additional `box.as(FishBox.class)` conversion methods in the future.
