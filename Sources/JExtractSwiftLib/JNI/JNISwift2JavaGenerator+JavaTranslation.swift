@@ -242,7 +242,7 @@ extension JNISwift2JavaGenerator {
       let javaName = javaIdentifiers.makeJavaMethodName(decl)
 
       // Swift -> Java
-      var translatedFunctionSignature = try translate(
+      var translatedFunctionSignature = try self.translate(
         functionSignature: decl.functionSignature,
         methodName: javaName,
         parentName: parentName,
@@ -508,6 +508,12 @@ extension JNISwift2JavaGenerator {
 
           case .foundationData, .essentialsData:
             break // Handled as wrapped struct
+
+          case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: .array(.byte)),
+              conversion: .placeholder
+            )
 
           case .foundationUUID, .essentialsUUID:
             return TranslatedParameter(
