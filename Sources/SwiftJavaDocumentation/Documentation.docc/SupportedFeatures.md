@@ -63,7 +63,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Dictionaries: `[String: Int]`, `[K:V]`                                               | ❌        | ✅   |
 | Generic type: `struct S<T>`                                                          | ❌        | ✅   |
 | Functions or properties using generic type param: `struct S<T> { func f(_: T) {} }`  | ❌        | ❌   |
-| Generic type specialization and conditional extensions: `struct S<T>{} extension S where T == Value {}`  | ✅        | ❌   |
+| Generic type specialization and conditional extensions: `struct S<T>{} extension S where T == Value {}` |  ❌ | ✅  |
 | Static functions or properties in generic type                                       | ❌        | ❌   | 
 | Generic parameters in functions: `func f<T: A & B>(x: T)`                            | ❌        | ✅   |
 | Generic return values in functions: `func f<T: A & B>() -> T`                        | ❌        | ❌   |

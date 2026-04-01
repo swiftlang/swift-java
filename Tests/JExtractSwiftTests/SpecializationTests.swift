@@ -43,7 +43,7 @@ struct SpecializationTests {
       public var name: String
     }
 
-    public struct Pet {
+    public struct Tool {
       public var name: String
     }
 
@@ -52,7 +52,7 @@ struct SpecializationTests {
     }
 
     public typealias FishBox = Box<Fish>
-    public typealias PetBox = Box<Pet>
+    public typealias ToolBox = Box<Tool>
     """#
 
   // ==== -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ struct SpecializationTests {
 
     // Both specialized types should be registered
     #expect(translator.importedTypes["FishBox"] != nil, "FishBox should be in importedTypes")
-    #expect(translator.importedTypes["PetBox"] != nil, "PetBox should be in importedTypes")
+    #expect(translator.importedTypes["ToolBox"] != nil, "ToolBox should be in importedTypes")
 
     // The base generic type remains in importedTypes (not removed)
     let baseBox = try #require(translator.importedTypes["Box"])
@@ -78,16 +78,16 @@ struct SpecializationTests {
 
     // Specialized types link back to their base
     let fishBox = try #require(translator.importedTypes["FishBox"])
-    let petBox = try #require(translator.importedTypes["PetBox"])
+    let toolBox = try #require(translator.importedTypes["ToolBox"])
     #expect(fishBox.isSpecialization)
-    #expect(petBox.isSpecialization)
+    #expect(toolBox.isSpecialization)
 
     // Verify effective names are distinct
     #expect(fishBox.effectiveJavaName == "FishBox")
-    #expect(petBox.effectiveJavaName == "PetBox")
+    #expect(toolBox.effectiveJavaName == "ToolBox")
 
     #expect(fishBox.effectiveSwiftTypeName == "Box<Fish>")
-    #expect(petBox.effectiveSwiftTypeName == "Box<Pet>")
+    #expect(toolBox.effectiveSwiftTypeName == "Box<Tool>")
 
     // Verify new generic-model properties
     #expect(fishBox.genericParameterNames == ["Element"])
@@ -96,14 +96,14 @@ struct SpecializationTests {
     #expect(fishBox.baseTypeName == "Box")
     #expect(fishBox.specializedTypeName == "FishBox")
 
-    #expect(petBox.genericParameterNames == ["Element"])
-    #expect(petBox.genericArguments == ["Element": "Pet"])
-    #expect(petBox.isFullySpecialized)
-    #expect(petBox.baseTypeName == "Box")
-    #expect(petBox.specializedTypeName == "PetBox")
+    #expect(toolBox.genericParameterNames == ["Element"])
+    #expect(toolBox.genericArguments == ["Element": "Tool"])
+    #expect(toolBox.isFullySpecialized)
+    #expect(toolBox.baseTypeName == "Box")
+    #expect(toolBox.specializedTypeName == "ToolBox")
 
     // Both wrappers delegate to the same base type
-    #expect(fishBox.specializationBaseType === petBox.specializationBaseType, "Both should wrap the same base Box type")
+    #expect(fishBox.specializationBaseType === toolBox.specializationBaseType, "Both should wrap the same base Box type")
     #expect(fishBox.specializationBaseType === translator.importedTypes["Box"], "Base should be the original Box")
   }
 
@@ -119,7 +119,7 @@ struct SpecializationTests {
     #expect(specializations.count == 2, "Should have exactly 2 specializations for Box")
 
     let javaNames = specializations.map(\.effectiveJavaName).sorted()
-    #expect(javaNames == ["FishBox", "PetBox"])
+    #expect(javaNames == ["FishBox", "ToolBox"])
   }
 
   // ==== -----------------------------------------------------------------------
@@ -151,8 +151,8 @@ struct SpecializationTests {
     )
   }
 
-  @Test("PetBox Java class has base methods but not Fish-constrained methods")
-  func petBoxJavaClass() throws {
+  @Test("ToolBox Java class has base methods but not Fish-constrained methods")
+  func toolBoxJavaClass() throws {
     try assertOutput(
       input: multiSpecializationInput,
       .jni,
@@ -160,20 +160,20 @@ struct SpecializationTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         // Class declaration
-        "public final class PetBox implements JNISwiftInstance {",
+        "public final class ToolBox implements JNISwiftInstance {",
         // Base method from Box<Element>
         "public long count()",
       ],
     )
 
-    // Verify observeTheFish does NOT appear inside PetBox's class body
+    // Verify observeTheFish does NOT appear inside ToolBox's class body
     var config = Configuration()
     config.swiftModule = "SwiftModule"
     let translator = Swift2JavaTranslator(config: config)
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
-    let petBox = try #require(translator.importedTypes["PetBox"])
-    let methodNames = petBox.methods.map(\.name)
-    #expect(!methodNames.contains("observeTheFish"), "PetBox should not have Fish-constrained method")
+    let toolBox = try #require(translator.importedTypes["ToolBox"])
+    let methodNames = toolBox.methods.map(\.name)
+    #expect(!methodNames.contains("observeTheFish"), "ToolBox should not have Fish-constrained method")
   }
 
   @Test("Single specialization generates expected Java class")

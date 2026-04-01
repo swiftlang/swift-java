@@ -110,16 +110,23 @@ class SwiftTypeLookupContext {
     case .protocolDecl(let node):
       typeDecl = try nominalTypeDeclaration(for: node, sourceFilePath: sourceFilePath)
     case .extensionDecl(let node):
-      // For extensions, we have to perform a unqualified lookup,
-      // as the extentedType is just the identifier of the type.
+      // For extensions, we need to resolve the extended type to find the
+      // actual nominal type declaration. The extended type might be a simple
+      // identifier (e.g. `extension Foo`) or a member type
+      // (e.g. `extension P256._ARCV1`).
 
-      guard case .identifierType(let id) = Syntax(node.extendedType).as(SyntaxEnum.self),
+      if case .identifierType(let id) = Syntax(node.extendedType).as(SyntaxEnum.self),
         let lookupResult = try unqualifiedLookup(name: Identifier(id.name)!, from: node)
-      else {
-        throw TypeLookupError.notType(Syntax(node))
+      {
+        typeDecl = lookupResult
+      } else {
+        // For member types (e.g. P256._ARCV1), resolve through SwiftType
+        let swiftType = try SwiftType(node.extendedType, lookupContext: self)
+        guard let nominalDecl = swiftType.asNominalTypeDeclaration else {
+          throw TypeLookupError.notType(Syntax(node))
+        }
+        typeDecl = nominalDecl
       }
-
-      typeDecl = lookupResult
     case .typeAliasDecl:
       fatalError("typealias not implemented")
     case .associatedTypeDecl:
