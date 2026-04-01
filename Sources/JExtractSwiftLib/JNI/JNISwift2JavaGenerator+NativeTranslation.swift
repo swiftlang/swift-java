@@ -125,6 +125,16 @@ extension JNISwift2JavaGenerator {
               parameterName: parameterName
             )
 
+          case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: .array(.byte))
+              ],
+              conversion: .jniByteArrayToUnsafeRawBufferPointer(.placeholder, name: parameterName),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
             // Handled as wrapped struct
             break
@@ -1154,6 +1164,9 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(inner)`
     indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
+    /// Converts a jbyteArray to UnsafeRawBufferPointer via GetByteArrayElements + defer
+    indirect case jniByteArrayToUnsafeRawBufferPointer(NativeSwiftConversionStep, name: String)
+
     /// Constructs a Swift tuple from individually-converted elements.
     /// E.g. `(label0: conv0, conv1)` for `(label0: Int, String)`
     indirect case tupleConstruct(elements: [(label: String?, conversion: NativeSwiftConversionStep)])
@@ -1712,6 +1725,21 @@ extension JNISwift2JavaGenerator {
       case .labelessInitializer(let inner, let swiftType):
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(\(inner))"
+
+      case .jniByteArrayToUnsafeRawBufferPointer(let inner, let name):
+        let inner = inner.render(&printer, placeholder)
+        let countVar = "\(name)$count"
+        let ptrVar = "\(name)$ptr"
+        let rbpVar = "\(name)$rbp"
+        printer.print(
+          """
+          let \(countVar) = Int(environment.interface.GetArrayLength(environment, \(inner)))
+          let \(ptrVar) = environment.interface.GetByteArrayElements(environment, \(inner), nil)!
+          defer { environment.interface.ReleaseByteArrayElements(environment, \(inner), \(ptrVar), jint(JNI_ABORT)) }
+          let \(rbpVar) = UnsafeRawBufferPointer(start: \(ptrVar), count: \(countVar))
+          """
+        )
+        return rbpVar
 
       case .tupleConstruct(let elements):
         let parts = elements.enumerated().map { idx, element in

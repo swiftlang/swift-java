@@ -58,4 +58,5 @@ extension JavaType {
   static var javaUtilUUID: JavaType {
     .class(package: "java.util", name: "UUID")
   }
+
 }
