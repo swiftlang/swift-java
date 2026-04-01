@@ -578,4 +578,53 @@ final class DataImportTests {
     )
   }
 
+  // ==== -----------------------------------------------------------------------
+  // MARK: JNI DataProtocol generic parameter
+
+  @Test("Import DataProtocol: JNI generic parameter")
+  func dataProtocol_jni_genericParameter() throws {
+    let text = """
+      import Foundation
+
+      public struct MyResult {
+        public init() {}
+      }
+      public func processData<D: DataProtocol>(data: D) -> MyResult
+      """
+
+    try assertOutput(
+      input: text,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        // The Java binding must have <D extends DataProtocol> type parameter
+        """
+        public static <D extends DataProtocol> MyResult processData(D data, SwiftArena swiftArena) {
+        """
+      ]
+    )
+  }
+
+  @Test("Import DataProtocol: JNI multiple generic parameters")
+  func dataProtocol_jni_multipleGenericParameters() throws {
+    let text = """
+      import Foundation
+
+      public func verify<D1: DataProtocol, D2: DataProtocol>(first: D1, second: D2) -> Bool
+      """
+
+    try assertOutput(
+      input: text,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        public static <D1 extends DataProtocol, D2 extends DataProtocol> boolean verify(D1 first, D2 second) {
+        """
+      ]
+    )
+  }
+
 }

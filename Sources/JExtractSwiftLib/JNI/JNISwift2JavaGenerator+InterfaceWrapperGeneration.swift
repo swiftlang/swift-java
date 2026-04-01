@@ -25,6 +25,13 @@ extension JNISwift2JavaGenerator {
     var wrappers = [ImportedNominalType: JavaInterfaceSwiftWrapper]()
 
     for type in types where type.swiftNominal.kind == .protocol {
+      // Skip protocols that have a known representative concrete type (e.g. DataProtocol).
+      if let knownKind = type.swiftNominal.knownTypeKind,
+        SwiftKnownTypes.representativeType(of: knownKind) != nil
+      {
+        continue
+      }
+
       do {
         let translator = JavaInterfaceProtocolWrapperGenerator()
         wrappers[type] = try translator.generate(for: type)

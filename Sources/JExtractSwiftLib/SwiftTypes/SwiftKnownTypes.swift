@@ -152,4 +152,12 @@ struct SwiftKnownTypes {
     default: return nil
     }
   }
+
+  /// Returns true if the given protocol kind has a representative concrete type
+  static func hasRepresentativeType(_ knownProtocol: SwiftKnownTypeDeclKind) -> Bool {
+    switch knownProtocol {
+    case .foundationDataProtocol, .essentialsDataProtocol: return true
+    default: return false
+    }
+  }
 }
