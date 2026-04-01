@@ -14,7 +14,7 @@
 
 enum JNICaching {
   static func cacheName(for type: ImportedNominalType) -> String {
-    cacheName(for: type.swiftNominal.qualifiedName)
+    cacheName(for: type.effectiveJavaName)
   }
 
   static func cacheName(for type: SwiftNominalType) -> String {

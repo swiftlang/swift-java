@@ -22,5 +22,6 @@ struct SwiftJavaMacrosPlugin: CompilerPlugin {
     JavaClassMacro.self,
     JavaFieldMacro.self,
     JavaMethodMacro.self,
+    JavaExportMacro.self,
   ]
 }

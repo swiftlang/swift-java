@@ -52,6 +52,9 @@ public final class Swift2JavaTranslator {
   /// type representation.
   package var importedTypes: [String: ImportedNominalType] = [:]
 
+  /// Specializations of generic types that will get their concrete Java declarations, "as if" they were independent types
+  package var specializations: [ImportedNominalType: Set<ImportedNominalType>] = [:]
+
   var lookupContext: SwiftTypeLookupContext! = nil
 
   var symbolTable: SwiftSymbolTable! {
@@ -104,6 +107,9 @@ extension Swift2JavaTranslator {
       log.trace("Analyzing \(input.path)")
       visitor.visit(inputFile: input)
     }
+
+    // Apply any specializations registered after their target types were visited
+    visitor.applyPendingSpecializations()
 
     self.visitFoundationDeclsIfNeeded(with: visitor)
   }

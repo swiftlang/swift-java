@@ -31,7 +31,7 @@ extension ImplicitlyUnwrappedOptionalTypeSyntax {
       wrappedType: wrappedType,
       self.unexpectedBetweenWrappedTypeAndExclamationMark,
       self.unexpectedAfterExclamationMark,
-      trailingTrivia: self.trailingTrivia
+      trailingTrivia: self.trailingTrivia,
     )
   }
 }
@@ -128,7 +128,9 @@ extension WithModifiersSyntax {
 }
 
 extension AttributeListSyntax.Element {
-  /// Whether this node has `SwiftJava` attributes.
+  /// Whether this node has `SwiftJava` wrapping attributes (types that wrap Java classes).
+  /// These are skipped during jextract because they represent Java->Swift wrappers.
+  /// Note: `@JavaExport` is NOT included here — it forces export of Swift types to Java.
   var isJava: Bool {
     guard case let .attribute(attr) = self else {
       // FIXME: Handle #if.
@@ -142,6 +144,14 @@ extension AttributeListSyntax.Element {
     default:
       return false
     }
+  }
+
+  /// Whether this is a `@JavaExport` attribute (used on typealiases for specialization,
+  /// or on struct/class/enum to force-include them even when excluded by filters)
+  var isJavaExport: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "JavaExport"
   }
 }
 
@@ -260,7 +270,7 @@ extension DeclSyntaxProtocol {
                 .with(\.accessorBlock, nil)
                 .with(\.initializer, nil)
             }
-          )
+          ),
         )
         .triviaSanitizedDescription
     case .enumCaseDecl(let node):

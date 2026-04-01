@@ -49,17 +49,17 @@ extension JNISwift2JavaGenerator {
     // Each parent type goes into its own file
     // any nested types are printed inside the body as `static class`
     for (_, ty) in importedTypes.filter({ _, type in type.parent == nil }) {
-      let filename = "\(ty.swiftNominal.name).java"
+      let filename = "\(ty.effectiveJavaSimpleName).java"
       logger.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
 
       if let outputFile = try printer.writeContents(
         outputDirectory: javaOutputDirectory,
         javaPackagePath: javaPackagePath,
-        filename: filename
+        filename: filename,
       ) {
         exportedFileNames.append(outputFile.path(percentEncoded: false))
-        logger.info("[swift-java] Generated: \(ty.swiftNominal.name.bold).java (at \(outputFile))")
+        logger.info("[swift-java] Generated: \(ty.effectiveJavaSimpleName.bold).java (at \(outputFile))")
       }
     }
 
@@ -70,7 +70,7 @@ extension JNISwift2JavaGenerator {
     if let outputFile = try printer.writeContents(
       outputDirectory: javaOutputDirectory,
       javaPackagePath: javaPackagePath,
-      filename: filename
+      filename: filename,
     ) {
       exportedFileNames.append(outputFile.path(percentEncoded: false))
       logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
@@ -82,7 +82,7 @@ extension JNISwift2JavaGenerator {
       try exportedFileNames.joined(separator: "\n").write(
         to: outputPath,
         atomically: true,
-        encoding: .utf8
+        encoding: .utf8,
       )
       logger.info("Generated file at \(outputPath)")
     }
@@ -151,7 +151,7 @@ extension JNISwift2JavaGenerator {
     }
     let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: ", "))"
 
-    printer.printBraceBlock("public interface \(decl.swiftNominal.name)\(extendsString)") { printer in
+    printer.printBraceBlock("public interface \(decl.effectiveJavaSimpleName)\(extendsString)") { printer in
       for initializer in decl.initializers {
         self.logger.debug("Skipping static method '\(initializer.name)'")
       }
@@ -177,6 +177,15 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteType(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    let savedPrintingTypeName = self.currentPrintingTypeName
+    let savedPrintingType = self.currentPrintingType
+    self.currentPrintingTypeName = decl.effectiveJavaName
+    self.currentPrintingType = decl
+    defer {
+      self.currentPrintingTypeName = savedPrintingTypeName
+      self.currentPrintingType = savedPrintingType
+    }
+
     printNominal(&printer, decl) { printer in
       printer.print(
         """
@@ -211,12 +220,14 @@ extension JNISwift2JavaGenerator {
         */
         """
       )
+      // Specialized types are concrete — no selfTypePointer needed
+      let isEffectivelyGeneric = decl.swiftNominal.isGeneric && !decl.isSpecialization
       var swiftPointerParams = ["selfPointer"]
-      if decl.swiftNominal.isGeneric {
+      if isEffectivelyGeneric {
         swiftPointerParams.append("selfTypePointer")
       }
       let swiftPointerArg = swiftPointerParams.map { "long \($0)" }.joined(separator: ", ")
-      printer.printBraceBlock("private \(decl.swiftNominal.name)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
+      printer.printBraceBlock("private \(decl.effectiveJavaSimpleName)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
         for param in swiftPointerParams {
           printer.print(
             """
@@ -234,29 +245,25 @@ extension JNISwift2JavaGenerator {
         )
       }
       printer.println()
-      let genericClause =
-        if decl.swiftNominal.isGeneric {
-          "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
-        } else {
-          ""
-        }
+      let genericClause = decl.javaGenericClause
+      let javaName = decl.effectiveJavaSimpleName
       printer.print(
         """
-        /** 
-         * Assume that the passed {@code long} represents a memory address of a {@link \(decl.swiftNominal.name)}.
+        /**
+         * Assume that the passed {@code long} represents a memory address of a {@link \(javaName)}.
          * <p/>
          * Warnings:
          * <ul>
-         *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(decl.swiftNominal.name) types.</li>
+         *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(javaName) types.</li>
          *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
          * </ul>
          */
-        public static\(genericClause) \(decl.swiftNominal.name)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
-          return new \(decl.swiftNominal.name)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
+        public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
+          return new \(javaName)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), swiftArena);
         }
 
-        public static\(genericClause) \(decl.swiftNominal.name)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
-          return new \(decl.swiftNominal.name)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+        public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
+          return new \(javaName)\(genericClause)(\(swiftPointerParams.joined(separator: ", ")), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
         }
         """
       )
@@ -280,7 +287,7 @@ extension JNISwift2JavaGenerator {
         """
       )
 
-      if decl.swiftNominal.isGeneric {
+      if isEffectivelyGeneric {
         printer.print("/** Pointer to the metatype of Self */")
         printer.print("private final long selfTypePointer;")
       }
@@ -374,7 +381,7 @@ extension JNISwift2JavaGenerator {
   private func printNominal(
     _ printer: inout CodePrinter,
     _ decl: ImportedNominalType,
-    body: (inout CodePrinter) -> Void
+    body: (inout CodePrinter) -> Void,
   ) {
     if decl.swiftNominal.isSendable {
       printer.print("@ThreadSafe // Sendable")
@@ -390,14 +397,10 @@ extension JNISwift2JavaGenerator {
       .filter { $0.kind == .protocol }
       .map(\.name)
     let implementsClause = implements.joined(separator: ", ")
-    let genericClause =
-      if decl.swiftNominal.isGeneric {
-        "<\(decl.swiftNominal.genericParameters.map(\.name).joined(separator: ", "))>"
-      } else {
-        ""
-      }
+    // Specialized types are concrete — no generic clause on the Java side
+    let genericClause = decl.javaGenericClause
     printer.printBraceBlock(
-      "\(modifiers.joined(separator: " ")) class \(decl.swiftNominal.name)\(genericClause) implements \(implementsClause)"
+      "\(modifiers.joined(separator: " ")) class \(decl.effectiveJavaSimpleName)\(genericClause) implements \(implementsClause)"
     ) { printer in
       body(&printer)
     }
@@ -466,8 +469,9 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    if !decl.cases.isEmpty && decl.swiftNominal.isGeneric {
-      self.logger.debug("Skipping generic static initializers in '\(decl.swiftNominal.name)'")
+    let isEffectivelyGeneric = decl.swiftNominal.isGeneric && !decl.isSpecialization
+    if !decl.cases.isEmpty && isEffectivelyGeneric {
+      self.logger.debug("Skipping generic static initializers in '\(decl.effectiveJavaSimpleName)'")
       return
     }
 
@@ -508,7 +512,7 @@ extension JNISwift2JavaGenerator {
   private func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    skipMethodBody: Bool = false
+    skipMethodBody: Bool = false,
   ) {
     guard translatedDecl(for: decl) != nil else {
       // Failed to translate. Skip.
@@ -527,7 +531,7 @@ extension JNISwift2JavaGenerator {
   /// * User-facing functional interfaces.
   private func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ImportedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     if translated.functionTypes.isEmpty {
@@ -548,7 +552,7 @@ extension JNISwift2JavaGenerator {
   /// Print "wrapper" functional interface representing a Swift closure type.
   func printJavaBindingWrapperFunctionTypeHelper(
     _ printer: inout CodePrinter,
-    _ functionType: TranslatedFunctionType
+    _ functionType: TranslatedFunctionType,
   ) {
     let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
 
@@ -565,7 +569,7 @@ extension JNISwift2JavaGenerator {
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ decl: ImportedFunc,
-    skipMethodBody: Bool
+    skipMethodBody: Bool,
   ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       fatalError("Decl was not translated, \(decl)")
@@ -577,7 +581,7 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
     importedFunc: ImportedFunc? = nil,
-    skipMethodBody: Bool
+    skipMethodBody: Bool,
   ) {
     var modifiers = ["public"]
     if translatedDecl.isStatic {
@@ -622,7 +626,7 @@ extension JNISwift2JavaGenerator {
         TranslatedDocumentation.printDocumentation(
           importedFunc: importedFunc,
           translatedDecl: translatedDecl,
-          in: &printer
+          in: &printer,
         )
       }
       var modifiers = modifiers
@@ -654,7 +658,7 @@ extension JNISwift2JavaGenerator {
       TranslatedDocumentation.printDocumentation(
         importedFunc: importedFunc,
         translatedDecl: translatedDecl,
-        in: &printer
+        in: &printer,
       )
     }
     let signature =
@@ -691,7 +695,7 @@ extension JNISwift2JavaGenerator {
 
   private func printDowncall(
     _ printer: inout CodePrinter,
-    _ translatedDecl: TranslatedFunctionDecl
+    _ translatedDecl: TranslatedFunctionDecl,
   ) {
     let translatedFunctionSignature = translatedDecl.translatedFunctionSignature
 
@@ -725,8 +729,9 @@ extension JNISwift2JavaGenerator {
     //=== Part 3: Downcall.
     // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
     // using the registry?
+    let effectiveParentName = self.currentPrintingTypeName ?? translatedDecl.parentName
     let downcall =
-      "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+      "\(effectiveParentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.resultType.javaType.isVoid {
@@ -744,7 +749,8 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    if type.swiftNominal.isGeneric {
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
+    if isEffectivelyGeneric {
       printer.print("@Override")
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
         printer.print("return this.selfTypePointer;")
@@ -755,7 +761,7 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock("public long $typeMetadataAddress()") { printer in
         // INFO: We are omitting `CallTraces.traceDowncall` here.
         // It internally calls `toString`, which in turn calls `$typeMetadataAddress`, creating an infinite loop.
-        printer.print("return \(type.swiftNominal.name).$typeMetadataAddressDowncall();")
+        printer.print("return \(type.effectiveJavaSimpleName).$typeMetadataAddressDowncall();")
       }
     }
   }
@@ -763,15 +769,17 @@ extension JNISwift2JavaGenerator {
   /// Prints the destroy function for a `JNISwiftInstance`
   private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let funcName = "$createDestroyFunction"
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
+    let typeName = type.effectiveJavaSimpleName
     printer.print("@Override")
     printer.printBraceBlock("public Runnable \(funcName)()") { printer in
       printer.print("long self$ = this.$memoryAddress();")
       printer.print("long selfType$ = this.$typeMetadataAddress();")
-      if type.swiftNominal.isGeneric {
+      if isEffectivelyGeneric {
         printer.print(
           """
           if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+            CallTraces.traceDowncall("\(typeName).\(funcName)",
                 "this", this,
                 "self", self$,
                 "selfType", selfType$);
@@ -780,7 +788,7 @@ extension JNISwift2JavaGenerator {
             @Override
             public void run() {
               if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$, "selfType", selfType$);
+                CallTraces.traceDowncall("\(typeName).$destroy", "self", self$, "selfType", selfType$);
               }
               SwiftObjects.destroy(self$, selfType$);
             }
@@ -791,7 +799,7 @@ extension JNISwift2JavaGenerator {
         printer.print(
           """
           if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(type.swiftNominal.name).\(funcName)",
+            CallTraces.traceDowncall("\(typeName).\(funcName)",
                 "this", this,
                 "self", self$);
           }
@@ -799,7 +807,7 @@ extension JNISwift2JavaGenerator {
             @Override
             public void run() {
               if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("\(type.swiftNominal.name).$destroy", "self", self$);
+                CallTraces.traceDowncall("\(typeName).$destroy", "self", self$);
               }
               SwiftObjects.destroy(self$, selfType$);
             }

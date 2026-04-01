@@ -112,21 +112,25 @@ public struct Configuration: Codable {
     importedModuleStubs?.keys.contains(moduleName) ?? false
   }
 
-  /// Monomorphization entries for generic types, mapping a qualified Swift type
-  /// name to a concrete specialization with a custom Java-facing name.
+  /// Specialization entries for generic types, mapping a Java-facing name
+  /// to its base Swift type and concrete type arguments.
   ///
   /// Example:
   /// ```json
   /// {
-  ///   "monomorphize": {
-  ///     "Tank": {
-  ///       "javaName": "FishTank",
+  ///   "specialize": {
+  ///     "FishBox": {
+  ///       "base": "Box",
   ///       "typeArgs": {"Element": "Fish"}
+  ///     },
+  ///     "PetBox": {
+  ///       "base": "Box",
+  ///       "typeArgs": {"Element": "Pet"}
   ///     }
   ///   }
   /// }
   /// ```
-  public var monomorphize: [String: MonomorphizeEntry]?
+  public var specialize: [String: SpecializationConfigEntry]?
 
   // ==== wrap-java ---------------------------------------------------------
 
@@ -468,19 +472,21 @@ public struct ConfigurationError: Error {
 }
 
 // ==== -----------------------------------------------------------------------
-// MARK: MonomorphizeEntry
+// MARK: SpecializationConfigEntry
 
-/// Configuration entry for monomorphizing a generic type into a concrete Java class
-public struct MonomorphizeEntry: Codable, Sendable {
-  /// Mapping from generic parameter name to concrete type (e.g. {"T": "Fish"})
+/// Configuration entry for specializing a generic type into a concrete Java class.
+/// The dictionary key is the Java-facing name; this entry provides the base type
+/// and type argument mapping.
+public struct SpecializationConfigEntry: Codable, Sendable {
+  /// The base Swift type name (e.g. "Box")
+  public var base: String
+
+  /// Mapping from generic parameter name to concrete type (e.g. {"Element": "Fish"})
   public var typeArgs: [String: String]
 
-  /// The Java-facing class name (e.g. "FishTank")
-  public var javaName: String
-
-  public init(typeArgs: [String: String], javaName: String) {
+  public init(base: String, typeArgs: [String: String]) {
+    self.base = base
     self.typeArgs = typeArgs
-    self.javaName = javaName
   }
 }
 

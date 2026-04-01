@@ -14,18 +14,15 @@
 
 package org.swift.swiftkit.ffm;
 
-import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.core.util.PlatformUtils;
-import org.swift.swiftkit.ffm.SwiftRuntime.swiftjava;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.swift.swiftkit.core.CallTraces.traceDowncall;
 import static org.swift.swiftkit.core.util.StringUtils.stripPrefix;
