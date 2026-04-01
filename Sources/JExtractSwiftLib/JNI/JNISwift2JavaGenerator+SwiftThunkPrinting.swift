@@ -151,7 +151,7 @@ extension JNISwift2JavaGenerator {
         global:
         \(symbolLines)
         local: *;
-      };"
+      };
       """
 
     try contents.write(
