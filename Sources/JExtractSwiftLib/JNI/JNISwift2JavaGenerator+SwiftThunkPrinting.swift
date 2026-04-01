@@ -1014,7 +1014,7 @@ extension JNISwift2JavaGenerator {
     printer.print(
       """
       assert(selfPointer != 0, "selfPointer memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+      let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
       let selfPointer$ = UnsafeMutablePointer<\(concreteSwiftType)>(bitPattern: selfPointerBits$)
       guard let selfPointer$ else {
         fatalError("selfPointer memory address was null in call to \\(#function)!")
