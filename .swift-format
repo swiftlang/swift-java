@@ -18,7 +18,6 @@
   "maximumBlankLines" : 2,
   "spacesBeforeEndOfLineComments" : 1, 
   "multiElementCollectionTrailingCommas" : true,
-  "multilineTrailingCommaBehavior" : "alwaysUsed",
   "respectsExistingLineBreaks" : true,
   "prioritizeKeepingFunctionOutputTogether" : true,
   "rules" : {
