@@ -886,7 +886,7 @@ extension JNISwift2JavaGenerator {
                       .constant("pointer$"),
                       swiftType: elementType,
                       allowNil: false,
-                      convertLongFromJNI: false
+                      convertFromJNI: false
                     )
                   )
                 )
@@ -1035,7 +1035,7 @@ extension JNISwift2JavaGenerator {
       NativeSwiftConversionStep,
       swiftType: SwiftType,
       allowNil: Bool = false,
-      convertLongFromJNI: Bool = true
+      convertFromJNI: Bool = true
     )
 
     indirect case extractMetatypeValue(NativeSwiftConversionStep)
@@ -1223,11 +1223,11 @@ extension JNISwift2JavaGenerator {
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
           """
-          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment))) else {
+          guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(fromJNI: \(typeMetadataVariableName), in: environment)) else {
             fatalError("\(typeMetadataVariableName) memory address was null")
           }
           let \(inner)DynamicType$: Any.Type = unsafeBitCast(\(inner)TypeMetadataPointer$, to: Any.Type.self)
-          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment))) else {
+          guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(fromJNI: \(inner), in: environment)) else {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
@@ -1242,14 +1242,14 @@ extension JNISwift2JavaGenerator {
         )
         return existentialName
 
-      case .extractSwiftValue(let inner, let swiftType, let allowNil, let convertLongFromJNI):
+      case .extractSwiftValue(let inner, let swiftType, let allowNil, let convertFromJNI):
         let inner = inner.render(&printer, placeholder)
         let pointerName = "\(inner)$"
         if !allowNil {
           printer.print(#"assert(\#(inner) != 0, "\#(inner) memory address was null")"#)
         }
-        if convertLongFromJNI {
-          printer.print("let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))")
+        if convertFromJNI {
+          printer.print("let \(inner)Bits$ = Int(fromJNI: \(inner), in: environment)")
         } else {
           printer.print("let \(inner)Bits$ = Int(\(inner))")
         }
@@ -1270,7 +1270,7 @@ extension JNISwift2JavaGenerator {
         let pointerName = "\(inner)$"
         printer.print(
           """
-          let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
+          let \(inner)Bits$ = Int(fromJNI: \(inner), in: environment)
           guard let \(pointerName) = UnsafeRawPointer(bitPattern: \(inner)Bits$) else {
             fatalError("\(inner) metadata address was null")
           }
@@ -1286,7 +1286,7 @@ extension JNISwift2JavaGenerator {
           """
           let \(pointerName) = UnsafeMutablePointer<\(swiftType)>.allocate(capacity: 1)
           \(pointerName).initialize(to: \(inner))
-          let \(bitsName) = Int64(Int(bitPattern: \(pointerName)))
+          let \(bitsName) = Int(bitPattern: \(pointerName))
           """
         )
         return bitsName
@@ -1478,7 +1478,7 @@ extension JNISwift2JavaGenerator {
             """
             environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, \(inner))
             let metadataPointer = unsafeBitCast(\(swiftFunctionResultType).self, to: UnsafeRawPointer.self)
-            let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+            let metadataPointerBits$ = Int(bitPattern: metadataPointer)
             environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             """
           )

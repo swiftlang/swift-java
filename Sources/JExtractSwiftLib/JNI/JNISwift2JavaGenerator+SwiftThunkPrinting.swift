@@ -809,7 +809,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         let metadataPointer = unsafeBitCast(\(type.swiftNominal.qualifiedName).self, to: UnsafeRawPointer.self)
-        return Int64(Int(bitPattern: metadataPointer)).getJNIValue(in: environment)
+        return Int(bitPattern: metadataPointer).getJNIValue(in: environment)
         """
       )
     }
@@ -990,7 +990,7 @@ extension JNISwift2JavaGenerator {
         fatalError("Missing JNIEnv in downcall to \\(#function)")
       }
       assert(\(selfPointerParam.name) != 0, "\(selfPointerParam.name) memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: \(selfPointerParam.name), in: env$))
+      let selfPointerBits$ = Int(fromJNI: \(selfPointerParam.name), in: env$)
       guard let \(newSelfParamName) = UnsafeMutablePointer<\(swiftParentName)>(bitPattern: selfPointerBits$) else {
         fatalError("selfPointer memory address was null in call to \\(#function)!")
       }

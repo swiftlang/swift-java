@@ -315,7 +315,7 @@ struct JNIAsyncTests {
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
           assert(c != 0, "c memory address was null")
-          let cBits$ = Int(Int64(fromJNI: c, in: environment))
+          let cBits$ = Int(fromJNI: c, in: environment)
           let c$ = UnsafeMutablePointer<MyClass>(bitPattern: cBits$)
           guard let c$ else {
             fatalError("c memory address was null in call to \\(#function)!")
@@ -334,7 +334,7 @@ struct JNIAsyncTests {
                 environment = try! JavaVirtualMachine.shared().environment()
                 let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
                 result$.initialize(to: swiftResult$)
-                let resultBits$ = Int64(Int(bitPattern: result$))
+                let resultBits$ = Int(bitPattern: result$)
                 let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
                 _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
               }
@@ -351,7 +351,7 @@ struct JNIAsyncTests {
               environment = try! JavaVirtualMachine.shared().environment()
               let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
               result$.initialize(to: swiftResult$)
-              let resultBits$ = Int64(Int(bitPattern: result$))
+              let resultBits$ = Int(bitPattern: result$)
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
               _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
             }

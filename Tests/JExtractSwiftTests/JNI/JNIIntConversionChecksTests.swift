@@ -73,10 +73,10 @@ struct JNIIntConversionChecksTests {
           #endif
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
           result$.initialize(to: MyStruct.init(normalInt: Int(fromJNI: normalInt, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -98,10 +98,10 @@ struct JNIIntConversionChecksTests {
           #endif
           let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
           result$.initialize(to: MyStruct.init(unsignedInt: UInt(fromJNI: unsignedInt, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -122,14 +122,14 @@ struct JNIIntConversionChecksTests {
           }
           #endif
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           selfPointer$.pointee.unsignedInt = UInt(fromJNI: newValue, in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -144,7 +144,7 @@ struct JNIIntConversionChecksTests {
         @_cdecl("Java_com_example_swift_MyStruct__00024getUnsignedInt__J")
         public func Java_com_example_swift_MyStruct__00024getUnsignedInt__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
@@ -172,14 +172,14 @@ struct JNIIntConversionChecksTests {
           }
           #endif
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           selfPointer$.pointee.normalInt = Int(fromJNI: newValue, in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -200,14 +200,14 @@ struct JNIIntConversionChecksTests {
           }
           #endif
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
           return selfPointer$.pointee.dummyFunc(arg: Int(fromJNI: arg, in: environment)).getJNILocalRefValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }
@@ -228,7 +228,7 @@ struct JNIIntConversionChecksTests {
           }
           #endif
           assert(selfPointer != 0, "selfPointer memory address was null")
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointerBits$ = Int(fromJNI: selfPointer, in: environment)
           let selfPointer$ = UnsafeMutablePointer<MyStruct>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
@@ -257,10 +257,10 @@ struct JNIIntConversionChecksTests {
           #endif
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.secondCase(UInt(fromJNI: arg0, in: environment)))
-          let resultBits$ = Int64(Int(bitPattern: result$))
+          let resultBits$ = Int(bitPattern: result$)
           return resultBits$.getJNILocalRefValue(in: environment)
         }
-        """,
+        """
       ]
     )
   }

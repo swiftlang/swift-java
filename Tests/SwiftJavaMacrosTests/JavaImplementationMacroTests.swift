@@ -180,12 +180,12 @@ class JavaImplementationMacroTests: XCTestCase {
       @JavaImplementation("org.swift.swiftkit.core.collections.SwiftDictionaryMap")
       extension SwiftDictionaryMapJava {
         @JavaMethod("$size")
-        public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) -> Int32 {
+        public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int) -> Int32 {
           return 42
         }
 
         @JavaMethod("$destroy")
-        public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) {
+        public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int) {
           // cleanup
         }
       }
@@ -193,10 +193,10 @@ class JavaImplementationMacroTests: XCTestCase {
       expandedSource: """
 
         extension SwiftDictionaryMapJava {
-          public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) -> Int32 {
+          public static func _size(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int) -> Int32 {
               return 42
           }
-          public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int64) {
+          public static func _destroy(environment: UnsafeMutablePointer<JNIEnv?>!, pointer: Int) {
             // cleanup
           }
         }
@@ -205,8 +205,8 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024size")
-        public func __macro_local_5_sizefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) -> Int32.JNIType {
-          return SwiftDictionaryMapJava._size(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
+        public func __macro_local_5_sizefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int.JNIType) -> Int32.JNIType {
+          return SwiftDictionaryMapJava._size(environment: environment, pointer: Int(fromJNI: pointer, in: environment!))
           .getJNILocalRefValue(in: environment)
         }
 
@@ -214,8 +214,8 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024destroy")
-        public func __macro_local_8_destroyfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) {
-          return SwiftDictionaryMapJava._destroy(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
+        public func __macro_local_8_destroyfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int.JNIType) {
+          return SwiftDictionaryMapJava._destroy(environment: environment, pointer: Int(fromJNI: pointer, in: environment!))
         }
         """,
       macros: Self.javaImplementationMacros

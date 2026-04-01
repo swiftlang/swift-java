@@ -238,7 +238,7 @@ extension Int: JavaBoxable {
     let cls = environment.interface.FindClass(environment, "java/lang/Long")
     let methodID = environment.interface.GetMethodID(environment, cls, "<init>", "(J)V")
     var args = [jvalue()]
-    args[0].j = Int64(self).getJNIValue(in: environment)
+    args[0].j = self.getJNIValue(in: environment)
     return environment.interface.NewObjectA(environment, cls, methodID, &args)
   }
 
@@ -247,7 +247,7 @@ extension Int: JavaBoxable {
     let cls = environment.interface.GetObjectClass(environment, obj)
     let methodID = environment.interface.GetMethodID(environment, cls, "longValue", "()J")
     let result = environment.interface.CallLongMethodA(environment, obj, methodID, nil)
-    return Int(Int64(fromJNI: result, in: environment))
+    return Int(fromJNI: result, in: environment)
   }
 }
 
@@ -256,7 +256,7 @@ extension UInt: JavaBoxable {
     let cls = environment.interface.FindClass(environment, "java/lang/Long")
     let methodID = environment.interface.GetMethodID(environment, cls, "<init>", "(J)V")
     var args = [jvalue()]
-    args[0].j = Int64(bitPattern: UInt64(self)).getJNIValue(in: environment)
+    args[0].j = self.getJNIValue(in: environment)
     return environment.interface.NewObjectA(environment, cls, methodID, &args)
   }
 
@@ -265,7 +265,7 @@ extension UInt: JavaBoxable {
     let cls = environment.interface.GetObjectClass(environment, obj)
     let methodID = environment.interface.GetMethodID(environment, cls, "longValue", "()J")
     let result = environment.interface.CallLongMethodA(environment, obj, methodID, nil)
-    return UInt(UInt64(fromJNI: result, in: environment))
+    return UInt(fromJNI: result, in: environment)
   }
 }
 
