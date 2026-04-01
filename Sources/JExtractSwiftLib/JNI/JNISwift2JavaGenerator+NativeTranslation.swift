@@ -1164,7 +1164,7 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(inner)`
     indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
-    /// Converts a jbyteArray to UnsafeRawBufferPointer via GetByteArrayElements + defer
+    /// Converts a jbyteArray to UnsafeRawBufferPointer via GetByteArrayElements
     indirect case jniByteArrayToUnsafeRawBufferPointer(NativeSwiftConversionStep, name: String)
 
     /// Constructs a Swift tuple from individually-converted elements.
