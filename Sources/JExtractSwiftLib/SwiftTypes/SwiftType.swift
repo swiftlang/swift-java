@@ -258,7 +258,7 @@ extension SwiftNominalType.Parent: CustomStringConvertible {
 
 extension SwiftNominalType {
   var isSwiftJavaWrapper: Bool {
-    nominalTypeDecl.syntax?.attributes.contains(where: \.isJava) ?? false
+    nominalTypeDecl.syntax?.attributes.contains(where: \.isSwiftJavaMacro) ?? false
   }
 
   var isProtocol: Bool {

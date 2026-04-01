@@ -123,9 +123,9 @@ public struct Configuration: Codable {
   ///       "base": "Box",
   ///       "typeArgs": {"Element": "Fish"}
   ///     },
-  ///     "PetBox": {
+  ///     "ToolBox": {
   ///       "base": "Box",
-  ///       "typeArgs": {"Element": "Pet"}
+  ///       "typeArgs": {"Element": "Tool"}
   ///     }
   ///   }
   /// }

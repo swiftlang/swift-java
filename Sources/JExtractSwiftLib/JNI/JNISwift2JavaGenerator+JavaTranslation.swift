@@ -1198,39 +1198,6 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    /// Translate a single element type for tuple results on the Java side.
-    private func translateTupleElementResult(
-      type: SwiftType,
-      genericParameters: [SwiftGenericParameterDeclaration],
-      genericRequirements: [SwiftGenericRequirement],
-    ) throws -> (JavaType, JavaNativeConversionStep) {
-      switch type {
-      case .nominal(let nominalType):
-        if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-            throw JavaTranslationError.unsupportedSwiftType(type)
-          }
-          // Primitives: just read from array
-          return (javaType, .placeholder)
-        }
-
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(type)
-        }
-
-        let javaType = try translateGenericTypeParameter(
-          type,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements,
-        )
-        // JExtract class: wrap memory address
-        return (.long, .constructSwiftValue(.placeholder, javaType))
-
-      default:
-        throw JavaTranslationError.unsupportedSwiftType(type)
-      }
-    }
-
     func translateOptionalResult(
       wrappedType swiftType: SwiftType,
       resultName: String,

@@ -131,7 +131,7 @@ extension AttributeListSyntax.Element {
   /// Whether this node has `SwiftJava` wrapping attributes (types that wrap Java classes).
   /// These are skipped during jextract because they represent Java->Swift wrappers.
   /// Note: `@JavaExport` is NOT included here — it forces export of Swift types to Java.
-  var isJava: Bool {
+  var isSwiftJavaMacro: Bool {
     guard case let .attribute(attr) = self else {
       // FIXME: Handle #if.
       return false
