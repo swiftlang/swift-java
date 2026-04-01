@@ -35,3 +35,14 @@ public func getDataCount(_ data: Data) -> Int {
 public func compareData(_ data1: Data, _ data2: Data) -> Bool {
   data1 == data2
 }
+
+// ==== -----------------------------------------------------------------------
+// MARK: DataProtocol generic parameter
+
+public func getDataCountGeneric<D: DataProtocol>(_ data: D) -> Int {
+  data.count
+}
+
+public func compareDataGeneric<D1: DataProtocol, D2: DataProtocol>(_ data1: D1, _ data2: D2) -> Bool {
+  data1.elementsEqual(data2)
+}

@@ -1094,6 +1094,9 @@ extension JNISwift2JavaGenerator {
           case .foundationData, .essentialsData:
             return .class(package: nil, name: "Data")
 
+          case .foundationDataProtocol, .essentialsDataProtocol:
+            return .class(package: nil, name: "DataProtocol")
+
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID
 
