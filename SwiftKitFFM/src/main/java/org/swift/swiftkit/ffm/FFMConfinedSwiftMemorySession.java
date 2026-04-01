@@ -19,7 +19,7 @@ import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
-final class FFMConfinedSwiftMemorySession extends ConfinedSwiftMemorySession implements AllocatingSwiftArena, ClosableAllocatingSwiftArena {
+final class FFMConfinedSwiftMemorySession extends ConfinedSwiftMemorySession implements ClosableAllocatingSwiftArena {
     final Arena arena;
 
     public FFMConfinedSwiftMemorySession() {

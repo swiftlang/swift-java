@@ -17,7 +17,7 @@ import SwiftSyntaxMacros
 
 /// Marker macro for jextract: forces a Swift declaration to be exported to Java.
 ///
-/// When applied to a typealias, registers a monomorphization entry for generic types.
+/// When applied to a typealias, registers a specialization entry for generic types.
 /// When applied to a nominal type, force-includes it for export regardless of filters.
 ///
 /// This macro produces no code — it is purely a marker read by the jextract tool.
@@ -29,7 +29,6 @@ extension JavaExportMacro: PeerMacro {
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext,
   ) throws -> [DeclSyntax] {
-    // Marker-only macro — no code generation
     []
   }
 }
