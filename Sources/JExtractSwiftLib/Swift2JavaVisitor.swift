@@ -373,27 +373,20 @@ final class Swift2JavaVisitor {
     in parent: ImportedNominalType?,
     sourceFilePath: String
   ) {
-    let (clause, diagnostics) = node.activeClause(in: .jextractDefault)
-    for diagnostic in diagnostics {
-      self.log.info(diagnostic.debugDescription)
-    }
+    let (clause, _) = node.activeClause(in: .jextractDefault)
     if let clause, let elements = clause.elements {
       switch elements {
-      case .statements(let statements):
-        for codeItem in statements {
+      case .statements(let codeBlock):
+        for codeItem in codeBlock {
           if let declNode = codeItem.item.as(DeclSyntax.self) {
             self.visit(decl: declNode, in: parent, sourceFilePath: sourceFilePath)
           }
         }
-      case .switchCases:
-        break
-      case .decls(let decls):
-        for decl in decls {
-          self.visit(decl: decl.decl, in: parent, sourceFilePath: sourceFilePath)
+      case .decls(let memberBlock):
+        for memberItem in memberBlock {
+          self.visit(decl: memberItem.decl, in: parent, sourceFilePath: sourceFilePath)
         }
-      case .postfixExpression:
-        break
-      case .attributes:
+      default:
         break
       }
     }
