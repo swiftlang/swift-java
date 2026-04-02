@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import JExtractSwiftLib
-import Testing
-import SwiftJavaConfigurationShared
 import Foundation
+import JExtractSwiftLib
+import SwiftJavaConfigurationShared
+import Testing
 
 @Suite
 struct IfConfigTests {
@@ -75,50 +75,50 @@ struct IfConfigTests {
     try withTemporaryFile(
       suffix: "json",
       contents: """
-      {
-        "attributes": [],
-        "compilerVersion": {
-          "components": [6, 3]
-        },
-        "customConditions": [
-          "DEBUG"
-        ],
-        "endianness": "little",
-        "features": [],
-        "languageMode": {
-          "components": [5, 10]
-        },
-        "targetArchitectures": [],
-        "targetAtomicBitWidths": [],
-        "targetEnvironments": [],
-        "targetOSs": [],
-        "targetObjectFileFormats": [],
-        "targetPointerAuthenticationSchemes": [],
-        "targetPointerBitWidth": 64,
-        "targetRuntimes": []
-      }
-      """
+        {
+          "attributes": [],
+          "compilerVersion": {
+            "components": [6, 3]
+          },
+          "customConditions": [
+            "DEBUG"
+          ],
+          "endianness": "little",
+          "features": [],
+          "languageMode": {
+            "components": [5, 10]
+          },
+          "targetArchitectures": [],
+          "targetAtomicBitWidths": [],
+          "targetEnvironments": [],
+          "targetOSs": [],
+          "targetObjectFileFormats": [],
+          "targetPointerAuthenticationSchemes": [],
+          "targetPointerBitWidth": 64,
+          "targetRuntimes": []
+        }
+        """
     ) { staticBuildConfigFile in
       var config = Configuration()
       config.staticBuildConfigurationFile = staticBuildConfigFile.absoluteURL.path(percentEncoded: false)
 
       try assertOutput(
         input: """
-        #if DEBUG
-        public struct IsDebug {}
-        #else
-        public struct IsNotDebug {}
-        #endif
-        """,
+          #if DEBUG
+          public struct IsDebug {}
+          #else
+          public struct IsNotDebug {}
+          #endif
+          """,
         config: config,
         .ffm,
         .java,
         detectChunkByInitialLines: 1,
         expectedChunks: [
-          "public final class IsDebug",
+          "public final class IsDebug"
         ],
         notExpectedChunks: [
-          "public final class IsNotDebug",
+          "public final class IsNotDebug"
         ]
       )
     }
