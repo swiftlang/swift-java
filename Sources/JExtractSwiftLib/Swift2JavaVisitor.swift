@@ -16,6 +16,7 @@ import Foundation
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
+import SwiftIfConfig
 
 final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator
@@ -70,7 +71,8 @@ final class Swift2JavaVisitor {
       self.visit(subscriptDecl: node, in: parent)
     case .enumCaseDecl(let node):
       self.visit(enumCaseDecl: node, in: parent)
-
+    case .ifConfigDecl(let node):
+      self.visit(ifConfigDecl: node, in: parent, sourceFilePath: sourceFilePath)
     default:
       break
     }
@@ -363,6 +365,37 @@ final class Swift2JavaVisitor {
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
+    }
+  }
+
+  private func visit(
+    ifConfigDecl node: IfConfigDeclSyntax,
+    in parent: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
+    let (clause, diagnostics) = node.activeClause(in: .jextractDefault)
+    for diagnostic in diagnostics {
+      self.log.info(diagnostic.debugDescription)
+    }
+    if let clause, let elements = clause.elements {
+      switch elements {
+      case .statements(let statements):
+        for codeItem in statements {
+          if let declNode = codeItem.item.as(DeclSyntax.self) {
+            self.visit(decl: declNode, in: parent, sourceFilePath: sourceFilePath)
+          }
+        }
+      case .switchCases:
+        break
+      case .decls(let decls):
+        for decl in decls {
+          self.visit(decl: decl.decl, in: parent, sourceFilePath: sourceFilePath)
+        }
+      case .postfixExpression:
+        break
+      case .attributes:
+        break
+      }
     }
   }
 
