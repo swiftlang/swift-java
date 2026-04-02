@@ -46,7 +46,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     // The name of the configuration file SwiftJava.config from the target for
     // which we are generating Swift wrappers for Java classes.
     let configFile = sourceDir.appending(path: "swift-java.config")
-    let configuration = try readConfiguration(sourceDir: sourceDir)
+    let configuration = try readConfiguration(configPath: configFile)
 
     // We use the the usual maven-style structure of "src/[generated|main|test]/java/..."
     // that is common in JVM ecosystem
@@ -70,6 +70,13 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       //       as it depends on the contents of the input files. Therefore we have to implement this as a prebuild plugin.
       //       We'll have to make up some caching inside the tool so we don't re-parse files which have not changed etc.
     ]
+
+    if let staticBuildConfig = configuration?.staticBuildConfigurationFile {
+      guard let resolvedURL = URL(string: staticBuildConfig, relativeTo: configFile) else {
+        fatalError("Could not resolve 'staticBuildConfigurationFile' url")
+      }
+      arguments += ["--static-build-config", resolvedURL.absoluteURL.path(percentEncoded: false)]
+    }
 
     let dependentConfigFilesArguments = dependentConfigFiles.flatMap { moduleAndConfigFile in
       let (moduleName, configFile) = moduleAndConfigFile

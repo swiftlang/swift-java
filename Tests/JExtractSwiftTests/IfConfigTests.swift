@@ -14,6 +14,8 @@
 
 import JExtractSwiftLib
 import Testing
+import SwiftJavaConfigurationShared
+import Foundation
 
 @Suite
 struct IfConfigTests {
@@ -69,6 +71,60 @@ struct IfConfigTests {
   }
 
   @Test
+  func overrideWithStaticBuildConfigurationFile() throws {
+    try withTemporaryFile(
+      suffix: "json",
+      contents: """
+      {
+        "attributes": [],
+        "compilerVersion": {
+          "components": [6, 3]
+        },
+        "customConditions": [
+          "DEBUG"
+        ],
+        "endianness": "little",
+        "features": [],
+        "languageMode": {
+          "components": [5, 10]
+        },
+        "targetArchitectures": [],
+        "targetAtomicBitWidths": [],
+        "targetEnvironments": [],
+        "targetOSs": [],
+        "targetObjectFileFormats": [],
+        "targetPointerAuthenticationSchemes": [],
+        "targetPointerBitWidth": 64,
+        "targetRuntimes": []
+      }
+      """
+    ) { staticBuildConfigFile in
+      var config = Configuration()
+      config.staticBuildConfigurationFile = staticBuildConfigFile.absoluteURL.path(percentEncoded: false)
+
+      try assertOutput(
+        input: """
+        #if DEBUG
+        public struct IsDebug {}
+        #else
+        public struct IsNotDebug {}
+        #endif
+        """,
+        config: config,
+        .ffm,
+        .java,
+        detectChunkByInitialLines: 1,
+        expectedChunks: [
+          "public final class IsDebug",
+        ],
+        notExpectedChunks: [
+          "public final class IsNotDebug",
+        ]
+      )
+    }
+  }
+
+  @Test
   func swiftinterfaceCommonPattern() throws {
     try assertOutput(
       input: """
@@ -96,4 +152,20 @@ struct IfConfigTests {
       ]
     )
   }
+}
+
+private func withTemporaryFile(
+  suffix: String,
+  contents: String = "",
+  in tempDirectory: URL = FileManager.default.temporaryDirectory,
+  _ perform: (URL) throws -> Void
+) throws {
+  let tempFileName = "tmp_\(UUID().uuidString).\(suffix)"
+  let tempFileURL = tempDirectory.appendingPathComponent(tempFileName)
+
+  try contents.write(to: tempFileURL, atomically: true, encoding: .utf8)
+  defer {
+    try? FileManager.default.removeItem(at: tempFileURL)
+  }
+  try perform(tempFileURL)
 }
