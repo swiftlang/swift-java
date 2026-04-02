@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import SwiftIfConfig
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
-import SwiftIfConfig
 
 final class Swift2JavaVisitor {
   let translator: Swift2JavaTranslator

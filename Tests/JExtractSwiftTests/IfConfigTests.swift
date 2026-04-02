@@ -26,7 +26,7 @@ struct IfConfigTests {
         #else
         public func notAndroidFunc()
         #endif
-        
+
         #if canImport(Foundation)
         public struct CanImport {
         }
@@ -34,7 +34,7 @@ struct IfConfigTests {
         public struct CannotImport {
         }
         #endif
-        
+
         #if DEBUG
         public struct IsDebug {
         }
@@ -57,13 +57,13 @@ struct IfConfigTests {
         "public static void androidFunc()",
         "public final class CannotImport",
         "public final class IsNotDebug",
-        "public long getLinuxVar()"
+        "public long getLinuxVar()",
       ],
       notExpectedChunks: [
         "public static void notAndroidFunc()",
         "public final class CanImport",
         "public final class IsDebug",
-        "public long getIOSorMacOSVar() "
+        "public long getIOSorMacOSVar() ",
       ]
     )
   }
@@ -75,7 +75,7 @@ struct IfConfigTests {
         public enum Foundation {
           public struct URL {}
         }
-        
+
         public struct AppStore : Swift.Sendable, Swift.Codable {
           public var storeURL: Foundation.URL?
           #if compiler(>=5.3) && $NonescapableTypes

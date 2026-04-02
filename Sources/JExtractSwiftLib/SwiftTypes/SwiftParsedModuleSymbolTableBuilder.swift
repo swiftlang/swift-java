@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftSyntax
 import SwiftIfConfig
+import SwiftSyntax
 
 struct SwiftParsedModuleSymbolTableBuilder {
   let log: Logger?
