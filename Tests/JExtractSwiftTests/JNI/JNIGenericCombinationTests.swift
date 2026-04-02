@@ -171,13 +171,13 @@ struct JNIGenericCombinationTests {
         detectChunkByInitialLines: 2,
         expectedChunks: [
           """
-          public static org.swift.swiftkit.core.tuple.Tuple2<MyID<String>, MyID<java.lang.Long>> makeIDs(java.lang.String stringValue, long intValue, SwiftArena swiftArena) {
+          public static org.swift.swiftkit.core.tuple.Tuple2<MyID<java.lang.String>, MyID<java.lang.Long>> makeIDs(java.lang.String stringValue, long intValue, SwiftArena swiftArena) {
             org.swift.swiftkit.core._OutSwiftGenericInstance result_0$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
             org.swift.swiftkit.core._OutSwiftGenericInstance result_1$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
             SwiftModule.$makeIDs(stringValue, intValue, result_0$, result_1$);
             var result_0 = MyID.<java.lang.String>wrapMemoryAddressUnsafe(result_0$.selfPointer, result_0$.selfTypePointer, swiftArena);
             var result_1 = MyID.<java.lang.Long>wrapMemoryAddressUnsafe(result_1$.selfPointer, result_1$.selfTypePointer, swiftArena);
-            return new org.swift.swiftkit.core.tuple.Tuple2<>(result_0, result_1);
+            return new org.swift.swiftkit.core.tuple.Tuple2<MyID<java.lang.String>, MyID<java.lang.Long>>(result_0, result_1);
           }
           """,
           """
@@ -233,12 +233,12 @@ struct JNIGenericCombinationTests {
         detectChunkByInitialLines: 2,
         expectedChunks: [
           """
-          public static org.swift.swiftkit.core.tuple.Tuple2<String, Long> takeValues(org.swift.swiftkit.core.tuple.Tuple2<MyID<String>, MyID<java.lang.Long>> tuple) {
-            java.lang.String[] result_0$ = new java.lang.String[1];
+          public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.String, java.lang.Long> takeValues(org.swift.swiftkit.core.tuple.Tuple2<MyID<java.lang.String>, MyID<java.lang.Long>> tuple) {
+            long[] result_0$ = new long[1];
             long[] result_1$ = new long[1];
             SwiftModule.$takeValues(tuple.$0.$memoryAddress(), tuple.$1.$memoryAddress(), result_0$, result_1$);
-            return new org.swift.swiftkit.core.tuple.Tuple2<>(result_0$[0], result_1$[0]);
-          } 
+            return new org.swift.swiftkit.core.tuple.Tuple2<java.lang.String, java.lang.Long>(result_0$[0], result_1$[0]);
+          }
           """,
           """
           private static native void $takeValues(long tuple_0, long tuple_1, java.lang.String[] result_0$, long[] result_1$);

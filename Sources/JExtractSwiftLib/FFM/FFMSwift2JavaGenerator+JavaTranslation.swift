@@ -335,7 +335,8 @@ extension FFMSwift2JavaGenerator {
       // Result.
       let result = try self.translateResult(
         swiftResult: swiftSignature.result,
-        loweredResult: loweredFunctionSignature.result
+        loweredResult: loweredFunctionSignature.result,
+        methodName: methodName
       )
 
       return TranslatedFunctionSignature(
@@ -620,8 +621,7 @@ extension FFMSwift2JavaGenerator {
           case .char: ("Optional<Character>", "toOptionalSegmentCharacter")
           case .short: ("Optional<Short>", "toOptionalSegmentShort")
           case .float: ("Optional<Float>", "toOptionalSegmentFloat")
-          default:
-            throw JavaTranslationError.unhandledType(known: .optional(swiftType))
+          default: throw JavaTranslationError.unhandledType(known: .optional(swiftType))
           }
         return TranslatedParameter(
           javaParameters: [
@@ -689,7 +689,8 @@ extension FFMSwift2JavaGenerator {
     /// Translate a Swift API result to the user-facing Java API result.
     func translateResult(
       swiftResult: SwiftResult,
-      loweredResult: LoweredResult
+      loweredResult: LoweredResult,
+      methodName: String
     ) throws -> TranslatedResult {
       let swiftType = swiftResult.type
       // If the result type should cause any annotations on the method, include them here.
@@ -844,6 +845,7 @@ extension FFMSwift2JavaGenerator {
 
       case .tuple(let elements):
         return try translateTupleResult(
+          methodName: methodName,
           elements: elements,
           resultAnnotations: resultAnnotations
         )
@@ -856,6 +858,7 @@ extension FFMSwift2JavaGenerator {
 
     /// Tuple results: indirect `MemorySegment` per element, then `new TupleN<…>(…)` (mirrors JNI out-arrays).
     func translateTupleResult(
+      methodName: String,
       elements: [SwiftTupleElement],
       resultAnnotations: [JavaAnnotation]
     ) throws -> TranslatedResult {

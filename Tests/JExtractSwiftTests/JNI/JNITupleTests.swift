@@ -32,11 +32,11 @@ struct JNITupleTests {
       .java,
       expectedChunks: [
         """
-        public static org.swift.swiftkit.core.tuple.Tuple2<Long, String> returnPair() {
+        public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.String> returnPair() {
           long[] result_0$ = new long[1];
-          java.lang.String[] result_1$ = new java.lang.String[1];
+          long[] result_1$ = new long[1];
           SwiftModule.$returnPair(result_0$, result_1$);
-          return new org.swift.swiftkit.core.tuple.Tuple2<>(result_0$[0], result_1$[0]);
+          return new org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.String>(result_0$[0], result_1$[0]);
         }
         """,
         """
@@ -74,7 +74,7 @@ struct JNITupleTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<Long, String> arg) {
+        public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.String> arg) {
           SwiftModule.$takePair(arg.$0, arg.$1);
         }
         """,
@@ -100,24 +100,36 @@ struct JNITupleTests {
     )
   }
 
-  @Test
-  func labeledTuple_javaBindings() throws {
+  @Test("Labelled tuple return (JNI)")
+  func labeledTuple_javaBindings_jni() throws {
     try assertOutput(
       input: source,
       .jni,
       .java,
       expectedChunks: [
         """
-        public static org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer> labeledTuple() {
+        public static LabeledTuple_labeledTuple_x_y<java.lang.Integer, java.lang.Integer> labeledTuple() {
         """,
         """
         private static native void $labeledTuple(int[] result_0$, int[] result_1$);
+        """,
+        """
+        public static final class LabeledTuple_labeledTuple_x_y<T0, T1> extends org.swift.swiftkit.core.tuple.Tuple2<T0, T1> {
+        """,
+        """
+        public LabeledTuple_labeledTuple_x_y(T0 $0, T1 $1) { super($0, $1); }
+        """,
+        """
+        public T0 x() { return $0; }
+        """,
+        """
+        public T1 y() { return $1; }
         """,
       ]
     )
   }
 
-  @Test
+  @Test("Labelled tuple return, Swift thunks (JNI)")
   func labeledTuple_swiftThunks() throws {
     try assertOutput(
       input: source,
