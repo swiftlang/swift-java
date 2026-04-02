@@ -14,7 +14,6 @@
 
 package com.example.swift;
 
-import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.tuple.Tuple2;
 import org.swift.swiftkit.core.tuple.Tuple3;
@@ -38,9 +37,19 @@ public class TupleTest {
 
     @Test
     void labeledTuple() {
-        Tuple2<Integer, Integer> result = MySwiftLibrary.labeledTuple();
+        var result = MySwiftLibrary.labeledTuple();
+        // Access via named accessors
+        assertEquals(10, result.x());
+        assertEquals(20, result.y());
+        // Positional access still works (inherited from Tuple2)
         assertEquals(10, result.$0);
         assertEquals(20, result.$1);
+
+        // The labelled tuple is a subclass of Tuple2
+        assertInstanceOf(Tuple2.class, result);
+        // And the generic types match positionally as well
+        @SuppressWarnings("unused")
+        Tuple2<Integer, Integer> check = result;
     }
 
     @Test

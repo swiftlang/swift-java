@@ -16,9 +16,13 @@ import SwiftJavaJNICore
 
 extension JavaType {
 
-  /// A container for receiving Swift generic instances.
-  static var _OutSwiftGenericInstance: JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
+  /// The description of the type org.swift.swiftkit.core.collections.SwiftDictionaryMap<K, V>
+  static func swiftDictionaryMap(_ K: JavaType, _ V: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core.collections", name: "SwiftDictionaryMap", typeParameters: [K.boxedType, V.boxedType])
   }
 
+  /// The description of the type org.swift.swiftkit.core.collections.SwiftSet<E>
+  static func swiftSet(_ E: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core.collections", name: "SwiftSet", typeParameters: [E.boxedType])
+  }
 }

@@ -18,7 +18,7 @@ package org.swift.swiftkit.core.tuple;
  * Corresponds to Swift's built-in 14-element tuple type <code>(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)</code>.
  * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
  */
-public final class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> {
+public class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> {
     public final T0 $0;
     public final T1 $1;
     public final T2 $2;

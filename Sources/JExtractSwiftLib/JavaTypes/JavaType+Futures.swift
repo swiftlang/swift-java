@@ -16,9 +16,8 @@ import SwiftJavaJNICore
 
 extension JavaType {
 
-  /// A container for receiving Swift generic instances.
-  static var _OutSwiftGenericInstance: JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
+  /// The description of the type org.swift.swiftkit.core.SimpleCompletableFuture<T>
+  static func simpleCompletableFuture(_ T: JavaType) -> JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SimpleCompletableFuture", typeParameters: [T.boxedType])
   }
-
 }

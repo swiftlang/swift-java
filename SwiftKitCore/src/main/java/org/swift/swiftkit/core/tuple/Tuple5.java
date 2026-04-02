@@ -18,7 +18,7 @@ package org.swift.swiftkit.core.tuple;
  * Corresponds to Swift's built-in 5-element tuple type <code>(T0, T1, T2, T3, T4)</code>.
  * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
  */
-public final class Tuple5<T0, T1, T2, T3, T4> {
+public class Tuple5<T0, T1, T2, T3, T4> {
     public final T0 $0;
     public final T1 $1;
     public final T2 $2;

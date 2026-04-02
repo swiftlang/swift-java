@@ -115,12 +115,12 @@ extension JNISwift2JavaGenerator {
       let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
         let resultName = parameter.name ?? "arg\(idx)"
         let result = SwiftResult(convention: .direct, type: parameter.type)
-        var translatedResult = try self.translate(swiftResult: result, resultName: resultName)
+        var translatedResult = try self.translate(swiftResult: result, methodName: methodName, resultName: resultName)
         translatedResult.conversion = .replacingPlaceholder(
           translatedResult.conversion,
           placeholder: "$nativeParameters.\(resultName)",
         )
-        let nativeResult = try nativeTranslation.translate(swiftResult: result, resultName: resultName)
+        let nativeResult = try nativeTranslation.translate(swiftResult: result, methodName: methodName, resultName: resultName)
         return (translated: translatedResult, native: nativeResult)
       }
 
@@ -319,7 +319,7 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let translatedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType))
+      let translatedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType), methodName: name)
 
       return TranslatedFunctionType(
         name: name,
@@ -367,6 +367,7 @@ extension JNISwift2JavaGenerator {
 
       let resultType = try translate(
         swiftResult: functionSignature.result,
+        methodName: methodName,
         genericParameters: functionSignature.genericParameters,
         genericRequirements: functionSignature.genericRequirements,
       )
@@ -628,7 +629,9 @@ extension JNISwift2JavaGenerator {
           parameterPosition: parameterPosition,
         )
 
-      case .tuple, .composite:
+      case .tuple:
+        throw JavaTranslationError.emptyTuple()
+      case .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -885,6 +888,7 @@ extension JNISwift2JavaGenerator {
 
     func translate(
       swiftResult: SwiftResult,
+      methodName: String,
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration] = [],
       genericRequirements: [SwiftGenericRequirement] = [],
@@ -1017,6 +1021,7 @@ extension JNISwift2JavaGenerator {
 
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(
+          methodName: methodName,
           elements: elements,
           resultName: resultName,
           genericParameters: genericParameters,
@@ -1149,7 +1154,9 @@ extension JNISwift2JavaGenerator {
       }
     }
 
+    /// - Parameter: methodName is necessary because we may need to form an ad-hoc one off type if e.g. named tuples are used.
     func translateTupleResult(
+      methodName: String,
       elements: [SwiftTupleElement],
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration],
@@ -1167,18 +1174,33 @@ extension JNISwift2JavaGenerator {
         // Determine the Java type for this element
         let elementResult = try translate(
           swiftResult: .init(convention: .indirect, type: element.type),
+          methodName: methodName,
           resultName: outParamName,
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
         )
 
+        // out names are always ...$N, no need to use real named tuple names here, this is just for the thunk
         elementOutParamNames.append(outParamName)
+
         // FIXME: More accurate determination of whether the result is direct or indirect
         if elementResult.outParameters.isEmpty {
-          // Convert direct result to indirect result
-          let arrayType: JavaType = .array(elementResult.javaType)
+          // Convert direct result to indirect result.
+          // For most class types (Swift wrapper classes), the JNI native representation
+          // is 'long' (a memory address). However, String is a native JNI reference
+          // type and must keep its original type so the out-parameter array matches
+          // the native method signature (String[] not long[])
+          let nativeElementType: JavaType
+          if elementResult.javaType.isString {
+            nativeElementType = elementResult.javaType
+          } else if case .class = elementResult.javaType {
+            nativeElementType = .long
+          } else {
+            nativeElementType = elementResult.javaType
+          }
+          let arrayType: JavaType = .array(nativeElementType)
           outParameters.append(
-            OutParameter(name: outParamName, type: arrayType, allocation: .newArray(elementResult.javaType, size: 1))
+            OutParameter(name: outParamName, type: arrayType, allocation: .newArray(nativeElementType, size: 1))
           )
           elementConversions.append(elementResult.conversion)
         } else {
@@ -1188,19 +1210,36 @@ extension JNISwift2JavaGenerator {
         elementJavaTypes.append(elementResult.javaType)
       }
 
-      let javaResultType: JavaType = .tuple(elementTypes: elementJavaTypes)
-      let fullTupleClassName = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
+      let isNamedTuple = elements.contains { $0.label != nil }
+      let names = elements.enumerated().map { idx, element in
+        if let label = element.label {
+          label
+        } else {
+          "$\(idx)"
+        }
+      }
 
       let tupleElements: [(outParamName: String, elementConversion: JavaNativeConversionStep)] =
         zip(elementOutParamNames, elementConversions).map { ($0, $1) }
 
+      let javaResultType: JavaType =
+        if isNamedTuple {
+          .labeledTuple(methodName, names: names, elementTypes: elementJavaTypes)
+        } else {
+          .tuple(elementTypes: elementJavaTypes)
+        }
+
+      let javaNativeConversionStep: JavaNativeConversionStep =
+        .tupleFromOutParams(
+          // try!-safe, because we know the result type is a class here (a Tuple of some form)
+          tupleClassName: "\(javaResultType)",
+          elements: tupleElements
+        )
+
       return TranslatedResult(
         javaType: javaResultType,
         outParameters: outParameters,
-        conversion: .tupleFromOutParams(
-          tupleClassName: fullTupleClassName,
-          elements: tupleElements
-        )
+        conversion: javaNativeConversionStep
       )
     }
 
@@ -1285,6 +1324,7 @@ extension JNISwift2JavaGenerator {
 
         let wrappedValueResult = try translate(
           swiftResult: SwiftResult(convention: .direct, type: swiftType),
+          methodName: "",
           resultName: resultName + "Wrapped$",
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
@@ -1945,7 +1985,7 @@ extension JNISwift2JavaGenerator {
           let converted = element.elementConversion.render(&printer, "\(element.outParamName)[0]")
           args.append(converted)
         }
-        return "new \(tupleClassName)<>(\(args.joined(separator: ", ")))"
+        return "new \(tupleClassName)(\(args.joined(separator: ", ")))"
 
       case .placeToVar(let inner, let name):
         let inner = inner.render(&printer, placeholder)
@@ -2025,6 +2065,7 @@ extension JNISwift2JavaGenerator {
 
   enum JavaTranslationError: Error {
     case unsupportedSwiftType(SwiftType, fileID: String, line: Int)
+
     static func unsupportedSwiftType(
       _ type: SwiftType,
       _fileID: String = #fileID,
@@ -2060,5 +2101,14 @@ extension JNISwift2JavaGenerator {
 
     /// Set type requires exactly one generic type argument (element).
     case setRequiresElementType(SwiftType)
+
+    /// Empty tuples are not supported in lowering, they should be treated as Void
+    case emptyTuple(file: String, line: Int)
+    static func emptyTuple(
+      _file: String = #fileID,
+      _line: Int = #line
+    ) -> JavaTranslationError {
+      .emptyTuple(file: _file, line: _line)
+    }
   }
 }

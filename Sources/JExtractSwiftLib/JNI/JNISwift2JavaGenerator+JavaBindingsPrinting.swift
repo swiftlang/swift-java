@@ -524,6 +524,10 @@ extension JNISwift2JavaGenerator {
     printJavaBindingWrapperHelperClass(&printer, decl)
 
     printJavaBindingWrapperMethod(&printer, decl, skipMethodBody: skipMethodBody)
+
+    // Print any additional types we may need to emit, e.g. named tuples are emitted as static classes
+    // right next to the func that is using them.
+    printNecessarySupportTypes(&printer, decl)
   }
 
   /// Print the helper type container for a user-facing Java API.
@@ -564,6 +568,17 @@ extension JNISwift2JavaGenerator {
       }
       """
     )
+  }
+
+  private func printNecessarySupportTypes(
+    _ printer: inout CodePrinter,
+    _ decl: ImportedFunc
+  ) {
+    let translatedDecl = translatedDecl(for: decl)!
+
+    for labeledTuple in translatedDecl.usedLabeledTuples {
+      printAdHocLabeledTupleStaticClass(&printer, labeledTuple)
+    }
   }
 
   private func printJavaBindingWrapperMethod(

@@ -133,7 +133,7 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeProtocol__Ljava_lang_Object_2Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?, y: jobject?) {
-          let xswiftObject$: (SomeProtocol)
+          let xswiftObject$: (any SomeProtocol)
           if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             ...
             let xpointer$DynamicType$: Any.Type = unsafeBitCast(xpointer$TypeMetadataPointer$, to: Any.Type.self)
@@ -141,10 +141,10 @@ struct JNIProtocolTests {
               fatalError("xpointer$ memory address was null")
             }
             #if hasFeature(ImplicitOpenExistentials)
-            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! any (SomeProtocol)
+            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! (any SomeProtocol)
             #else
-            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol) {
-              xpointer$RawPointer$.load(as: ty) as! any (SomeProtocol)
+            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> (any SomeProtocol) {
+              xpointer$RawPointer$.load(as: ty) as! (any SomeProtocol)
             }
             let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
             #endif
@@ -153,7 +153,7 @@ struct JNIProtocolTests {
           else {
             xswiftObject$ = _SwiftModule_takeProtocol_x_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment))
           }
-          let yswiftObject$: (SomeProtocol)
+          let yswiftObject$: (any SomeProtocol)
           if environment.interface.IsInstanceOf(environment, y, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             ...
             yswiftObject$ = ypointer$Existential$
@@ -209,7 +209,7 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeGeneric__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jobject?) {
-          let sswiftObject$: (SomeProtocol)
+          let sswiftObject$: (any SomeProtocol)
           if environment.interface.IsInstanceOf(environment, s, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             ...
             sswiftObject$ = spointer$Existential$
@@ -267,7 +267,7 @@ struct JNIProtocolTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2")
         public func Java_com_example_swift_SwiftModule__00024takeComposite__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jobject?) {
-          let xswiftObject$: (SomeProtocol & B)
+          let xswiftObject$: (any (SomeProtocol & B))
           if environment.interface.IsInstanceOf(environment, x, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
             let xpointer$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
             let xtypeMetadata$ = environment.interface.CallLongMethodA(environment, x, _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
@@ -279,10 +279,10 @@ struct JNIProtocolTests {
               fatalError("xpointer$ memory address was null")
             }
             #if hasFeature(ImplicitOpenExistentials)
-            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! any (SomeProtocol & B)
+            let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! (any (SomeProtocol & B))
             #else
-            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> any (SomeProtocol & B) {
-              xpointer$RawPointer$.load(as: ty) as! any (SomeProtocol & B)
+            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> (any (SomeProtocol & B)) {
+              xpointer$RawPointer$.load(as: ty) as! (any (SomeProtocol & B))
             }
             let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
             #endif

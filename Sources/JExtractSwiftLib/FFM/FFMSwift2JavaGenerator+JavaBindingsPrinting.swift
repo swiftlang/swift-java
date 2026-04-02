@@ -388,10 +388,10 @@ extension FFMSwift2JavaGenerator {
     // If a Swift function is 'throws' we throw a checked error for the Java side
     // TODO: When we support typed throws on Swift side we'll want to throw the right type here instead
     if translatedSignature.isThrowing {
-      throwsClauses.append(JavaType.swiftJavaErrorException.simpleClassName)
+      throwsClauses.append(JavaType.swiftJavaErrorException.className!)
     }
     if translatedSignature.canThrowSwiftIntegerOverflowException {
-      throwsClauses.append(JavaType.swiftIntegerOverflowException.simpleClassName)
+      throwsClauses.append(JavaType.swiftIntegerOverflowException.className!)
     }
     let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: ", "))"
 
@@ -522,7 +522,7 @@ extension FFMSwift2JavaGenerator {
     func printErrorCheck(_ printer: inout CodePrinter) {
       guard translatedSignature.isThrowing else { return }
       printer.printIfBlock("!result$throws.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)") { printer in
-        printer.print("throw new \(JavaType.swiftJavaErrorException.simpleClassName)(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());")
+        printer.print("throw new \(JavaType.swiftJavaErrorException.className!)(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());")
       }
     }
 
