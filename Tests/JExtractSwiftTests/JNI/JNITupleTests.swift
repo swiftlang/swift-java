@@ -34,7 +34,7 @@ struct JNITupleTests {
         """
         public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.String> returnPair() {
           long[] result_0$ = new long[1];
-          long[] result_1$ = new long[1];
+          java.lang.String[] result_1$ = new java.lang.String[1];
           SwiftModule.$returnPair(result_0$, result_1$);
           return new org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.String>(result_0$[0], result_1$[0]);
         }

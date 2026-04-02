@@ -234,7 +234,7 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           """
           public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.String, java.lang.Long> takeValues(org.swift.swiftkit.core.tuple.Tuple2<MyID<java.lang.String>, MyID<java.lang.Long>> tuple) {
-            long[] result_0$ = new long[1];
+            java.lang.String[] result_0$ = new java.lang.String[1];
             long[] result_1$ = new long[1];
             SwiftModule.$takeValues(tuple.$0.$memoryAddress(), tuple.$1.$memoryAddress(), result_0$, result_1$);
             return new org.swift.swiftkit.core.tuple.Tuple2<java.lang.String, java.lang.Long>(result_0$[0], result_1$[0]);
