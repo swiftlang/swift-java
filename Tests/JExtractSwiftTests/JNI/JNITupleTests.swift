@@ -117,7 +117,7 @@ struct JNITupleTests {
         public static final class LabeledTuple_labeledTuple_x_y<T0, T1> extends org.swift.swiftkit.core.tuple.Tuple2<T0, T1> {
         """,
         """
-        public LabeledTuple_labeledTuple_x_y(T0 $0, T1 $1) { super($0, $1); }
+        public LabeledTuple_labeledTuple_x_y(T0 param0, T1 param1) { super(param0, param1); }
         """,
         """
         public T0 x() { return $0; }

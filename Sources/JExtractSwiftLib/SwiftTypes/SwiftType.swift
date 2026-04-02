@@ -167,9 +167,19 @@ extension SwiftType: CustomStringConvertible {
     case .tuple(let elements):
       return "(\(elements.map(\.description).joined(separator: ", ")))"
     case .existential(let constraintType):
-      return "any \(constraintType)"
+      switch constraintType {
+      case .composite:
+        return "any (\(constraintType))"
+      default:
+        return "any \(constraintType)"
+      }
     case .opaque(let constraintType):
-      return "some \(constraintType)"
+      switch constraintType {
+      case .composite:
+        return "some (\(constraintType))"
+      default:
+        return "some \(constraintType)"
+      }
     case .composite(let types):
       return types.map(\.description).joined(separator: " & ")
     }

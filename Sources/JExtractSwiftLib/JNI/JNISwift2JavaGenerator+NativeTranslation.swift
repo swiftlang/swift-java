@@ -1082,7 +1082,7 @@ extension JNISwift2JavaGenerator {
     indirect case extractSwiftProtocolValue(
       NativeSwiftConversionStep,
       typeMetadataVariableName: NativeSwiftConversionStep,
-      protocolNames: [String]
+      protocolTypes: [SwiftNominalType]
     )
 
     /// Extracts a swift type at a pointer given by a long.
@@ -1228,12 +1228,10 @@ extension JNISwift2JavaGenerator {
         let protocolTypes,
         let allowsJavaImplementations
       ):
-        let protocolNames = protocolTypes.map { $0.nominalTypeDecl.qualifiedName }
-
         let inner = inner.render(&printer, placeholder)
         let variableName = "\(inner)swiftObject$"
-        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
-        printer.print("let \(variableName): \(compositeProtocolName)")
+        let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
+        printer.print("let \(variableName): \(existentialType)")
 
         func printStandardJExtractBlock(_ printer: inout CodePrinter) {
           let pointerVariableName = "\(inner)pointer$"
@@ -1247,7 +1245,7 @@ extension JNISwift2JavaGenerator {
           let existentialName = NativeSwiftConversionStep.extractSwiftProtocolValue(
             .constant(pointerVariableName),
             typeMetadataVariableName: .constant(typeMetadataVariableName),
-            protocolNames: protocolNames
+            protocolTypes: protocolTypes
           ).render(&printer, placeholder)
 
           printer.print("\(variableName) = \(existentialName)")
@@ -1276,12 +1274,12 @@ extension JNISwift2JavaGenerator {
 
         return variableName
 
-      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
+      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolTypes):
         let inner = inner.render(&printer, placeholder)
         let typeMetadataVariableName = typeMetadataVariableName.render(&printer, placeholder)
         let existentialName = "\(inner)Existential$"
 
-        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
+        let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
 
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
@@ -1294,10 +1292,10 @@ extension JNISwift2JavaGenerator {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
-          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(compositeProtocolName)
+          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! \(existentialType)
           #else
-          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> any \(compositeProtocolName) {
-            \(inner)RawPointer$.load(as: ty) as! any \(compositeProtocolName)
+          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> \(existentialType) {
+            \(inner)RawPointer$.load(as: ty) as! \(existentialType)
           }
           let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)DoLoad)
           #endif

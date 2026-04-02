@@ -26,7 +26,7 @@ extension JNISwift2JavaGenerator {
   /// public static class LabeledTuple_fn_x_y<T0, T1>
   ///     extends org.swift.swiftkit.core.tuple.Tuple2<T0, T1> {
   ///
-  ///   public LabeledTuple_fn_x_y(T0 $0, T1 $1) { super($0, $1); }
+  ///   public LabeledTuple_fn_x_y(T0 param0, T1 param1) { super(param0, param1); }
   ///   public T0 x() { return $0; }
   ///   public T1 y() { return $1; }
   /// }
@@ -61,9 +61,12 @@ extension JNISwift2JavaGenerator {
     let typeParamsClause = "<\(typeParams.joined(separator: ", "))>"
     let baseTupleClass = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
 
-    // Constructor parameters: T0 $0, T1 $1, ...
-    let ctorParams = typeParams.enumerated().map { "\($1) $\($0)" }.joined(separator: ", ")
-    let superArgs = (0..<arity).map { "$\($0)" }.joined(separator: ", ")
+    // Constructor parameters: T0 param0, T1 param1, ...
+    // Use paramN names (not $0, $1) because `$N` is invalid as a Swift parameter name,
+    // and the wrap-java generator copies parameter names verbatim into Swift wrappers
+    let paramNames = (0..<arity).map { "param\($0)" }
+    let ctorParams = zip(typeParams, paramNames).map { "\($0) \($1)" }.joined(separator: ", ")
+    let superArgs = paramNames.joined(separator: ", ")
 
     printer.printBraceBlock("public static final class \(rawClassName)\(typeParamsClause) extends \(baseTupleClass)\(typeParamsClause)") { printer in
       // Constructor

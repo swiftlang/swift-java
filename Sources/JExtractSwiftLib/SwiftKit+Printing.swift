@@ -26,9 +26,23 @@ package struct SwiftKitPrinting {
     SwiftRuntime.swiftjava.getType("\(module)", "\(nominal.swiftNominal.qualifiedName)")
     """
   }
+
+  /// Render a parenthesized existential type constraint from nominal protocol types
+  ///
+  /// For a single protocol: `(any DataProtocol)`
+  /// For multiple protocols: `(any (DataProtocol & Sendable))`
+  static func renderExistentialType(_ protocolTypes: [SwiftNominalType]) -> String {
+    let compositeType: SwiftType
+    if protocolTypes.count == 1 {
+      compositeType = .nominal(protocolTypes[0])
+    } else {
+      compositeType = .composite(protocolTypes.map { .nominal($0) })
+    }
+    return "(\(SwiftType.existential(compositeType)))"
+  }
 }
 
-// ==== ------------------------------------------------------------------------
+// ==== -----------------------------------------------------------------------
 // Helpers to form names of "well known" SwiftKit generated functions
 
 extension SwiftKitPrinting {
