@@ -24,6 +24,9 @@ struct SwiftParsedModuleSymbolTableBuilder {
   /// Imported modules to resolve type syntax.
   let importedModules: [String: SwiftModuleSymbolTable]
 
+  /// The build configuration used to resolve #if conditional compilation blocks.
+  let buildConfig: any BuildConfiguration
+
   /// Extension decls their extended type hasn't been resolved.
   var unresolvedExtensions: [ExtensionDeclSyntax]
 
@@ -32,6 +35,7 @@ struct SwiftParsedModuleSymbolTableBuilder {
     requiredAvailablityOfModuleWithName: String? = nil,
     alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil,
     importedModules: [String: SwiftModuleSymbolTable],
+    buildConfig: any BuildConfiguration = .jextractDefault,
     log: Logger? = nil
   ) {
     self.log = log
@@ -41,6 +45,7 @@ struct SwiftParsedModuleSymbolTableBuilder {
       alternativeModules: alternativeModules
     )
     self.importedModules = importedModules
+    self.buildConfig = buildConfig
     self.unresolvedExtensions = []
   }
 
@@ -165,7 +170,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
     ifConfig node: IfConfigDeclSyntax,
     sourceFilePath: String
   ) {
-    let (clause, _) = node.activeClause(in: .jextractDefault)
+    let (clause, _) = node.activeClause(in: buildConfig)
     if let clause, let elements = clause.elements {
       switch elements {
       case .statements(let codeBlock):

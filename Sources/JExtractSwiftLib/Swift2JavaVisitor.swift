@@ -373,7 +373,7 @@ final class Swift2JavaVisitor {
     in parent: ImportedNominalType?,
     sourceFilePath: String
   ) {
-    let (clause, _) = node.activeClause(in: .jextractDefault)
+    let (clause, _) = node.activeClause(in: translator.buildConfig)
     if let clause, let elements = clause.elements {
       switch elements {
       case .statements(let codeBlock):
