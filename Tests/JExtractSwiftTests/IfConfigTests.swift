@@ -18,9 +18,9 @@ import SwiftJavaConfigurationShared
 import Testing
 
 #if compiler(>=6.3)
-private let `compiler(>=6.3)` = true
+private let has6_3compilerFeature = true
 #else
-private let `compiler(>=6.3)` = false
+private let has6_3compilerFeature = false
 #endif
 
 @Suite
@@ -130,7 +130,7 @@ struct IfConfigTests {
     }
   }
 
-  @Test(.enabled(if: `compiler(>=6.3)`))
+  @Test(.enabled(if: has6_3compilerFeature))
   func swiftinterfaceCommonPattern() throws {
     try assertOutput(
       input: """
