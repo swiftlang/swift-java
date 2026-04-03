@@ -505,10 +505,24 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            break // Handled as wrapped struct
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .concrete(.swiftkitCoreGeneratedDate),
+                annotations: parameterAnnotations,
+              ),
+              conversion: .valueMemoryAddress(.placeholder),
+            )
 
           case .foundationData, .essentialsData:
-            break // Handled as wrapped struct
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .concrete(.swiftkitCoreGeneratedData),
+                annotations: parameterAnnotations,
+              ),
+              conversion: .valueMemoryAddress(.placeholder),
+            )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
@@ -945,12 +959,22 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
+            let javaType = JavaType.swiftkitCoreGeneratedDate
+            return TranslatedResult(
+              javaType: javaType,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            )
 
           case .foundationData, .essentialsData:
-            // Handled as wrapped struct
-            break
+            let javaType = JavaType.swiftkitCoreGeneratedData
+            return TranslatedResult(
+              javaType: javaType,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            )
 
           case .foundationUUID, .essentialsUUID:
             return TranslatedResult(
@@ -1094,13 +1118,13 @@ extension JNISwift2JavaGenerator {
             return .swiftSet(elementJavaType)
 
           case .foundationDate, .essentialsDate:
-            return .class(package: nil, name: "Date")
+            return .swiftkitCoreGeneratedDate
 
           case .foundationData, .essentialsData:
-            return .class(package: nil, name: "Data")
+            return .swiftkitCoreGeneratedData
 
           case .foundationDataProtocol, .essentialsDataProtocol:
-            return .class(package: nil, name: "DataProtocol")
+            return .swiftkitCoreGeneratedDataProtocol
 
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID
@@ -1162,7 +1186,6 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
-      let arity = elements.count
       var outParameters: [OutParameter] = []
       var elementOutParamNames: [String] = []
       var elementConversions: [JavaNativeConversionStep] = []
@@ -1854,16 +1877,22 @@ extension JNISwift2JavaGenerator {
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        guard case .class(_, let className, let typeParameters) = javaType else {
+        guard case .class(let package, let className, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
         }
+        let packagePart: String =
+          if let package {
+            "\(package)."
+          } else {
+            ""
+          }
         let genericClause =
           if !typeParameters.isEmpty {
             "<\(typeParameters.map(\.description).joined(separator: ", "))>"
           } else {
             ""
           }
-        return "\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        return "\(packagePart)\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)

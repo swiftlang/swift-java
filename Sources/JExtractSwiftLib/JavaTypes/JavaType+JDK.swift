@@ -59,4 +59,15 @@ extension JavaType {
     .class(package: "java.util", name: "UUID")
   }
 
+  static var swiftkitCoreGeneratedDate: JavaType {
+    .class(package: "org.swift.swiftkit.core.generated", name: "Date")
+  }
+
+  static var swiftkitCoreGeneratedData: JavaType {
+    .class(package: "org.swift.swiftkit.core.generated", name: "Data")
+  }
+
+  static var swiftkitCoreGeneratedDataProtocol: JavaType {
+    .class(package: "org.swift.swiftkit.core.generated", name: "DataProtocol")
+  }
 }

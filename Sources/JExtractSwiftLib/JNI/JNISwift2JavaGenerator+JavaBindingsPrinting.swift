@@ -616,7 +616,7 @@ extension JNISwift2JavaGenerator {
       }
       generics.append((name, extends))
     }
-    .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
+    .map { "\($0) extends \($1.compactMap(\.description).joined(separator: " & "))" }
     .joined(separator: ", ")
 
     if !generics.isEmpty {

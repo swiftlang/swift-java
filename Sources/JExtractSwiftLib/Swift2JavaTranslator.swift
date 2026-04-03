@@ -111,7 +111,7 @@ extension Swift2JavaTranslator {
     // Apply any specializations registered after their target types were visited
     visitor.applyPendingSpecializations()
 
-    self.visitFoundationDeclsIfNeeded(with: visitor)
+//    self.visitFoundationDeclsIfNeeded(with: visitor)
   }
 
   private func visitFoundationDeclsIfNeeded(with visitor: Swift2JavaVisitor) {
