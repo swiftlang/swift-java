@@ -73,7 +73,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     if let staticBuildConfig = configuration?.staticBuildConfigurationFile {
       guard let resolvedURL = URL(string: staticBuildConfig, relativeTo: configFile) else {
-        fatalError("Could not resolve 'staticBuildConfigurationFile' url")
+        fatalError("Could not resolve 'staticBuildConfigurationFile' url: \(staticBuildConfig)")
       }
       arguments += ["--static-build-config", resolvedURL.absoluteURL.path(percentEncoded: false)]
     }
