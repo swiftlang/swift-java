@@ -508,7 +508,7 @@ extension JNISwift2JavaGenerator {
             return TranslatedParameter(
               parameter: JavaParameter(
                 name: parameterName,
-                type: .concrete(.swiftkitCoreGeneratedDate),
+                type: .concrete(.swiftkitCoreFoundationDate),
                 annotations: parameterAnnotations,
               ),
               conversion: .valueMemoryAddress(.placeholder),
@@ -518,7 +518,7 @@ extension JNISwift2JavaGenerator {
             return TranslatedParameter(
               parameter: JavaParameter(
                 name: parameterName,
-                type: .concrete(.swiftkitCoreGeneratedData),
+                type: .concrete(.swiftkitCoreFoundationData),
                 annotations: parameterAnnotations,
               ),
               conversion: .valueMemoryAddress(.placeholder),
@@ -959,7 +959,7 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            let javaType = JavaType.swiftkitCoreGeneratedDate
+            let javaType = JavaType.swiftkitCoreFoundationDate
             return TranslatedResult(
               javaType: javaType,
               annotations: resultAnnotations,
@@ -968,7 +968,7 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            let javaType = JavaType.swiftkitCoreGeneratedData
+            let javaType = JavaType.swiftkitCoreFoundationData
             return TranslatedResult(
               javaType: javaType,
               annotations: resultAnnotations,
@@ -1118,13 +1118,13 @@ extension JNISwift2JavaGenerator {
             return .swiftSet(elementJavaType)
 
           case .foundationDate, .essentialsDate:
-            return .swiftkitCoreGeneratedDate
+            return .swiftkitCoreFoundationDate
 
           case .foundationData, .essentialsData:
-            return .swiftkitCoreGeneratedData
+            return .swiftkitCoreFoundationData
 
           case .foundationDataProtocol, .essentialsDataProtocol:
-            return .swiftkitCoreGeneratedDataProtocol
+            return .swiftkitCoreFoundationDataProtocol
 
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID

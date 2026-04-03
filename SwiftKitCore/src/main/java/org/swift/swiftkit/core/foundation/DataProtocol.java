@@ -12,15 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
+package org.swift.swiftkit.core.foundation;
 
-public struct Data: DataProtocol {
-  public init(bytes: UnsafeRawPointer, count: Int)
-  public init(_ bytes: [UInt8])
-  public var count: Int { get }
-  public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
+import org.swift.swiftkit.core.JNISwiftInstance;
+
+public interface DataProtocol extends JNISwiftInstance {
 }
