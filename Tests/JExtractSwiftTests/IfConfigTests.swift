@@ -17,6 +17,12 @@ import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
 
+#if compiler(>=6.3)
+private let `compiler(>=6.3)` = true
+#else
+private let `compiler(>=6.3)` = false
+#endif
+
 @Suite
 struct IfConfigTests {
   @Test
@@ -124,7 +130,7 @@ struct IfConfigTests {
     }
   }
 
-  @Test
+  @Test(.enabled(if: `compiler(>=6.3)`))
   func swiftinterfaceCommonPattern() throws {
     try assertOutput(
       input: """
