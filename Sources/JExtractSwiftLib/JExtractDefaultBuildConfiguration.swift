@@ -18,6 +18,8 @@ import SwiftSyntax
 
 /// A default, fixed build configuration during static analysis for interface extraction.
 struct JExtractDefaultBuildConfiguration: BuildConfiguration {
+  static let shared = JExtractDefaultBuildConfiguration()
+
   private var base: StaticBuildConfiguration
 
   init() {
@@ -86,11 +88,9 @@ struct JExtractDefaultBuildConfiguration: BuildConfiguration {
   }
 }
 
-private let shared = JExtractDefaultBuildConfiguration()
-
 extension BuildConfiguration where Self == JExtractDefaultBuildConfiguration {
   static var jextractDefault: JExtractDefaultBuildConfiguration {
-    shared
+    .shared
   }
 }
 
