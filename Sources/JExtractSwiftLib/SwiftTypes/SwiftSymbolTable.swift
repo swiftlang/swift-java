@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
-import SwiftIfConfig
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
@@ -70,7 +69,6 @@ extension SwiftSymbolTable {
     moduleName: String,
     _ inputFiles: some Collection<SwiftJavaInputFile>,
     config: Configuration?,
-    buildConfig: any BuildConfiguration = .jextractDefault,
     log: Logger,
   ) -> SwiftSymbolTable {
 
@@ -106,7 +104,6 @@ extension SwiftSymbolTable {
           var stubBuilder = SwiftParsedModuleSymbolTableBuilder(
             moduleName: stubModuleName,
             importedModules: ["Swift": importedModules["Swift"]!],
-            buildConfig: buildConfig,
           )
           stubBuilder.handle(sourceFile: sourceFile, sourceFilePath: "\(stubModuleName)_stub.swift")
           let stubModule = stubBuilder.finalize()
@@ -125,7 +122,6 @@ extension SwiftSymbolTable {
     var builder = SwiftParsedModuleSymbolTableBuilder(
       moduleName: moduleName,
       importedModules: importedModules,
-      buildConfig: buildConfig,
       log: log,
     )
     // First, register top-level and nested nominal types to the symbol table.

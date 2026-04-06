@@ -34,6 +34,7 @@ public struct SwiftToJava {
     }
 
     let translator = Swift2JavaTranslator(config: config)
+    translator.log.logLevel = config.logLevel ?? .info
     let log = translator.log
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
