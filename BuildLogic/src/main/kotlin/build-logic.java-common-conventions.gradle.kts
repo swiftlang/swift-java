@@ -92,9 +92,7 @@ tasks.test {
         "--enable-native-access=ALL-UNNAMED",
 
         // Include the library paths where our dylibs are that we want to load and call
-        "-Djava.library.path=" +
-                (javaLibraryPaths(rootDir) + javaLibraryPaths(project.projectDir))
-                    .joinToString(File.pathSeparator)
+        "-Djava.library.path=" + javaLibraryPaths(project.projectDir).joinToString(File.pathSeparator)
     )
 }
 
