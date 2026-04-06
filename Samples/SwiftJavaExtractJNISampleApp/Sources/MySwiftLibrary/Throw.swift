@@ -15,5 +15,8 @@
 import SwiftJava
 
 public func throwString(input: String) throws -> String {
-  input
+  if input.isEmpty {
+    throw MySwiftError.swiftError
+  }
+  return input
 }
