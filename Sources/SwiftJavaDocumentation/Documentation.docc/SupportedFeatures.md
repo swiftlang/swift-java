@@ -464,3 +464,40 @@ public final class FishBox ... {
 
 > NOTE: Currently no helpers are available to convert between unspecialized types to specialized ones, but this can be offered 
 >       as additional `box.as(FishBox.class)` conversion methods in the future.
+
+### Evaluating `#if`
+
+In jextract, `#if` branches are evaluated using [SwiftIfConfig](https://github.com/swiftlang/swift-syntax/blob/main/Sources/SwiftIfConfig/SwiftIfConfig.docc/SwiftIfConfig.md).
+The evaluation parameters are fixed; for example, the `os` expression always evaluates to true, so in the following case the value of the variable will be `Linux`.
+
+```swift
+#if os(Linux)
+let os = "Linux"
+#elseif os(Android)
+let os = "Android"
+#else
+let os = "Other"
+#endif
+```
+
+If you want the above situation to be evaluated as `Android`, you can override the evaluation parameters.
+First, obtain a [StaticBuildConfiguration](https://github.com/swiftlang/swift-syntax/blob/main/Sources/SwiftIfConfig/StaticBuildConfiguration.swift) with the following command and save it to a file.
+(Adjust `-target` to match the environment you want to build for. This command is available from Swift 6.3.)
+
+```sh
+swift frontend -print-static-build-config -target aarch64-unknown-linux-android28 > static-build-config.json
+```
+
+Then pass the path to that file when running jextract.
+
+- When using the jextract command: `--static-build-config <Path to JSON>`
+- When configuring via `swift-java.config`:
+    ```json
+    {
+        ...
+        "staticBuildConfigurationFile": "<Path to JSON>" // Relative path from `swift-java.config`
+    }
+    ```
+
+As a result, jextract will evaluate `os` as `Android`.
+

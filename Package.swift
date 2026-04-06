@@ -118,12 +118,12 @@ let package = Package(
   ],
   dependencies: [
     swiftJavaJNICoreDep,
-    .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
     .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(from: "1.3.0")), // primarily for ordered collections
-    .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1", traits: ["SubprocessFoundation"]),
+    .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.4.0", traits: ["SubprocessFoundation"]),
 
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
@@ -320,6 +320,7 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftLexicalLookup", package: "swift-syntax"),
+        .product(name: "SwiftIfConfig", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
@@ -331,6 +332,25 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
+      ],
+      plugins: [
+        .plugin(name: "_StaticBuildConfigPlugin")
+      ]
+    ),
+
+    .executableTarget(
+      name: "StaticBuildConfigPluginExecutable",
+      dependencies: [
+        .product(name: "Subprocess", package: "swift-subprocess"),
+        .product(name: "SwiftIfConfig", package: "swift-syntax"),
+      ]
+    ),
+
+    .plugin(
+      name: "_StaticBuildConfigPlugin",
+      capability: .buildTool(),
+      dependencies: [
+        "StaticBuildConfigPluginExecutable"
       ]
     ),
 

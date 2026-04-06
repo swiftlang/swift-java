@@ -229,8 +229,10 @@ extension DeclSyntaxProtocol {
       } else {
         "var"
       }
+    case .unexpectedCodeDecl(let node):
+      node.trimmedDescription
     case .usingDecl(let node):
-      node.nameForDebug
+      node.trimmedDescription
     }
   }
 

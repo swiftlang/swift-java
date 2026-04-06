@@ -133,6 +133,12 @@ extension SwiftJava {
 
     @Option(help: "If specified, only generate bindings for this single Swift type name")
     var singleType: String?
+
+    @Option(
+      help:
+        "Path to a JSON file containing a StaticBuildConfiguration. Used to resolve #if conditional compilation blocks."
+    )
+    var staticBuildConfig: String?
   }
 }
 
@@ -155,6 +161,7 @@ extension SwiftJava.JExtractCommand {
     configure(&config.swiftFilterInclude, append: self.filterInclude)
     configure(&config.swiftFilterExclude, append: self.filterExclude)
     configure(&config.singleType, overrideWith: self.singleType)
+    configure(&config.staticBuildConfigurationFile, overrideWith: self.staticBuildConfig)
 
     try checkModeCompatibility(config: config)
 

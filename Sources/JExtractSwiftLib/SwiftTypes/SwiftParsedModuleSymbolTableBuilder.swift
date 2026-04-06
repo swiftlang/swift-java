@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftIfConfig
 import SwiftSyntax
 
 struct SwiftParsedModuleSymbolTableBuilder {
@@ -23,6 +24,9 @@ struct SwiftParsedModuleSymbolTableBuilder {
   /// Imported modules to resolve type syntax.
   let importedModules: [String: SwiftModuleSymbolTable]
 
+  /// The build configuration used to resolve #if conditional compilation blocks.
+  let buildConfig: any BuildConfiguration
+
   /// Extension decls their extended type hasn't been resolved.
   var unresolvedExtensions: [ExtensionDeclSyntax]
 
@@ -31,6 +35,7 @@ struct SwiftParsedModuleSymbolTableBuilder {
     requiredAvailablityOfModuleWithName: String? = nil,
     alternativeModules: SwiftModuleSymbolTable.AlternativeModuleNamesData? = nil,
     importedModules: [String: SwiftModuleSymbolTable],
+    buildConfig: any BuildConfiguration = .jextractDefault,
     log: Logger? = nil
   ) {
     self.log = log
@@ -40,6 +45,7 @@ struct SwiftParsedModuleSymbolTableBuilder {
       alternativeModules: alternativeModules
     )
     self.importedModules = importedModules
+    self.buildConfig = buildConfig
     self.unresolvedExtensions = []
   }
 
@@ -56,17 +62,25 @@ extension SwiftParsedModuleSymbolTableBuilder {
   ) {
     // Find top-level type declarations.
     for statement in sourceFile.statements {
-      // We only care about declarations.
-      guard case .decl(let decl) = statement.item else {
-        continue
-      }
+      self.handle(codeBlockItem: statement.item, sourceFilePath: sourceFilePath)
+    }
+  }
 
-      if let nominalTypeNode = decl.asNominal {
-        self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalTypeNode, parent: nil)
-      }
-      if let extensionNode = decl.as(ExtensionDeclSyntax.self) {
-        self.handle(extensionDecl: extensionNode, sourceFilePath: sourceFilePath)
-      }
+  mutating func handle(
+    codeBlockItem node: CodeBlockItemSyntax.Item,
+    sourceFilePath: String
+  ) {
+    // We only care about declarations.
+    guard case .decl(let decl) = node else {
+      return
+    }
+
+    if let nominalTypeNode = decl.asNominal {
+      self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalTypeNode, parent: nil)
+    } else if let extensionNode = decl.as(ExtensionDeclSyntax.self) {
+      self.handle(extensionDecl: extensionNode, sourceFilePath: sourceFilePath)
+    } else if let ifConfigNode = decl.as(IfConfigDeclSyntax.self) {
+      self.handle(ifConfig: ifConfigNode, sourceFilePath: sourceFilePath)
     }
   }
 
@@ -150,6 +164,23 @@ extension SwiftParsedModuleSymbolTableBuilder {
     // Find any nested types within this extension and add them.
     self.handle(sourceFilePath: sourceFilePath, memberBlock: node.memberBlock, parent: extendedNominal)
     return true
+  }
+
+  mutating func handle(
+    ifConfig node: IfConfigDeclSyntax,
+    sourceFilePath: String
+  ) {
+    let (clause, _) = node.activeClause(in: buildConfig)
+    if let clause, let elements = clause.elements {
+      switch elements {
+      case .statements(let codeBlock):
+        for codeItem in codeBlock {
+          self.handle(codeBlockItem: codeItem.item, sourceFilePath: sourceFilePath)
+        }
+      default:
+        break
+      }
+    }
   }
 
   /// Finalize the symbol table and return it.

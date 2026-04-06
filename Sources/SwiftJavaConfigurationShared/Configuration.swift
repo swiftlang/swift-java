@@ -132,6 +132,10 @@ public struct Configuration: Codable {
   /// ```
   public var specialize: [String: SpecializationConfigEntry]?
 
+  /// If set, use this JSON file as the static build configuration for jextract.
+  /// This allows users to provide a custom StaticBuildConfiguration for #if resolution.
+  public var staticBuildConfigurationFile: String?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
