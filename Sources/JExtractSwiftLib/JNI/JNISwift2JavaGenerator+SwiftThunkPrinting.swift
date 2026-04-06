@@ -347,7 +347,6 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
   }
@@ -851,67 +850,6 @@ extension JNISwift2JavaGenerator {
         """
         let metadataPointer = unsafeBitCast(\(type.effectiveSwiftTypeName).self, to: UnsafeRawPointer.self)
         return Int64(Int(bitPattern: metadataPointer)).getJNIValue(in: environment)
-        """
-      )
-    }
-  }
-
-  /// Prints thunks for specific known types like Foundation.Date, Foundation.Data
-  private func printSpecificTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    guard let knownType = type.swiftNominal.knownTypeKind else { return }
-
-    switch knownType {
-    case .foundationData, .essentialsData:
-      printFoundationDataThunks(&printer, type)
-      printer.println()
-
-    default:
-      break
-    }
-  }
-
-  /// Prints Swift thunks for Foundation.Data helper methods
-  private func printFoundationDataThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
-    let parentName = type.qualifiedName
-
-    // Rebind the memory instead of converting, and set the memory directly using 'jniSetArrayRegion' from the buffer
-    printCDecl(
-      &printer,
-      javaMethodName: "$toByteArray",
-      parentName: type.effectiveJavaName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .array(.byte),
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        return \(selfVar).pointee.withUnsafeBytes { buffer in
-          return buffer.getJNIValue(in: environment)
-        }
-        """
-      )
-    }
-
-    // Legacy API, also to compare with as a baseline, we could remove it
-    printCDecl(
-      &printer,
-      javaMethodName: "$toByteArrayIndirectCopy",
-      parentName: type.effectiveJavaName,
-      parameters: [
-        selfPointerParam
-      ],
-      resultType: .array(.byte),
-    ) { printer in
-      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
-
-      printer.print(
-        """
-        // This is a double copy, we need to initialize the array and then copy into a JVM array in getJNIValue
-        return [UInt8](\(selfVar).pointee).getJNIValue(in: environment)
         """
       )
     }

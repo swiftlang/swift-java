@@ -39,29 +39,44 @@ extension Data {
     return Int64(selfPointer$.pointee.count)
   }
 
-  @JavaMethod("$toByteArray")
-  static func _toByteArray(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64) -> [UInt8] {
-    let selfPointer$ = UnsafeMutablePointer<Data>(bitPattern: Int(selfPointer))
-    guard let selfPointer$ else {
-      fatalError("selfPointer memory address was null in call to \(#function)!")
-    }
-    return selfPointer$.pointee.withUnsafeBytes { buffer in
-      return buffer.getJNIValue(in: environment)
-    }
-  }
-
-  @JavaMethod("$toByteArrayIndirectCopy")
-  static func _toByteArrayIndirectCopy(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64) -> [UInt8] {
-    let selfPointer$ = UnsafeMutablePointer<Data>(bitPattern: Int(selfPointer))
-    guard let selfPointer$ else {
-      fatalError("selfPointer memory address was null in call to \(#function)!")
-    }
-    return [UInt8](selfPointer$.pointee)
-  }
-
   @JavaMethod("$typeMetadataAddressDowncall")
   static func _typeMetadataAddressDowncall(environment: UnsafeMutablePointer<JNIEnv?>!) -> Int64 {
     let metadataPointer = unsafeBitCast(Data.self, to: UnsafeRawPointer.self)
     return Int64(Int(bitPattern: metadataPointer))
   }
+}
+
+#if compiler(>=6.3)
+@used
+#endif
+@_cdecl("Java_org_swift_swiftkit_core_foundation_Data__00024toByteArray__J")
+public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArray__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jbyteArray? {
+  guard let env$ = environment else {
+    fatalError("Missing JNIEnv in downcall to \(#function)")
+  }
+  assert(selfPointer != 0, "selfPointer memory address was null")
+  let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+  guard let selfPointer$ = UnsafeMutablePointer<Data>(bitPattern: selfPointerBits$) else {
+    fatalError("selfPointer memory address was null in call to \(#function)!")
+  }
+  return selfPointer$.pointee.withUnsafeBytes { buffer in
+    return buffer.getJNIValue(in: environment)
+  }
+}
+
+#if compiler(>=6.3)
+@used
+#endif
+@_cdecl("Java_org_swift_swiftkit_core_foundation_Data__00024toByteArrayIndirectCopy__J")
+public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArrayIndirectCopy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jbyteArray? {
+  guard let env$ = environment else {
+    fatalError("Missing JNIEnv in downcall to \(#function)")
+  }
+  assert(selfPointer != 0, "selfPointer memory address was null")
+  let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: env$))
+  guard let selfPointer$ = UnsafeMutablePointer<Data>(bitPattern: selfPointerBits$) else {
+    fatalError("selfPointer memory address was null in call to \(#function)!")
+  }
+  // This is a double copy, we need to initialize the array and then copy into a JVM array in getJNIValue
+  return [UInt8](selfPointer$.pointee).getJNIValue(in: environment)
 }
