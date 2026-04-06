@@ -48,7 +48,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_swift_example_Hello_1World_test_1method")
-        public func __macro_local_11test_methodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
+        public func __macro_local_22HelloWorld_test_methodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = HelloWorld(javaThis: thisObj, environment: environment!)
           return obj.test_method()
           .getJNILocalRefValue(in: environment)
@@ -81,7 +81,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_com_example_test_MyClass_simpleMethod")
-        public func __macro_local_12simpleMethodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
+        public func __macro_local_20MyClass_simpleMethodfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = MyClass(javaThis: thisObj, environment: environment!)
           return obj.simpleMethod()
           .getJNILocalRefValue(in: environment)
@@ -114,7 +114,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_example_Utils_static_1helper")
-        public func __macro_local_13static_helperfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> String.JNIType {
+        public func __macro_local_19Utils_static_helperfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> String.JNIType {
           return Utils.static_helper(environment: environment)
           .getJNILocalRefValue(in: environment)
         }
@@ -154,7 +154,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_test_Class_1With_1Underscores_method_1one")
-        public func __macro_local_10method_onefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
+        public func __macro_local_31ClassWithUnderscores_method_onefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = ClassWithUnderscores(javaThis: thisObj, environment: environment!)
           return obj.method_one()
           .getJNILocalRefValue(in: environment)
@@ -164,7 +164,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_test_Class_1With_1Underscores_method_1two")
-        public func __macro_local_10method_twofMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
+        public func __macro_local_31ClassWithUnderscores_method_twofMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) -> Int32.JNIType {
           let obj = ClassWithUnderscores(javaThis: thisObj, environment: environment!)
           return obj.method_two()
           .getJNILocalRefValue(in: environment)
@@ -205,7 +205,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024size")
-        public func __macro_local_5_sizefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) -> Int32.JNIType {
+        public func __macro_local_28SwiftDictionaryMapJava__sizefMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) -> Int32.JNIType {
           return SwiftDictionaryMapJava._size(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
           .getJNILocalRefValue(in: environment)
         }
@@ -214,7 +214,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_swift_swiftkit_core_collections_SwiftDictionaryMap__00024destroy")
-        public func __macro_local_8_destroyfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) {
+        public func __macro_local_31SwiftDictionaryMapJava__destroyfMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, pointer: Int64.JNIType) {
           return SwiftDictionaryMapJava._destroy(environment: environment, pointer: Int64(fromJNI: pointer, in: environment!))
         }
         """,
@@ -245,7 +245,7 @@ class JavaImplementationMacroTests: XCTestCase {
         @used
         #endif
         @_cdecl("Java_org_example_Processor_process_1data")
-        public func __macro_local_12process_datafMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) {
+        public func __macro_local_22Processor_process_datafMu_(environment: UnsafeMutablePointer<JNIEnv?>!, thisObj: jobject) {
           let obj = Processor(javaThis: thisObj, environment: environment!)
           return obj.process_data()
         }
