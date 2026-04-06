@@ -213,7 +213,7 @@ extension JavaImplementationMacro: PeerMacro {
         @used
         #endif
         @_cdecl(\(literal: cName))
-        public func \(context.makeUniqueName(swiftName))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
+        public func \(context.makeUniqueName("\(swiftTypeName)_\(swiftName)"))(\(raw: cParameters.map{ $0.description }.joined(separator: ", ")))\(raw: cReturnType) {
         \(body)
         }
         """
