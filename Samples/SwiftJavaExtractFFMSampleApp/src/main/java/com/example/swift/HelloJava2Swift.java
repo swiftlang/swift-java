@@ -22,6 +22,7 @@ import org.swift.swiftkit.core.CallTraces;
 import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 import org.swift.swiftkit.ffm.SwiftRuntime;
+import org.swift.swiftkit.ffm.foundation.Data;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -85,7 +86,7 @@ public class HelloJava2Swift {
             var origBytes = arena.allocateFrom("foobar");
             var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
             CallTraces.trace("origDat.count = " + origDat.getCount());
-            
+
             var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
             retDat.withUnsafeBytes((retBytes) -> {
                 var str = retBytes.getString(0);

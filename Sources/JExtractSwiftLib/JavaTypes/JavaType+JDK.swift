@@ -70,4 +70,12 @@ extension JavaType {
   static var swiftkitCoreFoundationDataProtocol: JavaType {
     .class(package: "org.swift.swiftkit.core.foundation", name: "DataProtocol")
   }
+
+  static var swiftkitFFMFoundationData: JavaType {
+    .class(package: "org.swift.swiftkit.ffm.foundation", name: "Data")
+  }
+
+  static var swiftkitFFMFoundationDataProtocol: JavaType {
+    .class(package: "org.swift.swiftkit.ffm.foundation", name: "DataProtocol")
+  }
 }
