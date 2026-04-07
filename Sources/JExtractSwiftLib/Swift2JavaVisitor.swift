@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import SwiftIfConfig
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
@@ -70,7 +71,8 @@ final class Swift2JavaVisitor {
       self.visit(subscriptDecl: node, in: parent)
     case .enumCaseDecl(let node):
       self.visit(enumCaseDecl: node, in: parent)
-
+    case .ifConfigDecl(let node):
+      self.visit(ifConfigDecl: node, in: parent, sourceFilePath: sourceFilePath)
     default:
       break
     }
@@ -363,6 +365,30 @@ final class Swift2JavaVisitor {
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
+    }
+  }
+
+  private func visit(
+    ifConfigDecl node: IfConfigDeclSyntax,
+    in parent: ImportedNominalType?,
+    sourceFilePath: String
+  ) {
+    let (clause, _) = node.activeClause(in: translator.buildConfig)
+    if let clause, let elements = clause.elements {
+      switch elements {
+      case .statements(let codeBlock):
+        for codeItem in codeBlock {
+          if let declNode = codeItem.item.as(DeclSyntax.self) {
+            self.visit(decl: declNode, in: parent, sourceFilePath: sourceFilePath)
+          }
+        }
+      case .decls(let memberBlock):
+        for memberItem in memberBlock {
+          self.visit(decl: memberItem.decl, in: parent, sourceFilePath: sourceFilePath)
+        }
+      default:
+        break
+      }
     }
   }
 

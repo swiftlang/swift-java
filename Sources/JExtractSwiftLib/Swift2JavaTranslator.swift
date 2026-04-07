@@ -14,6 +14,7 @@
 
 import Foundation
 import SwiftBasicFormat
+import SwiftIfConfig
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 import SwiftParser
@@ -26,6 +27,9 @@ public final class Swift2JavaTranslator {
   package var log: Logger
 
   let config: Configuration
+
+  /// The build configuration used to resolve #if conditional compilation blocks.
+  let buildConfig: any BuildConfiguration
 
   /// The name of the Swift module being translated.
   let swiftModuleName: String
@@ -70,6 +74,19 @@ public final class Swift2JavaTranslator {
     self.log = Logger(label: "translator", logLevel: config.logLevel ?? .info)
     self.config = config
     self.swiftModuleName = swiftModule
+
+    if let staticBuildConfigPath = config.staticBuildConfigurationFile {
+      do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: staticBuildConfigPath))
+        let decoder = JSONDecoder()
+        self.buildConfig = try decoder.decode(StaticBuildConfiguration.self, from: data)
+        self.log.info("Using custom static build configuration from: \(staticBuildConfigPath)")
+      } catch {
+        fatalError("Failed to load static build configuration from '\(staticBuildConfigPath)': \(error)")
+      }
+    } else {
+      self.buildConfig = .jextractDefault
+    }
   }
 }
 
@@ -152,6 +169,7 @@ extension Swift2JavaTranslator {
       moduleName: self.swiftModuleName,
       inputs + [dependenciesSource],
       config: self.config,
+      buildConfig: self.buildConfig,
       log: self.log,
     )
     self.lookupContext = SwiftTypeLookupContext(symbolTable: symbolTable)
