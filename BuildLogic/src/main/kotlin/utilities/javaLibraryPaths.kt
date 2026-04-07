@@ -44,11 +44,8 @@ fun Project.javaLibraryPaths(rootDir: File?): List<String> {
         "${arch}-apple-macosx"
     }
 
-    val paths: List<String> = listOf("release", "debug").flatMap { configuration ->
-        listOf(
-            "${base}.build/${triple}/$configuration/",
-            "${base}../../.build/${triple}/$configuration/",
-        )
+    val paths: List<String> = listOf("release", "debug").map { configuration ->
+        "${base}.build/${triple}/$configuration/"
     }
     val swiftRuntimePaths = swiftRuntimeLibraryPaths()
 
