@@ -330,6 +330,9 @@ let package = Package(
         "SwiftJavaConfigurationShared",
         "CodePrinting",
       ],
+      resources: [
+        .process("Resources")
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
       ],

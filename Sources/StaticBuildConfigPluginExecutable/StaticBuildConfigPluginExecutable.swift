@@ -26,31 +26,21 @@ import SwiftIfConfig
     let dst = URL(fileURLWithPath: args[1])
 
     let data = try await loadStaticBuildConfig()
-    let template = #"""
-      import Foundation
-      import SwiftIfConfig
-
-      extension StaticBuildConfiguration {
-        static var embedded: Data {
-          Data(#"\#(data)"#.utf8)
-        }
-      }
-      """#
-    try template.write(to: dst, atomically: true, encoding: .utf8)
+    try data.write(to: dst, options: .atomic)
   }
 
-  static func loadStaticBuildConfig() async throws -> String {
+  static func loadStaticBuildConfig() async throws -> Data {
     #if compiler(>=6.3)
     let result = try await run(
       .name("swift"),
       arguments: ["frontend", "-print-static-build-config", "-target", "aarch64-unknown-linux-gnu"],
-      output: .string(limit: 65536),
+      output: .data(limit: 65536),
       error: .string(limit: 65536)
     )
     if let error = result.standardError, !error.isEmpty {
       fatalError(error)
     }
-    return result.standardOutput ?? ""
+    return result.standardOutput
     #else
     #if compiler(>=6.2)
     let configuration = StaticBuildConfiguration(
@@ -64,7 +54,7 @@ import SwiftIfConfig
     )
     #endif
     let encoder = JSONEncoder()
-    return String(data: try encoder.encode(configuration), encoding: .utf8) ?? ""
+    return try encoder.encode(configuration)
     #endif
   }
 }

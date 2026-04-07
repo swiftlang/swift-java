@@ -18,15 +18,16 @@ import PackagePlugin
 @main
 struct _StaticBuildConfigPlugin: BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
-    let outSwift = context.pluginWorkDirectoryURL.appending(path: "StaticBuildConfiguration+embedded.swift")
+    let executable = try context.tool(named: "StaticBuildConfigPluginExecutable").url
+    let out = context.pluginWorkDirectoryURL.appending(path: "static-build-config.json")
     return [
       .buildCommand(
         displayName: "Run -print-static-build-config",
-        executable: try context.tool(named: "StaticBuildConfigPluginExecutable").url,
-        arguments: [outSwift.absoluteURL.path(percentEncoded: false)],
+        executable: executable,
+        arguments: [out.path(percentEncoded: false)],
         environment: [:],
         inputFiles: [],
-        outputFiles: [outSwift.absoluteURL]
+        outputFiles: [out]
       )
     ]
   }

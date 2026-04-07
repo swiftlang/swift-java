@@ -23,11 +23,15 @@ struct JExtractDefaultBuildConfiguration: BuildConfiguration {
   private var base: StaticBuildConfiguration
 
   init() {
-    let decoder = JSONDecoder()
+    guard let url = Bundle.module.url(forResource: "static-build-config", withExtension: "json") else {
+      fatalError("static-build-config.json is not found in module bundle")
+    }
     do {
-      base = try decoder.decode(StaticBuildConfiguration.self, from: StaticBuildConfiguration.embedded)
+      let data = try Data(contentsOf: url)
+      let decoder = JSONDecoder()
+      base = try decoder.decode(StaticBuildConfiguration.self, from: data)
     } catch {
-      fatalError("Embedded StaticBuildConfiguration is broken! data: \(String(data: StaticBuildConfiguration.embedded, encoding: .utf8) ?? "")")
+      fatalError("\(error)")
     }
   }
 
