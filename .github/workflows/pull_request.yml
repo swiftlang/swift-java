@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        swift_version: ['6.2', '6.3', 'nightly']
+        swift_version: ['6.2', '6.3']  # FIXME: reenable 'nightly' once snapshot toolchains are stable again
         os_version: ['jammy']
         jdk_vendor: ['corretto']
     container:
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.1.3', '6.2', '6.3', 'nightly']
+        swift_version: ['6.1.3', '6.2', '6.3']  # FIXME: reenable 'nightly' once snapshot toolchains are stable again
         os_version: ['jammy']
         jdk_vendor: ['corretto']
     container:
@@ -189,7 +189,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['nightly-main', 'nightly-6.3']
+        swift_version: ['nightly-6.3']  # FIXME: reenable 'nightly-main' once snapshot toolchains are stable again
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
@@ -213,7 +213,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.1.3', '6.2', '6.3', 'nightly']
+        swift_version: ['6.1.3', '6.2', '6.3']  # FIXME: reenable 'nightly' once snapshot toolchains are stable again
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
