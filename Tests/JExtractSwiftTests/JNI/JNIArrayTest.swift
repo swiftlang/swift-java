@@ -193,4 +193,122 @@ struct JNIArrayTest {
       ]
     )
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Nested arrays (array of arrays)
+
+  @Test("Import: ([[UInt8]]) -> byte[][] (Java)")
+  func uint8NestedArray_java() throws {
+    try assertOutput(
+      input: "public func f(data: [[UInt8]]) -> [[UInt8]] {}",
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @Unsigned
+        public static byte[][] f(@Unsigned byte[][] data) {
+          return SwiftModule.$f(Objects.requireNonNull(data, "data must not be null"));
+        }
+        """,
+        """
+        private static native byte[][] $f(byte[][] data);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: ([[UInt8]]) -> byte[][] (Swift)")
+  func uint8NestedArray_swift() throws {
+    try assertOutput(
+      input: "public func f(data: [[UInt8]]) -> [[UInt8]] {}",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f___3_3B")
+        public func Java_com_example_swift_SwiftModule__00024f___3_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jobjectArray?) -> jobjectArray? {
+          return SwiftModule.f(data: [[UInt8]](fromJNI: data, in: environment)).getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: ([[Int64]]) -> long[][] (Java)")
+  func int64NestedArray_java() throws {
+    try assertOutput(
+      input: "public func f(data: [[Int64]]) -> [[Int64]] {}",
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static long[][] f(long[][] data) {
+          return SwiftModule.$f(Objects.requireNonNull(data, "data must not be null"));
+        }
+        """,
+        """
+        private static native long[][] $f(long[][] data);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: ([[Int64]]) -> long[][] (Swift)")
+  func int64NestedArray_swift() throws {
+    try assertOutput(
+      input: "public func f(data: [[Int64]]) -> [[Int64]] {}",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f___3_3J")
+        public func Java_com_example_swift_SwiftModule__00024f___3_3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jobjectArray?) -> jobjectArray? {
+          return SwiftModule.f(data: [[Int64]](fromJNI: data, in: environment)).getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: ([[String]]) -> String[][] (Java)")
+  func stringNestedArray_java() throws {
+    try assertOutput(
+      input: "public func f(data: [[String]]) -> [[String]] {}",
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static java.lang.String[][] f(java.lang.String[][] data) {
+          return SwiftModule.$f(Objects.requireNonNull(data, "data must not be null"));
+        }
+        """,
+        """
+        private static native java.lang.String[][] $f(java.lang.String[][] data);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: ([[String]]) -> String[][] (Swift)")
+  func stringNestedArray_swift() throws {
+    try assertOutput(
+      input: "public func f(data: [[String]]) -> [[String]] {}",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f___3_3Ljava_lang_String_2")
+        public func Java_com_example_swift_SwiftModule__00024f___3_3Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jobjectArray?) -> jobjectArray? {
+          return SwiftModule.f(data: [[String]](fromJNI: data, in: environment)).getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
 }

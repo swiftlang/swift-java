@@ -57,3 +57,15 @@ public func stringArray(array: [String]) -> [String] {
 public func objectArray(array: [MySwiftClass]) -> [MySwiftClass] {
   array
 }
+
+public func nestedByteArray(array: [[UInt8]]) -> [[UInt8]] {
+  array
+}
+
+public func nestedLongArray(array: [[Int64]]) -> [[Int64]] {
+  array
+}
+
+public func nestedStringArray(array: [[String]]) -> [[String]] {
+  array
+}

@@ -121,6 +121,8 @@ extension JavaType {
     switch self {
     case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString:
       true
+    case .array(let element):
+      element.implementsJavaValue
     default:
       false
     }
