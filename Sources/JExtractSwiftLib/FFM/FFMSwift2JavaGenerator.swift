@@ -151,7 +151,7 @@ extension FFMSwift2JavaGenerator {
   /// Returns the Java class name for a nominal type, applying known-type overrides
   func javaClassName(for decl: ImportedNominalType) -> String {
     if decl.swiftNominal.knownTypeKind == .swiftJavaError {
-      return JavaType.swiftJavaErrorException.simpleClassName
+      return JavaType.swiftJavaErrorException.className!
     }
     return decl.swiftNominal.name
   }

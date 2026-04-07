@@ -79,7 +79,7 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
-      let result = try translate(swiftResult: functionSignature.result)
+      let result = try translate(swiftResult: functionSignature.result, methodName: methodName)
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
@@ -126,11 +126,12 @@ extension JNISwift2JavaGenerator {
             )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+            let isMutable = knownType.kind == .unsafeMutableRawBufferPointer
             return NativeParameter(
               parameters: [
                 JavaParameter(name: parameterName, type: .array(.byte))
               ],
-              conversion: .jniByteArrayToUnsafeRawBufferPointer(.placeholder, name: parameterName),
+              conversion: .jniByteArrayToUnsafeRawBufferPointer(.placeholder, name: parameterName, mutable: isMutable),
               indirectConversion: nil,
               conversionCheck: nil
             )
@@ -520,6 +521,7 @@ extension JNISwift2JavaGenerator {
 
     func translateOptionalResult(
       wrappedType swiftType: SwiftType,
+      methodName: String,
       resultName: String = "result"
     ) throws -> NativeResult {
       let discriminatorName = "\(resultName)_discriminator$"
@@ -592,6 +594,7 @@ extension JNISwift2JavaGenerator {
             convention: .direct,
             type: swiftType
           ),
+          methodName: methodName,
           resultName: resultName + "Wrapped"
         )
 
@@ -692,6 +695,7 @@ extension JNISwift2JavaGenerator {
 
     func translate(
       swiftResult: SwiftResult,
+      methodName: String,
       resultName: String = "result"
     ) throws -> NativeResult {
       switch swiftResult.type {
@@ -699,7 +703,7 @@ extension JNISwift2JavaGenerator {
         if let knownType = nominalType.asKnownType {
           switch knownType {
           case .optional(let wrapped):
-            return try translateOptionalResult(wrappedType: wrapped, resultName: resultName)
+            return try translateOptionalResult(wrappedType: wrapped, methodName: methodName, resultName: resultName)
 
           case .array(let elementType):
             return try translateArrayResult(elementType: elementType, resultName: resultName)
@@ -784,7 +788,7 @@ extension JNISwift2JavaGenerator {
         )
 
       case .tuple(let elements) where !elements.isEmpty:
-        return try translateTupleResult(elements: elements, resultName: resultName)
+        return try translateTupleResult(methodName: methodName, elements: elements, resultName: resultName)
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
@@ -792,6 +796,7 @@ extension JNISwift2JavaGenerator {
     }
 
     func translateTupleResult(
+      methodName: String,
       elements: [SwiftTupleElement],
       resultName: String
     ) throws -> NativeResult {
@@ -804,6 +809,7 @@ extension JNISwift2JavaGenerator {
         // Get the JNI type for this element
         let elementResult = try translate(
           swiftResult: .init(convention: .indirect, type: element.type),
+          methodName: methodName,
           resultName: outParamName
         )
 
@@ -1076,7 +1082,7 @@ extension JNISwift2JavaGenerator {
     indirect case extractSwiftProtocolValue(
       NativeSwiftConversionStep,
       typeMetadataVariableName: NativeSwiftConversionStep,
-      protocolNames: [String]
+      protocolTypes: [SwiftNominalType]
     )
 
     /// Extracts a swift type at a pointer given by a long.
@@ -1164,8 +1170,8 @@ extension JNISwift2JavaGenerator {
     /// `SwiftType(inner)`
     indirect case labelessInitializer(NativeSwiftConversionStep, swiftType: SwiftType)
 
-    /// Converts a jbyteArray to UnsafeRawBufferPointer via GetByteArrayElements
-    indirect case jniByteArrayToUnsafeRawBufferPointer(NativeSwiftConversionStep, name: String)
+    /// Converts a jbyteArray to UnsafeRawBufferPointer or UnsafeMutableRawBufferPointer via GetByteArrayElements
+    indirect case jniByteArrayToUnsafeRawBufferPointer(NativeSwiftConversionStep, name: String, mutable: Bool)
 
     /// Constructs a Swift tuple from individually-converted elements.
     /// E.g. `(label0: conv0, conv1)` for `(label0: Int, String)`
@@ -1222,12 +1228,10 @@ extension JNISwift2JavaGenerator {
         let protocolTypes,
         let allowsJavaImplementations
       ):
-        let protocolNames = protocolTypes.map { $0.nominalTypeDecl.qualifiedName }
-
         let inner = inner.render(&printer, placeholder)
         let variableName = "\(inner)swiftObject$"
-        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
-        printer.print("let \(variableName): \(compositeProtocolName)")
+        let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
+        printer.print("let \(variableName): \(existentialType)")
 
         func printStandardJExtractBlock(_ printer: inout CodePrinter) {
           let pointerVariableName = "\(inner)pointer$"
@@ -1241,7 +1245,7 @@ extension JNISwift2JavaGenerator {
           let existentialName = NativeSwiftConversionStep.extractSwiftProtocolValue(
             .constant(pointerVariableName),
             typeMetadataVariableName: .constant(typeMetadataVariableName),
-            protocolNames: protocolNames
+            protocolTypes: protocolTypes
           ).render(&printer, placeholder)
 
           printer.print("\(variableName) = \(existentialName)")
@@ -1270,12 +1274,12 @@ extension JNISwift2JavaGenerator {
 
         return variableName
 
-      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolNames):
+      case .extractSwiftProtocolValue(let inner, let typeMetadataVariableName, let protocolTypes):
         let inner = inner.render(&printer, placeholder)
         let typeMetadataVariableName = typeMetadataVariableName.render(&printer, placeholder)
         let existentialName = "\(inner)Existential$"
 
-        let compositeProtocolName = "(\(protocolNames.joined(separator: " & ")))"
+        let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
 
         // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
@@ -1288,10 +1292,10 @@ extension JNISwift2JavaGenerator {
             fatalError("\(inner) memory address was null")
           }
           #if hasFeature(ImplicitOpenExistentials)
-          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! any \(compositeProtocolName)
+          let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! \(existentialType)
           #else
-          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> any \(compositeProtocolName) {
-            \(inner)RawPointer$.load(as: ty) as! any \(compositeProtocolName)
+          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> \(existentialType) {
+            \(inner)RawPointer$.load(as: ty) as! \(existentialType)
           }
           let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)DoLoad)
           #endif
@@ -1726,17 +1730,19 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(swiftType)(\(inner))"
 
-      case .jniByteArrayToUnsafeRawBufferPointer(let inner, let name):
+      case .jniByteArrayToUnsafeRawBufferPointer(let inner, let name, let mutable):
         let inner = inner.render(&printer, placeholder)
         let countVar = "\(name)$count"
         let ptrVar = "\(name)$ptr"
         let rbpVar = "\(name)$rbp"
+        let bufferPointerType = mutable ? "UnsafeMutableRawBufferPointer" : "UnsafeRawBufferPointer"
+        let releaseMode = mutable ? "0" : "jint(JNI_ABORT)"
         printer.print(
           """
           let \(countVar) = Int(environment.interface.GetArrayLength(environment, \(inner)))
           let \(ptrVar) = environment.interface.GetByteArrayElements(environment, \(inner), nil)!
-          defer { environment.interface.ReleaseByteArrayElements(environment, \(inner), \(ptrVar), jint(JNI_ABORT)) }
-          let \(rbpVar) = UnsafeRawBufferPointer(start: \(ptrVar), count: \(countVar))
+          defer { environment.interface.ReleaseByteArrayElements(environment, \(inner), \(ptrVar), \(releaseMode)) }
+          let \(rbpVar) = \(bufferPointerType)(start: \(ptrVar), count: \(countVar))
           """
         )
         return rbpVar

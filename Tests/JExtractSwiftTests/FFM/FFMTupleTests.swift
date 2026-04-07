@@ -31,12 +31,12 @@ struct FFMTupleTests {
       .java,
       expectedChunks: [
         """
-        public static org.swift.swiftkit.core.tuple.Tuple2<Long, Long> returnPair() {
+        public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.Long> returnPair() {
           try(var arena$ = Arena.ofConfined()) {
             MemorySegment result$_0 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
             MemorySegment result$_1 = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
             swiftjava_SwiftModule_returnPair.call(result$_0, result$_1);
-            return new org.swift.swiftkit.core.tuple.Tuple2<Long, Long>(result$_0.get(SwiftValueLayout.SWIFT_INT64, 0), result$_1.get(SwiftValueLayout.SWIFT_INT64, 0));
+            return new org.swift.swiftkit.core.tuple.Tuple2(result$_0.get(SwiftValueLayout.SWIFT_INT64, 0), result$_1.get(SwiftValueLayout.SWIFT_INT64, 0));
           }
         }
         """
@@ -53,7 +53,7 @@ struct FFMTupleTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<Long, Long> arg) {
+        public static void takePair(org.swift.swiftkit.core.tuple.Tuple2<java.lang.Long, java.lang.Long> arg) {
           swiftjava_SwiftModule_takePair__.call(arg.$0, arg.$1);
         }
         """
@@ -69,10 +69,10 @@ struct FFMTupleTests {
       .java,
       expectedChunks: [
         """
-        public static org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer> labeledTuple() {
+        public static org.swift.swiftkit.core.tuple.Tuple2<java.lang.Integer, java.lang.Integer> labeledTuple() {
         """,
         """
-            return new org.swift.swiftkit.core.tuple.Tuple2<Integer, Integer>(result$_0.get(SwiftValueLayout.SWIFT_INT32, 0), result$_1.get(SwiftValueLayout.SWIFT_INT32, 0));
+            return new org.swift.swiftkit.core.tuple.Tuple2(result$_0.get(SwiftValueLayout.SWIFT_INT32, 0), result$_1.get(SwiftValueLayout.SWIFT_INT32, 0));
         """,
       ]
     )

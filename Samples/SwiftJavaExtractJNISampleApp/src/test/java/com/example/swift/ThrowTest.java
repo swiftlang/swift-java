@@ -25,4 +25,13 @@ public class ThrowTest {
         String result = MySwiftLibrary.throwString("hey");
         assertEquals("hey", result);
     }
+
+    @Test
+    void throwStringActuallyThrows() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            MySwiftLibrary.throwString("");
+        });
+        assertNotNull(exception.getMessage());
+        assertTrue(exception.getMessage().contains("swiftError"));
+    }
 }

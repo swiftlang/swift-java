@@ -16,9 +16,14 @@ import SwiftJavaJNICore
 
 extension JavaType {
 
-  /// A container for receiving Swift generic instances.
-  static var _OutSwiftGenericInstance: JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
+  /// The Java exception type for the Swift error wrapper
+  static var swiftJavaErrorException: JavaType {
+    .class(package: "org.swift.swiftkit.ffm.generated", name: "SwiftJavaErrorException")
+  }
+
+  /// The Java exception type for integer overflow checks
+  static var swiftIntegerOverflowException: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SwiftIntegerOverflowException")
   }
 
 }

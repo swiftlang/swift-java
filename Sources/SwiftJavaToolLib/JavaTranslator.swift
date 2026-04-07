@@ -106,7 +106,6 @@ package class JavaTranslator {
   }
 }
 
-// MARK: Defaults
 extension JavaTranslator {
   /// Default formatting options.
   private static let defaultFormat = BasicFormat(indentationWidth: .spaces(2))
