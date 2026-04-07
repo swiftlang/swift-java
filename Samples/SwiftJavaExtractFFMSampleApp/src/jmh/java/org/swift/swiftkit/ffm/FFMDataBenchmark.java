@@ -14,7 +14,6 @@
 
 package org.swift.swiftkit.ffm;
 
-import com.example.swift.Data;
 import com.example.swift.MySwiftLibrary;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -79,7 +78,7 @@ public class FFMDataBenchmark {
       });
       return buf.value;
     }
-    
+
     @Benchmark
     public byte[] ffm_data_withUnsafeBytes_toArray() {
       Holder<byte[]> buf = new Holder<>();
