@@ -60,7 +60,7 @@ public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArray__J(en
     fatalError("selfPointer memory address was null in call to \(#function)!")
   }
   return selfPointer$.pointee.withUnsafeBytes { buffer in
-    return buffer.getJNIValue(in: environment)
+    buffer.getJNIValue(in: environment)
   }
 }
 
@@ -68,7 +68,11 @@ public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArray__J(en
 @used
 #endif
 @_cdecl("Java_org_swift_swiftkit_core_foundation_Data__00024toByteArrayIndirectCopy__J")
-public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArrayIndirectCopy__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jbyteArray? {
+public func Java_org_swift_swiftkit_core_foundation_Data__00024toByteArrayIndirectCopy__J(
+  environment: UnsafeMutablePointer<JNIEnv?>!,
+  thisClass: jclass,
+  selfPointer: jlong
+) -> jbyteArray? {
   guard let env$ = environment else {
     fatalError("Missing JNIEnv in downcall to \(#function)")
   }

@@ -32,11 +32,11 @@ struct DateTests {
       .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-          """
-          public static void acceptDate(org.swift.swiftkit.core.foundation.Date date) {
-            SwiftModule.$acceptDate(date.$memoryAddress());
-          }
-          """
+        """
+        public static void acceptDate(org.swift.swiftkit.core.foundation.Date date) {
+          SwiftModule.$acceptDate(date.$memoryAddress());
+        }
+        """
       ]
     )
 
@@ -46,10 +46,10 @@ struct DateTests {
       .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-          """
-          @_cdecl("Java_com_example_swift_SwiftModule__00024acceptDate__J")
-          public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, date: jlong) {
-          """
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024acceptDate__J")
+        public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, date: jlong) {
+        """
       ]
     )
   }
@@ -67,9 +67,9 @@ struct DateTests {
       .jni,
       .java,
       expectedChunks: [
-          """
-          public static org.swift.swiftkit.core.foundation.Date returnDate(SwiftArena swiftArena) {
-          """
+        """
+        public static org.swift.swiftkit.core.foundation.Date returnDate(SwiftArena swiftArena) {
+        """
       ],
     )
 
@@ -78,10 +78,10 @@ struct DateTests {
       .jni,
       .swift,
       expectedChunks: [
-          """
-          @_cdecl("Java_com_example_swift_SwiftModule__00024returnDate__")
-          public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          """
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024returnDate__")
+        public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        """
       ]
     )
   }

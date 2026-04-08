@@ -24,7 +24,7 @@ import Foundation
 
 @_cdecl("swiftjava_getType_SwiftRuntimeFunctions_Data")
 public func swiftjava_getType_SwiftRuntimeFunctions_Data() -> UnsafeMutableRawPointer /* Any.Type */ {
-  return unsafeBitCast(Data.self, to: UnsafeMutableRawPointer.self)
+  unsafeBitCast(Data.self, to: UnsafeMutableRawPointer.self)
 }
 
 @_cdecl("swiftjava_SwiftRuntimeFunctions_Data_init_bytes_count")
@@ -39,13 +39,13 @@ public func swiftjava_SwiftRuntimeFunctions_Data_init__(_ bytes_pointer: UnsafeR
 
 @_cdecl("swiftjava_SwiftRuntimeFunctions_Data_count$get")
 public func swiftjava_SwiftRuntimeFunctions_Data_count$get(_ self: UnsafeRawPointer) -> Int {
-  return self.assumingMemoryBound(to: Data.self).pointee.count
+  self.assumingMemoryBound(to: Data.self).pointee.count
 }
 
 @_cdecl("swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__")
 public func swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__(_ body: @convention(c) (UnsafeRawPointer?, Int) -> Void, _ self: UnsafeRawPointer) {
   self.assumingMemoryBound(to: Data.self).pointee.withUnsafeBytes({ (_0) in
-    return body(_0.baseAddress, _0.count)
+    body(_0.baseAddress, _0.count)
   })
 }
 
@@ -66,5 +66,5 @@ public func swiftjava_SwiftRuntimeFunctions_Data_copyBytes__(
 
 @_cdecl("swiftjava_getType_SwiftRuntimeFunctions_DataProtocol")
 public func swiftjava_getType_SwiftRuntimeFunctions_DataProtocol() -> UnsafeMutableRawPointer /* Any.Type */ {
-  return unsafeBitCast((any DataProtocol).self, to: UnsafeMutableRawPointer.self)
+  unsafeBitCast((any DataProtocol).self, to: UnsafeMutableRawPointer.self)
 }

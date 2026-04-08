@@ -646,22 +646,28 @@ extension FFMSwift2JavaGenerator {
           case .foundationData, .essentialsData:
             return TranslatedParameter(
               javaParameters: [
-                JavaParameter(name: parameterName, type: .class(
-                  package: nil,
-                  name: "Optional",
-                  typeParameters: [.swiftkitFFMFoundationData]
-                ))
+                JavaParameter(
+                  name: parameterName,
+                  type: .class(
+                    package: nil,
+                    name: "Optional",
+                    typeParameters: [.swiftkitFFMFoundationData]
+                  )
+                )
               ],
               conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
             )
           case .foundationDataProtocol, .essentialsDataProtocol:
             return TranslatedParameter(
               javaParameters: [
-                JavaParameter(name: parameterName, type: .class(
-                  package: nil,
-                  name: "Optional",
-                  typeParameters: [.swiftkitFFMFoundationDataProtocol]
-                ))
+                JavaParameter(
+                  name: parameterName,
+                  type: .class(
+                    package: nil,
+                    name: "Optional",
+                    typeParameters: [.swiftkitFFMFoundationDataProtocol]
+                  )
+                )
               ],
               conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
             )
