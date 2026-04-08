@@ -176,7 +176,7 @@ extension JNISwift2JavaGenerator {
             ),
           parameters: [],
           resultType: TranslatedResult(
-            javaType: .class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: caseName)]),
+            javaType: .optional(.class(package: nil, name: caseName)),
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion
@@ -886,7 +886,7 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: nil, name: "Optional", typeParameters: [javaType]),
+            type: .optional(javaType),
             annotations: parameterAnnotations,
           ),
           conversion: .method(
@@ -1077,7 +1077,7 @@ extension JNISwift2JavaGenerator {
               genericParameters: genericParameters,
               genericRequirements: genericRequirements,
             )
-            return .class(package: "java.util", name: "Optional", typeParameters: [wrappedType])
+            return .optional(wrappedType)
 
           case .array:
             guard let elementType = nominalType.genericArguments?.first else {
@@ -1361,7 +1361,7 @@ extension JNISwift2JavaGenerator {
             .void
           }
 
-        let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
+        let returnType = JavaType.optional(javaType)
         return TranslatedResult(
           javaType: returnType,
           annotations: parameterAnnotations,

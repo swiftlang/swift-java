@@ -648,11 +648,7 @@ extension FFMSwift2JavaGenerator {
               javaParameters: [
                 JavaParameter(
                   name: parameterName,
-                  type: .class(
-                    package: nil,
-                    name: "Optional",
-                    typeParameters: [.swiftkitFFMFoundationData]
-                  )
+                  type: .optional(.swiftkitFFMFoundationData)
                 )
               ],
               conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
@@ -662,11 +658,7 @@ extension FFMSwift2JavaGenerator {
               javaParameters: [
                 JavaParameter(
                   name: parameterName,
-                  type: .class(
-                    package: nil,
-                    name: "Optional",
-                    typeParameters: [.swiftkitFFMFoundationDataProtocol]
-                  )
+                  type: .optional(.swiftkitFFMFoundationDataProtocol)
                 )
               ],
               conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
@@ -679,7 +671,7 @@ extension FFMSwift2JavaGenerator {
         let translatedTy = try self.translate(swiftType: swiftType)
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(name: parameterName, type: .class(package: nil, name: "Optional", typeParameters: [translatedTy]))
+            JavaParameter(name: parameterName, type: .optional(translatedTy))
           ],
           conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
         )

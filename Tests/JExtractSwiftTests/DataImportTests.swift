@@ -267,7 +267,7 @@ final class DataImportTests {
          * public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
          * }
          */
-        public static void receiveDataProtocol(org.swift.swiftkit.ffm.foundation.Data dat, Optional<org.swift.swiftkit.ffm.foundation.Data> dat2) {
+        public static void receiveDataProtocol(org.swift.swiftkit.ffm.foundation.Data dat, java.util.Optional<org.swift.swiftkit.ffm.foundation.Data> dat2) {
           swiftjava_SwiftModule_receiveDataProtocol_dat_dat2.call(dat.$memorySegment(), SwiftRuntime.toOptionalSegmentInstance(dat2));
         }
         """,
