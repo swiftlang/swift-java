@@ -1236,8 +1236,19 @@ extension JNISwift2JavaGenerator {
           elements: tupleElements
         )
 
+      // Collect annotations from tuple elements - if any element is @Unsigned,
+      // propagate that to the method level
+      var tupleAnnotations: [JavaAnnotation] = []
+      for element in elements {
+        let elementAnnotations = getJavaTypeAnnotations(swiftType: element.type, config: config)
+        for annotation in elementAnnotations where !tupleAnnotations.contains(annotation) {
+          tupleAnnotations.append(annotation)
+        }
+      }
+
       return TranslatedResult(
         javaType: javaResultType,
+        annotations: tupleAnnotations,
         outParameters: outParameters,
         conversion: javaNativeConversionStep
       )
@@ -2130,7 +2141,7 @@ extension JNISwift2JavaGenerator {
       _fileID: String = #fileID,
       _line: Int = #line,
     ) -> JavaTranslationError {
-      .unsupportedSwiftType(known: type, fileID: _fileID, line: _line)
+      .unsupportedSwiftType(knowvan: type, fileID: _fileID, line: _line)
     }
 
     /// The user has not supplied a mapping from `SwiftType` to
