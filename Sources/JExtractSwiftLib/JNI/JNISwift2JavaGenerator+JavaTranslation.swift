@@ -2141,7 +2141,7 @@ extension JNISwift2JavaGenerator {
       _fileID: String = #fileID,
       _line: Int = #line,
     ) -> JavaTranslationError {
-      .unsupportedSwiftType(knowvan: type, fileID: _fileID, line: _line)
+      .unsupportedSwiftType(known: type, fileID: _fileID, line: _line)
     }
 
     /// The user has not supplied a mapping from `SwiftType` to
