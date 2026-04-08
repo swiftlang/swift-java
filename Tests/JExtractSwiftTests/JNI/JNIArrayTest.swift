@@ -311,4 +311,54 @@ struct JNIArrayTest {
       ]
     )
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Tuples with array elements
+
+  @Test("Import: () -> (name: [UInt8], another: [UInt8]) (Java)")
+  func tupleByteArrays_java() throws {
+    try assertOutput(
+      input: "public func namedByteArrayTuple() -> (name: [UInt8], another: [UInt8]) {}",
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @Unsigned
+        public static LabeledTuple_namedByteArrayTuple_name_another<byte[], byte[]> namedByteArrayTuple() {
+          byte[][] result_0$ = new byte[1][];
+          byte[][] result_1$ = new byte[1][];
+          SwiftModule.$namedByteArrayTuple(result_0$, result_1$);
+          return new LabeledTuple_namedByteArrayTuple_name_another<byte[], byte[]>(result_0$[0], result_1$[0]);
+        }
+        """,
+        """
+        private static native void $namedByteArrayTuple(byte[][] result_0$, byte[][] result_1$);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: () -> (name: [UInt8], another: [UInt8]) (Swift)")
+  func tupleByteArrays_swift() throws {
+    try assertOutput(
+      input: "public func namedByteArrayTuple() -> (name: [UInt8], another: [UInt8]) {}",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024namedByteArrayTuple___3_3B_3_3B")
+        public func Java_com_example_swift_SwiftModule__00024namedByteArrayTuple___3_3B_3_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_0$: jobjectArray?, result_1$: jobjectArray?) {
+          let tupleResult$ = SwiftModule.namedByteArrayTuple()
+          let element_0_jni$ = tupleResult$.name.getJNILocalRefValue(in: environment)
+          environment.interface.SetObjectArrayElement(environment, result_0$, 0, element_0_jni$)
+          let element_1_jni$ = tupleResult$.another.getJNILocalRefValue(in: environment)
+          environment.interface.SetObjectArrayElement(environment, result_1$, 0, element_1_jni$)
+          return
+        }
+        """
+      ]
+    )
+  }
 }

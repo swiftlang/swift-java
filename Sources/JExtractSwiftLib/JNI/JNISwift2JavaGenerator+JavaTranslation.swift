@@ -1236,8 +1236,19 @@ extension JNISwift2JavaGenerator {
           elements: tupleElements
         )
 
+      // Collect annotations from tuple elements - if any element is @Unsigned,
+      // propagate that to the method level
+      var tupleAnnotations: [JavaAnnotation] = []
+      for element in elements {
+        let elementAnnotations = getJavaTypeAnnotations(swiftType: element.type, config: config)
+        for annotation in elementAnnotations where !tupleAnnotations.contains(annotation) {
+          tupleAnnotations.append(annotation)
+        }
+      }
+
       return TranslatedResult(
         javaType: javaResultType,
+        annotations: tupleAnnotations,
         outParameters: outParameters,
         conversion: javaNativeConversionStep
       )
@@ -1731,10 +1742,18 @@ extension JNISwift2JavaGenerator {
       func render(type: JavaType) -> String {
         switch self {
         case .newArray(let javaType, let size):
-          "new \(javaType)[\(size)]"
+          // For array element types like byte[], we need "new byte[size][]"
+          // not "new byte[][size]"
+          var baseType = javaType
+          var extraDimensions = ""
+          while case .array(let inner) = baseType {
+            extraDimensions += "[]"
+            baseType = inner
+          }
+          return "new \(baseType)[\(size)]\(extraDimensions)"
 
         case .new:
-          "new \(type)()"
+          return "new \(type)()"
         }
       }
     }

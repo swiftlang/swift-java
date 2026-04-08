@@ -32,11 +32,13 @@ import static java.lang.annotation.ElementType.*;
  * in a method signature corresponds to a Swift {@code UInt64} type, and therefore
  * negative values reported by the signed {@code long} should instead be interpreted positive values,
  * larger than {@code Long.MAX_VALUE} that are just not representable using a signed {@code long}.
+ * <p/>
+ * If this annotation is used on a method, it refers to the return type using an unsigned integer.
  */
 @Documented
 @Label("Unsigned integer type")
 @Description("Value should be interpreted as unsigned data type")
-@Target({TYPE_USE, PARAMETER, FIELD})
+@Target({TYPE_USE, PARAMETER, FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Unsigned {
 }
