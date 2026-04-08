@@ -41,3 +41,7 @@ public func makeBigTuple() -> (
     11, 12, 13, 14.0
   )
 }
+
+public func namedByteArrayTuple() -> (name: [UInt8], another: [UInt8]) {
+  (name: [1, 2, 3], another: [4, 5])
+}

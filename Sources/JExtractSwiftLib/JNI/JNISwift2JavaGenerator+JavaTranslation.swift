@@ -1731,10 +1731,18 @@ extension JNISwift2JavaGenerator {
       func render(type: JavaType) -> String {
         switch self {
         case .newArray(let javaType, let size):
-          "new \(javaType)[\(size)]"
+          // For array element types like byte[], we need "new byte[size][]"
+          // not "new byte[][size]"
+          var baseType = javaType
+          var extraDimensions = ""
+          while case .array(let inner) = baseType {
+            extraDimensions += "[]"
+            baseType = inner
+          }
+          return "new \(baseType)[\(size)]\(extraDimensions)"
 
         case .new:
-          "new \(type)()"
+          return "new \(type)()"
         }
       }
     }

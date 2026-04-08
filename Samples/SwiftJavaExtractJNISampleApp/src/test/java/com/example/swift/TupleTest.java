@@ -84,4 +84,15 @@ public class TupleTest {
         assertEquals(13L, result.$14);
         assertEquals(14.0f, result.$15);
     }
+
+    @Test
+    void namedByteArrayTuple() {
+        var result = MySwiftLibrary.namedByteArrayTuple();
+
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result.name());
+        assertArrayEquals(new byte[] { 4, 5 }, result.another());
+
+        assertArrayEquals(new byte[] { 1, 2, 3 }, (byte[]) result.$0);
+        assertArrayEquals(new byte[] { 4, 5 }, (byte[]) result.$1);
+    }
 }
