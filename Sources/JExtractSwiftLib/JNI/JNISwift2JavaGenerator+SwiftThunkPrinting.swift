@@ -57,24 +57,35 @@ extension JNISwift2JavaGenerator {
     let moduleFilename = "\(moduleFilenameBase).swift"
 
     do {
-      logger.trace("Printing swift module class: \(moduleFilename)")
+      // Skip the module-level .swift file when generating for a single type
+      if config.singleType == nil {
+        logger.trace("Printing swift module class: \(moduleFilename)")
 
-      try printGlobalSwiftThunkSources(&printer)
+        try printGlobalSwiftThunkSources(&printer)
 
-      if let outputFile = try printer.writeContents(
-        outputDirectory: self.swiftOutputDirectory,
-        javaPackagePath: nil,
-        filename: moduleFilename,
-      ) {
-        logger.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
-        self.expectedOutputSwiftFileNames.remove(moduleFilename)
+        if let outputFile = try printer.writeContents(
+          outputDirectory: self.swiftOutputDirectory,
+          javaPackagePath: nil,
+          filename: moduleFilename,
+        ) {
+          logger.info("Generated: \(moduleFilenameBase.bold).swift (at \(outputFile.absoluteString))")
+          self.expectedOutputSwiftFileNames.remove(moduleFilename)
+        }
       }
 
       // === All types
       // We have to write all types to their corresponding output file that matches the file they were declared in,
       // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
+
+      let filteredTypes: [String: ImportedNominalType]
+      if let singleType = config.singleType {
+        filteredTypes = self.analysis.importedTypes.filter { $0.key == singleType }
+      } else {
+        filteredTypes = self.analysis.importedTypes
+      }
+
       for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
-        grouping: self.analysis.importedTypes,
+        grouping: filteredTypes,
         by: { $0.value.sourceFilePath },
       ) {
         logger.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")

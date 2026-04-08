@@ -42,13 +42,21 @@ extension JNISwift2JavaGenerator {
   }
 
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
-    let importedTypes = analysis.importedTypes.sorted(by: { (lhs, rhs) in lhs.key < rhs.key })
+    let typesToExport: [(key: String, value: ImportedNominalType)]
+    if let singleType = config.singleType {
+      typesToExport = analysis.importedTypes
+        .filter { $0.key == singleType }
+        .sorted(by: { $0.key < $1.key })
+    } else {
+      typesToExport = analysis.importedTypes
+        .sorted(by: { $0.key < $1.key })
+    }
 
     var exportedFileNames: OrderedSet<String> = []
 
     // Each parent type goes into its own file
     // any nested types are printed inside the body as `static class`
-    for (_, ty) in importedTypes.filter({ _, type in type.parent == nil }) {
+    for (_, ty) in typesToExport.filter({ _, type in type.parent == nil }) {
       let filename = "\(ty.effectiveJavaSimpleName).java"
       logger.debug("Printing contents: \(filename)")
       printImportedNominal(&printer, ty)
@@ -63,17 +71,20 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    let filename = "\(self.swiftModuleName).java"
-    logger.trace("Printing module class: \(filename)")
-    printModule(&printer)
+    // Skip the module-level .swift file when generating for a single type
+    if config.singleType == nil {
+      let filename = "\(self.swiftModuleName).java"
+      logger.trace("Printing module class: \(filename)")
+      printModule(&printer)
 
-    if let outputFile = try printer.writeContents(
-      outputDirectory: javaOutputDirectory,
-      javaPackagePath: javaPackagePath,
-      filename: filename,
-    ) {
-      exportedFileNames.append(outputFile.path(percentEncoded: false))
-      logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
+      if let outputFile = try printer.writeContents(
+        outputDirectory: javaOutputDirectory,
+        javaPackagePath: javaPackagePath,
+        filename: filename,
+      ) {
+        exportedFileNames.append(outputFile.path(percentEncoded: false))
+        logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
+      }
     }
 
     // Write java sources list file
