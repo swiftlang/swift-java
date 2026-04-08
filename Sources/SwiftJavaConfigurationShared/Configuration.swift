@@ -32,6 +32,12 @@ public struct Configuration: Codable {
 
   public var swiftModule: String?
 
+  /// The name of the native library to load at runtime via `System.loadLibrary()`.
+  /// Defaults to the Swift module name when not set. Use this when the dynamic
+  /// library product has a different name than the module being exported
+  /// (e.g. the module is `MyLibrary` but the dylib is `MyLibrarySwiftJava` or something else).
+  public var nativeLibraryName: String?
+
   public var inputSwiftDirectory: String?
 
   public var outputSwiftDirectory: String?
@@ -131,6 +137,10 @@ public struct Configuration: Codable {
   /// }
   /// ```
   public var specialize: [String: SpecializationConfigEntry]?
+
+  /// If set, use this JSON file as the static build configuration for jextract.
+  /// This allows users to provide a custom StaticBuildConfiguration for #if resolution.
+  public var staticBuildConfigurationFile: String?
 
   // ==== wrap-java ---------------------------------------------------------
 

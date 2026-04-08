@@ -87,9 +87,17 @@ func assertOutput(
 
   let sourceLocation = SourceLocation(fileID: fileID, filePath: filePath, line: line, column: column)
   for notExpectedChunk in notExpectedChunks {
+    let outputNotContainsNotExpectedChunk = !output.contains(notExpectedChunk)
     #expect(
-      !output.contains(notExpectedChunk),
-      "Output must not contain:\n\(notExpectedChunk)\n\nGot output:\n\(output)",
+      outputNotContainsNotExpectedChunk,
+      """
+      \("error: Output must not contain not expected chunk!".red)
+      ==== Not Expected output -----------------------------------------------  
+      \(notExpectedChunk.yellow)
+      ==== Got output ----------------------------------------------------
+      \(output)
+      ==== ---------------------------------------------------------------
+      """,
       sourceLocation: sourceLocation
     )
   }

@@ -100,7 +100,7 @@ extension JNISwift2JavaGenerator {
     printModuleClass(&printer) { printer in
       printer.print(
         """
-        static final String LIB_NAME = "\(swiftModuleName)";
+        static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
 
         static {
           System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
@@ -189,7 +189,7 @@ extension JNISwift2JavaGenerator {
     printNominal(&printer, decl) { printer in
       printer.print(
         """
-        static final String LIB_NAME = "\(swiftModuleName)";
+        static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
 
         @SuppressWarnings("unused")
         private static final boolean INITIALIZED_LIBS = initializeLibs();
