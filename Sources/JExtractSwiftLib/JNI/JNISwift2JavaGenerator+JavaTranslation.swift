@@ -463,7 +463,7 @@ extension JNISwift2JavaGenerator {
     ) throws -> TranslatedParameter {
 
       // If the result type should cause any annotations on the method, include them here.
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let parameterAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
       case .nominal(let nominalType):
@@ -804,7 +804,7 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let parameterAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
       case .nominal(let nominalType):
@@ -896,7 +896,7 @@ extension JNISwift2JavaGenerator {
       let swiftType = swiftResult.type
 
       // If the result type should cause any annotations on the method, include them here.
-      let resultAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let resultAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
       case .nominal(let nominalType):
@@ -1251,7 +1251,7 @@ extension JNISwift2JavaGenerator {
     ) throws -> TranslatedResult {
       let discriminatorName = "\(resultName)$_discriminator$"
 
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: swiftType, config: config)
+      let parameterAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
       switch swiftType {
       case .nominal(let nominalType):
@@ -1365,9 +1365,30 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter {
-      let parameterAnnotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
+      let parameterAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: elementType, config: config)
 
       switch elementType {
+      case .nominal(let nominalType) where nominalType.nominalTypeDecl.knownTypeKind == .array:
+        guard let fullKnownType = nominalType.asKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        guard case .array(let innerElement) = fullKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        let innerParam = try translateArrayParameter(
+          elementType: innerElement,
+          parameterName: parameterName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        let innerJavaType = innerParam.parameter.type.javaType
+        return TranslatedParameter(
+          parameter: JavaParameter(name: parameterName, type: .array(innerJavaType), annotations: parameterAnnotations),
+          conversion: .requireNonNull(.placeholder, message: "\(parameterName) must not be null")
+        )
+
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
@@ -1417,9 +1438,30 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
-      let annotations: [JavaAnnotation] = getTypeAnnotations(swiftType: elementType, config: config)
+      let annotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: elementType, config: config)
 
       switch elementType {
+      case .nominal(let nominalType) where nominalType.nominalTypeDecl.knownTypeKind == .array:
+        guard let fullKnownType = nominalType.asKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        guard case .array(let innerElement) = fullKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        let innerResult = try translateArrayResult(
+          elementType: innerElement,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+        return TranslatedResult(
+          javaType: .array(innerResult.javaType),
+          annotations: annotations,
+          outParameters: [],
+          conversion: .placeholder
+        )
+
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {

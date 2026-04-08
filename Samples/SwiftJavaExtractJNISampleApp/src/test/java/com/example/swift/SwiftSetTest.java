@@ -61,7 +61,7 @@ public class SwiftSetTest {
             assertTrue(modified.contains("world"));
             assertTrue(modified.contains("swift"));
 
-            // The original set is unchanged (Swift value semantics — it's a copy)
+            // The original set is unchanged (Swift value semantics - it's a copy)
             assertEquals(2, original.size());
             assertFalse(original.contains("swift"));
         }

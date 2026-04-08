@@ -63,7 +63,7 @@ public class SwiftDictionaryMapTest {
             assertEquals(2L, modified.get("world"));
             assertEquals(42L, modified.get("swift"));
 
-            // The original dictionary is unchanged (Swift value semantics — it's a copy)
+            // The original dictionary is unchanged (Swift value semantics - it's a copy)
             assertEquals(2, original.size());
             assertNull(original.get("swift"));
         }

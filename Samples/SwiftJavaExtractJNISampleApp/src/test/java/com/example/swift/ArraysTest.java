@@ -102,4 +102,76 @@ public class ArraysTest {
             assertEquals(3, MySwiftLibrary.objectArray(input, arena).length);
         }
     }
+
+    @Test
+    void nestedByteArray() {
+        byte[][] input = new byte[][] {
+            { 1, 2, 3 },
+            { 4, 5 },
+            { 6 }
+        };
+        byte[][] result = MySwiftLibrary.nestedByteArray(input);
+        assertEquals(input.length, result.length);
+        assertArrayEquals(input[0], result[0]);
+        assertArrayEquals(input[1], result[1]);
+        assertArrayEquals(input[2], result[2]);
+    }
+
+    @Test
+    void nestedByteArray_empty() {
+        byte[][] input = new byte[][] {};
+        byte[][] result = MySwiftLibrary.nestedByteArray(input);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    void nestedByteArray_emptyInner() {
+        byte[][] input = new byte[][] { {}, { 1 }, {} };
+        byte[][] result = MySwiftLibrary.nestedByteArray(input);
+        assertEquals(3, result.length);
+        assertArrayEquals(new byte[] {}, result[0]);
+        assertArrayEquals(new byte[] { 1 }, result[1]);
+        assertArrayEquals(new byte[] {}, result[2]);
+    }
+
+    @Test
+    void nestedLongArray() {
+        long[][] input = new long[][] {
+            { 100, 200, 300 },
+            { 400, 500 }
+        };
+        long[][] result = MySwiftLibrary.nestedLongArray(input);
+        assertEquals(input.length, result.length);
+        assertArrayEquals(input[0], result[0]);
+        assertArrayEquals(input[1], result[1]);
+    }
+
+    @Test
+    void nestedStringArray() {
+        String[][] input = new String[][] {
+            { "hello", "world" },
+            { "foo", "bar", "baz" }
+        };
+        String[][] result = MySwiftLibrary.nestedStringArray(input);
+        assertEquals(input.length, result.length);
+        assertArrayEquals(input[0], result[0]);
+        assertArrayEquals(input[1], result[1]);
+    }
+
+    @Test
+    void nestedStringArray_empty() {
+        String[][] input = new String[][] {};
+        String[][] result = MySwiftLibrary.nestedStringArray(input);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    void nestedStringArray_emptyInner() {
+        String[][] input = new String[][] { {}, { "a" }, {} };
+        String[][] result = MySwiftLibrary.nestedStringArray(input);
+        assertEquals(3, result.length);
+        assertArrayEquals(new String[] {}, result[0]);
+        assertArrayEquals(new String[] { "a" }, result[1]);
+        assertArrayEquals(new String[] {}, result[2]);
+    }
 }

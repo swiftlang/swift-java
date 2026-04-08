@@ -846,6 +846,22 @@ extension JNISwift2JavaGenerator {
       resultName: String
     ) throws -> NativeResult {
       switch elementType {
+      case .nominal(let nominalType) where nominalType.nominalTypeDecl.knownTypeKind == .array:
+        guard let fullKnownType = nominalType.asKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
+        }
+
+        guard case .array(let innerElement) = fullKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
+        }
+
+        let innerResult = try translateArrayResult(elementType: innerElement, resultName: resultName)
+        return NativeResult(
+          javaType: .array(innerResult.javaType),
+          conversion: .getJNIValue(.placeholder),
+          outParameters: []
+        )
+
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
@@ -897,6 +913,28 @@ extension JNISwift2JavaGenerator {
       parameterName: String
     ) throws -> NativeParameter {
       switch elementType {
+      case .nominal(let nominalType) where nominalType.nominalTypeDecl.knownTypeKind == .array:
+        guard let fullKnownType = nominalType.asKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        guard case .array(let innerElement) = fullKnownType else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+
+        let innerParam = try translateArrayParameter(elementType: innerElement, parameterName: parameterName)
+        guard case .concrete(let innerJavaType) = innerParam.parameters.first?.type else {
+          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        }
+        return NativeParameter(
+          parameters: [
+            JavaParameter(name: parameterName, type: .array(innerJavaType))
+          ],
+          conversion: .initFromJNI(.placeholder, swiftType: knownTypes.arraySugar(elementType)),
+          indirectConversion: nil,
+          conversionCheck: nil
+        )
+
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),

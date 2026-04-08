@@ -44,7 +44,7 @@ public class BoxSpecializationTest {
 
     @Test
     void fishBoxDoesNotHaveGenericTypeParameter() {
-        // FishBox is a concrete specialization — no generic type parameters
+        // FishBox is a concrete specialization - no generic type parameters
         assertEquals(0, FishBox.class.getTypeParameters().length,
             "FishBox should have no generic type parameters");
     }
