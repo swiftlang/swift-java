@@ -71,6 +71,7 @@ extension FFMSwift2JavaGenerator {
     // === All types
     // We have to write all types to their corresponding output file that matches the file they were declared in,
     // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
+
     let filteredTypes: [String: ImportedNominalType]
     if let singleType = config.singleType {
       filteredTypes = self.analysis.importedTypes.filter { $0.key == singleType }
