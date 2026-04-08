@@ -17,6 +17,7 @@ package org.swift.swiftkit.ffm;
 import com.example.swift.MySwiftLibrary;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
+import org.swift.swiftkit.ffm.foundation.Data;
 
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
