@@ -5,7 +5,6 @@
 
 import SwiftJava
 import SwiftJavaJNICore
-import SwiftJavaRuntimeSupport
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
