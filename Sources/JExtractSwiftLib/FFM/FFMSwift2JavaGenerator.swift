@@ -448,7 +448,7 @@ extension FFMSwift2JavaGenerator {
 
       printer.print(
         """
-        static MemorySegment findOrThrow(String symbol) {
+        public static MemorySegment findOrThrow(String symbol) {
             return SYMBOL_LOOKUP.find(symbol)
                     .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
         }
