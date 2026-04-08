@@ -17,34 +17,8 @@ import SwiftJavaConfigurationShared
 import Testing
 
 struct DateTests {
-  @Test(
-    "Import: accept Date",
-    arguments: [
-      (
-        JExtractGenerationMode.jni,
-        /* expected Java chunks */
-        [
-          """
-          public static void acceptDate(Date date) {
-            SwiftModule.$acceptDate(date.$memoryAddress());
-          }
-          """
-        ],
-        /* expected Swift chunks */
-        [
-          """
-          @_cdecl("Java_com_example_swift_SwiftModule__00024acceptDate__J")
-          public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, date: jlong) {
-          """
-        ],
-      )
-    ]
-  )
-  func func_accept_date(
-    mode: JExtractGenerationMode,
-    expectedJavaChunks: [String],
-    expectedSwiftChunks: [String]
-  ) throws {
+  @Test("Import: accept Date")
+  func func_accept_date() throws {
     let text =
       """
       import Foundation
@@ -54,47 +28,34 @@ struct DateTests {
 
     try assertOutput(
       input: text,
-      mode,
+      .jni,
       .java,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedJavaChunks
+      expectedChunks: [
+          """
+          public static void acceptDate(org.swift.swiftkit.core.foundation.Date date) {
+            SwiftModule.$acceptDate(date.$memoryAddress());
+          }
+          """
+      ]
     )
 
     try assertOutput(
       input: text,
-      mode,
+      .jni,
       .swift,
       detectChunkByInitialLines: 1,
-      expectedChunks: expectedSwiftChunks
+      expectedChunks: [
+          """
+          @_cdecl("Java_com_example_swift_SwiftModule__00024acceptDate__J")
+          public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, date: jlong) {
+          """
+      ]
     )
   }
 
-  @Test(
-    "Import: return Date",
-    arguments: [
-      (
-        JExtractGenerationMode.jni,
-        /* expected Java chunks */
-        [
-          """
-          public static Date returnDate(SwiftArena swiftArena) {
-          """
-        ],
-        /* expected Swift chunks */
-        [
-          """
-          @_cdecl("Java_com_example_swift_SwiftModule__00024returnDate__")
-          public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          """
-        ]
-      )
-    ]
-  )
-  func func_return_Date(
-    mode: JExtractGenerationMode,
-    expectedJavaChunks: [String],
-    expectedSwiftChunks: [String]
-  ) throws {
+  @Test("Import: return Date")
+  func func_return_Date() throws {
     let text =
       """
       import Foundation
@@ -103,75 +64,25 @@ struct DateTests {
 
     try assertOutput(
       input: text,
-      mode,
+      .jni,
       .java,
-      expectedChunks: expectedJavaChunks
+      expectedChunks: [
+          """
+          public static org.swift.swiftkit.core.foundation.Date returnDate(SwiftArena swiftArena) {
+          """
+      ],
     )
 
     try assertOutput(
       input: text,
-      mode,
+      .jni,
       .swift,
-      expectedChunks: expectedSwiftChunks
-    )
-  }
-
-  @Test(
-    "Import: Date type",
-    arguments: [
-      (
-        JExtractGenerationMode.jni,
-        /* expected Java chunks */
-        [
+      expectedChunks: [
           """
-          public final class Date implements JNISwiftInstance {
-          """,
+          @_cdecl("Java_com_example_swift_SwiftModule__00024returnDate__")
+          public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
           """
-          public static Date init(double timeIntervalSince1970, SwiftArena swiftArena) {
-          """,
-          """
-          public double getTimeIntervalSince1970() {
-          """,
-          """
-          public static Date fromInstant(java.time.Instant instant, SwiftArena swiftArena) {
-          """,
-          """
-          public java.time.Instant toInstant() {
-          """,
-        ],
-        /* expected Swift chunks */
-        [
-          """
-          @_cdecl("Java_com_example_swift_Date__00024init__D")
-          public func Java_com_example_swift_Date__00024init__D(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, timeIntervalSince1970: jdouble) -> jlong {
-          """,
-          """
-          @_cdecl("Java_com_example_swift_Date__00024getTimeIntervalSince1970__J")
-          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
-          """,
-        ]
-      )
-    ]
-  )
-  func date_class(mode: JExtractGenerationMode, expectedJavaChunks: [String], expectedSwiftChunks: [String]) throws {
-    let text =
-      """
-      import Foundation
-      public func f() -> Date
-      """
-
-    try assertOutput(
-      input: text,
-      mode,
-      .java,
-      expectedChunks: expectedJavaChunks
-    )
-
-    try assertOutput(
-      input: text,
-      mode,
-      .swift,
-      expectedChunks: expectedSwiftChunks
+      ]
     )
   }
 }

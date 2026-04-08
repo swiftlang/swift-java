@@ -146,7 +146,7 @@ final class OptionalImportTests {
          * public func receiveOptionalDataProto(_ arg: (some DataProtocol)?)
          * }
          */
-        public static void receiveOptionalDataProto(Optional<Data> arg) {
+        public static void receiveOptionalDataProto(Optional<org.swift.swiftkit.ffm.foundation.Data> arg) {
           swiftjava_SwiftModule_receiveOptionalDataProto__.call(SwiftRuntime.toOptionalSegmentInstance(arg));
         }
         """,
