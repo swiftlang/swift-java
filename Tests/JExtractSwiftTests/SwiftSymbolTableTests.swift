@@ -52,8 +52,8 @@ struct SwiftSymbolTableSuite {
     #expect(symbolTable.lookupType("Z", parent: nil) == nil)
   }
 
-  @Test(arguments: [JExtractGenerationMode.jni, .ffm])
-  func resolveSelfModuleName(mode: JExtractGenerationMode) throws {
+  @Test
+  func resolveSelfModuleName() throws {
     try assertOutput(
       input: """
         import Foundation
@@ -62,13 +62,13 @@ struct SwiftSymbolTableSuite {
         public func fullyQualifiedType() -> MyModule.MyValue
         public func fullyQualifiedType2() -> Foundation.Data
         """,
-      mode,
+      .jni,
       .java,
       swiftModuleName: "MyModule",
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "public static MyValue fullyQualifiedType(",
-        "public static Data fullyQualifiedType2(",
+        "public static org.swift.swiftkit.core.foundation.Data fullyQualifiedType2(",
       ],
     )
   }

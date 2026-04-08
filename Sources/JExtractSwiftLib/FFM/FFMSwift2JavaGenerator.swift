@@ -328,9 +328,6 @@ extension FFMSwift2JavaGenerator {
         printFunctionDowncallMethods(&printer, funcDecl)
       }
 
-      // Special helper methods for known types (e.g. Data)
-      printSpecificTypeHelpers(&printer, decl)
-
       if let printSpecialPostExtras = self.getSpecialNominalPostMembersPrinting(decl) {
         printSpecialPostExtras(&printer)
       } else {
@@ -553,20 +550,6 @@ extension FFMSwift2JavaGenerator {
       }
       """
     )
-  }
-
-  /// Print special helper methods for known types like Foundation.Data
-  func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    guard let knownType = decl.swiftNominal.knownTypeKind else {
-      return
-    }
-
-    switch knownType {
-    case .foundationData, .essentialsData:
-      printFoundationDataHelpers(&printer, decl)
-    default:
-      break
-    }
   }
 
   /// Print the `fetchDescription` static helper for SwiftJavaError.

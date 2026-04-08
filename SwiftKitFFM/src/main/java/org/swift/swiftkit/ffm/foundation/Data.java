@@ -1,0 +1,406 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+package org.swift.swiftkit.ffm.foundation;
+
+import org.swift.swiftkit.core.*;
+import org.swift.swiftkit.core.util.*;
+import org.swift.swiftkit.ffm.*;
+import org.swift.swiftkit.ffm.generated.*;
+import org.swift.swiftkit.core.annotations.*;
+import java.lang.foreign.*;
+import java.lang.invoke.*;
+import java.util.*;
+
+public final class Data extends FFMSwiftInstance implements SwiftValue {
+  static final String LIB_NAME = "SwiftRuntimeFunctions";
+  static final Arena LIBRARY_ARENA = Arena.ofAuto();
+  @SuppressWarnings("unused")
+  private static final boolean INITIALIZED_LIBS = initializeLibs();
+  static boolean initializeLibs() {
+      SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+      SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+      SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+      SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
+      return true;
+  }
+
+  public static final SwiftAnyType TYPE_METADATA =
+      new SwiftAnyType(SwiftRuntime.swiftjava.getType("SwiftRuntimeFunctions", "Data"));
+  public SwiftAnyType $swiftType() {
+      return TYPE_METADATA;
+  }
+
+  public static final GroupLayout $LAYOUT = (GroupLayout) SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
+  public GroupLayout $layout() {
+      return $LAYOUT;
+  }
+
+  private Data(MemorySegment segment, AllocatingSwiftArena arena) {
+    super(segment, arena);
+  }
+
+  /**
+   * Assume that the passed {@code MemorySegment} represents a memory address of a {@link Data}.
+   * <p/>
+   * Warnings:
+   * <ul>
+   *   <li>No checks are performed about the compatibility of the pointed at memory and the actual Data types.</li>
+   *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
+   * </ul>
+   */
+  public static Data wrapMemoryAddressUnsafe(MemorySegment selfPointer, AllocatingSwiftArena arena) {
+    return new Data(selfPointer, arena);
+  }
+
+  // ==== --------------------------------------------------
+  // Data.init
+
+  /**
+   * {@snippet lang=c :
+   * void swiftjava_SwiftRuntimeFunctions_Data_init_bytes_count(const void *bytes, ptrdiff_t count, void *_result)
+   * }
+   */
+  private static class swiftjava_SwiftRuntimeFunctions_Data_init_bytes_count {
+    private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+      /* bytes: */SwiftValueLayout.SWIFT_POINTER,
+      /* count: */SwiftValueLayout.SWIFT_INT,
+      /* _result: */SwiftValueLayout.SWIFT_POINTER
+    );
+    private static final MemorySegment ADDR =
+            SwiftRuntime.findOrThrow("swiftjava_SwiftRuntimeFunctions_Data_init_bytes_count");
+    private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    public static void call(java.lang.foreign.MemorySegment bytes, long count, java.lang.foreign.MemorySegment _result) {
+      try {
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall(bytes, count, _result);
+        }
+        HANDLE.invokeExact(bytes, count, _result);
+      } catch (Throwable ex$) {
+        throw new AssertionError("should not reach here", ex$);
+      }
+    }
+  }
+
+  /**
+   * Downcall to Swift:
+   * {@snippet lang=swift :
+   * public init(bytes: UnsafeRawPointer, count: Int)
+   * }
+   */
+  public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena) throws SwiftIntegerOverflowException {
+    MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
+    if (SwiftValueLayout.has32bitSwiftInt) {
+      if (count < Integer.MIN_VALUE || count > Integer.MAX_VALUE) {
+        throw new SwiftIntegerOverflowException("Parameter 'count' overflow: " + count);
+      }
+    }
+    swiftjava_SwiftRuntimeFunctions_Data_init_bytes_count.call(bytes, count, result$);
+    return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
+  }
+
+  // ==== --------------------------------------------------
+  // Data.init
+
+  /**
+   * {@snippet lang=c :
+   * void swiftjava_SwiftRuntimeFunctions_Data_init__(const void *bytes_pointer, ptrdiff_t bytes_count, void *_result)
+   * }
+   */
+  private static class swiftjava_SwiftRuntimeFunctions_Data_init__ {
+    private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+      /* bytes_pointer: */SwiftValueLayout.SWIFT_POINTER,
+      /* bytes_count: */SwiftValueLayout.SWIFT_INT,
+      /* _result: */SwiftValueLayout.SWIFT_POINTER
+    );
+    private static final MemorySegment ADDR =
+      SwiftRuntime.findOrThrow("swiftjava_SwiftRuntimeFunctions_Data_init__");
+    private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    public static void call(java.lang.foreign.MemorySegment bytes_pointer, long bytes_count, java.lang.foreign.MemorySegment _result) {
+      try {
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall(bytes_pointer, bytes_count, _result);
+        }
+        HANDLE.invokeExact(bytes_pointer, bytes_count, _result);
+      } catch (Throwable ex$) {
+        throw new AssertionError("should not reach here", ex$);
+      }
+    }
+  }
+
+  /**
+   * Downcall to Swift:
+   * {@snippet lang=swift :
+   * public init(_ bytes: [UInt8])
+   * }
+   */
+  public static Data init(@Unsigned byte[] bytes, AllocatingSwiftArena swiftArena) {
+    try(var arena$ = Arena.ofConfined()) {
+      MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
+      swiftjava_SwiftRuntimeFunctions_Data_init__.call(arena$.allocateFrom(ValueLayout.JAVA_BYTE, bytes), bytes.length, result$);
+      return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
+    }
+  }
+
+  // ==== --------------------------------------------------
+  // getter:Data.count
+
+  /**
+   * {@snippet lang=c :
+   * ptrdiff_t swiftjava_SwiftRuntimeFunctions_Data_count$get(const void *self)
+   * }
+   */
+  private static class swiftjava_SwiftRuntimeFunctions_Data_count$get {
+    private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+      /* -> */SwiftValueLayout.SWIFT_INT,
+      /* self: */SwiftValueLayout.SWIFT_POINTER
+    );
+    private static final MemorySegment ADDR =
+      SwiftRuntime.findOrThrow("swiftjava_SwiftRuntimeFunctions_Data_count$get");
+    private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    public static long call(java.lang.foreign.MemorySegment self) {
+      try {
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall(self);
+        }
+        return (long) HANDLE.invokeExact(self);
+      } catch (Throwable ex$) {
+        throw new AssertionError("should not reach here", ex$);
+      }
+    }
+  }
+
+  /**
+   * Downcall to Swift:
+   * {@snippet lang=swift :
+   * public var count: Int
+   * }
+   */
+  public long getCount() throws SwiftIntegerOverflowException {
+    $ensureAlive();
+    long result$checked = swiftjava_SwiftRuntimeFunctions_Data_count$get.call(this.$memorySegment());
+    if (SwiftValueLayout.has32bitSwiftInt) {
+      if (result$checked < Integer.MIN_VALUE || result$checked > Integer.MAX_VALUE) {
+        throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
+      }
+    }
+    return result$checked;
+  }
+
+  // ==== --------------------------------------------------
+  // Data.withUnsafeBytes
+
+  /**
+   * {@snippet lang=c :
+   * void swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__(void (*body)(const void *, ptrdiff_t), const void *self)
+   * }
+   */
+  private static class swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__ {
+    private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+      /* body: */SwiftValueLayout.SWIFT_POINTER,
+      /* self: */SwiftValueLayout.SWIFT_POINTER
+    );
+    private static final MemorySegment ADDR =
+      SwiftRuntime.findOrThrow("swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__");
+    private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    public static void call(java.lang.foreign.MemorySegment body, java.lang.foreign.MemorySegment self) {
+      try {
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall(body, self);
+        }
+        HANDLE.invokeExact(body, self);
+      } catch (Throwable ex$) {
+        throw new AssertionError("should not reach here", ex$);
+      }
+    }
+    /**
+     * {snippet lang=c :
+     * void (*)(const void *, ptrdiff_t)
+     * }
+     */
+    private static class $body {
+      @FunctionalInterface
+      public interface Function {
+        void apply(java.lang.foreign.MemorySegment _0, long _1);
+      }
+      private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+        /* _0: */SwiftValueLayout.SWIFT_POINTER,
+        /* _1: */SwiftValueLayout.SWIFT_INT
+      );
+      private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
+      private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+        return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+      }
+    }
+  }
+  public static class withUnsafeBytes {
+    @FunctionalInterface
+    public interface body {
+      void apply(java.lang.foreign.MemorySegment _0);
+    }
+    private static MemorySegment $toUpcallStub(body fi, Arena arena) {
+      return swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__.$body.toUpcallStub((_0_pointer, _0_count) -> {
+        fi.apply(_0_pointer.reinterpret(_0_count));
+      }, arena);
+    }
+  }
+
+  /**
+   * Downcall to Swift:
+   * {@snippet lang=swift :
+   * public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
+   * }
+   */
+  public void withUnsafeBytes(withUnsafeBytes.body body) {
+    $ensureAlive();
+    try(var arena$ = Arena.ofConfined()) {
+      swiftjava_SwiftRuntimeFunctions_Data_withUnsafeBytes__.call(withUnsafeBytes.$toUpcallStub(body, arena$), this.$memorySegment());
+    }
+  }
+
+  // ==== --------------------------------------------------
+  // Data helper methods
+
+  /**
+   * Creates a new Swift {@link Data} instance from a byte array.
+   *
+   * @param bytes The byte array to copy into the Data
+   * @param arena The arena for memory management
+   * @return A new Data instance containing a copy of the bytes
+   */
+  public static Data fromByteArray(byte[] bytes, AllocatingSwiftArena arena) {
+    Objects.requireNonNull(bytes, "bytes cannot be null");
+    return Data.init(bytes, arena);
+  }
+
+  /**
+   * {@snippet lang=c :
+   * void swiftjava_SwiftRuntimeFunctions_Data_copyBytes__(void *const self, void *destination, ptrdiff_t count)
+   * }
+   */
+  private static class swiftjava_SwiftRuntimeFunctions_Data_copyBytes__ {
+    private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+      /* self: */SwiftValueLayout.SWIFT_POINTER,
+      /* destination: */SwiftValueLayout.SWIFT_POINTER,
+      /* count: */SwiftValueLayout.SWIFT_INT
+    );
+    private static final MemorySegment ADDR =
+      SwiftRuntime.findOrThrow("swiftjava_SwiftRuntimeFunctions_Data_copyBytes__");
+    private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    public static void call(java.lang.foreign.MemorySegment self, java.lang.foreign.MemorySegment destination, long count) {
+      try {
+        if (CallTraces.TRACE_DOWNCALLS) {
+          CallTraces.traceDowncall(self, destination, count);
+        }
+        HANDLE.invokeExact(self, destination, count);
+      } catch (Throwable ex$) {
+        throw new AssertionError("should not reach here", ex$);
+      }
+    }
+  }
+
+  /**
+   * Copies the contents of this Data to a new {@link MemorySegment}.
+   *
+   * This is the most efficient way to access Data bytes from Java when you don't
+   * need a {@code byte[]}. The returned segment is valid for the lifetime of the arena.
+   *
+   * <p>Copy count: 1 (Swift Data -> MemorySegment)
+   *
+   * @param arena The arena to allocate the segment in
+   * @return A MemorySegment containing a copy of this Data's bytes
+   */
+  public MemorySegment toMemorySegment(AllocatingSwiftArena arena) {
+    $ensureAlive();
+    long count = getCount();
+    if (count == 0) return MemorySegment.NULL;
+    MemorySegment segment = arena.allocate(count);
+    swiftjava_SwiftRuntimeFunctions_Data_copyBytes__.call(this.$memorySegment(), segment, count);
+    return segment;
+  }
+
+  /**
+   * Copies the contents of this Data to a new {@link java.nio.ByteBuffer}.
+   *
+   * The returned {@link java.nio.ByteBuffer} is a view over native memory and is valid for the
+   * lifetime of the arena. This avoids an additional copy to the Java heap.
+   *
+   * <p>Copy count: 1 (Swift Data -> native memory (managed by passed arena), then zero-copy view)
+   *
+   * @param arena The arena to allocate the underlying memory in
+   * @return A ByteBuffer view of the copied bytes
+   */
+  public java.nio.ByteBuffer toByteBuffer(AllocatingSwiftArena arena) {
+    $ensureAlive();
+    long count = getCount();
+    if (count == 0) return java.nio.ByteBuffer.allocate(0);
+    MemorySegment segment = arena.allocate(count);
+    swiftjava_SwiftRuntimeFunctions_Data_copyBytes__.call(this.$memorySegment(), segment, count);
+    return segment.asByteBuffer();
+  }
+
+  /**
+   * Copies the contents of this Data to a new byte array.
+   * The lifetime of the array is independent of the arena, the arena is just used for an intermediary copy.
+   *
+   * <p>Copy count: 2 (Swift Data -> MemorySegment -> byte[])
+   *
+   * <p>For better performance when you can work with {@link MemorySegment} or
+   * {@link java.nio.ByteBuffer}, prefer {@link #toMemorySegment} or {@link #toByteBuffer}.
+   *
+   * @param arena The arena to use for temporary native memory allocation
+   * @return A byte array containing a copy of this Data's bytes
+   */
+  public byte[] toByteArray(AllocatingSwiftArena arena) {
+    $ensureAlive();
+    long count = getCount();
+    if (count == 0) return new byte[0];
+    MemorySegment segment = arena.allocate(count);
+    swiftjava_SwiftRuntimeFunctions_Data_copyBytes__.call(this.$memorySegment(), segment, count);
+    return segment.toArray(ValueLayout.JAVA_BYTE);
+  }
+
+  /**
+   * Copies the contents of this Data to a new byte array.
+   * The lifetime of the array is independent of the arena, the arena is just used for an intermediary copy.
+   *
+   * This is a convenience method that creates a temporary arena for the copy.
+   * For repeated calls, prefer {@link #toByteArray(AllocatingSwiftArena)} to reuse an arena.
+   *
+   * <p>Copy count: 2 (Swift Data -> MemorySegment -> byte[])
+   *
+   * <p>For better performance when you can work with {@link MemorySegment} or
+   * {@link java.nio.ByteBuffer}, prefer {@link #toMemorySegment} or {@link #toByteBuffer}.
+   *
+   * @return A byte array containing a copy of this Data's bytes
+   */
+  public byte[] toByteArray() {
+    $ensureAlive();
+    long count = getCount();
+    if (count == 0) return new byte[0];
+    try (var arena = Arena.ofConfined()) {
+      MemorySegment segment = arena.allocate(count);
+      swiftjava_SwiftRuntimeFunctions_Data_copyBytes__.call(this.$memorySegment(), segment, count);
+      return segment.toArray(ValueLayout.JAVA_BYTE);
+    }
+  }
+  @Override
+  public String toString() {
+      return getClass().getSimpleName()
+          + "("
+          + SwiftRuntime.nameOfSwiftType($swiftType().$memorySegment(), true)
+          + ")@"
+          + $memorySegment();
+  }
+}

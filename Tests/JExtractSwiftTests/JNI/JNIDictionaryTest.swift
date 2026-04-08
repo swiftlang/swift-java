@@ -28,7 +28,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> f(SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """,
         """
@@ -104,7 +104,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> f(org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> dict, SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress()), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress()), swiftArena);
         }
         """,
         """
@@ -142,7 +142,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> f(org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> dict, SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress()), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress()), swiftArena);
         }
         """,
         """
@@ -183,7 +183,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Boolean> f(SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Boolean>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Boolean>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -200,7 +200,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Double> f(SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Double>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Double>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -217,7 +217,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.Long, java.lang.String> f(SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.Long, java.lang.String>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.Long, java.lang.String>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -234,7 +234,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.Integer, java.lang.Float> f(SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.Integer, java.lang.Float>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.Integer, java.lang.Float>wrapMemoryAddressUnsafe(SwiftModule.$f(), swiftArena);
         }
         """
       ]
@@ -295,7 +295,7 @@ struct JNIDictionaryTest {
       expectedChunks: [
         """
         public static org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> f(org.swift.swiftkit.core.collections.SwiftDictionaryMap<java.lang.String, java.lang.Long> dict, java.lang.String key, long value, SwiftArena swiftArena) {
-          return SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress(), key, value), swiftArena);
+          return org.swift.swiftkit.core.collections.SwiftDictionaryMap.<java.lang.String, java.lang.Long>wrapMemoryAddressUnsafe(SwiftModule.$f(Objects.requireNonNull(dict, "dict must not be null").$memoryAddress(), key, value), swiftArena);
         }
         """,
         """

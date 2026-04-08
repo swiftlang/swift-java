@@ -268,7 +268,7 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public Optional<First> getAsFirst() {
+        public java.util.Optional<First> getAsFirst() {
           if (getDiscriminator() != Discriminator.FIRST) {
             return Optional.empty();
           }
@@ -276,7 +276,7 @@ struct JNIEnumTests {
         }
         """,
         """
-        public Optional<Second> getAsSecond() {
+        public java.util.Optional<Second> getAsSecond() {
           if (getDiscriminator() != Discriminator.SECOND) {
             return Optional.empty();
           }
@@ -285,7 +285,7 @@ struct JNIEnumTests {
         }
         """,
         """
-        public Optional<Third> getAsThird() {
+        public java.util.Optional<Third> getAsThird() {
           if (getDiscriminator() != Discriminator.THIRD) {
             return Optional.empty();
           }

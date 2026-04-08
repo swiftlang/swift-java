@@ -95,36 +95,6 @@ final class DataImportTests {
           _result.assumingMemoryBound(to: Data.self).initialize(to: returnData())
         }
         """,
-
-        """
-        @_cdecl("swiftjava_getType_SwiftModule_Data")
-        public func swiftjava_getType_SwiftModule_Data() -> UnsafeMutableRawPointer /* Any.Type */ {
-          return unsafeBitCast(Data.self, to: UnsafeMutableRawPointer.self)
-        }
-        """,
-
-        """
-        @_cdecl("swiftjava_SwiftModule_Data_init_bytes_count")
-        public func swiftjava_SwiftModule_Data_init_bytes_count(_ bytes: UnsafeRawPointer, _ count: Int, _ _result: UnsafeMutableRawPointer) {
-          _result.assumingMemoryBound(to: Data.self).initialize(to: Data(bytes: bytes, count: count))
-        }
-        """,
-
-        """
-        @_cdecl("swiftjava_SwiftModule_Data_count$get")
-        public func swiftjava_SwiftModule_Data_count$get(_ self: UnsafeRawPointer) -> Int {
-          return self.assumingMemoryBound(to: Data.self).pointee.count
-        }
-        """,
-
-        """
-        @_cdecl("swiftjava_SwiftModule_Data_withUnsafeBytes__")
-        public func swiftjava_SwiftModule_Data_withUnsafeBytes__(_ body: @convention(c) (UnsafeRawPointer?, Int) -> Void, _ self: UnsafeRawPointer) {
-          self.assumingMemoryBound(to: Data.self).pointee.withUnsafeBytes({ (_0) in
-            return body(_0.baseAddress, _0.count)
-          })
-        }
-        """,
       ]
     )
   }
@@ -174,7 +144,7 @@ final class DataImportTests {
          * public func receiveData(dat: Data)
          * }
          */
-        public static void receiveData(Data dat) {
+        public static void receiveData(org.swift.swiftkit.ffm.foundation.Data dat) {
           swiftjava_SwiftModule_receiveData_dat.call(dat.$memorySegment());
         }
         """,
@@ -212,178 +182,10 @@ final class DataImportTests {
          * public func returnData() -> Data
          * }
          */
-        public static Data returnData(AllocatingSwiftArena swiftArena) {
-          MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
+        public static org.swift.swiftkit.ffm.foundation.Data returnData(AllocatingSwiftArena swiftArena) {
+          MemorySegment result$ = swiftArena.allocate(org.swift.swiftkit.ffm.foundation.Data.$LAYOUT);
           swiftjava_SwiftModule_returnData.call(result$);
-          return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
-        }
-        """,
-
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_Data_init_bytes_count(const void *bytes, ptrdiff_t count, void *_result)
-         * }
-         */
-        private static class swiftjava_SwiftModule_Data_init_bytes_count {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* bytes: */SwiftValueLayout.SWIFT_POINTER,
-            /* count: */SwiftValueLayout.SWIFT_INT,
-            /* _result: */SwiftValueLayout.SWIFT_POINTER
-          );
-          private static final MemorySegment ADDR =
-            SwiftModule.findOrThrow("swiftjava_SwiftModule_Data_init_bytes_count");
-          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          public static void call(java.lang.foreign.MemorySegment bytes, long count, java.lang.foreign.MemorySegment _result) {
-            try {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall(bytes, count, _result);
-              }
-              HANDLE.invokeExact(bytes, count, _result);
-            } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-            }
-          }
-        }
-        """,
-
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public init(bytes: UnsafeRawPointer, count: Int)
-         * }
-         */
-        public static Data init(java.lang.foreign.MemorySegment bytes, long count, AllocatingSwiftArena swiftArena) throws SwiftIntegerOverflowException {
-          MemorySegment result$ = swiftArena.allocate(Data.$LAYOUT);
-          if (SwiftValueLayout.has32bitSwiftInt) {
-            if (count < Integer.MIN_VALUE || count > Integer.MAX_VALUE) {
-              throw new SwiftIntegerOverflowException("Parameter 'count' overflow: " + count);
-            }
-          }
-          swiftjava_SwiftModule_Data_init_bytes_count.call(bytes, count, result$);
-          return Data.wrapMemoryAddressUnsafe(result$, swiftArena);
-        }
-        """,
-
-        """
-        /**
-         * {@snippet lang=c :
-         * ptrdiff_t swiftjava_SwiftModule_Data_count$get(const void *self)
-         * }
-         */
-        private static class swiftjava_SwiftModule_Data_count$get {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            /* -> */SwiftValueLayout.SWIFT_INT,
-            /* self: */SwiftValueLayout.SWIFT_POINTER
-          );
-          private static final MemorySegment ADDR =
-            SwiftModule.findOrThrow("swiftjava_SwiftModule_Data_count$get");
-          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          public static long call(java.lang.foreign.MemorySegment self) {
-            try {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall(self);
-              }
-              return (long) HANDLE.invokeExact(self);
-            } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-            }
-          }
-        } 
-        """,
-
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public var count: Int
-         * }
-         */
-        public long getCount() throws SwiftIntegerOverflowException {
-          $ensureAlive();
-          long result$checked = swiftjava_SwiftModule_Data_count$get.call(this.$memorySegment());
-          if (SwiftValueLayout.has32bitSwiftInt) {
-            if (result$checked < Integer.MIN_VALUE || result$checked > Integer.MAX_VALUE) {
-              throw new SwiftIntegerOverflowException("Return value overflow: " + result$checked);
-            }
-          }
-          return result$checked;
-        }
-        """,
-
-        """
-        /**
-         * {@snippet lang=c :
-         * void swiftjava_SwiftModule_Data_withUnsafeBytes__(void (*body)(const void *, ptrdiff_t), const void *self)
-         * }
-         */
-        private static class swiftjava_SwiftModule_Data_withUnsafeBytes__ {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* body: */SwiftValueLayout.SWIFT_POINTER,
-            /* self: */SwiftValueLayout.SWIFT_POINTER
-          );
-          private static final MemorySegment ADDR =
-            SwiftModule.findOrThrow("swiftjava_SwiftModule_Data_withUnsafeBytes__");
-          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          public static void call(java.lang.foreign.MemorySegment body, java.lang.foreign.MemorySegment self) {
-            try {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall(body, self);
-              }
-              HANDLE.invokeExact(body, self);
-            } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-            }
-          }
-          /**
-           * {snippet lang=c :
-           * void (*)(const void *, ptrdiff_t)
-           * }
-           */
-          private static class $body {
-            @FunctionalInterface
-            public interface Function {
-              void apply(java.lang.foreign.MemorySegment _0, long _1);
-            }
-            private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-              /* _0: */SwiftValueLayout.SWIFT_POINTER,
-              /* _1: */SwiftValueLayout.SWIFT_INT
-            );
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-            private static MemorySegment toUpcallStub(Function fi, Arena arena) {
-              return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
-            }
-          }
-        }
-        """,
-
-        """
-        public static class withUnsafeBytes {
-          @FunctionalInterface
-          public interface body {
-            void apply(java.lang.foreign.MemorySegment _0);
-          }
-          private static MemorySegment $toUpcallStub(body fi, Arena arena) {
-            return swiftjava_SwiftModule_Data_withUnsafeBytes__.$body.toUpcallStub((_0_pointer, _0_count) -> {
-              fi.apply(_0_pointer.reinterpret(_0_count));
-            }, arena);
-          }
-        }
-        """,
-
-        """
-        /**
-         * Downcall to Swift:
-         * {@snippet lang=swift :
-         * public func withUnsafeBytes(_ body: (UnsafeRawBufferPointer) -> Void)
-         * }
-         */
-        public void withUnsafeBytes(withUnsafeBytes.body body) {
-          $ensureAlive();
-          try(var arena$ = Arena.ofConfined()) {
-            swiftjava_SwiftModule_Data_withUnsafeBytes__.call(withUnsafeBytes.$toUpcallStub(body, arena$), this.$memorySegment());
-          }
+          return org.swift.swiftkit.ffm.foundation.Data.wrapMemoryAddressUnsafe(result$, swiftArena);
         }
         """,
       ]
@@ -412,11 +214,6 @@ final class DataImportTests {
         public func swiftjava_SwiftModule_receiveDataProtocol_dat_dat2(_ dat: UnsafeRawPointer, _ dat2: UnsafeRawPointer?) {
           receiveDataProtocol(dat: dat.assumingMemoryBound(to: Data.self).pointee, dat2: dat2?.assumingMemoryBound(to: Data.self).pointee)
         }
-        """,
-
-        // Just to make sure 'Data' is imported.
-        """
-        @_cdecl("swiftjava_getType_SwiftModule_Data")
         """,
       ]
     )
@@ -470,14 +267,9 @@ final class DataImportTests {
          * public func receiveDataProtocol<T: DataProtocol>(dat: some DataProtocol, dat2: T?)
          * }
          */
-        public static void receiveDataProtocol(Data dat, Optional<Data> dat2) {
+        public static void receiveDataProtocol(org.swift.swiftkit.ffm.foundation.Data dat, java.util.Optional<org.swift.swiftkit.ffm.foundation.Data> dat2) {
           swiftjava_SwiftModule_receiveDataProtocol_dat_dat2.call(dat.$memorySegment(), SwiftRuntime.toOptionalSegmentInstance(dat2));
         }
-        """,
-
-        // Just to make sure 'Data' is imported.
-        """
-        public final class Data extends FFMSwiftInstance implements SwiftValue {
         """,
       ]
     )
@@ -499,7 +291,7 @@ final class DataImportTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public static void acceptData(Data data) {
+        public static void acceptData(org.swift.swiftkit.core.foundation.Data data) {
           SwiftModule.$acceptData(data.$memoryAddress());
         }
         """
@@ -533,7 +325,7 @@ final class DataImportTests {
       .java,
       expectedChunks: [
         """
-        public static Data returnData(SwiftArena swiftArena) {
+        public static org.swift.swiftkit.core.foundation.Data returnData(SwiftArena swiftArena) {
         """
       ]
     )
@@ -547,33 +339,6 @@ final class DataImportTests {
         @_cdecl("Java_com_example_swift_SwiftModule__00024returnData__")
         public func Java_com_example_swift_SwiftModule__00024returnData__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
         """
-      ]
-    )
-  }
-
-  @Test("Import Data: JNI Data class")
-  func data_jni_class() throws {
-    let text = """
-      import Foundation
-      public func f() -> Data
-      """
-
-    try assertOutput(
-      input: text,
-      .jni,
-      .java,
-      detectChunkByInitialLines: 1,
-      expectedChunks: [
-        "public final class Data implements JNISwiftInstance, DataProtocol {",
-        "public long getCount() {",
-
-        "public static Data fromByteArray(byte[] bytes, SwiftArena swiftArena) {",
-
-        "public byte[] toByteArray() {",
-        "private static native byte[] $toByteArray(long selfPointer);",
-
-        "public byte[] toByteArrayIndirectCopy() {",
-        "private static native byte[] $toByteArrayIndirectCopy(long selfPointer);",
       ]
     )
   }
@@ -599,7 +364,7 @@ final class DataImportTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static <D extends DataProtocol> MyResult processData(D data, SwiftArena swiftArena) {
+        public static <D extends org.swift.swiftkit.core.foundation.DataProtocol> MyResult processData(D data, SwiftArena swiftArena) {
         """
       ]
     )
@@ -620,7 +385,7 @@ final class DataImportTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        public static <D1 extends DataProtocol, D2 extends DataProtocol> boolean verify(D1 first, D2 second) {
+        public static <D1 extends org.swift.swiftkit.core.foundation.DataProtocol, D2 extends org.swift.swiftkit.core.foundation.DataProtocol> boolean verify(D1 first, D2 second) {
         """
       ]
     )
