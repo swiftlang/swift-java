@@ -557,15 +557,13 @@ extension FFMSwift2JavaGenerator {
 
   /// Print special helper methods for known types like Foundation.Data
   func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    guard let knownType = decl.swiftNominal.knownTypeKind else {
-      return
-    }
-
-    switch knownType {
-    case .foundationData, .essentialsData:
-      printFoundationDataHelpers(&printer, decl)
-    default:
-      break
+    if decl.swiftNominal.moduleName == "SwiftRuntimeFunctions" {
+      switch decl.swiftNominal.qualifiedName {
+      case "Data":
+        printFoundationDataHelpers(&printer, decl)
+      default:
+        break
+      }
     }
   }
 

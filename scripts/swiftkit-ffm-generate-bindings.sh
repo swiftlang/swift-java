@@ -23,15 +23,18 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 JAVA_OUTPUT="${REPO_ROOT}/SwiftKitFFM/src/main/java"
-JAVA_PACKAGE="org.swift.swiftkit.ffm.generated"
+PACKAGE_GENERATED="org.swift.swiftkit.ffm.generated"
+PACKAGE_FOUNDATION="org.swift.swiftkit.ffm.foundation"
 
-# Declare types to generate: SWIFT_MODULE SINGLE_TYPE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
+# Declare types to generate: SWIFT_MODULE SINGLE_TYPE JAVA_PACKAGE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
 TYPES=(
-  "SwiftRuntimeFunctions  SwiftJavaError  Sources/SwiftRuntimeFunctions  Sources/SwiftRuntimeFunctions/generated"
+  "SwiftRuntimeFunctions  SwiftJavaError  ${PACKAGE_GENERATED}  Sources/SwiftRuntimeFunctions   Sources/SwiftRuntimeFunctions/generated"
+  "SwiftRuntimeFunctions  Data  ${PACKAGE_FOUNDATION}  Sources/FakeFoundation  Sources/SwiftRuntimeFunctions/foundation"
+  "SwiftRuntimeFunctions  DataProtocol  ${PACKAGE_FOUNDATION}  Sources/FakeFoundation  Sources/SwiftRuntimeFunctions/foundation"
 )
 
 for entry in "${TYPES[@]}"; do
-  read -r MODULE SINGLE_TYPE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
+  read -r MODULE SINGLE_TYPE JAVA_PACKAGE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
 
   echo "==> Generating ${SINGLE_TYPE} (module: ${MODULE})..."
 

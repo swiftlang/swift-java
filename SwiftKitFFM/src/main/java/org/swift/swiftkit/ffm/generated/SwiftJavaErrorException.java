@@ -127,4 +127,4 @@ public final class SwiftJavaErrorException extends FFMSwiftErrorInstance impleme
       return "Swift error (address: 0x" + Long.toHexString(errorPointer.address()) + ")";
     }
   }
-} // printNominal(_:_:body:) @ JExtractSwiftLib/FFMSwift2JavaGenerator.swift:385
+} // printNominal(_:_:body:) @ JExtractSwiftLib/FFMSwift2JavaGenerator.swift:395

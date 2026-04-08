@@ -27,8 +27,9 @@ JAVA_PACKAGE="org.swift.swiftkit.core.foundation"
 
 # Declare types to generate: SWIFT_MODULE SINGLE_TYPE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
 TYPES=(
-  "Foundation  Data  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
-  "Foundation  Date  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
+  "SwiftJava  Data  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
+  "SwiftJava  DataProtocol  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
+  "SwiftJava  Date  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
 )
 
 for entry in "${TYPES[@]}"; do
