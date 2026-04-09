@@ -20,9 +20,9 @@ public interface SwiftInstance {
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
      *
-     * @apiNote When using this pointer one must ensure that the underlying object
-     *          is kept alive using some means (e.g. a class remains retained), as
-     *          this function does not ensure safety of the address in any way.
+     * <b>API Note:</b> When using this pointer one must ensure that the underlying object
+     * is kept alive using some means (e.g. a class remains retained), as
+     * this function does not ensure safety of the address in any way.
      */
     long $memoryAddress();
 
