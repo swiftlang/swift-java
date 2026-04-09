@@ -49,7 +49,10 @@ public struct Configuration: Codable {
     mode ?? .default
   }
 
-  public var writeEmptyFiles: Bool? // FIXME: default it to false, but that plays not nice with Codable
+  public var writeEmptyFiles: Bool?
+  public var effectiveWriteEmptyFiles: Bool {
+    writeEmptyFiles ?? false
+  }
 
   public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
   public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {

@@ -20,7 +20,7 @@ struct SwiftJavaConfigurationTests {
 
   @Test
   func parseJSONWithComments() throws {
-    let config = try readConfiguration(
+    let _ = try readConfiguration(
       string:
         """
         // some comments
