@@ -30,6 +30,6 @@ enum JNICaching {
   }
 
   static func cacheMemberName(for translatedEnumCase: JNISwift2JavaGenerator.TranslatedEnumCase) -> String {
-    cacheMemberName(for: translatedEnumCase.original) 
+    cacheMemberName(for: translatedEnumCase.original)
   }
 }
