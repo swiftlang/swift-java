@@ -32,7 +32,7 @@ import org.swift.swiftkit.core.annotations.Nullable;
 
 /**
  * Collection of convenience functions to check argument preconditions.
- * <p/>
+ * <p>
  * Partially based on {@code com.google.common.base.Preconditions}.
  */
 public final class Preconditions {

@@ -266,7 +266,7 @@ public abstract class SwiftValueWitnessTable {
     /**
      * Given an invalid object of this type, initialize it as a copy of
      * the source object.
-     * <p/>
+     * <p>
      * Returns the dest object.
      */
     public static MemorySegment initializeWithCopy(SwiftAnyType type, MemorySegment dest, MemorySegment src) {

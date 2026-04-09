@@ -22,9 +22,9 @@ import org.swift.swiftkit.core.*;
 /**
  * A Java {@link java.util.Map} backed by a Swift Dictionary living in Swift's native heap memory.
  * This avoids un-necessary copying of the whole collection in case we're interested only in a few of its elements.
- * <p/>
+ * <p>
  * Methods on this type are implemented as JNI downcalls into the native Swift dictionary, unless specified otherwise.
- * <p/>
+ * <p>
  * You can use {@link #toJavaMap()} to obtain a copy of the data structure on the Java heap.
  *
  * @param <K> the key type, must be a value representable in Swift
@@ -106,7 +106,7 @@ public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISw
      * Make a copy of the dictionary into a Java heap {@link java.util.Map}, 
      * which may be preferable if you are going to perform many operations on the map 
      * and don't expect the changes to be reflected in Swift.
-     * <p/>
+     * <p>
      * This operation DOES NOT perform a deep copy. I.e. if the dictionary contained reference types,
      * the new map will keep pointing at the same objects in the Swift heap.
      * 

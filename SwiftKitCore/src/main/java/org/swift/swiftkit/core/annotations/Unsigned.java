@@ -26,13 +26,13 @@ import static java.lang.annotation.ElementType.*;
 
 /**
  * Value is of an unsigned numeric type.
- * <p/>
+ * <p>
  * This annotation is used to annotate java integer primitives when their
  * corresponding Swift type was actually unsigned, e.g. an {@code @Unsigned long}
  * in a method signature corresponds to a Swift {@code UInt64} type, and therefore
  * negative values reported by the signed {@code long} should instead be interpreted positive values,
  * larger than {@code Long.MAX_VALUE} that are just not representable using a signed {@code long}.
- * <p/>
+ * <p>
  * If this annotation is used on a method, it refers to the return type using an unsigned integer.
  */
 @Documented

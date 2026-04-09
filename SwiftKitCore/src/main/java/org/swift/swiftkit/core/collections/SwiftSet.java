@@ -22,9 +22,9 @@ import org.swift.swiftkit.core.*;
 /**
  * A Java {@link java.util.Set} backed by a Swift Set living in Swift's native heap memory.
  * This avoids un-necessary copying of the whole collection in case we're interested only in a few of its elements.
- * <p/>
+ * <p>
  * Methods on this type are implemented as JNI downcalls into the native Swift set, unless specified otherwise.
- * <p/>
+ * <p>
  * You can use {@link #toJavaSet()} to obtain a copy of the data structure on the Java heap.
  *
  * @param <E> the element type, must be a value representable in Swift
@@ -108,7 +108,7 @@ public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
      * Make a copy of the set into a Java heap {@link java.util.Set},
      * which may be preferable if you are going to perform many operations on the set
      * and don't expect the changes to be reflected in Swift.
-     * <p/>
+     * <p>
      * This operation DOES NOT perform a deep copy. I.e. if the set contained reference types,
      * the new set will keep pointing at the same objects in the Swift heap.
      *

@@ -299,7 +299,7 @@ extension FFMSwift2JavaGenerator {
 
           /**
            * Assume that the passed {@code MemorySegment} represents a memory address of a {@link \(self.javaClassName(for: decl))}.
-           * <p/>
+           * <p>
            * Warnings:
            * <ul>
            *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(self.javaClassName(for: decl)) types.</li>
