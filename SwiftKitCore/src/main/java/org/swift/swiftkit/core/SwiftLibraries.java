@@ -32,7 +32,7 @@ public final class SwiftLibraries {
 
     /** 
      * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
-     * <p/>
+     * <p>
      * If all libraries you need to load are available in paths passed to {@code -Djava.library.path} this should work correctly,
      * however if attempting to load libraries from e.g. the jar as a resource, you may want to disable this.
      */

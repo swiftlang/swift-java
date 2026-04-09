@@ -262,7 +262,7 @@ extension JNISwift2JavaGenerator {
         """
         /**
          * Assume that the passed {@code long} represents a memory address of a {@link \(javaName)}.
-         * <p/>
+         * <p>
          * Warnings:
          * <ul>
          *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(javaName) types.</li>

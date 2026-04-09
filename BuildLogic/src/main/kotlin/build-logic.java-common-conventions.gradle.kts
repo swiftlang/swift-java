@@ -101,3 +101,8 @@ tasks.withType<Test> {
         this.showStandardStreams = true
     }
 }
+
+// Validate javadoc for html/syntax/reference correctness but skip "missing" (no comment) warnings
+tasks.withType<Javadoc> {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
+}

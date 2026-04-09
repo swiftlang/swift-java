@@ -17,6 +17,7 @@ package org.swift.swiftkit.core.tuple;
 /**
  * Corresponds to Swift's built-in 1-element tuple type <code>(T0)</code>.
  * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ * @param <T0> the type of element 0
  */
 public class Tuple1<T0> {
     public final T0 $0;

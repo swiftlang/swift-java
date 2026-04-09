@@ -20,22 +20,22 @@ public interface SwiftInstance {
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
      *
-     * @apiNote When using this pointer one must ensure that the underlying object
-     *          is kept alive using some means (e.g. a class remains retained), as
-     *          this function does not ensure safety of the address in any way.
+     * <b>API Note:</b> When using this pointer one must ensure that the underlying object
+     * is kept alive using some means (e.g. a class remains retained), as
+     * this function does not ensure safety of the address in any way.
      */
     long $memoryAddress();
 
     /**
      * Called when the arena has decided the value should be destroyed.
-     * <p/>
+     * <p>
      * <b>Warning:</b> The cleanup action must not capture {@code this}.
      */
     SwiftInstanceCleanup $createCleanup();
 
     /**
      * Exposes a boolean value which can be used to indicate if the object was destroyed.
-     * <p/>
+     * <p>
      * This is exposing the object, rather than performing the action because we don't want to accidentally
      * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
      * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
@@ -43,7 +43,7 @@ public interface SwiftInstance {
     AtomicBoolean $statusDestroyedFlag();
     /**
      * Ensures that this instance has not been destroyed.
-     * <p/>
+     * <p>
      * If this object has been destroyed, calling this method will cause an {@link IllegalStateException}
      * to be thrown. This check should be performed before accessing {@code $memorySegment} to prevent
      * use-after-free errors.

@@ -17,6 +17,29 @@ package org.swift.swiftkit.core.tuple;
 /**
  * Corresponds to Swift's built-in 23-element tuple type <code>(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22)</code>.
  * Elements are accessed via public final fields <code>$0</code>, <code>$1</code>, etc.
+ * @param <T0> the type of element 0
+ * @param <T1> the type of element 1
+ * @param <T2> the type of element 2
+ * @param <T3> the type of element 3
+ * @param <T4> the type of element 4
+ * @param <T5> the type of element 5
+ * @param <T6> the type of element 6
+ * @param <T7> the type of element 7
+ * @param <T8> the type of element 8
+ * @param <T9> the type of element 9
+ * @param <T10> the type of element 10
+ * @param <T11> the type of element 11
+ * @param <T12> the type of element 12
+ * @param <T13> the type of element 13
+ * @param <T14> the type of element 14
+ * @param <T15> the type of element 15
+ * @param <T16> the type of element 16
+ * @param <T17> the type of element 17
+ * @param <T18> the type of element 18
+ * @param <T19> the type of element 19
+ * @param <T20> the type of element 20
+ * @param <T21> the type of element 21
+ * @param <T22> the type of element 22
  */
 public class Tuple23<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> {
     public final T0 $0;

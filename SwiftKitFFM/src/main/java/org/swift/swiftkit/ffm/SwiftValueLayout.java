@@ -65,7 +65,7 @@ public class SwiftValueLayout {
     /**
      * The value layout for Swift's {@code UInt} type, which is an unsigned type that follows
      * the size of a pointer (aka C's {@code size_t}).
-     * <p/>
+     * <p>
      * Java does not have unsigned integer types, so we use the layout for Swift's {@code Int}.
      */
     public static ValueLayout SWIFT_UINT = SWIFT_INT;
