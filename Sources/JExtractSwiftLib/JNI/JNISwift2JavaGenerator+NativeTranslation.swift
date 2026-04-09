@@ -1319,6 +1319,7 @@ extension JNISwift2JavaGenerator {
 
         let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
 
+        // TODO: Remove the _openExistential when we decide to only support language mode v6+
         printer.print(
           """
           guard let \(inner)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: \(typeMetadataVariableName), in: environment))) else {
@@ -1328,7 +1329,14 @@ extension JNISwift2JavaGenerator {
           guard let \(inner)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(inner), in: environment))) else {
             fatalError("\(inner) memory address was null")
           }
+          #if hasFeature(ImplicitOpenExistentials)
           let \(existentialName) = \(inner)RawPointer$.load(as: \(inner)DynamicType$) as! \(existentialType)
+          #else
+          func \(inner)DoLoad<Ty>(_ ty: Ty.Type) -> \(existentialType) {
+            \(inner)RawPointer$.load(as: ty) as! \(existentialType)
+          }
+          let \(existentialName) = _openExistential(\(inner)DynamicType$, do: \(inner)DoLoad)
+          #endif
           """
         )
         return existentialName
