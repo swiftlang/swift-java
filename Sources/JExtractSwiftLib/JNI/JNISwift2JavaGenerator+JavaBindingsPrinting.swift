@@ -506,10 +506,10 @@ extension JNISwift2JavaGenerator {
       // Print record
       printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") {
         printer in
-        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).flatMap {
+        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).map {
           value,
           conversion in
-          ["\(conversion.native.javaType) \(value.parameter.name)"]
+          "\(conversion.native.javaType) \(value.parameter.name)"
         }
 
         printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")

@@ -306,6 +306,12 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
+        enum _JNI_MyEnum {
+          static let myEnumSecondCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Second$_NativeParameters", methods: [.init(name: "<init>", signature: "(Ljava/lang/String;)V")])
+          static let myEnumThirdCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Third$_NativeParameters", methods: [.init(name: "<init>", signature: "(JI)V")])
+        }
+        """,
+        """
         @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
         public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
           ...
@@ -334,6 +340,36 @@ struct JNIEnumTests {
           let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNILocalRefValue(in: environment)), jvalue(i: y.getJNILocalRefValue(in: environment))]
           return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
+        """,
+      ],
+      notExpectedChunks: [
+        "public func Java_com_example_swift_MyEnum__00024getAsFirst__J("
+      ]
+    )
+  }
+
+  @Test
+  func nonGeneratesGetAsCase_swift() throws {
+    try assertOutput(
+      input: """
+        public enum MyEnum {
+          case first
+          case second
+        }
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [],
+      notExpectedChunks: [
+        """
+        enum _JNI_MyEnum
+        """,
+        """
+        public func Java_com_example_swift_MyEnum__00024getAsFirst__J("
+        """,
+        """
+        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(
         """,
       ]
     )

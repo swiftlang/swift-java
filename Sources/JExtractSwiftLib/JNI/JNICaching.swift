@@ -28,4 +28,8 @@ enum JNICaching {
   static func cacheMemberName(for enumCase: ImportedEnumCase) -> String {
     "\(enumCase.enumType.nominalTypeDecl.name.firstCharacterLowercased)\(enumCase.name.firstCharacterUppercased)Cache"
   }
+
+  static func cacheMemberName(for translatedEnumCase: JNISwift2JavaGenerator.TranslatedEnumCase) -> String {
+    cacheMemberName(for: translatedEnumCase.original)
+  }
 }
