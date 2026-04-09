@@ -1162,7 +1162,6 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedResult {
-      let arity = elements.count
       var outParameters: [OutParameter] = []
       var elementOutParamNames: [String] = []
       var elementConversions: [JavaNativeConversionStep] = []
