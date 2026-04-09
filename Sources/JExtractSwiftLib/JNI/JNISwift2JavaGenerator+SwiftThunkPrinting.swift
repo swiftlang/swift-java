@@ -322,7 +322,7 @@ extension JNISwift2JavaGenerator {
   private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let savedPrintingTypeName = self.currentPrintingTypeName
     let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = type.effectiveJavaName
+    self.currentPrintingTypeName = type.effectiveJavaTypeName
     self.currentPrintingType = type
     defer {
       self.currentPrintingTypeName = savedPrintingTypeName
@@ -558,7 +558,7 @@ extension JNISwift2JavaGenerator {
       let swiftClassName = JNISwift2JavaGenerator.protocolParameterWrapperClassName(
         methodName: decl.name,
         parameterName: parameterName,
-        parentName: decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedName ?? swiftModuleName,
+        parentName: decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedTypeName ?? SwiftQualifiedTypeName(swiftModuleName),
       )
       let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: ", ")
 
@@ -791,7 +791,7 @@ extension JNISwift2JavaGenerator {
   private func printCDecl(
     _ printer: inout CodePrinter,
     javaMethodName: String,
-    parentName: String,
+    parentName: SwiftQualifiedTypeName,
     parameters: [JavaParameter],
     resultType: JavaType,
     _ body: (inout CodePrinter) -> Void,
@@ -803,7 +803,7 @@ extension JNISwift2JavaGenerator {
     let cName =
       "Java_"
       + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName.replacingOccurrences(of: ".", with: "$").escapedJNIIdentifier)_"
+      + "_\(parentName.jniEscapedName.escapedJNIIdentifier)_"
       + javaMethodName.escapedJNIIdentifier
       + "__"
       + jniSignature.escapedJNIIdentifier
@@ -860,7 +860,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: "$typeMetadataAddressDowncall",
-      parentName: type.effectiveJavaName,
+      parentName: type.effectiveJavaTypeName,
       parameters: [],
       resultType: .long,
     ) { printer in
@@ -896,7 +896,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: "$toByteArray",
-      parentName: type.effectiveJavaName,
+      parentName: type.effectiveJavaTypeName,
       parameters: [
         selfPointerParam
       ],
@@ -917,7 +917,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: "$toByteArrayIndirectCopy",
-      parentName: type.effectiveJavaName,
+      parentName: type.effectiveJavaTypeName,
       parameters: [
         selfPointerParam
       ],
@@ -1081,11 +1081,11 @@ extension JNISwift2JavaGenerator {
   static func protocolParameterWrapperClassName(
     methodName: String,
     parameterName: String,
-    parentName: String?,
+    parentName: SwiftQualifiedTypeName?,
   ) -> String {
     let parent =
       if let parentName {
-        "\(parentName)_"
+        "\(parentName.fullFlatName)_"
       } else {
         ""
       }
@@ -1095,7 +1095,7 @@ extension JNISwift2JavaGenerator {
 
 extension SwiftNominalTypeDeclaration {
   private var safeProtocolName: String {
-    self.qualifiedName.replacingOccurrences(of: ".", with: "_")
+    self.flatName
   }
 
   /// The name of the corresponding `@JavaInterface` of this type.

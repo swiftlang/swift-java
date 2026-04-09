@@ -43,12 +43,13 @@ package struct ThunkNameRegistry {
         .joined()
     }
 
-    let name =
-      if let parent = decl.parentType {
-        "swiftjava_\(decl.module)_\(parent)_\(decl.name)\(suffix)"
-      } else {
-        "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
-      }
+    let name: String
+    if let parent = decl.parentType, let nominalDecl = parent.asNominalTypeDeclaration {
+      let parentName = nominalDecl.flatName
+      name = "swiftjava_\(decl.module)_\(parentName)_\(decl.name)\(suffix)"
+    } else {
+      name = "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
+    }
 
     let emittedCount = self.duplicateNames[name, default: 0]
     defer { self.duplicateNames[name] = emittedCount + 1 }

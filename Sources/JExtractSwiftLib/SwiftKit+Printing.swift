@@ -52,7 +52,7 @@ extension SwiftKitPrinting {
 
 extension SwiftKitPrinting.Names {
   static func getType(module: String, nominal: ImportedNominalType) -> String {
-    "swiftjava_getType_\(module)_\(nominal.swiftNominal.qualifiedName)"
+    "swiftjava_getType_\(module)_\(nominal.swiftNominal.qualifiedTypeName.fullFlatName)"
   }
 
 }

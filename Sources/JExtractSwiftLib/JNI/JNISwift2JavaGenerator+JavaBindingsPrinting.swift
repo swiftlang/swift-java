@@ -190,7 +190,7 @@ extension JNISwift2JavaGenerator {
   private func printConcreteType(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     let savedPrintingTypeName = self.currentPrintingTypeName
     let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = decl.effectiveJavaName
+    self.currentPrintingTypeName = decl.effectiveJavaTypeName
     self.currentPrintingType = decl
     defer {
       self.currentPrintingTypeName = savedPrintingTypeName
@@ -757,7 +757,7 @@ extension JNISwift2JavaGenerator {
     // using the registry?
     let effectiveParentName = self.currentPrintingTypeName ?? translatedDecl.parentName
     let downcall =
-      "\(effectiveParentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+      "\(effectiveParentName.fullName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.resultType.javaType.isVoid {
