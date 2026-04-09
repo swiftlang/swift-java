@@ -14,4 +14,5 @@
 
 public enum EnumWithValueCases {
   case firstCase(UInt)
+  case secondCase
 }

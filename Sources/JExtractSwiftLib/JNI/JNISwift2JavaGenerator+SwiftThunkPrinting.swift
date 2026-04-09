@@ -174,15 +174,17 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    if type.cases.isEmpty {
+    let targetCases = type.cases
+      .compactMap(translatedEnumCase(for:))
+      .filter { !$0.translatedValues.isEmpty }
+    if targetCases.isEmpty {
       return
     }
-    
+
     printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
-      for enumCase in type.cases {
-        guard let translatedCase = translatedEnumCase(for: enumCase) else { continue }
+      for translatedCase in targetCases {
         printer.print(
-          "static let \(JNICaching.cacheMemberName(for: enumCase)) = \(renderEnumCaseCacheInit(translatedCase))"
+          "static let \(JNICaching.cacheMemberName(for: translatedCase)) = \(renderEnumCaseCacheInit(translatedCase))"
         )
       }
     }
