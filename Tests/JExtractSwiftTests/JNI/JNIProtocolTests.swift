@@ -140,14 +140,7 @@ struct JNIProtocolTests {
             guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
               fatalError("xpointer$ memory address was null")
             }
-            #if hasFeature(ImplicitOpenExistentials)
             let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! (any SomeProtocol)
-            #else
-            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> (any SomeProtocol) {
-              xpointer$RawPointer$.load(as: ty) as! (any SomeProtocol)
-            }
-            let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
-            #endif
             xswiftObject$ = xpointer$Existential$
           }
           else {
@@ -278,14 +271,7 @@ struct JNIProtocolTests {
             guard let xpointer$RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: xpointer$, in: environment))) else {
               fatalError("xpointer$ memory address was null")
             }
-            #if hasFeature(ImplicitOpenExistentials)
             let xpointer$Existential$ = xpointer$RawPointer$.load(as: xpointer$DynamicType$) as! (any (SomeProtocol & B))
-            #else
-            func xpointer$DoLoad<Ty>(_ ty: Ty.Type) -> (any (SomeProtocol & B)) {
-              xpointer$RawPointer$.load(as: ty) as! (any (SomeProtocol & B))
-            }
-            let xpointer$Existential$ = _openExistential(xpointer$DynamicType$, do: xpointer$DoLoad)
-            #endif
             xswiftObject$ = xpointer$Existential$
           }
           else {
