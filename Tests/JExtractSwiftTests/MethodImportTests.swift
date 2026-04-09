@@ -117,9 +117,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first {
-      $0.name == "globalTakeInt"
-    })
+    let funcDecl = try #require(
+      st.importedGlobalFuncs.first {
+        $0.name == "globalTakeInt"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -164,9 +166,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first {
-      $0.name == "globalTakeIntLongString"
-    })
+    let funcDecl = try #require(
+      st.importedGlobalFuncs.first {
+        $0.name == "globalTakeIntLongString"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -208,9 +212,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first {
-      $0.name == "globalReturnClass"
-    })
+    let funcDecl = try #require(
+      st.importedGlobalFuncs.first {
+        $0.name == "globalReturnClass"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -252,9 +258,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first {
-      $0.name == "swapRawBufferPointer"
-    })
+    let funcDecl = try #require(
+      st.importedGlobalFuncs.first {
+        $0.name == "swapRawBufferPointer"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -299,9 +307,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(st.importedTypes["MySwiftClass"]!.methods.first {
-      $0.name == "helloMemberFunction"
-    })
+    let funcDecl: ImportedFunc = try #require(
+      st.importedTypes["MySwiftClass"]!.methods.first {
+        $0.name == "helloMemberFunction"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -342,9 +352,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(st.importedTypes["MySwiftClass"]!.methods.first {
-      $0.name == "makeInt"
-    })
+    let funcDecl: ImportedFunc = try #require(
+      st.importedTypes["MySwiftClass"]!.methods.first {
+        $0.name == "makeInt"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -391,9 +403,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(st.importedTypes["MySwiftClass"]!.initializers.first {
-      $0.name == "init"
-    })
+    let initDecl: ImportedFunc = try #require(
+      st.importedTypes["MySwiftClass"]!.initializers.first {
+        $0.name == "init"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -444,9 +458,11 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(st.importedTypes["MySwiftStruct"]!.initializers.first {
-      $0.name == "init"
-    })
+    let initDecl: ImportedFunc = try #require(
+      st.importedTypes["MySwiftStruct"]!.initializers.first {
+        $0.name == "init"
+      }
+    )
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
