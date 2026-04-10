@@ -57,7 +57,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         public final class MyStruct implements JNISwiftInstance {
-          static final String LIB_NAME = "SwiftModule";
+          static final java.lang.String LIB_NAME = "SwiftModule";
 
           @SuppressWarnings("unused")
           private static final boolean INITIALIZED_LIBS = initializeLibs();
@@ -221,7 +221,7 @@ struct JNIStructTests {
       expectedChunks: [
         """
         public final class MyStruct implements JNISwiftInstance {
-          static final String LIB_NAME = "SwiftModule";
+          static final java.lang.String LIB_NAME = "SwiftModule";
         """
       ],
       notExpectedChunks: [

@@ -32,7 +32,7 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public String toString() {
+        public java.lang.String toString() {
           return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         """
@@ -49,7 +49,7 @@ struct JNIToStringTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public String toDebugString() {
+        public java.lang.String toDebugString() {
           return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         """
