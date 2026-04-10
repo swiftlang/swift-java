@@ -112,13 +112,32 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
-
-        static {
-          System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-          System.loadLibrary(LIB_NAME);
-        }
         """
       )
+
+      if let overrideLoading = config.overrideStaticBlockLibraryLoading {
+        if !overrideLoading.isEmpty {
+          let body = overrideLoading.map { "    \($0)" }.joined(separator: "\n")
+          printer.print(
+            """
+
+            static {
+            \(body)
+            }
+            """
+          )
+        }
+      } else {
+        printer.print(
+          """
+
+          static {
+            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            System.loadLibrary(LIB_NAME);
+          }
+          """
+        )
+      }
 
       for decl in analysis.importedGlobalFuncs {
         self.logger.trace("Print global function: \(decl)")
@@ -201,16 +220,38 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
-
-        @SuppressWarnings("unused")
-        private static final boolean INITIALIZED_LIBS = initializeLibs();
-        static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            System.loadLibrary(LIB_NAME);
-            return true;
-        }
         """
       )
+
+      if let overrideLoading = config.overrideStaticBlockLibraryLoading {
+        if !overrideLoading.isEmpty {
+          let body = overrideLoading.map { "        \($0)" }.joined(separator: "\n")
+          printer.print(
+            """
+
+            @SuppressWarnings("unused")
+            private static final boolean INITIALIZED_LIBS = initializeLibs();
+            static boolean initializeLibs() {
+            \(body)
+                return true;
+            }
+            """
+          )
+        }
+      } else {
+        printer.print(
+          """
+
+          @SuppressWarnings("unused")
+          private static final boolean INITIALIZED_LIBS = initializeLibs();
+          static boolean initializeLibs() {
+              System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+              System.loadLibrary(LIB_NAME);
+              return true;
+          }
+          """
+        )
+      }
 
       let nestedTypes = self.analysis.importedTypes.filter { _, type in
         type.parent == decl.swiftNominal

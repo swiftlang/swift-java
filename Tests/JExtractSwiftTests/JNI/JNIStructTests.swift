@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
@@ -203,6 +204,29 @@ struct JNIStructTests {
           selfPointer$.pointee.doSomething(x: Int64(fromJNI: x, in: environment))
         }
         """
+      ]
+    )
+  }
+
+  @Test
+  func generatesStructJavaClass_overrideStaticBlockLibraryLoading_empty() throws {
+    var config = Configuration()
+    config.overrideStaticBlockLibraryLoading = []
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public final class MyStruct implements JNISwiftInstance {
+          static final String LIB_NAME = "SwiftModule";
+        """
+      ],
+      notExpectedChunks: [
+        "System.loadLibrary",
+        "initializeLibs",
       ]
     )
   }

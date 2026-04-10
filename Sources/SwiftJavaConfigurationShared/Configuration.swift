@@ -38,6 +38,14 @@ public struct Configuration: Codable {
   /// (e.g. the module is `MyLibrary` but the dylib is `MyLibrarySwiftJava` or something else).
   public var nativeLibraryName: String?
 
+  /// When non-nil, overrides the library loading statements emitted in the
+  /// `static {}` / `initializeLibs()` block of generated Java classes.
+  /// Each string is emitted as a verbatim Java statement.
+  ///
+  /// When `nil` (the default), the standard loading calls are emitted.
+  /// When set to an empty array `[]`, no library loading code is emitted at all.
+  public var overrideStaticBlockLibraryLoading: [String]?
+
   public var inputSwiftDirectory: String?
 
   public var outputSwiftDirectory: String?

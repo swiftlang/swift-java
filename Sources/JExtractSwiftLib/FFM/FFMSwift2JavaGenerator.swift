@@ -256,20 +256,37 @@ extension FFMSwift2JavaGenerator {
     printNominal(&printer, decl) { printer in
       // We use a static field to abuse the initialization order such that by the time we get type metadata,
       // we already have loaded the library where it will be obtained from.
-      printer.printParts(
-        """
-        @SuppressWarnings("unused")
-        private static final boolean INITIALIZED_LIBS = initializeLibs();
-        static boolean initializeLibs() {
-            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
-            return true;
+      if let overrideLoading = self.config.overrideStaticBlockLibraryLoading {
+        if !overrideLoading.isEmpty {
+          let body = overrideLoading.map { "    \($0)" }.joined(separator: "\n")
+          printer.printParts(
+            """
+            @SuppressWarnings("unused")
+            private static final boolean INITIALIZED_LIBS = initializeLibs();
+            static boolean initializeLibs() {
+            \(body)
+                return true;
+            }
+            """
+          )
+          printer.print("")
         }
-        """
-      )
-      printer.print("")
+      } else {
+        printer.printParts(
+          """
+          @SuppressWarnings("unused")
+          private static final boolean INITIALIZED_LIBS = initializeLibs();
+          static boolean initializeLibs() {
+              SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+              SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+              SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+              SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
+              return true;
+          }
+          """
+        )
+        printer.print("")
+      }
 
       // Type metadata (common to all nominal types)
       printer.printParts(
@@ -479,12 +496,35 @@ extension FFMSwift2JavaGenerator {
         """
         static final SymbolLookup SYMBOL_LOOKUP = getSymbolLookup();
         private static SymbolLookup getSymbolLookup() {
-            if (SwiftLibraries.AUTO_LOAD_LIBS) {
-                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
-                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-                SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
-                SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
-            }
+        """
+      )
+
+      if let overrideLoading = config.overrideStaticBlockLibraryLoading {
+        if !overrideLoading.isEmpty {
+          let body = overrideLoading.map { "        \($0)" }.joined(separator: "\n")
+          printer.print(
+            """
+                if (SwiftLibraries.AUTO_LOAD_LIBS) {
+            \(body)
+                }
+            """
+          )
+        }
+      } else {
+        printer.print(
+          """
+              if (SwiftLibraries.AUTO_LOAD_LIBS) {
+                  SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_CORE);
+                  SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+                  SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
+                  SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
+              }
+          """
+        )
+      }
+
+      printer.print(
+        """
 
             if (PlatformUtils.isMacOS()) {
                 return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)
