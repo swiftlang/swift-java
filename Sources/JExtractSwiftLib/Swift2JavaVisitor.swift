@@ -227,16 +227,17 @@ final class Swift2JavaVisitor {
           lookupContext: translator.lookupContext,
         )
 
+        let caseName = caseElement.name.text.trimmingCharacters(in: .init(charactersIn: "`"))
         let caseFunction = ImportedFunc(
           module: translator.swiftModuleName,
           swiftDecl: node,
-          name: caseElement.name.text,
+          name: caseName,
           apiKind: .enumCase,
           functionSignature: signature,
         )
 
         let importedCase = ImportedEnumCase(
-          name: caseElement.name.text,
+          name: caseName,
           parameters: parameters ?? [],
           swiftDecl: node,
           enumType: SwiftNominalType(nominalTypeDecl: typeContext.swiftNominal),

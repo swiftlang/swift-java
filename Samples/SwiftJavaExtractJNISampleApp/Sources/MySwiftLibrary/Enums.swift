@@ -16,3 +16,7 @@ public enum EnumWithValueCases {
   case firstCase(UInt)
   case secondCase
 }
+
+public enum EnumWithBacktick {
+  case `let`
+}

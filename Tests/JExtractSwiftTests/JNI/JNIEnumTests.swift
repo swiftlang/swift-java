@@ -374,4 +374,22 @@ struct JNIEnumTests {
       ]
     )
   }
+
+  @Test
+  func removeBacktick() throws {
+    try assertOutput(
+      input: """
+        public enum MyEnum {
+          case `let`
+        }
+        """,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public static MyEnum let(SwiftArena swiftArena) {",
+        "public record Let() implements Case {",
+      ],
+    )
+  }
 }
