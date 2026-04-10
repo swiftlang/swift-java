@@ -53,7 +53,7 @@ public struct SwiftToJava {
     var allFiles: OrderedSet<URL> = []
     for path in inputPaths {
       if path.isDirectory {
-        allFiles.formUnion(collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log))
+        allFiles.formUnion(collectAllFiles(suffix: ".swift", in: [path], log: translator.log))
       } else {
         allFiles.append(path)
       }
