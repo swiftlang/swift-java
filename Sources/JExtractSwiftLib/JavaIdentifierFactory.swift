@@ -68,7 +68,11 @@ package struct JavaIdentifierFactory {
       case .setter, .subscriptSetter: decl.javaSetterName
       case .function, .initializer, .enumCase: decl.name
       }
-    return baseName + paramsSuffix(decl, baseName: baseName)
+    var methodName = baseName + paramsSuffix(decl, baseName: baseName)
+    if Self.javaKeywords.contains(methodName) {
+      methodName += "_"
+    }
+    return methodName
   }
 
   private func paramsSuffix(_ decl: ImportedFunc, baseName: String) -> String {
@@ -86,4 +90,22 @@ package struct JavaIdentifierFactory {
       return labels.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()
     }
   }
+
+  static let javaKeywords: Set<String> = [
+    /// https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9
+    "abstract", "continue", "for", "new", "switch",
+    "assert", "default", "if", "package", "synchronized",
+    "boolean", "do", "goto", "private", "this",
+    "break", "double", "implements", "protected", "throw",
+    "byte", "else", "import", "public", "throws",
+    "case", "enum", "instanceof", "return", "transient",
+    "catch", "extends", "int", "short", "try",
+    "char", "final", "interface", "static", "void",
+    "class", "finally", "long", "strictfp", "volatile",
+    "const", "float", "native", "super", "while",
+    "_",
+
+    /// literals
+    "true", "false", "null",
+  ]
 }

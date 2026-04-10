@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,12 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum EnumWithValueCases {
-  case firstCase(UInt)
-  case secondCase
-}
+import Testing
 
-public enum EnumWithBacktick {
-  case `let`
-  case `default`
-}
+// TODO: 
