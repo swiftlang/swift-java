@@ -91,10 +91,12 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
           guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
             return nil
           }
-          guard fileName.hasSuffix(".swift") else {
-            return nil
+          if fileName.hasSuffix(".swift") {
+            return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
+          } else if fileName.hasSuffix(".swiftinterface") {
+            return String(fileName.replacing(".swiftinterface", with: "+SwiftJava.swift"))
           }
-          return String(fileName.replacing(".swift", with: "+SwiftJava.swift"))
+          return nil
         }
       )
       // Also include filtered-out files so SwiftPM gets the empty outputs it expects

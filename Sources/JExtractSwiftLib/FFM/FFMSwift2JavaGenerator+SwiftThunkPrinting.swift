@@ -90,7 +90,7 @@ extension FFMSwift2JavaGenerator {
         .sorted(by: { $0.qualifiedName < $1.qualifiedName })
 
       let inputFileName = "\(group.key)".split(separator: "/").last ?? "__Unknown.swift"
-      let filename = "\(inputFileName)".replacing(".swift", with: "+SwiftJava.swift")
+      let filename = "\(inputFileName)".replacing(/\.swift(interface)?/, with: "+SwiftJava.swift")
 
       // Print file header before all type thunks
       printer.print(
