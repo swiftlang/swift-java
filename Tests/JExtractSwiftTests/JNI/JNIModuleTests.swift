@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
@@ -274,6 +275,55 @@ struct JNIModuleTests {
           }
         }
         """,
+      ]
+    )
+  }
+
+  @Test
+  func generatesModuleJavaClass_overrideStaticBlockLibraryLoading_empty() throws {
+    let input = "public func helloWorld()"
+    var config = Configuration()
+    config.overrideStaticBlockLibraryLoading = []
+
+    try assertOutput(
+      input: input,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        static final String LIB_NAME = "SwiftModule";
+        """
+      ],
+      notExpectedChunks: [
+        "System.loadLibrary",
+        "initializeLibs",
+      ]
+    )
+  }
+
+  @Test
+  func generatesModuleJavaClass_overrideStaticBlockLibraryLoading_custom() throws {
+    let input = "public func helloWorld()"
+    var config = Configuration()
+    config.overrideStaticBlockLibraryLoading = [
+      "System.loadLibrary(\"SomeSpecialName\");"
+    ]
+
+    try assertOutput(
+      input: input,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        static {
+            System.loadLibrary("SomeSpecialName");
+        }
+        """
+      ],
+      notExpectedChunks: [
+        "SwiftLibraries.LIB_NAME_SWIFT_JAVA"
       ]
     )
   }
