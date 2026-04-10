@@ -32,7 +32,7 @@ final class SendableTests {
         """
         @ThreadSafe // Sendable
         public final class SendableStruct extends FFMSwiftInstance implements SwiftValue {
-          static final String LIB_NAME = "SwiftModule";
+          static final java.lang.String LIB_NAME = "SwiftModule";
           static final Arena LIBRARY_ARENA = Arena.ofAuto();
         """
       ]
@@ -50,7 +50,7 @@ final class SendableTests {
         """
         @ThreadSafe // Sendable
         public final class SendableStruct implements JNISwiftInstance {
-          static final String LIB_NAME = "SwiftModule";
+          static final java.lang.String LIB_NAME = "SwiftModule";
         """
       ]
     )

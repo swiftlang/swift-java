@@ -57,7 +57,7 @@ struct JNIModuleTests {
         import org.swift.swiftkit.core.annotations.*;
 
         public final class SwiftModule {
-          static final String LIB_NAME = "SwiftModule";
+          static final java.lang.String LIB_NAME = "SwiftModule";
 
           static {
             System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
@@ -292,7 +292,7 @@ struct JNIModuleTests {
       .java,
       expectedChunks: [
         """
-        static final String LIB_NAME = "SwiftModule";
+        static final java.lang.String LIB_NAME = "SwiftModule";
         """
       ],
       notExpectedChunks: [
