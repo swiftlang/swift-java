@@ -111,7 +111,7 @@ extension JNISwift2JavaGenerator {
     printModuleClass(&printer) { printer in
       printer.print(
         """
-        static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
+        static final java.lang.String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
         """
       )
 
@@ -219,7 +219,7 @@ extension JNISwift2JavaGenerator {
     printNominal(&printer, decl) { printer in
       printer.print(
         """
-        static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
+        static final java.lang.String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
         """
       )
 
@@ -373,11 +373,11 @@ extension JNISwift2JavaGenerator {
 
       printer.print(
         """
-        public String toString() {
+        public java.lang.String toString() {
           return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
 
-        public String toDebugString() {
+        public java.lang.String toDebugString() {
           return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
         """

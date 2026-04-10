@@ -545,7 +545,7 @@ extension FFMSwift2JavaGenerator {
   func printClassConstants(printer: inout CodePrinter) {
     printer.print(
       """
-      static final String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
+      static final java.lang.String LIB_NAME = "\(config.nativeLibraryName ?? swiftModuleName)";
       static final Arena LIBRARY_ARENA = Arena.ofAuto();
       """
     )
@@ -584,7 +584,7 @@ extension FFMSwift2JavaGenerator {
     printer.print(
       """
       @Override
-      public String toString() {
+      public java.lang.String toString() {
           return getClass().getSimpleName()
               + "("
               + SwiftRuntime.nameOfSwiftType($swiftType().$memorySegment(), true)
