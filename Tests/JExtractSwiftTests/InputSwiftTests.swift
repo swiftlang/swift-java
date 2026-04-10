@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
+import Foundation
 import JExtractSwiftLib
 import SwiftJavaConfigurationShared
-import Foundation
+import Testing
 
 @Suite
 struct InputSwiftTests {
@@ -32,8 +32,8 @@ struct InputSwiftTests {
       fileName: "MyDependent",
       extension: "swiftinterface",
       contents: """
-      public struct Foo {}
-      """,
+        public struct Foo {}
+        """,
       in: tempDirectory
     ) { swiftInterfaceURL in
       var config = Configuration()
@@ -48,7 +48,8 @@ struct InputSwiftTests {
         .run()
     }
 
-    let javaPackageRoot = outJavaURL
+    let javaPackageRoot =
+      outJavaURL
       .appending(path: "com")
       .appending(path: "example")
     let expectedSources: [URL] = [
@@ -89,7 +90,8 @@ struct InputSwiftTests {
         .run()
     }
 
-    let javaPackageRoot = outJavaURL
+    let javaPackageRoot =
+      outJavaURL
       .appending(path: "com")
       .appending(path: "example")
     let expectedSources: [URL] = [
