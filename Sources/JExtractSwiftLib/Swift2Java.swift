@@ -50,7 +50,14 @@ public struct SwiftToJava {
     let inputPaths = inputSwift.split(separator: ",").map { URL(string: String($0))! }
     log.info("Input paths = \(inputPaths)")
 
-    let allFiles = collectAllFiles(suffix: ".swift", in: inputPaths, log: translator.log)
+    var allFiles: OrderedSet<URL> = []
+    for path in inputPaths {
+      if path.isDirectory {
+        allFiles.formUnion(collectAllFiles(suffix: ".swift", in: [path], log: translator.log))
+      } else {
+        allFiles.append(path)
+      }
+    }
 
     let hasFilters =
       !(config.swiftFilterInclude ?? []).isEmpty || !(config.swiftFilterExclude ?? []).isEmpty

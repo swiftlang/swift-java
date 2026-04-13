@@ -79,7 +79,7 @@ struct IfConfigTests {
   @Test
   func overrideWithStaticBuildConfigurationFile() throws {
     try withTemporaryFile(
-      suffix: "json",
+      extension: "json",
       contents: """
         {
           "attributes": [],
@@ -158,20 +158,4 @@ struct IfConfigTests {
       ]
     )
   }
-}
-
-private func withTemporaryFile(
-  suffix: String,
-  contents: String = "",
-  in tempDirectory: URL = FileManager.default.temporaryDirectory,
-  _ perform: (URL) throws -> Void
-) throws {
-  let tempFileName = "tmp_\(UUID().uuidString).\(suffix)"
-  let tempFileURL = tempDirectory.appendingPathComponent(tempFileName)
-
-  try contents.write(to: tempFileURL, atomically: true, encoding: .utf8)
-  defer {
-    try? FileManager.default.removeItem(at: tempFileURL)
-  }
-  try perform(tempFileURL)
 }
