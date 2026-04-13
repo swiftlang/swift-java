@@ -19,6 +19,7 @@ private let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+
   struct DependentConfigFile {
     let swiftModuleName: String
     let configURL: URL
