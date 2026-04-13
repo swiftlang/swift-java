@@ -186,7 +186,7 @@ final class Swift2JavaVisitor {
     let imported = ImportedFunc(
       module: translator.swiftModuleName,
       swiftDecl: node,
-      name: node.name.text,
+      name: node.name.text.unescapedSwiftName,
       apiKind: .function,
       functionSignature: signature,
     )
@@ -227,7 +227,7 @@ final class Swift2JavaVisitor {
           lookupContext: translator.lookupContext,
         )
 
-        let caseName = caseElement.name.text.trimmingCharacters(in: .init(charactersIn: "`"))
+        let caseName = caseElement.name.text.unescapedSwiftName
         let caseFunction = ImportedFunc(
           module: translator.swiftModuleName,
           swiftDecl: node,
