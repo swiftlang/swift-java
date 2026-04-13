@@ -147,12 +147,23 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     return SwiftKnownTypeDeclKind(rawValue: "\(moduleName).\(name)")
   }
 
-  package var qualifiedName: String {
+  /// Structured qualified type name built from the parent chain
+  package var qualifiedTypeName: SwiftQualifiedTypeName {
     if let parent = self.parent {
-      return parent.qualifiedName + "." + name
+      return SwiftQualifiedTypeName(parent.qualifiedTypeName.components + [name])
     } else {
-      return name
+      return SwiftQualifiedTypeName(name)
     }
+  }
+
+  package var qualifiedName: String {
+    qualifiedTypeName.fullName
+  }
+
+  /// Like `qualifiedName` but with dots replaced by underscores, suitable for
+  /// use in C symbol names and Java identifiers
+  package var flatName: String {
+    qualifiedTypeName.fullFlatName
   }
 
   var isReferenceType: Bool {

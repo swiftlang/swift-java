@@ -14,15 +14,15 @@
 
 enum JNICaching {
   static func cacheName(for type: ImportedNominalType) -> String {
-    cacheName(for: type.effectiveJavaName)
+    cacheName(for: type.effectiveJavaTypeName)
   }
 
   static func cacheName(for type: SwiftNominalType) -> String {
-    cacheName(for: type.nominalTypeDecl.qualifiedName)
+    cacheName(for: type.nominalTypeDecl.qualifiedTypeName)
   }
 
-  private static func cacheName(for qualifiedName: String) -> String {
-    "_JNI_\(qualifiedName.replacingOccurrences(of: ".", with: "_"))"
+  private static func cacheName(for typeName: SwiftQualifiedTypeName) -> String {
+    "_JNI_\(typeName.fullFlatName)"
   }
 
   static func cacheMemberName(for enumCase: ImportedEnumCase) -> String {

@@ -102,7 +102,7 @@ extension JNISwift2JavaGenerator {
       )
 
       let methodName = "" // TODO: Used for closures, replace with better name?
-      let parentName = "" // TODO: Used for closures, replace with better name?
+      let parentName = SwiftQualifiedTypeName("") // TODO: Used for closures, replace with better name?
 
       let translatedValues = try self.translateParameters(
         enumCase.parameters.map { ($0.name, $0.type) },
@@ -153,7 +153,7 @@ extension JNISwift2JavaGenerator {
         isThrowing: false,
         isAsync: false,
         nativeFunctionName: "$\(getAsCaseName)",
-        parentName: enumName,
+        parentName: SwiftQualifiedTypeName(enumName),
         functionTypes: [],
         translatedFunctionSignature: TranslatedFunctionSignature(
           selfParameter: TranslatedParameter(
@@ -230,12 +230,12 @@ extension JNISwift2JavaGenerator {
 
       // Types with no parent will be outputted inside a "module" class.
       // For specialized types, use the Java-facing name as the parent scope
-      let parentName: String
+      let parentName: SwiftQualifiedTypeName
       if let parentNominal = decl.parentType?.asNominalType?.nominalTypeDecl {
         let importedParent = importedTypes.values.first { $0.swiftNominal === parentNominal }
-        parentName = importedParent?.effectiveJavaName ?? parentNominal.qualifiedName
+        parentName = importedParent?.effectiveJavaTypeName ?? parentNominal.qualifiedTypeName
       } else {
-        parentName = swiftModuleName
+        parentName = SwiftQualifiedTypeName(swiftModuleName)
       }
 
       // Name.
@@ -300,7 +300,7 @@ extension JNISwift2JavaGenerator {
     func translateFunctionType(
       name: String,
       swiftType: SwiftFunctionType,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
     ) throws -> TranslatedFunctionType {
       var translatedParams: [TranslatedParameter] = []
 
@@ -332,7 +332,7 @@ extension JNISwift2JavaGenerator {
     func translate(
       functionSignature: SwiftFunctionSignature,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
     ) throws -> TranslatedFunctionSignature {
       let parameters = try translateParameters(
         functionSignature.parameters.map { ($0.parameterName, $0.type) },
@@ -384,7 +384,7 @@ extension JNISwift2JavaGenerator {
     func translateParameters(
       _ parameters: [(name: String?, type: SwiftType)],
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> [TranslatedParameter] {
@@ -405,7 +405,7 @@ extension JNISwift2JavaGenerator {
     func translateSelfParameter(
       _ selfParameter: SwiftSelfParameter?,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter? {
@@ -428,7 +428,7 @@ extension JNISwift2JavaGenerator {
     func translateSelfTypeParameter(
       _ selfParameter: SwiftSelfParameter?,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> TranslatedParameter? {
@@ -456,7 +456,7 @@ extension JNISwift2JavaGenerator {
       swiftType: SwiftType,
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
       parameterPosition: Int?,
@@ -577,7 +577,7 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)"),
+            type: .class(package: javaPackage, name: "\(parentName.fullName).\(methodName).\(parameterName)"),
             annotations: parameterAnnotations,
           ),
           conversion: .placeholder,
@@ -640,7 +640,7 @@ extension JNISwift2JavaGenerator {
       elements: [SwiftTupleElement],
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
       parameterPosition: Int?,
@@ -1668,7 +1668,7 @@ extension JNISwift2JavaGenerator {
     let nativeFunctionName: String
 
     /// The name of the Java parent scope this function is declared in
-    let parentName: String
+    let parentName: SwiftQualifiedTypeName
 
     /// Functional interfaces required for the Java method.
     let functionTypes: [TranslatedFunctionType]

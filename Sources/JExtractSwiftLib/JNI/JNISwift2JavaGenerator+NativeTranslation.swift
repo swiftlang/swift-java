@@ -31,7 +31,7 @@ extension JNISwift2JavaGenerator {
       functionSignature: SwiftFunctionSignature,
       translatedFunctionSignature: TranslatedFunctionSignature,
       methodName: String,
-      parentName: String
+      parentName: SwiftQualifiedTypeName
     ) throws -> NativeFunctionSignature {
       let parameters = try zip(translatedFunctionSignature.parameters, functionSignature.parameters).map {
         translatedParameter,
@@ -93,7 +93,7 @@ extension JNISwift2JavaGenerator {
       type: SwiftType,
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> NativeParameter {
@@ -343,7 +343,7 @@ extension JNISwift2JavaGenerator {
       elements: [SwiftTupleElement],
       parameterName: String,
       methodName: String,
-      parentName: String,
+      parentName: SwiftQualifiedTypeName,
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement]
     ) throws -> NativeParameter {
@@ -376,7 +376,7 @@ extension JNISwift2JavaGenerator {
       protocolType: SwiftType,
       methodName: String,
       parameterName: String,
-      parentName: String?
+      parentName: SwiftQualifiedTypeName?
     ) throws -> NativeParameter {
       switch protocolType {
       case .nominal(let nominalType):
@@ -411,7 +411,7 @@ extension JNISwift2JavaGenerator {
       protocolTypes: [SwiftNominalType],
       methodName: String,
       parameterName: String,
-      parentName: String?
+      parentName: SwiftQualifiedTypeName?
     ) throws -> NativeParameter {
       // We allow Java implementations if we are able to generate the needed
       // Swift wrappers for all the protocol types.

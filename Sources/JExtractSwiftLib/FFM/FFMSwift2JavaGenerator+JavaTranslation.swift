@@ -913,10 +913,10 @@ extension FFMSwift2JavaGenerator {
     func translate(
       swiftType: SwiftType
     ) throws -> JavaType {
-      guard let nominalName = swiftType.asNominalTypeDeclaration?.name else {
+      guard let nominalDecl = swiftType.asNominalTypeDeclaration else {
         throw JavaTranslationError.unhandledType(swiftType)
       }
-      return .class(package: nil, name: nominalName)
+      return .class(package: nil, name: nominalDecl.qualifiedName)
     }
   }
 

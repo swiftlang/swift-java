@@ -170,9 +170,17 @@ package final class ImportedNominalType: ImportedDecl {
     .nominal(.init(nominalTypeDecl: swiftNominal))
   }
 
+  /// Structured Java-facing type name — "FishBox" for specialized, "Box" for base
+  package var effectiveJavaTypeName: SwiftQualifiedTypeName {
+    if let specializedTypeName {
+      return SwiftQualifiedTypeName(specializedTypeName)
+    }
+    return swiftNominal.qualifiedTypeName
+  }
+
   /// The effective Java-facing name — "FishBox" for specialized, "Box" for base
   var effectiveJavaName: String {
-    specializedTypeName ?? swiftNominal.qualifiedName
+    effectiveJavaTypeName.fullName
   }
 
   /// The simple Java class name (no qualification) for file naming purposes
