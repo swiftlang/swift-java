@@ -87,6 +87,14 @@ extension String {
 
     return .class(package: javaPackageName, name: javaClassName)
   }
+
+  /// Unescapes the name if it is surrounded by backticks.
+  var unescapedSwiftName: String {
+    if count >= 2 && hasPrefix("`") && hasSuffix("`") {
+      return String(dropFirst().dropLast())
+    }
+    return self
+  }
 }
 
 extension Array where Element == String {

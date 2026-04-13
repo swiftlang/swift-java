@@ -186,7 +186,7 @@ final class Swift2JavaVisitor {
     let imported = ImportedFunc(
       module: translator.swiftModuleName,
       swiftDecl: node,
-      name: node.name.text,
+      name: node.name.text.unescapedSwiftName,
       apiKind: .function,
       functionSignature: signature,
     )
@@ -227,16 +227,17 @@ final class Swift2JavaVisitor {
           lookupContext: translator.lookupContext,
         )
 
+        let caseName = caseElement.name.text.unescapedSwiftName
         let caseFunction = ImportedFunc(
           module: translator.swiftModuleName,
           swiftDecl: node,
-          name: caseElement.name.text,
+          name: caseName,
           apiKind: .enumCase,
           functionSignature: signature,
         )
 
         let importedCase = ImportedEnumCase(
-          name: caseElement.name.text,
+          name: caseName,
           parameters: parameters ?? [],
           swiftDecl: node,
           enumType: SwiftNominalType(nominalTypeDecl: typeContext.swiftNominal),

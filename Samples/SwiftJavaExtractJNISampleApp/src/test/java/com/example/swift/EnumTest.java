@@ -15,20 +15,25 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 import org.swift.swiftkit.core.SwiftArena;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EnumWithValueCasesTest {
+public class EnumTest {
     @Test
-    void fn() {
+    void enumWithValueCases() {
         try (var arena = SwiftArena.ofConfined()) {
             EnumWithValueCases e = EnumWithValueCases.firstCase(48, arena);
             EnumWithValueCases.FirstCase c = (EnumWithValueCases.FirstCase) e.getCase();
             assertNotNull(c);
+        }
+    }
+
+    @Test
+    void enumWithBacktick() {
+        try (var arena = SwiftArena.ofConfined()) {
+            EnumWithBacktick e = EnumWithBacktick.default_(arena);
+            assertTrue(e.getAsDefault().isPresent());
         }
     }
 }
