@@ -178,7 +178,7 @@ extension SwiftJava.JExtractCommand {
     let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn)
     print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
 
-    try jextractSwift(config: config, dependentConfigs: dependentConfigs.map(\.1))
+    try jextractSwift(config: config, dependentConfigs: dependentConfigs)
   }
 
   /// Check if the configured modes are compatible, and fail if not
@@ -207,7 +207,7 @@ struct IncompatibleModeError: Error {
 extension SwiftJava.JExtractCommand {
   func jextractSwift(
     config: Configuration,
-    dependentConfigs: [Configuration],
+    dependentConfigs: [(String?, Configuration)],
   ) throws {
     try SwiftToJava(config: config, dependentConfigs: dependentConfigs).run()
   }

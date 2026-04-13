@@ -23,6 +23,7 @@ extension JNISwift2JavaGenerator {
       swiftModuleName: swiftModuleName,
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
+      dependentJavaPackages: self.dependentJavaPackages,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
@@ -64,6 +65,7 @@ extension JNISwift2JavaGenerator {
         swiftModuleName: swiftModuleName,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
+        dependentJavaPackages: self.dependentJavaPackages,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
@@ -85,6 +87,7 @@ extension JNISwift2JavaGenerator {
     let swiftModuleName: String
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
+    let dependentJavaPackages: [String: String]
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
@@ -546,7 +549,7 @@ extension JNISwift2JavaGenerator {
         }
 
         let javaType = JavaType.class(
-          package: nil,
+          package: dependentJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalTypeName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
             try translateGenericTypeParameter(
@@ -982,7 +985,7 @@ extension JNISwift2JavaGenerator {
         }
 
         let javaType = JavaType.class(
-          package: nil,
+          package: dependentJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalType.nominalTypeDecl.qualifiedName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
             try translateGenericTypeParameter(
@@ -1131,7 +1134,7 @@ extension JNISwift2JavaGenerator {
           } ?? []
 
         return .class(
-          package: nil,
+          package: dependentJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalTypeName,
           typeParameters: typeParameters,
         )
