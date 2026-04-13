@@ -29,7 +29,7 @@ struct SwiftEscapedNameTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "public void guard() {",
-        "private static native void $guard(long selfPointer);"
+        "private static native void $guard(long selfPointer);",
       ],
     )
   }

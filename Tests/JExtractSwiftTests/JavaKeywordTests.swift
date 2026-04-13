@@ -36,7 +36,7 @@ struct JavaKeywordTests {
         """,
         """
         public void final_() {
-        """
+        """,
       ]
     )
 
@@ -47,7 +47,7 @@ struct JavaKeywordTests {
       expectedChunks: [
         """
         @_cdecl("swiftjava_SwiftModule_Foo_final")
-        """,
+        """
       ]
     )
   }
@@ -110,7 +110,7 @@ struct JavaKeywordTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnumWithValue__00024getAsInstanceof__J")
-        """,
+        """
       ]
     )
   }
