@@ -207,7 +207,7 @@ struct IncompatibleModeError: Error {
 extension SwiftJava.JExtractCommand {
   func jextractSwift(
     config: Configuration,
-    dependentConfigs: [(String?, Configuration)],
+    dependentConfigs: [DependentConfig],
   ) throws {
     try SwiftToJava(config: config, dependentConfigs: dependentConfigs).run()
   }

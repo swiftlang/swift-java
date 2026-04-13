@@ -78,6 +78,10 @@ extension SwiftJava {
 }
 
 extension SwiftJava.WrapJavaCommand {
+  struct NamedDependentConfig {
+    let swiftModuleName: String
+    let configuration: Configuration
+  }
 
   mutating func runSwiftJavaCommand(config: inout Configuration) async throws {
     print("self.filterInclude = \(self.filterInclude)")
@@ -101,23 +105,23 @@ extension SwiftJava.WrapJavaCommand {
     )
 
     // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { moduleName, config in
-      guard let moduleName else {
+    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { dependentConfig in
+      guard let moduleName = dependentConfig.swiftModuleName else {
         throw JavaToSwiftError.badConfigOption(self.dependsOn.joined(separator: " "))
       }
-      return (moduleName, config)
+      return NamedDependentConfig(swiftModuleName: moduleName, configuration: dependentConfig.configuration)
     }
     print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
 
     // Include classpath entries which libs we depend on require...
-    for (fromModule, config) in dependentConfigs {
+    for dependentConfig in dependentConfigs {
       print(
-        "[trace][swift-java] Add dependent config (\(fromModule)) classpath elements: \(config.classpathEntries.count)"
+        "[trace][swift-java] Add dependent config (\(dependentConfig.swiftModuleName)) classpath elements: \(dependentConfig.configuration.classpathEntries.count)"
       )
       // TODO: may need to resolve the dependent configs rather than just get their configs
       // TODO: We should cache the resolved classpaths as well so we don't do it many times
-      for entry in config.classpathEntries {
-        print("[trace][swift-java] Add dependent config (\(fromModule)) classpath element: \(entry)")
+      for entry in dependentConfig.configuration.classpathEntries {
+        print("[trace][swift-java] Add dependent config (\(dependentConfig.swiftModuleName)) classpath element: \(entry)")
         classpathEntries.append(entry)
       }
     }
@@ -137,7 +141,7 @@ extension SwiftJava.WrapJavaCommand {
 
   mutating func generateWrappers(
     config: Configuration,
-    dependentConfigs: [(String, Configuration)],
+    dependentConfigs: [NamedDependentConfig],
     environment: JNIEnvironment
   ) throws {
     let translator = JavaTranslator(
@@ -163,10 +167,10 @@ extension SwiftJava.WrapJavaCommand {
     }
 
     // Note all of the dependent configurations.
-    for (swiftModuleName, dependentConfig) in dependentConfigs {
+    for dependentConfig in dependentConfigs {
       translator.addConfiguration(
-        dependentConfig,
-        forSwiftModule: swiftModuleName
+        dependentConfig.configuration,
+        forSwiftModule: dependentConfig.swiftModuleName
       )
     }
 

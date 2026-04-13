@@ -390,9 +390,19 @@ public func readConfiguration(
   }
 }
 
-/// Load all dependent configs configured with `--depends-on` and return a list of
-/// `(SwiftModuleName, Configuration)` tuples.
-public func loadDependentConfigs(dependsOn: [String]) throws -> [(String?, Configuration)] {
+/// Parsed dependent configuration provided via `--depends-on`.
+public struct DependentConfig {
+  public let swiftModuleName: String?
+  public let configuration: Configuration
+
+  public init(swiftModuleName: String?, configuration: Configuration) {
+    self.swiftModuleName = swiftModuleName
+    self.configuration = configuration
+  }
+}
+
+/// Load all dependent configs configured with `--depends-on`.
+public func loadDependentConfigs(dependsOn: [String]) throws -> [DependentConfig] {
   try dependsOn.map { dependentConfig in
     let equalLoc = dependentConfig.firstIndex(of: "=")
 
@@ -406,7 +416,7 @@ public func loadDependentConfigs(dependsOn: [String]) throws -> [(String?, Confi
 
     let config = try readConfiguration(configPath: URL(fileURLWithPath: configFileName)) ?? Configuration()
 
-    return (swiftModuleName, config)
+    return DependentConfig(swiftModuleName: swiftModuleName, configuration: config)
   }
 }
 

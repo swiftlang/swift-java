@@ -19,6 +19,10 @@ private let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
+  struct DependentConfigFile {
+    let swiftModuleName: String
+    let configURL: URL
+  }
 
   var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
@@ -46,7 +50,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     /// Find the manifest files from other swift-java executions in any targets
     /// this target depends on.
-    var dependentConfigFiles: [(String, URL)] = []
+    var dependentConfigFiles: [DependentConfigFile] = []
     func searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
       let dependencyURL = target.directoryURL
@@ -60,7 +64,9 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
-        dependentConfigFiles.append((target.name, dependencyConfigURL))
+        dependentConfigFiles.append(
+          DependentConfigFile(swiftModuleName: target.name, configURL: dependencyConfigURL)
+        )
       }
     }
 
@@ -223,12 +229,11 @@ extension SwiftJavaBuildToolPlugin {
     ]
   }
 
-  func argumentsDependedOnConfigs(_ dependentConfigFiles: [(String, URL)]) -> [String] {
-    dependentConfigFiles.flatMap { moduleAndConfigFile in
-      let (moduleName, configFile) = moduleAndConfigFile
+  func argumentsDependedOnConfigs(_ dependentConfigFiles: [DependentConfigFile]) -> [String] {
+    dependentConfigFiles.flatMap { dependentConfigFile in
       return [
         "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))",
+        "\(dependentConfigFile.swiftModuleName)=\(dependentConfigFile.configURL.path(percentEncoded: false))",
       ]
     }
   }
