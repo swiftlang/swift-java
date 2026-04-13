@@ -73,7 +73,8 @@ func assertOutput(
       javaPackage: "com.example.swift",
       swiftOutputDirectory: "/fake",
       javaOutputDirectory: "/fake",
-      javaClassLookupTable: javaClassLookupTable
+      javaClassLookupTable: javaClassLookupTable,
+      dependentJavaPackages: [:]
     )
 
     switch renderKind {
