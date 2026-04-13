@@ -176,7 +176,7 @@ extension JNISwift2JavaGenerator {
             ),
           parameters: [],
           resultType: TranslatedResult(
-            javaType: .class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: caseName)]),
+            javaType: .optional(.class(package: nil, name: caseName)),
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion
@@ -505,10 +505,24 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            break // Handled as wrapped struct
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .concrete(.swiftkitCoreFoundationDate),
+                annotations: parameterAnnotations,
+              ),
+              conversion: .valueMemoryAddress(.placeholder),
+            )
 
           case .foundationData, .essentialsData:
-            break // Handled as wrapped struct
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .concrete(.swiftkitCoreFoundationData),
+                annotations: parameterAnnotations,
+              ),
+              conversion: .valueMemoryAddress(.placeholder),
+            )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
@@ -872,7 +886,7 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: nil, name: "Optional", typeParameters: [javaType]),
+            type: .optional(javaType),
             annotations: parameterAnnotations,
           ),
           conversion: .method(
@@ -945,12 +959,22 @@ extension JNISwift2JavaGenerator {
             )
 
           case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
+            let javaType = JavaType.swiftkitCoreFoundationDate
+            return TranslatedResult(
+              javaType: javaType,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            )
 
           case .foundationData, .essentialsData:
-            // Handled as wrapped struct
-            break
+            let javaType = JavaType.swiftkitCoreFoundationData
+            return TranslatedResult(
+              javaType: javaType,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            )
 
           case .foundationUUID, .essentialsUUID:
             return TranslatedResult(
@@ -1053,7 +1077,7 @@ extension JNISwift2JavaGenerator {
               genericParameters: genericParameters,
               genericRequirements: genericRequirements,
             )
-            return .class(package: "java.util", name: "Optional", typeParameters: [wrappedType])
+            return .optional(wrappedType)
 
           case .array:
             guard let elementType = nominalType.genericArguments?.first else {
@@ -1094,13 +1118,13 @@ extension JNISwift2JavaGenerator {
             return .swiftSet(elementJavaType)
 
           case .foundationDate, .essentialsDate:
-            return .class(package: nil, name: "Date")
+            return .swiftkitCoreFoundationDate
 
           case .foundationData, .essentialsData:
-            return .class(package: nil, name: "Data")
+            return .swiftkitCoreFoundationData
 
           case .foundationDataProtocol, .essentialsDataProtocol:
-            return .class(package: nil, name: "DataProtocol")
+            return .swiftkitCoreFoundationDataProtocol
 
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID
@@ -1348,7 +1372,7 @@ extension JNISwift2JavaGenerator {
             .void
           }
 
-        let returnType = JavaType.class(package: nil, name: "Optional", typeParameters: [javaType])
+        let returnType = JavaType.optional(javaType)
         return TranslatedResult(
           javaType: returnType,
           annotations: parameterAnnotations,
@@ -1914,16 +1938,22 @@ extension JNISwift2JavaGenerator {
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        guard case .class(_, let className, let typeParameters) = javaType else {
+        guard case .class(let package, let className, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
         }
+        let packagePart: String =
+          if let package {
+            "\(package)."
+          } else {
+            ""
+          }
         let genericClause =
           if !typeParameters.isEmpty {
             "<\(typeParameters.map(\.description).joined(separator: ", "))>"
           } else {
             ""
           }
-        return "\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        return "\(packagePart)\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)

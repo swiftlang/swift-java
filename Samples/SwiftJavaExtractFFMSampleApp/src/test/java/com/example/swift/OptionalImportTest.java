@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
+import org.swift.swiftkit.ffm.foundation.Data;
 
 import java.util.Optional;
 import java.util.OptionalLong;

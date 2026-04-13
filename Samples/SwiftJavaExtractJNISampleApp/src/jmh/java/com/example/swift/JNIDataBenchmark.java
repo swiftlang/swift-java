@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.swift.swiftkit.core.ClosableSwiftArena;
 import org.swift.swiftkit.core.SwiftArena;
+import org.swift.swiftkit.core.foundation.Data;
 
 import java.util.concurrent.TimeUnit;
 

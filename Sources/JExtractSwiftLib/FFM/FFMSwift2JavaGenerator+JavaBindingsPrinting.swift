@@ -456,6 +456,8 @@ extension FFMSwift2JavaGenerator {
       let arena =
         if let className = type.className,
           analysis.importedTypes[className] != nil
+            || type == .swiftkitFFMFoundationData
+            || type == .swiftkitFFMFoundationDataProtocol
         {
           // Use passed-in 'SwiftArena' for 'SwiftValue'.
           "swiftArena"
@@ -619,7 +621,9 @@ extension FFMSwift2JavaGenerator {
   func renderMemoryLayoutValue(for javaType: JavaType) -> String {
     if let layout = ForeignValueLayout(javaType: javaType) {
       return layout.description
-    } else if case .class(package: _, name: let customClass, _) = javaType {
+    } else if case .class(.some(let package), name: let customClass, _) = javaType {
+      return ForeignValueLayout(customType: "\(package).\(customClass)").description
+    } else if case .class(.none, name: let customClass, _) = javaType {
       return ForeignValueLayout(customType: customClass).description
     } else {
       fatalError("renderMemoryLayoutValue not supported for \(javaType)")
@@ -776,7 +780,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
 
     case .wrapMemoryAddressUnsafe(let inner, let javaType):
       let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
-      return "\(javaType.className!).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+      return "\(javaType).wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
     case .construct(let inner, let javaType):
       let inner = inner.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
