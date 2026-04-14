@@ -101,7 +101,7 @@ public struct SwiftToJava {
       }
     }
 
-    let dependentJavaPackages = dependentConfigs.reduce(into: [String: String]()) { partialResult, dependency in
+    let moduleJavaPackages = dependentConfigs.reduce(into: [String: String]()) { partialResult, dependency in
       guard
         let moduleName = dependency.swiftModuleName,
         let javaPackage = dependency.configuration.javaPackage,
@@ -136,7 +136,7 @@ public struct SwiftToJava {
         swiftOutputDirectory: outputSwiftDirectory,
         javaOutputDirectory: outputJavaDirectory,
         javaClassLookupTable: wrappedJavaClassesLookupTable,
-        dependentJavaPackages: dependentJavaPackages
+        moduleJavaPackages: moduleJavaPackages
       )
 
       try generator.generate()
