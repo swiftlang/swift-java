@@ -15,6 +15,7 @@
 import CodePrinting
 import Foundation
 import OrderedCollections
+import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
 // MARK: Defaults
@@ -693,6 +694,7 @@ extension JNISwift2JavaGenerator {
         TranslatedDocumentation.printDocumentation(
           importedFunc: importedFunc,
           translatedDecl: translatedDecl,
+          config: config,
           in: &printer,
         )
       }
@@ -725,6 +727,7 @@ extension JNISwift2JavaGenerator {
       TranslatedDocumentation.printDocumentation(
         importedFunc: importedFunc,
         translatedDecl: translatedDecl,
+        config: config,
         in: &printer,
       )
     }
