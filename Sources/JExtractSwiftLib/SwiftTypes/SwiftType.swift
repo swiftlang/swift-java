@@ -353,19 +353,21 @@ extension SwiftType {
       self = knownTypes.optionalSugar(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .memberType(let memberType):
-      // If the parent type isn't a known module, translate it.
-      // FIXME: Need a more reasonable notion of which names are module names
-      // for this to work. What can we query for this information?
+      // If the parent type is a known module name, perform a module-qualified
+      // lookup instead of treating the module as a parent type
       let parentType: SwiftType?
+      let moduleName: String?
       if let base = memberType.baseType.as(IdentifierTypeSyntax.self),
         lookupContext.symbolTable.isModuleName(base.name.trimmedDescription)
       {
         parentType = nil
+        moduleName = base.name.trimmedDescription
       } else {
         parentType = try SwiftType(memberType.baseType, lookupContext: lookupContext)
+        moduleName = nil
       }
 
-      // Translate the generic arguments.
+      // Translate the generic arguments
       let genericArgs = try memberType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
           switch argument.argument {
@@ -382,7 +384,8 @@ extension SwiftType {
         parent: parentType,
         name: memberType.name,
         genericArguments: genericArgs,
-        lookupContext: lookupContext
+        lookupContext: lookupContext,
+        module: moduleName
       )
 
     case .metatypeType(let metatypeType):
@@ -431,7 +434,8 @@ extension SwiftType {
     parent: SwiftType?,
     name: TokenSyntax,
     genericArguments: [SwiftType]?,
-    lookupContext: SwiftTypeLookupContext
+    lookupContext: SwiftTypeLookupContext,
+    module: String? = nil
   ) throws {
     // Look up the imported types by name to resolve it to a nominal type.
     let typeDecl: SwiftTypeDeclaration?
@@ -440,6 +444,8 @@ extension SwiftType {
         throw TypeTranslationError.unknown(originalType)
       }
       typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
+    } else if let module {
+      typeDecl = lookupContext.qualifiedLookup(name: name.text, inModule: module)
     } else {
       guard let ident = Identifier(name) else {
         throw TypeTranslationError.unknown(originalType)

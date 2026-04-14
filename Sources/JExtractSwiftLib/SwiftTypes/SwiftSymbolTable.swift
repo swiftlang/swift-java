@@ -153,9 +153,15 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
       }
     }
 
-    // FIXME: Implement module qualified name lookups. E.g. 'Swift.String'
-
     return nil
+  }
+
+  /// Look for a top-level nominal type in a specific module by name
+  package func lookupTopLevelNominalType(_ name: String, inModule moduleName: String) -> SwiftNominalTypeDeclaration? {
+    if moduleName == self.moduleName {
+      return parsedModule.lookupTopLevelNominalType(name)
+    }
+    return importedModules[moduleName]?.lookupTopLevelNominalType(name)
   }
 
   // Look for a nested type with the given name.
