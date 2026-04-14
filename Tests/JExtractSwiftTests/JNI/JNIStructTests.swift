@@ -62,8 +62,8 @@ struct JNIStructTests {
           @SuppressWarnings("unused")
           private static final boolean INITIALIZED_LIBS = initializeLibs();
           static boolean initializeLibs() {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            System.loadLibrary(LIB_NAME);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
             return true;
           }
         """,
@@ -225,7 +225,7 @@ struct JNIStructTests {
         """
       ],
       notExpectedChunks: [
-        "System.loadLibrary",
+        "loadLibraryWithFallbacks",
         "initializeLibs",
       ]
     )
