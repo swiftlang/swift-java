@@ -15,7 +15,8 @@
 import SwiftJavaJNICore
 
 extension JavaType {
-  var rawClassReference: String {
+
+  var fullyQualifiedName: String {
     switch self {
     case .class(let package, let name, _):
       if let package, !package.isEmpty {
