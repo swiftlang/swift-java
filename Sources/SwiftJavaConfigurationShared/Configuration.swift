@@ -77,6 +77,42 @@ public struct Configuration: Codable {
     asyncFuncMode ?? .default
   }
 
+  public var javaSourceLevel: JavaSourceLevel?
+  public var effectiveJavaSourceLevel: JavaSourceLevel {
+    javaSourceLevel ?? .default
+  }
+
+  /// Check whether the effective Java source level supports the given feature
+  public func supports(_ feature: JavaSourceFeature) -> Bool {
+    effectiveJavaSourceLevel >= feature.minimumJavaSourceLevel
+  }
+
+  /// Opening tag for a JavaDoc code snippet block.
+  ///
+  /// - JDK 18+: `{@snippet lang=<lang> :` (https://openjdk.org/jeps/413)
+  /// - JDK 17 and below: `<pre>{@code`
+  public func javadocCodeSnippetStart(lang: String) -> String {
+    // TODO: also handle ``` once we support /// style comments in JDK22+
+    if supports(.javadocSnippets) {
+      return "{@snippet lang=\(lang) :"
+    } else {
+      return "<pre>{@code"
+    }
+  }
+
+  /// Closing tag for a JavaDoc code snippet block.
+  ///
+  /// - JDK 18+: `}` (https://openjdk.org/jeps/413)
+  /// - JDK 17 and below: `}</pre>`
+  public var javadocCodeSnippetEnd: String {
+    // TODO: also handle ``` once we support /// style comments in JDK22+
+    if supports(.javadocSnippets) {
+      return "}"
+    } else {
+      return "}</pre>"
+    }
+  }
+
   public var enableJavaCallbacks: Bool?
   public var effectiveEnableJavaCallbacks: Bool {
     enableJavaCallbacks ?? false

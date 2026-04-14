@@ -520,4 +520,116 @@ struct SwiftDocumentationParsingTests {
       expectedChunks: expectedJavaChunks
     )
   }
+
+  @Test(
+    "JDK 17 fallback: <pre>{@code} instead of {@snippet}",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * <pre>{@code
+           * public func f()
+           * }</pre>
+           */
+          public static void f() {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * <pre>{@code
+           * public func f()
+           * }</pre>
+           */
+          public static void f() {
+          """
+        ]
+      ),
+    ]
+  )
+  func jdk17Fallback(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary
+      public func f() {}
+      """
+
+    var config = Configuration()
+    config.javaSourceLevel = .jdk17
+
+    try assertOutput(
+      input: text,
+      config: config,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
+    "JDK 22 uses {@snippet} tags",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
+          """
+        ]
+      ),
+    ]
+  )
+  func jdk22Snippets(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Simple summary
+      public func f() {}
+      """
+
+    var config = Configuration()
+    config.javaSourceLevel = .jdk22
+
+    try assertOutput(
+      input: text,
+      config: config,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
 }

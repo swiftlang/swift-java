@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
@@ -65,9 +66,9 @@ extension FFMSwift2JavaGenerator {
     printer.printBraceBlock(
       """
       /**
-       * {@snippet lang=c :
+       * \(config.javadocCodeSnippetStart(lang: "c"))
        * \(cFunc.description)
-       * }
+       * \(config.javadocCodeSnippetEnd)
        */
       private static class \(cFunc.name)
       """
@@ -398,6 +399,7 @@ extension FFMSwift2JavaGenerator {
     TranslatedDocumentation.printDocumentation(
       importedFunc: decl,
       translatedDecl: translated,
+      config: config,
       in: &printer,
     )
     printer.printBraceBlock(
