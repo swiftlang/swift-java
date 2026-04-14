@@ -74,7 +74,7 @@ func assertOutput(
       swiftOutputDirectory: "/fake",
       javaOutputDirectory: "/fake",
       javaClassLookupTable: javaClassLookupTable,
-      dependentJavaPackages: [:]
+      moduleJavaPackages: [:]
     )
 
     switch renderKind {
