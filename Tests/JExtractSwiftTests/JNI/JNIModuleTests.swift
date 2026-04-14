@@ -60,8 +60,8 @@ struct JNIModuleTests {
           static final java.lang.String LIB_NAME = "SwiftModule";
 
           static {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            System.loadLibrary(LIB_NAME);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
           }
         """
       ]
@@ -296,7 +296,7 @@ struct JNIModuleTests {
         """
       ],
       notExpectedChunks: [
-        "System.loadLibrary",
+        "loadLibraryWithFallbacks",
         "initializeLibs",
       ]
     )

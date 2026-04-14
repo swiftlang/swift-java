@@ -132,8 +132,8 @@ extension JNISwift2JavaGenerator {
           """
 
           static {
-            System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-            System.loadLibrary(LIB_NAME);
+            SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+            SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
           }
           """
         )
@@ -245,8 +245,8 @@ extension JNISwift2JavaGenerator {
           @SuppressWarnings("unused")
           private static final boolean INITIALIZED_LIBS = initializeLibs();
           static boolean initializeLibs() {
-              System.loadLibrary(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
-              System.loadLibrary(LIB_NAME);
+              SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_JAVA);
+              SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
               return true;
           }
           """
