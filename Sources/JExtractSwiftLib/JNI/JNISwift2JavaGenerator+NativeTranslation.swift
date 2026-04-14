@@ -1633,35 +1633,31 @@ extension JNISwift2JavaGenerator {
         // Global ref all indirect returns
         for outParameter in nativeFunctionSignature.result.outParameters {
           printer.print(
-            "let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
+            "nonisolated(unsafe) let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
           )
           globalRefs.append(outParameter.name)
         }
 
         // We also need to global ref any objects passed in
         for parameter in nativeFunctionSignature.parameters.flatMap(\.parameters) where !parameter.type.isPrimitive {
-          printer.print("let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
+          printer.print("nonisolated(unsafe) let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
           globalRefs.append(parameter.name)
         }
 
         printer.print(
           """
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           """
         )
 
-        printer.print("struct _SwiftJavaUncheckedSendableBox<T>: @unchecked Sendable { let value: T }")
-        for globalRef in globalRefs {
-          printer.print("let \(globalRef)_sendable$ = _SwiftJavaUncheckedSendableBox(value: \(globalRef))")
-        }
         if let selfParameter = nativeFunctionSignature.selfParameter {
           for parameter in selfParameter.parameters {
-            printer.print("let \(parameter.name)$sendable$ = _SwiftJavaUncheckedSendableBox(value: \(parameter.name)$)")
+            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
           }
         }
         if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
           for parameter in selfTypeParameter.parameters {
-            printer.print("let \(parameter.name)$sendable$ = _SwiftJavaUncheckedSendableBox(value: \(parameter.name)$)")
+            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
           }
         }
 
@@ -1707,17 +1703,14 @@ extension JNISwift2JavaGenerator {
         }
 
         func printTaskBody(printer: inout CodePrinter) {
-          for globalRef in globalRefs {
-            printer.print("let \(globalRef) = \(globalRef)_sendable$.value")
-          }
           if let selfParameter = nativeFunctionSignature.selfParameter {
             for parameter in selfParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)$sendable$.value")
+              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
             }
           }
           if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
             for parameter in selfTypeParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)$sendable$.value")
+              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
             }
           }
           printer.printBraceBlock("defer") { printer in
