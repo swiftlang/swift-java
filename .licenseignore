@@ -52,3 +52,7 @@ Samples/JavaDependencySampleApp/gradle
 Sources/_Subprocess/**
 Sources/_SubprocessCShims/**
 Samples/gradle
+Sources/SwiftJavaRuntimeSupport/Foundation/*
+Sources/SwiftRuntimeFunctions/Foundation/*
+SwiftKitCore/src/main/java/org/swift/swiftkit/core/foundation/*
+SwiftKitFFM/src/main/java/org/swift/swiftkit/ffm/foundation/*

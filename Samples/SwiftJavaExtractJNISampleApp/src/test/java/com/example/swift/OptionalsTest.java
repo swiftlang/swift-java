@@ -14,9 +14,10 @@
 
 package com.example.swift;
 
-import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
+import org.swift.swiftkit.core.foundation.Data;
+import org.swift.swiftkit.core.foundation.Date;
 
 import java.time.Instant;
 import java.util.Optional;

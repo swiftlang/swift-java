@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
+import org.swift.swiftkit.core.foundation.Date;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

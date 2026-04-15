@@ -17,14 +17,14 @@ public final class SwiftRuntimeFunctions {
   private SwiftRuntimeFunctions() {
     // Should not be called directly
   }
-  
+
   // Static enum to force initialization
   private static enum Initializer {
     FORCE; // Refer to this to force outer Class initialization (and static{} blocks to trigger)
   }
   static final String LIB_NAME = "SwiftRuntimeFunctions";
   static final Arena LIBRARY_ARENA = Arena.ofAuto();
-  static MemorySegment findOrThrow(String symbol) {
+  public static MemorySegment findOrThrow(String symbol) {
       return SYMBOL_LOOKUP.find(symbol)
               .orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: %s".formatted(symbol)));
   }
@@ -49,7 +49,7 @@ public final class SwiftRuntimeFunctions {
           SwiftLibraries.loadLibraryWithFallbacks(SwiftLibraries.LIB_NAME_SWIFT_RUNTIME_FUNCTIONS);
           SwiftLibraries.loadLibraryWithFallbacks(LIB_NAME);
       }
-  
+
       if (PlatformUtils.isMacOS()) {
           return SymbolLookup.libraryLookup(System.mapLibraryName(LIB_NAME), LIBRARY_ARENA)
                   .or(SymbolLookup.loaderLookup())

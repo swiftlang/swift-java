@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
+import org.swift.swiftkit.ffm.foundation.Data;
 
 import java.lang.foreign.ValueLayout;
 
@@ -134,7 +135,7 @@ public class DataImportTest {
             byte[] original = new byte[0];
             var data = Data.fromByteArray(original, arena);
             var buffer = data.toByteBuffer(arena);
-            
+
             assertEquals(0, buffer.capacity());
         }
     }

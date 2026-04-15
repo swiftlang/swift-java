@@ -22,24 +22,23 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-JAVA_OUTPUT="${REPO_ROOT}/SwiftKitFFM/src/main/java"
-PACKAGE_GENERATED="org.swift.swiftkit.ffm.generated"
-PACKAGE_FOUNDATION="org.swift.swiftkit.ffm.foundation"
+JAVA_OUTPUT="${REPO_ROOT}/SwiftKitCore/src/main/java"
+JAVA_PACKAGE="org.swift.swiftkit.core.foundation"
 
-# Declare types to generate: SWIFT_MODULE SINGLE_TYPE JAVA_PACKAGE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
+# Declare types to generate: SWIFT_MODULE SINGLE_TYPE INPUT_SWIFT_DIR OUTPUT_SWIFT_DIR
 TYPES=(
-  "SwiftRuntimeFunctions  SwiftJavaError  ${PACKAGE_GENERATED}  Sources/SwiftRuntimeFunctions   Sources/SwiftRuntimeFunctions/generated"
-  "SwiftRuntimeFunctions  Data  ${PACKAGE_FOUNDATION}  Sources/FakeFoundation  Sources/SwiftRuntimeFunctions/foundation"
-  "SwiftRuntimeFunctions  DataProtocol  ${PACKAGE_FOUNDATION}  Sources/FakeFoundation  Sources/SwiftRuntimeFunctions/foundation"
+  "SwiftJava  Data  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
+  "SwiftJava  DataProtocol  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
+  "SwiftJava  Date  Sources/FakeFoundation  Sources/SwiftJavaRuntimeSupport/foundation"
 )
 
 for entry in "${TYPES[@]}"; do
-  read -r MODULE SINGLE_TYPE JAVA_PACKAGE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
+  read -r MODULE SINGLE_TYPE INPUT_SWIFT OUTPUT_SWIFT <<< "$entry"
 
-  echo "==> Generating ${SINGLE_TYPE} (module: ${MODULE})..."
+  echo "==> Generating ${INPUT_SWIFT} ${SINGLE_TYPE}..."
 
   xcrun swift run swift-java jextract \
-    --mode ffm \
+    --mode jni \
     --single-type "$SINGLE_TYPE" \
     --swift-module "$MODULE" \
     --input-swift "${REPO_ROOT}/${INPUT_SWIFT}" \
@@ -48,7 +47,7 @@ for entry in "${TYPES[@]}"; do
     --java-package "$JAVA_PACKAGE"
 
   echo "  Swift thunks: ${OUTPUT_SWIFT}/"
-  echo "  Java output:  SwiftKitFFM/src/main/java/$(echo "$JAVA_PACKAGE" | tr '.' '/')/"
+  echo "  Java output:  SwiftKitCore/src/main/java/$(echo "$JAVA_PACKAGE" | tr '.' '/')/"
 done
 
 echo "==> Done."

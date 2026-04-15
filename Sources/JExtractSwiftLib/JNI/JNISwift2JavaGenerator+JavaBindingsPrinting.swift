@@ -391,17 +391,15 @@ extension JNISwift2JavaGenerator {
 
   /// Prints helpers for specific types like `Foundation.Date`
   private func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    guard let knownType = decl.swiftNominal.knownTypeKind else { return }
-
-    switch knownType {
-    case .foundationDate, .essentialsDate:
-      printFoundationDateHelpers(&printer, decl)
-
-    case .foundationData, .essentialsData:
-      printFoundationDataHelpers(&printer, decl)
-
-    default:
-      break
+    if decl.swiftNominal.moduleName == "SwiftJava" {
+      switch decl.swiftNominal.qualifiedName {
+      case "Date":
+        printFoundationDateHelpers(&printer, decl)
+      case "Data":
+        printFoundationDataHelpers(&printer, decl)
+      default:
+        break
+      }
     }
   }
 
@@ -669,7 +667,7 @@ extension JNISwift2JavaGenerator {
       }
       generics.append((name, extends))
     }
-    .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
+    .map { "\($0) extends \($1.compactMap(\.description).joined(separator: " & "))" }
     .joined(separator: ", ")
 
     if !generics.isEmpty {

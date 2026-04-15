@@ -127,39 +127,6 @@ extension Swift2JavaTranslator {
 
     // Apply any specializations registered after their target types were visited
     visitor.applyPendingSpecializations()
-
-    self.visitFoundationDeclsIfNeeded(with: visitor)
-  }
-
-  private func visitFoundationDeclsIfNeeded(with visitor: Swift2JavaVisitor) {
-    // If any API uses 'Foundation.Data' or 'FoundationEssentials.Data',
-    // import 'Data' as if it's declared in this module.
-    if let dataDecl = self.symbolTable[.foundationData] ?? self.symbolTable[.essentialsData] {
-      let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
-      if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
-        visitor.visit(
-          nominalDecl: dataDecl.syntax!.asNominal!,
-          in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift",
-        )
-        visitor.visit(
-          nominalDecl: dataProtocolDecl.syntax!.asNominal!,
-          in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift",
-        )
-      }
-    }
-
-    // Foundation.Date
-    if let dateDecl = self.symbolTable[.foundationDate] ?? self.symbolTable[.essentialsDate] {
-      if self.isUsing(where: { $0 == dateDecl }) {
-        visitor.visit(
-          nominalDecl: dateDecl.syntax!.asNominal!,
-          in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift",
-        )
-      }
-    }
   }
 
   package func prepareForTranslation() {

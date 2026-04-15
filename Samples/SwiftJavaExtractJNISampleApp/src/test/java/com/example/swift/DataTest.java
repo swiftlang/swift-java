@@ -16,6 +16,7 @@ package com.example.swift;
 
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
+import org.swift.swiftkit.core.foundation.Data;
 
 import static org.junit.jupiter.api.Assertions.*;
 

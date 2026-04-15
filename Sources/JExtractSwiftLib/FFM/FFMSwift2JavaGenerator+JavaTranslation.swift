@@ -464,7 +464,15 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            break
+            return TranslatedParameter(
+              javaParameters: [
+                JavaParameter(
+                  name: parameterName,
+                  type: .swiftkitFFMFoundationData
+                )
+              ],
+              conversion: .swiftValueSelfSegment(.placeholder)
+            )
 
           case .swiftJavaError:
             // SwiftJavaError is a class — treat as arbitrary nominal type below
@@ -635,10 +643,26 @@ extension FFMSwift2JavaGenerator {
       case .nominal(let nominal):
         if let knownType = nominal.nominalTypeDecl.knownTypeKind {
           switch knownType {
-          case .foundationData, .foundationDataProtocol:
-            break
-          case .essentialsData, .essentialsDataProtocol:
-            break
+          case .foundationData, .essentialsData:
+            return TranslatedParameter(
+              javaParameters: [
+                JavaParameter(
+                  name: parameterName,
+                  type: .optional(.swiftkitFFMFoundationData)
+                )
+              ],
+              conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
+            )
+          case .foundationDataProtocol, .essentialsDataProtocol:
+            return TranslatedParameter(
+              javaParameters: [
+                JavaParameter(
+                  name: parameterName,
+                  type: .optional(.swiftkitFFMFoundationDataProtocol)
+                )
+              ],
+              conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
+            )
           default:
             throw JavaTranslationError.unhandledType(known: .optional(swiftType))
           }
@@ -647,7 +671,7 @@ extension FFMSwift2JavaGenerator {
         let translatedTy = try self.translate(swiftType: swiftType)
         return TranslatedParameter(
           javaParameters: [
-            JavaParameter(name: parameterName, type: JavaType(className: "Optional<\(translatedTy.description)>"))
+            JavaParameter(name: parameterName, type: .optional(translatedTy))
           ],
           conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
         )
@@ -750,7 +774,15 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            break // Implemented as wrapper
+            let javaType: JavaType = .swiftkitFFMFoundationData
+            return TranslatedResult(
+              javaResultType: javaType,
+              annotations: resultAnnotations,
+              outParameters: [
+                JavaParameter(name: "", type: javaType)
+              ],
+              conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType)
+            )
 
           case .unsafePointer, .unsafeMutablePointer:
             // FIXME: Implement
