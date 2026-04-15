@@ -1917,7 +1917,7 @@ extension JNISwift2JavaGenerator {
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        guard case .class(_, let className, let typeParameters) = javaType else {
+        guard case .class(_, _, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
         }
         let genericClause =
