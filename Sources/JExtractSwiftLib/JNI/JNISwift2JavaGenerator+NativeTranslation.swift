@@ -1633,22 +1633,33 @@ extension JNISwift2JavaGenerator {
         // Global ref all indirect returns
         for outParameter in nativeFunctionSignature.result.outParameters {
           printer.print(
-            "let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
+            "nonisolated(unsafe) let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
           )
           globalRefs.append(outParameter.name)
         }
 
         // We also need to global ref any objects passed in
         for parameter in nativeFunctionSignature.parameters.flatMap(\.parameters) where !parameter.type.isPrimitive {
-          printer.print("let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
+          printer.print("nonisolated(unsafe) let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
           globalRefs.append(parameter.name)
         }
 
         printer.print(
           """
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           """
         )
+
+        if let selfParameter = nativeFunctionSignature.selfParameter {
+          for parameter in selfParameter.parameters {
+            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
+          }
+        }
+        if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
+          for parameter in selfTypeParameter.parameters {
+            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
+          }
+        }
 
         func printDo(printer: inout CodePrinter) {
           // Make sure try/await are printed when necessary and avoid duplicate, or wrong-order, keywords (which would cause warnings)
@@ -1692,6 +1703,16 @@ extension JNISwift2JavaGenerator {
         }
 
         func printTaskBody(printer: inout CodePrinter) {
+          if let selfParameter = nativeFunctionSignature.selfParameter {
+            for parameter in selfParameter.parameters {
+              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
+            }
+          }
+          if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
+            for parameter in selfTypeParameter.parameters {
+              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
+            }
+          }
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.
             printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
@@ -1722,8 +1743,8 @@ extension JNISwift2JavaGenerator {
         printer.printHashIfBlock("swift(>=6.2)") { printer in
           printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
             printer.printBraceBlock("task = Task.immediate") { printer in
-              // Immediate runs on the caller thread, so we don't need to attach the environment again.
-              printer.print("var environment = environment!") // this is to ensure we always use the same environment name, even though we are rebinding it.
+              // Even immediate tasks are a sending closure in Swift 6.2+, so reattach instead of capturing the caller's environment directly.
+              printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
               printTaskBody(printer: &printer)
             }
           }

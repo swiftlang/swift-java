@@ -81,7 +81,7 @@ struct SwiftSymbolTableSuite {
           public struct MyValue {}
         }
 
-        public func fullyQualifiedType() -> MyModule.MyModule.MyValue 
+        public func fullyQualifiedType() -> MyModule.MyModule.MyValue
         """,
       mode,
       .java,
@@ -89,6 +89,96 @@ struct SwiftSymbolTableSuite {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "public static MyModule.MyValue fullyQualifiedType("
+      ],
+    )
+  }
+
+  @Test func moduleScopedLookup() throws {
+    let sourceFile: SourceFileSyntax = """
+      public struct MyClass {}
+      """
+    let symbolTable = SwiftSymbolTable.setup(
+      moduleName: "MyModule",
+      [
+        .init(syntax: sourceFile, path: "Fake.swift")
+      ],
+      config: nil,
+      log: Logger(label: "swift-java", logLevel: .critical),
+    )
+
+    // Lookup in self-module by qualified name
+    let myClass = symbolTable.lookupTopLevelNominalType("MyClass", inModule: "MyModule")
+    #expect(myClass != nil)
+    #expect(myClass?.qualifiedName == "MyClass")
+
+    // Lookup in imported module (Swift)
+    let swiftInt = symbolTable.lookupTopLevelNominalType("Int", inModule: "Swift")
+    #expect(swiftInt != nil)
+    #expect(swiftInt?.qualifiedName == "Int")
+
+    // Lookup in unknown module returns nil
+    let unknown = symbolTable.lookupTopLevelNominalType("Foo", inModule: "NoSuchModule")
+    #expect(unknown == nil)
+  }
+
+  @Test(arguments: [JExtractGenerationMode.jni, .ffm])
+  func resolveQualifiedTypesInFunctionSignatures(mode: JExtractGenerationMode) throws {
+    try assertOutput(
+      input: """
+        public struct MySwiftClass {
+          public init() {}
+        }
+
+        public func factory(len: Swift.Int, cap: Swift.Int) -> MyModule.MySwiftClass
+        """,
+      mode,
+      .java,
+      swiftModuleName: "MyModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public static MySwiftClass factory("
+      ],
+    )
+  }
+
+  @Test(arguments: [JExtractGenerationMode.jni, .ffm])
+  func resolveQualifiedNestedTypesInFunctionSignatures(mode: JExtractGenerationMode) throws {
+    try assertOutput(
+      input: """
+        public struct MySwiftClass {
+          public struct Nested {
+            public init() {}
+          }
+        }
+
+        public func factory(len: Swift.Int, cap: Swift.Int) -> MyModule.MySwiftClass.Nested
+        """,
+      mode,
+      .java,
+      swiftModuleName: "MyModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public static MySwiftClass.Nested factory("
+      ],
+    )
+  }
+
+  @Test(arguments: [JExtractGenerationMode.jni, .ffm])
+  func resolveQualifiedTypesShadowingModule(mode: JExtractGenerationMode) throws {
+    try assertOutput(
+      input: """
+        public struct MyModule { // shadowing module MyModule
+          public init() {}
+        }
+
+        public func factory(len: Swift.Int, cap: Swift.Int) -> MyModule
+        """,
+      mode,
+      .java,
+      swiftModuleName: "MyModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public static MyModule factory("
       ],
     )
   }

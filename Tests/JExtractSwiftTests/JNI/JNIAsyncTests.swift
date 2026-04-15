@@ -61,12 +61,12 @@ struct JNIAsyncTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
               task = Task.immediate {
-                var environment = environment!
+                var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
@@ -137,12 +137,12 @@ struct JNIAsyncTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
               task = Task.immediate {
-                var environment = environment!
+                var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
@@ -227,12 +227,12 @@ struct JNIAsyncTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_future: jobject?) {
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
             task = Task.immediate {
-              var environment = environment!
+              var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                 deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
@@ -320,12 +320,12 @@ struct JNIAsyncTests {
           guard let c$ else {
             fatalError("c memory address was null in call to \\(#function)!")
           }
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
               task = Task.immediate {
-                var environment = environment!
+                var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
@@ -403,8 +403,8 @@ struct JNIAsyncTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2")
         public func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_future: jobject?) {
-          let s = environment.interface.NewGlobalRef(environment, s)
-          let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let s = environment.interface.NewGlobalRef(environment, s)
+          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
           ...
           defer {
             let deferEnvironment = try! JavaVirtualMachine.shared().environment()

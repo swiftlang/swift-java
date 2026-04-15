@@ -13,12 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftJavaConfigurationShared
 import SwiftSyntax
 
 enum TranslatedDocumentation {
   static func printDocumentation(
     importedFunc: ImportedFunc,
     translatedDecl: FFMSwift2JavaGenerator.TranslatedFunctionDecl,
+    config: Configuration,
     in printer: inout CodePrinter
   ) {
     var documentation = SwiftDocumentationParser.parse(importedFunc.swiftDecl)
@@ -32,12 +34,13 @@ enum TranslatedDocumentation {
       )
     }
 
-    printDocumentation(documentation, syntax: importedFunc.swiftDecl, in: &printer)
+    printDocumentation(documentation, syntax: importedFunc.swiftDecl, config: config, in: &printer)
   }
 
   static func printDocumentation(
     importedFunc: ImportedFunc,
     translatedDecl: JNISwift2JavaGenerator.TranslatedFunctionDecl,
+    config: Configuration,
     in printer: inout CodePrinter
   ) {
     var documentation = SwiftDocumentationParser.parse(importedFunc.swiftDecl)
@@ -51,12 +54,13 @@ enum TranslatedDocumentation {
       )
     }
 
-    printDocumentation(documentation, syntax: importedFunc.swiftDecl, in: &printer)
+    printDocumentation(documentation, syntax: importedFunc.swiftDecl, config: config, in: &printer)
   }
 
   private static func printDocumentation(
     _ parsedDocumentation: SwiftDocumentation?,
     syntax: some DeclSyntaxProtocol,
+    config: Configuration,
     in printer: inout CodePrinter
   ) {
     var groups = [String]()
@@ -71,12 +75,13 @@ enum TranslatedDocumentation {
       }
     }
 
+    let signatureString = syntax.signatureString
     groups.append(
       """
       \(parsedDocumentation != nil ? "<p>" : "")Downcall to Swift:
-      {@snippet lang=swift :
-      \(syntax.signatureString)
-      }
+      \(config.javadocCodeSnippetStart(lang: "swift"))
+      \(signatureString)
+      \(config.javadocCodeSnippetEnd)
       """
     )
 
