@@ -15,8 +15,8 @@
 @_spi(Experimental) import SwiftLexicalLookup
 import SwiftSyntax
 
-/// Unqualified type lookup manager.
-/// All unqualified lookup should be done via this instance. This caches the
+/// Type lookup manager.
+/// All type lookups should be done via this instance. This caches the
 /// association of `Syntax.ID` to `SwiftTypeDeclaration`, and guarantees that
 /// there's only one `SwiftTypeDeclaration` per declaration `Syntax`.
 class SwiftTypeLookupContext {
@@ -26,6 +26,15 @@ class SwiftTypeLookupContext {
 
   init(symbolTable: SwiftSymbolTable) {
     self.symbolTable = symbolTable
+  }
+
+  /// Perform module-qualified type lookup in a specific module
+  ///
+  /// - Parameters:
+  ///   - name: name to lookup
+  ///   - moduleName: the module to look in
+  func moduleQualifiedLookup(name: String, in moduleName: String) -> SwiftTypeDeclaration? {
+    symbolTable.lookupTopLevelNominalType(name, inModule: moduleName)
   }
 
   /// Perform unqualified type lookup.

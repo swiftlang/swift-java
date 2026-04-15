@@ -103,7 +103,7 @@ extension Swift2JavaTranslator {
   }
 
   package func add(filePath: String, text: String) {
-    log.info("Adding: \(filePath)")
+    log.debug("Adding: \(filePath)")
     let sourceFileSyntax = Parser.parse(source: text)
     self.inputs.append(SwiftJavaInputFile(syntax: sourceFileSyntax, path: filePath))
   }
