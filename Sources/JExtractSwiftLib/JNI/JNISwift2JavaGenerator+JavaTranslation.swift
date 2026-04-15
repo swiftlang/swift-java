@@ -1515,7 +1515,7 @@ extension JNISwift2JavaGenerator {
               ],
             ),
             function: "toArray",
-            arguments: [.constant("\(javaType.fullyQualifiedName)[]::new")]
+            arguments: [.constant("\(javaType.fullyQualifiedClassName!)[]::new")]
           )
         )
 
@@ -1926,7 +1926,7 @@ extension JNISwift2JavaGenerator {
           } else {
             ""
           }
-        return "\(javaType.fullyQualifiedName).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        return "\(javaType.fullyQualifiedClassName!).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)

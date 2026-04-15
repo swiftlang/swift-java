@@ -16,19 +16,6 @@ import SwiftJavaJNICore
 
 extension JavaType {
 
-  var fullyQualifiedName: String {
-    switch self {
-    case .class(let package, let name, _):
-      if let package, !package.isEmpty {
-        return "\(package).\(name)"
-      } else {
-        return name
-      }
-    default:
-      return description
-    }
-  }
-
   var jniTypeSignature: String {
     switch self {
     case .boolean: return "Z"
