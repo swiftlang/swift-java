@@ -367,7 +367,7 @@ extension SwiftType {
         moduleName = nil
       }
 
-      // Translate the generic arguments
+      // Translate the generic arguments.
       let genericArgs = try memberType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
           switch argument.argument {
@@ -445,7 +445,7 @@ extension SwiftType {
       }
       typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
     } else if let module {
-      typeDecl = lookupContext.qualifiedLookup(name: name.text, inModule: module)
+      typeDecl = lookupContext.moduleQualifiedLookup(name: name.text, in: module)
     } else {
       guard let ident = Identifier(name) else {
         throw TypeTranslationError.unknown(originalType)

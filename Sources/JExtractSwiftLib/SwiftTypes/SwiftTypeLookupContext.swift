@@ -28,12 +28,12 @@ class SwiftTypeLookupContext {
     self.symbolTable = symbolTable
   }
 
-  /// Perform qualified type lookup in a specific module
+  /// Perform module-qualified type lookup in a specific module
   ///
   /// - Parameters:
   ///   - name: name to lookup
   ///   - moduleName: the module to look in
-  func qualifiedLookup(name: String, inModule moduleName: String) -> SwiftTypeDeclaration? {
+  func moduleQualifiedLookup(name: String, in moduleName: String) -> SwiftTypeDeclaration? {
     symbolTable.lookupTopLevelNominalType(name, inModule: moduleName)
   }
 
