@@ -20,6 +20,9 @@ import SwiftJavaJNICore
 /// the fully qualified canoical names.
 package typealias JavaClassLookupTable = [String: String]
 
+/// A table where keys are Swift module names and the values are Java package names.
+package typealias ModuleJavaPackages = [String: String]
+
 package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   let logger: Logger
@@ -32,6 +35,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   let lookupContext: SwiftTypeLookupContext
 
   let javaClassLookupTable: JavaClassLookupTable
+  let moduleJavaPackages: ModuleJavaPackages
 
   var javaPackagePath: String {
     javaPackage.replacingOccurrences(of: ".", with: "/")
@@ -75,6 +79,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     swiftOutputDirectory: String,
     javaOutputDirectory: String,
     javaClassLookupTable: JavaClassLookupTable,
+    moduleJavaPackages: ModuleJavaPackages,
   ) {
     self.config = config
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
@@ -84,6 +89,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.swiftOutputDirectory = swiftOutputDirectory
     self.javaOutputDirectory = javaOutputDirectory
     self.javaClassLookupTable = javaClassLookupTable
+    self.moduleJavaPackages = moduleJavaPackages
     self.lookupContext = translator.lookupContext
 
     // If we are forced to write empty files, construct the expected outputs.

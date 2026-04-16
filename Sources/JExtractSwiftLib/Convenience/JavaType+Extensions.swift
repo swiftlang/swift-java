@@ -15,6 +15,7 @@
 import SwiftJavaJNICore
 
 extension JavaType {
+
   var jniTypeSignature: String {
     switch self {
     case .boolean: return "Z"

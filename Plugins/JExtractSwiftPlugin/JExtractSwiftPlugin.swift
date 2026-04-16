@@ -20,6 +20,11 @@ private let SwiftJavaConfigFileName = "swift-java.config"
 @main
 struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
+  struct DependentConfigFile {
+    let swiftModuleName: String
+    let configURL: URL
+  }
+
   var pluginName: String = "swift-java"
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
 
@@ -78,11 +83,10 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       arguments += ["--static-build-config", resolvedURL.absoluteURL.path(percentEncoded: false)]
     }
 
-    let dependentConfigFilesArguments = dependentConfigFiles.flatMap { moduleAndConfigFile in
-      let (moduleName, configFile) = moduleAndConfigFile
-      return [
+    let dependentConfigFilesArguments = dependentConfigFiles.flatMap { dependentConfigFile in
+      [
         "--depends-on",
-        "\(moduleName)=\(configFile.path(percentEncoded: false))",
+        "\(dependentConfigFile.swiftModuleName)=\(dependentConfigFile.configURL.path(percentEncoded: false))",
       ]
     }
     arguments += dependentConfigFilesArguments
@@ -270,8 +274,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   /// Find the manifest files from other swift-java executions in any targets
   /// this target depends on.
-  func searchForDependentConfigFiles(in target: any Target) -> [(String, URL)] {
-    var dependentConfigFiles = [(String, URL)]()
+  func searchForDependentConfigFiles(in target: any Target) -> [DependentConfigFile] {
+    var dependentConfigFiles: [DependentConfigFile] = []
 
     func _searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
@@ -286,7 +290,9 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
-        dependentConfigFiles.append((target.name, dependencyConfigURL))
+        dependentConfigFiles.append(
+          DependentConfigFile(swiftModuleName: target.name, configURL: dependencyConfigURL)
+        )
       }
     }
 

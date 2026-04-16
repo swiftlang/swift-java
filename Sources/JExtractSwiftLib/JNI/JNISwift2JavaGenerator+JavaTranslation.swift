@@ -23,6 +23,7 @@ extension JNISwift2JavaGenerator {
       swiftModuleName: swiftModuleName,
       javaPackage: self.javaPackage,
       javaClassLookupTable: self.javaClassLookupTable,
+      moduleJavaPackages: self.moduleJavaPackages,
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
@@ -64,6 +65,7 @@ extension JNISwift2JavaGenerator {
         swiftModuleName: swiftModuleName,
         javaPackage: self.javaPackage,
         javaClassLookupTable: self.javaClassLookupTable,
+        moduleJavaPackages: self.moduleJavaPackages,
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
@@ -85,6 +87,7 @@ extension JNISwift2JavaGenerator {
     let swiftModuleName: String
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
+    let moduleJavaPackages: ModuleJavaPackages
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
@@ -546,7 +549,7 @@ extension JNISwift2JavaGenerator {
         }
 
         let javaType = JavaType.class(
-          package: nil,
+          package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalTypeName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
             try translateGenericTypeParameter(
@@ -982,7 +985,7 @@ extension JNISwift2JavaGenerator {
         }
 
         let javaType = JavaType.class(
-          package: nil,
+          package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalType.nominalTypeDecl.qualifiedName,
           typeParameters: try nominalType.genericArguments?.map { swiftType in
             try translateGenericTypeParameter(
@@ -1131,7 +1134,7 @@ extension JNISwift2JavaGenerator {
           } ?? []
 
         return .class(
-          package: nil,
+          package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalTypeName,
           typeParameters: typeParameters,
         )
@@ -1512,7 +1515,7 @@ extension JNISwift2JavaGenerator {
               ],
             ),
             function: "toArray",
-            arguments: [.constant("\(javaType.className!)[]::new")]
+            arguments: [.constant("\(javaType.fullyQualifiedClassName!)[]::new")]
           )
         )
 
@@ -1914,7 +1917,7 @@ extension JNISwift2JavaGenerator {
 
       case .wrapMemoryAddressUnsafe(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
-        guard case .class(_, let className, let typeParameters) = javaType else {
+        guard case .class(_, _, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
         }
         let genericClause =
@@ -1923,7 +1926,7 @@ extension JNISwift2JavaGenerator {
           } else {
             ""
           }
-        return "\(className).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        return "\(javaType.fullyQualifiedClassName!).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
