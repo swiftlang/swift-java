@@ -231,7 +231,7 @@ extension SwiftJavaBuildToolPlugin {
 
   func argumentsDependedOnConfigs(_ dependentConfigFiles: [DependentConfigFile]) -> [String] {
     dependentConfigFiles.flatMap { dependentConfigFile in
-      return [
+      [
         "--depends-on",
         "\(dependentConfigFile.swiftModuleName)=\(dependentConfigFile.configURL.path(percentEncoded: false))",
       ]
