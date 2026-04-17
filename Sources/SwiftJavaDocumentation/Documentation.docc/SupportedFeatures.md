@@ -208,7 +208,7 @@ You can then instantiate a case of `Vehicle` by using one of the static methods:
 ```java
 try (var arena = SwiftArena.ofConfined()) {
     Vehicle vehicle = Vehicle.car("BMW", arena);
-    Optional<Vehicle.Car> car = vehicle.getAsCar();
+    Optional<Vehicle.Case.Car> car = vehicle.getAsCar();
     assertEquals("BMW", car.orElseThrow().arg0());
 }
 ```
@@ -217,10 +217,10 @@ As you can see above, to access the associated values of a case you can call one
 ```java
 try (var arena = SwiftArena.ofConfined()) {
     Vehicle vehicle = Vehicle.bycicle("My Brand", arena);
-    Optional<Vehicle.Car> car = vehicle.getAsCar();
+    Optional<Vehicle.Case.Car> car = vehicle.getAsCar();
     assertFalse(car.isPresent());
     
-    Optional<Vehicle.Bicycle> bicycle = vehicle.getAsBicycle();
+    Optional<Vehicle.Case.Bicycle> bicycle = vehicle.getAsBicycle();
     assertEquals("My Brand", bicycle.orElseThrow().maker());
 }
 ```
@@ -246,10 +246,10 @@ If you are running Java 21+ you can use [pattern matching for switch](https://op
 ```java
 Vehicle vehicle = ...;
 switch (vehicle.getCase()) {
-    case Vehicle.Bicycle b:
+    case Vehicle.Case.Bicycle b:
         System.out.println("Bicycle maker: " + b.maker());
         break;
-    case Vehicle.Car c:
+    case Vehicle.Case.Car c:
         System.out.println("Car: " + c.arg0());
         break;
 }
@@ -258,7 +258,7 @@ or even, destructuring the records in the switch statement's pattern match direc
 ```java
 Vehicle vehicle = ...;
 switch (vehicle.getCase()) {
-    case Vehicle.Car(var name, var unused):
+    case Vehicle.Case.Car(var name, var unused):
         System.out.println("Car: " + name);
         break;
     default:
@@ -270,9 +270,9 @@ For Java 16+ you can use [pattern matching for instanceof](https://openjdk.org/j
 ```java
 Vehicle vehicle = ...;
 Vehicle.Case case = vehicle.getCase();
-if (case instanceof Vehicle.Bicycle b) {
+if (case instanceof Vehicle.Case.Bicycle b) {
     System.out.println("Bicycle maker: " + b.maker());
-} else if(case instanceof Vehicle.Car c) {
+} else if(case instanceof Vehicle.Case.Car c) {
     System.out.println("Car: " + c.arg0());
 }
 ```
@@ -280,11 +280,11 @@ For any previous Java versions you can resort to casting the `Case` to the expec
 ```java
 Vehicle vehicle = ...;
 Vehicle.Case case = vehicle.getCase();
-if (case instanceof Vehicle.Bicycle) {
-    Vehicle.Bicycle b = (Vehicle.Bicycle) case;
+if (case instanceof Vehicle.Case.Bicycle) {
+    Vehicle.Bicycle b = (Vehicle.Case.Bicycle) case;
     System.out.println("Bicycle maker: " + b.maker());
-} else if(case instanceof Vehicle.Car) {
-    Vehicle.Car c = (Vehicle.Car) case;
+} else if(case instanceof Vehicle.Case.Car) {
+    Vehicle.Car c = (Vehicle.Case.Car) case;
     System.out.println("Car: " + c.arg0());
 }
 ```

@@ -21,3 +21,13 @@ public enum EnumWithBacktick {
   case `let`
   case `default`
 }
+
+public enum EnumWithCaseNameValue {
+  case success(Success)
+  public struct Success {
+    public init(message: String) {
+      self.message = message
+    }
+    public var message: String
+  }
+}

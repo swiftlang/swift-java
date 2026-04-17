@@ -497,7 +497,30 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    printer.print("public sealed interface Case {}")
+    printer.printBraceBlock("public sealed interface Case") { printer in
+      for enumCase in decl.cases {
+        guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+          continue
+        }
+
+        let members = translatedCase.translatedValues.map {
+          $0.parameter.renderParameter()
+        }
+        let caseName = enumCase.name.firstCharacterUppercased
+
+        // Print record
+        printer.printBraceBlock("record \(caseName)(\(members.joined(separator: ", "))) implements Case") {
+          printer in
+          let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).map {
+            value,
+            conversion in
+            "\(conversion.native.javaType) \(value.parameter.name)"
+          }
+
+          printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
+        }
+      }
+    }
     printer.println()
 
     let requiresSwiftArena = decl.cases.compactMap {
@@ -537,24 +560,6 @@ extension JNISwift2JavaGenerator {
     for enumCase in decl.cases {
       guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
         return
-      }
-
-      let members = translatedCase.translatedValues.map {
-        $0.parameter.renderParameter()
-      }
-
-      let caseName = enumCase.name.firstCharacterUppercased
-
-      // Print record
-      printer.printBraceBlock("public record \(caseName)(\(members.joined(separator: ", "))) implements Case") {
-        printer in
-        let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).map {
-          value,
-          conversion in
-          "\(conversion.native.javaType) \(value.parameter.name)"
-        }
-
-        printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
       }
 
       self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, skipMethodBody: false)

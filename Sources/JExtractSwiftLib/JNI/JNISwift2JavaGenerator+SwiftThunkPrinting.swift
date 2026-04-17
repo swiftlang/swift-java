@@ -409,7 +409,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-    let nativeParametersClassName = "\(enumCase.enumName)$\(enumCase.name)$_NativeParameters"
+    let nativeParametersClassName = "\(enumCase.enumName)$Case$\(enumCase.name)$_NativeParameters"
     let methodSignature = MethodSignature(
       resultType: .void,
       parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
