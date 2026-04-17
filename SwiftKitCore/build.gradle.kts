@@ -43,12 +43,12 @@ publishing {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 25))
     }
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    // Support Java 11
+    // SwiftKitCore is consumable down to Java 11
     options.release.set(11)
 }
 

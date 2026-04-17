@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.ConfinedSwiftMemorySession;
 import org.swift.swiftkit.core.SwiftArena;
 
-import java.lang.foreign.Arena;
 import java.util.Optional;
 import java.util.OptionalInt;
 

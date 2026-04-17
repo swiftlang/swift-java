@@ -221,7 +221,7 @@ jobs:
           'JavaKitSampleApp',
           'JavaProbablyPrime',
           'JavaSieve',
-          'SwiftAndJavaJarSampleLib',
+          'SwiftAndJavaJarFFMSampleLib',
           'SwiftJavaExtractFFMSampleApp',
           'SwiftJavaExtractJNISampleApp',
         ]
@@ -249,7 +249,7 @@ jobs:
           'JavaKitSampleApp',
           'JavaProbablyPrime',
           'JavaSieve',
-          'SwiftAndJavaJarSampleLib',
+          'SwiftAndJavaJarFFMSampleLib',
           'SwiftJavaExtractFFMSampleApp',
           'SwiftJavaExtractJNISampleApp',
         ]
