@@ -92,7 +92,7 @@ public class VehicleEnumTest {
     void getAsBicycle() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.bicycle(arena);
-            Vehicle.Bicycle bicycle = vehicle.getAsBicycle().orElseThrow();
+            Vehicle.Case.Bicycle bicycle = vehicle.getAsBicycle().orElseThrow();
             assertNotNull(bicycle);
         }
     }
@@ -101,7 +101,7 @@ public class VehicleEnumTest {
     void getAsCar() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
-            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            Vehicle.Case.Car car = vehicle.getAsCar().orElseThrow();
             assertEquals("BMW", car.arg0());
 
             vehicle = Vehicle.car("BMW", Optional.of("Long trailer"), arena);
@@ -114,7 +114,7 @@ public class VehicleEnumTest {
     void getAsMotorbike() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.motorbike("Yamaha", 750, OptionalInt.empty(), arena);
-            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            Vehicle.Case.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
             assertEquals("Yamaha", motorbike.arg0());
             assertEquals(750, motorbike.horsePower());
             assertEquals(OptionalInt.empty(), motorbike.helmets());
@@ -129,7 +129,7 @@ public class VehicleEnumTest {
     void getAsTransformer() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.car("BMW", Optional.empty(), arena), arena);
-            Vehicle.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
+            Vehicle.Case.Transformer transformer = vehicle.getAsTransformer(arena).orElseThrow();
             assertTrue(transformer.front().getAsBicycle().isPresent());
             assertEquals("BMW", transformer.back().getAsCar().orElseThrow().arg0());
         }
@@ -139,7 +139,7 @@ public class VehicleEnumTest {
     void getAsBoat() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.boat(OptionalInt.of(10), Optional.of((short) 1), arena);
-            Vehicle.Boat boat = vehicle.getAsBoat().orElseThrow();
+            Vehicle.Case.Boat boat = vehicle.getAsBoat().orElseThrow();
             assertEquals(OptionalInt.of(10), boat.passengers());
             assertEquals(Optional.of((short) 1), boat.length());
         }
@@ -149,10 +149,10 @@ public class VehicleEnumTest {
     void associatedValuesAreCopied() {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
-            Vehicle.Car car = vehicle.getAsCar().orElseThrow();
+            Vehicle.Case.Car car = vehicle.getAsCar().orElseThrow();
             assertEquals("BMW", car.arg0());
             vehicle.upgrade();
-            Vehicle.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
+            Vehicle.Case.Motorbike motorbike = vehicle.getAsMotorbike().orElseThrow();
             assertNotNull(motorbike);
             // Motorbike should still remain
             assertEquals("BMW", car.arg0());
@@ -174,7 +174,7 @@ public class VehicleEnumTest {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.bicycle(arena);
             Vehicle.Case caseElement = vehicle.getCase(arena);
-            assertInstanceOf(Vehicle.Bicycle.class, caseElement);
+            assertInstanceOf(Vehicle.Case.Bicycle.class, caseElement);
         }
     }
 
@@ -183,19 +183,19 @@ public class VehicleEnumTest {
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             switch (vehicle.getCase(arena)) {
-                case Vehicle.Bicycle b:
+                case Vehicle.Case.Bicycle b:
                     fail("Was bicycle");
                     break;
-                case Vehicle.Car car:
+                case Vehicle.Case.Car car:
                     assertEquals("BMW", car.arg0());
                     break;
-                case Vehicle.Motorbike motorbike:
+                case Vehicle.Case.Motorbike motorbike:
                     fail("Was motorbike");
                     break;
-                case Vehicle.Transformer transformer:
+                case Vehicle.Case.Transformer transformer:
                     fail("Was transformer");
                     break;
-                case Vehicle.Boat b:
+                case Vehicle.Case.Boat b:
                     fail("Was boat");
                     break;
             }

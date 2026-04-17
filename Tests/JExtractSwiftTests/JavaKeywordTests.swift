@@ -70,7 +70,7 @@ struct JavaKeywordTests {
         public static MyEnum null_(SwiftArena swiftArena) {
         """,
         """
-        public record Null() implements Case {
+        record Null() implements Case {
         """,
       ]
     )
@@ -95,10 +95,10 @@ struct JavaKeywordTests {
         public static MyEnumWithValue instanceof_(java.lang.String arg0, SwiftArena swiftArena) {
         """,
         """
-        public record Instanceof(java.lang.String arg0) implements Case {
+        record Instanceof(java.lang.String arg0) implements Case {
         """,
         """
-        private static native Instanceof._NativeParameters $getAsInstanceof(long selfPointer);
+        private static native Case.Instanceof._NativeParameters $getAsInstanceof(long selfPointer);
         """,
       ]
     )
@@ -133,7 +133,7 @@ struct JavaKeywordTests {
         public static MyEnum default_(SwiftArena swiftArena) {
         """,
         """
-        public record Default() implements Case {
+        record Default() implements Case {
         """,
       ]
     )

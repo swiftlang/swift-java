@@ -163,7 +163,17 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public sealed interface Case {}
+        public sealed interface Case {
+          record First() implements Case {
+            record _NativeParameters() {}
+          }
+          record Second(java.lang.String arg0) implements Case {
+            record _NativeParameters(java.lang.String arg0) {}
+          }
+          record Third(long x, int y) implements Case {
+            record _NativeParameters(long x, int y) {}
+          }
+        }
         """,
         """
         public Case getCase() {
@@ -174,21 +184,6 @@ struct JNIEnumTests {
             case THIRD: return this.getAsThird().orElseThrow();
           }
           throw new RuntimeException("Unknown discriminator value " + discriminator);
-        }
-        """,
-        """
-        public record First() implements Case {
-          record _NativeParameters() {}
-        }
-        """,
-        """
-        public record Second(java.lang.String arg0) implements Case {
-          record _NativeParameters(java.lang.String arg0) {}
-        }
-        """,
-        """
-        public record Third(long x, int y) implements Case {
-          record _NativeParameters(long x, int y) {}
         }
         """,
       ]
@@ -270,29 +265,29 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public Optional<First> getAsFirst() {
+        public java.util.Optional<Case.First> getAsFirst() {
           if (getDiscriminator() != Discriminator.FIRST) {
             return Optional.empty();
           }
-          return Optional.of(new First());
+          return Optional.of(new Case.First());
         }
         """,
         """
-        public Optional<Second> getAsSecond() {
+        public java.util.Optional<Case.Second> getAsSecond() {
           if (getDiscriminator() != Discriminator.SECOND) {
             return Optional.empty();
           }
-          Second._NativeParameters $nativeParameters = MyEnum.$getAsSecond(this.$memoryAddress());
-          return Optional.of(new Second($nativeParameters.arg0));
+          Case.Second._NativeParameters $nativeParameters = MyEnum.$getAsSecond(this.$memoryAddress());
+          return Optional.of(new Case.Second($nativeParameters.arg0));
         }
         """,
         """
-        public Optional<Third> getAsThird() {
+        public java.util.Optional<Case.Third> getAsThird() {
           if (getDiscriminator() != Discriminator.THIRD) {
             return Optional.empty();
           }
-          Third._NativeParameters $nativeParameters = MyEnum.$getAsThird(this.$memoryAddress());
-          return Optional.of(new Third($nativeParameters.x, $nativeParameters.y));
+          Case.Third._NativeParameters $nativeParameters = MyEnum.$getAsThird(this.$memoryAddress());
+          return Optional.of(new Case.Third($nativeParameters.x, $nativeParameters.y));
         }
         """,
       ]
@@ -309,8 +304,8 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         enum _JNI_MyEnum {
-          static let myEnumSecondCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Second$_NativeParameters", methods: [.init(name: "<init>", signature: "(Ljava/lang/String;)V")])
-          static let myEnumThirdCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Third$_NativeParameters", methods: [.init(name: "<init>", signature: "(JI)V")])
+          static let myEnumSecondCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Case$Second$_NativeParameters", methods: [.init(name: "<init>", signature: "(Ljava/lang/String;)V")])
+          static let myEnumThirdCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Case$Third$_NativeParameters", methods: [.init(name: "<init>", signature: "(JI)V")])
         }
         """,
         """

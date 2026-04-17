@@ -65,8 +65,8 @@ public class GenericTypeTest {
         try (var arena = SwiftArena.ofConfined()) {
             GenericEnum<Long> value = MySwiftLibrary.makeIntGenericEnum(arena);
             switch (value.getCase()) {
-                case GenericEnum.Foo _ -> assertTrue(value.getAsFoo().isPresent());
-                case GenericEnum.Bar _ -> assertTrue(value.getAsBar().isPresent());
+                case GenericEnum.Case.Foo _ -> assertTrue(value.getAsFoo().isPresent());
+                case GenericEnum.Case.Bar _ -> assertTrue(value.getAsBar().isPresent());
             }
         }
     }

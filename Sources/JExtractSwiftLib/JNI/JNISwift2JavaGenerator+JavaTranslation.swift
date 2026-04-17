@@ -129,7 +129,8 @@ extension JNISwift2JavaGenerator {
 
       let caseName = enumCase.name.firstCharacterUppercased
       let enumName = enumCase.enumType.nominalTypeDecl.name
-      let nativeParametersType = JavaType.class(package: nil, name: "\(caseName)._NativeParameters")
+      let caseType = JavaType.class(package: nil, name: "Case.\(caseName)")
+      let nativeParametersType = JavaType.class(package: nil, name: "Case.\(caseName)._NativeParameters")
       let getAsCaseName = "getAs\(caseName)"
       // If the case has no parameters, we can skip the native call.
       let constructRecordConversion = JavaNativeConversionStep.method(
@@ -138,7 +139,7 @@ extension JNISwift2JavaGenerator {
         arguments: [
           .constructJavaClass(
             .commaSeparated(conversions.map(\.translated.conversion)),
-            .class(package: nil, name: caseName),
+            caseType,
           )
         ],
       )
@@ -179,7 +180,7 @@ extension JNISwift2JavaGenerator {
             ),
           parameters: [],
           resultType: TranslatedResult(
-            javaType: .class(package: nil, name: "Optional", typeParameters: [.class(package: nil, name: caseName)]),
+            javaType: .optional(caseType),
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion

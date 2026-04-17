@@ -24,7 +24,7 @@ public class EnumTest {
     void enumWithValueCases() {
         try (var arena = SwiftArena.ofConfined()) {
             EnumWithValueCases e = EnumWithValueCases.firstCase(48, arena);
-            EnumWithValueCases.FirstCase c = (EnumWithValueCases.FirstCase) e.getCase();
+            EnumWithValueCases.Case.FirstCase c = (EnumWithValueCases.Case.FirstCase) e.getCase();
             assertNotNull(c);
         }
     }
@@ -34,6 +34,19 @@ public class EnumTest {
         try (var arena = SwiftArena.ofConfined()) {
             EnumWithBacktick e = EnumWithBacktick.default_(arena);
             assertTrue(e.getAsDefault().isPresent());
+        }
+    }
+
+    @Test
+    void enumWithCaseNameValue() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var success = EnumWithCaseNameValue.Success.init("ok", arena);
+            EnumWithCaseNameValue e = EnumWithCaseNameValue.success(success, arena);
+         
+            switch (e.getCase(arena)) {
+            case EnumWithCaseNameValue.Case.Success(var s):
+                assertEquals("ok", s.getMessage());
+            }
         }
     }
 }
