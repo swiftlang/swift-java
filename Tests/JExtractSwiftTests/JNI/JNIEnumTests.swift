@@ -12,7 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
@@ -372,6 +374,47 @@ struct JNIEnumTests {
         public func Java_com_example_swift_MyEnum__00024getAsSecond__J(
         """,
       ]
+    )
+  }
+
+  @Test
+  func invalidRedeclaration() throws {
+    let input = """
+      public enum DeliveryStage : Swift.String, Swift.Sendable & Swift.Codable {
+        case schedule
+        case delivered
+        public init?(rawValue: Swift.String)
+        public typealias RawValue = Swift.String
+        public var rawValue: Swift.String {
+          get
+        }
+      }
+      """
+
+    var config = Configuration()
+    config.swiftModule = "SwiftModule"
+    let translator = Swift2JavaTranslator(config: config)
+    try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
+
+    var printer: CodePrinter = CodePrinter(mode: .accumulateAll)
+    let generator = JNISwift2JavaGenerator(
+      config: config,
+      translator: translator,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake",
+      javaClassLookupTable: [:],
+      moduleJavaPackages: [:]
+    )
+    try generator.writeSwiftThunkSources(&printer)
+    let output = printer.finalize()
+    let gotLines = output.components(separatedBy: .whitespacesAndNewlines)
+
+    #expect(
+      gotLines.count(where: { line in
+        line == #"@_cdecl("Java_com_example_swift_DeliveryStage__00024getRawValue__J")"#
+      }) == 1,
+      "Invalid redeclaration detected."
     )
   }
 }

@@ -460,7 +460,7 @@ final class Swift2JavaVisitor {
       inheritanceType.isRawTypeCompatible
     {
       if !imported.variables.contains(where: {
-        $0.name == "rawValue" && $0.functionSignature.result.type != inheritanceType
+        $0.name == "rawValue" && $0.functionSignature.result.type == inheritanceType
       }) {
         let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
