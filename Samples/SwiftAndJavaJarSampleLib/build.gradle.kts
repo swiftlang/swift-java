@@ -32,7 +32,7 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 25))
     }
 }
 

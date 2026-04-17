@@ -23,7 +23,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 25)
     }
 }
 
