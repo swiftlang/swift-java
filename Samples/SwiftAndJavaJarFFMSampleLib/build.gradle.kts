@@ -32,7 +32,7 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 25))
+        languageVersion.set(JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 17))
     }
 }
 
@@ -85,13 +85,13 @@ tasks.jar.configure {
 }
 
 base {
-    archivesName = "swift-and-java-jar-sample-lib"
+    archivesName = "swift-and-java-jar-ffm-sample-lib"
 }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "swift-and-java-jar-sample-lib"
+            artifactId = "swift-and-java-jar-ffm-sample-lib"
             from(components["java"])
         }
     }

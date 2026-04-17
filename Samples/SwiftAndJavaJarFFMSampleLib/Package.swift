@@ -5,7 +5,7 @@ import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
-  name: "SwiftAndJavaJarSampleLib",
+  name: "SwiftAndJavaJarFFMSampleLib",
   platforms: [
     .macOS(.v15),
     .iOS(.v18),

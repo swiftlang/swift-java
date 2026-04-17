@@ -21,7 +21,7 @@ rootProject.name = "swift-java"
 // ==== -----------------------------------------------------------------------
 // MARK: JDK detection
 //
-// Some modules require JDK 22+ (FFM API). When the active toolchain is
+// Some modules require JDK 25+ (FFM API). When the active toolchain is
 // older we exclude those modules so developers with only JDK 17 can still
 // build the JDK-17-compatible subset (currently SwiftKitCore).
 //
@@ -62,8 +62,7 @@ val ffmCapable = swiftJavaJdk >= 22
 val ffmModules = setOf(
     "SwiftKitFFM",
     "SwiftJavaExtractFFMSampleApp",
-    "SwiftAndJavaJarSampleLib",
-    "SwiftJavaExtractJNISampleApp",
+    "SwiftAndJavaJarFFMSampleLib",
 )
 
 val skipped = mutableListOf<String>()
