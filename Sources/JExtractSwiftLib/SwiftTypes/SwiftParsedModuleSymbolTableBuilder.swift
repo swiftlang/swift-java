@@ -81,7 +81,27 @@ extension SwiftParsedModuleSymbolTableBuilder {
       self.handle(extensionDecl: extensionNode, sourceFilePath: sourceFilePath)
     } else if let ifConfigNode = decl.as(IfConfigDeclSyntax.self) {
       self.handle(ifConfig: ifConfigNode, sourceFilePath: sourceFilePath)
+    } else if let typeAliasNode = decl.as(TypeAliasDeclSyntax.self) {
+      self.handle(typeAliasDecl: typeAliasNode, sourceFilePath: sourceFilePath)
     }
+  }
+
+  mutating func handle(
+    typeAliasDecl node: TypeAliasDeclSyntax,
+    sourceFilePath: String
+  ) {
+    let name = node.name.text
+    if symbolTable.topLevelTypeAliases[name] != nil
+      || symbolTable.lookupTopLevelNominalType(name) != nil
+    {
+      log?.debug("Failed to add a typealias into symbol table: redeclaration; \(name)")
+      return
+    }
+    symbolTable.topLevelTypeAliases[name] = SwiftTypeAliasDeclaration(
+      sourceFilePath: sourceFilePath,
+      moduleName: moduleName,
+      node: node
+    )
   }
 
   /// Add a nominal type declaration and all of the nested types within it to the symbol
