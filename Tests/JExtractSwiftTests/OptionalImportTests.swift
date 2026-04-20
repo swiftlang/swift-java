@@ -15,6 +15,7 @@
 import JExtractSwiftLib
 import Testing
 
+@Suite
 final class OptionalImportTests {
   let interfaceFile =
     """

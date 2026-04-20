@@ -16,6 +16,7 @@ import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
 
+@Suite
 final class JNIUnsignedNumberTests {
 
   @Test("Import: UInt16 (char)")
