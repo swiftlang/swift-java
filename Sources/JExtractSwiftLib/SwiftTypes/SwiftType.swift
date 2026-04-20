@@ -466,6 +466,29 @@ extension SwiftType {
       )
     } else if let genericParamDecl = typeDecl as? SwiftGenericParameterDeclaration {
       self = .genericParameter(genericParamDecl)
+    } else if let aliasDecl = typeDecl as? SwiftTypeAliasDeclaration {
+      let aliasGenericParams =
+        aliasDecl.syntax.genericParameterClause?.parameters.map { $0.name.text } ?? []
+      let useSiteArgs = genericArguments ?? []
+
+      // The alias's generic parameter count must match the use-site argument
+      // count. Treat any mismatch (including use-site args on a non-generic
+      // alias, or missing args on a generic alias) as unimplemented to fall
+      // through to silent drop.
+      guard aliasGenericParams.count == useSiteArgs.count else {
+        throw TypeTranslationError.unimplementedType(originalType)
+      }
+
+      let resolved = try lookupContext.resolve(typeAlias: aliasDecl)
+
+      if aliasGenericParams.isEmpty {
+        self = resolved
+      } else {
+        let substitutions = Dictionary(
+          uniqueKeysWithValues: zip(aliasGenericParams, useSiteArgs)
+        )
+        self = resolved.substituting(genericParameters: substitutions)
+      }
     } else {
       fatalError("unknown SwiftTypeDeclaration: \(type(of: typeDecl))")
     }
@@ -492,6 +515,55 @@ extension SwiftType {
         genericArguments: nil
       )
     )
+  }
+
+  /// Substitute generic parameters *by name*.
+  ///
+  /// This is used e.g. by typealiases like `typealias Ano<T> = Array<T>`,
+  /// so usages like `Ano<Int>` become `Array<Int>`.
+  func substituting(genericParameters substitutions: [String: SwiftType]) -> SwiftType {
+    guard !substitutions.isEmpty else { return self }
+
+    switch self {
+    case .nominal(let nominal):
+      return .nominal(
+        SwiftNominalType(
+          parent: nominal.parent,
+          sugarName: nominal.sugarName,
+          nominalTypeDecl: nominal.nominalTypeDecl,
+          genericArguments: nominal.genericArguments?.map {
+            $0.substituting(genericParameters: substitutions)
+          }
+        )
+      )
+    case .genericParameter(let decl):
+      return substitutions[decl.name] ?? self
+    case .function(var fn):
+      fn.parameters = fn.parameters.map { p in
+        var p = p
+        p.type = p.type.substituting(genericParameters: substitutions)
+        return p
+      }
+      fn.resultType = fn.resultType.substituting(genericParameters: substitutions)
+      return .function(fn)
+    case .metatype(let inner):
+      return .metatype(inner.substituting(genericParameters: substitutions))
+    case .tuple(let elements):
+      return .tuple(
+        elements.map {
+          SwiftTupleElement(
+            label: $0.label,
+            type: $0.type.substituting(genericParameters: substitutions)
+          )
+        }
+      )
+    case .existential(let inner):
+      return .existential(inner.substituting(genericParameters: substitutions))
+    case .opaque(let inner):
+      return .opaque(inner.substituting(genericParameters: substitutions))
+    case .composite(let types):
+      return .composite(types.map { $0.substituting(genericParameters: substitutions) })
+    }
   }
 
   /// Produce an expression that creates the metatype for this type in

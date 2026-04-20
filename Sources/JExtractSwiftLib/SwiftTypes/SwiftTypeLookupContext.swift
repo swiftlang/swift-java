@@ -24,6 +24,10 @@ class SwiftTypeLookupContext {
 
   private var typeDecls: [Syntax.ID: SwiftTypeDeclaration] = [:]
 
+  /// Set of typealias syntax ids currently being resolved, to break
+  /// cycles like `typealias A = B; typealias B = A`.
+  private var resolvingAliases: Set<Syntax.ID> = []
+
   init(symbolTable: SwiftSymbolTable) {
     self.symbolTable = symbolTable
   }
@@ -52,8 +56,12 @@ class SwiftTypeLookupContext {
         }
 
       case .lookForMembers(let scopeNode):
-        if let nominalDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
-          if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl as! SwiftNominalTypeDeclaration) {
+        if let typeDecl = try typeDeclaration(for: scopeNode, sourceFilePath: "FIXME.swift") { // FIXME: no path here // implement some node -> file
+          guard let nominalDecl = typeDecl as? SwiftNominalTypeDeclaration else {
+            // Member lookup on a non-nominal (e.g. a typealias) is not supported here.
+            continue
+          }
+          if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl) {
             return found
           }
         }
@@ -69,8 +77,12 @@ class SwiftTypeLookupContext {
       }
     }
 
+    // maybe it's a typealias, can we resolve it to a known type?
+    if let nominal = symbolTable.lookupTopLevelNominalType(name.name) {
+      return nominal
+    }
     // Fallback to global symbol table lookup.
-    return symbolTable.lookupTopLevelNominalType(name.name)
+    return symbolTable.lookupTopLevelTypealias(name.name)
   }
 
   /// Find the first type declaration in the `LookupName` results.
@@ -136,8 +148,12 @@ class SwiftTypeLookupContext {
         }
         typeDecl = nominalDecl
       }
-    case .typeAliasDecl:
-      fatalError("typealias not implemented")
+    case .typeAliasDecl(let node):
+      typeDecl = SwiftTypeAliasDeclaration(
+        sourceFilePath: sourceFilePath,
+        moduleName: symbolTable.moduleName,
+        node: node
+      )
     case .associatedTypeDecl:
       fatalError("associatedtype not implemented")
     default:
@@ -184,6 +200,17 @@ class SwiftTypeLookupContext {
       }
     }
     return nil
+  }
+
+  /// Resolve a typealias to the `SwiftType` of its right-hand side.
+  func resolve(typeAlias decl: SwiftTypeAliasDeclaration) throws -> SwiftType {
+    let id = decl.syntax.id
+    guard !resolvingAliases.contains(id) else {
+      throw TypeTranslationError.unimplementedType(TypeSyntax(decl.syntax.initializer.value))
+    }
+    resolvingAliases.insert(id)
+    defer { resolvingAliases.remove(id) }
+    return try SwiftType(decl.syntax.initializer.value, lookupContext: self)
   }
 }
 

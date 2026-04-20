@@ -203,6 +203,24 @@ package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
   }
 }
 
+/// A plain typealias will resolve as the right hand type in generated code.
+///
+/// A typealias used as a specialization of a generic type will be emitted as
+/// a new concrete type in the Java. This way we can specialize `FishBox` from
+/// `Box<T>` by doing `typealias FishBox = Box<Fish>`.
+package final class SwiftTypeAliasDeclaration: SwiftTypeDeclaration {
+  let syntax: TypeAliasDeclSyntax
+
+  init(
+    sourceFilePath: String,
+    moduleName: String,
+    node: TypeAliasDeclSyntax
+  ) {
+    self.syntax = node
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
+  }
+}
+
 extension SwiftTypeDeclaration: Equatable {
   package static func == (lhs: SwiftTypeDeclaration, rhs: SwiftTypeDeclaration) -> Bool {
     lhs === rhs

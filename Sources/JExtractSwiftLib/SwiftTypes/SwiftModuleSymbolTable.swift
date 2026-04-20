@@ -28,6 +28,9 @@ struct SwiftModuleSymbolTable: SwiftSymbolTableProtocol {
   /// The top-level nominal types, found by name.
   var topLevelTypes: [String: SwiftNominalTypeDeclaration] = [:]
 
+  /// The top-level typealias declarations, found by name.
+  var topLevelTypeAliases: [String: SwiftTypeAliasDeclaration] = [:]
+
   /// The nested types defined within this module. The map itself is indexed by the
   /// identifier of the nominal type declaration, and each entry is a map from the nested
   /// type name to the nominal type declaration.
@@ -36,6 +39,11 @@ struct SwiftModuleSymbolTable: SwiftSymbolTableProtocol {
   /// Look for a top-level type with the given name.
   func lookupTopLevelNominalType(_ name: String) -> SwiftNominalTypeDeclaration? {
     topLevelTypes[name]
+  }
+
+  /// Look for a top-level typealias with the given name.
+  func lookupTopLevelTypealias(_ name: String) -> SwiftTypeAliasDeclaration? {
+    topLevelTypeAliases[name]
   }
 
   // Look for a nested type with the given name.
