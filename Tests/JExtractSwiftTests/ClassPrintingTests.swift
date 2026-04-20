@@ -15,6 +15,7 @@
 import JExtractSwiftLib
 import Testing
 
+@Suite
 struct ClassPrintingTests {
   let class_interfaceFile =
     """

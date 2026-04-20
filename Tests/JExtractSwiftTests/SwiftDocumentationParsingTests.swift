@@ -16,6 +16,7 @@ import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
 
+@Suite
 struct SwiftDocumentationParsingTests {
   @Test(
     "Simple Swift func documentation",

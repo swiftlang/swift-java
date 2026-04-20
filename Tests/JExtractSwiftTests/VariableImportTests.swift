@@ -15,6 +15,7 @@
 import JExtractSwiftLib
 import Testing
 
+@Suite
 final class VariableImportTests {
   let class_interfaceFile =
     """

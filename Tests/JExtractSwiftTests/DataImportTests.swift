@@ -15,6 +15,7 @@
 import JExtractSwiftLib
 import Testing
 
+@Suite
 final class DataImportTests {
   private static let ifConfigImport = """
     #if canImport(FoundationEssentials)

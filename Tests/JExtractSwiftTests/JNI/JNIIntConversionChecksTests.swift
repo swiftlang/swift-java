@@ -16,6 +16,7 @@ import Testing
 
 @testable import JExtractSwiftLib
 
+@Suite
 struct JNIIntConversionChecksTests {
   private let signedSource = """
     public struct MyStruct {

@@ -17,6 +17,7 @@ import JExtractSwiftLib
 import SwiftJavaConfigurationShared
 import Testing
 
+@Suite
 final class FuncCallbackImportTests {
 
   static let class_interfaceFile =
