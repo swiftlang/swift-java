@@ -213,4 +213,73 @@ struct JNIGenericTypeTests {
       ]
     )
   }
+
+  @Test
+  func genericValueInEnumCase() throws {
+    let input =
+      #"""
+      public struct MyID<T> {}
+      
+      public enum MyEnum {
+        case foo(MyID<Double>)
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        #"""
+        public sealed interface Case {
+          record Foo(MyID<java.lang.Double> arg0) implements Case {
+           record _NativeParameters(org.swift.swiftkit.core._OutSwiftGenericInstance arg0) {}
+          }
+        }
+        """#
+      ]
+    )
+
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        #"""
+        @_cdecl("Java_com_example_swift_MyEnum__00024getAsFoo__JLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
+        public func Java_com_example_swift_MyEnum__00024getAsFoo__JLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, arg0Out: jobject?) -> jobject? {
+          assert(selfPointer != 0, "selfPointer memory address was null")
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
+          let selfPointer$ = UnsafeMutablePointer<MyEnum>(bitPattern: selfPointerBits$)
+          guard let selfPointer$ else {
+            fatalError("selfPointer memory address was null in call to \(#function)!")
+          }
+          guard case .foo(let _0) = selfPointer$.pointee else {
+            fatalError("Expected enum case 'foo', but was '\(selfPointer$.pointee)'!")
+          }
+          let cache$ = _JNI_MyEnum.myEnumFooCache
+          let class$ = cache$.javaClass
+          let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(V)V")
+          let constructorID$ = cache$[method$]
+          
+          let _0$ = UnsafeMutablePointer<MyID<Double>>.allocate(capacity: 1)
+          _0$.initialize(to: _0)
+          let _0Bits$ = Int64(Int(bitPattern: _0$))
+          do {
+            environment.interface.SetLongField(environment, arg0Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, _0Bits$.getJNIValue(in: environment))
+            let metadataPointer = unsafeBitCast(MyID<Double>.self, to: UnsafeRawPointer.self)
+            let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
+            environment.interface.SetLongField(environment, arg0Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+          }
+         
+          let newObjectArgs$: [jvalue] = []
+          return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
+        }
+        """#
+      ]
+    )
+  }
 }
