@@ -91,6 +91,10 @@ enum TranslatedDocumentation {
       annotationsGroup.append("@param \(param.name) \(param.description)")
     }
 
+    if let throwsDescription = parsedDocumentation?.throwsDescription {
+      annotationsGroup.append("@throws Exception \(throwsDescription)")
+    }
+
     if let returns = parsedDocumentation?.returns {
       annotationsGroup.append("@return \(returns)")
     }

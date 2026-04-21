@@ -25,6 +25,7 @@ struct SwiftDocumentation: Equatable {
   var discussion: String?
   var parameters: [Parameter] = []
   var returns: String?
+  var throwsDescription: String?
 }
 
 enum SwiftDocumentationParser {
@@ -33,6 +34,7 @@ enum SwiftDocumentationParser {
     case discussion
     case parameter(Int)
     case returns
+    case throwsDescription
   }
 
   // TODO: Replace with Regex
@@ -99,6 +101,12 @@ enum SwiftDocumentationParser {
           doc.returns = content
           state = .returns
 
+        case "throws":
+          if !content.isEmpty {
+            append(&doc.throwsDescription, content)
+          }
+          state = .throwsDescription
+
         default:
           // Parameter names are marked like
           // - myString: description
@@ -142,6 +150,7 @@ enum SwiftDocumentationParser {
     case .summary: append(&doc.summary, line)
     case .discussion: append(&doc.discussion, line)
     case .returns: append(&doc.returns, line)
+    case .throwsDescription: append(&doc.throwsDescription, line)
     case .parameter(let index):
       if index < doc.parameters.count {
         append(&doc.parameters[index].description, line)

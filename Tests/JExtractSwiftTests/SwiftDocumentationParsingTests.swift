@@ -73,6 +73,67 @@ struct SwiftDocumentationParsingTests {
   }
 
   @Test(
+    "Throws documentation",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           *
+           * @throws Exception - An error if something fails.
+           * - Another error case.
+           */
+          public static void f() {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           *
+           * @throws Exception - An error if something fails.
+           * - Another error case.
+           */
+          public static void f() {
+          """
+        ]
+      ),
+    ]
+  )
+  func throwsDocumentation(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Summary
+      /// - Throws:
+      ///   - An error if something fails.
+      ///   - Another error case.
+      public func f() {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
     "Multi-line parameter description continuation",
     arguments: [
       (
