@@ -30,7 +30,7 @@ struct SwiftDocumentationParsingTests {
            *
            * <p>Downcall to Swift:
            * {@snippet lang=swift :
-           * public func f()
+           * public static func f()
            * }
            */
           public static void f() {
@@ -46,7 +46,7 @@ struct SwiftDocumentationParsingTests {
            *
            * <p>Downcall to Swift:
            * {@snippet lang=swift :
-           * public func f()
+           * public static func f()
            * }
            */
           public static void f() {
@@ -60,7 +60,7 @@ struct SwiftDocumentationParsingTests {
       """
       public class MyClass {
           /// Simple summary
-          public func f() {}
+          public static func f() {}
       }
       """
 
