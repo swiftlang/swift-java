@@ -73,6 +73,66 @@ struct SwiftDocumentationParsingTests {
   }
 
   @Test(
+    "Multi-line parameter description continuation",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String)
+           * }
+           *
+           * @param arg0 First line of description.
+           * Continuation line.
+           */
+          public static void f(java.lang.String arg0) {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f(arg0: String)
+           * }
+           *
+           * @param arg0 First line of description.
+           * Continuation line.
+           */
+          public static void f(java.lang.String arg0) {
+          """
+        ]
+      ),
+    ]
+  )
+  func parameterContinuationLine(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      /// Summary
+      /// - Parameter arg0: First line of description.
+      ///   Continuation line.
+      public func f(arg0: String) {}
+      """
+
+    try assertOutput(
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
     "Simple Swift func documentation",
     arguments: [
       (

@@ -50,12 +50,14 @@ enum SwiftDocumentationParser {
     while case .spaces(_) = pieces.last { pieces.removeLast() }
     while case .tabs(_) = pieces.last { pieces.removeLast() }
 
-    // Walk backwards: each doc line is preceded by newlines(1) then optional indentation
+    // Walk backwards. The backwards pattern is:
+    //   newlines(1), docLineComment, spaces/tabs(indent), newlines(1), docLineComment, spaces/tabs, …
+    // Spaces/tabs are stripped *after* consuming each docLineComment (they precede it in source order).
     while case .newlines(1) = pieces.popLast() {
-      while case .spaces(_) = pieces.last { pieces.removeLast() }
-      while case .tabs(_) = pieces.last { pieces.removeLast() }
       guard case .docLineComment(let text) = pieces.popLast() else { break }
       comments.append(text)
+      while case .spaces(_) = pieces.last { pieces.removeLast() }
+      while case .tabs(_) = pieces.last { pieces.removeLast() }
     }
 
     guard !comments.isEmpty else { return nil }
@@ -88,7 +90,7 @@ enum SwiftDocumentationParser {
               description: content
             )
           )
-          state = .parameter(doc.parameters.count > 0 ? doc.parameters.count : 0)
+          state = .parameter(doc.parameters.count - 1)
 
         case "parameters":
           state = .parameter(0)
