@@ -19,6 +19,60 @@ import Testing
 @Suite
 struct SwiftDocumentationParsingTests {
   @Test(
+    "Indented Swift func documentation (inside extension)",
+    arguments: [
+      (
+        JExtractGenerationMode.jni,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
+          """
+        ]
+      ),
+      (
+        JExtractGenerationMode.ffm,
+        [
+          """
+          /**
+           * Simple summary
+           *
+           * <p>Downcall to Swift:
+           * {@snippet lang=swift :
+           * public func f()
+           * }
+           */
+          public static void f() {
+          """
+        ]
+      ),
+    ]
+  )
+  func indented(mode: JExtractGenerationMode, expectedJavaChunks: [String]) throws {
+    let text =
+      """
+      public class MyClass {
+          /// Simple summary
+          public func f() {}
+      }
+      """
+
+    try assertOutput(
+      input: text,
+      mode,
+      .java,
+      expectedChunks: expectedJavaChunks
+    )
+  }
+
+  @Test(
     "Simple Swift func documentation",
     arguments: [
       (

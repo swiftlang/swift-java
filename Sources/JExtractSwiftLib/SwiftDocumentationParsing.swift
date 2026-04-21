@@ -46,8 +46,15 @@ enum SwiftDocumentationParser {
     var comments = [String]()
     var pieces = syntax.leadingTrivia.pieces
 
-    // We always expect a newline follows a docline comment
-    while case .newlines(1) = pieces.popLast(), case .docLineComment(let text) = pieces.popLast() {
+    // Strip trailing indentation (spaces/tabs before the declaration keyword itself)
+    while case .spaces(_) = pieces.last { pieces.removeLast() }
+    while case .tabs(_) = pieces.last { pieces.removeLast() }
+
+    // Walk backwards: each doc line is preceded by newlines(1) then optional indentation
+    while case .newlines(1) = pieces.popLast() {
+      while case .spaces(_) = pieces.last { pieces.removeLast() }
+      while case .tabs(_) = pieces.last { pieces.removeLast() }
+      guard case .docLineComment(let text) = pieces.popLast() else { break }
       comments.append(text)
     }
 
