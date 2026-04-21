@@ -25,6 +25,7 @@ struct SwiftDocumentation: Equatable {
   var discussion: String?
   var parameters: [Parameter] = []
   var returns: String?
+  var throwsDescription: String?
 }
 
 enum SwiftDocumentationParser {
@@ -33,6 +34,7 @@ enum SwiftDocumentationParser {
     case discussion
     case parameter(Int)
     case returns
+    case throwsDescription
   }
 
   // TODO: Replace with Regex
@@ -46,9 +48,18 @@ enum SwiftDocumentationParser {
     var comments = [String]()
     var pieces = syntax.leadingTrivia.pieces
 
-    // We always expect a newline follows a docline comment
-    while case .newlines(1) = pieces.popLast(), case .docLineComment(let text) = pieces.popLast() {
+    // Strip trailing indentation (spaces/tabs before the declaration keyword itself)
+    while case .spaces(_) = pieces.last { pieces.removeLast() }
+    while case .tabs(_) = pieces.last { pieces.removeLast() }
+
+    // Walk backwards. The backwards pattern is:
+    //   newlines(1), docLineComment, spaces/tabs(indent), newlines(1), docLineComment, spaces/tabs, …
+    // Spaces/tabs are stripped *after* consuming each docLineComment (they precede it in source order).
+    while case .newlines(1) = pieces.popLast() {
+      guard case .docLineComment(let text) = pieces.popLast() else { break }
       comments.append(text)
+      while case .spaces(_) = pieces.last { pieces.removeLast() }
+      while case .tabs(_) = pieces.last { pieces.removeLast() }
     }
 
     guard !comments.isEmpty else { return nil }
@@ -81,7 +92,7 @@ enum SwiftDocumentationParser {
               description: content
             )
           )
-          state = .parameter(doc.parameters.count > 0 ? doc.parameters.count : 0)
+          state = .parameter(doc.parameters.count - 1)
 
         case "parameters":
           state = .parameter(0)
@@ -89,6 +100,12 @@ enum SwiftDocumentationParser {
         case "returns":
           doc.returns = content
           state = .returns
+
+        case "throws":
+          if !content.isEmpty {
+            append(&doc.throwsDescription, content)
+          }
+          state = .throwsDescription
 
         default:
           // Parameter names are marked like
@@ -133,6 +150,7 @@ enum SwiftDocumentationParser {
     case .summary: append(&doc.summary, line)
     case .discussion: append(&doc.discussion, line)
     case .returns: append(&doc.returns, line)
+    case .throwsDescription: append(&doc.throwsDescription, line)
     case .parameter(let index):
       if index < doc.parameters.count {
         append(&doc.parameters[index].description, line)
