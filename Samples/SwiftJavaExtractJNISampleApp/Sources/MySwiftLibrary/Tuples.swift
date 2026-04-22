@@ -45,3 +45,7 @@ public func makeBigTuple() -> (
 public func namedByteArrayTuple() -> (name: [UInt8], another: [UInt8]) {
   (name: [1, 2, 3], another: [4, 5])
 }
+
+public func genericTypeTuple() -> (MyID<Double>, Alignment) {
+  (MyID(1.23), .horizontal)
+}
