@@ -177,13 +177,11 @@ struct JNIEnumTests {
         """,
         """
         public Case getCase() {
-          Discriminator discriminator = this.getDiscriminator();
-          switch (discriminator) {
-            case FIRST: return this.getAsFirst().orElseThrow();
-            case SECOND: return this.getAsSecond().orElseThrow();
-            case THIRD: return this.getAsThird().orElseThrow();
+          return switch (this.getDiscriminator()) {
+            case FIRST -> this.getAsFirst().orElseThrow();
+            case SECOND -> this.getAsSecond().orElseThrow();
+            case THIRD -> this.getAsThird().orElseThrow();
           }
-          throw new RuntimeException("Unknown discriminator value " + discriminator);
         }
         """,
       ]

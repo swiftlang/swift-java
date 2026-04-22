@@ -528,19 +528,17 @@ extension JNISwift2JavaGenerator {
     }.contains(where: \.requiresSwiftArena)
 
     printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
-      printer.print("Discriminator discriminator = this.getDiscriminator();")
-      printer.printBraceBlock("switch (discriminator)") { printer in
+      printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
         for enumCase in decl.cases {
           guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
             continue
           }
           let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
           printer.print(
-            "case \(enumCase.name.uppercased()): return this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
+            "case \(enumCase.name.uppercased()) -> this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
           )
         }
       }
-      printer.print(#"throw new RuntimeException("Unknown discriminator value " + discriminator);"#)
     }
   }
 
