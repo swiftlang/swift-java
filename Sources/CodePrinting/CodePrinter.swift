@@ -91,6 +91,7 @@ public struct CodePrinter {
   public mutating func printBraceBlock(
     _ header: Any,
     parameters: [String]? = nil,
+    _ terminator: PrinterTerminator = .sloc,
     function: String = #function,
     file: String = #fileID,
     line: UInt = #line,
@@ -104,7 +105,7 @@ public struct CodePrinter {
     indent()
     try body(&self)
     outdent()
-    print("}", .sloc, function: function, file: file, line: line)
+    print("}", terminator, function: function, file: file, line: line)
   }
 
   public mutating func printIfBlock(
@@ -224,6 +225,7 @@ public enum PrinterTerminator: String {
   case commaNewLine = ",\n"
   case `continue` = ""
   case sloc = "// <source location>"
+  case semicolonNewLine = ";\n"
 
   public static func parameterSeparator(_ isLast: Bool) -> Self {
     if isLast {
