@@ -55,7 +55,7 @@ struct JNIGenericCombinationTests {
         detectChunkByInitialLines: 2,
         expectedChunks: [
           """
-          public static Optional<MyID<java.lang.String>> makeStringIDOptional(java.lang.String value, SwiftArena swiftArena) {
+          public static java.util.Optional<MyID<java.lang.String>> makeStringIDOptional(java.lang.String value, SwiftArena swiftArena) {
             byte[] result$_discriminator$ = new byte[1];
             org.swift.swiftkit.core._OutSwiftGenericInstance resultWrapped$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
             SwiftModule.$makeStringIDOptional(value, result$_discriminator$, resultWrapped$);

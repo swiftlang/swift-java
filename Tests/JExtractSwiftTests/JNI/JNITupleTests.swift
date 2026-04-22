@@ -147,4 +147,60 @@ struct JNITupleTests {
       ]
     )
   }
+
+  @Test
+  func optionalTuple() throws {
+    let input = """
+      public struct Foo {}
+      public func optionalTuple() -> (Int64?, Foo)? {
+        (42, Foo())
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        byte[] result$_discriminator$ = new byte[1];
+        byte[] resultWrapped$_0$$_discriminator$ = new byte[1];
+        long[] resultWrapped$_0$ = new long[1];
+        long[] resultWrapped$_1$ = new long[1];
+        SwiftModule.$optionalTuple(result$_discriminator$, resultWrapped$_0$$_discriminator$, resultWrapped$_0$, resultWrapped$_1$);
+        """,
+        """
+        private static native void $optionalTuple(byte[] result_discriminator$, byte[] resultWrapped_0$_discriminator$, long[] resultWrapped_0$, long[] resultWrapped_1$);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func genericTuple() throws {
+    let input = """
+      public struct Box<T> {}
+      public func genericTuple() -> (Box<Bool>, Box<String>) {
+        fatalError()
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        org.swift.swiftkit.core._OutSwiftGenericInstance result_0$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+        org.swift.swiftkit.core._OutSwiftGenericInstance result_1$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+        SwiftModule.$genericTuple(result_0$, result_1$);
+        """,
+        """
+        private static native void $genericTuple(org.swift.swiftkit.core._OutSwiftGenericInstance result_0$Out, org.swift.swiftkit.core._OutSwiftGenericInstance result_1$Out);
+        """,
+      ]
+    )
+  }
 }
