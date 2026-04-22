@@ -21,19 +21,6 @@ import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Byte-array marshalling benchmarks (JNI mode).
- *
- * All benchmark methods are suffixed with _jni to sort adjacently to their
- * _ffm counterparts in combined reports. Covers [UInt8], [[UInt8]],
- * UnsafeRawBufferPointer, UnsafeMutableRawBufferPointer, and Data.
- *
- * Sizes span 4 KB .. 16 MB to expose:
- *   - [[UInt8]] overhead (per-call FindClass, intermediate [jobject?] buffer,
- *     per-element SetObjectArrayElement).
- *   - Sparse vs dense patterns: flat-byte input scaling with sparsity vs
- *     dense-array input scaling with the full payload size.
- */
 @BenchmarkMode(Mode.AverageTime)
 @Warmup(iterations = 2, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 3, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -42,22 +29,24 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED", "-Xmx1g" })
 public class JNIByteArrayBenchmark {
 
-    @Param({"4096", "65536", "262144", "1048576", "8388608", "16777216"})
+    @Param({"jni"})
+    public String mode;
+
+    @Param({"4096", "65536", "16777216"})
     public int totalBytes;
 
-    // [[UInt8]] shape: outer * inner = totalBytes.
-    @Param({"2"})
-    public int outerCount;
+    public final int outerCount = 2;
 
     byte[] flat;
     byte[][] nested;
     Data data;
     ClosableSwiftArena arena;
 
-    // Sparse state: fixed shape, isolates the sparse-input benefit.
-    int[] sparseIndices;
-    int[] sparseValues;
-    byte[] helperKey;
+    // Fixtures for largeFunction(a:b:c:d:)
+    int large_a;
+    byte[] large_b;
+    int[] large_c;
+    byte[] large_d;
 
     @Setup(Level.Trial)
     public void beforeAll() {
@@ -79,13 +68,14 @@ public class JNIByteArrayBenchmark {
 
         data = Data.fromByteArray(flat, arena);
 
-        sparseIndices = new int[8192];
-        sparseValues = new int[8192];
+        large_a = 1000;
+        large_b = new byte[8192];
+        large_c = new int[8192];
         for (int i = 0; i < 8192; i++) {
-            sparseIndices[i] = i * 17;
-            sparseValues[i] = i;
+            large_b[i] = (byte) (i & 0xff);
+            large_c[i] = i;
         }
-        helperKey = new byte[32];
+        large_d = new byte[32];
     }
 
     @TearDown(Level.Trial)
@@ -98,17 +88,17 @@ public class JNIByteArrayBenchmark {
 
     @Benchmark
     public long acceptBytes_jni() {
-        return MySwiftLibrary.benchAcceptBytes(flat);
+        return MySwiftLibrary.acceptBytes(flat);
     }
 
     @Benchmark
     public byte[] returnBytes_jni() {
-        return MySwiftLibrary.benchReturnBytes(totalBytes);
+        return MySwiftLibrary.returnBytes(totalBytes);
     }
 
     @Benchmark
     public byte[] echoBytes_jni() {
-        return MySwiftLibrary.benchEchoBytes(flat);
+        return MySwiftLibrary.echoBytes(flat);
     }
 
     // ==== -----------------------------------------------------------------
@@ -116,17 +106,17 @@ public class JNIByteArrayBenchmark {
 
     @Benchmark
     public long acceptNested_jni() {
-        return MySwiftLibrary.benchAcceptNestedBytes(nested);
+        return MySwiftLibrary.acceptNestedBytes(nested);
     }
 
     @Benchmark
     public byte[][] returnNested_jni() {
-        return MySwiftLibrary.benchReturnNestedBytes(outerCount, totalBytes / outerCount);
+        return MySwiftLibrary.returnNestedBytes(outerCount, totalBytes / outerCount);
     }
 
     @Benchmark
     public byte[][] echoNested_jni() {
-        return MySwiftLibrary.benchEchoNestedBytes(nested);
+        return MySwiftLibrary.echoNestedBytes(nested);
     }
 
     // ==== -----------------------------------------------------------------
@@ -134,12 +124,12 @@ public class JNIByteArrayBenchmark {
 
     @Benchmark
     public long acceptBuffer_jni() {
-        return MySwiftLibrary.benchAcceptBuffer(flat);
+        return MySwiftLibrary.acceptBuffer(flat);
     }
 
     @Benchmark
     public long acceptMutableBuffer_jni() {
-        return MySwiftLibrary.benchAcceptMutableBuffer(flat);
+        return MySwiftLibrary.acceptMutableBuffer(flat);
     }
 
     // ==== -----------------------------------------------------------------
@@ -147,33 +137,28 @@ public class JNIByteArrayBenchmark {
 
     @Benchmark
     public long acceptData_jni() {
-        return MySwiftLibrary.benchAcceptData(data);
+        return MySwiftLibrary.acceptData(data);
     }
 
     @Benchmark
     public Data returnData_jni(Blackhole bh) {
-        Data result = MySwiftLibrary.benchReturnData(totalBytes, arena);
+        Data result = MySwiftLibrary.returnData(totalBytes, arena);
         bh.consume(result.getCount());
         return result;
     }
 
     @Benchmark
     public Data echoData_jni(Blackhole bh) {
-        Data echoed = MySwiftLibrary.benchEchoData(data, arena);
+        Data echoed = MySwiftLibrary.echoData(data, arena);
         bh.consume(echoed.getCount());
         return echoed;
     }
 
     // ==== -----------------------------------------------------------------
-    // MARK: sparse vs dense shard
+    // MARK: large multi-parameter function
 
     @Benchmark
-    public byte[] sparseShard_jni() {
-        return MySwiftLibrary.benchSparseShard(1000, 2, sparseIndices, sparseValues, helperKey);
-    }
-
-    @Benchmark
-    public byte[][] denseShard_jni() {
-        return MySwiftLibrary.benchDenseShard(1000, 2, flat, helperKey);
+    public byte[] wide_jni() {
+        return MySwiftLibrary.largeFunction(large_a, large_b, large_c, large_d);
     }
 }

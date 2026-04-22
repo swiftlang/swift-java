@@ -23,79 +23,64 @@ import Foundation
 // ==== -----------------------------------------------------------------------
 // MARK: [UInt8] pass-through
 
-public func benchAcceptBytes(_ bytes: [UInt8]) -> Int {
+public func acceptBytes(_ bytes: [UInt8]) -> Int {
   bytes.count
 }
 
-public func benchReturnBytes(_ size: Int) -> [UInt8] {
+public func returnBytes(_ size: Int) -> [UInt8] {
   [UInt8](repeating: 0xff, count: size)
 }
 
-public func benchEchoBytes(_ bytes: [UInt8]) -> [UInt8] {
+public func echoBytes(_ bytes: [UInt8]) -> [UInt8] {
   bytes
 }
 
 // ==== -----------------------------------------------------------------------
 // MARK: [[UInt8]] pass-through
 
-public func benchAcceptNestedBytes(_ arrays: [[UInt8]]) -> Int {
+public func acceptNestedBytes(_ arrays: [[UInt8]]) -> Int {
   arrays.reduce(0) { $0 + $1.count }
 }
 
-public func benchReturnNestedBytes(_ outer: Int, _ inner: Int) -> [[UInt8]] {
+public func returnNestedBytes(_ outer: Int, _ inner: Int) -> [[UInt8]] {
   (0..<outer).map { _ in [UInt8](repeating: 0xff, count: inner) }
 }
 
-public func benchEchoNestedBytes(_ arrays: [[UInt8]]) -> [[UInt8]] {
+public func echoNestedBytes(_ arrays: [[UInt8]]) -> [[UInt8]] {
   arrays
 }
 
 // ==== -----------------------------------------------------------------------
 // MARK: UnsafeRawBufferPointer (JNI only)
 
-public func benchAcceptBuffer(_ buf: UnsafeRawBufferPointer) -> Int {
+public func acceptBuffer(_ buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }
 
-public func benchAcceptMutableBuffer(_ buf: UnsafeMutableRawBufferPointer) -> Int {
+public func acceptMutableBuffer(_ buf: UnsafeMutableRawBufferPointer) -> Int {
   buf.count
 }
 
 // ==== -----------------------------------------------------------------------
 // MARK: Data
 
-public func benchAcceptData(_ data: Data) -> Int {
+public func acceptData(_ data: Data) -> Int {
   data.count
 }
 
-public func benchReturnData(_ size: Int) -> Data {
+public func returnData(_ size: Int) -> Data {
   Data(repeating: 0xff, count: size)
 }
 
-public func benchEchoData(_ data: Data) -> Data {
-  data
-}
-
 // ==== -----------------------------------------------------------------------
-// MARK: real world examples
+// MARK: large multi-parameter function
 
-public func benchSparseShard(
-  dimension: Int32,
-  numShards: Int32,
-  indices: [Int32],
-  values: [Int32],
-  helperKey: [UInt8]
+public func largeFunction(
+  a: Int32,
+  b: [UInt8],
+  c: [Int32],
+  d: [UInt8]
 ) -> [UInt8] {
-  let outSize = Int(indices.count) * 40 + helperKey.count
+  let outSize = b.count + d.count + c.count * 4
   return [UInt8](repeating: 0xff, count: outSize)
-}
-
-public func benchDenseShard(
-  dimension: Int32,
-  numShards: Int32,
-  measurement: [UInt8],
-  helperKey: [UInt8]
-) -> [[UInt8]] {
-  let shardSize = measurement.count / Int(numShards)
-  return (0..<Int(numShards)).map { _ in [UInt8](repeating: 0xff, count: shardSize) }
 }

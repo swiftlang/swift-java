@@ -21,16 +21,6 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Byte-array marshalling benchmarks (FFM mode).
- *
- * FFM mode supports the [UInt8] and Data shapes but not [[UInt8]],
- * UnsafeRawBufferPointer, or UnsafeMutableRawBufferPointer — the
- * corresponding benchmarks live only in JNIByteArrayBenchmark.
- *
- * Method suffix _ffm aligns these rows with their _jni counterparts for
- * side-by-side reading when reports are sorted alphabetically.
- */
 @BenchmarkMode(Mode.AverageTime)
 @Warmup(iterations = 2, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 3, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -39,6 +29,9 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, jvmArgsAppend = { "--enable-native-access=ALL-UNNAMED", "-Xmx1g" })
 public class FFMByteArrayBenchmark {
 
+    @Param({"ffm"})
+    public String mode;
+
     @Param({"4096", "65536", "262144", "1048576", "8388608", "16777216"})
     public int totalBytes;
 
@@ -46,9 +39,11 @@ public class FFMByteArrayBenchmark {
     Data data;
     ClosableAllocatingSwiftArena arena;
 
-    int[] sparseIndices;
-    int[] sparseValues;
-    byte[] helperKey;
+    // Fixtures for largeFunction(a:b:c:d:)
+    int large_a;
+    byte[] large_b;
+    int[] large_c;
+    byte[] large_d;
 
     @Setup(Level.Trial)
     public void beforeAll() {
@@ -61,13 +56,14 @@ public class FFMByteArrayBenchmark {
 
         data = Data.init(flat, arena);
 
-        sparseIndices = new int[8192];
-        sparseValues = new int[8192];
+        large_a = 1000;
+        large_b = new byte[8192];
+        large_c = new int[8192];
         for (int i = 0; i < 8192; i++) {
-            sparseIndices[i] = i * 17;
-            sparseValues[i] = i;
+            large_b[i] = (byte) (i & 0xff);
+            large_c[i] = i;
         }
-        helperKey = new byte[32];
+        large_d = new byte[32];
     }
 
     @TearDown(Level.Trial)
@@ -80,17 +76,17 @@ public class FFMByteArrayBenchmark {
 
     @Benchmark
     public long acceptBytes_ffm() {
-        return MySwiftLibrary.benchAcceptBytes(flat);
+        return MySwiftLibrary.acceptBytes(flat);
     }
 
     @Benchmark
     public byte[] returnBytes_ffm() {
-        return MySwiftLibrary.benchReturnBytes(totalBytes);
+        return MySwiftLibrary.returnBytes(totalBytes);
     }
 
     @Benchmark
     public byte[] echoBytes_ffm() {
-        return MySwiftLibrary.benchEchoBytes(flat);
+        return MySwiftLibrary.echoBytes(flat);
     }
 
     // ==== -----------------------------------------------------------------
@@ -98,28 +94,28 @@ public class FFMByteArrayBenchmark {
 
     @Benchmark
     public long acceptData_ffm() {
-        return MySwiftLibrary.benchAcceptData(data);
+        return MySwiftLibrary.acceptData(data);
     }
 
     @Benchmark
     public Data returnData_ffm(Blackhole bh) {
-        Data result = MySwiftLibrary.benchReturnData(totalBytes, arena);
+        Data result = MySwiftLibrary.returnData(totalBytes, arena);
         bh.consume(result.getCount());
         return result;
     }
 
     @Benchmark
     public Data echoData_ffm(Blackhole bh) {
-        Data echoed = MySwiftLibrary.benchEchoData(data, arena);
+        Data echoed = MySwiftLibrary.echoData(data, arena);
         bh.consume(echoed.getCount());
         return echoed;
     }
 
     // ==== -----------------------------------------------------------------
-    // MARK: sparse shard
+    // MARK: large multi-parameter function
 
     @Benchmark
-    public byte[] sparseShard_ffm() {
-        return MySwiftLibrary.benchSparseShard(1000, 2, sparseIndices, sparseValues, helperKey);
+    public byte[] wide_ffm() {
+        return MySwiftLibrary.largeFunction(large_a, large_b, large_c, large_d);
     }
 }
