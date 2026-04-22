@@ -348,7 +348,7 @@ extension JNISwift2JavaGenerator {
 
       if !isEffectivelyGeneric {
         for enumCase in type.cases {
-          printEnumCase(&printer, enumCase)
+          printEnumCase(&printer, type, enumCase)
           printer.println()
         }
       }
@@ -393,7 +393,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumType: ImportedNominalType, _ enumCase: ImportedEnumCase) {
     guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
       return
     }
@@ -404,12 +404,13 @@ extension JNISwift2JavaGenerator {
 
     // Print getAsCase method
     if !translatedCase.translatedValues.isEmpty {
-      printEnumGetAsCaseThunk(&printer, translatedCase)
+      printEnumGetAsCaseThunk(&printer, enumType, translatedCase)
     }
   }
 
   private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-    let nativeParametersClassName = "\(enumCase.enumName)$Case$\(enumCase.name)$_NativeParameters"
+    let enumName = enumCase.original.enumType.nominalTypeDecl.name
+    let nativeParametersClassName = "\(enumName)$Case$\(enumCase.name)$_NativeParameters"
     let methodSignature = MethodSignature(
       resultType: .void,
       parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
@@ -429,8 +430,24 @@ extension JNISwift2JavaGenerator {
 
   private func printEnumGetAsCaseThunk(
     _ printer: inout CodePrinter,
+    _ enumType: ImportedNominalType,
     _ enumCase: TranslatedEnumCase,
   ) {
+    printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
+      let associatedValueTypes = enumCase.original.parameters.map { param in
+        param.type.description
+      }.joined(separator: ", ")
+      printer.printBraceBlock("private var _\(enumCase.original.name)Values: (\(associatedValueTypes))?") { printer in
+        let params = enumCase.original.parameters.enumerated().map { i, param in
+          param.name ?? "_\(i)"
+        }.joined(separator: ", ")
+        printer.printBraceBlock("if case let .\(enumCase.original.name)(\(params)) = self") { printer in
+          printer.print("return (\(params))")
+        }
+        printer.print("return nil")
+      }
+    }
+
     printCDecl(
       &printer,
       enumCase.getAsCaseFunction,

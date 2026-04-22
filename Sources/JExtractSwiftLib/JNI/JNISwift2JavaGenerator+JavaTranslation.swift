@@ -222,7 +222,6 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedEnumCase(
         name: enumCase.name.firstCharacterUppercased,
-        enumName: enumCase.enumType.nominalTypeDecl.name,
         original: enumCase,
         translatedValues: translatedValues,
         parameterConversions: conversions,
@@ -1649,9 +1648,6 @@ extension JNISwift2JavaGenerator {
   struct TranslatedEnumCase {
     /// The corresponding Java case class (CamelCased)
     let name: String
-
-    /// The name of the translated enum
-    let enumName: String
 
     /// The oringinal enum case.
     let original: ImportedEnumCase
