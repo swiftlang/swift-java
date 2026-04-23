@@ -91,3 +91,11 @@ public func multipleOptionals(
 ) -> Int64? {
   1
 }
+
+public func optionalTuple() -> (Int64, String)? {
+  (42, "hello")
+}
+
+public func optionalTuple2() -> (Int64?, Alignment?)? {
+  (42, .horizontal)
+}
