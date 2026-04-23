@@ -850,7 +850,7 @@ extension JNISwift2JavaGenerator {
                 annotations: parameterAnnotations,
               ),
               conversion: .commaSeparated([
-                .isOptionalPresent,
+                .method(.placeholder, function: "isPresent", arguments: []),
                 .method(.placeholder, function: "orElse", arguments: [.constant(placeholderValue)]),
               ]),
             )
@@ -1295,7 +1295,7 @@ extension JNISwift2JavaGenerator {
                 nativeJavaType: javaType,
                 annotations: parameterAnnotations,
                 outParameters: [
-                  OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
+                  OutParameter(name: discriminatorName, type: .array(.boolean), allocation: .newArray(.boolean, size: 1))
                 ],
                 conversion: .toOptionalFromIndirectReturn(
                   discriminatorName: .constant(discriminatorName),
@@ -1341,7 +1341,7 @@ extension JNISwift2JavaGenerator {
         nativeJavaType: wrappedValueResult.nativeJavaType,
         annotations: parameterAnnotations,
         outParameters: [
-          OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
+          OutParameter(name: discriminatorName, type: .array(.boolean), allocation: .newArray(.boolean, size: 1))
         ] + wrappedValueResult.outParameters,
         conversion: .toOptionalFromIndirectReturn(
           discriminatorName: .constant(discriminatorName),
@@ -1798,8 +1798,6 @@ extension JNISwift2JavaGenerator {
 
     indirect case member(JavaNativeConversionStep, field: String)
 
-    case isOptionalPresent
-
     indirect case combinedValueToOptional(
       JavaNativeConversionStep,
       JavaType,
@@ -1830,10 +1828,7 @@ extension JNISwift2JavaGenerator {
         variable: nativeResultJavaType.isVoid ? nil : (name: "\(resultName)$", type: nativeResultJavaType),
         [
           .ternary(
-            .equals(
-              .subscriptOf(discriminatorName, arguments: [.constant("0")]),
-              .constant("1"),
-            ),
+            .subscriptOf(discriminatorName, arguments: [.constant("0")]),
             thenExp: .method(.constant(optionalClass), function: "of", arguments: [valueConversion]),
             elseExp: .method(.constant(optionalClass), function: "empty"),
           )
@@ -1920,9 +1915,6 @@ extension JNISwift2JavaGenerator {
       case .call(let inner, let function):
         let inner = inner.render(&printer, placeholder)
         return "\(function)(\(inner))"
-
-      case .isOptionalPresent:
-        return "(byte) (\(placeholder).isPresent() ? 1 : 0)"
 
       case .method(let inner, let methodName, let arguments):
         let inner = inner.render(&printer, placeholder)
@@ -2045,7 +2037,7 @@ extension JNISwift2JavaGenerator {
     /// Whether the conversion uses SwiftArena.
     var requiresSwiftArena: Bool {
       switch self {
-      case .placeholder, .constant, .isOptionalPresent, .combinedName:
+      case .placeholder, .constant, .combinedName:
         return false
 
       case .constructSwiftValue, .wrapMemoryAddressUnsafe:

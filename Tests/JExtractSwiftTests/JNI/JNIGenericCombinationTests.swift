@@ -56,14 +56,14 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           """
           public static java.util.Optional<MyID<java.lang.String>> makeStringIDOptional(java.lang.String value, SwiftArena swiftArena) {
-            byte[] result$_discriminator$ = new byte[1];
+            boolean[] result$_discriminator$ = new boolean[1];
             org.swift.swiftkit.core._OutSwiftGenericInstance resultWrapped$ = new org.swift.swiftkit.core._OutSwiftGenericInstance();
             SwiftModule.$makeStringIDOptional(value, result$_discriminator$, resultWrapped$);
-            return (result$_discriminator$[0] == 1) ? Optional.of(MyID.<java.lang.String>wrapMemoryAddressUnsafe(resultWrapped$.selfPointer, resultWrapped$.selfTypePointer, swiftArena)) : Optional.empty();
+            return (result$_discriminator$[0]) ? Optional.of(MyID.<java.lang.String>wrapMemoryAddressUnsafe(resultWrapped$.selfPointer, resultWrapped$.selfTypePointer, swiftArena)) : Optional.empty();
           }
           """,
           """
-          private static native void $makeStringIDOptional(java.lang.String value, byte[] result_discriminator$, org.swift.swiftkit.core._OutSwiftGenericInstance resultWrappedOut);
+          private static native void $makeStringIDOptional(java.lang.String value, boolean[] result_discriminator$, org.swift.swiftkit.core._OutSwiftGenericInstance resultWrappedOut);
           """,
         ]
       )
@@ -78,8 +78,8 @@ struct JNIGenericCombinationTests {
         detectChunkByInitialLines: 2,
         expectedChunks: [
           """
-          @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
-          public func Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
+          @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3ZLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
+          public func Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3ZLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, result_discriminator$: jbooleanArray?, resultWrappedOut: jobject?) {
             if let innerResult$ = SwiftModule.makeStringIDOptional(String(fromJNI: value, in: environment)) {
               let resultWrapped$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
               resultWrapped$.initialize(to: innerResult$)
@@ -90,12 +90,12 @@ struct JNIGenericCombinationTests {
                let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
                environment.interface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
               }
-              var flag$ = Int8(1)
-              environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+              var flag$ = jboolean(JNI_TRUE)
+              environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
             } 
             else {
-              var flag$ = Int8(0)
-              environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+              var flag$ = jboolean(JNI_FALSE)
+              environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
             }
             return 
           }

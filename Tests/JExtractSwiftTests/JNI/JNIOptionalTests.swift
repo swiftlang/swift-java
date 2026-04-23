@@ -47,14 +47,14 @@ struct JNIOptionalTests {
          * }
          */
         public static OptionalInt optionalSugar(OptionalLong arg) {
-          long result_combined$ = SwiftModule.$optionalSugar((byte) (arg.isPresent() ? 1 : 0), arg.orElse(0L));
+          long result_combined$ = SwiftModule.$optionalSugar(arg.isPresent(), arg.orElse(0L));
           byte result_discriminator$ = (byte) (result_combined$ & 0xFF);
           int result_value$ = (int) (result_combined$ >> 32);
           return result_discriminator$ == 1 ? OptionalInt.of(result_value$) : OptionalInt.empty();
         }
         """,
         """
-        private static native long $optionalSugar(byte arg_discriminator, long arg_value);
+        private static native long $optionalSugar(boolean arg_discriminator, long arg_value);
         """,
       ]
     )
@@ -66,13 +66,13 @@ struct JNIOptionalTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__BJ")
-        public func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
-          let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment) : nil).map {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__ZJ")
+        public func Java_com_example_swift_SwiftModule__00024optionalSugar__ZJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jboolean, arg_value: jlong) -> jlong {
+          let result_value$ = SwiftModule.optionalSugar(arg_discriminator == jboolean(JNI_TRUE) ? Int64(fromJNI: arg_value, in: environment) : nil).map {
             Int64($0) << 32 | Int64(1)
           } ?? 0
           return result_value$.getJNILocalRefValue(in: environment)
@@ -98,13 +98,13 @@ struct JNIOptionalTests {
          * }
          */
         public static Optional<String> optionalExplicit(Optional<String> arg) {
-          byte[] result$_discriminator$ = new byte[1];
-          java.lang.String result$ = SwiftModule.$optionalExplicit((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null), result$_discriminator$);
-          return (result$_discriminator$[0] == 1) ? Optional.of(result$) : Optional.empty();
+          boolean[] result$_discriminator$ = new boolean[1];
+          java.lang.String result$ = SwiftModule.$optionalExplicit(arg.isPresent(), arg.orElse(null), result$_discriminator$);
+          return (result$_discriminator$[0]) ? Optional.of(result$) : Optional.empty();
         }
         """,
         """
-        private static native java.lang.String $optionalExplicit(byte arg_discriminator, java.lang.String arg_value, byte[] result_discriminator$);
+        private static native java.lang.String $optionalExplicit(boolean arg_discriminator, java.lang.String arg_value, boolean[] result_discriminator$);
         """,
       ]
     )
@@ -120,18 +120,18 @@ struct JNIOptionalTests {
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B")
-        public func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jstring?, result_discriminator$: jbyteArray?) -> jstring? {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalExplicit__ZLjava_lang_String_2_3Z")
+        public func Java_com_example_swift_SwiftModule__00024optionalExplicit__ZLjava_lang_String_2_3Z(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jboolean, arg_value: jstring?, result_discriminator$: jbooleanArray?) -> jstring? {
           let result$: jstring?
-          if let innerResult$ = SwiftModule.optionalExplicit(arg_discriminator == 1 ? String(fromJNI: arg_value, in: environment) : nil) {
+          if let innerResult$ = SwiftModule.optionalExplicit(arg_discriminator == jboolean(JNI_TRUE) ? String(fromJNI: arg_value, in: environment) : nil) {
             result$ = innerResult$.getJNIValue(in: environment)
-            var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            var flag$ = jboolean(JNI_TRUE)
+            environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
             result$ = nil
-            var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            var flag$ = jboolean(JNI_FALSE)
+            environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           return result$
         }
@@ -156,13 +156,13 @@ struct JNIOptionalTests {
          * }
          */
         public static java.util.Optional<MyClass> optionalClass(java.util.Optional<MyClass> arg, SwiftArena swiftArena) {
-          byte[] result$_discriminator$ = new byte[1];
+          boolean[] result$_discriminator$ = new boolean[1];
           long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result$_discriminator$);
-          return (result$_discriminator$[0] == 1) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena)) : Optional.empty();
+          return (result$_discriminator$[0]) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena)) : Optional.empty();
         }
         """,
         """
-        private static native long $optionalClass(long arg, byte[] result_discriminator$);
+        private static native long $optionalClass(long arg, boolean[] result_discriminator$);
         """,
       ]
     )
@@ -178,8 +178,8 @@ struct JNIOptionalTests {
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3B")
-        public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3Z")
+        public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3Z(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbooleanArray?) -> jlong {
           let argBits$ = Int(Int64(fromJNI: arg, in: environment))
           let arg$ = UnsafeMutablePointer<MyClass>(bitPattern: argBits$)
           let result$: jlong
@@ -188,13 +188,13 @@ struct JNIOptionalTests {
             resultWrapped$.initialize(to: innerResult$)
             let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
             result$ = resultWrappedBits$.getJNILocalRefValue(in: environment)
-            var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            var flag$ = jboolean(JNI_TRUE)
+            environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
             result$ = 0
-            var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            var flag$ = jboolean(JNI_FALSE)
+            environment.interface.SetBooleanArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           return result$
         }
@@ -267,14 +267,14 @@ struct JNIOptionalTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        byte[] result$_discriminator$ = new byte[1];
-        byte[] resultWrapped$_0$$_discriminator$ = new byte[1];
+        boolean[] result$_discriminator$ = new boolean[1];
+        boolean[] resultWrapped$_0$$_discriminator$ = new boolean[1];
         long[] resultWrapped$_0$ = new long[1];
         long[] resultWrapped$_1$ = new long[1];
         SwiftModule.$optionalTuple(result$_discriminator$, resultWrapped$_0$$_discriminator$, resultWrapped$_0$, resultWrapped$_1$);
         """,
         """
-        private static native void $optionalTuple(byte[] result_discriminator$, byte[] resultWrapped_0$_discriminator$, long[] resultWrapped_0$, long[] resultWrapped_1$);
+        private static native void $optionalTuple(boolean[] result_discriminator$, boolean[] resultWrapped_0$_discriminator$, long[] resultWrapped_0$, long[] resultWrapped_1$);
         """,
       ]
     )

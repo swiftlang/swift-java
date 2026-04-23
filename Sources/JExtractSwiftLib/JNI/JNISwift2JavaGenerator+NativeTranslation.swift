@@ -477,7 +477,7 @@ extension JNISwift2JavaGenerator {
 
             return NativeParameter(
               parameters: [
-                JavaParameter(name: discriminatorName, type: .byte),
+                JavaParameter(name: discriminatorName, type: .boolean),
                 JavaParameter(name: valueName, type: javaType),
               ],
               conversion: .optionalLowering(
@@ -568,7 +568,7 @@ extension JNISwift2JavaGenerator {
                   discriminatorParameterName: discriminatorName
                 ),
                 outParameters: [
-                  JavaParameter(name: discriminatorName, type: .array(.byte))
+                  JavaParameter(name: discriminatorName, type: .array(.boolean))
                 ]
               )
             }
@@ -602,7 +602,7 @@ extension JNISwift2JavaGenerator {
           discriminatorParameterName: discriminatorName
         ),
         outParameters: [
-          JavaParameter(name: discriminatorName, type: .array(.byte))
+          JavaParameter(name: discriminatorName, type: .array(.boolean))
         ] + wrappedValueResult.outParameters
       )
     }
@@ -1494,7 +1494,7 @@ extension JNISwift2JavaGenerator {
 
       case .optionalLowering(let valueConversion, let discriminatorName, let valueName):
         let value = valueConversion.render(&printer, valueName)
-        return "\(discriminatorName) == 1 ? \(value) : nil"
+        return "\(discriminatorName) == jboolean(JNI_TRUE) ? \(value) : nil"
 
       case .optionalChain(let inner):
         let inner = inner.render(&printer, placeholder)
@@ -1535,8 +1535,8 @@ extension JNISwift2JavaGenerator {
           }
           printer.print(
             """
-            var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            var flag$ = jboolean(JNI_TRUE)
+            environment.interface.SetBooleanArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
             """
           )
         }
@@ -1546,8 +1546,8 @@ extension JNISwift2JavaGenerator {
           }
           printer.print(
             """
-            var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            var flag$ = jboolean(JNI_FALSE)
+            environment.interface.SetBooleanArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
             """
           )
         }
