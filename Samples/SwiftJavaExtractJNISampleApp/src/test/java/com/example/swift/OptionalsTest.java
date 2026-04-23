@@ -143,4 +143,30 @@ public class OptionalsTest {
             assertEquals("swiftError", exception.getMessage());
         }
     }
+
+    @Test
+    void optionalTuple() {
+        var result = MySwiftLibrary.optionalTuple();
+        assertDoesNotThrow(() -> {
+            var resultUnwrapped = result.orElseThrow();
+            assertEquals(42, resultUnwrapped.$0);
+            assertEquals("hello", resultUnwrapped.$1);
+        });
+    }
+
+    @Test
+    void optionalTuple2() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var result = MySwiftLibrary.optionalTuple2(arena);
+            assertDoesNotThrow(() -> {
+                var resultUnwrapped = result.orElseThrow();
+                assertDoesNotThrow(() -> {
+                    assertEquals(42, resultUnwrapped.$0.orElseThrow());
+                });
+                assertDoesNotThrow(() -> {
+                    assertEquals(Alignment.Discriminator.HORIZONTAL, resultUnwrapped.$1.orElseThrow().getDiscriminator());
+                });
+            });
+        }
+    }
 }

@@ -49,11 +49,3 @@ public func namedByteArrayTuple() -> (name: [UInt8], another: [UInt8]) {
 public func genericTypeTuple() -> (MyID<Double>, Alignment) {
   (MyID(1.23), .horizontal)
 }
-
-public func optionalTuple() -> (Int64, String)? {
-  (42, "hello")
-}
-
-public func optionalTuple2() -> (Int64?, Alignment?)? {
-  (42, .horizontal)
-}
