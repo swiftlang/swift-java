@@ -1190,7 +1190,7 @@ extension JNISwift2JavaGenerator {
             || (name == "Optional" && typeParameters.count == 1):
             true
           default: false
-          } // Optional uses both the direct value and the indirect value
+          } // Optional uses a combination of direct and indirect values.
         if isOptional || elementResult.outParameters.isEmpty {
           // Convert direct result to indirect result.
           // For most class types (Swift wrapper classes), the JNI native representation
