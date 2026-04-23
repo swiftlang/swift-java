@@ -1039,8 +1039,8 @@ extension JNISwift2JavaGenerator {
           switch knownType {
           case .optional(let wrapped):
             if let wrappedKnownKind = wrapped.asNominalTypeDeclaration?.knownTypeKind,
-               let javaType = JNIJavaTypeTranslator.translate(knownType: wrappedKnownKind, config: self.config),
-               let optionalType = javaType.optionalType
+              let javaType = JNIJavaTypeTranslator.translate(knownType: wrappedKnownKind, config: self.config),
+              let optionalType = javaType.optionalType
             {
               return .class(package: nil, name: optionalType)
             }
@@ -1183,13 +1183,14 @@ extension JNISwift2JavaGenerator {
 
         // FIXME: More accurate determination of whether the result is direct or indirect
         // essentially, it should refer to the NativeTranslation result
-        let isOptional = switch elementResult.javaType {
-        case .class(_, let name, let typeParameters)
+        let isOptional =
+          switch elementResult.javaType {
+          case .class(_, let name, let typeParameters)
           where (name.starts(with: "Optional") && typeParameters.count == 0)
-          || (name == "Optional" && typeParameters.count == 1):
-          true
-        default: false
-        } // Optional uses both the direct value and the indirect value
+            || (name == "Optional" && typeParameters.count == 1):
+            true
+          default: false
+          } // Optional uses both the direct value and the indirect value
         if isOptional || elementResult.outParameters.isEmpty {
           // Convert direct result to indirect result.
           // For most class types (Swift wrapper classes), the JNI native representation
@@ -1273,9 +1274,10 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind,
-           let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-           let returnType = javaType.optionalType,
-           let optionalClass = javaType.optionalWrapperType {
+          let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+          let returnType = javaType.optionalType,
+          let optionalClass = javaType.optionalWrapperType
+        {
           // Check if we can fit the value and a discriminator byte in a primitive.
           // so the return JNI value will be (value, discriminator)
           if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
@@ -1331,11 +1333,12 @@ extension JNISwift2JavaGenerator {
       )
 
       // FIXME: More accurate JavaType using NativeJavaTranslation results directly
-      let nativeResultJavaType: JavaType = if wrappedValueResult.outParameters.isEmpty {
-        .long
-      } else {
-        .void
-      }
+      let nativeResultJavaType: JavaType =
+        if wrappedValueResult.outParameters.isEmpty {
+          .long
+        } else {
+          .void
+        }
 
       let returnType = JavaType.optional(wrappedJavaType)
       return TranslatedResult(

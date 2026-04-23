@@ -529,8 +529,9 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind,
-           let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-           javaType.implementsJavaValue {
+          let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+          javaType.implementsJavaValue
+        {
           // Check if we can fit the value and a discriminator byte in a primitive.
           // so the return JNI value will be (value, discriminator)
           if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
