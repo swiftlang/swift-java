@@ -155,7 +155,7 @@ struct JNIOptionalTests {
          * public func optionalClass(_ arg: MyClass?) -> MyClass?
          * }
          */
-        public static Optional<MyClass> optionalClass(Optional<MyClass> arg, SwiftArena swiftArena) {
+        public static java.util.Optional<MyClass> optionalClass(java.util.Optional<MyClass> arg, SwiftArena swiftArena) {
           byte[] result$_discriminator$ = new byte[1];
           long result$ = SwiftModule.$optionalClass(arg.map(MyClass::$memoryAddress).orElse(0L), result$_discriminator$);
           return (result$_discriminator$[0] == 1) ? Optional.of(MyClass.wrapMemoryAddressUnsafe(result$, swiftArena)) : Optional.empty();
@@ -218,7 +218,7 @@ struct JNIOptionalTests {
          * public func optionalJavaKitClass(_ arg: JavaLong?)
          * }
          */
-        public static void optionalJavaKitClass(Optional<java.lang.Long> arg) {
+        public static void optionalJavaKitClass(java.util.Optional<java.lang.Long> arg) {
           SwiftModule.$optionalJavaKitClass(arg.orElse(null));
         }
         """,
