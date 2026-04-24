@@ -1049,6 +1049,13 @@ extension JNISwift2JavaGenerator {
         if let knownType = nominalType.asKnownType {
           switch knownType {
           case .optional(let wrapped):
+            if let wrappedKnownKind = wrapped.asNominalTypeDeclaration?.knownTypeKind,
+              let javaType = JNIJavaTypeTranslator.translate(knownType: wrappedKnownKind, config: self.config),
+              let optionalType = javaType.optionalType
+            {
+              return .class(package: nil, name: optionalType)
+            }
+
             let wrappedType = try translateGenericTypeParameter(
               wrapped,
               genericParameters: genericParameters,
@@ -1141,7 +1148,17 @@ extension JNISwift2JavaGenerator {
         }
         return .class(package: nil, name: generic.name)
 
-      case .metatype, .tuple, .function, .existential, .opaque, .composite:
+      case .tuple(let elements):
+        let elementJavaTypes = try elements.map { element in
+          try translateGenericTypeParameter(
+            element.type,
+            genericParameters: genericParameters,
+            genericRequirements: genericRequirements
+          )
+        }
+        return .tuple(elementTypes: elementJavaTypes)
+
+      case .metatype, .function, .existential, .opaque, .composite:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -1259,22 +1276,11 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          switch knownType {
-          case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
-
-          case .foundationData, .essentialsData:
-            // Handled as wrapped struct
-            break
-
-          default:
-            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftType)
-            }
-
+          if let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+            javaType.implementsJavaValue
+          {
             guard let returnType = javaType.optionalType, let optionalClass = javaType.optionalWrapperType else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+              break
             }
 
             // Check if we can fit the value and a discriminator byte in a primitive.
@@ -1315,46 +1321,41 @@ extension JNISwift2JavaGenerator {
             }
           }
         }
-
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
-        }
-
-        // We assume this is a JExtract class.
-        let javaType = try translateGenericTypeParameter(
-          swiftType,
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements,
-        )
-
-        let wrappedValueResult = try translateResult(
-          swiftType: swiftType,
-          methodName: methodName,
-          resultName: resultName + "Wrapped$",
-          genericParameters: genericParameters,
-          genericRequirements: genericRequirements,
-        )
-
-        let returnType = JavaType.optional(javaType)
-        return TranslatedResult(
-          javaType: returnType,
-          nativeJavaType: wrappedValueResult.nativeJavaType,
-          annotations: parameterAnnotations,
-          outParameters: [
-            OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
-          ] + wrappedValueResult.outParameters,
-          conversion: .toOptionalFromIndirectReturn(
-            discriminatorName: .constant(discriminatorName),
-            optionalClass: "Optional",
-            nativeResultJavaType: wrappedValueResult.nativeJavaType,
-            toValue: wrappedValueResult.conversion,
-            resultName: resultName
-          )
-        )
-
       default:
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        break
       }
+
+      // We assume this is a JExtract class.
+      let javaType = try translateGenericTypeParameter(
+        swiftType,
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements,
+      )
+
+      let wrappedValueResult = try translateResult(
+        swiftType: swiftType,
+        methodName: methodName,
+        resultName: resultName + "Wrapped$",
+        genericParameters: genericParameters,
+        genericRequirements: genericRequirements,
+      )
+
+      let returnType = JavaType.optional(javaType)
+      return TranslatedResult(
+        javaType: returnType,
+        nativeJavaType: wrappedValueResult.nativeJavaType,
+        annotations: parameterAnnotations,
+        outParameters: [
+          OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
+        ] + wrappedValueResult.outParameters,
+        conversion: .toOptionalFromIndirectReturn(
+          discriminatorName: .constant(discriminatorName),
+          optionalClass: "Optional",
+          nativeResultJavaType: wrappedValueResult.nativeJavaType,
+          toValue: wrappedValueResult.conversion,
+          resultName: resultName
+        )
+      )
     }
 
     func translateArrayParameter(

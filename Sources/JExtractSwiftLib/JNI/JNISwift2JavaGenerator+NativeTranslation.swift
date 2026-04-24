@@ -531,23 +531,9 @@ extension JNISwift2JavaGenerator {
       switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
-          switch knownType {
-          case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
-
-          case .foundationData, .essentialsData:
-            // Handled as wrapped struct
-            break
-
-          default:
-            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
-              javaType.implementsJavaValue
-            else {
-              self.logger.debug("Known type \(knownType) is not supported for optional results, skipping.")
-              throw JavaTranslationError.unsupportedSwiftType(swiftType)
-            }
-
+          if let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
+            javaType.implementsJavaValue
+          {
             // Check if we can fit the value and a discriminator byte in a primitive.
             // so the return JNI value will be (value, discriminator)
             if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
@@ -571,6 +557,7 @@ extension JNISwift2JavaGenerator {
                 javaType: javaType,
                 conversion: .optionalRaisingIndirectReturn(
                   .getJNIValue(.placeholder),
+                  resultName: "\(resultName)$",
                   returnType: javaType,
                   discriminatorParameterName: discriminatorName,
                   placeholderValue: .member(
@@ -585,35 +572,30 @@ extension JNISwift2JavaGenerator {
             }
           }
         }
-
-        guard !nominalType.isSwiftJavaWrapper else {
-          // TODO: Should be the same as above
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
-        }
-
-        let wrappedValueResult = try translateResult(
-          swiftType: swiftType,
-          methodName: methodName,
-          resultName: resultName + "Wrapped"
-        )
-
-        // Assume JExtract imported class
-        return NativeResult(
-          javaType: wrappedValueResult.javaType,
-          conversion: .optionalRaisingIndirectReturn(
-            wrappedValueResult.conversion,
-            returnType: wrappedValueResult.javaType,
-            discriminatorParameterName: discriminatorName,
-            placeholderValue: .constant("0")
-          ),
-          outParameters: [
-            JavaParameter(name: discriminatorName, type: .array(.byte))
-          ] + wrappedValueResult.outParameters
-        )
-
       default:
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        break
       }
+
+      let wrappedValueResult = try translateResult(
+        swiftType: swiftType,
+        methodName: methodName,
+        resultName: resultName + "Wrapped"
+      )
+
+      // Assume JExtract imported class
+      return NativeResult(
+        javaType: wrappedValueResult.javaType,
+        conversion: .optionalRaisingIndirectReturn(
+          wrappedValueResult.conversion,
+          resultName: "\(resultName)$",
+          returnType: wrappedValueResult.javaType,
+          discriminatorParameterName: discriminatorName,
+          placeholderValue: .constant("0")
+        ),
+        outParameters: [
+          JavaParameter(name: discriminatorName, type: .array(.byte))
+        ] + wrappedValueResult.outParameters
+      )
     }
 
     func translateClosureResult(
@@ -1162,6 +1144,7 @@ extension JNISwift2JavaGenerator {
 
     indirect case optionalRaisingIndirectReturn(
       NativeSwiftConversionStep,
+      resultName: String,
       returnType: JavaType,
       discriminatorParameterName: String,
       placeholderValue: NativeSwiftConversionStep
@@ -1530,17 +1513,18 @@ extension JNISwift2JavaGenerator {
 
       case .optionalRaisingIndirectReturn(
         let inner,
+        let resultName,
         let returnType,
         let discriminatorParameterName,
         let placeholderValue
       ):
         if !returnType.isVoid {
-          printer.print("let result$: \(returnType.jniTypeName)")
+          printer.print("let \(resultName): \(returnType.jniTypeName)")
         }
         printer.printBraceBlock("if let innerResult$ = \(placeholder)") { printer in
           let inner = inner.render(&printer, "innerResult$")
           if !returnType.isVoid {
-            printer.print("result$ = \(inner)")
+            printer.print("\(resultName) = \(inner)")
           }
           printer.print(
             """
@@ -1552,7 +1536,7 @@ extension JNISwift2JavaGenerator {
         printer.printBraceBlock("else") { printer in
           let placeholderValue = placeholderValue.render(&printer, placeholder)
           if !returnType.isVoid {
-            printer.print("result$ = \(placeholderValue)")
+            printer.print("\(resultName) = \(placeholderValue)")
           }
           printer.print(
             """
@@ -1562,7 +1546,7 @@ extension JNISwift2JavaGenerator {
           )
         }
         if !returnType.isVoid {
-          return "result$"
+          return resultName
         } else {
           return ""
         }
