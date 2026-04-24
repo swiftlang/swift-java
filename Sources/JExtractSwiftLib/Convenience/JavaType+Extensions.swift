@@ -88,6 +88,15 @@ extension JavaType {
     }
   }
 
+  var swiftJniPlaceholderExpr: String {
+    switch self {
+    case .boolean, .byte, .char, .short, .int, .long: "0"
+    case .float, .double: "0.0"
+    case .array, .class: "nil"
+    case .void: "()"
+    }
+  }
+
   var jniCallMethodAName: String {
     switch self {
     case .boolean: "CallBooleanMethodA"

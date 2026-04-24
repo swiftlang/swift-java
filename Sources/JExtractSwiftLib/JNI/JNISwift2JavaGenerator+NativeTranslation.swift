@@ -559,11 +559,7 @@ extension JNISwift2JavaGenerator {
                   .getJNIValue(.placeholder),
                   resultName: "\(resultName)$",
                   returnType: javaType,
-                  discriminatorParameterName: discriminatorName,
-                  placeholderValue: .member(
-                    .constant("\(swiftType)"),
-                    member: "jniPlaceholderValue"
-                  )
+                  discriminatorParameterName: discriminatorName
                 ),
                 outParameters: [
                   JavaParameter(name: discriminatorName, type: .array(.byte))
@@ -572,25 +568,32 @@ extension JNISwift2JavaGenerator {
             }
           }
         }
-      default:
+
+        guard !nominalType.isSwiftJavaWrapper else {
+          // TODO: Should be the same as above
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+      case .tuple:
         break
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
 
+      // Common indirect conversion
       let wrappedValueResult = try translateResult(
         swiftType: swiftType,
         methodName: methodName,
         resultName: resultName + "Wrapped"
       )
-
-      // Assume JExtract imported class
       return NativeResult(
         javaType: wrappedValueResult.javaType,
         conversion: .optionalRaisingIndirectReturn(
           wrappedValueResult.conversion,
           resultName: "\(resultName)$",
           returnType: wrappedValueResult.javaType,
-          discriminatorParameterName: discriminatorName,
-          placeholderValue: .constant("0")
+          discriminatorParameterName: discriminatorName
         ),
         outParameters: [
           JavaParameter(name: discriminatorName, type: .array(.byte))
@@ -1146,8 +1149,7 @@ extension JNISwift2JavaGenerator {
       NativeSwiftConversionStep,
       resultName: String,
       returnType: JavaType,
-      discriminatorParameterName: String,
-      placeholderValue: NativeSwiftConversionStep
+      discriminatorParameterName: String
     )
 
     indirect case genericValueIndirectReturn(
@@ -1515,8 +1517,7 @@ extension JNISwift2JavaGenerator {
         let inner,
         let resultName,
         let returnType,
-        let discriminatorParameterName,
-        let placeholderValue
+        let discriminatorParameterName
       ):
         if !returnType.isVoid {
           printer.print("let \(resultName): \(returnType.jniTypeName)")
@@ -1534,9 +1535,8 @@ extension JNISwift2JavaGenerator {
           )
         }
         printer.printBraceBlock("else") { printer in
-          let placeholderValue = placeholderValue.render(&printer, placeholder)
           if !returnType.isVoid {
-            printer.print("\(resultName) = \(placeholderValue)")
+            printer.print("\(resultName) = \(returnType.swiftJniPlaceholderExpr)")
           }
           printer.print(
             """

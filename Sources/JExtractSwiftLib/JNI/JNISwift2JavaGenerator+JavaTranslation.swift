@@ -1321,11 +1321,19 @@ extension JNISwift2JavaGenerator {
             }
           }
         }
-      default:
+
+        guard !nominalType.isSwiftJavaWrapper else {
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        }
+
+      case .tuple:
         break
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
 
-      // We assume this is a JExtract class.
+      // Common indirect conversion
       let javaType = try translateGenericTypeParameter(
         swiftType,
         genericParameters: genericParameters,
