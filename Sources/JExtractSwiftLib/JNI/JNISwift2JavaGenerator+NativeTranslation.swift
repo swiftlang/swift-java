@@ -80,6 +80,8 @@ extension JNISwift2JavaGenerator {
         }
 
       let result = try translate(swiftResult: functionSignature.result, methodName: methodName)
+      assert(translatedFunctionSignature.result.nativeJavaType == result.javaType)
+      assert(translatedFunctionSignature.result.outParameters.map(\.javaParameter.type) == result.outParameters.map(\.type))
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,

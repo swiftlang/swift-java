@@ -660,7 +660,7 @@ extension JNISwift2JavaGenerator {
     }
 
     let translatedSignature = translatedDecl.translatedFunctionSignature
-    let resultType = translatedSignature.resultType.javaType
+    let resultType = translatedSignature.result.javaType
     var parameters = translatedDecl.translatedFunctionSignature.parameters.map { $0.parameter.renderParameter() }
     let throwsClause = translatedDecl.throwsClause()
 
@@ -714,7 +714,7 @@ extension JNISwift2JavaGenerator {
         let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
-        if translatedDecl.translatedFunctionSignature.resultType.javaType.isVoid {
+        if translatedDecl.translatedFunctionSignature.result.javaType.isVoid {
           printer.print("\(call);")
         } else {
           printer.print("return \(call);")
@@ -792,7 +792,7 @@ extension JNISwift2JavaGenerator {
     }
 
     // Indirect return receivers
-    for outParameter in translatedFunctionSignature.resultType.outParameters {
+    for outParameter in translatedFunctionSignature.result.outParameters {
       printer.print(
         "\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));"
       )
@@ -807,15 +807,15 @@ extension JNISwift2JavaGenerator {
       "\(effectiveParentName.fullName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
-    if translatedFunctionSignature.resultType.javaType.isVoid {
+    if translatedFunctionSignature.result.javaType.isVoid {
       printer.print("\(downcall);")
     } else {
       let result: String
       if translatedDecl.nativeFunctionSignature.result.javaType.isVoid {
         printer.print("\(downcall);")
-        result = translatedFunctionSignature.resultType.conversion.render(&printer, "")
+        result = translatedFunctionSignature.result.conversion.render(&printer, "")
       } else {
-        result = translatedFunctionSignature.resultType.conversion.render(&printer, downcall)
+        result = translatedFunctionSignature.result.conversion.render(&printer, downcall)
       }
       printer.print("return \(result);")
     }

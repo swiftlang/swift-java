@@ -19,7 +19,7 @@ extension JNISwift2JavaGenerator.TranslatedFunctionDecl {
   /// Returns any used labeled tuple types that this function uses
   var usedLabeledTuples: [JavaType] {
     var result: [JavaType] = []
-    collectLabeledTuples(from: translatedFunctionSignature.resultType.javaType, into: &result)
+    collectLabeledTuples(from: translatedFunctionSignature.result.javaType, into: &result)
     for param in translatedFunctionSignature.parameters {
       collectLabeledTuples(from: param.parameter.type.javaType, into: &result)
     }
