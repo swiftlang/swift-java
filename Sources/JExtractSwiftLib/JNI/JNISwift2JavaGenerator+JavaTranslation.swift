@@ -117,13 +117,20 @@ extension JNISwift2JavaGenerator {
 
       let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
         let resultName = parameter.name ?? "arg\(idx)"
-        let result = SwiftResult(convention: .direct, type: parameter.type)
-        var translatedResult = try self.translate(swiftResult: result, methodName: methodName, resultName: resultName)
+        var translatedResult = try self.translateResult(
+          swiftType: parameter.type,
+          methodName: methodName,
+          resultName: resultName
+        )
         translatedResult.conversion = .replacingPlaceholder(
           translatedResult.conversion,
           placeholder: "$nativeParameters.\(resultName)",
         )
-        let nativeResult = try nativeTranslation.translate(swiftResult: result, methodName: methodName, resultName: resultName)
+        let nativeResult = try nativeTranslation.translateResult(
+          swiftType: parameter.type,
+          methodName: methodName,
+          resultName: resultName
+        )
         return (translated: translatedResult, native: nativeResult)
       }
 
@@ -179,8 +186,9 @@ extension JNISwift2JavaGenerator {
               conversion: .typeMetadataAddress(.placeholder),
             ),
           parameters: [],
-          resultType: TranslatedResult(
+          result: TranslatedResult(
             javaType: .optional(caseType),
+            nativeJavaType: nativeParametersType,
             outParameters: conversions.flatMap(\.translated.outParameters),
             conversion: enumCase.parameters.isEmpty
               ? constructRecordConversion
@@ -323,7 +331,7 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let translatedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType), methodName: name)
+      let translatedResult = try translateResult(swiftType: swiftType.resultType, methodName: name)
 
       return TranslatedFunctionType(
         name: name,
@@ -369,8 +377,8 @@ extension JNISwift2JavaGenerator {
         exceptions.append(.integerOverflow)
       }
 
-      let resultType = try translate(
-        swiftResult: functionSignature.result,
+      let resultType = try translateResult(
+        swiftType: functionSignature.result.type,
         methodName: methodName,
         genericParameters: functionSignature.genericParameters,
         genericRequirements: functionSignature.genericRequirements,
@@ -380,7 +388,7 @@ extension JNISwift2JavaGenerator {
         selfParameter: selfParameter,
         selfTypeParameter: selfTypeParameter,
         parameters: parameters,
-        resultType: resultType,
+        result: resultType,
         exceptions: exceptions,
       )
     }
@@ -699,13 +707,13 @@ extension JNISwift2JavaGenerator {
       switch mode {
       case .completableFuture:
         nativeFutureType = .completableFuture(nativeFunctionSignature.result.javaType)
-        translatedFutureType = .completableFuture(translatedFunctionSignature.resultType.javaType)
+        translatedFutureType = .completableFuture(translatedFunctionSignature.result.javaType)
         completeMethodID = "_JNIMethodIDCache.CompletableFuture.complete"
         completeExceptionallyMethodID = "_JNIMethodIDCache.CompletableFuture.completeExceptionally"
 
       case .legacyFuture:
         nativeFutureType = .simpleCompletableFuture(nativeFunctionSignature.result.javaType)
-        translatedFutureType = .future(translatedFunctionSignature.resultType.javaType)
+        translatedFutureType = .future(translatedFunctionSignature.result.javaType)
         completeMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.complete"
         completeExceptionallyMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.completeExceptionally"
       }
@@ -716,9 +724,10 @@ extension JNISwift2JavaGenerator {
         allocation: .new,
       )
 
-      let result = translatedFunctionSignature.resultType
-      translatedFunctionSignature.resultType = TranslatedResult(
+      let result = translatedFunctionSignature.result
+      translatedFunctionSignature.result = TranslatedResult(
         javaType: translatedFutureType,
+        nativeJavaType: .void,
         annotations: result.annotations,
         outParameters: result.outParameters + [futureOutParameter],
         conversion: .method(
@@ -890,15 +899,13 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(
-      swiftResult: SwiftResult,
+    func translateResult(
+      swiftType: SwiftType,
       methodName: String,
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration] = [],
       genericRequirements: [SwiftGenericRequirement] = [],
     ) throws -> TranslatedResult {
-      let swiftType = swiftResult.type
-
       // If the result type should cause any annotations on the method, include them here.
       let resultAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
@@ -948,6 +955,7 @@ extension JNISwift2JavaGenerator {
           case .foundationUUID, .essentialsUUID:
             return TranslatedResult(
               javaType: .javaUtilUUID,
+              nativeJavaType: .javaLangString,
               outParameters: [],
               conversion: .method(
                 .constant("java.util.UUID"),
@@ -963,6 +971,7 @@ extension JNISwift2JavaGenerator {
 
             return TranslatedResult(
               javaType: javaType,
+              nativeJavaType: javaType,
               annotations: resultAnnotations,
               outParameters: [],
               conversion: .placeholder,
@@ -990,6 +999,7 @@ extension JNISwift2JavaGenerator {
         if nominalType.nominalTypeDecl.isGeneric {
           return TranslatedResult(
             javaType: javaType,
+            nativeJavaType: .void,
             annotations: resultAnnotations,
             outParameters: [.init(name: resultName, type: ._OutSwiftGenericInstance, allocation: .new)],
             conversion: .wrapMemoryAddressUnsafe(
@@ -1003,6 +1013,7 @@ extension JNISwift2JavaGenerator {
         } else {
           return TranslatedResult(
             javaType: javaType,
+            nativeJavaType: .long,
             annotations: resultAnnotations,
             outParameters: [],
             conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
@@ -1010,7 +1021,7 @@ extension JNISwift2JavaGenerator {
         }
 
       case .tuple([]):
-        return TranslatedResult(javaType: .void, outParameters: [], conversion: .placeholder)
+        return TranslatedResult(javaType: .void, nativeJavaType: .void, outParameters: [], conversion: .placeholder)
 
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(
@@ -1152,8 +1163,8 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Determine the Java type for this element
-        let elementResult = try translate(
-          swiftResult: .init(convention: .indirect, type: element.type),
+        let elementResult = try translateResult(
+          swiftType: element.type,
           methodName: methodName,
           resultName: outParamName,
           genericParameters: genericParameters,
@@ -1162,9 +1173,9 @@ extension JNISwift2JavaGenerator {
 
         // out names are always ...$N, no need to use real named tuple names here, this is just for the thunk
         elementOutParamNames.append(outParamName)
+        outParameters.append(contentsOf: elementResult.outParameters)
 
-        // FIXME: More accurate determination of whether the result is direct or indirect
-        if elementResult.outParameters.isEmpty {
+        if !elementResult.nativeJavaType.isVoid {
           // Convert direct result to indirect result.
           // For most class types (Swift wrapper classes), the JNI native representation
           // is 'long' (a memory address). However, String is a native JNI reference
@@ -1184,7 +1195,6 @@ extension JNISwift2JavaGenerator {
           )
           elementConversions.append(elementResult.conversion)
         } else {
-          outParameters.append(contentsOf: elementResult.outParameters)
           elementConversions.append(.placeToVar(elementResult.conversion, name: "\(resultName)_\(idx)"))
         }
         elementJavaTypes.append(elementResult.javaType)
@@ -1228,6 +1238,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedResult(
         javaType: javaResultType,
+        nativeJavaType: .void,
         annotations: tupleAnnotations,
         outParameters: outParameters,
         conversion: javaNativeConversionStep
@@ -1271,6 +1282,7 @@ extension JNISwift2JavaGenerator {
             if let nextIntergralTypeWithSpaceForByte = javaType.nextIntergralTypeWithSpaceForByte {
               return TranslatedResult(
                 javaType: .class(package: nil, name: returnType),
+                nativeJavaType: nextIntergralTypeWithSpaceForByte.javaType,
                 annotations: parameterAnnotations,
                 outParameters: [],
                 conversion: .combinedValueToOptional(
@@ -1287,6 +1299,7 @@ extension JNISwift2JavaGenerator {
               // use an indirect return for the discriminator.
               return TranslatedResult(
                 javaType: .class(package: nil, name: returnType),
+                nativeJavaType: javaType,
                 annotations: parameterAnnotations,
                 outParameters: [
                   OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
@@ -1314,25 +1327,18 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-        let wrappedValueResult = try translate(
-          swiftResult: SwiftResult(convention: .direct, type: swiftType),
+        let wrappedValueResult = try translateResult(
+          swiftType: swiftType,
           methodName: methodName,
           resultName: resultName + "Wrapped$",
           genericParameters: genericParameters,
           genericRequirements: genericRequirements,
         )
 
-        // FIXME: More accurate JavaType using NativeJavaTranslation results directly
-        let nativeResultJavaType: JavaType =
-          if wrappedValueResult.outParameters.isEmpty {
-            .long
-          } else {
-            .void
-          }
-
         let returnType = JavaType.optional(javaType)
         return TranslatedResult(
           javaType: returnType,
+          nativeJavaType: wrappedValueResult.nativeJavaType,
           annotations: parameterAnnotations,
           outParameters: [
             OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
@@ -1340,7 +1346,7 @@ extension JNISwift2JavaGenerator {
           conversion: .toOptionalFromIndirectReturn(
             discriminatorName: .constant(discriminatorName),
             optionalClass: "Optional",
-            nativeResultJavaType: nativeResultJavaType,
+            nativeResultJavaType: wrappedValueResult.nativeJavaType,
             toValue: wrappedValueResult.conversion,
             resultName: resultName
           )
@@ -1449,6 +1455,7 @@ extension JNISwift2JavaGenerator {
         )
         return TranslatedResult(
           javaType: .array(innerResult.javaType),
+          nativeJavaType: .array(innerResult.javaType),
           annotations: annotations,
           outParameters: [],
           conversion: .placeholder
@@ -1462,6 +1469,7 @@ extension JNISwift2JavaGenerator {
 
           return TranslatedResult(
             javaType: .array(javaType),
+            nativeJavaType: .array(javaType),
             annotations: annotations,
             outParameters: [],
             conversion: .placeholder,
@@ -1480,6 +1488,7 @@ extension JNISwift2JavaGenerator {
         // We assume this is a JExtract class.
         return TranslatedResult(
           javaType: .array(javaType),
+          nativeJavaType: .array(.long),
           annotations: annotations,
           outParameters: [],
           conversion: .method(
@@ -1564,6 +1573,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedResult(
         javaType: dictType,
+        nativeJavaType: .long,
         outParameters: [],
         conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType),
       )
@@ -1606,6 +1616,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedResult(
         javaType: setType,
+        nativeJavaType: .long,
         outParameters: [],
         conversion: .wrapMemoryAddressUnsafe(.placeholder, setType),
       )
@@ -1682,17 +1693,17 @@ extension JNISwift2JavaGenerator {
     var selfParameter: TranslatedParameter?
     var selfTypeParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
-    var resultType: TranslatedResult
+    var result: TranslatedResult
     var exceptions: [JavaExceptionType]
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from
     var annotations: [JavaAnnotation] {
-      self.resultType.annotations
+      self.result.annotations
     }
 
     var requiresSwiftArena: Bool {
-      self.resultType.conversion.requiresSwiftArena
+      self.result.conversion.requiresSwiftArena
     }
   }
 
@@ -1704,12 +1715,15 @@ extension JNISwift2JavaGenerator {
 
   /// Represent a Swift API result translated to Java.
   struct TranslatedResult {
-    let javaType: JavaType
+    var javaType: JavaType
+
+    /// result type of native function
+    var nativeJavaType: JavaType
 
     /// Java annotations that should be propagated from the result type onto the method
     var annotations: [JavaAnnotation] = []
 
-    let outParameters: [OutParameter]
+    var outParameters: [OutParameter]
 
     /// Represents how to convert the Java native result into a user-facing result.
     var conversion: JavaNativeConversionStep
@@ -1742,10 +1756,6 @@ extension JNISwift2JavaGenerator {
     let name: String
     let type: JavaType
     let allocation: Allocation
-
-    var javaParameter: JavaParameter {
-      JavaParameter(name: self.name, type: self.type)
-    }
   }
 
   /// Represent a Swift closure type in the user facing Java API.

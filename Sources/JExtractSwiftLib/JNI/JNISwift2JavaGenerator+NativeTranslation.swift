@@ -79,7 +79,9 @@ extension JNISwift2JavaGenerator {
           nil
         }
 
-      let result = try translate(swiftResult: functionSignature.result, methodName: methodName)
+      let result = try translateResult(swiftType: functionSignature.result.type, methodName: methodName)
+      assert(translatedFunctionSignature.result.nativeJavaType == result.javaType, "Not synchronized with JavaTranslation")
+      assert(translatedFunctionSignature.result.outParameters.map(\.type) == result.outParameters.map(\.type.javaType), "Not synchronized with JavaTranslation")
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
@@ -589,11 +591,8 @@ extension JNISwift2JavaGenerator {
           throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
-        let wrappedValueResult = try translate(
-          swiftResult: .init(
-            convention: .direct,
-            type: swiftType
-          ),
+        let wrappedValueResult = try translateResult(
+          swiftType: swiftType,
           methodName: methodName,
           resultName: resultName + "Wrapped"
         )
@@ -693,12 +692,12 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(
-      swiftResult: SwiftResult,
+    func translateResult(
+      swiftType: SwiftType,
       methodName: String,
       resultName: String = "result"
     ) throws -> NativeResult {
-      switch swiftResult.type {
+      switch swiftType {
       case .nominal(let nominalType):
         if let knownType = nominalType.asKnownType {
           switch knownType {
@@ -736,7 +735,7 @@ extension JNISwift2JavaGenerator {
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType.kind, config: self.config),
               javaType.implementsJavaValue
             else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
 
             if let indirectReturnType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
@@ -759,15 +758,15 @@ extension JNISwift2JavaGenerator {
         }
 
         if nominalType.isSwiftJavaWrapper {
-          throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+          throw JavaTranslationError.unsupportedSwiftType(swiftType)
         }
 
         if nominalType.nominalTypeDecl.isGeneric {
           return NativeResult(
             javaType: .void,
             conversion: .genericValueIndirectReturn(
-              .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftResult.type)),
-              swiftFunctionResultType: swiftResult.type,
+              .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftType)),
+              swiftFunctionResultType: swiftType,
               outArgumentName: resultName + "Out"
             ),
             outParameters: [.init(name: resultName + "Out", type: ._OutSwiftGenericInstance)]
@@ -775,7 +774,7 @@ extension JNISwift2JavaGenerator {
         } else {
           return NativeResult(
             javaType: .long,
-            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftResult.type)),
+            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftType)),
             outParameters: []
           )
         }
@@ -791,7 +790,7 @@ extension JNISwift2JavaGenerator {
         return try translateTupleResult(methodName: methodName, elements: elements, resultName: resultName)
 
       case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
-        throw JavaTranslationError.unsupportedSwiftType(swiftResult.type)
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
 
@@ -807,20 +806,18 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Get the JNI type for this element
-        let elementResult = try translate(
-          swiftResult: .init(convention: .indirect, type: element.type),
+        let elementResult = try translateResult(
+          swiftType: element.type,
           methodName: methodName,
           resultName: outParamName
         )
 
-        // FIXME: More accurate determination of whether the result is direct or indirect
-        if elementResult.outParameters.isEmpty {
+        outParameters.append(contentsOf: elementResult.outParameters)
+        if !elementResult.javaType.isVoid {
           // Convert direct result to indirect result
           outParameters.append(
             JavaParameter(name: outParamName, type: .array(elementResult.javaType))
           )
-        } else {
-          outParameters.append(contentsOf: elementResult.outParameters)
         }
 
         destructureElements.append(

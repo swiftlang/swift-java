@@ -16,7 +16,7 @@ import SwiftJavaJNICore
 
 /// Represent a parameter in Java code.
 struct JavaParameter {
-  enum ParameterType: CustomStringConvertible {
+  enum ParameterType: Equatable, CustomStringConvertible {
     case concrete(JavaType)
     case generic(name: String, extends: [JavaType])
 
