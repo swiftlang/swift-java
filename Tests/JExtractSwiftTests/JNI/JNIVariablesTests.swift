@@ -242,7 +242,7 @@ struct JNIVariablesTests {
             return try selfPointer$.pointee.computedThrowing.getJNILocalRefValue(in: environment)
           } catch {
             environment.throwAsException(error)
-            return Int64.jniPlaceholderValue
+            return 0
           }
         }
         """

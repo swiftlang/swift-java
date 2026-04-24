@@ -129,7 +129,7 @@ struct JNIOptionalTests {
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
-            result$ = String.jniPlaceholderValue
+            result$ = nil
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }

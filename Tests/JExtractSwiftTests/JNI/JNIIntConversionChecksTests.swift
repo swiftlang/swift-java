@@ -70,7 +70,7 @@ struct JNIIntConversionChecksTests {
           #if _pointerBitWidth(_32)
           guard normalInt$indirect >= Int32.min && normalInt$indirect <= Int32.max else {
             environment.throwJavaException(javaException: .integerOverflow)
-            return Int64.jniPlaceholderValue
+            return 0
         """,
         """
         #endif
@@ -96,7 +96,7 @@ struct JNIIntConversionChecksTests {
           #if _pointerBitWidth(_32)
           guard unsignedInt$indirect >= UInt32.min && unsignedInt$indirect <= UInt32.max else {
             environment.throwJavaException(javaException: .integerOverflow)
-            return Int64.jniPlaceholderValue
+            return 0
         """,
         """
         #endif
@@ -201,7 +201,7 @@ struct JNIIntConversionChecksTests {
           #if _pointerBitWidth(_32)
           guard arg$indirect >= Int32.min && arg$indirect <= Int32.max else {
             environment.throwJavaException(javaException: .integerOverflow)
-            return Int64.jniPlaceholderValue
+            return 0
         """,
         """
         #endif
@@ -230,7 +230,7 @@ struct JNIIntConversionChecksTests {
           #if _pointerBitWidth(_32)
           guard arg$indirect >= UInt32.min && arg$indirect <= UInt32.max else {
             environment.throwJavaException(javaException: .integerOverflow)
-            return Int64.jniPlaceholderValue
+            return 0
         """,
         """
         assert(selfPointer != 0, "selfPointer memory address was null")
@@ -258,7 +258,7 @@ struct JNIIntConversionChecksTests {
           #if _pointerBitWidth(_32)
           guard arg0$indirect >= UInt32.min && arg0$indirect <= UInt32.max else {
             environment.throwJavaException(javaException: .integerOverflow)
-            return Int64.jniPlaceholderValue
+            return 0
         """,
         """
         #endif
