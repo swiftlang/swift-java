@@ -117,13 +117,20 @@ extension JNISwift2JavaGenerator {
 
       let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
         let resultName = parameter.name ?? "arg\(idx)"
-        let result = SwiftResult(convention: .direct, type: parameter.type)
-        var translatedResult = try self.translate(swiftResult: result, methodName: methodName, resultName: resultName)
+        var translatedResult = try self.translateResult(
+          swiftType: parameter.type,
+          methodName: methodName,
+          resultName: resultName
+        )
         translatedResult.conversion = .replacingPlaceholder(
           translatedResult.conversion,
           placeholder: "$nativeParameters.\(resultName)",
         )
-        let nativeResult = try nativeTranslation.translate(swiftResult: result, methodName: methodName, resultName: resultName)
+        let nativeResult = try nativeTranslation.translateResult(
+          swiftType: parameter.type,
+          methodName: methodName,
+          resultName: resultName
+        )
         return (translated: translatedResult, native: nativeResult)
       }
 
@@ -324,7 +331,7 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let translatedResult = try translate(swiftResult: SwiftResult(convention: .direct, type: swiftType.resultType), methodName: name)
+      let translatedResult = try translateResult(swiftType: swiftType.resultType, methodName: name)
 
       return TranslatedFunctionType(
         name: name,
@@ -370,8 +377,8 @@ extension JNISwift2JavaGenerator {
         exceptions.append(.integerOverflow)
       }
 
-      let resultType = try translate(
-        swiftResult: functionSignature.result,
+      let resultType = try translateResult(
+        swiftType: functionSignature.result.type,
         methodName: methodName,
         genericParameters: functionSignature.genericParameters,
         genericRequirements: functionSignature.genericRequirements,
@@ -892,15 +899,13 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    func translate(
-      swiftResult: SwiftResult,
+    func translateResult(
+      swiftType: SwiftType,
       methodName: String,
       resultName: String = "result",
       genericParameters: [SwiftGenericParameterDeclaration] = [],
       genericRequirements: [SwiftGenericRequirement] = [],
     ) throws -> TranslatedResult {
-      let swiftType = swiftResult.type
-
       // If the result type should cause any annotations on the method, include them here.
       let resultAnnotations: [JavaAnnotation] = getJavaTypeAnnotations(swiftType: swiftType, config: config)
 
@@ -1158,8 +1163,8 @@ extension JNISwift2JavaGenerator {
         let outParamName = "\(resultName)_\(idx)$"
 
         // Determine the Java type for this element
-        let elementResult = try translate(
-          swiftResult: .init(convention: .indirect, type: element.type),
+        let elementResult = try translateResult(
+          swiftType: element.type,
           methodName: methodName,
           resultName: outParamName,
           genericParameters: genericParameters,
@@ -1323,8 +1328,8 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-        let wrappedValueResult = try translate(
-          swiftResult: SwiftResult(convention: .direct, type: swiftType),
+        let wrappedValueResult = try translateResult(
+          swiftType: swiftType,
           methodName: methodName,
           resultName: resultName + "Wrapped$",
           genericParameters: genericParameters,
