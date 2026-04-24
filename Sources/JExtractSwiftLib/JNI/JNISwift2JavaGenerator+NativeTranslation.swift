@@ -812,14 +812,12 @@ extension JNISwift2JavaGenerator {
           resultName: outParamName
         )
 
-        // FIXME: More accurate determination of whether the result is direct or indirect
-        if elementResult.outParameters.isEmpty {
+        outParameters.append(contentsOf: elementResult.outParameters)
+        if !elementResult.javaType.isVoid {
           // Convert direct result to indirect result
           outParameters.append(
             JavaParameter(name: outParamName, type: .array(elementResult.javaType))
           )
-        } else {
-          outParameters.append(contentsOf: elementResult.outParameters)
         }
 
         destructureElements.append(

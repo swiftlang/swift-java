@@ -1173,9 +1173,9 @@ extension JNISwift2JavaGenerator {
 
         // out names are always ...$N, no need to use real named tuple names here, this is just for the thunk
         elementOutParamNames.append(outParamName)
+        outParameters.append(contentsOf: elementResult.outParameters)
 
-        // FIXME: More accurate determination of whether the result is direct or indirect
-        if elementResult.outParameters.isEmpty {
+        if !elementResult.nativeJavaType.isVoid {
           // Convert direct result to indirect result.
           // For most class types (Swift wrapper classes), the JNI native representation
           // is 'long' (a memory address). However, String is a native JNI reference
@@ -1195,7 +1195,6 @@ extension JNISwift2JavaGenerator {
           )
           elementConversions.append(elementResult.conversion)
         } else {
-          outParameters.append(contentsOf: elementResult.outParameters)
           elementConversions.append(.placeToVar(elementResult.conversion, name: "\(resultName)_\(idx)"))
         }
         elementJavaTypes.append(elementResult.javaType)
@@ -1336,18 +1335,10 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-        // FIXME: More accurate JavaType using NativeJavaTranslation results directly
-        let nativeResultJavaType: JavaType =
-          if wrappedValueResult.outParameters.isEmpty {
-            .long
-          } else {
-            .void
-          }
-
         let returnType = JavaType.optional(javaType)
         return TranslatedResult(
           javaType: returnType,
-          nativeJavaType: nativeResultJavaType,
+          nativeJavaType: wrappedValueResult.nativeJavaType,
           annotations: parameterAnnotations,
           outParameters: [
             OutParameter(name: discriminatorName, type: .array(.byte), allocation: .newArray(.byte, size: 1))
@@ -1355,7 +1346,7 @@ extension JNISwift2JavaGenerator {
           conversion: .toOptionalFromIndirectReturn(
             discriminatorName: .constant(discriminatorName),
             optionalClass: "Optional",
-            nativeResultJavaType: nativeResultJavaType,
+            nativeResultJavaType: wrappedValueResult.nativeJavaType,
             toValue: wrappedValueResult.conversion,
             resultName: resultName
           )
