@@ -1765,10 +1765,6 @@ extension JNISwift2JavaGenerator {
     let name: String
     let type: JavaType
     let allocation: Allocation
-
-    var javaParameter: JavaParameter {
-      JavaParameter(name: self.name, type: self.type)
-    }
   }
 
   /// Represent a Swift closure type in the user facing Java API.

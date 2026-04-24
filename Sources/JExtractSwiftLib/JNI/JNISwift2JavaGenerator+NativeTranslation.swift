@@ -81,7 +81,7 @@ extension JNISwift2JavaGenerator {
 
       let result = try translateResult(swiftType: functionSignature.result.type, methodName: methodName)
       assert(translatedFunctionSignature.result.nativeJavaType == result.javaType, "Not synchronized with JavaTranslation")
-      assert(translatedFunctionSignature.result.outParameters.map(\.javaParameter.type) == result.outParameters.map(\.type), "Not synchronized with JavaTranslation")
+      assert(translatedFunctionSignature.result.outParameters.map(\.type) == result.outParameters.map(\.type.javaType), "Not synchronized with JavaTranslation")
 
       return NativeFunctionSignature(
         selfParameter: nativeSelf,
