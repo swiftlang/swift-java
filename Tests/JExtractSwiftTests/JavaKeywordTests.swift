@@ -98,7 +98,7 @@ struct JavaKeywordTests {
         record Instanceof(java.lang.String arg0) implements Case {
         """,
         """
-        private static native Case.Instanceof._NativeParameters $getAsInstanceof(long selfPointer);
+        public java.util.Optional<Case.Instanceof> getAsInstanceof() {
         """,
       ]
     )
@@ -109,7 +109,8 @@ struct JavaKeywordTests {
       .swift,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyEnumWithValue__00024getAsInstanceof__J")
+        extension MyEnumWithValue {
+          fileprivate func _getInstanceofValues() -> (String)? {
         """
       ]
     )

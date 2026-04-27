@@ -174,7 +174,7 @@ struct JNIEnumTests {
         """
         public Case getCase(SwiftArena swiftArena) {
           return switch (this.getDiscriminator()) {
-            case FIRST -> this.getAsFirst().orElseThrow();
+            case FIRST -> new Case.First();
             case SECOND -> this.getAsSecond().orElseThrow();
             case THIRD -> this.getAsThird(swiftArena).orElseThrow();
           }
@@ -262,34 +262,36 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .java,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         public java.util.Optional<Case.First> getAsFirst() {
           if (getDiscriminator() != Discriminator.FIRST) {
-            return Optional.empty();
+            return java.util.Optional.empty();
           }
-          return Optional.of(new Case.First());
+          return java.util.Optional.of(new Case.First());
         }
         """,
         """
         public java.util.Optional<Case.Second> getAsSecond() {
-          if (getDiscriminator() != Discriminator.SECOND) {
-            return Optional.empty();
-          }
-          Case.Second._NativeParameters $nativeParameters = MyEnum.$getAsSecond(this.$memoryAddress());
-          return Optional.of(new Case.Second($nativeParameters.arg0));
+          return _getSecondValues().map(t ->
+            new Case.Second(t)
+          );
         }
         """,
         """
+        private java.util.Optional<java.lang.String> _getSecondValues() {
+        """,
+        """
         public java.util.Optional<Case.Third> getAsThird(SwiftArena swiftArena) {
-          if (getDiscriminator() != Discriminator.THIRD) {
-            return Optional.empty();
-          }
-          Case.Third._NativeParameters $nativeParameters = MyEnum.$getAsThird(this.$memoryAddress());
-          return Optional.of(new Case.Third($nativeParameters.x, $nativeParameters.y, MyValue.wrapMemoryAddressUnsafe($nativeParameters.arg2, swiftArena)));
+          return _getThirdValues(swiftArena).map(t ->
+            new Case.Third(t.$0, t.$1, t.$2)
+          );
         }
         """,
+        """
+        private java.util.Optional<org.swift.swiftkit.core.tuple.Tuple3<java.lang.Long, java.lang.Integer, MyValue>> _getThirdValues(SwiftArena swiftArena) {
+        """
       ]
     )
   }
@@ -300,50 +302,37 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
-        enum _JNI_MyEnum {
-          static let myEnumSecondCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Case$Second$_NativeParameters", methods: [.init(name: "<init>", signature: "(Ljava/lang/String;)V")])
-          static let myEnumThirdCache = _JNIMethodIDCache(className: "com/example/swift/MyEnum$Case$Third$_NativeParameters", methods: [.init(name: "<init>", signature: "(JIJ)V")])
+        extension MyEnum { 
+          fileprivate func _getSecondValues() -> (String)? {
+            if case let .second(_0) = self {
+              return (_0)
+            }
+            return nil
+          }
         }
         """,
         """
-        @_cdecl("Java_com_example_swift_MyEnum__00024getAsSecond__J")
-        public func Java_com_example_swift_MyEnum__00024getAsSecond__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
-          ...
-          guard case .second(let _0) = selfPointer$.pointee else {
-            fatalError("Expected enum case 'second', but was '\\(selfPointer$.pointee)'!")
+        extension MyEnum {
+          fileprivate func _getThirdValues() -> (Int64, Int32, MyValue)? {
+            if case let .third(x, y, _2) = self {
+              return (x, y, _2)
+            }
+            return nil
           }
-          let cache$ = _JNI_MyEnum.myEnumSecondCache
-          let class$ = cache$.javaClass
-          let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(Ljava/lang/String;)V")
-          let constructorID$ = cache$[method$]
-          let newObjectArgs$: [jvalue] = [jvalue(l: _0.getJNILocalRefValue(in: environment) ?? nil)]
-          return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
         }
         """,
         """
-        @_cdecl("Java_com_example_swift_MyEnum__00024getAsThird__J")
-        public func Java_com_example_swift_MyEnum__00024getAsThird__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jobject? {
-          ...
-          guard case .third(let x, let y, let _2) = selfPointer$.pointee else {
-            fatalError("Expected enum case 'third', but was '\\(selfPointer$.pointee)'!")
-          }
-          let cache$ = _JNI_MyEnum.myEnumThirdCache
-          let class$ = cache$.javaClass
-          let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "(JIJ)V")
-          let constructorID$ = cache$[method$]
-          let arg2$ = UnsafeMutablePointer<MyValue>.allocate(capacity: 1)
-          arg2$.initialize(to: _2)
-          let arg2Bits$ = Int64(Int(bitPattern: arg2$))
-          let newObjectArgs$: [jvalue] = [jvalue(j: x.getJNILocalRefValue(in: environment)), jvalue(i: y.getJNILocalRefValue(in: environment)), jvalue(j: arg2Bits$.getJNILocalRefValue(in: environment))]
-          return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
-        }
+        public func Java_com_example_swift_MyEnum__00024_1getSecondValues
+        """,
+        """
+        public func Java_com_example_swift_MyEnum__00024_1getThirdValues
         """,
       ],
       notExpectedChunks: [
-        "public func Java_com_example_swift_MyEnum__00024getAsFirst__J("
+        "fileprivate func _getFirstValues("
       ]
     )
   }

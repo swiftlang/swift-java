@@ -564,10 +564,10 @@ extension JNISwift2JavaGenerator {
         printer.print(
           """
           public \(resultType) \(getAsCaseName)() {
-            if (getDiscriminator() == Discriminator.\(enumCase.name.uppercased())) {
-              return java.util.Optional.of(new Case.\(translatedCase.name)());
+            if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
+              return java.util.Optional.empty();
             }
-            return java.util.Optional.empty();
+            return java.util.Optional.of(new Case.\(translatedCase.name)());
           }
           """
         )
