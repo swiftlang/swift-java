@@ -384,9 +384,8 @@ extension JNISwift2JavaGenerator {
     printSwiftFunctionThunk(&printer, enumCase.caseFunction)
     printer.println()
 
-    // Print getAsCase method
-    if !translatedCase.translatedValues.isEmpty {
-      printEnumGetAsCaseThunk(&printer, enumType, translatedCase)
+    if !translatedCase.parameters.isEmpty {
+      printEnumGetAssociatedValueThunk(&printer, enumType, translatedCase)
     }
   }
 
@@ -399,7 +398,7 @@ extension JNISwift2JavaGenerator {
     return #"_JNIMethodIDCache(className: "\#(fullClassName)", methods: [\#(methods)])"#
   }
 
-  private func printEnumGetAsCaseThunk(
+  private func printEnumGetAssociatedValueThunk(
     _ printer: inout CodePrinter,
     _ enumType: ImportedNominalType,
     _ enumCase: TranslatedEnumCase,

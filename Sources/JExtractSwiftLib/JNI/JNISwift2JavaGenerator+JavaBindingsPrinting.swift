@@ -505,8 +505,8 @@ extension JNISwift2JavaGenerator {
           continue
         }
 
-        let members = translatedCase.translatedValues.map {
-          $0.parameter.renderParameter()
+        let members = translatedCase.parameters.map {
+          $0.renderParameter()
         }
 
         // Print record

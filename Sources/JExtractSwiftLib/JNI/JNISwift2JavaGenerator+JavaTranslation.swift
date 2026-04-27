@@ -95,52 +95,26 @@ extension JNISwift2JavaGenerator {
     let importedTypes: [String: ImportedNominalType]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
-      let nativeTranslation = NativeJavaTranslation(
-        config: self.config,
-        javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers,
-        logger: self.logger,
-      )
-
       let methodName = "" // TODO: Used for closures, replace with better name?
-      let parentName = SwiftQualifiedTypeName("") // TODO: Used for closures, replace with better name?
 
-      let translatedValues = try self.translateParameters(
-        enumCase.parameters.map { ($0.name, $0.type) },
-        methodName: methodName,
-        parentName: parentName,
-        genericParameters: [],
-        genericRequirements: [],
-      )
-
-      let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
+      let parameterResults = try enumCase.parameters.enumerated().map { idx, parameter in
         let resultName = parameter.name ?? "arg\(idx)"
-        var translatedResult = try self.translateResult(
+        let translatedResult = try self.translateResult(
           swiftType: parameter.type,
           methodName: methodName,
           resultName: resultName
         )
-        translatedResult.conversion = .replacingPlaceholder(
-          translatedResult.conversion,
-          placeholder: "$nativeParameters.\(resultName)",
+        return (
+          parameter: JavaParameter(name: resultName, type: translatedResult.javaType),
+          requiresSwiftArena: translatedResult.conversion.requiresSwiftArena
         )
-        let nativeResult = try nativeTranslation.translateResult(
-          swiftType: parameter.type,
-          methodName: methodName,
-          resultName: resultName
-        )
-        return (translated: translatedResult, native: nativeResult)
       }
 
-      let caseName = enumCase.name.firstCharacterUppercased
-
       return TranslatedEnumCase(
-        name: caseName,
+        name: enumCase.name.firstCharacterUppercased,
         original: enumCase,
-        translatedValues: translatedValues,
-        parameterConversions: conversions
+        parameters: parameterResults.map(\.parameter),
+        requiresSwiftArena: parameterResults.contains(where: \.requiresSwiftArena)
       )
     }
 
@@ -1569,15 +1543,10 @@ extension JNISwift2JavaGenerator {
     let original: ImportedEnumCase
 
     /// A list of the translated associated values
-    let translatedValues: [TranslatedParameter]
+    let parameters: [JavaParameter]
 
-    /// A list of parameter conversions
-    let parameterConversions: [(translated: TranslatedResult, native: NativeResult)]
-
-    /// Returns whether the parameters require an arena
-    var requiresSwiftArena: Bool {
-      parameterConversions.contains(where: \.translated.conversion.requiresSwiftArena)
-    }
+    /// Returns whether the associated values require an arena
+    let requiresSwiftArena: Bool
   }
 
   struct TranslatedFunctionDecl {
