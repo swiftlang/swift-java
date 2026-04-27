@@ -710,7 +710,10 @@ extension JNISwift2JavaGenerator {
     importedFunc: ImportedFunc? = nil,
     skipMethodBody: Bool,
   ) {
-    var modifiers = ["public"]
+    var modifiers: [String] = []
+    if let acccessModifier = translatedDecl.acccessModifier {
+      modifiers.append(acccessModifier.description)
+    }
     if translatedDecl.isStatic {
       modifiers.append("static")
     }

@@ -111,6 +111,9 @@ extension FFMSwift2JavaGenerator {
     /// Java function name.
     let name: String
 
+    /// Access level in Java
+    let acccessModifier: JavaAccessModifier?
+
     /// Functional interfaces required for the Java method.
     let functionTypes: [TranslatedFunctionType]
 
@@ -208,6 +211,7 @@ extension FFMSwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
+        acccessModifier: JavaAccessModifier(decl.swiftDecl),
         functionTypes: funcTypes,
         translatedSignature: translatedSignature,
         loweredSignature: loweredSignature

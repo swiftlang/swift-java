@@ -160,6 +160,7 @@ extension JNISwift2JavaGenerator {
 
       let getAsCaseFunction = TranslatedFunctionDecl(
         name: getAsCaseName,
+        acccessModifier: .public,
         isStatic: false,
         isThrowing: false,
         isAsync: false,
@@ -296,6 +297,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
+        acccessModifier: JavaAccessModifier(decl.swiftDecl),
         isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
         isAsync: decl.isAsync,
@@ -1669,6 +1671,9 @@ extension JNISwift2JavaGenerator {
   struct TranslatedFunctionDecl {
     /// Java function name
     let name: String
+
+    /// Access level in Java
+    let acccessModifier: JavaAccessModifier?
 
     let isStatic: Bool
 

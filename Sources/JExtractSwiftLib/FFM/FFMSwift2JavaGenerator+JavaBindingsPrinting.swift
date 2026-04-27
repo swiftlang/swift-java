@@ -364,7 +364,7 @@ extension FFMSwift2JavaGenerator {
     let translated = self.translatedDecl(for: decl)!
     let methodName = translated.name
 
-    var modifiers = "public"
+    var modifiers: String = translated.acccessModifier?.description ?? ""
     switch decl.functionSignature.selfParameter {
     case .staticMethod, .initializer, nil:
       modifiers.append(" static")
