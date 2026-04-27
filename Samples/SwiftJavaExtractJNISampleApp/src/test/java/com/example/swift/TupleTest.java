@@ -22,6 +22,9 @@ import org.swift.swiftkit.core.tuple.Tuple16;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Optional;
+import java.util.OptionalLong;
+
 public class TupleTest {
     @Test
     void returnPair() {
@@ -63,6 +66,32 @@ public class TupleTest {
     }
 
     @Test
+    void echoOptionalTriple() {
+        try (var arena = SwiftArena.ofConfined()) {
+            Tuple3<OptionalLong, Optional<String>, Optional<Alignment>> input = new Tuple3<>(
+                    OptionalLong.of(100L),
+                    Optional.of("hello"),
+                    Optional.of(Alignment.horizontal(arena))
+            );
+            Tuple3<OptionalLong, Optional<String>, Optional<Alignment>> result = MySwiftLibrary.echoOptionalTriple(input, arena);
+            assertEquals(input.$0, result.$0);
+            assertEquals(input.$1, result.$1);
+            assertEquals(input.$2.map(Alignment::getDiscriminator), result.$2.map(Alignment::getDiscriminator));
+        }
+        try (var arena = SwiftArena.ofConfined()) {
+            Tuple3<OptionalLong, Optional<String>, Optional<Alignment>> input = new Tuple3<>(
+                    OptionalLong.empty(),
+                    Optional.empty(),
+                    Optional.empty()
+            );
+            Tuple3<OptionalLong, Optional<String>, Optional<Alignment>> result = MySwiftLibrary.echoOptionalTriple(input, arena);
+            assertEquals(input.$0, result.$0);
+            assertEquals(input.$1, result.$1);
+            assertEquals(input.$2.map(Alignment::getDiscriminator), result.$2.map(Alignment::getDiscriminator));
+        }
+    }
+
+    @Test
     void makeBigTuple() {
         Tuple16<Boolean, Byte, Short, Character,
                 Integer, Long, Float, Double,
@@ -90,11 +119,11 @@ public class TupleTest {
     void namedByteArrayTuple() {
         var result = MySwiftLibrary.namedByteArrayTuple();
 
-        assertArrayEquals(new byte[] { 1, 2, 3 }, result.name());
-        assertArrayEquals(new byte[] { 4, 5 }, result.another());
+        assertArrayEquals(new byte[]{1, 2, 3}, result.name());
+        assertArrayEquals(new byte[]{4, 5}, result.another());
 
-        assertArrayEquals(new byte[] { 1, 2, 3 }, (byte[]) result.$0);
-        assertArrayEquals(new byte[] { 4, 5 }, (byte[]) result.$1);
+        assertArrayEquals(new byte[]{1, 2, 3}, (byte[]) result.$0);
+        assertArrayEquals(new byte[]{4, 5}, (byte[]) result.$1);
     }
 
     @Test
