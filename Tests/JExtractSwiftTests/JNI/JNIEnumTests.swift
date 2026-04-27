@@ -21,7 +21,7 @@ import Testing
 struct JNIEnumTests {
   let source = """
     public struct MyValue {}
-    
+
     public enum MyEnum {
       case first
       case second(String)

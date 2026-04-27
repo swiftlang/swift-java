@@ -437,7 +437,7 @@ extension JNISwift2JavaGenerator {
       let associatedValueTypes = enumCase.original.parameters.map { param in
         param.type.description
       }.joined(separator: ", ")
-      printer.printBraceBlock("private var _\(enumCase.original.name)Values: (\(associatedValueTypes))?") { printer in
+      printer.printBraceBlock("fileprivate var _\(enumCase.original.name)Values: (\(associatedValueTypes))?") { printer in
         let params = enumCase.original.parameters.enumerated().map { i, param in
           param.name ?? "_\(i)"
         }.joined(separator: ", ")
@@ -446,46 +446,6 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("return nil")
       }
-    }
-
-    printCDecl(
-      &printer,
-      enumCase.getAsCaseFunction,
-    ) { printer in
-      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
-        &printer,
-        "selfPointer",
-      )
-      let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
-        parameter.name ?? "_\(idx)"
-      }
-      let caseNamesWithLet = caseNames.map { "let \($0)" }
-      let methodSignature = MethodSignature(
-        resultType: .void,
-        parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-      )
-      printer.print(
-        """
-        guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
-          fatalError("Expected enum case '\(enumCase.original.name)', but was '\\(\(selfPointer).pointee)'!")
-        }
-        let cache$ = \(JNICaching.cacheName(for: enumCase.original.enumType)).\(JNICaching.cacheMemberName(for: enumCase.original))
-        let class$ = cache$.javaClass
-        let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "\(methodSignature.mangledName)")
-        let constructorID$ = cache$[method$]
-        """
-      )
-      let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in
-        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? nil" : ""
-        let result = conversion.native.conversion.render(&printer, caseName)
-        return "jvalue(\(conversion.native.javaType.jniFieldName): \(result)\(nullConversion))"
-      }
-      printer.print(
-        """
-        let newObjectArgs$: [jvalue] = [\(upcallArguments.joined(separator: ", "))]
-        return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
-        """
-      )
     }
   }
 
