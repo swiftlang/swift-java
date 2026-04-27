@@ -510,16 +510,7 @@ extension JNISwift2JavaGenerator {
         }
 
         // Print record
-        printer.printBraceBlock("record \(translatedCase.name)(\(members.joined(separator: ", "))) implements Case") {
-          printer in
-          let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).map {
-            value,
-            conversion in
-            "\(conversion.native.javaType) \(value.parameter.name)"
-          }
-
-          printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
-        }
+        printer.print("record \(translatedCase.name)(\(members.joined(separator: ", "))) implements Case {}")
       }
     }
     printer.println()
@@ -567,11 +558,12 @@ extension JNISwift2JavaGenerator {
         continue
       }
 
-      let resultType = translatedCase.getAsCaseFunction.translatedFunctionSignature.result.javaType
+      let resultType = JavaType.optional(.class(package: nil, name: "Case.\(translatedCase.name)"))
+      let getAsCaseName = "getAs\(translatedCase.name)"
       if enumCase.parameters.isEmpty {
         printer.print(
           """
-          public \(resultType) \(translatedCase.getAsCaseFunction.name)() {
+          public \(resultType) \(getAsCaseName)() {
             if (getDiscriminator() == Discriminator.\(enumCase.name.uppercased())) {
               return java.util.Optional.of(new Case.\(translatedCase.name)());
             }
@@ -580,7 +572,18 @@ extension JNISwift2JavaGenerator {
           """
         )
       } else {
-        let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && translatedCase.requiresSwiftArena
+        let requiresSwiftArena = translatedCase.requiresSwiftArena
+        let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && requiresSwiftArena
+
+        if shouldGenerateGlobalArenaVariation {
+          printer.print(
+            """
+            public \(resultType) \(getAsCaseName)() {
+              return \(getAsCaseName)(\(Self.globalArenaName));
+            }
+            """
+          )
+        }
 
         let caseClassName = "Case.\(enumCase.name.firstCharacterUppercased)"
         let args =
@@ -592,24 +595,14 @@ extension JNISwift2JavaGenerator {
             }.joined(separator: ", ")
           }
         var parameters: [String] = []
-        if translatedCase.requiresSwiftArena {
+        if requiresSwiftArena {
           parameters.append("SwiftArena swiftArena")
-        }
-
-        if shouldGenerateGlobalArenaVariation {
-          printer.print(
-            """
-            public \(resultType) \(translatedCase.getAsCaseFunction.name)() {
-              return \(translatedCase.getAsCaseFunction.name)(\(Self.globalArenaName));
-            }
-            """
-          )
         }
 
         printer.print(
           """
-          public \(resultType) \(translatedCase.getAsCaseFunction.name)(\(parameters.joined(separator: ", "))) {
-            return get_\(translatedCase.original.name)Values(\(translatedCase.requiresSwiftArena ? "swiftArena" : "")).map(t ->
+          public \(resultType) \(getAsCaseName)(\(parameters.joined(separator: ", "))) {
+            return _get\(translatedCase.name)Values(\(requiresSwiftArena ? "swiftArena" : "")).map(t ->
               new \(caseClassName)(\(args))
             );
           }

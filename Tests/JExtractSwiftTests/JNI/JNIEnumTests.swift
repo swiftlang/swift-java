@@ -166,15 +166,9 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         public sealed interface Case {
-          record First() implements Case {
-            record _NativeParameters() {}
-          }
-          record Second(java.lang.String arg0) implements Case {
-            record _NativeParameters(java.lang.String arg0) {}
-          }
-          record Third(long x, int y, MyValue arg2) implements Case {
-            record _NativeParameters(long x, int y, long arg2) {}
-          }
+          record First() implements Case {}
+          record Second(java.lang.String arg0) implements Case {}
+          record Third(long x, int y, MyValue arg2) implements Case {}
         }
         """,
         """

@@ -135,98 +135,12 @@ extension JNISwift2JavaGenerator {
       }
 
       let caseName = enumCase.name.firstCharacterUppercased
-      let enumName = enumCase.enumType.nominalTypeDecl.name
-      let caseType = JavaType.class(package: nil, name: "Case.\(caseName)")
-      let nativeParametersType = JavaType.class(package: nil, name: "Case.\(caseName)._NativeParameters")
-      let getAsCaseName = "getAs\(caseName)"
-      // If the case has no parameters, we can skip the native call.
-      let constructRecordConversion = JavaNativeConversionStep.method(
-        .constant("Optional"),
-        function: "of",
-        arguments: [
-          .constructJavaClass(
-            .commaSeparated(conversions.map(\.translated.conversion)),
-            caseType,
-          )
-        ],
-      )
-      var exceptions: [JavaExceptionType] = []
-
-      if enumCase.parameters.contains(where: \.type.isArchDependingInteger) {
-        exceptions.append(.integerOverflow)
-      }
-
-      let isGenericParent = enumCase.caseFunction.parentType?.asNominalTypeDeclaration?.isGeneric == true
-
-      let getAsCaseFunction = TranslatedFunctionDecl(
-        name: getAsCaseName,
-        acccessModifier: .public,
-        isStatic: false,
-        isThrowing: false,
-        isAsync: false,
-        nativeFunctionName: "$\(getAsCaseName)",
-        parentName: SwiftQualifiedTypeName(enumName),
-        functionTypes: [],
-        translatedFunctionSignature: TranslatedFunctionSignature(
-          selfParameter: TranslatedParameter(
-            parameter: JavaParameter(name: "selfPointer", type: .long),
-            conversion: .aggregate(
-              [
-                .ifStatement(
-                  .constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"),
-                  thenExp: .constant("return Optional.empty();"),
-                ),
-                .valueMemoryAddress(.placeholder),
-              ]
-            ),
-          ),
-          selfTypeParameter: !isGenericParent
-            ? nil
-            : .init(
-              parameter: JavaParameter(name: "selfTypePointer", type: .long),
-              conversion: .typeMetadataAddress(.placeholder),
-            ),
-          parameters: [],
-          result: TranslatedResult(
-            javaType: .optional(caseType),
-            nativeJavaType: nativeParametersType,
-            outParameters: conversions.flatMap(\.translated.outParameters),
-            conversion: enumCase.parameters.isEmpty
-              ? constructRecordConversion
-              : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion]),
-          ),
-          exceptions: exceptions,
-        ),
-        nativeFunctionSignature: NativeFunctionSignature(
-          selfParameter: NativeParameter(
-            parameters: [JavaParameter(name: "selfPointer", type: .long)],
-            conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
-            indirectConversion: nil,
-            conversionCheck: nil,
-          ),
-          selfTypeParameter: !isGenericParent
-            ? nil
-            : .init(
-              parameters: [JavaParameter(name: "selfTypePointer", type: .long)],
-              conversion: .extractMetatypeValue(.placeholder),
-              indirectConversion: nil,
-              conversionCheck: nil,
-            ),
-          parameters: [],
-          result: NativeResult(
-            javaType: nativeParametersType,
-            conversion: .placeholder,
-            outParameters: conversions.flatMap(\.native.outParameters),
-          ),
-        ),
-      )
 
       return TranslatedEnumCase(
-        name: enumCase.name.firstCharacterUppercased,
+        name: caseName,
         original: enumCase,
         translatedValues: translatedValues,
-        parameterConversions: conversions,
-        getAsCaseFunction: getAsCaseFunction,
+        parameterConversions: conversions
       )
     }
 
@@ -1659,8 +1573,6 @@ extension JNISwift2JavaGenerator {
 
     /// A list of parameter conversions
     let parameterConversions: [(translated: TranslatedResult, native: NativeResult)]
-
-    let getAsCaseFunction: TranslatedFunctionDecl
 
     /// Returns whether the parameters require an arena
     var requiresSwiftArena: Bool {

@@ -233,9 +233,7 @@ struct JNIGenericTypeTests {
       expectedChunks: [
         #"""
         public sealed interface Case {
-          record Foo(MyID<java.lang.Double> arg0) implements Case {
-           record _NativeParameters(org.swift.swiftkit.core._OutSwiftGenericInstance arg0) {}
-          }
+          record Foo(MyID<java.lang.Double> arg0) implements Case {}
         }
         """#
       ]

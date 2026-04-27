@@ -173,23 +173,6 @@ extension JNISwift2JavaGenerator {
     logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
   }
 
-  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let targetCases = type.cases
-      .compactMap(translatedEnumCase(for:))
-      .filter { !$0.translatedValues.isEmpty }
-    if targetCases.isEmpty {
-      return
-    }
-
-    printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
-      for translatedCase in targetCases {
-        printer.print(
-          "static let \(JNICaching.cacheMemberName(for: translatedCase)) = \(renderEnumCaseCacheInit(translatedCase))"
-        )
-      }
-    }
-  }
-
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
   private func printSwiftInterfaceWrapper(
     _ printer: inout CodePrinter,
@@ -308,7 +291,6 @@ extension JNISwift2JavaGenerator {
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
     printHeader(&printer)
 
-    printJNICache(&printer, type)
     printer.println()
 
     switch type.swiftNominal.kind {
@@ -408,17 +390,6 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-    let enumName = enumCase.original.enumType.nominalTypeDecl.name
-    let nativeParametersClassName = "\(enumName)$Case$\(enumCase.name)$_NativeParameters"
-    let methodSignature = MethodSignature(
-      resultType: .void,
-      parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-    )
-
-    return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
-  }
-
   private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
     let fullClassName = "\(javaPackagePath)/\(className)"
     let methods = methods.map { name, signature in
@@ -437,7 +408,7 @@ extension JNISwift2JavaGenerator {
       let associatedValueTypes = enumCase.original.parameters.map { param in
         param.type.description
       }.joined(separator: ", ")
-      printer.printBraceBlock("fileprivate var _\(enumCase.original.name)Values: (\(associatedValueTypes))?") { printer in
+      printer.printBraceBlock("fileprivate func _get\(enumCase.name)Values() -> (\(associatedValueTypes))?") { printer in
         let params = enumCase.original.parameters.enumerated().map { i, param in
           param.name ?? "_\(i)"
         }.joined(separator: ", ")

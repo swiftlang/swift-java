@@ -489,7 +489,7 @@ final class Swift2JavaVisitor {
     let associatedValueTypes = enumCase.parameters.map { param in
       param.type.description
     }.joined(separator: ", ")
-    let decl: DeclSyntax = "@JavaExport fileprivate var _\(raw: enumCase.name)Values: (\(raw: associatedValueTypes))? { get }"
+    let decl: DeclSyntax = "@JavaExport fileprivate func _get\(raw: enumCase.name.firstCharacterUppercased)Values() -> (\(raw: associatedValueTypes))?"
     self.visit(decl: decl, in: enumType, sourceFilePath: enumType.sourceFilePath)
   }
 
