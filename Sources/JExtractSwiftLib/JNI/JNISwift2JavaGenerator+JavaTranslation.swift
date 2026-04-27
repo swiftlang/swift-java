@@ -1168,6 +1168,13 @@ extension JNISwift2JavaGenerator {
         }
         return .class(package: nil, name: generic.name)
 
+      case .tuple(let elements) where elements.count == 1:
+        return try translateGenericTypeParameter(
+          elements[0].type,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+
       case .tuple(let elements):
         let elementJavaTypes = try elements.map { element in
           try translateGenericTypeParameter(

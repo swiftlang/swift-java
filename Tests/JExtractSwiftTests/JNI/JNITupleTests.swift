@@ -209,4 +209,26 @@ struct JNITupleTests {
       ]
     )
   }
+
+  @Test
+  func singleTupleInGeneric() throws {
+    let input = """
+      public struct Box<T> {}
+      public var singleTupleInGeneric: Box<(String)> {
+        "input"
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static Box<java.lang.String> getSingleTupleInGeneric(SwiftArena swiftArena)
+        """
+      ]
+    )
+  }
 }
