@@ -15,6 +15,7 @@
 package com.example.swift;
 
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.SwiftArena;
 import org.swift.swiftkit.core.tuple.Tuple2;
 import org.swift.swiftkit.core.tuple.Tuple3;
 import org.swift.swiftkit.core.tuple.Tuple16;
@@ -94,5 +95,14 @@ public class TupleTest {
 
         assertArrayEquals(new byte[] { 1, 2, 3 }, (byte[]) result.$0);
         assertArrayEquals(new byte[] { 4, 5 }, (byte[]) result.$1);
+    }
+
+    @Test
+    void genericTypeTuple() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var result = MySwiftLibrary.genericTypeTuple(arena);
+            assertEquals("1.23", result.$0.getDescription());
+            assertEquals(Alignment.Discriminator.HORIZONTAL, result.$1.getDiscriminator());
+        }
     }
 }

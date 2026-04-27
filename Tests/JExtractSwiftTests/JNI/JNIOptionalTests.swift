@@ -129,7 +129,7 @@ struct JNIOptionalTests {
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
-            result$ = String.jniPlaceholderValue
+            result$ = nil
             var flag$ = Int8(0)
             environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
@@ -247,6 +247,35 @@ struct JNIOptionalTests {
           )
         }
         """
+      ]
+    )
+  }
+
+  @Test
+  func optionalTuple() throws {
+    let input = """
+      public struct Foo {}
+      public func optionalTuple() -> (Int64?, Foo)? {
+        (42, Foo())
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        byte[] result$_discriminator$ = new byte[1];
+        byte[] resultWrapped$_0$$_discriminator$ = new byte[1];
+        long[] resultWrapped$_0$ = new long[1];
+        long[] resultWrapped$_1$ = new long[1];
+        SwiftModule.$optionalTuple(result$_discriminator$, resultWrapped$_0$$_discriminator$, resultWrapped$_0$, resultWrapped$_1$);
+        """,
+        """
+        private static native void $optionalTuple(byte[] result_discriminator$, byte[] resultWrapped_0$_discriminator$, long[] resultWrapped_0$, long[] resultWrapped_1$);
+        """,
       ]
     )
   }
