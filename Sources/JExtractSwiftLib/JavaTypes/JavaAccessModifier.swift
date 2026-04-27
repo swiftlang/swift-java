@@ -41,6 +41,10 @@ extension JavaAccessModifier {
       default: break
       }
     }
+    if syntax.is(EnumCaseDeclSyntax.self) {
+      self = .public
+      return
+    }
     return nil
   }
 }
