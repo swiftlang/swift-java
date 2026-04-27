@@ -24,6 +24,10 @@ public func labeledTuple() -> (x: Int32, y: Int32) {
   (x: 10, y: 20)
 }
 
+public func echoSingleTuple(input: (String)) -> (String) {
+  input
+}
+
 public func echoTriple(triple: (Bool, Double, Int64)) -> (Bool, Double, Int64) {
   triple
 }

@@ -630,6 +630,17 @@ extension JNISwift2JavaGenerator {
           conversion: .typeMetadataAddress(.placeholder),
         )
 
+      case .tuple(let elements) where elements.count == 1:
+        return try translateParameter(
+          swiftType: elements[0].type,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+          parameterPosition: parameterPosition,
+        )
+
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleParameter(
           elements: elements,
@@ -1022,6 +1033,15 @@ extension JNISwift2JavaGenerator {
 
       case .tuple([]):
         return TranslatedResult(javaType: .void, nativeJavaType: .void, outParameters: [], conversion: .placeholder)
+
+      case .tuple(let elements) where elements.count == 1:
+        return try translateResult(
+          swiftType: elements[0].type,
+          methodName: methodName,
+          resultName: resultName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements,
+        )
 
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(

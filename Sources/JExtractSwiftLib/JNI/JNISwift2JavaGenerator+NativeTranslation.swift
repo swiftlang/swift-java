@@ -326,6 +326,16 @@ extension JNISwift2JavaGenerator {
           conversionCheck: nil
         )
 
+      case .tuple(let elements) where elements.count == 1:
+        return try translateParameter(
+          type: elements[0].type,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          genericParameters: genericParameters,
+          genericRequirements: genericRequirements
+        )
+
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleParameter(
           elements: elements,
@@ -770,6 +780,9 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder,
           outParameters: []
         )
+
+      case .tuple(let elements) where elements.count == 1:
+        return try translateResult(swiftType: elements[0].type, methodName: methodName, resultName: resultName)
 
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(methodName: methodName, elements: elements, resultName: resultName)

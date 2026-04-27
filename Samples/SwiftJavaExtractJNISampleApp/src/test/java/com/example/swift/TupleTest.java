@@ -54,6 +54,13 @@ public class TupleTest {
     }
 
     @Test
+    void echoSingleTuple() {
+        var input = "Swift";
+        String result = MySwiftLibrary.echoSingleTuple(input);
+        assertEquals(input, result);
+    }
+
+    @Test
     void echoTriple() {
         Tuple3<Boolean, Double, Long> input = new Tuple3<>(true, 3.14, 100L);
         Tuple3<Boolean, Double, Long> result = MySwiftLibrary.echoTriple(input);
