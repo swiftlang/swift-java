@@ -106,12 +106,8 @@ extension WithModifiersSyntax {
   }
 
   var isAtLeastPackage: Bool {
-    if self.modifiers.isEmpty {
-      return false
-    }
-
-    return self.modifiers.contains { modifier in
-      modifier.isAtLeastInternal
+    self.modifiers.contains { modifier in
+      modifier.isAtLeastPackage
     }
   }
 
