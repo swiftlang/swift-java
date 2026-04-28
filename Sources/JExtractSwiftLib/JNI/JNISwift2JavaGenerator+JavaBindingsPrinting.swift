@@ -32,8 +32,6 @@ extension JNISwift2JavaGenerator {
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
   ]
-
-  private static let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
 }
 
 // MARK: Printing
@@ -748,9 +746,10 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock(
         "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parametersStr))\(throwsClause)"
       ) { printer in
-        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [Self.globalArenaName]
+        let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
+        let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
         let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
-        if translatedSignature.result.javaType.isVoid {
+        if translatedDecl.translatedFunctionSignature.result.javaType.isVoid {
           printer.print("\(call);")
         } else {
           printer.print("return \(call);")

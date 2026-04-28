@@ -384,9 +384,7 @@ extension JNISwift2JavaGenerator {
     printSwiftFunctionThunk(&printer, enumCase.caseFunction)
     printer.println()
 
-    if !translatedCase.parameters.isEmpty {
-      printEnumGetAssociatedValueThunk(&printer, enumType, translatedCase)
-    }
+    printEnumGetAsCaseThunk(&printer, enumType, translatedCase)
   }
 
   private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
@@ -398,27 +396,27 @@ extension JNISwift2JavaGenerator {
     return #"_JNIMethodIDCache(className: "\#(fullClassName)", methods: [\#(methods)])"#
   }
 
-  private func printEnumGetAssociatedValueThunk(
+  private func printEnumGetAsCaseThunk(
     _ printer: inout CodePrinter,
     _ enumType: ImportedNominalType,
     _ enumCase: TranslatedEnumCase,
   ) {
-    printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
-      let associatedValueTypes = enumCase.original.parameters.map { param in
-        param.type.description
-      }.joined(separator: ", ")
-      printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
-        let params = enumCase.original.parameters.enumerated().map { i, param in
-          param.name ?? "_\(i)"
-        }.joined(separator: ", ")
-        printer.printBraceBlock("if case let .\(enumCase.original.name)(\(params)) = self") { printer in
-          printer.print("return (\(params))")
-        }
-        printer.print("return nil")
-      }
-    }
-
     if let getAsCaseFunction = enumCase.getAsCaseFunction {
+      printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
+        let associatedValueTypes = enumCase.original.parameters.map { param in
+          param.type.description
+        }.joined(separator: ", ")
+        printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
+          let params = enumCase.original.parameters.enumerated().map { i, param in
+            param.name ?? "_\(i)"
+          }.joined(separator: ", ")
+          printer.printBraceBlock("if case let .\(enumCase.original.name)(\(params)) = self") { printer in
+            printer.print("return (\(params))")
+          }
+          printer.print("return nil")
+        }
+      }
+
       printSwiftFunctionThunk(&printer, getAsCaseFunction)
     }
   }
