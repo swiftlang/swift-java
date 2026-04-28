@@ -558,34 +558,11 @@ extension JNISwift2JavaGenerator {
         continue
       }
 
-      let resultType = JavaType.optional(.class(package: nil, name: "Case.\(translatedCase.name)"))
-      let getAsCaseName = "getAs\(translatedCase.name)"
-      if enumCase.parameters.isEmpty {
-        printer.print(
-          """
-          public \(resultType) \(getAsCaseName)() {
-            if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
-              return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(new Case.\(translatedCase.name)());
-          }
-          """
-        )
-      } else {
-        let requiresSwiftArena = translatedCase.requiresSwiftArena
-        let shouldGenerateGlobalArenaVariation = config.effectiveMemoryManagementMode.requiresGlobalArena && requiresSwiftArena
-
-        if shouldGenerateGlobalArenaVariation {
-          printer.print(
-            """
-            public \(resultType) \(getAsCaseName)() {
-              return \(getAsCaseName)(\(Self.globalArenaName));
-            }
-            """
-          )
-        }
-
-        let caseClassName = "Case.\(enumCase.name.firstCharacterUppercased)"
+      let caseType = JavaType.class(package: nil, name: "Case.\(translatedCase.name)")
+      let resultType = JavaType.optional(caseType)
+      if let getAsCaseFunctionDecl = translatedCase.getAsCaseFunction,
+        var getAsCaseFunction = self.translatedDecl(for: getAsCaseFunctionDecl)
+      {
         let args =
           if enumCase.parameters.count == 1 {
             "t"
@@ -594,17 +571,28 @@ extension JNISwift2JavaGenerator {
               "t.$\(i)"
             }.joined(separator: ", ")
           }
-        var parameters: [String] = []
-        if requiresSwiftArena {
-          parameters.append("SwiftArena swiftArena")
-        }
-
+        let translatedResult = getAsCaseFunction.translatedFunctionSignature.result
+        getAsCaseFunction.translatedFunctionSignature.result.conversion = .method(
+          .placeToVar(translatedResult.conversion, name: "associatedValues$", type: translatedResult.javaType),
+          function: "map",
+          arguments: [
+            .lambda(
+              args: ["t"],
+              body: .constructJavaClass(.constant(args), caseType)
+            )
+          ]
+        )
+        getAsCaseFunction.translatedFunctionSignature.result.javaType = resultType
+        printJavaBindingWrapperMethod(&printer, getAsCaseFunction, skipMethodBody: false)
+      } else {
+        let getAsCaseName = "getAs\(translatedCase.name)"
         printer.print(
           """
-          public \(resultType) \(getAsCaseName)(\(parameters.joined(separator: ", "))) {
-            return _get\(translatedCase.name)Values(\(requiresSwiftArena ? "swiftArena" : "")).map(t ->
-              new \(caseClassName)(\(args))
-            );
+          public \(resultType) \(getAsCaseName)() {
+            if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
+              return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(new Case.\(translatedCase.name)());
           }
           """
         )

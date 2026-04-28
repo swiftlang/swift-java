@@ -407,7 +407,7 @@ extension JNISwift2JavaGenerator {
       let associatedValueTypes = enumCase.original.parameters.map { param in
         param.type.description
       }.joined(separator: ", ")
-      printer.printBraceBlock("fileprivate func _get\(enumCase.name)Values() -> (\(associatedValueTypes))?") { printer in
+      printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
         let params = enumCase.original.parameters.enumerated().map { i, param in
           param.name ?? "_\(i)"
         }.joined(separator: ", ")
@@ -416,6 +416,10 @@ extension JNISwift2JavaGenerator {
         }
         printer.print("return nil")
       }
+    }
+
+    if let getAsCaseFunction = enumCase.getAsCaseFunction {
+      printSwiftFunctionThunk(&printer, getAsCaseFunction)
     }
   }
 

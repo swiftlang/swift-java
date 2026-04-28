@@ -291,7 +291,7 @@ struct JNIEnumTests {
         """,
         """
         private java.util.Optional<org.swift.swiftkit.core.tuple.Tuple3<java.lang.Long, java.lang.Integer, MyValue>> _getThirdValues(SwiftArena swiftArena) {
-        """
+        """,
       ]
     )
   }

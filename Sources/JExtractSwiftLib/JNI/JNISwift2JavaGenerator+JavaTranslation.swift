@@ -15,6 +15,7 @@
 import CodePrinting
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
+import SwiftSyntax
 
 extension JNISwift2JavaGenerator {
   var javaTranslator: JavaTranslation {
@@ -110,10 +111,44 @@ extension JNISwift2JavaGenerator {
         )
       }
 
+      let associatedValueTypes = enumCase.parameters.map { param in
+        param.type.description
+      }.joined(separator: ", ")
+      let javaCaseClassName = enumCase.name.firstCharacterUppercased
+      let resultType = knownTypes.optionalSugar(
+        .tuple(
+          enumCase.parameters.map {
+            SwiftTupleElement(label: nil, type: $0.type)
+          }
+        )
+      )
+      let getAsCaseFunction: ImportedFunc? =
+        if !enumCase.parameters.isEmpty {
+          //          try translate(
+          ImportedFunc(
+            module: enumCase.enumType.nominalTypeDecl.moduleName,
+            swiftDecl: DeclSyntax("func getAs\(raw: javaCaseClassName)() -> (\(raw: associatedValueTypes))?"),
+            name: "getAs\(javaCaseClassName)",
+            apiKind: .function,
+            functionSignature: .init(
+              selfParameter: .instance(convention: .byValue, swiftType: .nominal(enumCase.enumType)),
+              parameters: [],
+              result: .init(convention: .direct, type: resultType),
+              effectSpecifiers: [],
+              genericParameters: [],
+              genericRequirements: []
+            )
+          )
+          //          )
+        } else {
+          nil
+        }
+
       return TranslatedEnumCase(
-        name: enumCase.name.firstCharacterUppercased,
+        name: javaCaseClassName,
         original: enumCase,
         parameters: parameterResults.map(\.parameter),
+        getAsCaseFunction: getAsCaseFunction,
         requiresSwiftArena: parameterResults.contains(where: \.requiresSwiftArena)
       )
     }
@@ -1141,7 +1176,6 @@ extension JNISwift2JavaGenerator {
 
       let javaNativeConversionStep: JavaNativeConversionStep =
         .tupleFromOutParams(
-          // try!-safe, because we know the result type is a class here (a Tuple of some form)
           tupleClassName: "\(javaResultType)",
           elements: tupleElements
         )
@@ -1545,37 +1579,39 @@ extension JNISwift2JavaGenerator {
     /// A list of the translated associated values
     let parameters: [JavaParameter]
 
+    let getAsCaseFunction: ImportedFunc?
+
     /// Returns whether the associated values require an arena
     let requiresSwiftArena: Bool
   }
 
   struct TranslatedFunctionDecl {
     /// Java function name
-    let name: String
+    var name: String
 
     /// Access level in Java
-    let acccessModifier: JavaAccessModifier?
+    var acccessModifier: JavaAccessModifier?
 
-    let isStatic: Bool
+    var isStatic: Bool
 
-    let isThrowing: Bool
+    var isThrowing: Bool
 
-    let isAsync: Bool
+    var isAsync: Bool
 
     /// The name of the native function
-    let nativeFunctionName: String
+    var nativeFunctionName: String
 
     /// The name of the Java parent scope this function is declared in
-    let parentName: SwiftQualifiedTypeName
+    var parentName: SwiftQualifiedTypeName
 
     /// Functional interfaces required for the Java method.
-    let functionTypes: [TranslatedFunctionType]
+    var functionTypes: [TranslatedFunctionType]
 
     /// Function signature of the Java function the user will call
-    let translatedFunctionSignature: TranslatedFunctionSignature
+    var translatedFunctionSignature: TranslatedFunctionSignature
 
     /// Function signature of the native function that will be implemented by Swift
-    let nativeFunctionSignature: NativeFunctionSignature
+    var nativeFunctionSignature: NativeFunctionSignature
 
     /// Annotations to include on the Java function declaration
     var annotations: [JavaAnnotation] {
@@ -1774,7 +1810,7 @@ extension JNISwift2JavaGenerator {
     /// E.g. `new Tuple2<>(result_0$[0], result_1$[0])`
     case tupleFromOutParams(tupleClassName: String, elements: [(outParamName: String, elementConversion: JavaNativeConversionStep)])
 
-    indirect case placeToVar(JavaNativeConversionStep, name: String)
+    indirect case placeToVar(JavaNativeConversionStep, name: String, type: JavaType? = nil)
 
     /// `Arrays.stream(args)`
     static func arraysStream(_ argument: JavaNativeConversionStep) -> JavaNativeConversionStep {
@@ -1944,9 +1980,10 @@ extension JNISwift2JavaGenerator {
         }
         return "new \(tupleClassName)(\(args.joined(separator: ", ")))"
 
-      case .placeToVar(let inner, let name):
+      case .placeToVar(let inner, let name, let type):
         let inner = inner.render(&printer, placeholder)
-        printer.print("var \(name) = \(inner);")
+        let type = type?.description ?? "var"
+        printer.print("\(type) \(name) = \(inner);")
         return name
       }
     }
@@ -2014,7 +2051,7 @@ extension JNISwift2JavaGenerator {
       case .tupleFromOutParams(_, let elements):
         return elements.contains(where: { $0.elementConversion.requiresSwiftArena })
 
-      case .placeToVar(let inner, _):
+      case .placeToVar(let inner, _, _):
         return inner.requiresSwiftArena
       }
     }

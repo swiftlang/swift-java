@@ -245,8 +245,6 @@ final class Swift2JavaVisitor {
         )
 
         typeContext.cases.append(importedCase)
-
-        self.synthesizeGetAssociatedValue(enumType: typeContext, enumCase: importedCase)
       }
     } catch {
       self.log.debug("Failed to import: \(node.qualifiedNameForDebug); \(error)")
@@ -477,20 +475,6 @@ final class Swift2JavaVisitor {
         self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
       }
     }
-  }
-
-  private func synthesizeGetAssociatedValue(
-    enumType: ImportedNominalType,
-    enumCase: ImportedEnumCase,
-  ) {
-    if enumCase.parameters.isEmpty {
-      return
-    }
-    let associatedValueTypes = enumCase.parameters.map { param in
-      param.type.description
-    }.joined(separator: ", ")
-    let decl: DeclSyntax = "@JavaExport fileprivate func _get\(raw: enumCase.name.firstCharacterUppercased)Values() -> (\(raw: associatedValueTypes))?"
-    self.visit(decl: decl, in: enumType, sourceFilePath: enumType.sourceFilePath)
   }
 
   // ==== -----------------------------------------------------------------------
