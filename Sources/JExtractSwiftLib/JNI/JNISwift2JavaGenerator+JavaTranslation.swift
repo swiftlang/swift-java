@@ -124,7 +124,6 @@ extension JNISwift2JavaGenerator {
       )
       let getAsCaseFunction: ImportedFunc? =
         if !enumCase.parameters.isEmpty {
-          //          try translate(
           ImportedFunc(
             module: enumCase.enumType.nominalTypeDecl.moduleName,
             swiftDecl: DeclSyntax("func getAs\(raw: javaCaseClassName)() -> (\(raw: associatedValueTypes))?"),
@@ -139,7 +138,6 @@ extension JNISwift2JavaGenerator {
               genericRequirements: []
             )
           )
-          //          )
         } else {
           nil
         }
@@ -220,7 +218,6 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
-        acccessModifier: JavaAccessModifier(decl.swiftDecl),
         isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
         isAsync: decl.isAsync,
@@ -1588,9 +1585,6 @@ extension JNISwift2JavaGenerator {
   struct TranslatedFunctionDecl {
     /// Java function name
     var name: String
-
-    /// Access level in Java
-    var acccessModifier: JavaAccessModifier?
 
     var isStatic: Bool
 
