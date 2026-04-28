@@ -262,7 +262,7 @@ struct JNIEnumTests {
       input: source,
       .jni,
       .java,
-      detectChunkByInitialLines: 2,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         public java.util.Optional<Case.First> getAsFirst() {
@@ -274,23 +274,21 @@ struct JNIEnumTests {
         """,
         """
         public java.util.Optional<Case.Second> getAsSecond() {
-          return _getSecondValues().map(t ->
-            new Case.Second(t)
+          ...
+          return associatedValues$.map((t) -> {
+            return new Case.Second(t);
+          }
           );
         }
-        """,
-        """
-        private java.util.Optional<java.lang.String> _getSecondValues() {
         """,
         """
         public java.util.Optional<Case.Third> getAsThird(SwiftArena swiftArena) {
-          return _getThirdValues(swiftArena).map(t ->
-            new Case.Third(t.$0, t.$1, t.$2)
+          ...
+          return associatedValues$.map((t) -> {
+            return new Case.Third(t.$0, t.$1, t.$2);
+          }
           );
         }
-        """,
-        """
-        private java.util.Optional<org.swift.swiftkit.core.tuple.Tuple3<java.lang.Long, java.lang.Integer, MyValue>> _getThirdValues(SwiftArena swiftArena) {
         """,
       ]
     )
@@ -306,7 +304,7 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         extension MyEnum { 
-          fileprivate func _getSecondValues() -> (String)? {
+          fileprivate func getAsSecond() -> (String)? {
             if case let .second(_0) = self {
               return (_0)
             }
@@ -316,7 +314,7 @@ struct JNIEnumTests {
         """,
         """
         extension MyEnum {
-          fileprivate func _getThirdValues() -> (Int64, Int32, MyValue)? {
+          fileprivate func getAsThird() -> (Int64, Int32, MyValue)? {
             if case let .third(x, y, _2) = self {
               return (x, y, _2)
             }
@@ -325,14 +323,14 @@ struct JNIEnumTests {
         }
         """,
         """
-        public func Java_com_example_swift_MyEnum__00024_1getSecondValues
+        public func Java_com_example_swift_MyEnum__00024getAsSecond__J_3B
         """,
         """
-        public func Java_com_example_swift_MyEnum__00024_1getThirdValues
+        public func Java_com_example_swift_MyEnum__00024getAsThird__J_3B_3J_3I_3J
         """,
       ],
       notExpectedChunks: [
-        "fileprivate func _getFirstValues("
+        "fileprivate func getAsFirst("
       ]
     )
   }

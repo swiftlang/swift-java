@@ -247,7 +247,7 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         #"""
-        public func Java_com_example_swift_MyEnum__00024_1getFooValues__J_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
+        public func Java_com_example_swift_MyEnum__00024getAsFoo__J_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
         """#
       ]
     )

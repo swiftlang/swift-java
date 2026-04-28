@@ -110,7 +110,7 @@ struct JavaKeywordTests {
       expectedChunks: [
         """
         extension MyEnumWithValue {
-          fileprivate func _getInstanceofValues() -> (String)? {
+          fileprivate func getAsInstanceof() -> (String)? {
         """
       ]
     )
