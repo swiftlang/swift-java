@@ -18,21 +18,23 @@ import Testing
 
 @Suite
 final class InternalExtractTests {
-  let text =
-    """
-    internal func catchMeIfYouCan()
-    """
-
   @Test("Import: internal decl if configured")
-  func data_swiftThunk() throws {
+  func internalScope() throws {
     var config = Configuration()
     config.minimumInputAccessLevelMode = .internal
+
+    let text =
+      """
+      internal func catchMeIfYouCan()
+      func catchMeIfYouCan2()
+      """
 
     try assertOutput(
       input: text,
       config: config,
       .ffm,
       .java,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         """
         /**
@@ -44,7 +46,54 @@ final class InternalExtractTests {
         public static void catchMeIfYouCan() {
           swiftjava_SwiftModule_catchMeIfYouCan.call();
         }
+        """,
         """
+        public static void catchMeIfYouCan2() {
+          swiftjava_SwiftModule_catchMeIfYouCan2.call();
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: package decl if configured")
+  func packageScope() throws {
+    var config = Configuration()
+    config.minimumInputAccessLevelMode = .package
+
+    let text =
+      """
+      package func catchMeIfYouCan()
+      func skipMe()
+      internal func skipMe2()
+      """
+
+    try assertOutput(
+      input: text,
+      config: config,
+      .ffm,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * package func catchMeIfYouCan()
+         * }
+         */
+        public static void catchMeIfYouCan() {
+          swiftjava_SwiftModule_catchMeIfYouCan.call();
+        }
+        """
+      ],
+      notExpectedChunks: [
+        """
+        public static void skipMe() {
+        """,
+        """
+        public static void skipMe2() {
+        """,
       ]
     )
   }
