@@ -28,6 +28,10 @@ public func echoTriple(triple: (Bool, Double, Int64)) -> (Bool, Double, Int64) {
   triple
 }
 
+public func echoOptionalTriple(triple: (Int64?, String?, Alignment?)) -> (Int64?, String?, Alignment?) {
+  triple
+}
+
 public func makeBigTuple() -> (
   Bool, Int8, Int16, UInt16,
   Int32, Int64, Float, Double,

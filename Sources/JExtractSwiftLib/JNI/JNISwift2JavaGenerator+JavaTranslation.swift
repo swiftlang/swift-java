@@ -1193,22 +1193,9 @@ extension JNISwift2JavaGenerator {
         outParameters.append(contentsOf: elementResult.outParameters)
 
         if !elementResult.nativeJavaType.isVoid {
-          // Convert direct result to indirect result.
-          // For most class types (Swift wrapper classes), the JNI native representation
-          // is 'long' (a memory address). However, String is a native JNI reference
-          // type and must keep its original type so the out-parameter array matches
-          // the native method signature (String[] not long[])
-          let nativeElementType: JavaType
-          if elementResult.javaType.isString {
-            nativeElementType = elementResult.javaType
-          } else if case .class = elementResult.javaType {
-            nativeElementType = .long
-          } else {
-            nativeElementType = elementResult.javaType
-          }
-          let arrayType: JavaType = .array(nativeElementType)
+          let arrayType: JavaType = .array(elementResult.nativeJavaType)
           outParameters.append(
-            OutParameter(name: outParamName, type: arrayType, allocation: .newArray(nativeElementType, size: 1))
+            OutParameter(name: outParamName, type: arrayType, allocation: .newArray(elementResult.nativeJavaType, size: 1))
           )
           elementConversions.append(elementResult.conversion)
         } else {
