@@ -69,16 +69,16 @@ public class EnumTest {
     }
 
     @Test
-    void complexAssociatedValues_typealiasedGeneric() {
+    void complexAssociatedValues_optionalTypealiasedGeneric() {
         try (var arena = SwiftArena.ofConfined()) {
-            var e = ComplexAssociatedValues.typealiasedGeneric(
-                    MyIDs.makeIntID(42L, arena),
+            var e = ComplexAssociatedValues.optionalTypealiasedGeneric(
+                    Optional.of(MyIDs.makeIntID(42L, arena)),
                     arena
             );
-            assertEquals(
-                    Optional.of("42"),
-                    e.getAsTypealiasedGeneric(arena).map(v -> v.id().getDescription())
-            );
+            assertDoesNotThrow(() -> {
+                var id = e.getAsOptionalTypealiasedGeneric(arena).orElseThrow().id();
+                assertEquals(Optional.of("42"), id.map(MyID::getDescription));
+            });
         }
     }
 
@@ -86,7 +86,7 @@ public class EnumTest {
     void complexAssociatedValues_array() {
         try (var arena = SwiftArena.ofConfined()) {
             var e = ComplexAssociatedValues.array(
-                    List.of("Hello", "World").toArray(String[]::new),
+                    new String[]{"Hello", "World"},
                     arena
             );
             assertDoesNotThrow(() -> {

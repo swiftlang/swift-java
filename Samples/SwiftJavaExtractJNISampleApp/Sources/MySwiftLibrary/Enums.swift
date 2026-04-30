@@ -34,6 +34,6 @@ public enum EnumWithCaseNameValue {
 
 public enum ComplexAssociatedValues {
   case generic(MyID<Int>, GenericEnum<Int>)
-  case typealiasedGeneric(id: MyIntID)
+  case optionalTypealiasedGeneric(id: MyIntID?)
   case array([String])
 }
