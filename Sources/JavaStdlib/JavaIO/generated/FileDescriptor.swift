@@ -26,7 +26,7 @@ open class FileDescriptor: JavaObject {
   open func valid() -> Bool
 }
 extension JavaClass<FileDescriptor> {
-  @JavaStaticField(isFinal: true)
+  @JavaStaticField("in", isFinal: true)
   public var `in`: FileDescriptor!
 
   @JavaStaticField(isFinal: true)
