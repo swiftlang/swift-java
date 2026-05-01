@@ -47,6 +47,10 @@ public class HelloSwift {
         return value;
     }
 
+    public String $echo(String value) {
+        return value;
+    }
+
     public Predicate<Integer> lessThanTen() {
         Predicate<Integer> predicate = i -> (i < 10);
         return predicate;
