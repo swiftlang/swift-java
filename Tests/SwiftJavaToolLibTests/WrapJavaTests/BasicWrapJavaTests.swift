@@ -281,4 +281,44 @@ final class BasicWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+  func test_wrapJava_escapedSwiftName() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      
+      class MyClass {
+        public long init;
+        public static boolean $foo; 
+        public void func() {}
+        public static void $bar() {}
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyClass",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaField("init", isFinal: false)
+        public var `init`: Int64
+        """,
+        """
+        @JavaStaticField("$foo", isFinal: false)
+        public var _foo: Bool
+        """,
+        """
+        @JavaMethod("func")
+        open func `func`()
+        """,
+        """
+        @JavaStaticMethod("$bar")
+        public func _bar()
+        """
+      ]
+    )
+  }
 }

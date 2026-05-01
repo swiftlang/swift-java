@@ -27,17 +27,19 @@ extension String {
   }
 
   /// Escape a name with backticks if it's a Swift keyword.
-  var escapedSwiftName: String {
-    if isValidSwiftIdentifier(for: .variableName) {
-      return self
+  var escapedSwiftName: (swiftName: String, escaped: Bool) {
+    var escaped = false
+    var copy = self
+    if starts(with: "$") {
+      copy = "_\(self.dropFirst())"
+      escaped = true
     }
 
-    return "`\(self)`"
-  }
+    if copy.isValidSwiftIdentifier(for: .variableName) {
+      return (copy, escaped)
+    }
 
-  /// Returns whether this is a valid Swift function name
-  var isValidSwiftFunctionName: Bool {
-    !self.starts(with: "$")
+    return ("`\(copy)`", true)
   }
 
   /// Replace all occurrences of one character in the string with another.
