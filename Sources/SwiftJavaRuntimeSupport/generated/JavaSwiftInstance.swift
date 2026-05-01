@@ -10,7 +10,7 @@ public struct JavaSwiftInstance {
   /// ```java
   /// public abstract long org.swift.swiftkit.core.SwiftInstance.$memoryAddress()
   /// ```
-@JavaMethod("$memoryAddress")
+  @JavaMethod("$memoryAddress")
   public func _memoryAddress() -> Int64
 
   /// Java method `$ensureAlive`.
@@ -19,6 +19,6 @@ public struct JavaSwiftInstance {
   /// ```java
   /// public default void org.swift.swiftkit.core.SwiftInstance.$ensureAlive()
   /// ```
-@JavaMethod("$ensureAlive")
+  @JavaMethod("$ensureAlive")
   public func _ensureAlive()
 }

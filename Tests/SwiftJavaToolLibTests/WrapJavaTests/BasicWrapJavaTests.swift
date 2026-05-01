@@ -286,7 +286,7 @@ final class BasicWrapJavaTests: XCTestCase {
     let classpathURL = try await compileJava(
       """
       package com.example;
-      
+
       class MyClass {
         public long init;
         public static boolean $foo; 
@@ -298,7 +298,7 @@ final class BasicWrapJavaTests: XCTestCase {
 
     try assertWrapJavaOutput(
       javaClassNames: [
-        "com.example.MyClass",
+        "com.example.MyClass"
       ],
       classpath: [classpathURL],
       expectedChunks: [
@@ -317,7 +317,7 @@ final class BasicWrapJavaTests: XCTestCase {
         """
         @JavaStaticMethod("$bar")
         public func _bar()
-        """
+        """,
       ]
     )
   }

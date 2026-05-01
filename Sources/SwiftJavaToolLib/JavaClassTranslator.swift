@@ -1079,11 +1079,12 @@ extension JavaClassTranslator {
       outerOptional: .implicitlyUnwrappedOptional
     )
     let (swiftFieldName, swiftFieldNameIsEscaped) = javaField.getName().escapedSwiftName
-    var fieldAttributeStr = if javaField.isStatic {
-      "@JavaStaticField"
-    } else {
-      "@JavaField"
-    }
+    var fieldAttributeStr =
+      if javaField.isStatic {
+        "@JavaStaticField"
+      } else {
+        "@JavaField"
+      }
     var parameters: [String] = []
     if swiftFieldNameIsEscaped {
       parameters.append("\"\(javaField.getName())\"")
