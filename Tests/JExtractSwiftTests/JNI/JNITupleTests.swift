@@ -174,4 +174,61 @@ struct JNITupleTests {
       ]
     )
   }
+
+  @Test
+  func singleTuple() throws {
+    let input = """
+      public func singleTuple(input: (String)) -> (String) {
+        input
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        private static native java.lang.String $singleTuple(java.lang.String input);
+        """
+      ]
+    )
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public func Java_com_example_swift_SwiftModule__00024singleTuple__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, input: jstring?) -> jstring? {
+          return SwiftModule.singleTuple(input: String(fromJNI: input, in: environment)).getJNILocalRefValue(in: environment)
+        } 
+        """
+      ]
+    )
+  }
+
+  @Test
+  func singleTupleInGeneric() throws {
+    let input = """
+      public struct Box<T> {}
+      public var singleTupleInGeneric: Box<(String)> {
+        "input"
+      }
+      """
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static Box<java.lang.String> getSingleTupleInGeneric(SwiftArena swiftArena)
+        """
+      ]
+    )
+  }
 }
