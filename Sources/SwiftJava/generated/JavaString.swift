@@ -483,7 +483,7 @@ open class JavaString: JavaObject {
   /// ```java
   /// public java.lang.String java.lang.String.repeat(int)
   /// ```
-  @JavaMethod
+  @JavaMethod("repeat")
   open func `repeat`(_ arg0: Int32) -> String
 
   /// Java method `isBlank`.
