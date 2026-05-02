@@ -232,7 +232,8 @@ extension JNISwift2JavaGenerator {
           ],
           conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type)),
           indirectConversion: nil,
-          conversionCheck: nil
+          conversionCheck: nil,
+          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
         )
 
       case .tuple([]):
@@ -329,7 +330,8 @@ extension JNISwift2JavaGenerator {
           ],
           conversion: .extractMetatypeValue(.placeholder),
           indirectConversion: nil,
-          conversionCheck: nil
+          conversionCheck: nil,
+          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
         )
 
       case .tuple(let elements) where elements.count == 1:
@@ -367,6 +369,7 @@ extension JNISwift2JavaGenerator {
     ) throws -> NativeParameter {
       var allJNIParameters: [JavaParameter] = []
       var elementConversions: [(label: String?, conversion: NativeSwiftConversionStep)] = []
+      var asyncTaskCaptureNames: [String] = []
 
       for (idx, element) in elements.enumerated() {
         let elementParamName = "\(parameterName)_\(idx)"
@@ -380,13 +383,15 @@ extension JNISwift2JavaGenerator {
         )
         allJNIParameters.append(contentsOf: elementNative.parameters)
         elementConversions.append((label: element.label, conversion: elementNative.conversion))
+        asyncTaskCaptureNames.append(contentsOf: elementNative.asyncTaskCaptureNames)
       }
 
       return NativeParameter(
         parameters: allJNIParameters,
         conversion: .tupleConstruct(elements: elementConversions),
         indirectConversion: nil,
-        conversionCheck: nil
+        conversionCheck: nil,
+        asyncTaskCaptureNames: asyncTaskCaptureNames
       )
     }
 
@@ -452,7 +457,8 @@ extension JNISwift2JavaGenerator {
           allowsJavaImplementations: allowsJavaImplementations
         ),
         indirectConversion: nil,
-        conversionCheck: nil
+        conversionCheck: nil,
+        asyncTaskCaptureNames: [NativeSwiftConversionStep.swiftObjectName(for: parameterName)]
       )
     }
 
@@ -529,7 +535,8 @@ extension JNISwift2JavaGenerator {
             )
           ),
           indirectConversion: nil,
-          conversionCheck: nil
+          conversionCheck: nil,
+          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
         )
 
       default:
@@ -1072,6 +1079,24 @@ extension JNISwift2JavaGenerator {
 
     /// Represents check operations executed in if/guard conditional block for check during conversion
     let conversionCheck: NativeSwiftConversionCheck?
+
+    /// Temporary values created by this parameter conversion that must be moved
+    /// into async task bodies through an unchecked Sendable wrapper.
+    let asyncTaskCaptureNames: [String]
+
+    init(
+      parameters: [JavaParameter],
+      conversion: NativeSwiftConversionStep,
+      indirectConversion: NativeSwiftConversionStep?,
+      conversionCheck: NativeSwiftConversionCheck?,
+      asyncTaskCaptureNames: [String] = []
+    ) {
+      self.parameters = parameters
+      self.conversion = conversion
+      self.indirectConversion = indirectConversion
+      self.conversionCheck = conversionCheck
+      self.asyncTaskCaptureNames = asyncTaskCaptureNames
+    }
   }
 
   struct NativeResult {
@@ -1219,6 +1244,14 @@ extension JNISwift2JavaGenerator {
     /// Destructures a Swift tuple result and writes each element to an out-parameter.
     indirect case tupleDestructure(elements: [(index: Int, label: String?, conversion: NativeSwiftConversionStep, outParamName: String, javaType: JavaType)])
 
+    static func extractedSwiftValueName(for name: String) -> String {
+      "\(name)$"
+    }
+
+    static func swiftObjectName(for name: String) -> String {
+      "\(name)swiftObject$"
+    }
+
     /// Promotes the outermost `.getJNIValue` to `.getJNILocalRefValue`.
     /// Used for `@_cdecl` return positions to ensure the local ref survives
     /// ARC destruction of temporary `JavaObject`s.
@@ -1268,7 +1301,7 @@ extension JNISwift2JavaGenerator {
         let allowsJavaImplementations
       ):
         let inner = inner.render(&printer, placeholder)
-        let variableName = "\(inner)swiftObject$"
+        let variableName = Self.swiftObjectName(for: inner)
         let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
         printer.print("let \(variableName): \(existentialType)")
 
@@ -1344,7 +1377,7 @@ extension JNISwift2JavaGenerator {
 
       case .extractSwiftValue(let inner, let swiftType, let allowNil, let convertLongFromJNI):
         let inner = inner.render(&printer, placeholder)
-        let pointerName = "\(inner)$"
+        let pointerName = Self.extractedSwiftValueName(for: inner)
         if !allowNil {
           printer.print(#"assert(\#(inner) != 0, "\#(inner) memory address was null")"#)
         }
@@ -1367,7 +1400,7 @@ extension JNISwift2JavaGenerator {
 
       case .extractMetatypeValue(let inner):
         let inner = inner.render(&printer, placeholder)
-        let pointerName = "\(inner)$"
+        let pointerName = Self.extractedSwiftValueName(for: inner)
         printer.print(
           """
           let \(inner)Bits$ = Int(Int64(fromJNI: \(inner), in: environment))
@@ -1629,36 +1662,52 @@ extension JNISwift2JavaGenerator {
         let completeExceptionallyMethodID
       ):
         var globalRefs: [String] = ["globalFuture"]
+        var asyncTaskCaptureNames: [String] = []
+
+        func appendAsyncTaskCaptureNames(_ names: [String]) {
+          for name in names where !asyncTaskCaptureNames.contains(name) {
+            asyncTaskCaptureNames.append(name)
+          }
+        }
+
+        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfParameter?.asyncTaskCaptureNames ?? [])
+        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfTypeParameter?.asyncTaskCaptureNames ?? [])
+        for parameter in nativeFunctionSignature.parameters {
+          appendAsyncTaskCaptureNames(parameter.asyncTaskCaptureNames)
+        }
+
+        printer.print(
+          """
+          struct _SwiftJavaUncheckedSendable<T>: @unchecked Sendable {
+            let value: T
+          }
+          """
+        )
 
         // Global ref all indirect returns
         for outParameter in nativeFunctionSignature.result.outParameters {
           printer.print(
-            "nonisolated(unsafe) let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
+            "let \(outParameter.name)Sendable$ = _SwiftJavaUncheckedSendable(value: environment.interface.NewGlobalRef(environment, \(outParameter.name)))"
           )
           globalRefs.append(outParameter.name)
         }
 
         // We also need to global ref any objects passed in
         for parameter in nativeFunctionSignature.parameters.flatMap(\.parameters) where !parameter.type.isPrimitive {
-          printer.print("nonisolated(unsafe) let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
+          printer.print(
+            "let \(parameter.name)Sendable$ = _SwiftJavaUncheckedSendable(value: environment.interface.NewGlobalRef(environment, \(parameter.name)))"
+          )
           globalRefs.append(parameter.name)
         }
 
         printer.print(
           """
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          let globalFutureSendable$ = _SwiftJavaUncheckedSendable(value: environment.interface.NewGlobalRef(environment, result_future))
           """
         )
 
-        if let selfParameter = nativeFunctionSignature.selfParameter {
-          for parameter in selfParameter.parameters {
-            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
-          }
-        }
-        if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
-          for parameter in selfTypeParameter.parameters {
-            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
-          }
+        for name in asyncTaskCaptureNames {
+          printer.print("let \(name)Sendable$ = _SwiftJavaUncheckedSendable(value: \(name))")
         }
 
         func printDo(printer: inout CodePrinter) {
@@ -1703,15 +1752,11 @@ extension JNISwift2JavaGenerator {
         }
 
         func printTaskBody(printer: inout CodePrinter) {
-          if let selfParameter = nativeFunctionSignature.selfParameter {
-            for parameter in selfParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
-            }
+          for globalRef in globalRefs {
+            printer.print("let \(globalRef) = \(globalRef)Sendable$.value")
           }
-          if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
-            for parameter in selfTypeParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
-            }
+          for name in asyncTaskCaptureNames {
+            printer.print("let \(name) = \(name)Sendable$.value")
           }
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.
