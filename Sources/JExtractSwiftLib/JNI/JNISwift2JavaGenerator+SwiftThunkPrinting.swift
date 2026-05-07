@@ -856,11 +856,6 @@ extension JNISwift2JavaGenerator {
 
     printer.printSeparator("JavaBoxable conformances for Dictionary/Set element types")
 
-    if !boxableTypes.dictionaryTypes.isEmpty || !boxableTypes.setTypes.isEmpty {
-      printCollectionJavaBoxableCaches(&printer, boxableTypes)
-      printer.println()
-    }
-
     for nominalType in boxableTypes.nominalTypes {
       printNominalJavaBoxableCache(&printer, nominalType)
       printer.println()
@@ -983,65 +978,6 @@ extension JNISwift2JavaGenerator {
       dictionaryTypes: dictionaryTypes.sorted { $0.swiftTypeName < $1.swiftTypeName },
       setTypes: setTypes.sorted { $0.swiftTypeName < $1.swiftTypeName }
     )
-  }
-
-  private func printCollectionJavaBoxableCaches(
-    _ printer: inout CodePrinter,
-    _ boxableTypes: CollectionJavaBoxableTypes
-  ) {
-    printer.printBraceBlock("private enum _SwiftJavaCollectionJavaBoxingCache") { printer in
-      if !boxableTypes.dictionaryTypes.isEmpty {
-        printer.print(
-          """
-          private static let swiftDictionaryMapWrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
-            name: "wrapMemoryAddressUnsafe",
-            signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftDictionaryMap;",
-            isStatic: true
-          )
-          private static let swiftDictionaryMapCache = _JNIMethodIDCache(
-            className: "org/swift/swiftkit/core/collections/SwiftDictionaryMap",
-            methods: [swiftDictionaryMapWrapMemoryAddressUnsafeMethod]
-          )
-
-          static var swiftDictionaryMapClass: jclass {
-            swiftDictionaryMapCache.javaClass
-          }
-
-          static var swiftDictionaryMapWrapMemoryAddressUnsafe: jmethodID {
-            swiftDictionaryMapCache[swiftDictionaryMapWrapMemoryAddressUnsafeMethod]!
-          }
-          """
-        )
-      }
-
-      if !boxableTypes.dictionaryTypes.isEmpty && !boxableTypes.setTypes.isEmpty {
-        printer.println()
-      }
-
-      if !boxableTypes.setTypes.isEmpty {
-        printer.print(
-          """
-          private static let swiftSetWrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
-            name: "wrapMemoryAddressUnsafe",
-            signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftSet;",
-            isStatic: true
-          )
-          private static let swiftSetCache = _JNIMethodIDCache(
-            className: "org/swift/swiftkit/core/collections/SwiftSet",
-            methods: [swiftSetWrapMemoryAddressUnsafeMethod]
-          )
-
-          static var swiftSetClass: jclass {
-            swiftSetCache.javaClass
-          }
-
-          static var swiftSetWrapMemoryAddressUnsafe: jmethodID {
-            swiftSetCache[swiftSetWrapMemoryAddressUnsafeMethod]!
-          }
-          """
-        )
-      }
-    }
   }
 
   private func importedNominalCollectionBoxingType(from nominalType: SwiftNominalType) -> ImportedNominalType? {
@@ -1254,8 +1190,8 @@ extension JNISwift2JavaGenerator {
           args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
           return environment.interface.CallStaticObjectMethodA(
             environment,
-            _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapClass,
-            _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapWrapMemoryAddressUnsafe,
+            _JNIMethodIDCache.SwiftDictionaryMap.class,
+            _JNIMethodIDCache.SwiftDictionaryMap.wrapMemoryAddressUnsafe,
             &args
           )
           """
@@ -1308,7 +1244,7 @@ extension JNISwift2JavaGenerator {
       }
       printer.println()
       printer.printBraceBlock("public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray") { printer in
-        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapClass, nil) }")
+        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _JNIMethodIDCache.SwiftDictionaryMap.class, nil) }")
       }
       printer.println()
       printer.printBraceBlock("public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>") { printer in
@@ -1366,8 +1302,8 @@ extension JNISwift2JavaGenerator {
           args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
           return environment.interface.CallStaticObjectMethodA(
             environment,
-            _SwiftJavaCollectionJavaBoxingCache.swiftSetClass,
-            _SwiftJavaCollectionJavaBoxingCache.swiftSetWrapMemoryAddressUnsafe,
+            _JNIMethodIDCache.SwiftSet.class,
+            _JNIMethodIDCache.SwiftSet.wrapMemoryAddressUnsafe,
             &args
           )
           """
@@ -1420,7 +1356,7 @@ extension JNISwift2JavaGenerator {
       }
       printer.println()
       printer.printBraceBlock("public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray") { printer in
-        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _SwiftJavaCollectionJavaBoxingCache.swiftSetClass, nil) }")
+        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _JNIMethodIDCache.SwiftSet.class, nil) }")
       }
       printer.println()
       printer.printBraceBlock("public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>") { printer in

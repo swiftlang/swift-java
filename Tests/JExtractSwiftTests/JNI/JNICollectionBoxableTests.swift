@@ -16,7 +16,7 @@ import JExtractSwiftLib
 import Testing
 
 @Suite
-struct JUICollectionBoxableTests {
+struct JNICollectionBoxableTests {
   @Test("JNI generates JavaValue and JavaBoxable for dictionary element types")
   func dictionaryCustomValueGeneratesJavaBoxingConformance() throws {
     try assertOutput(
@@ -86,7 +86,8 @@ struct JUICollectionBoxableTests {
           public static var jniPlaceholderValue: JNIType { nil }
         }
         """,
-      ]
+      ],
+      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
     )
   }
 
@@ -152,7 +153,72 @@ struct JUICollectionBoxableTests {
           ...
         }
         """,
-      ]
+      ],
+      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
+    )
+  }
+
+  @Test("JNI uses runtime support cache for nested dictionary boxing")
+  func nestedDictionaryUsesRuntimeSupportCache() throws {
+    try assertOutput(
+      input: """
+        public struct ReefFish: Hashable {}
+        public func f(dict: [String: [Int: ReefFish]]) -> [String: [Int: ReefFish]] {}
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        extension [Int: ReefFish]: JavaValue, JavaBoxable {
+          ...
+          let selfPointer$ = self.dictionaryGetJNIValue(in: environment)
+          var args = [jvalue(), jvalue()]
+          args[0].j = selfPointer$
+          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
+          return environment.interface.CallStaticObjectMethodA(
+            environment,
+            _JNIMethodIDCache.SwiftDictionaryMap.class,
+            _JNIMethodIDCache.SwiftDictionaryMap.wrapMemoryAddressUnsafe,
+            &args
+          )
+          ...
+        }
+        """,
+      ],
+      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
+    )
+  }
+
+  @Test("JNI uses runtime support cache for nested set boxing")
+  func nestedSetUsesRuntimeSupportCache() throws {
+    try assertOutput(
+      input: """
+        public struct ReefFish: Hashable {}
+        public func f(dict: [String: Set<ReefFish>]) -> [String: Set<ReefFish>] {}
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        extension Set<ReefFish>: JavaValue, JavaBoxable {
+          ...
+          let selfPointer$ = self.setGetJNIValue(in: environment)
+          var args = [jvalue(), jvalue()]
+          args[0].j = selfPointer$
+          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
+          return environment.interface.CallStaticObjectMethodA(
+            environment,
+            _JNIMethodIDCache.SwiftSet.class,
+            _JNIMethodIDCache.SwiftSet.wrapMemoryAddressUnsafe,
+            &args
+          )
+          ...
+        }
+        """,
+      ],
+      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
     )
   }
 

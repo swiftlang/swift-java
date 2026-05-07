@@ -121,6 +121,48 @@ extension _JNIMethodIDCache {
     }
   }
 
+  public enum SwiftDictionaryMap {
+    private static let wrapMemoryAddressUnsafeMethod = Method(
+      name: "wrapMemoryAddressUnsafe",
+      signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftDictionaryMap;",
+      isStatic: true
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "org/swift/swiftkit/core/collections/SwiftDictionaryMap",
+      methods: [wrapMemoryAddressUnsafeMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var wrapMemoryAddressUnsafe: jmethodID {
+      cache.methods[wrapMemoryAddressUnsafeMethod]!
+    }
+  }
+
+  public enum SwiftSet {
+    private static let wrapMemoryAddressUnsafeMethod = Method(
+      name: "wrapMemoryAddressUnsafe",
+      signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftSet;",
+      isStatic: true
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "org/swift/swiftkit/core/collections/SwiftSet",
+      methods: [wrapMemoryAddressUnsafeMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var wrapMemoryAddressUnsafe: jmethodID {
+      cache.methods[wrapMemoryAddressUnsafeMethod]!
+    }
+  }
+
   public enum _OutSwiftGenericInstance {
     private static let selfPointerField = Field(
       name: "selfPointer",
