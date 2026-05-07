@@ -303,6 +303,8 @@ extension JNISwift2JavaGenerator {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
+
+    printCollectionJavaBoxableExtensions(&printer)
   }
 
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
@@ -825,6 +827,620 @@ extension JNISwift2JavaGenerator {
       """
     ) { printer in
       body(&printer)
+    }
+  }
+
+  private struct ConcreteDictionaryJavaBoxable: Hashable {
+    let swiftTypeName: String
+  }
+
+  private struct ConcreteSetJavaBoxable: Hashable {
+    let swiftTypeName: String
+  }
+
+  private struct CollectionJavaBoxableTypes {
+    let nominalTypes: [ImportedNominalType]
+    let dictionaryTypes: [ConcreteDictionaryJavaBoxable]
+    let setTypes: [ConcreteSetJavaBoxable]
+
+    var isEmpty: Bool {
+      nominalTypes.isEmpty && dictionaryTypes.isEmpty && setTypes.isEmpty
+    }
+  }
+
+  private func printCollectionJavaBoxableExtensions(_ printer: inout CodePrinter) {
+    let boxableTypes = collectCollectionJavaBoxableTypes()
+    guard !boxableTypes.isEmpty else {
+      return
+    }
+
+    printer.printSeparator("JavaBoxable conformances for Dictionary/Set element types")
+
+    if !boxableTypes.dictionaryTypes.isEmpty || !boxableTypes.setTypes.isEmpty {
+      printCollectionJavaBoxableCaches(&printer, boxableTypes)
+      printer.println()
+    }
+
+    for nominalType in boxableTypes.nominalTypes {
+      printNominalJavaBoxableCache(&printer, nominalType)
+      printer.println()
+      printNominalJavaBoxableExtension(&printer, nominalType)
+      printer.println()
+    }
+
+    for dictionaryType in boxableTypes.dictionaryTypes {
+      printConcreteDictionaryJavaBoxableExtension(&printer, dictionaryType)
+      printer.println()
+    }
+
+    for setType in boxableTypes.setTypes {
+      printConcreteSetJavaBoxableExtension(&printer, setType)
+      printer.println()
+    }
+  }
+
+  private func collectCollectionJavaBoxableTypes() -> CollectionJavaBoxableTypes {
+    var nominalTypes: Set<ImportedNominalType> = []
+    var dictionaryTypes: Set<ConcreteDictionaryJavaBoxable> = []
+    var setTypes: Set<ConcreteSetJavaBoxable> = []
+
+    func collect(_ type: SwiftType, insideCollectionElement: Bool = false) {
+      switch type {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.asKnownType {
+          switch knownType {
+          case .dictionary(let keyType, let valueType):
+            if insideCollectionElement {
+              dictionaryTypes.insert(.init(swiftTypeName: type.description))
+            }
+            collect(keyType, insideCollectionElement: true)
+            collect(valueType, insideCollectionElement: true)
+            return
+
+          case .set(let elementType):
+            if insideCollectionElement {
+              setTypes.insert(.init(swiftTypeName: type.description))
+            }
+            collect(elementType, insideCollectionElement: true)
+            return
+
+          case .optional(let wrappedType):
+            collect(wrappedType, insideCollectionElement: insideCollectionElement)
+            return
+
+          case .array(let elementType):
+            collect(elementType, insideCollectionElement: false)
+            return
+
+          default:
+            break
+          }
+        }
+
+        guard insideCollectionElement else {
+          return
+        }
+        guard !nominalType.isSwiftJavaWrapper else {
+          return
+        }
+        guard nominalType.nominalTypeDecl.knownTypeKind == nil else {
+          return
+        }
+        guard let importedType = analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName] else {
+          return
+        }
+        guard !importedType.swiftNominal.isGeneric else {
+          return
+        }
+        guard !importedType.isSpecialization else {
+          return
+        }
+        nominalTypes.insert(importedType)
+
+      case .tuple(let elements):
+        for element in elements {
+          collect(element.type, insideCollectionElement: false)
+        }
+
+      case .existential(let innerType), .opaque(let innerType), .metatype(let innerType):
+        collect(innerType, insideCollectionElement: false)
+
+      case .function(let functionType):
+        for parameter in functionType.parameters {
+          collect(parameter.type, insideCollectionElement: false)
+        }
+        collect(functionType.resultType, insideCollectionElement: false)
+
+      case .composite(let innerTypes):
+        for innerType in innerTypes {
+          collect(innerType, insideCollectionElement: false)
+        }
+
+      case .genericParameter:
+        break
+      }
+    }
+
+    for decl in analysis.importedGlobalFuncs {
+      for parameter in decl.functionSignature.parameters {
+        collect(parameter.type)
+      }
+      collect(decl.functionSignature.result.type)
+    }
+
+    for decl in analysis.importedGlobalVariables {
+      for parameter in decl.functionSignature.parameters {
+        collect(parameter.type)
+      }
+      collect(decl.functionSignature.result.type)
+    }
+
+    for importedType in analysis.importedTypes.values {
+      for decl in importedType.initializers + importedType.methods + importedType.variables {
+        for parameter in decl.functionSignature.parameters {
+          collect(parameter.type)
+        }
+        collect(decl.functionSignature.result.type)
+      }
+    }
+
+    return CollectionJavaBoxableTypes(
+      nominalTypes: nominalTypes.sorted { $0.effectiveSwiftTypeName < $1.effectiveSwiftTypeName },
+      dictionaryTypes: dictionaryTypes.sorted { $0.swiftTypeName < $1.swiftTypeName },
+      setTypes: setTypes.sorted { $0.swiftTypeName < $1.swiftTypeName }
+    )
+  }
+
+  private func printCollectionJavaBoxableCaches(
+    _ printer: inout CodePrinter,
+    _ boxableTypes: CollectionJavaBoxableTypes
+  ) {
+    printer.printBraceBlock("private enum _SwiftJavaCollectionJavaBoxingCache") { printer in
+      if !boxableTypes.dictionaryTypes.isEmpty {
+        printer.print(
+          """
+          private static let swiftDictionaryMapWrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
+            name: "wrapMemoryAddressUnsafe",
+            signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftDictionaryMap;",
+            isStatic: true
+          )
+          private static let swiftDictionaryMapCache = _JNIMethodIDCache(
+            className: "org/swift/swiftkit/core/collections/SwiftDictionaryMap",
+            methods: [swiftDictionaryMapWrapMemoryAddressUnsafeMethod]
+          )
+
+          static var swiftDictionaryMapClass: jclass {
+            swiftDictionaryMapCache.javaClass
+          }
+
+          static var swiftDictionaryMapWrapMemoryAddressUnsafe: jmethodID {
+            swiftDictionaryMapCache[swiftDictionaryMapWrapMemoryAddressUnsafeMethod]!
+          }
+          """
+        )
+      }
+
+      if !boxableTypes.dictionaryTypes.isEmpty && !boxableTypes.setTypes.isEmpty {
+        printer.println()
+      }
+
+      if !boxableTypes.setTypes.isEmpty {
+        printer.print(
+          """
+          private static let swiftSetWrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
+            name: "wrapMemoryAddressUnsafe",
+            signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lorg/swift/swiftkit/core/collections/SwiftSet;",
+            isStatic: true
+          )
+          private static let swiftSetCache = _JNIMethodIDCache(
+            className: "org/swift/swiftkit/core/collections/SwiftSet",
+            methods: [swiftSetWrapMemoryAddressUnsafeMethod]
+          )
+
+          static var swiftSetClass: jclass {
+            swiftSetCache.javaClass
+          }
+
+          static var swiftSetWrapMemoryAddressUnsafe: jmethodID {
+            swiftSetCache[swiftSetWrapMemoryAddressUnsafeMethod]!
+          }
+          """
+        )
+      }
+    }
+  }
+
+  private func printNominalJavaBoxableCache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let cacheName = "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
+    let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
+    let signature = "(J)L\(jniClassName);"
+
+    printer.printBraceBlock("private enum \(cacheName)") { printer in
+      printer.print(
+        """
+        private static let wrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
+          name: "wrapMemoryAddressUnsafe",
+          signature: "\(signature)",
+          isStatic: true
+        )
+        private static let cache = _JNIMethodIDCache(
+          className: "\(jniClassName)",
+          methods: [wrapMemoryAddressUnsafeMethod]
+        )
+
+        static var javaClass: jclass {
+          cache.javaClass
+        }
+
+        static var wrapMemoryAddressUnsafe: jmethodID {
+          cache[wrapMemoryAddressUnsafeMethod]!
+        }
+        """
+      )
+    }
+  }
+
+  private func printNominalJavaBoxableExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let swiftTypeName = type.effectiveSwiftTypeName
+    let cacheName = "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
+    let javaClassName = "\(javaPackage).\(type.effectiveJavaTypeName.jniEscapedName)"
+
+    printer.printBraceBlock("extension \(swiftTypeName): JavaValue, JavaBoxable") { printer in
+      printer.print("public typealias JNIType = jobject?")
+      printer.print("public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \\.l }")
+      printer.print(#"public static var javaType: JavaType { JavaType(className: "\#(javaClassName)") }"#)
+      printer.println()
+      printer.printBraceBlock(
+        "public func getJNIValue(in environment: JNIEnvironment) -> JNIType"
+      ) { printer in
+        printer.print("toJavaObject(in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
+        printer.print(
+          """
+          let selfPointer$ = UnsafeMutablePointer<\(swiftTypeName)>.allocate(capacity: 1)
+          selfPointer$.initialize(to: self)
+          let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
+          var args = [jvalue()]
+          args[0].j = selfPointerBits$.getJNIValue(in: environment)
+          return environment.interface.CallStaticObjectMethodA(
+            environment,
+            \(cacheName).javaClass,
+            \(cacheName).wrapMemoryAddressUnsafe,
+            &args
+          )
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public init(fromJNI value: JNIType, in environment: JNIEnvironment)"
+      ) { printer in
+        printer.print("self = Self.fromJavaObject(value, in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> \(swiftTypeName)") { printer in
+        printer.print(
+          """
+          guard let obj else {
+            fatalError("\(swiftTypeName).fromJavaObject received a null Java object")
+          }
+          let selfPointer$ = environment.interface.CallLongMethodA(
+            environment,
+            obj,
+            _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
+            nil
+          )
+          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
+          guard let valuePointer$ = UnsafeMutablePointer<\(swiftTypeName)>(bitPattern: selfPointerBits$) else {
+            fatalError("\(swiftTypeName).fromJavaObject received a null Swift memory address")
+          }
+          return valuePointer$.pointee
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniMethodCall(in environment: JNIEnvironment) -> JNIMethodCall<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.CallObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniFieldGet(in environment: JNIEnvironment) -> JNIFieldGet<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.GetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniFieldSet(in environment: JNIEnvironment) -> JNIFieldSet<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.SetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniStaticMethodCall(in environment: JNIEnvironment) -> JNIStaticMethodCall<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.CallStaticObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.GetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>"
+      ) { printer in
+        printer.print("environment.interface.SetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray"
+      ) { printer in
+        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, \(cacheName).javaClass, nil) }")
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>"
+      ) { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              buffer.initializeElement(
+                at: Int(i),
+                to: environment.interface.GetObjectArrayElement(environment, array, Int32(i))
+              )
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock(
+        "public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>"
+      ) { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.print("public static var jniPlaceholderValue: JNIType { nil }")
+    }
+  }
+
+  private func printConcreteDictionaryJavaBoxableExtension(
+    _ printer: inout CodePrinter,
+    _ type: ConcreteDictionaryJavaBoxable
+  ) {
+    printer.printBraceBlock("extension \(type.swiftTypeName): JavaValue, JavaBoxable") { printer in
+      printer.print("public typealias JNIType = jobject?")
+      printer.print("public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \\.l }")
+      printer.print(#"public static var javaType: JavaType { JavaType(className: "org.swift.swiftkit.core.collections.SwiftDictionaryMap") }"#)
+      printer.println()
+      printer.printBraceBlock("public func getJNIValue(in environment: JNIEnvironment) -> JNIType") { printer in
+        printer.print("toJavaObject(in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
+        printer.print(
+          """
+          let selfPointer$ = self.dictionaryGetJNIValue(in: environment)
+          var args = [jvalue(), jvalue()]
+          args[0].j = selfPointer$
+          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
+          return environment.interface.CallStaticObjectMethodA(
+            environment,
+            _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapClass,
+            _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapWrapMemoryAddressUnsafe,
+            &args
+          )
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public init(fromJNI value: JNIType, in environment: JNIEnvironment)") { printer in
+        printer.print("self = Self.fromJavaObject(value, in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self") { printer in
+        printer.print(
+          """
+          guard let obj else {
+            fatalError("\(type.swiftTypeName).fromJavaObject received a null Java object")
+          }
+          let selfPointer$ = environment.interface.CallLongMethodA(
+            environment,
+            obj,
+            _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
+            nil
+          )
+          return Self(fromJNI: selfPointer$, in: environment)
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniMethodCall(in environment: JNIEnvironment) -> JNIMethodCall<JNIType>") { printer in
+        printer.print("environment.interface.CallObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniFieldGet(in environment: JNIEnvironment) -> JNIFieldGet<JNIType>") { printer in
+        printer.print("environment.interface.GetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniFieldSet(in environment: JNIEnvironment) -> JNIFieldSet<JNIType>") { printer in
+        printer.print("environment.interface.SetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticMethodCall(in environment: JNIEnvironment) -> JNIStaticMethodCall<JNIType>") { printer in
+        printer.print("environment.interface.CallStaticObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>") { printer in
+        printer.print("environment.interface.GetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>") { printer in
+        printer.print("environment.interface.SetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray") { printer in
+        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _SwiftJavaCollectionJavaBoxingCache.swiftDictionaryMapClass, nil) }")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>") { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              buffer.initializeElement(
+                at: Int(i),
+                to: environment.interface.GetObjectArrayElement(environment, array, Int32(i))
+              )
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>") { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.print("public static var jniPlaceholderValue: JNIType { nil }")
+    }
+  }
+
+  private func printConcreteSetJavaBoxableExtension(
+    _ printer: inout CodePrinter,
+    _ type: ConcreteSetJavaBoxable
+  ) {
+    printer.printBraceBlock("extension \(type.swiftTypeName): JavaValue, JavaBoxable") { printer in
+      printer.print("public typealias JNIType = jobject?")
+      printer.print("public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \\.l }")
+      printer.print(#"public static var javaType: JavaType { JavaType(className: "org.swift.swiftkit.core.collections.SwiftSet") }"#)
+      printer.println()
+      printer.printBraceBlock("public func getJNIValue(in environment: JNIEnvironment) -> JNIType") { printer in
+        printer.print("toJavaObject(in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
+        printer.print(
+          """
+          let selfPointer$ = self.setGetJNIValue(in: environment)
+          var args = [jvalue(), jvalue()]
+          args[0].j = selfPointer$
+          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
+          return environment.interface.CallStaticObjectMethodA(
+            environment,
+            _SwiftJavaCollectionJavaBoxingCache.swiftSetClass,
+            _SwiftJavaCollectionJavaBoxingCache.swiftSetWrapMemoryAddressUnsafe,
+            &args
+          )
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public init(fromJNI value: JNIType, in environment: JNIEnvironment)") { printer in
+        printer.print("self = Self.fromJavaObject(value, in: environment)")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self") { printer in
+        printer.print(
+          """
+          guard let obj else {
+            fatalError("\(type.swiftTypeName).fromJavaObject received a null Java object")
+          }
+          let selfPointer$ = environment.interface.CallLongMethodA(
+            environment,
+            obj,
+            _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
+            nil
+          )
+          return Self(fromJNI: selfPointer$, in: environment)
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniMethodCall(in environment: JNIEnvironment) -> JNIMethodCall<JNIType>") { printer in
+        printer.print("environment.interface.CallObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniFieldGet(in environment: JNIEnvironment) -> JNIFieldGet<JNIType>") { printer in
+        printer.print("environment.interface.GetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniFieldSet(in environment: JNIEnvironment) -> JNIFieldSet<JNIType>") { printer in
+        printer.print("environment.interface.SetObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticMethodCall(in environment: JNIEnvironment) -> JNIStaticMethodCall<JNIType>") { printer in
+        printer.print("environment.interface.CallStaticObjectMethodA")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticFieldGet(in environment: JNIEnvironment) -> JNIStaticFieldGet<JNIType>") { printer in
+        printer.print("environment.interface.GetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniStaticFieldSet(in environment: JNIEnvironment) -> JNIStaticFieldSet<JNIType>") { printer in
+        printer.print("environment.interface.SetStaticObjectField")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray") { printer in
+        printer.print("{ environment, size in environment.interface.NewObjectArray(environment, size, _SwiftJavaCollectionJavaBoxingCache.swiftSetClass, nil) }")
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniGetArrayRegion(in environment: JNIEnvironment) -> JNIGetArrayRegion<JNIType>") { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeMutableBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              buffer.initializeElement(
+                at: Int(i),
+                to: environment.interface.GetObjectArrayElement(environment, array, Int32(i))
+              )
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.printBraceBlock("public static func jniSetArrayRegion(in environment: JNIEnvironment) -> JNISetArrayRegion<JNIType>") { printer in
+        printer.print(
+          """
+          { environment, array, start, length, outPointer in
+            let buffer = UnsafeBufferPointer(start: outPointer, count: Int(length))
+            for i in start..<start + length {
+              environment.interface.SetObjectArrayElement(environment, array, i, buffer[Int(i)])
+            }
+          }
+          """
+        )
+      }
+      printer.println()
+      printer.print("public static var jniPlaceholderValue: JNIType { nil }")
     }
   }
 
