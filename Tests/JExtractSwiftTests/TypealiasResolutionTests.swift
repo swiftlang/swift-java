@@ -226,14 +226,21 @@ struct TypealiasResolutionTests {
       }
 
       public typealias FishBox = Box<Fish>
+      public func makeFishBox() -> FishBox {
+        .init()
+      }
       """#
 
-    var config = Configuration()
-    config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
-    try translator.analyze(path: "/fake/Fake.swift", text: input)
-
-    #expect(translator.importedTypes["FishBox"] != nil, "FishBox specialization should still register")
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishBox implements JNISwiftInstance {",
+        "public static Box<Fish> makeFishBox(",
+      ],
+    )
   }
 
   // ==== -----------------------------------------------------------------------
@@ -404,5 +411,87 @@ struct TypealiasResolutionTests {
     }
     #expect(nominal.nominalTypeDecl.name == "Optional")
     #expect(nominal.genericArguments?.first?.description == "Int64")
+  }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Nested typealiases
+
+  @Test("Typealias nested inside a type resolves correctly")
+  func nestedTypealiasResolves() throws {
+    let input =
+      #"""
+      public struct Foo {
+        public typealias ID = Int
+        public var id: ID
+      }
+
+      public func useFooID(value: Foo.ID) -> Foo.ID {
+        value
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        #"""
+        @_cdecl("Java_com_example_swift_Foo__00024getId__J")
+        public func Java_com_example_swift_Foo__00024getId__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
+        """#,
+        #"""
+        @_cdecl("Java_com_example_swift_Foo__00024setId__JJ")
+        public func Java_com_example_swift_Foo__00024setId__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
+        """#,
+      ],
+    )
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        public long getId()
+        """,
+        """
+        public void setId(long newValue) 
+        """,
+        """
+        public static long useFooID(long value)
+        """,
+      ],
+    )
+  }
+
+  @Test("Nested typealias used in an extension of that typealias's RHS resolves")
+  func useNestedTypealiasFromExtension() throws {
+    let input =
+      #"""
+      public typealias MyEnumAlt = Never
+
+      extension MyStruct.MyEnumAlt {
+        public func methodInExtension() {}
+      }
+
+      public struct MyStruct {
+        public enum MyEnum {}
+        public typealias MyEnumAlt = MyEnum
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .ffm,
+      .java,
+      expectedChunks: [
+        #"""
+        private static final MemorySegment ADDR =
+         SwiftModule.findOrThrow("swiftjava_SwiftModule_MyStruct_MyEnum_methodInExtension");
+        """#,
+      ],
+    )
   }
 }
