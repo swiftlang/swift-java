@@ -4,7 +4,14 @@ import SwiftJavaJNICore
 
 @JavaInterface("org.swift.swiftkit.core.SwiftArena")
 public struct JavaSwiftArena {
-
+  /// Java method `register`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract void org.swift.swiftkit.core.SwiftArena.register(org.swift.swiftkit.core.SwiftInstance)
+  /// ```
+  @JavaMethod
+  public func register(_ arg0: JavaSwiftInstance?)
 }
 extension JavaClass<JavaSwiftArena> {
   /// Java method `ofAuto`.

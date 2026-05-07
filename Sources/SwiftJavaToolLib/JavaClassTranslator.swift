@@ -259,11 +259,6 @@ struct JavaClassTranslator {
         continue
       }
 
-      guard method.getName().isValidSwiftFunctionName else {
-        log.warning("Skipping method \(method.getName()) because it is not a valid Swift function name")
-        continue
-      }
-
       addMethod(method, isNative: false)
     }
 
@@ -949,8 +944,8 @@ extension JavaClassTranslator {
 
     // --- Handle other effects
     let throwsStr = javaMethod.throwsCheckedException ? "throws" : ""
-    let swiftMethodName = javaMethod.getName().escapedSwiftName
-    let swiftOptionalMethodName = "\(javaMethod.getName())Optional".escapedSwiftName
+    let (swiftMethodName, swiftMethodNameEscaped) = javaMethod.getName().escapedSwiftName
+    let (swiftOptionalMethodName, _) = "\(javaMethod.getName())Optional".escapedSwiftName
 
     // --- Handle docs for the generated method.
     // Include the original Java signature
@@ -987,10 +982,8 @@ extension JavaClassTranslator {
         }
       // Do we need to record any generic information, in order to enable type-erasure for the upcalls?
       var parameters: [String] = []
-      // If the method name is "init", we need to explicitly specify it in the annotation
-      // because "init" is a Swift keyword and will be escaped in the function name via `init`
-      if javaMethod.getName() == "init" {
-        parameters.append("\"init\"")
+      if swiftMethodNameEscaped {
+        parameters.append("\"\(javaMethod.getName())\"")
       }
       if hasTypeEraseGenericResultType {
         let returnType = javaMethod.getReturnType()!
@@ -1085,8 +1078,24 @@ extension JavaClassTranslator {
       preferValueTypes: true,
       outerOptional: .implicitlyUnwrappedOptional
     )
-    let fieldAttribute: AttributeSyntax = javaField.isStatic ? "@JavaStaticField" : "@JavaField"
-    let swiftFieldName = javaField.getName().escapedSwiftName
+    let (swiftFieldName, swiftFieldNameIsEscaped) = javaField.getName().escapedSwiftName
+    var fieldAttributeStr =
+      if javaField.isStatic {
+        "@JavaStaticField"
+      } else {
+        "@JavaField"
+      }
+    var parameters: [String] = []
+    if swiftFieldNameIsEscaped {
+      parameters.append("\"\(javaField.getName())\"")
+    }
+    parameters.append("isFinal: \(javaField.isFinal)")
+    if !parameters.isEmpty {
+      fieldAttributeStr += "("
+      fieldAttributeStr.append(parameters.joined(separator: ", "))
+      fieldAttributeStr += ")"
+    }
+    let fieldAttribute: AttributeSyntax = "\(raw: fieldAttributeStr)"
     let fieldAnnotations = javaField.getDeclaredAnnotations().compactMap(\.self)
     let invisibleFieldAnnotations = runtimeInvisibleAnnotations.annotationsFor(field: javaField.getName())
     let availableAttributes = swiftAvailableAttributes(
@@ -1109,7 +1118,7 @@ extension JavaClassTranslator {
           ""
         }
       return """
-        \(raw: availableAttributes.render())\(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        \(raw: availableAttributes.render())\(fieldAttribute)
         public var \(raw: swiftFieldName): \(raw: typeName)
 
 
@@ -1121,7 +1130,7 @@ extension JavaClassTranslator {
         """
     } else {
       return """
-        \(raw: availableAttributes.render())\(fieldAttribute)(isFinal: \(raw: javaField.isFinal))
+        \(raw: availableAttributes.render())\(fieldAttribute)
         public var \(raw: swiftFieldName): \(raw: typeName)
         """
     }

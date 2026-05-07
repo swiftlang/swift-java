@@ -62,6 +62,10 @@ extension HelloSwift: HelloSwiftNativeMethods {
       fatalError("Expected subclass here")
     }
 
+    // Check escaped name
+    assert(self.`init`(42) == 42)
+    assert(self._echo("Hello") == "Hello")
+
     // Check "is" behavior
     assert(newHello.is(HelloSwift.self))
     assert(!newHello.is(HelloSubclass.self))
