@@ -26,11 +26,14 @@ package protocol SwiftSymbolTableProtocol {
   /// return nominal types within this module.
   func lookupTopLevelNominalType(_ name: String) -> SwiftNominalTypeDeclaration?
 
+  /// Look for a top-level typealias with the given name.
+  func lookupTopLevelTypealias(_ name: String) -> SwiftTypeAliasDeclaration?
+
   // Look for a nested type with the given name.
   func lookupNestedType(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftNominalTypeDeclaration?
 
-  /// Look for a top-level typealias with the given name.
-  func lookupTopLevelTypealias(_ name: String) -> SwiftTypeAliasDeclaration?
+  // Look for a nested typealias with the given name.
+  func lookupNestedTypealias(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftTypeAliasDeclaration?
 }
 
 extension SwiftSymbolTableProtocol {
@@ -41,6 +44,14 @@ extension SwiftSymbolTableProtocol {
     }
 
     return lookupTopLevelNominalType(name)
+  }
+
+  package func lookupTypealias(_ name: String, parent: SwiftNominalTypeDeclaration?) -> SwiftTypeAliasDeclaration? {
+    if let parent {
+      return lookupNestedTypealias(name, parent: parent)
+    }
+
+    return lookupTopLevelTypealias(name)
   }
 }
 
@@ -167,6 +178,21 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
     return importedModules[moduleName]?.lookupTopLevelNominalType(name)
   }
 
+  /// Look for a top-level typealias with the given name.
+  package func lookupTopLevelTypealias(_ name: String) -> SwiftTypeAliasDeclaration? {
+    if let parsedResult = parsedModule.lookupTopLevelTypealias(name) {
+      return parsedResult
+    }
+
+    for importedModule in prioritySortedImportedModules {
+      if let result = importedModule.lookupTopLevelTypealias(name) {
+        return result
+      }
+    }
+
+    return nil
+  }
+
   // Look for a nested type with the given name.
   package func lookupNestedType(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftNominalTypeDeclaration? {
     if let parsedResult = parsedModule.lookupNestedType(name, parent: parent) {
@@ -182,14 +208,14 @@ extension SwiftSymbolTable: SwiftSymbolTableProtocol {
     return nil
   }
 
-  /// Look for a top-level typealias with the given name.
-  package func lookupTopLevelTypealias(_ name: String) -> SwiftTypeAliasDeclaration? {
-    if let parsedResult = parsedModule.lookupTopLevelTypealias(name) {
+  // Look for a nested typealias with the given name.
+  package func lookupNestedTypealias(_ name: String, parent: SwiftNominalTypeDeclaration) -> SwiftTypeAliasDeclaration? {
+    if let parsedResult = parsedModule.lookupNestedTypealias(name, parent: parent) {
       return parsedResult
     }
 
-    for importedModule in prioritySortedImportedModules {
-      if let result = importedModule.lookupTopLevelTypealias(name) {
+    for importedModule in importedModules.values {
+      if let result = importedModule.lookupNestedTypealias(name, parent: parent) {
         return result
       }
     }

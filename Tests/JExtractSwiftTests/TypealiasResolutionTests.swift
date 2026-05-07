@@ -490,7 +490,7 @@ struct TypealiasResolutionTests {
         #"""
         private static final MemorySegment ADDR =
          SwiftModule.findOrThrow("swiftjava_SwiftModule_MyStruct_MyEnum_methodInExtension");
-        """#,
+        """#
       ],
     )
   }

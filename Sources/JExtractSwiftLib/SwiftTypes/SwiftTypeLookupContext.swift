@@ -64,6 +64,9 @@ class SwiftTypeLookupContext {
           if let found = symbolTable.lookupNestedType(name.name, parent: nominalDecl) {
             return found
           }
+          if let found = symbolTable.lookupNestedTypealias(name.name, parent: nominalDecl) {
+            return found
+          }
         }
 
       case .lookForGenericParameters(let extensionNode):
