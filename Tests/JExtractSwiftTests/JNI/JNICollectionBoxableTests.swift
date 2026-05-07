@@ -170,23 +170,16 @@ struct JNICollectionBoxableTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        extension [Int: ReefFish]: JavaValue, JavaBoxable {
-          ...
-          let selfPointer$ = self.dictionaryGetJNIValue(in: environment)
-          var args = [jvalue(), jvalue()]
-          args[0].j = selfPointer$
-          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
-          return environment.interface.CallStaticObjectMethodA(
-            environment,
-            _JNIMethodIDCache.SwiftDictionaryMap.class,
-            _JNIMethodIDCache.SwiftDictionaryMap.wrapMemoryAddressUnsafe,
-            &args
-          )
-          ...
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
+        public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
+          return SwiftModule.f(dict: [String: [Int: ReefFish]](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
         }
         """,
       ],
-      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
+      notExpectedChunks: [
+        "private enum _SwiftJavaCollectionJavaBoxingCache",
+        "extension [Int: ReefFish]: JavaValue, JavaBoxable",
+      ]
     )
   }
 
@@ -202,23 +195,16 @@ struct JNICollectionBoxableTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        extension Set<ReefFish>: JavaValue, JavaBoxable {
-          ...
-          let selfPointer$ = self.setGetJNIValue(in: environment)
-          var args = [jvalue(), jvalue()]
-          args[0].j = selfPointer$
-          args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
-          return environment.interface.CallStaticObjectMethodA(
-            environment,
-            _JNIMethodIDCache.SwiftSet.class,
-            _JNIMethodIDCache.SwiftSet.wrapMemoryAddressUnsafe,
-            &args
-          )
-          ...
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
+        public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
+          return SwiftModule.f(dict: [String: Set<ReefFish>](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
         }
         """,
       ],
-      notExpectedChunks: ["private enum _SwiftJavaCollectionJavaBoxingCache"]
+      notExpectedChunks: [
+        "private enum _SwiftJavaCollectionJavaBoxingCache",
+        "extension Set<ReefFish>: JavaValue, JavaBoxable",
+      ]
     )
   }
 
