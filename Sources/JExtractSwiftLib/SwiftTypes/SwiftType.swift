@@ -443,7 +443,9 @@ extension SwiftType {
       guard let parentDecl = parent.asNominalTypeDeclaration else {
         throw TypeTranslationError.unknown(originalType)
       }
-      typeDecl = lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
+      typeDecl =
+        lookupContext.symbolTable.lookupNestedType(name.text, parent: parentDecl)
+        ?? lookupContext.symbolTable.lookupNestedTypealias(name.text, parent: parentDecl)
     } else if let module {
       typeDecl = lookupContext.moduleQualifiedLookup(name: name.text, in: module)
     } else {

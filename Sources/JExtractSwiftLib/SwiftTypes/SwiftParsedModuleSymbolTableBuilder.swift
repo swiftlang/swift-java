@@ -77,6 +77,8 @@ extension SwiftParsedModuleSymbolTableBuilder {
 
     if let nominalTypeNode = decl.asNominal {
       self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalTypeNode, parent: nil)
+    } else if let typeAliasNode = decl.as(TypeAliasDeclSyntax.self) {
+      self.handle(sourceFilePath: sourceFilePath, typeAliasDecl: typeAliasNode, parent: nil)
     } else if let extensionNode = decl.as(ExtensionDeclSyntax.self) {
       self.handle(extensionDecl: extensionNode, sourceFilePath: sourceFilePath)
     } else if let ifConfigNode = decl.as(IfConfigDeclSyntax.self) {
@@ -113,7 +115,9 @@ extension SwiftParsedModuleSymbolTableBuilder {
   ) {
     // If we have already recorded a nominal type with the name in this module,
     // it's an invalid redeclaration.
-    if let _ = symbolTable.lookupType(node.name.text, parent: parent) {
+    if symbolTable.lookupType(node.name.text, parent: parent) != nil
+      || symbolTable.lookupTypealias(node.name.text, parent: parent) != nil
+    {
       log?.debug("Failed to add a decl into symbol table: redeclaration; " + node.nameForDebug)
       return
     }
@@ -139,6 +143,31 @@ extension SwiftParsedModuleSymbolTableBuilder {
 
   mutating func handle(
     sourceFilePath: String,
+    typeAliasDecl node: TypeAliasDeclSyntax,
+    parent: SwiftNominalTypeDeclaration?
+  ) {
+    if symbolTable.lookupType(node.name.text, parent: parent) != nil
+      || symbolTable.lookupTypealias(node.name.text, parent: parent) != nil
+    {
+      log?.debug("Failed to add a decl into symbol table: redeclaration; " + node.nameForDebug)
+      return
+    }
+
+    let typeAliasDecl = SwiftTypeAliasDeclaration(
+      sourceFilePath: sourceFilePath,
+      moduleName: moduleName,
+      node: node
+    )
+
+    if let parent {
+      symbolTable.nestedTypeAliases[parent, default: [:]][typeAliasDecl.name] = typeAliasDecl
+    } else {
+      symbolTable.topLevelTypeAliases[typeAliasDecl.name] = typeAliasDecl
+    }
+  }
+
+  mutating func handle(
+    sourceFilePath: String,
     memberBlock node: MemberBlockSyntax,
     parent: SwiftNominalTypeDeclaration
   ) {
@@ -146,9 +175,10 @@ extension SwiftParsedModuleSymbolTableBuilder {
       // Find any nested types within this nominal type and add them.
       if let nominalMember = member.decl.asNominal {
         self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalMember, parent: parent)
+      } else if let typeAliasMember = member.decl.as(TypeAliasDeclSyntax.self) {
+        self.handle(sourceFilePath: sourceFilePath, typeAliasDecl: typeAliasMember, parent: parent)
       }
     }
-
   }
 
   mutating func handle(
