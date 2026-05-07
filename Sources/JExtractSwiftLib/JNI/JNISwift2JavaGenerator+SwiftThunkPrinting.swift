@@ -926,13 +926,7 @@ extension JNISwift2JavaGenerator {
         guard nominalType.nominalTypeDecl.knownTypeKind == nil else {
           return
         }
-        guard let importedType = analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName] else {
-          return
-        }
-        guard !importedType.swiftNominal.isGeneric else {
-          return
-        }
-        guard !importedType.isSpecialization else {
+        guard let importedType = importedNominalCollectionBoxingType(from: nominalType) else {
           return
         }
         nominalTypes.insert(importedType)
@@ -1050,10 +1044,19 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  private func importedNominalCollectionBoxingType(from nominalType: SwiftNominalType) -> ImportedNominalType? {
+    analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName]
+  }
+
+  private func nominalJavaBoxingCacheName(for type: ImportedNominalType) -> String {
+    "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
+  }
+
   private func printNominalJavaBoxableCache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let cacheName = "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
+    let cacheName = nominalJavaBoxingCacheName(for: type)
     let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
-    let signature = "(J)L\(jniClassName);"
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
+    let signature = isEffectivelyGeneric ? "(JJ)L\(jniClassName);" : "(J)L\(jniClassName);"
 
     printer.printBraceBlock("private enum \(cacheName)") { printer in
       printer.print(
@@ -1082,8 +1085,9 @@ extension JNISwift2JavaGenerator {
 
   private func printNominalJavaBoxableExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let swiftTypeName = type.effectiveSwiftTypeName
-    let cacheName = "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
+    let cacheName = nominalJavaBoxingCacheName(for: type)
     let javaClassName = "\(javaPackage).\(type.effectiveJavaTypeName.jniEscapedName)"
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
 
     printer.printBraceBlock("extension \(swiftTypeName): JavaValue, JavaBoxable") { printer in
       printer.print("public typealias JNIType = jobject?")
@@ -1097,13 +1101,21 @@ extension JNISwift2JavaGenerator {
       }
       printer.println()
       printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
+        printer.print("let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)")
+        printer.print("selfPointer$.initialize(to: self)")
+        printer.print("let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))")
+        if isEffectivelyGeneric {
+          printer.print("let selfTypePointer$ = unsafeBitCast(Self.self, to: UnsafeRawPointer.self)")
+          printer.print("let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))")
+          printer.print("var args = [jvalue(), jvalue()]")
+          printer.print("args[0].j = selfPointerBits$.getJNIValue(in: environment)")
+          printer.print("args[1].j = selfTypePointerBits$.getJNIValue(in: environment)")
+        } else {
+          printer.print("var args = [jvalue()]")
+          printer.print("args[0].j = selfPointerBits$.getJNIValue(in: environment)")
+        }
         printer.print(
           """
-          let selfPointer$ = UnsafeMutablePointer<\(swiftTypeName)>.allocate(capacity: 1)
-          selfPointer$.initialize(to: self)
-          let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
-          var args = [jvalue()]
-          args[0].j = selfPointerBits$.getJNIValue(in: environment)
           return environment.interface.CallStaticObjectMethodA(
             environment,
             \(cacheName).javaClass,
@@ -1120,7 +1132,7 @@ extension JNISwift2JavaGenerator {
         printer.print("self = Self.fromJavaObject(value, in: environment)")
       }
       printer.println()
-      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> \(swiftTypeName)") { printer in
+      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self") { printer in
         printer.print(
           """
           guard let obj else {
@@ -1133,7 +1145,7 @@ extension JNISwift2JavaGenerator {
             nil
           )
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-          guard let valuePointer$ = UnsafeMutablePointer<\(swiftTypeName)>(bitPattern: selfPointerBits$) else {
+          guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
             fatalError("\(swiftTypeName).fromJavaObject received a null Swift memory address")
           }
           return valuePointer$.pointee

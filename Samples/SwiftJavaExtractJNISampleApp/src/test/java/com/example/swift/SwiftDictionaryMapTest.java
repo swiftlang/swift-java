@@ -92,4 +92,20 @@ public class SwiftDictionaryMapTest {
         assertEquals(1L, javaMap.get("hello"));
         assertEquals(2L, javaMap.get("world"));
     }
+
+    @Test
+    void makeMyIDToFish() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<MyID<Long>, Fish> dict = MySwiftLibrary.makeMyIDToFish(arena);
+            assertEquals(2, dict.size());
+
+            MyID<Long> salmonId = MyIDs.makeIntID(0, arena);
+            MyID<Long> clownfishId = MyIDs.makeIntID(1, arena);
+
+            assertTrue(dict.containsKey(salmonId));
+            assertTrue(dict.containsKey(clownfishId));
+            assertEquals("salmon", dict.get(salmonId).getName());
+            assertEquals("clownfish", dict.get(clownfishId).getName());
+        }
+    }
 }

@@ -53,7 +53,7 @@ struct JUICollectionBoxableTests {
             toJavaObject(in: environment)
           }
           public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-            let selfPointer$ = UnsafeMutablePointer<ReefFish>.allocate(capacity: 1)
+            let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)
             selfPointer$.initialize(to: self)
             let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
             var args = [jvalue()]
@@ -66,7 +66,7 @@ struct JUICollectionBoxableTests {
             )
           }
           ...
-          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> ReefFish {
+          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
             guard let obj else {
               fatalError("ReefFish.fromJavaObject received a null Java object")
             }
@@ -77,7 +77,7 @@ struct JUICollectionBoxableTests {
               nil
             )
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-            guard let valuePointer$ = UnsafeMutablePointer<ReefFish>(bitPattern: selfPointerBits$) else {
+            guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
               fatalError("ReefFish.fromJavaObject received a null Swift memory address")
             }
             return valuePointer$.pointee
@@ -116,7 +116,7 @@ struct JUICollectionBoxableTests {
             toJavaObject(in: environment)
           }
           public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-            let selfPointer$ = UnsafeMutablePointer<ReefFish>.allocate(capacity: 1)
+            let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)
             selfPointer$.initialize(to: self)
             let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
             var args = [jvalue()]
@@ -129,7 +129,7 @@ struct JUICollectionBoxableTests {
             )
           }
           ...
-          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> ReefFish {
+          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
             guard let obj else {
               fatalError("ReefFish.fromJavaObject received a null Java object")
             }
@@ -140,7 +140,7 @@ struct JUICollectionBoxableTests {
               nil
             )
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-            guard let valuePointer$ = UnsafeMutablePointer<ReefFish>(bitPattern: selfPointerBits$) else {
+            guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
               fatalError("ReefFish.fromJavaObject received a null Swift memory address")
             }
             return valuePointer$.pointee
@@ -148,6 +148,76 @@ struct JUICollectionBoxableTests {
           ...
           public static func jniNewArray(in environment: JNIEnvironment) -> JNINewArray {
             { environment, size in environment.interface.NewObjectArray(environment, size, _SwiftJavaBoxing_ReefFish.javaClass, nil) }
+          }
+          ...
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test("JNI generates JavaBoxable for generic dictionary keys")
+  func genericDictionaryKeyGeneratesJavaBoxingConformance() throws {
+    try assertOutput(
+      input: """
+        public struct Fish: Hashable {}
+        public struct MyID<T>: Hashable {}
+        public func f() -> [MyID<Int>: Fish] {}
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        private enum _SwiftJavaBoxing_MyID {
+          private static let wrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
+            name: "wrapMemoryAddressUnsafe",
+            signature: "(JJ)Lcom/example/swift/MyID;",
+            isStatic: true
+          )
+          ...
+        }
+        """,
+        """
+        extension MyID: JavaValue, JavaBoxable {
+          public typealias JNIType = jobject?
+          public static var jvalueKeyPath: WritableKeyPath<jvalue, JNIType> { \\.l }
+          public static var javaType: JavaType { JavaType(className: "com.example.swift.MyID") }
+          public func getJNIValue(in environment: JNIEnvironment) -> JNIType {
+            toJavaObject(in: environment)
+          }
+          public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
+            let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)
+            selfPointer$.initialize(to: self)
+            let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
+            let selfTypePointer$ = unsafeBitCast(Self.self, to: UnsafeRawPointer.self)
+            let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))
+            var args = [jvalue(), jvalue()]
+            args[0].j = selfPointerBits$.getJNIValue(in: environment)
+            args[1].j = selfTypePointerBits$.getJNIValue(in: environment)
+            return environment.interface.CallStaticObjectMethodA(
+              environment,
+              _SwiftJavaBoxing_MyID.javaClass,
+              _SwiftJavaBoxing_MyID.wrapMemoryAddressUnsafe,
+              &args
+            )
+          }
+          ...
+          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+            guard let obj else {
+              fatalError("MyID.fromJavaObject received a null Java object")
+            }
+            let selfPointer$ = environment.interface.CallLongMethodA(
+              environment,
+              obj,
+              _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
+              nil
+            )
+            let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
+            guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
+              fatalError("MyID.fromJavaObject received a null Swift memory address")
+            }
+            return valuePointer$.pointee
           }
           ...
         }

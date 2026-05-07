@@ -13,14 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 public struct ReefFish: Hashable {
-  private let rawName: String
+  public var name: String
 
   public init(name: String) {
-    self.rawName = name
-  }
-
-  public func getName() -> String {
-    rawName
+    self.name = name
   }
 }
 
