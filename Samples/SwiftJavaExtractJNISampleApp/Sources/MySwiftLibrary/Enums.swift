@@ -31,3 +31,9 @@ public enum EnumWithCaseNameValue {
     public var message: String
   }
 }
+
+public enum ComplexAssociatedValues {
+  case generic(MyID<Int>, GenericEnum<Int>)
+  case optionalTypealiasedGeneric(id: MyIntID?)
+  case array([String])
+}

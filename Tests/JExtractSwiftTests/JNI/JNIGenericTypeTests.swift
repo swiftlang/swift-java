@@ -213,4 +213,43 @@ struct JNIGenericTypeTests {
       ]
     )
   }
+
+  @Test
+  func genericValueInEnumCase() throws {
+    let input =
+      #"""
+      public struct MyID<T> {}
+
+      public enum MyEnum {
+        case foo(MyID<Double>)
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        #"""
+        public sealed interface Case {
+          record Foo(MyID<java.lang.Double> arg0) implements Case {}
+        }
+        """#
+      ]
+    )
+
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        #"""
+        public func Java_com_example_swift_MyEnum__00024getAsFoo__J_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
+        """#
+      ]
+    )
+  }
 }

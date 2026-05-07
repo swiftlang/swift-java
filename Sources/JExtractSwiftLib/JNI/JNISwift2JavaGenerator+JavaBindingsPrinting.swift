@@ -503,22 +503,12 @@ extension JNISwift2JavaGenerator {
           continue
         }
 
-        let members = translatedCase.translatedValues.map {
-          $0.parameter.renderParameter()
+        let members = translatedCase.parameters.map {
+          $0.renderParameter()
         }
-        let caseName = enumCase.name.firstCharacterUppercased
 
         // Print record
-        printer.printBraceBlock("record \(caseName)(\(members.joined(separator: ", "))) implements Case") {
-          printer in
-          let nativeParameters = zip(translatedCase.translatedValues, translatedCase.parameterConversions).map {
-            value,
-            conversion in
-            "\(conversion.native.javaType) \(value.parameter.name)"
-          }
-
-          printer.print("record _NativeParameters(\(nativeParameters.joined(separator: ", "))) {}")
-        }
+        printer.print("record \(translatedCase.name)(\(members.joined(separator: ", "))) implements Case {}")
       }
     }
     printer.println()
@@ -533,10 +523,16 @@ extension JNISwift2JavaGenerator {
           guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
             continue
           }
-          let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
-          printer.print(
-            "case \(enumCase.name.uppercased()) -> this.getAs\(enumCase.name.firstCharacterUppercased)(\(arenaArgument)).orElseThrow();"
-          )
+          if enumCase.parameters.isEmpty {
+            printer.print(
+              "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
+            )
+          } else {
+            let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
+            printer.print(
+              "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
+            )
+          }
         }
       }
     }
@@ -557,10 +553,49 @@ extension JNISwift2JavaGenerator {
   private func printEnumCases(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
     for enumCase in decl.cases {
       guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-        return
+        continue
       }
 
-      self.printJavaBindingWrapperMethod(&printer, translatedCase.getAsCaseFunction, skipMethodBody: false)
+      let caseType = JavaType.class(package: nil, name: "Case.\(translatedCase.name)")
+      let resultType = JavaType.optional(caseType)
+      if let getAsCaseFunctionDecl = translatedCase.getAsCaseFunction,
+        var getAsCaseFunction = self.translatedDecl(for: getAsCaseFunctionDecl)
+      {
+        let args =
+          if enumCase.parameters.count == 1 {
+            "t"
+          } else {
+            (0..<enumCase.parameters.count).map { i in
+              "t.$\(i)"
+            }.joined(separator: ", ")
+          }
+        let translatedResult = getAsCaseFunction.translatedFunctionSignature.result
+        getAsCaseFunction.translatedFunctionSignature.result.conversion = .method(
+          .placeToVar(translatedResult.conversion, name: "associatedValues$", type: translatedResult.javaType),
+          function: "map",
+          arguments: [
+            .lambda(
+              args: ["t"],
+              body: .constructJavaClass(.constant(args), caseType)
+            )
+          ]
+        )
+        getAsCaseFunction.translatedFunctionSignature.result.javaType = resultType
+        printJavaBindingWrapperMethod(&printer, getAsCaseFunction, skipMethodBody: false)
+      } else {
+        let getAsCaseName = "getAs\(translatedCase.name)"
+        printer.print(
+          """
+          public \(resultType) \(getAsCaseName)() {
+            if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
+              return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(new Case.\(translatedCase.name)());
+          }
+          """
+        )
+      }
+
       printer.println()
     }
   }

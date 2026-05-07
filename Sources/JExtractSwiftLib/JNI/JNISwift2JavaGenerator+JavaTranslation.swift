@@ -15,6 +15,7 @@
 import CodePrinting
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
+import SwiftSyntax
 
 extension JNISwift2JavaGenerator {
   var javaTranslator: JavaTranslation {
@@ -95,138 +96,58 @@ extension JNISwift2JavaGenerator {
     let importedTypes: [String: ImportedNominalType]
 
     func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
-      let nativeTranslation = NativeJavaTranslation(
-        config: self.config,
-        javaPackage: self.javaPackage,
-        javaClassLookupTable: self.javaClassLookupTable,
-        knownTypes: self.knownTypes,
-        protocolWrappers: self.protocolWrappers,
-        logger: self.logger,
-      )
-
       let methodName = "" // TODO: Used for closures, replace with better name?
-      let parentName = SwiftQualifiedTypeName("") // TODO: Used for closures, replace with better name?
 
-      let translatedValues = try self.translateParameters(
-        enumCase.parameters.map { ($0.name, $0.type) },
-        methodName: methodName,
-        parentName: parentName,
-        genericParameters: [],
-        genericRequirements: [],
-      )
-
-      let conversions = try enumCase.parameters.enumerated().map { idx, parameter in
+      let parameterResults = try enumCase.parameters.enumerated().map { idx, parameter in
         let resultName = parameter.name ?? "arg\(idx)"
-        var translatedResult = try self.translateResult(
+        let translatedResult = try self.translateResult(
           swiftType: parameter.type,
           methodName: methodName,
           resultName: resultName
         )
-        translatedResult.conversion = .replacingPlaceholder(
-          translatedResult.conversion,
-          placeholder: "$nativeParameters.\(resultName)",
+        return (
+          parameter: JavaParameter(name: resultName, type: translatedResult.javaType),
+          requiresSwiftArena: translatedResult.conversion.requiresSwiftArena
         )
-        let nativeResult = try nativeTranslation.translateResult(
-          swiftType: parameter.type,
-          methodName: methodName,
-          resultName: resultName
-        )
-        return (translated: translatedResult, native: nativeResult)
       }
 
-      let caseName = enumCase.name.firstCharacterUppercased
-      let enumName = enumCase.enumType.nominalTypeDecl.name
-      let caseType = JavaType.class(package: nil, name: "Case.\(caseName)")
-      let nativeParametersType = JavaType.class(package: nil, name: "Case.\(caseName)._NativeParameters")
-      let getAsCaseName = "getAs\(caseName)"
-      // If the case has no parameters, we can skip the native call.
-      let constructRecordConversion = JavaNativeConversionStep.method(
-        .constant("Optional"),
-        function: "of",
-        arguments: [
-          .constructJavaClass(
-            .commaSeparated(conversions.map(\.translated.conversion)),
-            caseType,
+      let associatedValueTypes = enumCase.parameters.map { param in
+        param.type.description
+      }.joined(separator: ", ")
+      let javaCaseClassName = enumCase.name.firstCharacterUppercased
+      let resultType = knownTypes.optionalSugar(
+        .tuple(
+          enumCase.parameters.map {
+            SwiftTupleElement(label: nil, type: $0.type)
+          }
+        )
+      )
+      let getAsCaseFunction: ImportedFunc? =
+        if !enumCase.parameters.isEmpty {
+          ImportedFunc(
+            module: enumCase.enumType.nominalTypeDecl.moduleName,
+            swiftDecl: DeclSyntax("func getAs\(raw: javaCaseClassName)() -> (\(raw: associatedValueTypes))?"),
+            name: "getAs\(javaCaseClassName)",
+            apiKind: .function,
+            functionSignature: .init(
+              selfParameter: .instance(convention: .byValue, swiftType: .nominal(enumCase.enumType)),
+              parameters: [],
+              result: .init(convention: .direct, type: resultType),
+              effectSpecifiers: [],
+              genericParameters: [],
+              genericRequirements: []
+            )
           )
-        ],
-      )
-      var exceptions: [JavaExceptionType] = []
-
-      if enumCase.parameters.contains(where: \.type.isArchDependingInteger) {
-        exceptions.append(.integerOverflow)
-      }
-
-      let isGenericParent = enumCase.caseFunction.parentType?.asNominalTypeDeclaration?.isGeneric == true
-
-      let getAsCaseFunction = TranslatedFunctionDecl(
-        name: getAsCaseName,
-        isStatic: false,
-        isThrowing: false,
-        isAsync: false,
-        nativeFunctionName: "$\(getAsCaseName)",
-        parentName: SwiftQualifiedTypeName(enumName),
-        functionTypes: [],
-        translatedFunctionSignature: TranslatedFunctionSignature(
-          selfParameter: TranslatedParameter(
-            parameter: JavaParameter(name: "selfPointer", type: .long),
-            conversion: .aggregate(
-              [
-                .ifStatement(
-                  .constant("getDiscriminator() != Discriminator.\(caseName.uppercased())"),
-                  thenExp: .constant("return Optional.empty();"),
-                ),
-                .valueMemoryAddress(.placeholder),
-              ]
-            ),
-          ),
-          selfTypeParameter: !isGenericParent
-            ? nil
-            : .init(
-              parameter: JavaParameter(name: "selfTypePointer", type: .long),
-              conversion: .typeMetadataAddress(.placeholder),
-            ),
-          parameters: [],
-          result: TranslatedResult(
-            javaType: .optional(caseType),
-            nativeJavaType: nativeParametersType,
-            outParameters: conversions.flatMap(\.translated.outParameters),
-            conversion: enumCase.parameters.isEmpty
-              ? constructRecordConversion
-              : .aggregate(variable: ("$nativeParameters", nativeParametersType), [constructRecordConversion]),
-          ),
-          exceptions: exceptions,
-        ),
-        nativeFunctionSignature: NativeFunctionSignature(
-          selfParameter: NativeParameter(
-            parameters: [JavaParameter(name: "selfPointer", type: .long)],
-            conversion: .extractSwiftValue(.placeholder, swiftType: .nominal(enumCase.enumType), allowNil: false),
-            indirectConversion: nil,
-            conversionCheck: nil,
-          ),
-          selfTypeParameter: !isGenericParent
-            ? nil
-            : .init(
-              parameters: [JavaParameter(name: "selfTypePointer", type: .long)],
-              conversion: .extractMetatypeValue(.placeholder),
-              indirectConversion: nil,
-              conversionCheck: nil,
-            ),
-          parameters: [],
-          result: NativeResult(
-            javaType: nativeParametersType,
-            conversion: .placeholder,
-            outParameters: conversions.flatMap(\.native.outParameters),
-          ),
-        ),
-      )
+        } else {
+          nil
+        }
 
       return TranslatedEnumCase(
-        name: enumCase.name.firstCharacterUppercased,
-        enumName: enumCase.enumType.nominalTypeDecl.name,
+        name: javaCaseClassName,
         original: enumCase,
-        translatedValues: translatedValues,
-        parameterConversions: conversions,
+        parameters: parameterResults.map(\.parameter),
         getAsCaseFunction: getAsCaseFunction,
+        requiresSwiftArena: parameterResults.contains(where: \.requiresSwiftArena)
       )
     }
 
@@ -1252,7 +1173,6 @@ extension JNISwift2JavaGenerator {
 
       let javaNativeConversionStep: JavaNativeConversionStep =
         .tupleFromOutParams(
-          // try!-safe, because we know the result type is a class here (a Tuple of some form)
           tupleClassName: "\(javaResultType)",
           elements: tupleElements
         )
@@ -1650,50 +1570,42 @@ extension JNISwift2JavaGenerator {
     /// The corresponding Java case class (CamelCased)
     let name: String
 
-    /// The name of the translated enum
-    let enumName: String
-
     /// The oringinal enum case.
     let original: ImportedEnumCase
 
     /// A list of the translated associated values
-    let translatedValues: [TranslatedParameter]
+    let parameters: [JavaParameter]
 
-    /// A list of parameter conversions
-    let parameterConversions: [(translated: TranslatedResult, native: NativeResult)]
+    let getAsCaseFunction: ImportedFunc?
 
-    let getAsCaseFunction: TranslatedFunctionDecl
-
-    /// Returns whether the parameters require an arena
-    var requiresSwiftArena: Bool {
-      parameterConversions.contains(where: \.translated.conversion.requiresSwiftArena)
-    }
+    /// Returns whether the associated values require an arena
+    let requiresSwiftArena: Bool
   }
 
   struct TranslatedFunctionDecl {
     /// Java function name
-    let name: String
+    var name: String
 
-    let isStatic: Bool
+    var isStatic: Bool
 
-    let isThrowing: Bool
+    var isThrowing: Bool
 
-    let isAsync: Bool
+    var isAsync: Bool
 
     /// The name of the native function
-    let nativeFunctionName: String
+    var nativeFunctionName: String
 
     /// The name of the Java parent scope this function is declared in
-    let parentName: SwiftQualifiedTypeName
+    var parentName: SwiftQualifiedTypeName
 
     /// Functional interfaces required for the Java method.
-    let functionTypes: [TranslatedFunctionType]
+    var functionTypes: [TranslatedFunctionType]
 
     /// Function signature of the Java function the user will call
-    let translatedFunctionSignature: TranslatedFunctionSignature
+    var translatedFunctionSignature: TranslatedFunctionSignature
 
     /// Function signature of the native function that will be implemented by Swift
-    let nativeFunctionSignature: NativeFunctionSignature
+    var nativeFunctionSignature: NativeFunctionSignature
 
     /// Annotations to include on the Java function declaration
     var annotations: [JavaAnnotation] {
@@ -1892,7 +1804,7 @@ extension JNISwift2JavaGenerator {
     /// E.g. `new Tuple2<>(result_0$[0], result_1$[0])`
     case tupleFromOutParams(tupleClassName: String, elements: [(outParamName: String, elementConversion: JavaNativeConversionStep)])
 
-    indirect case placeToVar(JavaNativeConversionStep, name: String)
+    indirect case placeToVar(JavaNativeConversionStep, name: String, type: JavaType? = nil)
 
     /// `Arrays.stream(args)`
     static func arraysStream(_ argument: JavaNativeConversionStep) -> JavaNativeConversionStep {
@@ -2062,9 +1974,10 @@ extension JNISwift2JavaGenerator {
         }
         return "new \(tupleClassName)(\(args.joined(separator: ", ")))"
 
-      case .placeToVar(let inner, let name):
+      case .placeToVar(let inner, let name, let type):
         let inner = inner.render(&printer, placeholder)
-        printer.print("var \(name) = \(inner);")
+        let type = type?.description ?? "var"
+        printer.print("\(type) \(name) = \(inner);")
         return name
       }
     }
@@ -2132,7 +2045,7 @@ extension JNISwift2JavaGenerator {
       case .tupleFromOutParams(_, let elements):
         return elements.contains(where: { $0.elementConversion.requiresSwiftArena })
 
-      case .placeToVar(let inner, _):
+      case .placeToVar(let inner, _, _):
         return inner.requiresSwiftArena
       }
     }

@@ -22,6 +22,8 @@ public struct MyID<T> {
   }
 }
 
+public typealias MyIntID = MyID<Int>
+
 public enum MyIDs {
   public static func makeIntID(_ value: Int) -> MyID<Int> {
     MyID(value)
