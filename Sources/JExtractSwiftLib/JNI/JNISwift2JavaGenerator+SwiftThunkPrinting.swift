@@ -830,14 +830,6 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private struct CollectionJavaBoxableTypes {
-    let nominalTypes: [ImportedNominalType]
-
-    var isEmpty: Bool {
-      nominalTypes.isEmpty
-    }
-  }
-
   private func printCollectionJavaBoxableExtensions(_ printer: inout CodePrinter) {
     let boxableTypes = collectCollectionJavaBoxableTypes()
     guard !boxableTypes.isEmpty else {
@@ -846,16 +838,15 @@ extension JNISwift2JavaGenerator {
 
     printer.printSeparator("JavaBoxable conformances for Dictionary/Set element types")
 
-    for nominalType in boxableTypes.nominalTypes {
+    for nominalType in boxableTypes {
       printNominalJavaBoxableCache(&printer, nominalType)
       printer.println()
       printNominalJavaBoxableExtension(&printer, nominalType)
       printer.println()
     }
-
   }
 
-  private func collectCollectionJavaBoxableTypes() -> CollectionJavaBoxableTypes {
+  private func collectCollectionJavaBoxableTypes() -> [ImportedNominalType] {
     var nominalTypes: Set<ImportedNominalType> = []
 
     func collect(_ type: SwiftType, insideCollectionElement: Bool = false) {
@@ -946,9 +937,7 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    return CollectionJavaBoxableTypes(
-      nominalTypes: nominalTypes.sorted { $0.effectiveSwiftTypeName < $1.effectiveSwiftTypeName }
-    )
+    return nominalTypes.sorted { $0.effectiveSwiftTypeName < $1.effectiveSwiftTypeName }
   }
 
   private func importedNominalCollectionBoxingType(from nominalType: SwiftNominalType) -> ImportedNominalType? {

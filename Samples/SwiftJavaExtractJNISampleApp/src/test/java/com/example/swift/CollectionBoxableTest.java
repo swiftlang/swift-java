@@ -21,16 +21,19 @@ import org.swift.swiftkit.core.collections.SwiftSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class CollectionBoxableTest {
     @Test
     void intToFishDictionaryRoundtrip() {
         try (var arena = SwiftArena.ofConfined()) {
-            SwiftDictionaryMap<Long, ReefFish> original = MySwiftLibrary.makeIntToFishDictionary(arena);
+            SwiftDictionaryMap<Long, Fish> original = MySwiftLibrary.makeIntToFishDictionary(arena);
             assertEquals(2, original.size());
             assertEquals("salmon", original.get(1L).getName());
             assertEquals("clownfish", original.get(2L).getName());
 
-            SwiftDictionaryMap<Long, ReefFish> roundtripped = MySwiftLibrary.intToFishDictionary(original, arena);
+            SwiftDictionaryMap<Long, Fish> roundtripped = MySwiftLibrary.intToFishDictionary(original, arena);
             assertEquals(2, roundtripped.size());
             assertEquals("salmon", roundtripped.get(1L).getName());
             assertEquals("clownfish", roundtripped.get(2L).getName());
@@ -38,48 +41,47 @@ public class CollectionBoxableTest {
     }
 
     @Test
-    void insertIntoIntToFishDictionary() {
-        try (var arena = SwiftArena.ofConfined()) {
-            SwiftDictionaryMap<Long, ReefFish> original = MySwiftLibrary.makeIntToFishDictionary(arena);
-            ReefFish tuna = ReefFish.init("tuna", arena);
-
-            SwiftDictionaryMap<Long, ReefFish> modified =
-                MySwiftLibrary.insertIntoIntToFishDictionary(original, 3L, tuna, arena);
-
-            assertEquals(3, modified.size());
-            assertEquals("tuna", modified.get(3L).getName());
-            assertEquals(2, original.size());
-            assertNull(original.get(3L));
-        }
-    }
-
-    @Test
     void fishSetRoundtrip() {
         try (var arena = SwiftArena.ofConfined()) {
-            SwiftSet<ReefFish> original = MySwiftLibrary.makeFishSet(arena);
+            SwiftSet<Fish> original = MySwiftLibrary.makeFishSet(arena);
             assertEquals(2, original.size());
-            assertTrue(original.contains(ReefFish.init("salmon", arena)));
-            assertTrue(original.contains(ReefFish.init("clownfish", arena)));
+            assertTrue(original.contains(Fish.init("salmon", arena)));
+            assertTrue(original.contains(Fish.init("clownfish", arena)));
 
-            SwiftSet<ReefFish> roundtripped = MySwiftLibrary.fishSet(original, arena);
+            SwiftSet<Fish> roundtripped = MySwiftLibrary.fishSet(original, arena);
             assertEquals(2, roundtripped.size());
-            assertTrue(roundtripped.contains(ReefFish.init("salmon", arena)));
-            assertTrue(roundtripped.contains(ReefFish.init("clownfish", arena)));
+            assertTrue(roundtripped.contains(Fish.init("salmon", arena)));
+            assertTrue(roundtripped.contains(Fish.init("clownfish", arena)));
         }
     }
 
     @Test
-    void insertIntoFishSet() {
+    void makeMyIDToFish() {
         try (var arena = SwiftArena.ofConfined()) {
-            SwiftSet<ReefFish> original = MySwiftLibrary.makeFishSet(arena);
-            ReefFish tuna = ReefFish.init("tuna", arena);
+            SwiftDictionaryMap<MyID<Long>, Fish> dict = MySwiftLibrary.makeMyIDToFish(arena);
+            assertEquals(2, dict.size());
 
-            SwiftSet<ReefFish> modified = MySwiftLibrary.insertIntoFishSet(original, tuna, arena);
+            MyID<Long> salmonId = MyIDs.makeIntID(0, arena);
+            MyID<Long> clownfishId = MyIDs.makeIntID(1, arena);
 
-            assertEquals(3, modified.size());
-            assertTrue(modified.contains(tuna));
-            assertEquals(2, original.size());
-            assertFalse(original.contains(tuna));
+            assertTrue(dict.containsKey(salmonId));
+            assertTrue(dict.containsKey(clownfishId));
+            assertEquals("salmon", dict.get(salmonId).getName());
+            assertEquals("clownfish", dict.get(clownfishId).getName());
+        }
+    }
+
+    @Test
+    void makeSpecializedGenericTypeSet() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftSet<Box<Fish>> set = MySwiftLibrary.makeSpecializedGenericTypeSet(arena);
+
+            assertEquals(
+                    set.stream()
+                            .map(Box::getCount)
+                            .collect(Collectors.toSet()),
+                    Set.of(2L, 3L)
+            );
         }
     }
 }

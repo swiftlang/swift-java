@@ -12,44 +12,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct ReefFish: Hashable {
-  public var name: String
-
-  public init(name: String) {
-    self.name = name
-  }
-}
-
-public func makeIntToFishDictionary() -> [Int: ReefFish] {
+public func makeIntToFishDictionary() -> [Int: Fish] {
   [
-    1: ReefFish(name: "salmon"),
-    2: ReefFish(name: "clownfish"),
+    1: Fish(name: "salmon"),
+    2: Fish(name: "clownfish"),
   ]
 }
 
-public func intToFishDictionary(dict: [Int: ReefFish]) -> [Int: ReefFish] {
+public func intToFishDictionary(dict: [Int: Fish]) -> [Int: Fish] {
   dict
 }
 
-public func insertIntoIntToFishDictionary(dict: [Int: ReefFish], key: Int, value: ReefFish) -> [Int: ReefFish] {
-  var copy = dict
-  copy[key] = value
-  return copy
-}
-
-public func makeFishSet() -> Set<ReefFish> {
+public func makeFishSet() -> Set<Fish> {
   [
-    ReefFish(name: "salmon"),
-    ReefFish(name: "clownfish"),
+    Fish(name: "salmon"),
+    Fish(name: "clownfish"),
   ]
 }
 
-public func fishSet(set: Set<ReefFish>) -> Set<ReefFish> {
+public func fishSet(set: Set<Fish>) -> Set<Fish> {
   set
 }
 
-public func insertIntoFishSet(set: Set<ReefFish>, fish: ReefFish) -> Set<ReefFish> {
-  var copy = set
-  copy.insert(fish)
-  return copy
+public func makeMyIDToFish() -> [MyID<Int>: Fish] {
+  [
+    .init(0): Fish(name: "salmon"),
+    .init(1): Fish(name: "clownfish"),
+  ]
+}
+
+public func makeSpecializedGenericTypeSet() -> Set<FishBox> {
+  [.init(count: 2), .init(count: 3)]
 }

@@ -28,10 +28,3 @@ public func insertIntoStringToLongDictionary(dict: [String: Int64], key: String,
   copy[key] = value
   return copy
 }
-
-public func makeMyIDToFish() -> [MyID<Int>: Fish] {
-  [
-    .init(0): Fish(name: "salmon"),
-    .init(1): Fish(name: "clownfish"),
-  ]
-}
