@@ -858,37 +858,32 @@ extension JNISwift2JavaGenerator {
             collect(keyType, insideCollectionElement: true)
             collect(valueType, insideCollectionElement: true)
             return
-
           case .set(let elementType):
             collect(elementType, insideCollectionElement: true)
             return
-
           case .optional(let wrappedType):
             collect(wrappedType, insideCollectionElement: insideCollectionElement)
             return
-
           case .array(let elementType):
             collect(elementType, insideCollectionElement: false)
             return
-
-          default:
+          case .foundationData, .essentialsData, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
             break
+          default:
+            // Other known types should be treatable as JavaBoxable.
+            return
           }
         }
 
-        guard insideCollectionElement else {
-          return
-        }
         guard !nominalType.isSwiftJavaWrapper else {
           return
         }
-        guard nominalType.nominalTypeDecl.knownTypeKind == nil else {
-          return
+        if insideCollectionElement {
+          guard let importedType = analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName] else {
+            return
+          }
+          nominalTypes.insert(importedType)
         }
-        guard let importedType = importedNominalCollectionBoxingType(from: nominalType) else {
-          return
-        }
-        nominalTypes.insert(importedType)
 
       case .tuple(let elements):
         for element in elements {
@@ -938,10 +933,6 @@ extension JNISwift2JavaGenerator {
     }
 
     return nominalTypes.sorted { $0.effectiveSwiftTypeName < $1.effectiveSwiftTypeName }
-  }
-
-  private func importedNominalCollectionBoxingType(from nominalType: SwiftNominalType) -> ImportedNominalType? {
-    analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName]
   }
 
   private func nominalJavaBoxingCacheName(for type: ImportedNominalType) -> String {

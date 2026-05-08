@@ -12,6 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 public func makeIntToFishDictionary() -> [Int: Fish] {
   [
     1: Fish(name: "salmon"),
@@ -43,4 +49,8 @@ public func makeMyIDToFish() -> [MyID<Int>: Fish] {
 
 public func makeSpecializedGenericTypeSet() -> Set<FishBox> {
   [.init(count: 2), .init(count: 3)]
+}
+
+public func makeFoundationTypeToOptional(uuid: UUID) -> [UUID: String?] {
+  [uuid: uuid.uuidString]
 }

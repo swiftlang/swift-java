@@ -20,7 +20,7 @@ import SwiftJavaJNICore
 /// A type that can be boxed into and unboxed from a Java object via JNI.
 /// This is used for dictionary keys and values that need to cross the JNI boundary
 /// as boxed Java objects (e.g. Long, Double, Boolean, String).
-public protocol JavaBoxable: JavaValue {
+public protocol JavaBoxable {
   /// Convert this Swift value to a boxed Java object.
   func toJavaObject(in environment: JNIEnvironment) -> jobject?
 

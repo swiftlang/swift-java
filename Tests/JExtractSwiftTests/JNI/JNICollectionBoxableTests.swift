@@ -158,6 +158,36 @@ struct JNICollectionBoxableTests {
     )
   }
 
+  @Test("JNI supports optional collection values without generating optional boxing")
+  func dictionaryOptionalValueUsesRuntimeOptionalBoxing() throws {
+    try assertOutput(
+      input: """
+        public struct ReefFish: Hashable {}
+        public func f(dict: [Int: ReefFish?]) -> [Int: ReefFish?] {}
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
+        public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
+          return SwiftModule.f(dict: [Int: ReefFish?](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
+        }
+        """,
+        """
+        extension ReefFish: JavaValue, JavaBoxable {
+          ...
+        }
+        """,
+      ],
+      notExpectedChunks: [
+        "extension Optional<ReefFish>: JavaValue, JavaBoxable",
+        "extension ReefFish?: JavaValue, JavaBoxable",
+      ]
+    )
+  }
+
   @Test("JNI uses runtime support cache for nested dictionary boxing")
   func nestedDictionaryUsesRuntimeSupportCache() throws {
     try assertOutput(
