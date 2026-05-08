@@ -86,4 +86,22 @@ public class CollectionBoxableTest {
             );
         }
     }
+
+    @Test
+    void makeSetInDictionary() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<String, SwiftSet<Integer>> dict = MySwiftLibrary.makeSetInDictionary(arena);
+            assertEquals(dict.get("even").toJavaSet(), Set.of(0, 2, 4));
+            assertNull(dict.get("unknown"));
+        }
+    }
+
+    @Test
+    void makeArrayInDictionary() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<String, Integer[]> dict = MySwiftLibrary.makeArrayInDictionary(arena);
+            assertEquals(dict.get("even").toJavaSet(), Set.of(0, 2, 4));
+            assertNull(dict.get("unknown"));
+        }
+    }
 }

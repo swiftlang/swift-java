@@ -50,3 +50,17 @@ public func makeMyIDToFish() -> [MyID<Int>: Fish] {
 public func makeSpecializedGenericTypeSet() -> Set<FishBox> {
   [.init(count: 2), .init(count: 3)]
 }
+
+public func makeSetInDictionary() -> [String: Set<Int32>] {
+  [
+    "even": [0, 2, 4],
+    "odd": [1, 3, 5],
+  ]
+}
+
+public func makeArrayInDictionary() -> [String: [Int32]] {
+  [
+    "even": [0, 2, 4],
+    "odd": [1, 3, 5],
+  ]
+}
