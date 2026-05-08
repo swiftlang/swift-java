@@ -27,7 +27,7 @@ public class DataTest {
             var data = Data.fromByteArray(bytes, arena);
 
             var echoed = MySwiftLibrary.echoData(data, arena);
-            assertEquals(4, echoed.getCount());
+            assertArrayEquals(bytes, echoed.toByteArray());
         }
     }
 

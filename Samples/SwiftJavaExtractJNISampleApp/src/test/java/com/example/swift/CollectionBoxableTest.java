@@ -63,9 +63,11 @@ public class CollectionBoxableTest {
 
             MyID<Long> salmonId = MyIDs.makeIntID(0, arena);
             MyID<Long> clownfishId = MyIDs.makeIntID(1, arena);
+            MyID<Long> unknownId = MyIDs.makeIntID(-100, arena);
 
             assertTrue(dict.containsKey(salmonId));
             assertTrue(dict.containsKey(clownfishId));
+            assertFalse(dict.containsKey(unknownId));
             assertEquals("salmon", dict.get(salmonId).getName());
             assertEquals("clownfish", dict.get(clownfishId).getName());
         }

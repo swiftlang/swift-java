@@ -114,20 +114,3 @@ extension Optional: @retroactive JavaValue where Wrapped: AnyJavaObject {
     nil
   }
 }
-
-extension Optional: JavaBoxable where Wrapped: JavaBoxable {
-  public func toJavaObject(in environment: SwiftJavaJNICore.JNIEnvironment) -> jobject? {
-    switch self {
-    case let value?: value.toJavaObject(in: environment)
-    case nil: nil
-    }
-  }
-  
-  public static func fromJavaObject(_ obj: jobject?, in environment: SwiftJavaJNICore.JNIEnvironment) -> Optional<Wrapped> {
-    if let obj {
-      return Wrapped.fromJavaObject(obj, in: environment)
-    } else {
-      return nil
-    }
-  }
-}
