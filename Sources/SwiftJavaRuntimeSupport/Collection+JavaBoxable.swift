@@ -14,19 +14,6 @@
 
 import SwiftJava
 
-extension Array: JavaBoxable where Element: JavaValue {
-  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-    getJNIValue(in: environment)
-  }
-
-  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
-    guard let obj else {
-      fatalError("Array.fromJavaObject received a null Java object")
-    }
-    return Self(fromJNI: obj, in: environment)
-  }
-}
-
 extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: JavaBoxable {
   public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
     let selfPointer = self.dictionaryGetJNIValue(in: environment)

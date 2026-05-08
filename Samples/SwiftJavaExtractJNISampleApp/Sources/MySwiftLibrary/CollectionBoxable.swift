@@ -57,10 +57,3 @@ public func makeSetInDictionary() -> [String: Set<Int32>] {
     "odd": [1, 3, 5],
   ]
 }
-
-public func makeArrayInDictionary() -> [String: [Int32]] {
-  [
-    "even": [0, 2, 4],
-    "odd": [1, 3, 5],
-  ]
-}

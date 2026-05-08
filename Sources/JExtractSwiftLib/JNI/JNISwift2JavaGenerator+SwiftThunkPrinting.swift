@@ -864,6 +864,9 @@ extension JNISwift2JavaGenerator {
             }
           case .array(let elementType):
             collect(elementType, insideCollectionElement: false)
+            if insideCollectionElement {
+              logger.warning("\(knownType) is not boxable supported yet!")
+            }
           case .foundationData, .essentialsData, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
             if insideCollectionElement {
               logger.warning("\(knownType) is not boxable supported yet!")
