@@ -165,6 +165,10 @@ public func globalOverloaded(b: Int) {
   p("globalOverloaded(b: \(b))")
 }
 
+public func globalOverloaded(_ c: Int) {
+  p("globalOverloaded(c: \(c))")
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
