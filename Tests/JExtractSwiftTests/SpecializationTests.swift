@@ -46,7 +46,7 @@ struct SpecializationTests {
     public struct Tool {
       public var name: String
     }
-    
+
     public struct Bait {
       public var name: String
     }
@@ -164,7 +164,7 @@ struct SpecializationTests {
       ],
       notExpectedChunks: [
         "public void observeTheBait()",
-        "public void swappedObserveTheBait()"
+        "public void swappedObserveTheBait()",
       ]
     )
   }

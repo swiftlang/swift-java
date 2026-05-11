@@ -219,7 +219,7 @@ struct JNIGenericTypeTests {
     let input =
       #"""
       public struct MyID<T> {}
-      
+
       extension MyID where T: BinaryInteger {
         public func computeSomeValue() -> Int
       }
@@ -234,7 +234,7 @@ struct JNIGenericTypeTests {
       .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-        "public final class MyID<T> implements JNISwiftInstance {",
+        "public final class MyID<T> implements JNISwiftInstance {"
       ],
       notExpectedChunks: [
         "computeSomeValue",

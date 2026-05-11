@@ -31,11 +31,12 @@ final class Swift2JavaVisitor {
   var log: Logger { translator.log }
 
   /// Constrained extensions deferred until specializations are applied
-  private var deferredConstrainedExtensions: [(
-    node: ExtensionDeclSyntax,
-    sourceFilePath: String,
-    sameConstraint: [(String, String)]
-  )] = []
+  private var deferredConstrainedExtensions:
+    [(
+      node: ExtensionDeclSyntax,
+      sourceFilePath: String,
+      sameConstraint: [(String, String)]
+    )] = []
 
   func visit(inputFile: SwiftJavaInputFile) {
     let node = inputFile.syntax
