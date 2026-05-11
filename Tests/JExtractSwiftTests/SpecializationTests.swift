@@ -46,9 +46,22 @@ struct SpecializationTests {
     public struct Tool {
       public var name: String
     }
+    
+    public struct Bait {
+      public var name: String
+    }
 
     extension Box where Element == Fish {
       public func observeTheFish() {}
+    }
+    extension Box where Fish == Element {
+      public func swappedObserveTheFish() {}
+    }
+    extension Box where Element == Bait {
+      public func observeTheBait() {}
+    }
+    extension Box where Bait == Element {
+      public func swappedObserveTheBait() {}
     }
 
     public typealias FishBox = Box<Fish>
@@ -141,13 +154,18 @@ struct SpecializationTests {
         "public static FishBox wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena)",
         // Base method from Box<Element>
         "public long count()",
-        // Method body must call FishBox's own native method, not Box's
         "FishBox.$count(",
         // Constrained extension method (Element == Fish)
         "public void observeTheFish()",
-        // Constrained method body must also call FishBox's native method
         "FishBox.$observeTheFish(",
+        // Constrained extension method (Fish == Element)
+        "public void swappedObserveTheFish()",
+        "FishBox.$swappedObserveTheFish(",
       ],
+      notExpectedChunks: [
+        "public void observeTheBait()",
+        "public void swappedObserveTheBait()"
+      ]
     )
   }
 
