@@ -85,7 +85,7 @@ public class HelloJava2Swift {
             var origBytes = arena.allocateFrom("foobar");
             var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
             CallTraces.trace("origDat.count = " + origDat.getCount());
-            
+
             var retDat = MySwiftLibrary.globalReceiveReturnData(origDat, arena);
             retDat.withUnsafeBytes((retBytes) -> {
                 var str = retBytes.getString(0);
@@ -104,6 +104,7 @@ public class HelloJava2Swift {
         // Overloaded functions with label-based disambiguation
         MySwiftLibrary.globalOverloadedA(100);
         MySwiftLibrary.globalOverloadedB(200);
+        MySwiftLibrary.globalOverloaded(300);
 
         System.out.println("DONE.");
     }

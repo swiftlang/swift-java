@@ -81,11 +81,12 @@ package struct JavaIdentifierFactory {
       return ""
     default:
       guard needsSuffix(for: baseName) else { return "" }
-      let labels = decl.functionSignature.parameters
-        .compactMap { $0.argumentLabel }
-      // A parameterless function that still conflicts (e.g. with a property
-      // getter) gets a bare "_" so it compiles as a distinct Java method.
-      guard !labels.isEmpty else { return "_" }
+      if decl.functionSignature.parameters.isEmpty {
+        // A parameterless function that still conflicts (e.g. with a property
+        // getter) gets a bare "_" so it compiles as a distinct Java method.
+        return "_"
+      }
+      let labels = decl.functionSignature.parameters.compactMap(\.argumentLabel)
       // Join labels in camelCase: takeValue(a:) → takeValueA
       return labels.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()
     }
