@@ -92,3 +92,13 @@ extension MyID where T: BinaryInteger {
     Int(rawValue)
   }
 }
+
+extension MyID where T == Int128 {
+  // Conditional extension functions are not exported
+  public func decomposed() -> (high: Int64, low: Int64) {
+      let value = self.rawValue
+      let high = Int64(truncatingIfNeeded: value >> 64)
+      let low = Int64(bitPattern: UInt64(truncatingIfNeeded: value))
+      return (high: high, low: low)
+  }
+}

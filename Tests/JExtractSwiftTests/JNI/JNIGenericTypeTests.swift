@@ -213,4 +213,33 @@ struct JNIGenericTypeTests {
       ]
     )
   }
+
+  @Test("Constrained extensions are ignored")
+  func constrainedExtensionsAreIgnored() throws {
+    let input =
+      #"""
+      public struct MyID<T> {}
+      
+      extension MyID where T: BinaryInteger {
+        public func computeSomeValue() -> Int
+      }
+      extension MyID where T == Int128 {
+        public func decomposed() -> (high: Int64, low: Int64)
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class MyID<T> implements JNISwiftInstance {",
+      ],
+      notExpectedChunks: [
+        "computeSomeValue",
+        "decomposed",
+      ],
+    )
+  }
 }
