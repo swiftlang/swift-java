@@ -85,3 +85,10 @@ public enum GenericEnum<T> {
 public func makeIntGenericEnum() -> GenericEnum<Int> {
   if Bool.random() { return .foo } else { return .bar }
 }
+
+extension MyID where T: BinaryInteger {
+  // Conditional extension functions are not exported
+  public func computeSomeValue() -> Int {
+    Int(rawValue)
+  }
+}
