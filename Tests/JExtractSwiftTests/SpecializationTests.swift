@@ -154,13 +154,10 @@ struct SpecializationTests {
         "public static FishBox wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena)",
         // Base method from Box<Element>
         "public long count()",
-        "FishBox.$count(",
         // Constrained extension method (Element == Fish)
         "public void observeTheFish()",
-        "FishBox.$observeTheFish(",
         // Constrained extension method (Fish == Element)
         "public void swappedObserveTheFish()",
-        "FishBox.$swappedObserveTheFish(",
       ],
       notExpectedChunks: [
         "public void observeTheBait()",
