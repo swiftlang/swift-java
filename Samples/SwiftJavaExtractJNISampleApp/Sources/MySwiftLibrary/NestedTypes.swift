@@ -51,7 +51,7 @@ public enum NamespaceEnum {
     public static func something() {}
   }
 
-  public struct GenericType<T> {
+  public struct NestedGenericType<T> {
     public var value: Int
   }
 }
