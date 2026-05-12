@@ -50,7 +50,7 @@ public func returnData(_ size: Int) -> Data {
 public func largeFunction(
   a: Int32,
   b: [UInt8],
-  c: [Int32],
+  c: [Int8],
   d: [UInt8]
 ) -> [UInt8] {
   let outSize = b.count + d.count + c.count * 4
