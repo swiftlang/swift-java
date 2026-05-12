@@ -173,23 +173,6 @@ extension JNISwift2JavaGenerator {
     logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
   }
 
-  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let targetCases = type.cases
-      .compactMap(translatedEnumCase(for:))
-      .filter { !$0.translatedValues.isEmpty }
-    if targetCases.isEmpty {
-      return
-    }
-
-    printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
-      for translatedCase in targetCases {
-        printer.print(
-          "static let \(JNICaching.cacheMemberName(for: translatedCase)) = \(renderEnumCaseCacheInit(translatedCase))"
-        )
-      }
-    }
-  }
-
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
   private func printSwiftInterfaceWrapper(
     _ printer: inout CodePrinter,
@@ -308,7 +291,6 @@ extension JNISwift2JavaGenerator {
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
     printHeader(&printer)
 
-    printJNICache(&printer, type)
     printer.println()
 
     switch type.swiftNominal.kind {
@@ -348,7 +330,7 @@ extension JNISwift2JavaGenerator {
 
       if !isEffectivelyGeneric {
         for enumCase in type.cases {
-          printEnumCase(&printer, enumCase)
+          printEnumCase(&printer, type, enumCase)
           printer.println()
         }
       }
@@ -393,7 +375,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumType: ImportedNominalType, _ enumCase: ImportedEnumCase) {
     guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
       return
     }
@@ -402,20 +384,7 @@ extension JNISwift2JavaGenerator {
     printSwiftFunctionThunk(&printer, enumCase.caseFunction)
     printer.println()
 
-    // Print getAsCase method
-    if !translatedCase.translatedValues.isEmpty {
-      printEnumGetAsCaseThunk(&printer, translatedCase)
-    }
-  }
-
-  private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-    let nativeParametersClassName = "\(enumCase.enumName)$Case$\(enumCase.name)$_NativeParameters"
-    let methodSignature = MethodSignature(
-      resultType: .void,
-      parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-    )
-
-    return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
+    printEnumGetAsCaseThunk(&printer, enumType, translatedCase)
   }
 
   private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
@@ -429,46 +398,26 @@ extension JNISwift2JavaGenerator {
 
   private func printEnumGetAsCaseThunk(
     _ printer: inout CodePrinter,
+    _ enumType: ImportedNominalType,
     _ enumCase: TranslatedEnumCase,
   ) {
-    printCDecl(
-      &printer,
-      enumCase.getAsCaseFunction,
-    ) { printer in
-      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
-        &printer,
-        "selfPointer",
-      )
-      let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
-        parameter.name ?? "_\(idx)"
-      }
-      let caseNamesWithLet = caseNames.map { "let \($0)" }
-      let methodSignature = MethodSignature(
-        resultType: .void,
-        parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-      )
-      printer.print(
-        """
-        guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
-          fatalError("Expected enum case '\(enumCase.original.name)', but was '\\(\(selfPointer).pointee)'!")
+    if let getAsCaseFunction = enumCase.getAsCaseFunction {
+      printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
+        let associatedValueTypes = enumCase.original.parameters.map { param in
+          param.type.description
+        }.joined(separator: ", ")
+        printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
+          let params = enumCase.original.parameters.enumerated().map { i, param in
+            param.name ?? "_\(i)"
+          }.joined(separator: ", ")
+          printer.printBraceBlock("if case let .\(enumCase.original.name)(\(params)) = self") { printer in
+            printer.print("return (\(params))")
+          }
+          printer.print("return nil")
         }
-        let cache$ = \(JNICaching.cacheName(for: enumCase.original.enumType)).\(JNICaching.cacheMemberName(for: enumCase.original))
-        let class$ = cache$.javaClass
-        let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "\(methodSignature.mangledName)")
-        let constructorID$ = cache$[method$]
-        """
-      )
-      let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in
-        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? nil" : ""
-        let result = conversion.native.conversion.render(&printer, caseName)
-        return "jvalue(\(conversion.native.javaType.jniFieldName): \(result)\(nullConversion))"
       }
-      printer.print(
-        """
-        let newObjectArgs$: [jvalue] = [\(upcallArguments.joined(separator: ", "))]
-        return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
-        """
-      )
+
+      printSwiftFunctionThunk(&printer, getAsCaseFunction)
     }
   }
 
