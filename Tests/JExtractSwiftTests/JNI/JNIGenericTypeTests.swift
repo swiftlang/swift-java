@@ -219,12 +219,9 @@ struct JNIGenericTypeTests {
     let input =
       #"""
       public struct MyID<T> {}
-      
+
       public enum MyEnum {
         case foo(MyID<Double>)
-      
-      
-      
       }
       """#
 

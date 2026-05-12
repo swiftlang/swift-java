@@ -31,12 +31,12 @@ final class Swift2JavaVisitor {
   var log: Logger { translator.log }
 
   /// Constrained extensions deferred until specializations are applied
-  private var deferredConstrainedExtensions:
-    [(
-      node: ExtensionDeclSyntax,
-      sourceFilePath: String,
-      sameConstraint: [(String, String)]
-    )] = []
+  private struct DeferredConstrainedExtension {
+    var node: ExtensionDeclSyntax
+    var sourceFilePath: String
+    var constraints: [(String, String)]
+  }
+  private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
   func visit(inputFile: SwiftJavaInputFile) {
     let node = inputFile.syntax
@@ -139,7 +139,13 @@ final class Swift2JavaVisitor {
       )
       if matchingSpecializations.isEmpty {
         // Specializations may not exist yet — defer for later
-        deferredConstrainedExtensions.append((node, sourceFilePath, whereConstraints))
+        deferredConstrainedExtensions.append(
+          .init(
+            node: node,
+            sourceFilePath: sourceFilePath,
+            constraints: whereConstraints
+          )
+        )
         return
       }
 
@@ -583,21 +589,21 @@ final class Swift2JavaVisitor {
     }
 
     // Process constrained extensions that were deferred
-    for (node, sourceFilePath, whereConstraints) in deferredConstrainedExtensions {
-      guard let baseType = translator.importedNominalType(node.extendedType) else {
+    for deferred in deferredConstrainedExtensions {
+      guard let baseType = translator.importedNominalType(deferred.node.extendedType) else {
         continue
       }
       let matchingSpecializations = findMatchingSpecializations(
         extendedType: baseType,
-        whereConstraints: whereConstraints,
+        whereConstraints: deferred.constraints,
       )
       guard !matchingSpecializations.isEmpty else {
-        log.debug("Skipping deferred constrained extension of \(node.extendedType.trimmedDescription) — no matching specialization")
+        log.debug("Skipping deferred constrained extension of \(deferred.node.extendedType.trimmedDescription) — no matching specialization")
         continue
       }
       for specialized in matchingSpecializations {
-        for memberItem in node.memberBlock.members {
-          self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: sourceFilePath)
+        for memberItem in deferred.node.memberBlock.members {
+          self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: deferred.sourceFilePath)
         }
       }
     }
