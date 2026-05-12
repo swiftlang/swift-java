@@ -23,6 +23,7 @@ import org.swift.swiftkit.core.SwiftArena;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SwiftSetTest {
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Test
     void makeStringSet() {
         try (var arena = SwiftArena.ofConfined()) {
@@ -31,6 +32,7 @@ public class SwiftSetTest {
             assertTrue(set.contains("hello"));
             assertTrue(set.contains("world"));
             assertFalse(set.contains("missing"));
+            assertFalse(set.contains(99999L), "Java's Set accepts keys of different types");
         }
     }
 

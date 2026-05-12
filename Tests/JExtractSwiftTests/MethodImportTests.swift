@@ -530,6 +530,7 @@ final class MethodImportTests {
 
     public func takeValue(a: Swift.String) -> Swift.Int
     public func takeValue(b: Swift.String) -> Swift.Int
+    public func takeValue(_ c: Swift.String) -> Swift.Int
     public func uniqueFunc(x: Swift.Int) -> Swift.Int
     public func overloaded(a: Swift.Int) -> Swift.Int
     public func overloaded(a: Swift.String) -> Swift.Int
@@ -551,6 +552,7 @@ final class MethodImportTests {
       expectedChunks: [
         "public static long takeValueA(java.lang.String a)",
         "public static long takeValueB(java.lang.String b)",
+        "public static long takeValue(java.lang.String c)",
       ]
     )
   }
@@ -679,6 +681,7 @@ final class MethodImportTests {
       expectedChunks: [
         "public static long takeValueA(java.lang.String a)",
         "public static long takeValueB(java.lang.String b)",
+        "public static long takeValue(java.lang.String c)",
       ]
     )
   }

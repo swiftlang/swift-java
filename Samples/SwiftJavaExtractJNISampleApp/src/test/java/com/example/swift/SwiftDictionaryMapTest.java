@@ -23,6 +23,7 @@ import org.swift.swiftkit.core.SwiftArena;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SwiftDictionaryMapTest {
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Test
     void makeStringToLongDictionary() {
         try (var arena = SwiftArena.ofConfined()) {
@@ -33,6 +34,8 @@ public class SwiftDictionaryMapTest {
             assertTrue(dict.containsKey("hello"));
             assertFalse(dict.containsKey("missing"));
             assertNull(dict.get("missing"));
+            assertNull(dict.get(99999L), "Java's Map accepts keys of different types");
+            assertFalse(dict.containsKey(99999L), "Java's Map accepts keys of different types");
         }
     }
 
