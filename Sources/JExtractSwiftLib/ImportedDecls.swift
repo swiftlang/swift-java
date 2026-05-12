@@ -234,6 +234,22 @@ package final class ImportedNominalType: ImportedDecl {
       genericArguments: substitutions,
     )
   }
+
+  /// Checks if this type, or any of types it inherits from, conforms to the passed in protocol.
+  package func conformsTo(_ protocolName: String, in importedTypes: [String: ImportedNominalType]) -> Bool {
+    var visited: Set<ObjectIdentifier> = []
+    var queue: [ImportedNominalType] = [self]
+    while let current = queue.popLast() {
+      for inherited in current.inheritedTypes {
+        guard let name = inherited.asNominalTypeDeclaration?.name else { continue }
+        if name == protocolName { return true }
+        if let next = importedTypes[name], visited.insert(ObjectIdentifier(next)).inserted {
+          queue.append(next)
+        }
+      }
+    }
+    return false
+  }
 }
 
 struct SpecializationError: Error {

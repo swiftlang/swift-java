@@ -34,7 +34,7 @@ final class Swift2JavaVisitor {
   private struct DeferredConstrainedExtension {
     var node: ExtensionDeclSyntax
     var sourceFilePath: String
-    var constraints: [(String, String)]
+    var constraints: [ParsedWhereConstraint]
   }
   private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
@@ -124,48 +124,53 @@ final class Swift2JavaVisitor {
       return
     }
 
-    switch parseWhereConstraints(node.genericWhereClause) {
-    case .none:
-      break
-    case .unsupported:
+    guard let constraints = parseWhereConstraints(node.genericWhereClause) else {
       log.debug(
         "Skip importing constrained extension '\(node.extendedType.trimmedDescription)'; unsupported where-clause requirements: \(node.genericWhereClause?.trimmedDescription ?? "")"
       )
       return
-    case .sameType(let whereConstraints):
-      let matchingSpecializations = findMatchingSpecializations(
-        extendedType: importedNominalType,
-        whereConstraints: whereConstraints,
-      )
-      if matchingSpecializations.isEmpty {
-        // Specializations may not exist yet — defer for later
-        deferredConstrainedExtensions.append(
-          .init(
-            node: node,
-            sourceFilePath: sourceFilePath,
-            constraints: whereConstraints
-          )
-        )
-        return
-      }
+    }
 
-      // Visit members in each matching specialization, not the base type
-      for specialized in matchingSpecializations {
-        for memberItem in node.memberBlock.members {
-          self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: sourceFilePath)
-        }
+    guard !constraints.isEmpty else {
+      // The extension is unconstrained: add to the base type (visible through all specializations)
+      importedNominalType.inheritedTypes +=
+        node.inheritanceClause?.inheritedTypes.compactMap {
+          try? SwiftType($0.type, lookupContext: translator.lookupContext)
+        } ?? []
+      for memberItem in node.memberBlock.members {
+        self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
       }
       return
     }
 
-    // Unconstrained extension — add to the base type (visible through all specializations)
-    importedNominalType.inheritedTypes +=
-      node.inheritanceClause?.inheritedTypes.compactMap {
-        try? SwiftType($0.type, lookupContext: translator.lookupContext)
-      } ?? []
+    let hasConformanceConstraint = constraints.contains { if case .conformance = $0 { true } else { false } }
 
-    for memberItem in node.memberBlock.members {
-      self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
+    // Conformance requirements depend on inheritedTypes that may be populated
+    // by an `extension Fish: Animal {}` later in the same file: always defer.
+    if hasConformanceConstraint {
+      deferredConstrainedExtensions.append(
+        .init(node: node, sourceFilePath: sourceFilePath, constraints: constraints)
+      )
+      return
+    }
+
+    let matchingSpecializations = findMatchingSpecializations(
+      extendedType: importedNominalType,
+      whereConstraints: constraints,
+    )
+    if matchingSpecializations.isEmpty {
+      // Specializations may not exist yet: defer for later
+      deferredConstrainedExtensions.append(
+        .init(node: node, sourceFilePath: sourceFilePath, constraints: constraints)
+      )
+      return
+    }
+
+    // Visit members in each matching specialization, not the base type
+    for specialized in matchingSpecializations {
+      for memberItem in node.memberBlock.members {
+        self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: sourceFilePath)
+      }
     }
   }
 
@@ -613,32 +618,47 @@ final class Swift2JavaVisitor {
   // ==== -----------------------------------------------------------------------
   // MARK: Constrained extension merging
 
-  private enum ParsedWhereConstraints {
-    case none
-    case sameType([(String, String)])
-    case unsupported
+  private enum ParsedWhereConstraint {
+    case sameType(first: String, second: String)
+    case conformance(typeParam: String, proto: String)
   }
 
-  private func parseWhereConstraints(_ whereClause: GenericWhereClauseSyntax?) -> ParsedWhereConstraints {
-    guard let whereClause else { return .none }
-    var constraints: [(String, String)] = []
+  /// Returns list of where requirements -- empty if unconstrained; or nil if failed to parse/handle the constraints.
+  private func parseWhereConstraints(_ whereClause: GenericWhereClauseSyntax?) -> [ParsedWhereConstraint]? {
+    guard let whereClause else { return [] }
+    var constraints: [ParsedWhereConstraint] = []
     for requirement in whereClause.requirements {
       switch requirement.requirement {
       case .sameTypeRequirement(let sameType):
-        let lhs = sameType.leftType.trimmedDescription
-        let rhs = sameType.rightType.trimmedDescription
-        constraints.append((lhs, rhs))
-      case .conformanceRequirement, .layoutRequirement:
-        return .unsupported
+        let first = sameType.leftType.trimmedDescription
+        let second = sameType.rightType.trimmedDescription
+        constraints.append(.sameType(first: first, second: second))
+
+      case .conformanceRequirement(let conformance):
+        let typeParam = conformance.leftType.trimmedDescription
+        if let composition = conformance.rightType.as(CompositionTypeSyntax.self) {
+          for element in composition.elements {
+            constraints.append(
+              .conformance(typeParam: typeParam, proto: element.type.trimmedDescription)
+            )
+          }
+        } else {
+          constraints.append(
+            .conformance(typeParam: typeParam, proto: conformance.rightType.trimmedDescription)
+          )
+        }
+
+      case .layoutRequirement:
+        return nil
       }
     }
-    return .sameType(constraints)
+    return constraints
   }
 
   /// Find specializations whose type args match the given where-clause constraints
   private func findMatchingSpecializations(
     extendedType: ImportedNominalType,
-    whereConstraints: [(String, String)],
+    whereConstraints: [ParsedWhereConstraint],
   ) -> [ImportedNominalType] {
     guard let specializations = translator.specializations[extendedType] else {
       return []
@@ -649,15 +669,29 @@ final class Swift2JavaVisitor {
   }
 
   /// Check if where clause constraints match a specialization's generic arguments.
-  /// Same-type where-clauses are conjunctive: every constraint must hold.
+  /// Where-clauses are conjunctive: every constraint must hold.
   private func constraintsMatchSpecialization(
-    _ constraints: [(String, String)],
+    _ constraints: [ParsedWhereConstraint],
     specialized: ImportedNominalType,
   ) -> Bool {
-    for (lhs, rhs) in constraints {
-      if specialized.genericArguments[lhs] == rhs { continue }
-      if specialized.genericArguments[rhs] == lhs { continue }
-      return false
+    for constraint in constraints {
+      switch constraint {
+      case .sameType(let first, let second):
+        if specialized.genericArguments[first] == second { continue }
+        if specialized.genericArguments[second] == first { continue }
+        return false
+
+      case .conformance(let typeParam, let proto):
+        guard let concreteName = specialized.genericArguments[typeParam] else {
+          return false
+        }
+        guard let concreteType = translator.importedTypes[concreteName] else {
+          return false
+        }
+        guard concreteType.conformsTo(proto, in: translator.importedTypes) else {
+          return false
+        }
+      }
     }
     return true
   }
