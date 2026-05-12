@@ -271,7 +271,7 @@ struct SpecializationTests {
       input: multiSpecializationInput,
       .jni,
       .swift,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 4,
       expectedChunks: [
         // FishBox constrained extension method: direct downcall with concrete type
         """
@@ -279,7 +279,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024observeTheFish__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
@@ -292,7 +292,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024count__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }

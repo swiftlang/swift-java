@@ -88,7 +88,8 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     sourceFilePath: String,
     moduleName: String,
     parent: SwiftNominalTypeDeclaration?,
-    node: NominalTypeDeclSyntaxNode
+    node: NominalTypeDeclSyntaxNode,
+    customName: String? = nil
   ) {
     self.parent = parent
     self.syntax = node
@@ -106,7 +107,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
-    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: customName ?? node.name.text)
   }
 
   lazy var firstInheritanceType: TypeSyntax? = {

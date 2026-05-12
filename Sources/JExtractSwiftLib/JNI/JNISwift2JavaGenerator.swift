@@ -56,15 +56,6 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   /// Duplicate identifier tracking for the current batch of methods being generated.
   var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
 
-  /// The Java-facing name of the type currently being printed.
-  /// Used to override cached parentName in translations (needed for specializations
-  /// where the same ImportedFunc is shared between base and specialized types)
-  var currentPrintingTypeName: SwiftQualifiedTypeName?
-
-  /// The type currently being printed (Java class or Swift thunks).
-  /// Used to determine specialization context for correct code generation
-  var currentPrintingType: ImportedNominalType?
-
   /// Because we need to write empty files for SwiftPM, keep track which files we didn't write yet,
   /// and write an empty file for those.
   ///

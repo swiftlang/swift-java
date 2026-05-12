@@ -302,15 +302,6 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let savedPrintingTypeName = self.currentPrintingTypeName
-    let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = type.effectiveJavaTypeName
-    self.currentPrintingType = type
-    defer {
-      self.currentPrintingTypeName = savedPrintingTypeName
-      self.currentPrintingType = savedPrintingType
-    }
-
     // Specialized types are treated as concrete even if the underlying Swift type is generic
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
 
@@ -436,13 +427,8 @@ extension JNISwift2JavaGenerator {
       &printer,
       translatedDecl,
     ) { printer in
-      if let parent = decl.parentType?.asNominalType, parent.nominalTypeDecl.isGeneric {
-        if self.currentPrintingType?.isSpecialization == true {
-          // Specializations use direct calls with concrete type, not protocol opening
-          self.printFunctionDowncall(&printer, decl)
-        } else {
-          self.printFunctionOpenerCall(&printer, decl)
-        }
+      if let parent = decl.parentType?.asNominalType, parent.isGeneric {
+        self.printFunctionOpenerCall(&printer, decl)
       } else {
         self.printFunctionDowncall(&printer, decl)
       }
@@ -598,13 +584,13 @@ extension JNISwift2JavaGenerator {
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
-      case .instance:
-        if let specializedType = self.currentPrintingType, specializedType.isSpecialization {
+      case .instance(_, let swiftType):
+        if let nominal = swiftType.asNominalTypeDeclaration, nominal.name != nominal.syntax?.name.text {
           // For specializations, use the concrete Swift type for pointer casting
           // (the cached conversion uses the raw generic type name which won't compile)
           self.renderSpecializedSelfPointer(
             &printer,
-            concreteSwiftType: specializedType.effectiveSwiftTypeName,
+            concreteSwiftType: swiftType.description,
           )
         } else {
           nativeSignature.selfParameter!.conversion.render(
@@ -722,7 +708,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: translatedDecl.nativeFunctionName,
-      parentName: self.currentPrintingTypeName ?? translatedDecl.parentName,
+      parentName: translatedDecl.parentName,
       parameters: parameters,
       resultType: nativeSignature.result.javaType,
     ) { printer in
