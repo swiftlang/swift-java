@@ -167,7 +167,7 @@ package final class ImportedNominalType: ImportedDecl {
   }
 
   var swiftType: SwiftType {
-    .nominal(.init(nominalTypeDecl: swiftNominal))
+    swiftNominal.asSwiftType
   }
 
   /// Structured Java-facing type name — "FishBox" for specialized, "Box" for base
