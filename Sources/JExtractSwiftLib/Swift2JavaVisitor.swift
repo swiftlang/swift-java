@@ -648,20 +648,18 @@ final class Swift2JavaVisitor {
     }
   }
 
-  /// Check if where clause constraints match a specialization's generic arguments
+  /// Check if where clause constraints match a specialization's generic arguments.
+  /// Same-type where-clauses are conjunctive: every constraint must hold.
   private func constraintsMatchSpecialization(
     _ constraints: [(String, String)],
     specialized: ImportedNominalType,
   ) -> Bool {
     for (lhs, rhs) in constraints {
-      if specialized.genericArguments[lhs] == rhs {
-        return true
-      }
-      if specialized.genericArguments[rhs] == lhs {
-        return true
-      }
+      if specialized.genericArguments[lhs] == rhs { continue }
+      if specialized.genericArguments[rhs] == lhs { continue }
+      return false
     }
-    return false
+    return true
   }
 }
 

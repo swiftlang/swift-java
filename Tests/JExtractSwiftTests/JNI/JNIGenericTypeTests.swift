@@ -281,4 +281,102 @@ struct JNIGenericTypeTests {
       ],
     )
   }
+
+  @Test("Constrained extensions are ignored, unless specialized")
+  func constrainedExtensionsAreIgnoredUnlessSpecialized() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Tool {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      extension Fish: Animal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal { // currently not supported yet
+        public func feed() {}
+      }
+      extension Tank where T == Fish {
+        public func observeTheFish() {}
+      }
+      extension Tank where T == Tool {
+        public func useTheTool() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {",
+        "observeTheFish",
+      ],
+      notExpectedChunks: [
+        "feed",
+        "useTheTool",
+      ],
+    )
+  }
+
+  @Test("Multi-constraint extensions require all constraints to match")
+  func multiConstraintExtensionsRequireAllToMatch() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Tool {
+        public var name: String
+      }
+      public struct Bait {
+        public var name: String
+      }
+
+      public struct Pair<A, B> {
+        public var first: A
+        public var second: B
+      }
+
+      extension Pair where A == Fish, B == Tool {
+        // OK: Both constraints match FishToolPair
+        public func bothMatch() {}
+      }
+      extension Pair where A == Fish, B == Bait {
+        // NOPE: Only A matches FishToolPair
+        public func onlyAMatches() {}
+      }
+      extension Pair where A == Tool, B == Tool {
+        // NOPE: Only B matches FishToolPair
+        public func onlyBMatches() {}
+      }
+
+      public typealias FishToolPair = Pair<Fish, Tool>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishToolPair implements JNISwiftInstance {",
+        "bothMatch",
+      ],
+      notExpectedChunks: [
+        "onlyAMatches",
+        "onlyBMatches",
+      ],
+    )
+  }
 }
