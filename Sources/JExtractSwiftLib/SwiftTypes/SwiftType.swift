@@ -589,3 +589,18 @@ enum TypeTranslationError: Error {
   /// Unknown nominal type.
   case unknown(TypeSyntax, file: StaticString = #file, line: Int = #line)
 }
+
+extension SwiftNominalTypeDeclaration {
+  var asSwiftNominalType: SwiftNominalType {
+    let genericArguments = genericParameters.map { SwiftType.genericParameter($0) }
+    return SwiftNominalType(
+      parent: parent?.asSwiftNominalType,
+      nominalTypeDecl: self,
+      genericArguments: genericArguments.isEmpty ? nil : genericArguments
+    )
+  }
+
+  var asSwiftType: SwiftType {
+    .nominal(asSwiftNominalType)
+  }
+}

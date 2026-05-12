@@ -920,7 +920,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func openerProtocolName(for type: SwiftNominalTypeDeclaration) -> String {
-    "_\(swiftModuleName)_\(type.name)_opener"
+    "_\(swiftModuleName)_\(type.flatName)_opener"
   }
 
   private func printOpenerProtocol(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
@@ -969,7 +969,7 @@ extension JNISwift2JavaGenerator {
       }
     }
     printer.println()
-    printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
+    printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): \(protocolName)") { printer in
       for variable in type.variables {
         if variable.isStatic { continue }
         printFunctionDecl(&printer, decl: variable, skipMethodBody: false)

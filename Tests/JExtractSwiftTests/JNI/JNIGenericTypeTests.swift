@@ -121,7 +121,7 @@ struct JNIGenericTypeTests {
           static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
             assert(selfPointer != 0, "selfPointer memory address was null")
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-            let selfPointer$ = UnsafeMutablePointer<MyID>(bitPattern: selfPointerBits$)
+            let selfPointer$ = UnsafeMutablePointer<MyID<T>>(bitPattern: selfPointerBits$)
             guard let selfPointer$ else {
               fatalError("selfPointer memory address was null in call to \(#function)!")
             }
@@ -239,7 +239,6 @@ struct JNIGenericTypeTests {
       ]
     )
 
-
     try assertOutput(
       input: input,
       .jni,
@@ -250,6 +249,39 @@ struct JNIGenericTypeTests {
         public func Java_com_example_swift_MyEnum__00024getAsFoo__J_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
         """#
       ]
+    )
+  }
+
+  @Test
+  func nestedGenericType() throws {
+    let input =
+      #"""
+      public enum Foo {
+        public struct Bar<T> {
+          public func work() {}
+        }
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        #"""
+        extension Foo.Bar: _SwiftModule_Foo_Bar_opener {
+          static func _work(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+            ...
+            let selfPointer$ = UnsafeMutablePointer<Foo.Bar<T>>(bitPattern: selfPointerBits$)
+            guard let selfPointer$ else {
+             fatalError("selfPointer memory address was null in call to \(#function)!")
+            }
+            selfPointer$.pointee.work()
+          }
+        }
+        """#
+      ],
     )
   }
 
