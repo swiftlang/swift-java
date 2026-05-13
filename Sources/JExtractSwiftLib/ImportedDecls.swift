@@ -116,7 +116,6 @@ package final class ImportedNominalType: ImportedDecl {
 
     self.specializedTypeName = specializedTypeName
     self.genericArguments = genericArguments
-    self.inheritedTypes = []
     self.swiftType = selfType
   }
 

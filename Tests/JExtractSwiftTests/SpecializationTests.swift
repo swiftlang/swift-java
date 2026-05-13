@@ -271,7 +271,7 @@ struct SpecializationTests {
       input: multiSpecializationInput,
       .jni,
       .swift,
-      detectChunkByInitialLines: 4,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         // FishBox constrained extension method: direct downcall with concrete type
         """

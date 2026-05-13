@@ -585,10 +585,10 @@ extension JNISwift2JavaGenerator {
     let callee: String =
       switch decl.functionSignature.selfParameter {
       case .instance:
-          nativeSignature.selfParameter!.conversion.render(
-            &printer,
-            "selfPointer",
-          )
+        nativeSignature.selfParameter!.conversion.render(
+          &printer,
+          "selfPointer",
+        )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
       case .none:
