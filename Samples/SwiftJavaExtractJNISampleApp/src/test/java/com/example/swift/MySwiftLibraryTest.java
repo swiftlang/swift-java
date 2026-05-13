@@ -78,4 +78,11 @@ public class MySwiftLibraryTest {
     void returnLargestUnsignedByte() {
         assertEquals(-1, MySwiftLibrary.returnLargestUnsignedByte());
     }
+
+    @Test
+    void labeledOverloads() {
+        assertEquals(101, MySwiftLibrary.globalOverloadedA(100));
+        assertEquals(202, MySwiftLibrary.globalOverloadedB(200));
+        assertEquals(303, MySwiftLibrary.globalOverloaded(300));
+    }
 }

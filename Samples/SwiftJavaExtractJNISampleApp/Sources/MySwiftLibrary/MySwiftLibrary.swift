@@ -64,6 +64,18 @@ public func returnLargestUnsignedByte() -> UInt8 {
   UInt8.max
 }
 
+public func globalOverloaded(a: Int) -> Int {
+  a + 1
+}
+
+public func globalOverloaded(b: Int) -> Int {
+  b + 2
+}
+
+public func globalOverloaded(_ c: Int) -> Int {
+  c + 3
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
