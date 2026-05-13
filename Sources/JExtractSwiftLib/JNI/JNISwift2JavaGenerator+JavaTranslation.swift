@@ -162,14 +162,12 @@ extension JNISwift2JavaGenerator {
       )
 
       // Types with no parent will be outputted inside a "module" class.
-      // For specialized types, use the Java-facing name as the parent scope
-      let parentName: SwiftQualifiedTypeName
-      if let parentNominal = decl.parentType?.asNominalType?.nominalTypeDecl {
-        let importedParent = importedTypes.values.first { $0.swiftNominal === parentNominal }
-        parentName = importedParent?.effectiveJavaTypeName ?? parentNominal.qualifiedTypeName
-      } else {
-        parentName = SwiftQualifiedTypeName(swiftModuleName)
-      }
+      let parentName =
+        if let parent = decl.parentType?.asNominalTypeDeclaration {
+          parent.qualifiedTypeName
+        } else {
+          SwiftQualifiedTypeName(swiftModuleName)
+        }
 
       // Name.
       let javaName = javaIdentifiers.makeJavaMethodName(decl)

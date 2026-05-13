@@ -95,7 +95,7 @@ package final class ImportedNominalType: ImportedDecl {
     self.specializationBaseType = base
 
     let selfType = SwiftType.nominal(
-      .init(
+      SwiftNominalType(
         parent: swiftNominal.parent?.asSwiftNominalType,
         nominalTypeDecl: SwiftNominalTypeDeclaration(
           name: specializedTypeName,
