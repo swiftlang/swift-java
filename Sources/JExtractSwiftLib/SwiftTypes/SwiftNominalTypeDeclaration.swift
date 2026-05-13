@@ -77,7 +77,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
-  lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
+  private(set) lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
     self.computeKnownStandardLibraryType()
   }()
 
@@ -109,7 +109,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: name)
   }
 
-  lazy var firstInheritanceType: TypeSyntax? = {
+  private(set) lazy var firstInheritanceType: TypeSyntax? = {
     guard let firstInheritanceType = self.syntax.inheritanceClause?.inheritedTypes.first else {
       return nil
     }
@@ -122,7 +122,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 
   /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
-  lazy var isSendable: Bool = {
+  private(set) lazy var isSendable: Bool = {
     // Check if Sendable is in the inheritance list
     guard let inheritanceClause = self.syntax.inheritanceClause else {
       return false
