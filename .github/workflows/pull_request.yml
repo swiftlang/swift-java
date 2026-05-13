@@ -190,10 +190,12 @@ jobs:
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (swift:${{ matrix.swift_version }} android:${{matrix.sdk_triple}} NDK:${{matrix.ndk_version}})
     runs-on: ubuntu-22.04
+    # Nightly builds are best-effort
+    continue-on-error: ${{ contains(matrix.swift_version, 'nightly') }}
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['nightly']
+        swift_version: ['6.3']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
