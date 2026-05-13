@@ -15,6 +15,10 @@
 import SwiftJava
 
 extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: JavaBoxable {
+  public static var javaBoxClass: jclass {
+    _JNIMethodIDCache.SwiftDictionaryMap.class
+  }
+  
   public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
     let selfPointer = self.dictionaryGetJNIValue(in: environment)
     var args = [jvalue(), jvalue()]
@@ -43,6 +47,10 @@ extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: Java
 }
 
 extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
+  public static var javaBoxClass: jclass {
+    _JNIMethodIDCache.SwiftSet.class
+  }
+
   public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
     let selfPointer = self.setGetJNIValue(in: environment)
     var args = [jvalue(), jvalue()]

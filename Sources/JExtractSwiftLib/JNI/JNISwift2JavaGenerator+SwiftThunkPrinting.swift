@@ -906,6 +906,10 @@ extension JNISwift2JavaGenerator {
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
 
     printer.printBraceBlock("extension \(swiftTypeName): JavaBoxable") { printer in
+      printer.printBraceBlock("public static var javaBoxClass: jclass") { printer in
+        printer.print("\(cacheName).javaClass")
+      }
+      printer.println()
       printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
         printer.print("let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)")
         printer.print("selfPointer$.initialize(to: self)")
