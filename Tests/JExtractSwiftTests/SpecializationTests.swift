@@ -118,6 +118,14 @@ struct SpecializationTests {
     // Both wrappers delegate to the same base type
     #expect(fishBox.specializationBaseType === toolBox.specializationBaseType, "Both should wrap the same base Box type")
     #expect(fishBox.specializationBaseType === translator.importedTypes["Box"], "Base should be the original Box")
+
+    // Both wrappers have owned method models
+    let baseCountFunc: ImportedFunc = try #require(baseBox.methods.first(where: { $0.name == "count" }))
+    let fishCountFunc: ImportedFunc = try #require(fishBox.methods.first(where: { $0.name == "count" }))
+    let toolCountFunc: ImportedFunc = try #require(toolBox.methods.first(where: { $0.name == "count" }))
+    #expect(baseCountFunc.parentType?.description == "Box<Element>")
+    #expect(fishCountFunc.parentType?.description == "FishBox")
+    #expect(toolCountFunc.parentType?.description == "ToolBox")
   }
 
   @Test("Specializations keyed by base type contain all entries")
