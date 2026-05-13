@@ -585,7 +585,7 @@ extension JNISwift2JavaGenerator {
     let callee: String =
       switch decl.functionSignature.selfParameter {
       case .instance(_, let swiftType):
-        if let nominal = swiftType.asNominalTypeDeclaration, nominal.name != nominal.syntax?.name.text {
+        if let nominal = swiftType.asNominalTypeDeclaration, nominal.name != nominal.syntax.name.text {
           // For specializations, use the concrete Swift type for pointer casting
           // (the cached conversion uses the raw generic type name which won't compile)
           self.renderSpecializedSelfPointer(

@@ -63,8 +63,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 
   /// The syntax node this declaration is derived from.
-  /// Can be `nil` if this is loaded from a .swiftmodule.
-  let syntax: NominalTypeDeclSyntaxNode?
+  let syntax: NominalTypeDeclSyntaxNode
 
   /// The kind of nominal type.
   let kind: Kind
@@ -85,11 +84,11 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   /// Create a nominal type declaration from the syntax node for a nominal type
   /// declaration.
   init(
+    name: String,
     sourceFilePath: String,
     moduleName: String,
     parent: SwiftNominalTypeDeclaration?,
     node: NominalTypeDeclSyntaxNode,
-    customName: String? = nil
   ) {
     self.parent = parent
     self.syntax = node
@@ -107,11 +106,11 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
-    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: customName ?? node.name.text)
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: name)
   }
 
   lazy var firstInheritanceType: TypeSyntax? = {
-    guard let firstInheritanceType = self.syntax?.inheritanceClause?.inheritedTypes.first else {
+    guard let firstInheritanceType = self.syntax.inheritanceClause?.inheritedTypes.first else {
       return nil
     }
 
@@ -119,13 +118,13 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }()
 
   var inheritanceTypes: InheritedTypeListSyntax? {
-    self.syntax?.inheritanceClause?.inheritedTypes
+    self.syntax.inheritanceClause?.inheritedTypes
   }
 
   /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
   lazy var isSendable: Bool = {
     // Check if Sendable is in the inheritance list
-    guard let inheritanceClause = self.syntax?.inheritanceClause else {
+    guard let inheritanceClause = self.syntax.inheritanceClause else {
       return false
     }
 

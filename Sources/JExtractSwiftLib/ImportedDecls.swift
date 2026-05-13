@@ -98,11 +98,11 @@ package final class ImportedNominalType: ImportedDecl {
       .init(
         parent: swiftNominal.parent?.asSwiftNominalType,
         nominalTypeDecl: SwiftNominalTypeDeclaration(
+          name: specializedTypeName,
           sourceFilePath: swiftNominal.sourceFilePath,
           moduleName: swiftNominal.moduleName,
           parent: swiftNominal.parent,
-          node: swiftNominal.syntax!,
-          customName: specializedTypeName
+          node: swiftNominal.syntax
         ),
         genericArguments: nil
       )
