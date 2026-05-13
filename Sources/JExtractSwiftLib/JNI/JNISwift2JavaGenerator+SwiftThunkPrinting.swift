@@ -427,7 +427,7 @@ extension JNISwift2JavaGenerator {
       &printer,
       translatedDecl,
     ) { printer in
-      if let parent = decl.parentType?.asNominalType, parent.isGeneric {
+      if let parent = decl.parentType?.asNominalType, parent.hasGenericParameter {
         self.printFunctionOpenerCall(&printer, decl)
       } else {
         self.printFunctionDowncall(&printer, decl)

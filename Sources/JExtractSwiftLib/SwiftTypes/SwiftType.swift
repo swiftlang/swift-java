@@ -230,8 +230,13 @@ struct SwiftNominalType: Equatable {
     }
   }
 
-  var isGeneric: Bool {
-    genericArguments != nil
+  var hasGenericParameter: Bool {
+    (genericArguments ?? []).contains {
+      if case .genericParameter = $0 {
+        return true
+      }
+      return false
+    }
   }
 }
 
