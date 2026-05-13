@@ -302,15 +302,6 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let savedPrintingTypeName = self.currentPrintingTypeName
-    let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = type.effectiveJavaTypeName
-    self.currentPrintingType = type
-    defer {
-      self.currentPrintingTypeName = savedPrintingTypeName
-      self.currentPrintingType = savedPrintingType
-    }
-
     // Specialized types are treated as concrete even if the underlying Swift type is generic
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
 
@@ -436,13 +427,8 @@ extension JNISwift2JavaGenerator {
       &printer,
       translatedDecl,
     ) { printer in
-      if let parent = decl.parentType?.asNominalType, parent.nominalTypeDecl.isGeneric {
-        if self.currentPrintingType?.isSpecialization == true {
-          // Specializations use direct calls with concrete type, not protocol opening
-          self.printFunctionDowncall(&printer, decl)
-        } else {
-          self.printFunctionOpenerCall(&printer, decl)
-        }
+      if let parent = decl.parentType?.asNominalType, parent.hasGenericParameter {
+        self.printFunctionOpenerCall(&printer, decl)
       } else {
         self.printFunctionDowncall(&printer, decl)
       }
@@ -599,19 +585,10 @@ extension JNISwift2JavaGenerator {
     let callee: String =
       switch decl.functionSignature.selfParameter {
       case .instance:
-        if let specializedType = self.currentPrintingType, specializedType.isSpecialization {
-          // For specializations, use the concrete Swift type for pointer casting
-          // (the cached conversion uses the raw generic type name which won't compile)
-          self.renderSpecializedSelfPointer(
-            &printer,
-            concreteSwiftType: specializedType.effectiveSwiftTypeName,
-          )
-        } else {
-          nativeSignature.selfParameter!.conversion.render(
-            &printer,
-            "selfPointer",
-          )
-        }
+        nativeSignature.selfParameter!.conversion.render(
+          &printer,
+          "selfPointer",
+        )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
       case .none:
@@ -722,7 +699,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: translatedDecl.nativeFunctionName,
-      parentName: self.currentPrintingTypeName ?? translatedDecl.parentName,
+      parentName: translatedDecl.parentName,
       parameters: parameters,
       resultType: nativeSignature.result.javaType,
     ) { printer in
@@ -980,27 +957,6 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
     }
-  }
-
-  /// Renders self pointer extraction for a specialized (concrete) type.
-  /// Used instead of the generic opener mechanism when we know the exact type at compile time.
-  ///
-  /// - Returns: name of the created "self" variable (e.g., "selfPointer$")
-  private func renderSpecializedSelfPointer(
-    _ printer: inout CodePrinter,
-    concreteSwiftType: String,
-  ) -> String {
-    printer.print(
-      """
-      assert(selfPointer != 0, "selfPointer memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-      let selfPointer$ = UnsafeMutablePointer<\(concreteSwiftType)>(bitPattern: selfPointerBits$)
-      guard let selfPointer$ else {
-        fatalError("selfPointer memory address was null in call to \\(#function)!")
-      }
-      """
-    )
-    return "selfPointer$.pointee"
   }
 
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`

@@ -208,15 +208,6 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteType(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    let savedPrintingTypeName = self.currentPrintingTypeName
-    let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = decl.effectiveJavaTypeName
-    self.currentPrintingType = decl
-    defer {
-      self.currentPrintingTypeName = savedPrintingTypeName
-      self.currentPrintingType = savedPrintingType
-    }
-
     printNominal(&printer, decl) { printer in
       printer.print(
         """
@@ -837,9 +828,8 @@ extension JNISwift2JavaGenerator {
     //=== Part 3: Downcall.
     // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
     // using the registry?
-    let effectiveParentName = self.currentPrintingTypeName ?? translatedDecl.parentName
     let downcall =
-      "\(effectiveParentName.fullName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+      "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.result.javaType.isVoid {

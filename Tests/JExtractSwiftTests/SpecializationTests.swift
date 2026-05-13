@@ -118,6 +118,14 @@ struct SpecializationTests {
     // Both wrappers delegate to the same base type
     #expect(fishBox.specializationBaseType === toolBox.specializationBaseType, "Both should wrap the same base Box type")
     #expect(fishBox.specializationBaseType === translator.importedTypes["Box"], "Base should be the original Box")
+
+    // Both wrappers have owned method models
+    let baseCountFunc: ImportedFunc = try #require(baseBox.methods.first(where: { $0.name == "count" }))
+    let fishCountFunc: ImportedFunc = try #require(fishBox.methods.first(where: { $0.name == "count" }))
+    let toolCountFunc: ImportedFunc = try #require(toolBox.methods.first(where: { $0.name == "count" }))
+    #expect(baseCountFunc.parentType?.description == "Box<Element>")
+    #expect(fishCountFunc.parentType?.description == "FishBox")
+    #expect(toolCountFunc.parentType?.description == "ToolBox")
   }
 
   @Test("Specializations keyed by base type contain all entries")
@@ -279,7 +287,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024observeTheFish__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
@@ -292,7 +300,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024count__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }

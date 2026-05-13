@@ -69,9 +69,21 @@ enum SwiftSelfParameter: Equatable {
   case initializer(SwiftType)
 
   var selfType: SwiftType {
-    switch self {
-    case .instance(_, let swiftType), .staticMethod(let swiftType), .initializer(let swiftType):
-      return swiftType
+    get {
+      switch self {
+      case .instance(_, let swiftType), .staticMethod(let swiftType), .initializer(let swiftType):
+        return swiftType
+      }
+    }
+    set {
+      switch self {
+      case .instance(let convention, _):
+        self = .instance(convention: convention, swiftType: newValue)
+      case .staticMethod:
+        self = .staticMethod(newValue)
+      case .initializer:
+        self = .initializer(newValue)
+      }
     }
   }
 }

@@ -228,6 +228,15 @@ struct SwiftNominalType: Equatable {
       SwiftKnownType(kind: $0, genericArguments: genericArguments)
     }
   }
+
+  var hasGenericParameter: Bool {
+    genericArguments.contains {
+      if case .genericParameter = $0 {
+        return true
+      }
+      return false
+    }
+  }
 }
 
 extension SwiftNominalType: CustomStringConvertible {
@@ -268,7 +277,7 @@ extension SwiftNominalType.Parent: CustomStringConvertible {
 
 extension SwiftNominalType {
   var isSwiftJavaWrapper: Bool {
-    nominalTypeDecl.syntax?.attributes.contains(where: \.isSwiftJavaMacro) ?? false
+    nominalTypeDecl.syntax.attributes.contains(where: \.isSwiftJavaMacro)
   }
 
   var isProtocol: Bool {

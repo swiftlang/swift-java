@@ -181,6 +181,7 @@ class SwiftTypeLookupContext {
     }
 
     return SwiftNominalTypeDeclaration(
+      name: node.name.text,
       sourceFilePath: sourceFilePath,
       moduleName: self.symbolTable.moduleName,
       parent: try parentTypeDecl(for: node),
