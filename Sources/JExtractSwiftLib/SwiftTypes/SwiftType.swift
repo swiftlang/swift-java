@@ -200,13 +200,13 @@ struct SwiftNominalType: Equatable {
   private var storedParent: Parent?
   var sugarName: SugarName?
   var nominalTypeDecl: SwiftNominalTypeDeclaration
-  var genericArguments: [SwiftType]?
+  var genericArguments: [SwiftType]
 
   init(
     parent: SwiftNominalType? = nil,
     sugarName: SugarName? = nil,
     nominalTypeDecl: SwiftNominalTypeDeclaration,
-    genericArguments: [SwiftType]? = nil
+    genericArguments: [SwiftType] = []
   ) {
     self.storedParent =
       parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
@@ -228,6 +228,15 @@ struct SwiftNominalType: Equatable {
       SwiftKnownType(kind: $0, genericArguments: genericArguments)
     }
   }
+
+  var hasGenericParameter: Bool {
+    genericArguments.contains {
+      if case .genericParameter = $0 {
+        return true
+      }
+      return false
+    }
+  }
 }
 
 extension SwiftNominalType: CustomStringConvertible {
@@ -242,15 +251,15 @@ extension SwiftNominalType: CustomStringConvertible {
     switch sugarName {
     case .none:
       resultString += nominalTypeDecl.name
-      if let genericArguments {
+      if !genericArguments.isEmpty {
         resultString += "<\(genericArguments.map(\.description).joined(separator: ", "))>"
       }
     case .some(.optional):
-      resultString += "\(genericArguments![0])?"
+      resultString += "\(genericArguments[0])?"
     case .some(.array):
-      resultString += "[\(genericArguments![0])]"
+      resultString += "[\(genericArguments[0])]"
     case .some(.dictionary):
-      resultString += "[\(genericArguments![0]): \(genericArguments![1])]"
+      resultString += "[\(genericArguments[0]): \(genericArguments[1])]"
     }
 
     return resultString
@@ -268,7 +277,7 @@ extension SwiftNominalType.Parent: CustomStringConvertible {
 
 extension SwiftNominalType {
   var isSwiftJavaWrapper: Bool {
-    nominalTypeDecl.syntax?.attributes.contains(where: \.isSwiftJavaMacro) ?? false
+    nominalTypeDecl.syntax.attributes.contains(where: \.isSwiftJavaMacro)
   }
 
   var isProtocol: Bool {
@@ -345,7 +354,7 @@ extension SwiftType {
         originalType: type,
         parent: nil,
         name: identifierType.name,
-        genericArguments: genericArgs,
+        genericArguments: genericArgs ?? [],
         lookupContext: lookupContext
       )
 
@@ -383,7 +392,7 @@ extension SwiftType {
         originalType: type,
         parent: parentType,
         name: memberType.name,
-        genericArguments: genericArgs,
+        genericArguments: genericArgs ?? [],
         lookupContext: lookupContext,
         module: moduleName
       )
@@ -433,7 +442,7 @@ extension SwiftType {
     originalType: TypeSyntax,
     parent: SwiftType?,
     name: TokenSyntax,
-    genericArguments: [SwiftType]?,
+    genericArguments: [SwiftType],
     lookupContext: SwiftTypeLookupContext,
     module: String? = nil
   ) throws {
@@ -471,7 +480,7 @@ extension SwiftType {
     } else if let aliasDecl = typeDecl as? SwiftTypeAliasDeclaration {
       let aliasGenericParams =
         aliasDecl.syntax.genericParameterClause?.parameters.map { $0.name.text } ?? []
-      let useSiteArgs = genericArguments ?? []
+      let useSiteArgs = genericArguments
 
       // The alias's generic parameter count must match the use-site argument
       // count. Treat any mismatch (including use-site args on a non-generic
@@ -514,7 +523,7 @@ extension SwiftType {
       SwiftNominalType(
         parent: parent?.asNominalType,
         nominalTypeDecl: nominalTypeDecl,
-        genericArguments: nil
+        genericArguments: []
       )
     )
   }
@@ -533,7 +542,7 @@ extension SwiftType {
           parent: nominal.parent,
           sugarName: nominal.sugarName,
           nominalTypeDecl: nominal.nominalTypeDecl,
-          genericArguments: nominal.genericArguments?.map {
+          genericArguments: nominal.genericArguments.map {
             $0.substituting(genericParameters: substitutions)
           }
         )
@@ -588,4 +597,19 @@ enum TypeTranslationError: Error {
 
   /// Unknown nominal type.
   case unknown(TypeSyntax, file: StaticString = #file, line: Int = #line)
+}
+
+extension SwiftNominalTypeDeclaration {
+  var asSwiftNominalType: SwiftNominalType {
+    let genericArguments = genericParameters.map { SwiftType.genericParameter($0) }
+    return SwiftNominalType(
+      parent: parent?.asSwiftNominalType,
+      nominalTypeDecl: self,
+      genericArguments: genericArguments
+    )
+  }
+
+  var asSwiftType: SwiftType {
+    .nominal(asSwiftNominalType)
+  }
 }

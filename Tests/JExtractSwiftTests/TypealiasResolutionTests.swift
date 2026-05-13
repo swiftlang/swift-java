@@ -126,7 +126,7 @@ struct TypealiasResolutionTests {
       return
     }
     #expect(nominal.nominalTypeDecl.name == "Optional")
-    let arg0 = try #require(nominal.genericArguments?.first)
+    let arg0 = try #require(nominal.genericArguments.first)
     #expect(arg0.description == "Int64", "Expected substituted T to be Int64, got \(arg0)")
   }
 
@@ -154,7 +154,7 @@ struct TypealiasResolutionTests {
       return
     }
     #expect(nominal.nominalTypeDecl.name == "Dictionary")
-    let args = try #require(nominal.genericArguments)
+    let args = nominal.genericArguments
     #expect(args.count == 2)
     #expect(args[0].description == "String")
     #expect(args[1].description == "Int64")
@@ -295,7 +295,7 @@ struct TypealiasResolutionTests {
       return
     }
     #expect(nominal.nominalTypeDecl.name == "Optional")
-    #expect(nominal.genericArguments?.first?.description == "Int64")
+    #expect(nominal.genericArguments.first?.description == "Int64")
   }
 
   @Test("Typealias to array sugar resolves to an array")
@@ -320,7 +320,7 @@ struct TypealiasResolutionTests {
       return
     }
     #expect(nominal.nominalTypeDecl.name == "Array")
-    #expect(nominal.genericArguments?.first?.description == "Int8")
+    #expect(nominal.genericArguments.first?.description == "Int8")
   }
 
   // ==== -----------------------------------------------------------------------
@@ -410,7 +410,7 @@ struct TypealiasResolutionTests {
       return
     }
     #expect(nominal.nominalTypeDecl.name == "Optional")
-    #expect(nominal.genericArguments?.first?.description == "Int64")
+    #expect(nominal.genericArguments.first?.description == "Int64")
   }
 
   // ==== -----------------------------------------------------------------------

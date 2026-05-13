@@ -47,8 +47,21 @@ struct SpecializationTests {
       public var name: String
     }
 
+    public struct Bait {
+      public var name: String
+    }
+
     extension Box where Element == Fish {
       public func observeTheFish() {}
+    }
+    extension Box where Fish == Element {
+      public func swappedObserveTheFish() {}
+    }
+    extension Box where Element == Bait {
+      public func observeTheBait() {}
+    }
+    extension Box where Bait == Element {
+      public func swappedObserveTheBait() {}
     }
 
     public typealias FishBox = Box<Fish>
@@ -105,6 +118,14 @@ struct SpecializationTests {
     // Both wrappers delegate to the same base type
     #expect(fishBox.specializationBaseType === toolBox.specializationBaseType, "Both should wrap the same base Box type")
     #expect(fishBox.specializationBaseType === translator.importedTypes["Box"], "Base should be the original Box")
+
+    // Both wrappers have owned method models
+    let baseCountFunc: ImportedFunc = try #require(baseBox.methods.first(where: { $0.name == "count" }))
+    let fishCountFunc: ImportedFunc = try #require(fishBox.methods.first(where: { $0.name == "count" }))
+    let toolCountFunc: ImportedFunc = try #require(toolBox.methods.first(where: { $0.name == "count" }))
+    #expect(baseCountFunc.parentType?.description == "Box<Element>")
+    #expect(fishCountFunc.parentType?.description == "FishBox")
+    #expect(toolCountFunc.parentType?.description == "ToolBox")
   }
 
   @Test("Specializations keyed by base type contain all entries")
@@ -141,13 +162,15 @@ struct SpecializationTests {
         "public static FishBox wrapMemoryAddressUnsafe(long selfPointer, SwiftArena swiftArena)",
         // Base method from Box<Element>
         "public long count()",
-        // Method body must call FishBox's own native method, not Box's
-        "FishBox.$count(",
         // Constrained extension method (Element == Fish)
         "public void observeTheFish()",
-        // Constrained method body must also call FishBox's native method
-        "FishBox.$observeTheFish(",
+        // Constrained extension method (Fish == Element)
+        "public void swappedObserveTheFish()",
       ],
+      notExpectedChunks: [
+        "public void observeTheBait()",
+        "public void swappedObserveTheBait()",
+      ]
     )
   }
 
@@ -264,7 +287,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024observeTheFish__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }
@@ -277,7 +300,7 @@ struct SpecializationTests {
         public func Java_com_example_swift_FishBox__00024count__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-          let selfPointer$ = UnsafeMutablePointer<Box<Fish>>(bitPattern: selfPointerBits$)
+          let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
           guard let selfPointer$ else {
             fatalError("selfPointer memory address was null in call to \\(#function)!")
           }

@@ -63,8 +63,7 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 
   /// The syntax node this declaration is derived from.
-  /// Can be `nil` if this is loaded from a .swiftmodule.
-  let syntax: NominalTypeDeclSyntaxNode?
+  let syntax: NominalTypeDeclSyntaxNode
 
   /// The kind of nominal type.
   let kind: Kind
@@ -78,17 +77,18 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
 
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
-  lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
+  private(set) lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
     self.computeKnownStandardLibraryType()
   }()
 
   /// Create a nominal type declaration from the syntax node for a nominal type
   /// declaration.
   init(
+    name: String,
     sourceFilePath: String,
     moduleName: String,
     parent: SwiftNominalTypeDeclaration?,
-    node: NominalTypeDeclSyntaxNode
+    node: NominalTypeDeclSyntaxNode,
   ) {
     self.parent = parent
     self.syntax = node
@@ -106,11 +106,11 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     case .structDecl: self.kind = .struct
     default: fatalError("Not a nominal type declaration")
     }
-    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
+    super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: name)
   }
 
-  lazy var firstInheritanceType: TypeSyntax? = {
-    guard let firstInheritanceType = self.syntax?.inheritanceClause?.inheritedTypes.first else {
+  private(set) lazy var firstInheritanceType: TypeSyntax? = {
+    guard let firstInheritanceType = self.syntax.inheritanceClause?.inheritedTypes.first else {
       return nil
     }
 
@@ -118,13 +118,13 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }()
 
   var inheritanceTypes: InheritedTypeListSyntax? {
-    self.syntax?.inheritanceClause?.inheritedTypes
+    self.syntax.inheritanceClause?.inheritedTypes
   }
 
   /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
-  lazy var isSendable: Bool = {
+  private(set) lazy var isSendable: Bool = {
     // Check if Sendable is in the inheritance list
-    guard let inheritanceClause = self.syntax?.inheritanceClause else {
+    guard let inheritanceClause = self.syntax.inheritanceClause else {
       return false
     }
 

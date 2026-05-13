@@ -138,12 +138,12 @@ extension Swift2JavaTranslator {
       let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
       if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
         visitor.visit(
-          nominalDecl: dataDecl.syntax!.asNominal!,
+          nominalDecl: dataDecl.syntax.asNominal!,
           in: nil,
           sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift",
         )
         visitor.visit(
-          nominalDecl: dataProtocolDecl.syntax!.asNominal!,
+          nominalDecl: dataProtocolDecl.syntax.asNominal!,
           in: nil,
           sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift",
         )
@@ -154,7 +154,7 @@ extension Swift2JavaTranslator {
     if let dateDecl = self.symbolTable[.foundationDate] ?? self.symbolTable[.essentialsDate] {
       if self.isUsing(where: { $0 == dateDecl }) {
         visitor.visit(
-          nominalDecl: dateDecl.syntax!.asNominal!,
+          nominalDecl: dateDecl.syntax.asNominal!,
           in: nil,
           sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift",
         )
@@ -181,10 +181,8 @@ extension Swift2JavaTranslator {
     func check(_ type: SwiftType) -> Bool {
       switch type {
       case .nominal(let nominal):
-        if let genericArguments = nominal.genericArguments {
-          if genericArguments.contains(where: check) {
-            return true
-          }
+        if nominal.genericArguments.contains(where: check) {
+          return true
         }
         return predicate(nominal.nominalTypeDecl)
       case .tuple(let tuple):
@@ -280,7 +278,7 @@ extension Swift2JavaTranslator {
       return nil
     }
 
-    guard swiftNominalDecl.syntax!.shouldExtract(config: config, log: log, in: nil) else {
+    guard swiftNominalDecl.syntax.shouldExtract(config: config, log: log, in: nil) else {
       return nil
     }
 

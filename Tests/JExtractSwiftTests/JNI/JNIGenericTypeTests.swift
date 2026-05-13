@@ -121,7 +121,7 @@ struct JNIGenericTypeTests {
           static func _get_description(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jstring? {
             assert(selfPointer != 0, "selfPointer memory address was null")
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-            let selfPointer$ = UnsafeMutablePointer<MyID>(bitPattern: selfPointerBits$)
+            let selfPointer$ = UnsafeMutablePointer<MyID<T>>(bitPattern: selfPointerBits$)
             guard let selfPointer$ else {
               fatalError("selfPointer memory address was null in call to \(#function)!")
             }
@@ -211,6 +211,435 @@ struct JNIGenericTypeTests {
         }
         """,
       ]
+    )
+  }
+
+  @Test
+  func genericValueInEnumCase() throws {
+    let input =
+      #"""
+      public struct MyID<T> {}
+
+      public enum MyEnum {
+        case foo(MyID<Double>)
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        #"""
+        public sealed interface Case {
+          record Foo(MyID<java.lang.Double> arg0) implements Case {}
+        }
+        """#
+      ]
+    )
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        #"""
+        public func Java_com_example_swift_MyEnum__00024getAsFoo__J_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
+        """#
+      ]
+    )
+  }
+
+  @Test
+  func nestedGenericType() throws {
+    let input =
+      #"""
+      public enum Foo {
+        public struct Bar<T> {
+          public func work() {}
+        }
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        #"""
+        extension Foo.Bar: _SwiftModule_Foo_Bar_opener {
+          static func _work(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) {
+            ...
+            let selfPointer$ = UnsafeMutablePointer<Foo.Bar<T>>(bitPattern: selfPointerBits$)
+            guard let selfPointer$ else {
+             fatalError("selfPointer memory address was null in call to \(#function)!")
+            }
+            selfPointer$.pointee.work()
+          }
+        }
+        """#
+      ],
+    )
+  }
+
+  @Test("Constrained extensions are ignored")
+  func constrainedExtensionsAreIgnored() throws {
+    let input =
+      #"""
+      public struct MyID<T> {}
+
+      extension MyID where T: BinaryInteger {
+        public func computeSomeValue() -> Int
+      }
+      extension MyID where T == Int128 {
+        public func decomposed() -> (high: Int64, low: Int64)
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class MyID<T> implements JNISwiftInstance {"
+      ],
+      notExpectedChunks: [
+        "computeSomeValue",
+        "decomposed",
+      ],
+    )
+  }
+
+  @Test("Constrained extensions are ignored, unless specialized")
+  func constrainedExtensionsAreIgnoredUnlessSpecialized() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Tool {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      extension Fish: Animal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal {
+        public func feed() {}
+      }
+      extension Tank where T == Fish {
+        public func observeTheFish() {}
+      }
+      extension Tank where T == Tool {
+        public func useTheTool() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {",
+        "observeTheFish",
+        "feed",
+      ],
+      notExpectedChunks: [
+        "useTheTool"
+      ],
+    )
+  }
+
+  @Test("Multi-constraint extensions require all constraints to match")
+  func multiConstraintExtensionsRequireAllToMatch() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Tool {
+        public var name: String
+      }
+      public struct Bait {
+        public var name: String
+      }
+
+      public struct Pair<A, B> {
+        public var first: A
+        public var second: B
+      }
+
+      extension Pair where A == Fish, B == Tool {
+        // OK: Both constraints match FishToolPair
+        public func bothMatch() {}
+      }
+      extension Pair where A == Fish, B == Bait {
+        // NOPE: Only A matches FishToolPair
+        public func onlyAMatches() {}
+      }
+      extension Pair where A == Tool, B == Tool {
+        // NOPE: Only B matches FishToolPair
+        public func onlyBMatches() {}
+      }
+
+      public typealias FishToolPair = Pair<Fish, Tool>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishToolPair implements JNISwiftInstance {",
+        "bothMatch",
+      ],
+      notExpectedChunks: [
+        "onlyAMatches",
+        "onlyBMatches",
+      ],
+    )
+  }
+
+  @Test("Conformance constraint with no matching conformance is dropped")
+  func conformanceConstraintWithoutConformanceIsDropped() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+
+      public protocol Animal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal {
+        public func feed() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {"
+      ],
+      notExpectedChunks: [
+        "feed"
+      ],
+    )
+  }
+
+  @Test("Transitive conformance through protocol refinement is honored")
+  func transitiveConformanceIsHonored() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      public protocol AquaticAnimal: Animal {}
+      extension Fish: AquaticAnimal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal {
+        public func feed() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {",
+        "feed",
+      ],
+    )
+  }
+
+  @Test("Multi-conformance extensions require all conformances to match")
+  func multiConformanceExtensionsRequireAllToMatch() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      public protocol Edible {}
+      extension Fish: Animal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal, T: Edible {
+        // Fish is Animal but not Edible, so this must be dropped
+        public func cookAndServe() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {"
+      ],
+      notExpectedChunks: [
+        "cookAndServe"
+      ],
+    )
+  }
+
+  @Test("Composition constraint flattens to multiple requirements")
+  func compositionConstraintFlattens() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Salmon {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      public protocol Edible {}
+      extension Fish: Animal {}
+      extension Salmon: Animal {}
+      extension Salmon: Edible {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      extension Tank where T: Animal & Edible {
+        public func cookAndServe() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+      public typealias SalmonTank = Tank<Salmon>
+      """#
+
+    // Salmon conforms to both, so SalmonTank gets the method.
+    // Fish only conforms to Animal, so FishTank does not get the method,
+    // but the FishTank class is still generated.
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {",
+        "public final class SalmonTank implements JNISwiftInstance {",
+        "cookAndServe",
+      ],
+    )
+  }
+
+  @Test("Mixed same-type + conformance constraints")
+  func mixedSameTypeAndConformanceConstraints() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+      public struct Tool {
+        public var name: String
+      }
+
+      public protocol Animal {}
+      extension Fish: Animal {}
+
+      public struct Pair<A, B> {
+        public var first: A
+        public var second: B
+      }
+
+      extension Pair where A == Int, B: Animal {
+        // FishPair (Int, Fish): matches both. ToolPair (Int, Tool): B not Animal.
+        public func describe() {}
+      }
+
+      public typealias FishPair = Pair<Int, Fish>
+      public typealias ToolPair = Pair<Int, Tool>
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishPair implements JNISwiftInstance {",
+        "public final class ToolPair implements JNISwiftInstance {",
+        "describe",
+      ],
+    )
+  }
+
+  @Test("Conformance can be added after the constrained extension in same file")
+  func conformanceDeclaredAfterConstrainedExtension() throws {
+    let input =
+      #"""
+      public struct Fish {
+        public var name: String
+      }
+
+      public protocol Animal {}
+
+      public struct Tank<T> {
+        public var contents: T
+      }
+
+      // Constrained extension comes BEFORE the conformance declaration:
+      // matching must defer until after the input is fully visited.
+      extension Tank where T: Animal {
+        public func feed() {}
+      }
+
+      public typealias FishTank = Tank<Fish>
+
+      extension Fish: Animal {}
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "public final class FishTank implements JNISwiftInstance {",
+        "feed",
+      ],
     )
   }
 }

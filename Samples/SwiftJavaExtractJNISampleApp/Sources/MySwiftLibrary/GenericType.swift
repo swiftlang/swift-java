@@ -22,6 +22,8 @@ public struct MyID<T: Hashable>: Hashable {
   }
 }
 
+public typealias MyIntID = MyID<Int>
+
 public enum MyIDs {
   public static func makeIntID(_ value: Int) -> MyID<Int> {
     MyID(value)
@@ -84,4 +86,21 @@ public enum GenericEnum<T> {
 
 public func makeIntGenericEnum() -> GenericEnum<Int> {
   if Bool.random() { return .foo } else { return .bar }
+}
+
+extension MyID where T: BinaryInteger {
+  // Conditional extension functions are not exported
+  public func computeSomeValue() -> Int {
+    Int(rawValue)
+  }
+}
+
+extension MyID where T == Int128 {
+  // Conditional extension functions are not exported
+  public func decomposed() -> (high: Int64, low: Int64) {
+    let value = self.rawValue
+    let high = Int64(truncatingIfNeeded: value >> 64)
+    let low = Int64(bitPattern: UInt64(truncatingIfNeeded: value))
+    return (high: high, low: low)
+  }
 }

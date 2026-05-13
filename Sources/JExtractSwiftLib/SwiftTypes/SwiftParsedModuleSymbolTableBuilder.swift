@@ -124,6 +124,7 @@ extension SwiftParsedModuleSymbolTableBuilder {
 
     // Otherwise, create the nominal type declaration.
     let nominalTypeDecl = SwiftNominalTypeDeclaration(
+      name: node.name.text,
       sourceFilePath: sourceFilePath,
       moduleName: moduleName,
       parent: parent,

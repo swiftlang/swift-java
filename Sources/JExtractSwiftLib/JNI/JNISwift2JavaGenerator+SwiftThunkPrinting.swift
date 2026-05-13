@@ -173,23 +173,6 @@ extension JNISwift2JavaGenerator {
     logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
   }
 
-  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let targetCases = type.cases
-      .compactMap(translatedEnumCase(for:))
-      .filter { !$0.translatedValues.isEmpty }
-    if targetCases.isEmpty {
-      return
-    }
-
-    printer.printBraceBlock("enum \(JNICaching.cacheName(for: type))") { printer in
-      for translatedCase in targetCases {
-        printer.print(
-          "static let \(JNICaching.cacheMemberName(for: translatedCase)) = \(renderEnumCaseCacheInit(translatedCase))"
-        )
-      }
-    }
-  }
-
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
   private func printSwiftInterfaceWrapper(
     _ printer: inout CodePrinter,
@@ -310,7 +293,6 @@ extension JNISwift2JavaGenerator {
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
     printHeader(&printer)
 
-    printJNICache(&printer, type)
     printer.println()
 
     switch type.swiftNominal.kind {
@@ -322,15 +304,6 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let savedPrintingTypeName = self.currentPrintingTypeName
-    let savedPrintingType = self.currentPrintingType
-    self.currentPrintingTypeName = type.effectiveJavaTypeName
-    self.currentPrintingType = type
-    defer {
-      self.currentPrintingTypeName = savedPrintingTypeName
-      self.currentPrintingType = savedPrintingType
-    }
-
     // Specialized types are treated as concrete even if the underlying Swift type is generic
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
 
@@ -350,7 +323,7 @@ extension JNISwift2JavaGenerator {
 
       if !isEffectivelyGeneric {
         for enumCase in type.cases {
-          printEnumCase(&printer, enumCase)
+          printEnumCase(&printer, type, enumCase)
           printer.println()
         }
       }
@@ -395,7 +368,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCase(_ printer: inout CodePrinter, _ enumCase: ImportedEnumCase) {
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumType: ImportedNominalType, _ enumCase: ImportedEnumCase) {
     guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
       return
     }
@@ -404,20 +377,7 @@ extension JNISwift2JavaGenerator {
     printSwiftFunctionThunk(&printer, enumCase.caseFunction)
     printer.println()
 
-    // Print getAsCase method
-    if !translatedCase.translatedValues.isEmpty {
-      printEnumGetAsCaseThunk(&printer, translatedCase)
-    }
-  }
-
-  private func renderEnumCaseCacheInit(_ enumCase: TranslatedEnumCase) -> String {
-    let nativeParametersClassName = "\(enumCase.enumName)$Case$\(enumCase.name)$_NativeParameters"
-    let methodSignature = MethodSignature(
-      resultType: .void,
-      parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-    )
-
-    return renderJNICacheInit(className: nativeParametersClassName, methods: [("<init>", methodSignature)])
+    printEnumGetAsCaseThunk(&printer, enumType, translatedCase)
   }
 
   private func renderJNICacheInit(className: String, methods: [(String, MethodSignature)]) -> String {
@@ -431,46 +391,26 @@ extension JNISwift2JavaGenerator {
 
   private func printEnumGetAsCaseThunk(
     _ printer: inout CodePrinter,
+    _ enumType: ImportedNominalType,
     _ enumCase: TranslatedEnumCase,
   ) {
-    printCDecl(
-      &printer,
-      enumCase.getAsCaseFunction,
-    ) { printer in
-      let selfPointer = enumCase.getAsCaseFunction.nativeFunctionSignature.selfParameter!.conversion.render(
-        &printer,
-        "selfPointer",
-      )
-      let caseNames = enumCase.original.parameters.enumerated().map { idx, parameter in
-        parameter.name ?? "_\(idx)"
-      }
-      let caseNamesWithLet = caseNames.map { "let \($0)" }
-      let methodSignature = MethodSignature(
-        resultType: .void,
-        parameterTypes: enumCase.parameterConversions.map(\.native.javaType),
-      )
-      printer.print(
-        """
-        guard case .\(enumCase.original.name)(\(caseNamesWithLet.joined(separator: ", "))) = \(selfPointer).pointee else {
-          fatalError("Expected enum case '\(enumCase.original.name)', but was '\\(\(selfPointer).pointee)'!")
+    if let getAsCaseFunction = enumCase.getAsCaseFunction {
+      printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
+        let associatedValueTypes = enumCase.original.parameters.map { param in
+          param.type.description
+        }.joined(separator: ", ")
+        printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
+          let params = enumCase.original.parameters.enumerated().map { i, param in
+            param.name ?? "_\(i)"
+          }.joined(separator: ", ")
+          printer.printBraceBlock("if case let .\(enumCase.original.name)(\(params)) = self") { printer in
+            printer.print("return (\(params))")
+          }
+          printer.print("return nil")
         }
-        let cache$ = \(JNICaching.cacheName(for: enumCase.original.enumType)).\(JNICaching.cacheMemberName(for: enumCase.original))
-        let class$ = cache$.javaClass
-        let method$ = _JNIMethodIDCache.Method(name: "<init>", signature: "\(methodSignature.mangledName)")
-        let constructorID$ = cache$[method$]
-        """
-      )
-      let upcallArguments = zip(enumCase.parameterConversions, caseNames).map { conversion, caseName in
-        let nullConversion = !conversion.native.javaType.isPrimitive ? " ?? nil" : ""
-        let result = conversion.native.conversion.render(&printer, caseName)
-        return "jvalue(\(conversion.native.javaType.jniFieldName): \(result)\(nullConversion))"
       }
-      printer.print(
-        """
-        let newObjectArgs$: [jvalue] = [\(upcallArguments.joined(separator: ", "))]
-        return environment.interface.NewObjectA(environment, class$, constructorID$, newObjectArgs$)
-        """
-      )
+
+      printSwiftFunctionThunk(&printer, getAsCaseFunction)
     }
   }
 
@@ -489,13 +429,8 @@ extension JNISwift2JavaGenerator {
       &printer,
       translatedDecl,
     ) { printer in
-      if let parent = decl.parentType?.asNominalType, parent.nominalTypeDecl.isGeneric {
-        if self.currentPrintingType?.isSpecialization == true {
-          // Specializations use direct calls with concrete type, not protocol opening
-          self.printFunctionDowncall(&printer, decl)
-        } else {
-          self.printFunctionOpenerCall(&printer, decl)
-        }
+      if let parent = decl.parentType?.asNominalType, parent.hasGenericParameter {
+        self.printFunctionOpenerCall(&printer, decl)
       } else {
         self.printFunctionDowncall(&printer, decl)
       }
@@ -652,19 +587,10 @@ extension JNISwift2JavaGenerator {
     let callee: String =
       switch decl.functionSignature.selfParameter {
       case .instance:
-        if let specializedType = self.currentPrintingType, specializedType.isSpecialization {
-          // For specializations, use the concrete Swift type for pointer casting
-          // (the cached conversion uses the raw generic type name which won't compile)
-          self.renderSpecializedSelfPointer(
-            &printer,
-            concreteSwiftType: specializedType.effectiveSwiftTypeName,
-          )
-        } else {
-          nativeSignature.selfParameter!.conversion.render(
-            &printer,
-            "selfPointer",
-          )
-        }
+        nativeSignature.selfParameter!.conversion.render(
+          &printer,
+          "selfPointer",
+        )
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
       case .none:
@@ -775,7 +701,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       javaMethodName: translatedDecl.nativeFunctionName,
-      parentName: self.currentPrintingTypeName ?? translatedDecl.parentName,
+      parentName: translatedDecl.parentName,
       parameters: parameters,
       resultType: nativeSignature.result.javaType,
     ) { printer in
@@ -1172,7 +1098,7 @@ extension JNISwift2JavaGenerator {
   }
 
   private func openerProtocolName(for type: SwiftNominalTypeDeclaration) -> String {
-    "_\(swiftModuleName)_\(type.name)_opener"
+    "_\(swiftModuleName)_\(type.flatName)_opener"
   }
 
   private func printOpenerProtocol(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
@@ -1221,7 +1147,7 @@ extension JNISwift2JavaGenerator {
       }
     }
     printer.println()
-    printer.printBraceBlock("extension \(type.swiftNominal.name): \(protocolName)") { printer in
+    printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): \(protocolName)") { printer in
       for variable in type.variables {
         if variable.isStatic { continue }
         printFunctionDecl(&printer, decl: variable, skipMethodBody: false)
@@ -1232,27 +1158,6 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
     }
-  }
-
-  /// Renders self pointer extraction for a specialized (concrete) type.
-  /// Used instead of the generic opener mechanism when we know the exact type at compile time.
-  ///
-  /// - Returns: name of the created "self" variable (e.g., "selfPointer$")
-  private func renderSpecializedSelfPointer(
-    _ printer: inout CodePrinter,
-    concreteSwiftType: String,
-  ) -> String {
-    printer.print(
-      """
-      assert(selfPointer != 0, "selfPointer memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-      let selfPointer$ = UnsafeMutablePointer<\(concreteSwiftType)>(bitPattern: selfPointerBits$)
-      guard let selfPointer$ else {
-        fatalError("selfPointer memory address was null in call to \\(#function)!")
-      }
-      """
-    )
-    return "selfPointer$.pointee"
   }
 
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`

@@ -476,7 +476,7 @@ extension FFMSwift2JavaGenerator {
         }
 
         // Generic types are not supported yet.
-        guard swiftNominalType.genericArguments == nil else {
+        guard swiftNominalType.genericArguments.isEmpty else {
           throw JavaTranslationError.unhandledType(swiftType)
         }
 
@@ -821,7 +821,7 @@ extension FFMSwift2JavaGenerator {
         }
 
         // Generic types are not supported yet.
-        guard swiftNominalType.genericArguments == nil else {
+        guard swiftNominalType.genericArguments.isEmpty else {
           throw JavaTranslationError.unhandledType(swiftType)
         }
 
