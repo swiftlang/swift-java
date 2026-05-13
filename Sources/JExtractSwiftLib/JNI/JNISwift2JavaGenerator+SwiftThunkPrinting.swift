@@ -277,6 +277,10 @@ extension JNISwift2JavaGenerator {
   private func printGlobalSwiftThunkSources(_ printer: inout CodePrinter) throws {
     printHeader(&printer)
 
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+    )
+
     for decl in analysis.importedGlobalFuncs {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
@@ -292,8 +296,11 @@ extension JNISwift2JavaGenerator {
 
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
     printHeader(&printer)
-
     printer.println()
+
+    self.currentJavaIdentifiers = JavaIdentifierFactory(
+      type.initializers + type.variables + type.methods
+    )
 
     switch type.swiftNominal.kind {
     case .actor, .class, .enum, .struct:
