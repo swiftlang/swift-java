@@ -61,7 +61,7 @@ let package = Package(
 
     .executable(
       name: "swift-java",
-      targets: ["SwiftJavaTool"]
+      targets: ["swift-java"]
     ),
 
     .library(
@@ -224,7 +224,7 @@ let package = Package(
       name: "SwiftJavaPlugin",
       capability: .buildTool(),
       dependencies: [
-        "SwiftJavaTool"
+        "swift-java"
       ]
     ),
 
@@ -289,7 +289,7 @@ let package = Package(
     ),
 
     .executableTarget(
-      name: "SwiftJavaTool",
+      name: "swift-java",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -304,6 +304,10 @@ let package = Package(
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
       ],
+      // Keep existing directory name while the target is renamed; see
+      // https://github.com/swiftlang/swift-java/issues/733 for why the
+      // target name must match the product name.
+      path: "Sources/SwiftJavaTool",
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .enableUpcomingFeature("BareSlashRegexLiterals"),
@@ -362,7 +366,7 @@ let package = Package(
       name: "JExtractSwiftPlugin",
       capability: .buildTool(),
       dependencies: [
-        "SwiftJavaTool"
+        "swift-java"
       ]
     ),
 

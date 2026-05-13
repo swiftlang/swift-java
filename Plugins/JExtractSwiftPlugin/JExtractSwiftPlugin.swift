@@ -29,7 +29,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
 
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-    let toolURL = try context.tool(named: "SwiftJavaTool").url
+    let toolURL = try context.tool(named: "swift-java").url
 
     var commands: [Command] = []
 

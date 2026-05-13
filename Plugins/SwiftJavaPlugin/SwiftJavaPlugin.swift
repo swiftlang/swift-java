@@ -31,7 +31,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
-    let executable = try context.tool(named: "SwiftJavaTool").url
+    let executable = try context.tool(named: "swift-java").url
     var commands: [Command] = []
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
