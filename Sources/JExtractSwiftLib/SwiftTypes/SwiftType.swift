@@ -596,7 +596,7 @@ extension SwiftNominalTypeDeclaration {
     return SwiftNominalType(
       parent: parent?.asSwiftNominalType,
       nominalTypeDecl: self,
-      genericArguments: genericArguments.isEmpty ? nil : genericArguments
+      genericArguments: genericArguments
     )
   }
 
