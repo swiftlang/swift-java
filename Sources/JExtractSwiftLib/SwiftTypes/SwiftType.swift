@@ -212,7 +212,6 @@ struct SwiftNominalType: Equatable {
       parent.map { .nominal($0) } ?? nominalTypeDecl.parent.map { .nominal(SwiftNominalType(nominalTypeDecl: $0)) }
     self.sugarName = sugarName
     self.nominalTypeDecl = nominalTypeDecl
-    assert(genericArguments == nil || !genericArguments!.isEmpty)
     self.genericArguments = genericArguments
   }
 
@@ -231,7 +230,7 @@ struct SwiftNominalType: Equatable {
   }
 
   var hasGenericParameter: Bool {
-    (genericArguments ?? []).contains {
+    genericArguments.contains {
       if case .genericParameter = $0 {
         return true
       }

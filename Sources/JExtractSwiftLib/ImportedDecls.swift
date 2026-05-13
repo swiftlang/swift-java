@@ -104,7 +104,7 @@ package final class ImportedNominalType: ImportedDecl {
           parent: swiftNominal.parent,
           node: swiftNominal.syntax
         ),
-        genericArguments: nil
+        genericArguments: []
       )
     )
     self.initializers = base.initializers.map { $0.clone(for: selfType) }
