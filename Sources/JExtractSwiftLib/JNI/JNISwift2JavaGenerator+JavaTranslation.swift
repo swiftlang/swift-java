@@ -481,13 +481,13 @@ extension JNISwift2JavaGenerator {
         let javaType = JavaType.class(
           package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalTypeName,
-          typeParameters: try nominalType.genericArguments?.map { swiftType in
+          typeParameters: try nominalType.genericArguments.map { swiftType in
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
               genericRequirements: genericRequirements,
             )
-          } ?? [],
+          },
         )
 
         // We assume this is a JExtract class.
@@ -918,13 +918,13 @@ extension JNISwift2JavaGenerator {
         let javaType = JavaType.class(
           package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
           name: nominalType.nominalTypeDecl.qualifiedName,
-          typeParameters: try nominalType.genericArguments?.map { swiftType in
+          typeParameters: try nominalType.genericArguments.map { swiftType in
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
               genericRequirements: genericRequirements,
             )
-          } ?? [],
+          },
         )
 
         // We assume this is a JExtract class.
@@ -1062,13 +1062,13 @@ extension JNISwift2JavaGenerator {
 
         // We assume this is a JExtract class.
         let typeParameters =
-          try nominalType.genericArguments?.map { swiftType in
+          try nominalType.genericArguments.map { swiftType in
             try translateGenericTypeParameter(
               swiftType,
               genericParameters: genericParameters,
               genericRequirements: genericRequirements,
             )
-          } ?? []
+          }
 
         return .class(
           package: moduleJavaPackages[nominalType.nominalTypeDecl.moduleName],
