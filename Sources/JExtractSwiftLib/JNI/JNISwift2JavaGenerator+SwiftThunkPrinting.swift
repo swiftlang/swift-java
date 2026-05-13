@@ -584,20 +584,11 @@ extension JNISwift2JavaGenerator {
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
-      case .instance(_, let swiftType):
-        if let nominal = swiftType.asNominalTypeDeclaration, nominal.name != nominal.syntax.name.text {
-          // For specializations, use the concrete Swift type for pointer casting
-          // (the cached conversion uses the raw generic type name which won't compile)
-          self.renderSpecializedSelfPointer(
-            &printer,
-            concreteSwiftType: swiftType.description,
-          )
-        } else {
+      case .instance:
           nativeSignature.selfParameter!.conversion.render(
             &printer,
             "selfPointer",
           )
-        }
       case .staticMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
       case .none:
@@ -966,27 +957,6 @@ extension JNISwift2JavaGenerator {
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
     }
-  }
-
-  /// Renders self pointer extraction for a specialized (concrete) type.
-  /// Used instead of the generic opener mechanism when we know the exact type at compile time.
-  ///
-  /// - Returns: name of the created "self" variable (e.g., "selfPointer$")
-  private func renderSpecializedSelfPointer(
-    _ printer: inout CodePrinter,
-    concreteSwiftType: String,
-  ) -> String {
-    printer.print(
-      """
-      assert(selfPointer != 0, "selfPointer memory address was null")
-      let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
-      let selfPointer$ = UnsafeMutablePointer<\(concreteSwiftType)>(bitPattern: selfPointerBits$)
-      guard let selfPointer$ else {
-        fatalError("selfPointer memory address was null in call to \\(#function)!")
-      }
-      """
-    )
-    return "selfPointer$.pointee"
   }
 
   /// Print the necessary conversion logic to go from a `jlong` to a `UnsafeMutablePointer<Type>`
