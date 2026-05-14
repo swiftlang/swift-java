@@ -880,7 +880,11 @@ extension JNISwift2JavaGenerator {
     let cacheName = nominalJavaBoxingCacheName(for: type)
     let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
-    let signature = isEffectivelyGeneric ? "(JJ)L\(jniClassName);" : "(J)L\(jniClassName);"
+    let signature = if isEffectivelyGeneric {
+      "(JJLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+    } else {
+      "(JLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+    }
 
     printer.printBraceBlock("private enum \(cacheName)") { printer in
       printer.print(
@@ -921,15 +925,18 @@ extension JNISwift2JavaGenerator {
         printer.print("let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)")
         printer.print("selfPointer$.initialize(to: self)")
         printer.print("let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))")
+        var args = [
+          ("j", "selfPointerBits$.getJNIValue(in: environment)")
+        ]
         if isEffectivelyGeneric {
           printer.print("let selfTypePointer$ = unsafeBitCast(Self.self, to: UnsafeRawPointer.self)")
           printer.print("let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))")
-          printer.print("var args = [jvalue(), jvalue()]")
-          printer.print("args[0].j = selfPointerBits$.getJNIValue(in: environment)")
-          printer.print("args[1].j = selfTypePointerBits$.getJNIValue(in: environment)")
-        } else {
-          printer.print("var args = [jvalue()]")
-          printer.print("args[0].j = selfPointerBits$.getJNIValue(in: environment)")
+          args.append(("j", "selfTypePointerBits$.getJNIValue(in: environment)"))
+        }
+        args.append(("l", "JavaSwiftArena.defaultAutoArena.javaThis"))
+        printer.print("var args = [\(Array(repeating: "jvalue()", count: args.count).joined(separator: ", "))]")
+        for (i, (jvalueField, expr)) in args.enumerated() {
+          printer.print("args[\(i)].\(jvalueField) = \(expr)")
         }
         printer.print(
           """
