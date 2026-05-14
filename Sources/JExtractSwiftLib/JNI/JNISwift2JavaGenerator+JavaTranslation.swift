@@ -1458,7 +1458,14 @@ extension JNISwift2JavaGenerator {
       genericParameters: [SwiftGenericParameterDeclaration],
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> JavaType {
-      try translateGenericTypeParameter(
+      switch swiftType {
+      case let .tuple(elements):
+        if elements.count != 1 { throw JavaTranslationError.unsupportedSwiftType(swiftType) }
+      default:
+        break
+      }
+
+      return try translateGenericTypeParameter(
         swiftType,
         genericParameters: genericParameters,
         genericRequirements: genericRequirements,
