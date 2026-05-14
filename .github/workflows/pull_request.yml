@@ -93,8 +93,8 @@ jobs:
       - name: Gradle :SwiftKitFFM:check
         run: ./gradlew :SwiftKitFFM:check --debug
 
-  benchmark-java:
-    name: Benchmark (JMH) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
+  benchmark:
+    name: Benchmark (JMH + Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -112,24 +112,6 @@ jobs:
         uses: ./.github/actions/prepare_env
       - name: Gradle compile JMH benchmarks
         run: ./gradlew compileJmh --info
-
-  benchmark-swift:
-    name: Benchmark (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        swift_version: ['6.3']
-        os_version: ['jammy']
-        jdk_vendor: ['corretto']
-    container:
-      image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
-    env:
-      SWIFT_JAVA_VERBOSE: true
-    steps:
-      - uses: actions/checkout@v6
-      - name: Prepare CI Environment
-        uses: ./.github/actions/prepare_env
       - name: Install jemalloc
         run: apt-get update && apt-get install -y libjemalloc-dev
       - name: Swift Benchmarks
@@ -221,7 +203,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.1.3', '6.2', '6.3', 'nightly']
+        swift_version: ['6.1.3', '6.3', 'nightly']
         os_version: ['jammy']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
@@ -246,10 +228,12 @@ jobs:
   verify-samples-macos:
     name: Sample ${{ matrix.sample_app }} (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
     runs-on: [self-hosted, macos, tahoe, ARM64]
+    # Nightly builds are best-effort
+    continue-on-error: ${{ contains(matrix.swift_version, 'nightly') }}
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.2', '6.3']  # no nightly testing on macOS
+        swift_version: ['6.3', 'nightly']
         os_version: ['macos']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
