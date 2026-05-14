@@ -20,7 +20,7 @@ import SwiftJavaJNICore
 /// A type that can be boxed into and unboxed from a Java object via JNI.
 /// This is used for dictionary keys and values that need to cross the JNI boundary
 /// as boxed Java objects (e.g. Long, Double, Boolean, String).
-public protocol JavaBoxable {
+public protocol JavaBoxable: JavaValue {
   /// Convert this Swift value to a boxed Java object.
   func toJavaObject(in environment: JNIEnvironment) -> jobject?
 
@@ -331,9 +331,11 @@ class AnySwiftDictionaryBox {
 /// Generic subclass that wraps a concrete `[K: V]` Swift dictionary.
 final class SwiftDictionaryBox<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: AnySwiftDictionaryBox
 where KeyBridge.SwiftType: Hashable {
-  let dictionary: [KeyBridge.SwiftType: ValueBridge.SwiftType]
+  typealias Key = KeyBridge.SwiftType
+  typealias Value = ValueBridge.SwiftType
+  let dictionary: [Key: Value]
 
-  init(_ dictionary: [KeyBridge.SwiftType: ValueBridge.SwiftType]) {
+  init(_ dictionary: [Key: Value]) {
     self.dictionary = dictionary
   }
 
@@ -402,9 +404,10 @@ class AnySwiftSetBox {
 
 /// Generic subclass that wraps a concrete `Set<E>` Swift set.
 final class SwiftSetBox<ElementBridge: JavaTypeBridge>: AnySwiftSetBox where ElementBridge.SwiftType: Hashable {
-  let set: Set<ElementBridge.SwiftType>
+  typealias Element = ElementBridge.SwiftType
+  let set: Set<Element>
 
-  init(_ set: Set<ElementBridge.SwiftType>) {
+  init(_ set: Set<Element>) {
     self.set = set
   }
 

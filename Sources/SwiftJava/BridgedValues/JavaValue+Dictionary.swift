@@ -17,7 +17,7 @@ import SwiftJavaJNICore
 // ==== -----------------------------------------------------------------------
 // MARK: Dictionary extension for JNI bridging
 
-extension Dictionary where Key: Hashable {
+extension Dictionary {
   /// Box this dictionary and return a jlong pointer for passing across JNI.
   /// The dictionary is retained on the Swift heap; Java holds the pointer.
   public func dictionaryGetJNIValue<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>(
@@ -34,34 +34,12 @@ extension Dictionary where Key: Hashable {
   /// Reconstruct a Swift dictionary from a JNI jlong pointer to a SwiftDictionaryBox.
   public init<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>(
     fromJNI value: jlong,
-    in environment: JNIEnvironment,
+      in environment: JNIEnvironment,
     keyBridge: KeyBridge.Type,
     valueBridge: ValueBridge.Type
   ) where KeyBridge.SwiftType == Key, ValueBridge.SwiftType == Value {
     let rawPointer = UnsafeRawPointer(bitPattern: Int(value))!
     let box = Unmanaged<SwiftDictionaryBox<KeyBridge, ValueBridge>>.fromOpaque(rawPointer).takeUnretainedValue()
     self = box.dictionary
-  }
-}
-
-extension Dictionary where Key: JavaBoxable & Hashable, Value: JavaBoxable {
-  /// Box this dictionary and return a jlong pointer for passing across JNI.
-  /// The dictionary is retained on the Swift heap; Java holds the pointer.
-  public func dictionaryGetJNIValue(in environment: JNIEnvironment) -> jlong {
-    dictionaryGetJNIValue(
-      in: environment,
-      keyBridge: JavaBoxableBridge<Key>.self,
-      valueBridge: JavaBoxableBridge<Value>.self
-    )
-  }
-
-  /// Reconstruct a Swift dictionary from a JNI jlong pointer to a SwiftDictionaryBox.
-  public init(fromJNI value: jlong, in environment: JNIEnvironment) {
-    self.init(
-      fromJNI: value,
-      in: environment,
-      keyBridge: JavaBoxableBridge<Key>.self,
-      valueBridge: JavaBoxableBridge<Value>.self
-    )
   }
 }

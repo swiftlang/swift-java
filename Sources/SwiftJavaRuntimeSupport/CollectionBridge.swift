@@ -83,31 +83,3 @@ public enum JavaSetBridge<ElementBridge: JavaTypeBridge>: JavaTypeBridge where E
     return SwiftType(fromJNI: selfPointer, in: environment, elementBridge: ElementBridge.self)
   }
 }
-
-extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: JavaBoxable {
-  public static var javaBoxClass: jclass {
-    _JNIMethodIDCache.SwiftDictionaryMap.class
-  }
-
-  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-    JavaDictionaryBridge<JavaBoxableBridge<Key>, JavaBoxableBridge<Value>>.toJavaObject(self, in: environment)
-  }
-
-  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
-    JavaDictionaryBridge<JavaBoxableBridge<Key>, JavaBoxableBridge<Value>>.fromJavaObject(obj, in: environment)
-  }
-}
-
-extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
-  public static var javaBoxClass: jclass {
-    _JNIMethodIDCache.SwiftSet.class
-  }
-
-  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-    JavaSetBridge<JavaBoxableBridge<Element>>.toJavaObject(self, in: environment)
-  }
-
-  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
-    JavaSetBridge<JavaBoxableBridge<Element>>.fromJavaObject(obj, in: environment)
-  }
-}
