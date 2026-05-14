@@ -485,18 +485,30 @@ extension JNISwift2JavaGenerator {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)
             }
 
+            let indirectStepType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
+              for: knownType,
+              from: knownTypes
+            )
+            let indirectCheck = JNIJavaTypeTranslator.checkStep(for: knownType, from: knownTypes)
+            let valueConversion: NativeSwiftConversionStep =
+              if indirectStepType != nil {
+                .labelessAssignmentOfVariable(.constant(parameterName), swiftType: swiftType)
+              } else {
+                .initFromJNI(.placeholder, swiftType: swiftType)
+              }
+
             return NativeParameter(
               parameters: [
                 JavaParameter(name: discriminatorName, type: .byte),
                 JavaParameter(name: valueName, type: javaType),
               ],
               conversion: .optionalLowering(
-                .initFromJNI(.placeholder, swiftType: swiftType),
+                valueConversion,
                 discriminatorName: discriminatorName,
                 valueName: valueName
               ),
-              indirectConversion: nil,
-              conversionCheck: nil
+              indirectConversion: indirectStepType.flatMap { .initFromJNI(.constant(valueName), swiftType: $0) },
+              conversionCheck: indirectCheck
             )
           }
         }
@@ -568,11 +580,20 @@ extension JNISwift2JavaGenerator {
               )
             } else {
               // Use indirect byte array to store discriminator
+              let valueConversion: NativeSwiftConversionStep =
+                if let indirectReturnType = JNIJavaTypeTranslator.indirectConversionStepSwiftType(
+                  for: knownType,
+                  from: knownTypes
+                ) {
+                  .getJNIValue(.labelessInitializer(.placeholder, swiftType: indirectReturnType))
+                } else {
+                  .getJNIValue(.placeholder)
+                }
 
               return NativeResult(
                 javaType: javaType,
                 conversion: .optionalRaisingIndirectReturn(
-                  .getJNIValue(.placeholder),
+                  valueConversion,
                   resultName: "\(resultName)$",
                   returnType: javaType,
                   discriminatorParameterName: discriminatorName
