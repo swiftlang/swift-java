@@ -230,10 +230,14 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(name: parameterName, type: .long)
           ],
-          conversion: .pointee(.extractSwiftValue(.placeholder, swiftType: type)),
+          conversion: .pointee(
+            .asyncTaskCapture(
+              .extractSwiftValue(.placeholder, swiftType: type),
+              name: NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)
+            )
+          ),
           indirectConversion: nil,
-          conversionCheck: nil,
-          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
+          conversionCheck: nil
         )
 
       case .tuple([]):
@@ -328,10 +332,12 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(name: parameterName, type: .long)
           ],
-          conversion: .extractMetatypeValue(.placeholder),
+          conversion: .asyncTaskCapture(
+            .extractMetatypeValue(.placeholder),
+            name: NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)
+          ),
           indirectConversion: nil,
-          conversionCheck: nil,
-          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
+          conversionCheck: nil
         )
 
       case .tuple(let elements) where elements.count == 1:
@@ -369,7 +375,6 @@ extension JNISwift2JavaGenerator {
     ) throws -> NativeParameter {
       var allJNIParameters: [JavaParameter] = []
       var elementConversions: [(label: String?, conversion: NativeSwiftConversionStep)] = []
-      var asyncTaskCaptureNames: [String] = []
 
       for (idx, element) in elements.enumerated() {
         let elementParamName = "\(parameterName)_\(idx)"
@@ -383,15 +388,13 @@ extension JNISwift2JavaGenerator {
         )
         allJNIParameters.append(contentsOf: elementNative.parameters)
         elementConversions.append((label: element.label, conversion: elementNative.conversion))
-        asyncTaskCaptureNames.append(contentsOf: elementNative.asyncTaskCaptureNames)
       }
 
       return NativeParameter(
         parameters: allJNIParameters,
         conversion: .tupleConstruct(elements: elementConversions),
         indirectConversion: nil,
-        conversionCheck: nil,
-        asyncTaskCaptureNames: asyncTaskCaptureNames
+        conversionCheck: nil
       )
     }
 
@@ -446,19 +449,21 @@ extension JNISwift2JavaGenerator {
         parameters: [
           JavaParameter(name: parameterName, type: .javaLangObject)
         ],
-        conversion: .interfaceToSwiftObject(
-          .placeholder,
-          swiftWrapperClassName: JNISwift2JavaGenerator.protocolParameterWrapperClassName(
-            methodName: methodName,
-            parameterName: parameterName,
-            parentName: parentName
+        conversion: .asyncTaskCapture(
+          .interfaceToSwiftObject(
+            .placeholder,
+            swiftWrapperClassName: JNISwift2JavaGenerator.protocolParameterWrapperClassName(
+              methodName: methodName,
+              parameterName: parameterName,
+              parentName: parentName
+            ),
+            protocolTypes: protocolTypes,
+            allowsJavaImplementations: allowsJavaImplementations
           ),
-          protocolTypes: protocolTypes,
-          allowsJavaImplementations: allowsJavaImplementations
+          name: NativeSwiftConversionStep.swiftObjectName(for: parameterName)
         ),
         indirectConversion: nil,
-        conversionCheck: nil,
-        asyncTaskCaptureNames: [NativeSwiftConversionStep.swiftObjectName(for: parameterName)]
+        conversionCheck: nil
       )
     }
 
@@ -527,16 +532,18 @@ extension JNISwift2JavaGenerator {
           parameters: [JavaParameter(name: parameterName, type: .long)],
           conversion: .pointee(
             .optionalChain(
-              .extractSwiftValue(
-                .placeholder,
-                swiftType: swiftType,
-                allowNil: true
+              .asyncTaskCapture(
+                .extractSwiftValue(
+                  .placeholder,
+                  swiftType: swiftType,
+                  allowNil: true
+                ),
+                name: NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)
               )
             )
           ),
           indirectConversion: nil,
-          conversionCheck: nil,
-          asyncTaskCaptureNames: [NativeSwiftConversionStep.extractedSwiftValueName(for: parameterName)]
+          conversionCheck: nil
         )
 
       default:
@@ -1079,24 +1086,6 @@ extension JNISwift2JavaGenerator {
 
     /// Represents check operations executed in if/guard conditional block for check during conversion
     let conversionCheck: NativeSwiftConversionCheck?
-
-    /// Temporary values created by this parameter conversion that must be moved
-    /// into async task bodies through an unchecked Sendable wrapper.
-    let asyncTaskCaptureNames: [String]
-
-    init(
-      parameters: [JavaParameter],
-      conversion: NativeSwiftConversionStep,
-      indirectConversion: NativeSwiftConversionStep?,
-      conversionCheck: NativeSwiftConversionCheck?,
-      asyncTaskCaptureNames: [String] = []
-    ) {
-      self.parameters = parameters
-      self.conversion = conversion
-      self.indirectConversion = indirectConversion
-      self.conversionCheck = conversionCheck
-      self.asyncTaskCaptureNames = asyncTaskCaptureNames
-    }
   }
 
   struct NativeResult {
@@ -1244,6 +1233,10 @@ extension JNISwift2JavaGenerator {
     /// Destructures a Swift tuple result and writes each element to an out-parameter.
     indirect case tupleDestructure(elements: [(index: Int, label: String?, conversion: NativeSwiftConversionStep, outParamName: String, javaType: JavaType)])
 
+    /// Marks a temporary value produced by the inner conversion as captured by
+    /// the async task body.
+    indirect case asyncTaskCapture(NativeSwiftConversionStep, name: String)
+
     static func extractedSwiftValueName(for name: String) -> String {
       "\(name)$"
     }
@@ -1261,6 +1254,22 @@ extension JNISwift2JavaGenerator {
         return .getJNILocalRefValue(inner)
       default:
         return self
+      }
+    }
+
+    var asyncTaskCaptureNames: [String] {
+      switch self {
+      case .asyncTaskCapture(let inner, let name):
+        return [name] + inner.asyncTaskCaptureNames
+
+      case .pointee(let inner), .optionalChain(let inner):
+        return inner.asyncTaskCaptureNames
+
+      case .tupleConstruct(let elements):
+        return elements.flatMap { $0.conversion.asyncTaskCaptureNames }
+
+      default:
+        return []
       }
     }
 
@@ -1670,10 +1679,10 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfParameter?.asyncTaskCaptureNames ?? [])
-        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfTypeParameter?.asyncTaskCaptureNames ?? [])
+        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfParameter?.conversion.asyncTaskCaptureNames ?? [])
+        appendAsyncTaskCaptureNames(nativeFunctionSignature.selfTypeParameter?.conversion.asyncTaskCaptureNames ?? [])
         for parameter in nativeFunctionSignature.parameters {
-          appendAsyncTaskCaptureNames(parameter.asyncTaskCaptureNames)
+          appendAsyncTaskCaptureNames(parameter.conversion.asyncTaskCaptureNames)
         }
 
         printer.print(
@@ -1884,6 +1893,9 @@ extension JNISwift2JavaGenerator {
           }
         }
         return ""
+
+      case .asyncTaskCapture(let inner, _):
+        return inner.render(&printer, placeholder)
       }
     }
   }
