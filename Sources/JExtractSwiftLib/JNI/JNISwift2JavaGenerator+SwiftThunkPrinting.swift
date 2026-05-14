@@ -290,8 +290,6 @@ extension JNISwift2JavaGenerator {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
-
-    printCollectionJavaBoxableExtensions(&printer)
   }
 
   private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
@@ -343,6 +341,14 @@ extension JNISwift2JavaGenerator {
 
     for variable in type.variables {
       printSwiftFunctionThunk(&printer, variable)
+      printer.println()
+    }
+
+    let isNeverLike = type.swiftNominal.kind == .enum && type.cases.isEmpty // Never types cannot be values, so ignore them
+    if !type.isSpecialization && !isNeverLike {
+      printJNICache(&printer, type)
+      printer.println()
+      printNominalJavaBoxableExtension(&printer, type)
       printer.println()
     }
 
@@ -763,121 +769,8 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printCollectionJavaBoxableExtensions(_ printer: inout CodePrinter) {
-    let boxableTypes = collectCollectionJavaBoxableTypes()
-    guard !boxableTypes.isEmpty else {
-      return
-    }
-
-    for nominalType in boxableTypes {
-      printNominalJavaBoxableCache(&printer, nominalType)
-      printer.println()
-      printNominalJavaBoxableExtension(&printer, nominalType)
-      printer.println()
-    }
-  }
-
-  private func collectCollectionJavaBoxableTypes() -> [ImportedNominalType] {
-    var nominalTypes: Set<ImportedNominalType> = []
-
-    func collect(_ type: SwiftType, insideCollectionElement: Bool = false) {
-      switch type {
-      case .nominal(let nominalType):
-        if let knownType = nominalType.asKnownType {
-          switch knownType {
-          case .dictionary(let keyType, let valueType):
-            collect(keyType, insideCollectionElement: true)
-            collect(valueType, insideCollectionElement: true)
-          case .set(let elementType):
-            collect(elementType, insideCollectionElement: true)
-          case .optional(let wrappedType):
-            collect(wrappedType, insideCollectionElement: insideCollectionElement)
-            if insideCollectionElement {
-              logger.warning("\(knownType) is not boxable supported yet!")
-            }
-          case .array(let elementType):
-            collect(elementType, insideCollectionElement: false)
-            if insideCollectionElement {
-              logger.warning("\(knownType) is not boxable supported yet!")
-            }
-          case .foundationData, .essentialsData, .foundationDate, .essentialsDate, .foundationUUID, .essentialsUUID:
-            if insideCollectionElement {
-              logger.warning("\(knownType) is not boxable supported yet!")
-            }
-          default:
-            // Other known types should be treatable as JavaBoxable.
-            break
-          }
-          return
-        }
-
-        if nominalType.isSwiftJavaWrapper {
-          return
-        }
-
-        if insideCollectionElement {
-          guard let importedType = analysis.importedTypes[nominalType.nominalTypeDecl.qualifiedName] else {
-            return
-          }
-          nominalTypes.insert(importedType)
-        }
-
-      case .tuple(let elements):
-        for element in elements {
-          collect(element.type, insideCollectionElement: false)
-        }
-
-      case .existential(let innerType), .opaque(let innerType), .metatype(let innerType):
-        collect(innerType, insideCollectionElement: false)
-
-      case .function(let functionType):
-        for parameter in functionType.parameters {
-          collect(parameter.type, insideCollectionElement: false)
-        }
-        collect(functionType.resultType, insideCollectionElement: false)
-
-      case .composite(let innerTypes):
-        for innerType in innerTypes {
-          collect(innerType, insideCollectionElement: false)
-        }
-
-      case .genericParameter:
-        break
-      }
-    }
-
-    for decl in analysis.importedGlobalFuncs {
-      for parameter in decl.functionSignature.parameters {
-        collect(parameter.type)
-      }
-      collect(decl.functionSignature.result.type)
-    }
-
-    for decl in analysis.importedGlobalVariables {
-      for parameter in decl.functionSignature.parameters {
-        collect(parameter.type)
-      }
-      collect(decl.functionSignature.result.type)
-    }
-
-    for importedType in analysis.importedTypes.values {
-      for decl in importedType.initializers + importedType.methods + importedType.variables {
-        for parameter in decl.functionSignature.parameters {
-          collect(parameter.type)
-        }
-        collect(decl.functionSignature.result.type)
-      }
-    }
-
-    return nominalTypes.sorted { $0.effectiveSwiftTypeName < $1.effectiveSwiftTypeName }
-  }
-
-  private func nominalJavaBoxingCacheName(for type: ImportedNominalType) -> String {
-    "_SwiftJavaBoxing_\(type.effectiveJavaTypeName.fullFlatName)"
-  }
-
-  private func printNominalJavaBoxableCache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let cacheName = nominalJavaBoxingCacheName(for: type)
+  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let cacheName = JNICaching.cacheName(for: type)
     let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
     let signature = if isEffectivelyGeneric {
@@ -913,7 +806,7 @@ extension JNISwift2JavaGenerator {
 
   private func printNominalJavaBoxableExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let swiftTypeName = type.effectiveSwiftTypeName
-    let cacheName = nominalJavaBoxingCacheName(for: type)
+    let cacheName = JNICaching.cacheName(for: type)
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
 
     printer.printBraceBlock("extension \(swiftTypeName): JavaBoxable") { printer in
@@ -922,14 +815,14 @@ extension JNISwift2JavaGenerator {
       }
       printer.println()
       printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
-        printer.print("let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)")
+        printer.print("let selfPointer$ = UnsafeMutablePointer<\(swiftTypeName)>.allocate(capacity: 1)")
         printer.print("selfPointer$.initialize(to: self)")
         printer.print("let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))")
         var args = [
           ("j", "selfPointerBits$.getJNIValue(in: environment)")
         ]
         if isEffectivelyGeneric {
-          printer.print("let selfTypePointer$ = unsafeBitCast(Self.self, to: UnsafeRawPointer.self)")
+          printer.print("let selfTypePointer$ = unsafeBitCast(\(swiftTypeName).self, to: UnsafeRawPointer.self)")
           printer.print("let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))")
           args.append(("j", "selfTypePointerBits$.getJNIValue(in: environment)"))
         }
@@ -950,7 +843,7 @@ extension JNISwift2JavaGenerator {
         )
       }
       printer.println()
-      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self") { printer in
+      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> \(swiftTypeName)") { printer in
         printer.print(
           """
           guard let obj else {
@@ -963,7 +856,7 @@ extension JNISwift2JavaGenerator {
             nil
           )
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-          guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
+          guard let valuePointer$ = UnsafeMutablePointer<\(swiftTypeName)>(bitPattern: selfPointerBits$) else {
             fatalError("\(swiftTypeName).fromJavaObject received a null Swift memory address")
           }
           return valuePointer$.pointee
