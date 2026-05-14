@@ -21,8 +21,20 @@ enum JNICaching {
     cacheName(for: type.nominalTypeDecl.qualifiedTypeName)
   }
 
+  static func bridgeName(for type: ImportedNominalType) -> String {
+    bridgeName(for: type.swiftNominal.qualifiedTypeName)
+  }
+
+  static func bridgeName(for type: SwiftNominalType) -> String {
+    bridgeName(for: type.nominalTypeDecl.qualifiedTypeName)
+  }
+
   private static func cacheName(for typeName: SwiftQualifiedTypeName) -> String {
     "_JNI_\(typeName.fullFlatName)"
+  }
+
+  private static func bridgeName(for typeName: SwiftQualifiedTypeName) -> String {
+    "_SwiftJavaBridge_\(typeName.fullFlatName)"
   }
 
   static func cacheMemberName(for enumCase: ImportedEnumCase) -> String {

@@ -49,7 +49,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__")
         public func Java_com_example_swift_SwiftModule__00024f__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          return SwiftModule.f().dictionaryGetJNIValue(in: environment)
+          return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)
         }
         """
       ]
@@ -87,7 +87,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) {
-          SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment))
+          SwiftModule.f(dict: [String: Int64].init(fromJNI: dict, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self))
         }
         """
       ]
@@ -125,7 +125,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
-          return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
+          return SwiftModule.f(dict: [String: Int64].init(fromJNI: dict, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)).dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)
         }
         """
       ]
@@ -163,7 +163,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong) -> jlong {
-          return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment)).dictionaryGetJNIValue(in: environment)
+          return SwiftModule.f(dict: [String: Int64].init(fromJNI: dict, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)).dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)
         }
         """
       ]
@@ -275,7 +275,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JJ")
         public func Java_com_example_swift_SwiftModule__00024f__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, a: jlong, b: jlong) {
-          SwiftModule.f(a: [String: Int64](fromJNI: a, in: environment), b: [String: Bool](fromJNI: b, in: environment))
+          SwiftModule.f(a: [String: Int64].init(fromJNI: a, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self), b: [String: Bool].init(fromJNI: b, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Bool>.self))
         }
         """
       ]
@@ -316,7 +316,7 @@ struct JNIDictionaryTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2J")
         public func Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, dict: jlong, key: jstring?, value: jlong) -> jlong {
-          return SwiftModule.f(dict: [String: Int64](fromJNI: dict, in: environment), key: String(fromJNI: key, in: environment), value: Int64(fromJNI: value, in: environment)).dictionaryGetJNIValue(in: environment)
+          return SwiftModule.f(dict: [String: Int64].init(fromJNI: dict, in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self), key: String(fromJNI: key, in: environment), value: Int64(fromJNI: value, in: environment)).dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<String>.self, valueBridge: JavaBoxableBridge<Int64>.self)
         }
         """
       ]

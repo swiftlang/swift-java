@@ -17,8 +17,8 @@ import Testing
 
 @Suite
 struct JNICollectionBoxableTests {
-  @Test("JNI generates JavaBoxable for dictionary element types")
-  func generatesJavaBoxableConformance() throws {
+  @Test("JNI generates explicit bridges for dictionary element types")
+  func generatesBridgeDeclaration() throws {
     try assertOutput(
       input: """
         public struct ReefFish: Hashable {}
@@ -29,30 +29,35 @@ struct JNICollectionBoxableTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        private enum _SwiftJavaBoxing_ReefFish {
+        private enum _JNI_ReefFish {
           private static let wrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
             name: "wrapMemoryAddressUnsafe",
-            signature: "(J)Lcom/example/swift/ReefFish;",
+            signature: "(JLorg/swift/swiftkit/core/SwiftArena;)Lcom/example/swift/ReefFish;",
             isStatic: true
           )
         """,
         """
-        extension ReefFish: JavaBoxable {
-          public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-            let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)
-            selfPointer$.initialize(to: self)
+        enum _SwiftJavaBridge_ReefFish: JavaClassBackedTypeBridge {
+          typealias SwiftType = ReefFish
+          static var javaClass: jclass {
+            _JNI_ReefFish.javaClass
+          }
+          static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
+            let selfPointer$ = UnsafeMutablePointer<SwiftType>.allocate(capacity: 1)
+            selfPointer$.initialize(to: value)
             let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
-            var args = [jvalue()]
+            var args = [jvalue(), jvalue()]
             args[0].j = selfPointerBits$.getJNIValue(in: environment)
+            args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
             return environment.interface.CallStaticObjectMethodA(
               environment,
-              _SwiftJavaBoxing_ReefFish.javaClass,
-              _SwiftJavaBoxing_ReefFish.wrapMemoryAddressUnsafe,
+              _JNI_ReefFish.javaClass,
+              _JNI_ReefFish.wrapMemoryAddressUnsafe,
               &args
             )
           }
           ...
-          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+          static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType {
             guard let obj else {
               fatalError("ReefFish.fromJavaObject received a null Java object")
             }
@@ -63,20 +68,23 @@ struct JNICollectionBoxableTests {
               nil
             )
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-            guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
+            guard let valuePointer$ = UnsafeMutablePointer<SwiftType>(bitPattern: selfPointerBits$) else {
               fatalError("ReefFish.fromJavaObject received a null Swift memory address")
             }
             return valuePointer$.pointee
           }
         }
         """,
+        """
+        return SwiftModule.f(dict: [Int: ReefFish].init(fromJNI: dict, in: environment, keyBridge: JavaBoxableBridge<Int>.self, valueBridge: _SwiftJavaBridge_ReefFish.self)).dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<Int>.self, valueBridge: _SwiftJavaBridge_ReefFish.self)
+        """,
       ]
     )
   }
 
 
-  @Test("JNI generates JavaBoxable for generic dictionary keys")
-  func generatesJavaBoxableConformanceForGenericType() throws {
+  @Test("JNI generates explicit bridges for generic dictionary keys")
+  func generatesBridgeDeclarationForGenericType() throws {
     try assertOutput(
       input: """
         public struct MyID<T>: Hashable {}
@@ -87,35 +95,40 @@ struct JNICollectionBoxableTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        private enum _SwiftJavaBoxing_MyID {
+        private enum _JNI_MyID {
           private static let wrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
             name: "wrapMemoryAddressUnsafe",
-            signature: "(JJ)Lcom/example/swift/MyID;",
+            signature: "(JJLorg/swift/swiftkit/core/SwiftArena;)Lcom/example/swift/MyID;",
             isStatic: true
           )
         """,
         """
-        extension MyID: JavaBoxable {
-          public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-            let selfPointer$ = UnsafeMutablePointer<Self>.allocate(capacity: 1)
-            selfPointer$.initialize(to: self)
+        enum _SwiftJavaBridge_MyID<T>: JavaClassBackedTypeBridge {
+          typealias SwiftType = MyID<T>
+          static var javaClass: jclass {
+            _JNI_MyID.javaClass
+          }
+          static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
+            let selfPointer$ = UnsafeMutablePointer<SwiftType>.allocate(capacity: 1)
+            selfPointer$.initialize(to: value)
             let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
-            let selfTypePointer$ = unsafeBitCast(Self.self, to: UnsafeRawPointer.self)
+            let selfTypePointer$ = unsafeBitCast(SwiftType.self, to: UnsafeRawPointer.self)
             let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))
-            var args = [jvalue(), jvalue()]
+            var args = [jvalue(), jvalue(), jvalue()]
             args[0].j = selfPointerBits$.getJNIValue(in: environment)
             args[1].j = selfTypePointerBits$.getJNIValue(in: environment)
+            args[2].l = JavaSwiftArena.defaultAutoArena.javaThis
             return environment.interface.CallStaticObjectMethodA(
               environment,
-              _SwiftJavaBoxing_MyID.javaClass,
-              _SwiftJavaBoxing_MyID.wrapMemoryAddressUnsafe,
+              _JNI_MyID.javaClass,
+              _JNI_MyID.wrapMemoryAddressUnsafe,
               &args
             )
           }
           ...
-          public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+          static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType {
             guard let obj else {
-              fatalError("MyID.fromJavaObject received a null Java object")
+              fatalError("MyID<T>.fromJavaObject received a null Java object")
             }
             let selfPointer$ = environment.interface.CallLongMethodA(
               environment,
@@ -124,12 +137,15 @@ struct JNICollectionBoxableTests {
               nil
             )
             let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-            guard let valuePointer$ = UnsafeMutablePointer<Self>(bitPattern: selfPointerBits$) else {
-              fatalError("MyID.fromJavaObject received a null Swift memory address")
+            guard let valuePointer$ = UnsafeMutablePointer<SwiftType>(bitPattern: selfPointerBits$) else {
+              fatalError("MyID<T>.fromJavaObject received a null Swift memory address")
             }
             return valuePointer$.pointee
           }
         }
+        """,
+        """
+        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _SwiftJavaBridge_MyID<Int>.self, valueBridge: JavaBoxableBridge<String>.self)
         """,
       ]
     )

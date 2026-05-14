@@ -14,13 +14,16 @@
 
 import SwiftJava
 
-extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: JavaBoxable {
-  public static var javaBoxClass: jclass {
+public enum JavaDictionaryBridge<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: JavaClassBackedTypeBridge
+where KeyBridge.SwiftType: Hashable {
+  public typealias SwiftType = [KeyBridge.SwiftType: ValueBridge.SwiftType]
+
+  public static var javaClass: jclass {
     _JNIMethodIDCache.SwiftDictionaryMap.class
   }
-  
-  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-    let selfPointer = self.dictionaryGetJNIValue(in: environment)
+
+  public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
+    let selfPointer = value.dictionaryGetJNIValue(in: environment, keyBridge: KeyBridge.self, valueBridge: ValueBridge.self)
     var args = [jvalue(), jvalue()]
     args[0].j = selfPointer
     args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
@@ -32,7 +35,7 @@ extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: Java
     )
   }
 
-  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType {
     guard let obj else {
       fatalError("Dictionary.fromJavaObject received a null Java object")
     }
@@ -42,17 +45,19 @@ extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: Java
       _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
       nil
     )
-    return Self(fromJNI: selfPointer, in: environment)
+    return SwiftType(fromJNI: selfPointer, in: environment, keyBridge: KeyBridge.self, valueBridge: ValueBridge.self)
   }
 }
 
-extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
-  public static var javaBoxClass: jclass {
+public enum JavaSetBridge<ElementBridge: JavaTypeBridge>: JavaClassBackedTypeBridge where ElementBridge.SwiftType: Hashable {
+  public typealias SwiftType = Set<ElementBridge.SwiftType>
+
+  public static var javaClass: jclass {
     _JNIMethodIDCache.SwiftSet.class
   }
 
-  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
-    let selfPointer = self.setGetJNIValue(in: environment)
+  public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
+    let selfPointer = value.setGetJNIValue(in: environment, elementBridge: ElementBridge.self)
     var args = [jvalue(), jvalue()]
     args[0].j = selfPointer
     args[1].l = JavaSwiftArena.defaultAutoArena.javaThis
@@ -64,7 +69,7 @@ extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
     )
   }
 
-  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType {
     guard let obj else {
       fatalError("Set.fromJavaObject received a null Java object")
     }
@@ -74,6 +79,34 @@ extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
       _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
       nil
     )
-    return Self(fromJNI: selfPointer, in: environment)
+    return SwiftType(fromJNI: selfPointer, in: environment, elementBridge: ElementBridge.self)
+  }
+}
+
+extension Dictionary: JavaBoxable where Key: JavaBoxable & Hashable, Value: JavaBoxable {
+  public static var javaBoxClass: jclass {
+    _JNIMethodIDCache.SwiftDictionaryMap.class
+  }
+
+  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
+    JavaDictionaryBridge<JavaBoxableBridge<Key>, JavaBoxableBridge<Value>>.toJavaObject(self, in: environment)
+  }
+
+  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+    JavaDictionaryBridge<JavaBoxableBridge<Key>, JavaBoxableBridge<Value>>.fromJavaObject(obj, in: environment)
+  }
+}
+
+extension Set: JavaBoxable where Element: JavaBoxable & Hashable {
+  public static var javaBoxClass: jclass {
+    _JNIMethodIDCache.SwiftSet.class
+  }
+
+  public func toJavaObject(in environment: JNIEnvironment) -> jobject? {
+    JavaSetBridge<JavaBoxableBridge<Element>>.toJavaObject(self, in: environment)
+  }
+
+  public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Self {
+    JavaSetBridge<JavaBoxableBridge<Element>>.fromJavaObject(obj, in: environment)
   }
 }

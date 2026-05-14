@@ -348,7 +348,7 @@ extension JNISwift2JavaGenerator {
     if !type.isSpecialization && !isNeverLike {
       printJNICache(&printer, type)
       printer.println()
-      printNominalJavaBoxableExtension(&printer, type)
+      printNominalJavaBridge(&printer, type)
       printer.println()
     }
 
@@ -804,25 +804,39 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printNominalJavaBoxableExtension(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let swiftTypeName = type.effectiveSwiftTypeName
+  private func printNominalJavaBridge(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let bridgeName = JNICaching.bridgeName(for: type)
     let cacheName = JNICaching.cacheName(for: type)
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
+    let bridgeGenericClause =
+      if type.swiftNominal.genericParameters.isEmpty {
+        ""
+      } else {
+        "<\(type.swiftNominal.genericParameters.map { $0.syntax.trimmedDescription }.joined(separator: ", "))>"
+      }
+    let bridgedSwiftType =
+      if type.genericParameterNames.isEmpty {
+        type.effectiveSwiftTypeName
+      } else {
+        "\(type.baseTypeName)<\(type.genericParameterNames.joined(separator: ", "))>"
+      }
 
-    printer.printBraceBlock("extension \(swiftTypeName): JavaBoxable") { printer in
-      printer.printBraceBlock("public static var javaBoxClass: jclass") { printer in
+    printer.printBraceBlock("enum \(bridgeName)\(bridgeGenericClause): JavaClassBackedTypeBridge") { printer in
+      printer.print("typealias SwiftType = \(bridgedSwiftType)")
+      printer.println()
+      printer.printBraceBlock("static var javaClass: jclass") { printer in
         printer.print("\(cacheName).javaClass")
       }
       printer.println()
-      printer.printBraceBlock("public func toJavaObject(in environment: JNIEnvironment) -> jobject?") { printer in
-        printer.print("let selfPointer$ = UnsafeMutablePointer<\(swiftTypeName)>.allocate(capacity: 1)")
-        printer.print("selfPointer$.initialize(to: self)")
+      printer.printBraceBlock("static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject?") { printer in
+        printer.print("let selfPointer$ = UnsafeMutablePointer<SwiftType>.allocate(capacity: 1)")
+        printer.print("selfPointer$.initialize(to: value)")
         printer.print("let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))")
         var args = [
           ("j", "selfPointerBits$.getJNIValue(in: environment)")
         ]
         if isEffectivelyGeneric {
-          printer.print("let selfTypePointer$ = unsafeBitCast(\(swiftTypeName).self, to: UnsafeRawPointer.self)")
+          printer.print("let selfTypePointer$ = unsafeBitCast(SwiftType.self, to: UnsafeRawPointer.self)")
           printer.print("let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))")
           args.append(("j", "selfTypePointerBits$.getJNIValue(in: environment)"))
         }
@@ -843,11 +857,11 @@ extension JNISwift2JavaGenerator {
         )
       }
       printer.println()
-      printer.printBraceBlock("public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> \(swiftTypeName)") { printer in
+      printer.printBraceBlock("static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType") { printer in
         printer.print(
           """
           guard let obj else {
-            fatalError("\(swiftTypeName).fromJavaObject received a null Java object")
+            fatalError("\(bridgedSwiftType).fromJavaObject received a null Java object")
           }
           let selfPointer$ = environment.interface.CallLongMethodA(
             environment,
@@ -856,8 +870,8 @@ extension JNISwift2JavaGenerator {
             nil
           )
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-          guard let valuePointer$ = UnsafeMutablePointer<\(swiftTypeName)>(bitPattern: selfPointerBits$) else {
-            fatalError("\(swiftTypeName).fromJavaObject received a null Swift memory address")
+          guard let valuePointer$ = UnsafeMutablePointer<SwiftType>(bitPattern: selfPointerBits$) else {
+            fatalError("\(bridgedSwiftType).fromJavaObject received a null Swift memory address")
           }
           return valuePointer$.pointee
           """

@@ -995,11 +995,23 @@ extension JNISwift2JavaGenerator {
       valueType: SwiftType,
       parameterName: String
     ) throws -> NativeParameter {
-      NativeParameter(
+      let swiftDictionaryType = knownTypes.dictionarySugar(keyType, valueType)
+      let keyBridgeType = try bridgeTypeName(for: keyType)
+      let valueBridgeType = try bridgeTypeName(for: valueType)
+      return NativeParameter(
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .initFromJNI(.placeholder, swiftType: knownTypes.dictionarySugar(keyType, valueType)),
+        conversion: .method(
+          .constant("\(swiftDictionaryType)"),
+          function: "init",
+          arguments: [
+            ("fromJNI", .placeholder),
+            ("in", .constant("environment")),
+            ("keyBridge", .constant("\(keyBridgeType).self")),
+            ("valueBridge", .constant("\(valueBridgeType).self")),
+          ]
+        ),
         indirectConversion: nil,
         conversionCheck: nil
       )
@@ -1010,12 +1022,18 @@ extension JNISwift2JavaGenerator {
       valueType: SwiftType,
       resultName: String
     ) throws -> NativeResult {
-      NativeResult(
+      let keyBridgeType = try bridgeTypeName(for: keyType)
+      let valueBridgeType = try bridgeTypeName(for: valueType)
+      return NativeResult(
         javaType: .long,
         conversion: .method(
           .placeholder,
           function: "dictionaryGetJNIValue",
-          arguments: [("in", .constant("environment"))]
+          arguments: [
+            ("in", .constant("environment")),
+            ("keyBridge", .constant("\(keyBridgeType).self")),
+            ("valueBridge", .constant("\(valueBridgeType).self")),
+          ]
         ),
         outParameters: []
       )
@@ -1025,11 +1043,21 @@ extension JNISwift2JavaGenerator {
       elementType: SwiftType,
       parameterName: String
     ) throws -> NativeParameter {
-      NativeParameter(
+      let swiftSetType = knownTypes.set(elementType)
+      let elementBridgeType = try bridgeTypeName(for: elementType)
+      return NativeParameter(
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .initFromJNI(.placeholder, swiftType: knownTypes.set(elementType)),
+        conversion: .method(
+          .constant("\(swiftSetType)"),
+          function: "init",
+          arguments: [
+            ("fromJNI", .placeholder),
+            ("in", .constant("environment")),
+            ("elementBridge", .constant("\(elementBridgeType).self")),
+          ]
+        ),
         indirectConversion: nil,
         conversionCheck: nil
       )
@@ -1039,15 +1067,66 @@ extension JNISwift2JavaGenerator {
       elementType: SwiftType,
       resultName: String
     ) throws -> NativeResult {
-      NativeResult(
+      let elementBridgeType = try bridgeTypeName(for: elementType)
+      return NativeResult(
         javaType: .long,
         conversion: .method(
           .placeholder,
           function: "setGetJNIValue",
-          arguments: [("in", .constant("environment"))]
+          arguments: [
+            ("in", .constant("environment")),
+            ("elementBridge", .constant("\(elementBridgeType).self")),
+          ]
         ),
         outParameters: []
       )
+    }
+
+    private func bridgeTypeName(for swiftType: SwiftType) throws -> String {
+      switch swiftType {
+      case .nominal(let nominalType):
+        if let knownType = nominalType.asKnownType {
+          switch knownType {
+          case .dictionary(let key, let value):
+            return "JavaDictionaryBridge<\(try bridgeTypeName(for: key)), \(try bridgeTypeName(for: value))>"
+          case .set(let element):
+            return "JavaSetBridge<\(try bridgeTypeName(for: element))>"
+          default:
+            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType.kind, config: self.config),
+              javaType.implementsJavaValue
+            else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+            return "JavaBoxableBridge<\(swiftType)>"
+          }
+        }
+
+        if nominalType.isSwiftJavaWrapper {
+          return "JavaObjectBridge<\(swiftType)>"
+        }
+
+        let bridgeName = JNICaching.bridgeName(for: nominalType)
+        if nominalType.genericArguments.isEmpty {
+          return bridgeName
+        }
+        let genericArguments = try nominalType.genericArguments.map { try renderedBridgeNominalGenericArgument($0) }
+        return "\(bridgeName)<\(genericArguments.joined(separator: ", "))>"
+
+      case .genericParameter:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
+    }
+
+    private func renderedBridgeNominalGenericArgument(_ swiftType: SwiftType) throws -> String {
+      switch swiftType {
+      case .nominal, .genericParameter:
+        return "\(swiftType)"
+      default:
+        throw JavaTranslationError.unsupportedSwiftType(swiftType)
+      }
     }
   }
 
