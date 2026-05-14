@@ -1002,9 +1002,8 @@ extension JNISwift2JavaGenerator {
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .method(
-          .constant("\(swiftDictionaryType)"),
-          function: "init",
+        conversion: .constructor(
+          swiftDictionaryType,
           arguments: [
             ("fromJNI", .placeholder),
             ("in", .constant("environment")),
@@ -1049,9 +1048,8 @@ extension JNISwift2JavaGenerator {
         parameters: [
           JavaParameter(name: parameterName, type: .long)
         ],
-        conversion: .method(
-          .constant("\(swiftSetType)"),
-          function: "init",
+        conversion: .constructor(
+          swiftSetType,
           arguments: [
             ("fromJNI", .placeholder),
             ("in", .constant("environment")),
@@ -1091,13 +1089,10 @@ extension JNISwift2JavaGenerator {
             return "JavaDictionaryBridge<\(try bridgeTypeName(for: key)), \(try bridgeTypeName(for: value))>"
           case .set(let element):
             return "JavaSetBridge<\(try bridgeTypeName(for: element))>"
-          default:
-            guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType.kind, config: self.config),
-              javaType.implementsJavaValue
-            else {
-              throw JavaTranslationError.unsupportedSwiftType(swiftType)
-            }
+          case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string:
             return "JavaBoxableBridge<\(swiftType)>"
+          default:
+            throw JavaTranslationError.unsupportedSwiftType(swiftType)
           }
         }
 
@@ -1108,22 +1103,13 @@ extension JNISwift2JavaGenerator {
         let bridgeName = JNICaching.bridgeName(for: nominalType)
         if nominalType.genericArguments.isEmpty {
           return bridgeName
+        } else {
+          return "\(bridgeName)<\(nominalType.genericArguments.map(\.description).joined(separator: ", "))>"
         }
-        let genericArguments = try nominalType.genericArguments.map { try renderedBridgeNominalGenericArgument($0) }
-        return "\(bridgeName)<\(genericArguments.joined(separator: ", "))>"
 
       case .genericParameter:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
 
-      default:
-        throw JavaTranslationError.unsupportedSwiftType(swiftType)
-      }
-    }
-
-    private func renderedBridgeNominalGenericArgument(_ swiftType: SwiftType) throws -> String {
-      switch swiftType {
-      case .nominal, .genericParameter:
-        return "\(swiftType)"
       default:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
@@ -1254,6 +1240,11 @@ extension JNISwift2JavaGenerator {
       NativeSwiftConversionStep,
       swiftFunctionResultType: SwiftType,
       outArgumentName: String
+    )
+
+    indirect case constructor(
+      _ swiftType: SwiftType,
+      arguments: [(String?, NativeSwiftConversionStep)] = []
     )
 
     indirect case method(
@@ -1662,6 +1653,18 @@ extension JNISwift2JavaGenerator {
           )
         }
         return ""
+
+      case .constructor(let swiftType, let arguments):
+        let args = arguments.map { name, value in
+          let value = value.render(&printer, placeholder)
+          if let name {
+            return "\(name): \(value)"
+          } else {
+            return value
+          }
+        }
+        let argsStr = args.joined(separator: ", ")
+        return "\(swiftType)(\(argsStr))"
 
       case .method(let inner, let methodName, let arguments):
         let inner = inner.render(&printer, placeholder)

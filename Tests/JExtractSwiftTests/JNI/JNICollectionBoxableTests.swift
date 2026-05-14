@@ -37,7 +37,7 @@ struct JNICollectionBoxableTests {
           )
         """,
         """
-        enum _SwiftJavaBridge_ReefFish: JavaClassBackedTypeBridge {
+        enum _SwiftJavaBridge_ReefFish: JextractedTypeBridge {
           typealias SwiftType = ReefFish
           static var javaClass: jclass {
             _JNI_ReefFish.javaClass
@@ -103,7 +103,7 @@ struct JNICollectionBoxableTests {
           )
         """,
         """
-        enum _SwiftJavaBridge_MyID<T>: JavaClassBackedTypeBridge {
+        enum _SwiftJavaBridge_MyID<T>: JextractedTypeBridge {
           typealias SwiftType = MyID<T>
           static var javaClass: jclass {
             _JNI_MyID.javaClass

@@ -34,7 +34,7 @@ enum JNICaching {
   }
 
   private static func bridgeName(for typeName: SwiftQualifiedTypeName) -> String {
-    "_SwiftJavaBridge_\(typeName.fullFlatName)"
+    "_JNIBridge_\(typeName.fullFlatName)"
   }
 
   static func cacheMemberName(for enumCase: ImportedEnumCase) -> String {

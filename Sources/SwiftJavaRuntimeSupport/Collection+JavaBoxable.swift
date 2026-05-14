@@ -14,12 +14,12 @@
 
 import SwiftJava
 
-public enum JavaDictionaryBridge<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: JavaClassBackedTypeBridge
-where KeyBridge.SwiftType: Hashable {
+public enum JavaDictionaryBridge<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: JavaTypeBridge where KeyBridge.SwiftType: Hashable {
   public typealias SwiftType = [KeyBridge.SwiftType: ValueBridge.SwiftType]
 
-  public static var javaClass: jclass {
-    _JNIMethodIDCache.SwiftDictionaryMap.class
+  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
+    guard let obj else { return false }
+    return environment.interface.IsInstanceOf(environment, obj, _JNIMethodIDCache.SwiftDictionaryMap.class) == JNI_TRUE
   }
 
   public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
@@ -49,11 +49,12 @@ where KeyBridge.SwiftType: Hashable {
   }
 }
 
-public enum JavaSetBridge<ElementBridge: JavaTypeBridge>: JavaClassBackedTypeBridge where ElementBridge.SwiftType: Hashable {
+public enum JavaSetBridge<ElementBridge: JavaTypeBridge>: JavaTypeBridge where ElementBridge.SwiftType: Hashable {
   public typealias SwiftType = Set<ElementBridge.SwiftType>
 
-  public static var javaClass: jclass {
-    _JNIMethodIDCache.SwiftSet.class
+  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
+    guard let obj else { return false }
+    return environment.interface.IsInstanceOf(environment, obj, _JNIMethodIDCache.SwiftSet.class) == JNI_TRUE
   }
 
   public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {

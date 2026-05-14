@@ -787,6 +787,7 @@ extension JNISwift2JavaGenerator {
           signature: "\(signature)",
           isStatic: true
         )
+        
         private static let cache = _JNIMethodIDCache(
           className: "\(jniClassName)",
           methods: [wrapMemoryAddressUnsafeMethod]
@@ -807,7 +808,7 @@ extension JNISwift2JavaGenerator {
   private func printNominalJavaBridge(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
     let bridgeName = JNICaching.bridgeName(for: type)
     let cacheName = JNICaching.cacheName(for: type)
-    let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
     let bridgeGenericClause =
       if type.swiftNominal.genericParameters.isEmpty {
         ""
@@ -820,62 +821,17 @@ extension JNISwift2JavaGenerator {
       } else {
         "\(type.baseTypeName)<\(type.genericParameterNames.joined(separator: ", "))>"
       }
+    let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
 
-    printer.printBraceBlock("enum \(bridgeName)\(bridgeGenericClause): JavaClassBackedTypeBridge") { printer in
+    printer.printBraceBlock("enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol)") { printer in
       printer.print("typealias SwiftType = \(bridgedSwiftType)")
       printer.println()
       printer.printBraceBlock("static var javaClass: jclass") { printer in
         printer.print("\(cacheName).javaClass")
       }
       printer.println()
-      printer.printBraceBlock("static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject?") { printer in
-        printer.print("let selfPointer$ = UnsafeMutablePointer<SwiftType>.allocate(capacity: 1)")
-        printer.print("selfPointer$.initialize(to: value)")
-        printer.print("let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))")
-        var args = [
-          ("j", "selfPointerBits$.getJNIValue(in: environment)")
-        ]
-        if isEffectivelyGeneric {
-          printer.print("let selfTypePointer$ = unsafeBitCast(SwiftType.self, to: UnsafeRawPointer.self)")
-          printer.print("let selfTypePointerBits$ = Int64(Int(bitPattern: selfTypePointer$))")
-          args.append(("j", "selfTypePointerBits$.getJNIValue(in: environment)"))
-        }
-        args.append(("l", "JavaSwiftArena.defaultAutoArena.javaThis"))
-        printer.print("var args = [\(Array(repeating: "jvalue()", count: args.count).joined(separator: ", "))]")
-        for (i, (jvalueField, expr)) in args.enumerated() {
-          printer.print("args[\(i)].\(jvalueField) = \(expr)")
-        }
-        printer.print(
-          """
-          return environment.interface.CallStaticObjectMethodA(
-            environment,
-            \(cacheName).javaClass,
-            \(cacheName).wrapMemoryAddressUnsafe,
-            &args
-          )
-          """
-        )
-      }
-      printer.println()
-      printer.printBraceBlock("static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType") { printer in
-        printer.print(
-          """
-          guard let obj else {
-            fatalError("\(bridgedSwiftType).fromJavaObject received a null Java object")
-          }
-          let selfPointer$ = environment.interface.CallLongMethodA(
-            environment,
-            obj,
-            _JNIMethodIDCache.JNISwiftInstance.memoryAddress,
-            nil
-          )
-          let selfPointerBits$ = Int(Int64(fromJNI: selfPointer$, in: environment))
-          guard let valuePointer$ = UnsafeMutablePointer<SwiftType>(bitPattern: selfPointerBits$) else {
-            fatalError("\(bridgedSwiftType).fromJavaObject received a null Swift memory address")
-          }
-          return valuePointer$.pointee
-          """
-        )
+      printer.printBraceBlock("static var wrapMemoryAddressUnsafe: jmethodID") { printer in
+        printer.print("\(cacheName).wrapMemoryAddressUnsafe")
       }
     }
   }
