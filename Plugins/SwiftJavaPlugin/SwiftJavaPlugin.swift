@@ -31,7 +31,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     log("Create build commands for target '\(target.name)'")
     guard let sourceModule = target.sourceModule else { return [] }
 
-    let executable = try context.tool(named: "SwiftJavaTool").url
+    let executable = try context.tool(named: "swift-java").url
     var commands: [Command] = []
 
     // Note: Target doesn't have a directoryURL counterpart to directory,
@@ -165,7 +165,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           arguments: ["resolve"]
             + argumentsOutputDirectory(context: context, generated: false)
             + argumentsSwiftModule(sourceModule: sourceModule),
-          environment: [:],
+          environment: ProcessInfo.processInfo.environment,
           inputFiles: [configFile],
           outputFiles: fetchDependenciesOutputFiles
         )
@@ -192,6 +192,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
           executable: executable,
           arguments: ["wrap-java"]
             + arguments,
+          environment: ProcessInfo.processInfo.environment,
           inputFiles: compiledClassFiles + fetchDependenciesOutputFiles + [configFile],
           outputFiles: outputSwiftFiles
         )

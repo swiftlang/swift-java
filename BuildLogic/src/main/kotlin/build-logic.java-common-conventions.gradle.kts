@@ -81,9 +81,23 @@ fun javaLibraryPaths(rootDir: File): List<String> {
 
     val debugBuildOutputPaths = swiftBuildOutputPaths.map { "$it/debug" }
     val releaseBuildOutputPaths = swiftBuildOutputPaths.map { "$it/release" }
+
+    // swift-build layout (https://github.com/swiftlang/swift-build/issues/1363):
+    // .build/out/Products/<Config>[-<os>]/ — no triple, different config casing,
+    // OS suffix on Linux
+    val swiftBuildSystemConfigs = if (isLinux) {
+        listOf("Debug-linux", "Release-linux")
+    } else {
+        listOf("Debug", "Release")
+    }
+    val swiftBuildSystemRoots = listOf("$base.build/out/Products", "../../$base.build/out/Products")
+    val swiftBuildSystemPaths = swiftBuildSystemRoots.flatMap { root ->
+        swiftBuildSystemConfigs.map { config -> "$root/$config" }
+    }
+
     val swiftRuntimePaths = getSwiftRuntimeLibraryPaths()
 
-    return debugBuildOutputPaths + releaseBuildOutputPaths + swiftRuntimePaths
+    return debugBuildOutputPaths + releaseBuildOutputPaths + swiftBuildSystemPaths + swiftRuntimePaths
 }
 
 // Configure paths for native (Swift) libraries

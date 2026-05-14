@@ -29,7 +29,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
   var verbose: Bool = getEnvironmentBool("SWIFT_JAVA_VERBOSE")
 
   func createBuildCommands(context: PluginContext, target: Target) throws -> [Command] {
-    let toolURL = try context.tool(named: "SwiftJavaTool").url
+    let toolURL = try context.tool(named: "swift-java").url
 
     var commands: [Command] = []
 
@@ -171,6 +171,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         displayName: "Generate Java wrappers for Swift types",
         executable: toolURL,
         arguments: arguments,
+        environment: ProcessInfo.processInfo.environment,
         inputFiles: [configFile] + swiftFiles,
         outputFiles: jextractOutputFiles,
       )
@@ -203,9 +204,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let GradleUserHome = "GRADLE_USER_HOME"
     let gradleUserHomePath = gradleUserHome.path(percentEncoded: false)
     log("Prepare command: :SwiftKitCore:build in \(GradleUserHome)=\(gradleUserHomePath)")
-    var gradlewEnvironment = ProcessInfo.processInfo.environment
-    gradlewEnvironment[GradleUserHome] = gradleUserHomePath
-    log("Forward environment: \(gradlewEnvironment)")
+    var environment = ProcessInfo.processInfo.environment
+    environment[GradleUserHome] = gradleUserHomePath
 
     let gradlewURL = swiftJavaDirectory.appending(path: "gradlew")
     let gradleExecutable: URL
@@ -256,6 +256,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         displayName: "Build SwiftKitCore, compile Java callbacks, and generate Swift wrappers",
         executable: toolURL,
         arguments: javaCallbacksArguments,
+        environment: environment,
         inputFiles: outputSwiftFiles + [swiftJavaDirectory],
         outputFiles: [javaCallbacksSwiftOutput],
       )

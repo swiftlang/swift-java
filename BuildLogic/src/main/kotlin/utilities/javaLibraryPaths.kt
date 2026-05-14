@@ -44,10 +44,22 @@ fun Project.javaLibraryPaths(rootDir: File?): List<String> {
         "${arch}-apple-macosx"
     }
 
-    val paths: List<String> = listOf("release", "debug").map { configuration ->
+    // Native build system: .build/<triple>/<config>/
+    val nativeBuildPaths: List<String> = listOf("release", "debug").map { configuration ->
         "${base}.build/${triple}/$configuration/"
     }
+
+    // swift-build: .build/out/Products/<Config>[-<os>]/
+    val swiftBuildConfigs = if (isLinux) {
+        listOf("Debug-linux", "Release-linux")
+    } else {
+        listOf("Debug", "Release")
+    }
+    val swiftBuildPaths: List<String> = swiftBuildConfigs.map { config ->
+        "${base}.build/out/Products/$config/"
+    }
+
     val swiftRuntimePaths = swiftRuntimeLibraryPaths()
 
-    return paths + swiftRuntimePaths
+    return nativeBuildPaths + swiftBuildPaths + swiftRuntimePaths
 }
