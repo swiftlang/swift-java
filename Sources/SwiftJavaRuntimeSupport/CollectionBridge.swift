@@ -148,12 +148,14 @@ public enum ArrayBridge<ElementBridge: JobjectBridge>: JobjectBridge {
 
   public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
     try! ElementBridge.withJNIClass(in: environment) { elementClass in
-      guard let array = environment.interface.NewObjectArray(
-        environment,
-        jsize(value.count),
-        elementClass,
-        nil
-      ) else {
+      guard
+        let array = environment.interface.NewObjectArray(
+          environment,
+          jsize(value.count),
+          elementClass,
+          nil
+        )
+      else {
         fatalError("Array.toJavaObject failed to allocate a Java array")
       }
 

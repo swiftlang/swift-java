@@ -773,11 +773,12 @@ extension JNISwift2JavaGenerator {
     let cacheName = JNICaching.cacheName(for: type)
     let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
-    let signature = if isEffectivelyGeneric {
-      "(JJLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
-    } else {
-      "(JLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
-    }
+    let signature =
+      if isEffectivelyGeneric {
+        "(JJLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+      } else {
+        "(JLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+      }
 
     printer.printBraceBlock("private enum \(cacheName)") { printer in
       printer.print(
@@ -787,7 +788,7 @@ extension JNISwift2JavaGenerator {
           signature: "\(signature)",
           isStatic: true
         )
-        
+
         private static let cache = _JNIMethodIDCache(
           className: "\(jniClassName)",
           methods: [wrapMemoryAddressUnsafeMethod]

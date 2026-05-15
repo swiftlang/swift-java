@@ -34,7 +34,7 @@ extension Dictionary {
   /// Reconstruct a Swift dictionary from a JNI jlong pointer to a SwiftDictionaryBox.
   public init<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>(
     fromJNI value: jlong,
-      in environment: JNIEnvironment,
+    in environment: JNIEnvironment,
     keyBridge: KeyBridge.Type,
     valueBridge: ValueBridge.Type
   ) where KeyBridge.SwiftType == Key, ValueBridge.SwiftType == Value {

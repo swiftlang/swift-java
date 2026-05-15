@@ -34,9 +34,13 @@ public protocol JobjectBridge {
 extension JobjectBridge {
   public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
     guard let obj else { return false }
-    return (try? withJNIClass(in: environment) { cls in
-      environment.interface.IsInstanceOf(environment, obj, cls) == JNI_TRUE
-    }) ?? false
+    do {
+      return try withJNIClass(in: environment) { cls in
+        environment.interface.IsInstanceOf(environment, obj, cls) == JNI_TRUE
+      }
+    } catch {
+      return false
+    }
   }
 }
 

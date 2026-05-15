@@ -54,7 +54,7 @@ struct JNIJobjectBridgeTests {
           static var javaClass: jclass {
             _JNI_ReefFish.javaClass
           } 
-        
+
           static var wrapMemoryAddressUnsafe: jmethodID {
             _JNI_ReefFish.wrapMemoryAddressUnsafe
           }
