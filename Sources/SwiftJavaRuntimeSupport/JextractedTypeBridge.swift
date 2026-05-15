@@ -14,7 +14,7 @@
 
 import SwiftJava
 
-public protocol JextractedTypeBridge: JavaTypeBridge {
+public protocol JextractedTypeBridge: JobjectBridge {
   static var javaClass: jclass { get }
   static var wrapMemoryAddressUnsafe: jmethodID { get }
 }

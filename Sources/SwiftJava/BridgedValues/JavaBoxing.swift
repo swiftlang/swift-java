@@ -329,7 +329,7 @@ class AnySwiftDictionaryBox {
 }
 
 /// Generic subclass that wraps a concrete `[K: V]` Swift dictionary.
-final class SwiftDictionaryBox<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: AnySwiftDictionaryBox
+final class SwiftDictionaryBox<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>: AnySwiftDictionaryBox
 where KeyBridge.SwiftType: Hashable {
   typealias Key = KeyBridge.SwiftType
   typealias Value = ValueBridge.SwiftType
@@ -403,7 +403,7 @@ class AnySwiftSetBox {
 }
 
 /// Generic subclass that wraps a concrete `Set<E>` Swift set.
-final class SwiftSetBox<ElementBridge: JavaTypeBridge>: AnySwiftSetBox where ElementBridge.SwiftType: Hashable {
+final class SwiftSetBox<ElementBridge: JobjectBridge>: AnySwiftSetBox where ElementBridge.SwiftType: Hashable {
   typealias Element = ElementBridge.SwiftType
   let set: Set<Element>
 

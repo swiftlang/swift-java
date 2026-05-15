@@ -14,7 +14,7 @@
 
 import SwiftJava
 
-public enum JavaDictionaryBridge<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>: JavaTypeBridge where KeyBridge.SwiftType: Hashable {
+public enum DictionaryBridge<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>: JobjectBridge where KeyBridge.SwiftType: Hashable {
   public typealias SwiftType = [KeyBridge.SwiftType: ValueBridge.SwiftType]
 
   public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
@@ -49,7 +49,7 @@ public enum JavaDictionaryBridge<KeyBridge: JavaTypeBridge, ValueBridge: JavaTyp
   }
 }
 
-public enum JavaSetBridge<ElementBridge: JavaTypeBridge>: JavaTypeBridge where ElementBridge.SwiftType: Hashable {
+public enum SetBridge<ElementBridge: JobjectBridge>: JobjectBridge where ElementBridge.SwiftType: Hashable {
   public typealias SwiftType = Set<ElementBridge.SwiftType>
 
   public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {

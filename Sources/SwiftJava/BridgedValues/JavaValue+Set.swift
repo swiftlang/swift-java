@@ -20,7 +20,7 @@ import SwiftJavaJNICore
 extension Set {
   /// Box this set and return a jlong pointer for passing across JNI.
   /// The set is retained on the Swift heap; Java holds the pointer.
-  public func setGetJNIValue<ElementBridge: JavaTypeBridge>(
+  public func setGetJNIValue<ElementBridge: JobjectBridge>(
     in environment: JNIEnvironment,
     elementBridge: ElementBridge.Type
   ) -> jlong where ElementBridge.SwiftType == Element {
@@ -31,7 +31,7 @@ extension Set {
   }
 
   /// Reconstruct a Swift set from a JNI jlong pointer to a SwiftSetBox.
-  public init<ElementBridge: JavaTypeBridge>(
+  public init<ElementBridge: JobjectBridge>(
     fromJNI value: jlong,
     in environment: JNIEnvironment,
     elementBridge: ElementBridge.Type

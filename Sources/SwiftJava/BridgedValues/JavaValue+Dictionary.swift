@@ -20,7 +20,7 @@ import SwiftJavaJNICore
 extension Dictionary {
   /// Box this dictionary and return a jlong pointer for passing across JNI.
   /// The dictionary is retained on the Swift heap; Java holds the pointer.
-  public func dictionaryGetJNIValue<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>(
+  public func dictionaryGetJNIValue<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>(
     in environment: JNIEnvironment,
     keyBridge: KeyBridge.Type,
     valueBridge: ValueBridge.Type
@@ -32,7 +32,7 @@ extension Dictionary {
   }
 
   /// Reconstruct a Swift dictionary from a JNI jlong pointer to a SwiftDictionaryBox.
-  public init<KeyBridge: JavaTypeBridge, ValueBridge: JavaTypeBridge>(
+  public init<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>(
     fromJNI value: jlong,
       in environment: JNIEnvironment,
     keyBridge: KeyBridge.Type,

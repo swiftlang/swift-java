@@ -16,7 +16,7 @@
 ///
 /// Unlike `JavaBoxable`, this is not attached to the bridged nominal type itself,
 /// which avoids protocol-conformance conflicts for inheritable classes.
-public protocol JavaTypeBridge {
+public protocol JobjectBridge {
   associatedtype SwiftType
 
   /// Returns whether the given Java object can be consumed by this bridge.
@@ -29,7 +29,7 @@ public protocol JavaTypeBridge {
   static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType
 }
 
-public enum JavaBoxableBridge<T: JavaBoxable>: JavaTypeBridge {
+public enum JavaBoxableBridge<T: JavaBoxable>: JobjectBridge {
   public typealias SwiftType = T
 
   public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
@@ -46,7 +46,7 @@ public enum JavaBoxableBridge<T: JavaBoxable>: JavaTypeBridge {
   }
 }
 
-public enum JavaObjectBridge<T: AnyJavaObject>: JavaTypeBridge {
+public enum JavaObjectBridge<T: AnyJavaObject>: JobjectBridge {
   public typealias SwiftType = T
 
   public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {

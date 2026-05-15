@@ -1086,9 +1086,9 @@ extension JNISwift2JavaGenerator {
         if let knownType = nominalType.asKnownType {
           switch knownType {
           case .dictionary(let key, let value):
-            return "JavaDictionaryBridge<\(try bridgeTypeName(for: key)), \(try bridgeTypeName(for: value))>"
+            return "DictionaryBridge<\(try bridgeTypeName(for: key)), \(try bridgeTypeName(for: value))>"
           case .set(let element):
-            return "JavaSetBridge<\(try bridgeTypeName(for: element))>"
+            return "SetBridge<\(try bridgeTypeName(for: element))>"
           case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string:
             return "JavaBoxableBridge<\(swiftType)>"
           default:
