@@ -57,3 +57,30 @@ public func makeSetInDictionary() -> [String: Set<Int32>] {
     "odd": [1, 3, 5],
   ]
 }
+
+public func makeFishArrayDictionary() -> [String: [Fish]] {
+  [
+    "reef": [
+      Fish(name: "clownfish"),
+      Fish(name: "blue tang"),
+    ],
+    "river": [
+      Fish(name: "salmon")
+    ],
+  ]
+}
+
+public func fishArrayDictionary(dict: [String: [Fish]]) -> [String: [Fish]] {
+  dict
+}
+
+public func makeOptionalFishDictionary() -> [String: Fish?] {
+  [
+    "reef": Fish(name: "clownfish"),
+    "empty": nil,
+  ]
+}
+
+public func optionalFishDictionary(dict: [String: Fish?]) -> [String: Fish?] {
+  dict
+}

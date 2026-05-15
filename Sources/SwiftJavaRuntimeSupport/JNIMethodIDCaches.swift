@@ -163,6 +163,55 @@ extension _JNIMethodIDCache {
     }
   }
 
+  public enum JavaOptional {
+    private static let emptyMethod = Method(
+      name: "empty",
+      signature: "()Ljava/util/Optional;",
+      isStatic: true
+    )
+
+    private static let ofMethod = Method(
+      name: "of",
+      signature: "(Ljava/lang/Object;)Ljava/util/Optional;",
+      isStatic: true
+    )
+
+    private static let isPresentMethod = Method(
+      name: "isPresent",
+      signature: "()Z"
+    )
+
+    private static let getMethod = Method(
+      name: "get",
+      signature: "()Ljava/lang/Object;"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "java/util/Optional",
+      methods: [emptyMethod, ofMethod, isPresentMethod, getMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var empty: jmethodID {
+      cache.methods[emptyMethod]!
+    }
+
+    public static var of: jmethodID {
+      cache.methods[ofMethod]!
+    }
+
+    public static var isPresent: jmethodID {
+      cache.methods[isPresentMethod]!
+    }
+
+    public static var get: jmethodID {
+      cache.methods[getMethod]!
+    }
+  }
+
   public enum _OutSwiftGenericInstance {
     private static let selfPointerField = Field(
       name: "selfPointer",

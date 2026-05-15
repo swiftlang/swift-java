@@ -21,6 +21,8 @@ import org.swift.swiftkit.core.collections.SwiftSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -94,5 +96,47 @@ public class CollectionBoxableTest {
             assertEquals(Set.of(0, 2, 4), dict.get("even").toJavaSet());
             assertNull(dict.get("unknown"));
         }
+    }
+
+    @Test
+    void fishArrayDictionaryRoundtrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<String, Fish[]> original = MySwiftLibrary.makeFishArrayDictionary(arena);
+            assertArrayEquals(new String[] {"clownfish", "blue tang"}, fishNames(original.get("reef")));
+            assertArrayEquals(new String[] {"salmon"}, fishNames(original.get("river")));
+
+            SwiftDictionaryMap<String, Fish[]> roundtripped = MySwiftLibrary.fishArrayDictionary(original, arena);
+            assertArrayEquals(new String[] {"clownfish", "blue tang"}, fishNames(roundtripped.get("reef")));
+            assertArrayEquals(new String[] {"salmon"}, fishNames(roundtripped.get("river")));
+        }
+    }
+
+    @Test
+    void optionalFishDictionaryRoundtrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<String, Optional<Fish>> original = MySwiftLibrary.makeOptionalFishDictionary(arena);
+            assertDoesNotThrow(() -> {
+                var value = original.get("reef").orElseThrow();
+                assertEquals("clownfish", value.getName());
+            });
+            assertDoesNotThrow(() -> {
+                assertTrue(original.get("empty").isEmpty());
+            });
+
+            SwiftDictionaryMap<String, Optional<Fish>> roundtripped = MySwiftLibrary.optionalFishDictionary(original, arena);
+            assertDoesNotThrow(() -> {
+                var value = roundtripped.get("reef").orElseThrow();
+                assertEquals("clownfish", value.getName());
+            });
+            assertDoesNotThrow(() -> {
+                assertTrue(roundtripped.get("empty").isEmpty());
+            });
+        }
+    }
+
+    private static String[] fishNames(Fish[] fish) {
+        return Arrays.stream(fish)
+                .map(Fish::getName)
+                .toArray(String[]::new);
     }
 }

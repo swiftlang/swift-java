@@ -1085,6 +1085,10 @@ extension JNISwift2JavaGenerator {
       case .nominal(let nominalType):
         if let knownType = nominalType.asKnownType {
           switch knownType {
+          case .optional(let wrapped):
+            return "OptionalBridge<\(try bridgeTypeName(for: wrapped))>"
+          case .array(let element):
+            return "ArrayBridge<\(try bridgeTypeName(for: element))>"
           case .dictionary(let key, let value):
             return "DictionaryBridge<\(try bridgeTypeName(for: key)), \(try bridgeTypeName(for: value))>"
           case .set(let element):

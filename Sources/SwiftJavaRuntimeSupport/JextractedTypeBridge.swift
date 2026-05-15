@@ -20,11 +20,6 @@ public protocol JextractedTypeBridge: JobjectBridge {
 }
 
 extension JextractedTypeBridge {
-  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
-    guard let obj else { return false }
-    return environment.interface.IsInstanceOf(environment, obj, javaClass) == JNI_TRUE
-  }
-
   public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
     let selfPointer$ = UnsafeMutablePointer<SwiftType>.allocate(capacity: 1)
     selfPointer$.initialize(to: value)
@@ -55,6 +50,13 @@ extension JextractedTypeBridge {
       fatalError("fromJavaObject received a null Swift memory address")
     }
     return valuePointer$.pointee
+  }
+
+  public static func withJNIClass<Result>(
+    in environment: JNIEnvironment,
+    _ body: (jclass) throws -> Result
+  ) throws -> Result {
+    try body(javaClass)
   }
 }
 

@@ -19,23 +19,29 @@
 public protocol JobjectBridge {
   associatedtype SwiftType
 
-  /// Returns whether the given Java object can be consumed by this bridge.
-  static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool
-
   /// Convert a Swift value to a Java object.
   static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject?
 
   /// Convert a Java object back to a Swift value.
   static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> SwiftType
+
+  static func withJNIClass<Result>(
+    in environment: JNIEnvironment,
+    _ body: (jclass) throws -> Result
+  ) throws -> Result
+}
+
+extension JobjectBridge {
+  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
+    guard let obj else { return false }
+    return (try? withJNIClass(in: environment) { cls in
+      environment.interface.IsInstanceOf(environment, obj, cls) == JNI_TRUE
+    }) ?? false
+  }
 }
 
 public enum JavaBoxableBridge<T: JavaBoxable>: JobjectBridge {
   public typealias SwiftType = T
-
-  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
-    guard let obj else { return false }
-    return environment.interface.IsInstanceOf(environment, obj, T.javaBoxClass) == JNI_TRUE
-  }
 
   public static func toJavaObject(_ value: T, in environment: JNIEnvironment) -> jobject? {
     value.toJavaObject(in: environment)
@@ -44,17 +50,17 @@ public enum JavaBoxableBridge<T: JavaBoxable>: JobjectBridge {
   public static func fromJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> T {
     T.fromJavaObject(obj, in: environment)
   }
+
+  public static func withJNIClass<Result>(
+    in environment: JNIEnvironment,
+    _ body: (jclass) throws -> Result
+  ) throws -> Result {
+    try body(T.javaBoxClass)
+  }
 }
 
 public enum JavaObjectBridge<T: AnyJavaObject>: JobjectBridge {
   public typealias SwiftType = T
-
-  public static func isJavaObject(_ obj: jobject?, in environment: JNIEnvironment) -> Bool {
-    guard let obj else { return false }
-    return (try? T.withJNIClass(in: environment) { cls in
-      environment.interface.IsInstanceOf(environment, obj, cls) == JNI_TRUE
-    }) ?? false
-  }
 
   public static func toJavaObject(_ value: T, in environment: JNIEnvironment) -> jobject? {
     value.javaThis
@@ -65,5 +71,12 @@ public enum JavaObjectBridge<T: AnyJavaObject>: JobjectBridge {
       fatalError("\(T.self).fromJavaObject received a null Java object")
     }
     return T(javaThis: obj, environment: environment)
+  }
+
+  public static func withJNIClass<Result>(
+    in environment: JNIEnvironment,
+    _ body: (jclass) throws -> Result
+  ) throws -> Result {
+    try T.withJNIClass(in: environment, body)
   }
 }
