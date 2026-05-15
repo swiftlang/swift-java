@@ -147,19 +147,19 @@ public enum ArrayBridge<ElementBridge: JobjectBridge>: JobjectBridge {
   public typealias SwiftType = [ElementBridge.SwiftType]
 
   public static func toJavaObject(_ value: SwiftType, in environment: JNIEnvironment) -> jobject? {
-    try! ElementBridge.withJNIClass(in: environment) { componentClass in
+    try! ElementBridge.withJNIClass(in: environment) { elementClass in
       guard let array = environment.interface.NewObjectArray(
         environment,
         jsize(value.count),
-        componentClass,
+        elementClass,
         nil
       ) else {
         fatalError("Array.toJavaObject failed to allocate a Java array")
       }
 
-      for (index, element) in value.enumerated() {
+      for (i, element) in value.enumerated() {
         let javaElement = ElementBridge.toJavaObject(element, in: environment)
-        environment.interface.SetObjectArrayElement(environment, array, jsize(index), javaElement)
+        environment.interface.SetObjectArrayElement(environment, array, jsize(i), javaElement)
       }
       return array
     }
@@ -175,8 +175,8 @@ public enum ArrayBridge<ElementBridge: JobjectBridge>: JobjectBridge {
     var result: SwiftType = []
     result.reserveCapacity(count)
 
-    for index in 0..<count {
-      let javaElement = environment.interface.GetObjectArrayElement(environment, array, jsize(index))
+    for i in 0..<count {
+      let javaElement = environment.interface.GetObjectArrayElement(environment, array, jsize(i))
       result.append(ElementBridge.fromJavaObject(javaElement, in: environment))
     }
 

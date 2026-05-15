@@ -58,6 +58,17 @@ public func makeSetInDictionary() -> [String: Set<Int32>] {
   ]
 }
 
+public func makeIntArrayDictionary() -> [String: [Int32]] {
+  [
+    "even": [0, 2, 4],
+    "odd": [1, 3, 5],
+  ]
+}
+
+public func intArrayDictionary(dict: [String: [Int32]]) -> [String: [Int32]] {
+  dict
+}
+
 public func makeFishArrayDictionary() -> [String: [Fish]] {
   [
     "reef": [

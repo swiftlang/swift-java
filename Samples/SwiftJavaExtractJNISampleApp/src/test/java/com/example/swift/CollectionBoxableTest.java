@@ -99,6 +99,17 @@ public class CollectionBoxableTest {
     }
 
     @Test
+    void intArrayDictionaryRoundtrip() {
+        try (var arena = SwiftArena.ofConfined()) {
+            SwiftDictionaryMap<String, Integer[]> original = MySwiftLibrary.makeIntArrayDictionary(arena);
+            assertArrayEquals(new Integer[] {0, 2, 4}, original.get("even"));
+
+            SwiftDictionaryMap<String, Integer[]> roundtripped = MySwiftLibrary.intArrayDictionary(original, arena);
+            assertArrayEquals(new Integer[] {0, 2, 4}, roundtripped.get("even"));
+        }
+    }
+
+    @Test
     void fishArrayDictionaryRoundtrip() {
         try (var arena = SwiftArena.ofConfined()) {
             SwiftDictionaryMap<String, Fish[]> original = MySwiftLibrary.makeFishArrayDictionary(arena);
