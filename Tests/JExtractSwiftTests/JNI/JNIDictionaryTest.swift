@@ -322,4 +322,34 @@ struct JNIDictionaryTest {
       ]
     )
   }
+
+  @Test("Import: () -> [UInt32: tuple] is unsupported")
+  func tupleDictionaryValue_swift() throws {
+    try assertOutput(
+      input: """
+        public enum ResponseType {
+          case ok
+        }
+
+        public class BindingStore {
+          public typealias RawResponse = (requestId: UInt32, stringResponse: String, responseType: ResponseType, finished: Bool)
+          public static var completeResponses: [UInt32: RawResponse] = [:]
+        }
+        """,
+      .jni,
+      .swift,
+      expectedChunks: [],
+      notExpectedChunks: [
+        """
+        dictionaryGetJNIValue
+        """,
+        """
+        getCompleteResponses
+        """,
+        """
+        setCompleteResponses
+        """,
+      ]
+    )
+  }
 }
