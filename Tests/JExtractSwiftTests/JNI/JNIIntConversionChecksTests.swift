@@ -36,6 +36,24 @@ struct JNIIntConversionChecksTests {
       }
     }
     """
+  private let optionalSignedSource = """
+    public struct MyStruct {
+      public var optionalInt: Int? = nil
+
+      public init(optionalInt: Int?) {
+          self.optionalInt = optionalInt
+      }
+    }
+    """
+  private let optionalUnsignedSource = """
+    public struct MyStruct {
+      public var optionalUInt: UInt? = nil
+
+      public init(optionalUInt: UInt?) {
+          self.optionalUInt = optionalUInt
+      }
+    }
+    """
   private let signedFuncSource = """
     public struct MyStruct {
       public func dummyFunc(arg: Int) -> Int {
@@ -104,6 +122,96 @@ struct JNIIntConversionChecksTests {
         result$.initialize(to: MyStruct.init(unsignedInt: UInt(unsignedInt$indirect)))
         let resultBits$ = Int64(Int(bitPattern: result$))
         return resultBits$.getJNILocalRefValue(in: environment)
+        """,
+      ]
+    )
+  }
+
+  @Test func generatesOptionalInitWithSignedCheck() throws {
+    try assertOutput(
+      input: optionalSignedSource,
+      .jni,
+      .swift,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024init__BJ")
+        public func Java_com_example_swift_MyStruct__00024init__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, optionalInt_discriminator: jbyte, optionalInt_value: jlong) -> jlong {
+          let optionalInt$indirect = Int64(fromJNI: optionalInt_value, in: environment)
+          #if _pointerBitWidth(_32)
+          guard optionalInt$indirect >= Int32.min && optionalInt$indirect <= Int32.max else {
+            environment.throwJavaException(javaException: .integerOverflow)
+            return 0
+        """,
+        """
+        #endif
+        let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
+        result$.initialize(to: MyStruct.init(optionalInt: optionalInt_discriminator == 1 ? Int(optionalInt$indirect) : nil))
+        let resultBits$ = Int64(Int(bitPattern: result$))
+        return resultBits$.getJNILocalRefValue(in: environment)
+        """,
+      ]
+    )
+  }
+
+  @Test func generatesOptionalInitWithUnsignedCheck() throws {
+    try assertOutput(
+      input: optionalUnsignedSource,
+      .jni,
+      .swift,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024init__BJ")
+        public func Java_com_example_swift_MyStruct__00024init__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, optionalUInt_discriminator: jbyte, optionalUInt_value: jlong) -> jlong {
+          let optionalUInt$indirect = UInt64(fromJNI: optionalUInt_value, in: environment)
+          #if _pointerBitWidth(_32)
+          guard optionalUInt$indirect >= UInt32.min && optionalUInt$indirect <= UInt32.max else {
+            environment.throwJavaException(javaException: .integerOverflow)
+            return 0
+        """,
+        """
+        #endif
+        let result$ = UnsafeMutablePointer<MyStruct>.allocate(capacity: 1)
+        result$.initialize(to: MyStruct.init(optionalUInt: optionalUInt_discriminator == 1 ? UInt(optionalUInt$indirect) : nil))
+        let resultBits$ = Int64(Int(bitPattern: result$))
+        return resultBits$.getJNILocalRefValue(in: environment)
+        """,
+      ]
+    )
+  }
+
+  @Test func generatesOptionalSignedGetterWithoutCheck() throws {
+    try assertOutput(
+      input: optionalSignedSource,
+      .jni,
+      .swift,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024getOptionalInt__J_3B")
+        public func Java_com_example_swift_MyStruct__00024getOptionalInt__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?) -> jlong {
+        """,
+        """
+        let result$: jlong
+        if let innerResult$ = selfPointer$.pointee.optionalInt {
+          result$ = Int64(innerResult$).getJNIValue(in: environment)
+        """,
+      ]
+    )
+  }
+
+  @Test func generatesOptionalUnsignedGetterWithoutCheck() throws {
+    try assertOutput(
+      input: optionalUnsignedSource,
+      .jni,
+      .swift,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024getOptionalUInt__J_3B")
+        public func Java_com_example_swift_MyStruct__00024getOptionalUInt__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, result_discriminator$: jbyteArray?) -> jlong {
+        """,
+        """
+        let result$: jlong
+        if let innerResult$ = selfPointer$.pointee.optionalUInt {
+          result$ = UInt64(innerResult$).getJNIValue(in: environment)
         """,
       ]
     )
