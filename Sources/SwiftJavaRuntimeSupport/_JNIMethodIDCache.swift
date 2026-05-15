@@ -20,7 +20,7 @@ import SwiftJavaJNICore
 /// This type is used internally in by the outputted JExtract wrappers
 /// to improve performance of any JNI lookups.
 public final class _JNIMethodIDCache: Sendable {
-  public struct Method: Hashable {
+  public struct Method: Hashable, Sendable {
     public let name: String
     public let signature: String
     public let isStatic: Bool
@@ -32,7 +32,7 @@ public final class _JNIMethodIDCache: Sendable {
     }
   }
 
-  public struct Field: Hashable {
+  public struct Field: Hashable, Sendable {
     public let name: String
     public let signature: String
     public let isStatic: Bool
