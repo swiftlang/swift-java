@@ -22,7 +22,12 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   struct DependentConfigFile {
     let swiftModuleName: String
+    // The specific URL of a swift-java.config file
     let configURL: URL
+    // Specific path of sources of this module, usually the same directory where
+    // swift-java.config is but not always. This can be passed as --depends-on
+    // if swiftpm cannot find the location automatically though module dependency
+    let sourceDirURL: URL?
   }
 
   var pluginName: String = "swift-java"
@@ -83,11 +88,15 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       arguments += ["--static-build-config", resolvedURL.absoluteURL.path(percentEncoded: false)]
     }
 
-    let dependentConfigFilesArguments = dependentConfigFiles.flatMap { dependentConfigFile in
-      [
-        "--depends-on",
-        "\(dependentConfigFile.swiftModuleName)=\(dependentConfigFile.configURL.path(percentEncoded: false))",
-      ]
+    let dependentConfigFilesArguments = dependentConfigFiles.flatMap { dependentConfigFile -> [String] in
+      let configPath = dependentConfigFile.configURL.path(percentEncoded: false)
+      let value: String
+      if let src = dependentConfigFile.sourceDirURL {
+        value = "\(dependentConfigFile.swiftModuleName)=\(configPath),\(src.path(percentEncoded: false))"
+      } else {
+        value = "\(dependentConfigFile.swiftModuleName)=\(configPath)"
+      }
+      return ["--depends-on", value]
     }
     arguments += dependentConfigFilesArguments
 
@@ -292,7 +301,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
         dependentConfigFiles.append(
-          DependentConfigFile(swiftModuleName: target.name, configURL: dependencyConfigURL)
+          DependentConfigFile(
+            swiftModuleName: target.name,
+            configURL: dependencyConfigURL,
+            sourceDirURL: target.sourceModule?.directoryURL,
+          )
         )
       }
     }

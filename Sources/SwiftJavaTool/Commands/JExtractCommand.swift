@@ -175,7 +175,7 @@ extension SwiftJava.JExtractCommand {
     print("[debug][swift-java] Running 'swift-java jextract' in mode: " + "\(config.effectiveMode)".bold)
 
     // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn)
+    let dependentConfigs = try parseDependsOnSyntax(dependsOn: self.dependsOn)
     print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
 
     try jextractSwift(config: config, dependentConfigs: dependentConfigs)

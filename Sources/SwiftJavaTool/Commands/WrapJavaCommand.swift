@@ -105,7 +105,7 @@ extension SwiftJava.WrapJavaCommand {
     )
 
     // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { dependentConfig in
+    let dependentConfigs = try parseDependsOnSyntax(dependsOn: self.dependsOn).map { dependentConfig in
       guard let moduleName = dependentConfig.swiftModuleName else {
         throw JavaToSwiftError.badConfigOption(self.dependsOn.joined(separator: " "))
       }

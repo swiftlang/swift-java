@@ -431,29 +431,117 @@ public struct DependentConfig {
   public let swiftModuleName: String?
   public let configuration: Configuration
 
-  public init(swiftModuleName: String?, configuration: Configuration) {
+  /// Absolute paths to the dependent module's Swift source directories (or individual files).
+  ///
+  /// Populated by `parseDependsOnSyntax` from, in order:
+  /// 1. Explicit `,<sources-path>` suffixes on the `--depends-on` argument.
+  /// 2. The dependent's `configuration.inputSwiftDirectory`, resolved relative to the
+  ///    directory containing the config file.
+  /// 3. `<configParent>/Sources/<swiftModuleName>/` if it exists (SwiftPM convention).
+  /// 4. The directory containing the config file.
+  ///
+  /// Empty only when none of the above could be resolved; in that case cross-module
+  /// type lookups for this dependent will fail and `jextract` will log a warning.
+  public let swiftSourcePaths: [URL]
+
+  public init(swiftModuleName: String?, configuration: Configuration, swiftSourcePaths: [URL] = []) {
     self.swiftModuleName = swiftModuleName
     self.configuration = configuration
+    self.swiftSourcePaths = swiftSourcePaths
   }
 }
 
 /// Load all dependent configs configured with `--depends-on`.
-public func loadDependentConfigs(dependsOn: [String]) throws -> [DependentConfig] {
-  try dependsOn.map { dependentConfig in
-    let equalLoc = dependentConfig.firstIndex(of: "=")
+///
+/// Argument grammar: `[<ModuleName>=]<configPath>[,<sourcesPath>...]`.
+///
+/// The optional comma-separated sources paths override the default inference chain
+/// described on ``DependentConfig/swiftSourcePaths``.
+public func parseDependsOnSyntax(dependsOn: [String]) throws -> [DependentConfig] {
+  try dependsOn.map(parseDependsOnSyntax)
+}
 
-    var swiftModuleName: String? = nil
-    if let equalLoc {
-      swiftModuleName = String(dependentConfig[..<equalLoc])
-    }
+/// Parse a single `--depends-on` argument
+public func parseDependsOnSyntax(_ dependsOn: String) throws -> DependentConfig {
+  let equalLoc = dependsOn.firstIndex(of: "=")
 
-    let afterEqual = equalLoc.map { dependentConfig.index(after: $0) } ?? dependentConfig.startIndex
-    let configFileName = String(dependentConfig[afterEqual...])
-
-    let config = try readConfiguration(configPath: URL(fileURLWithPath: configFileName)) ?? Configuration()
-
-    return DependentConfig(swiftModuleName: swiftModuleName, configuration: config)
+  var swiftModuleName: String? = nil
+  if let equalLoc {
+    swiftModuleName = String(dependsOn[..<equalLoc])
   }
+
+  let afterEqual = equalLoc.map { dependsOn.index(after: $0) } ?? dependsOn.startIndex
+  let valueSection = dependsOn[afterEqual...]
+
+  // Split by ',' to separate config path from any explicit sources paths.
+  let pieces = valueSection.split(separator: ",", omittingEmptySubsequences: true).map(String.init)
+  guard let configFileName = pieces.first else {
+    throw EmptyDependsOnArgumentError(argument: dependsOn)
+  }
+  let explicitSources = pieces.dropFirst().map { URL(fileURLWithPath: $0) }
+
+  let configURL = URL(fileURLWithPath: configFileName)
+  let config = try readConfiguration(configPath: configURL) ?? Configuration()
+
+  let sources = resolveDependentSources(
+    moduleName: swiftModuleName,
+    configURL: configURL,
+    configuration: config,
+    explicit: explicitSources,
+  )
+
+  return DependentConfig(
+    swiftModuleName: swiftModuleName,
+    configuration: config,
+    swiftSourcePaths: sources,
+  )
+}
+
+/// Apply the fallback chain described on ``DependentConfig/swiftSourcePaths``.
+///
+/// Returns an empty array when nothing could be resolved. Callers should log a warning
+/// in that case.
+private func resolveDependentSources(
+  moduleName: String?,
+  configURL: URL,
+  configuration: Configuration,
+  explicit: [URL],
+) -> [URL] {
+  if !explicit.isEmpty {
+    return explicit
+  }
+
+  let configParent = configURL.deletingLastPathComponent()
+  let fm = FileManager.default
+
+  // 2) Dependent config's inputSwiftDirectory, relative to the config file's directory.
+  if let input = configuration.inputSwiftDirectory, !input.isEmpty {
+    let parts = input.split(separator: ",", omittingEmptySubsequences: true).map(String.init)
+    let urls: [URL] = parts.map { part in
+      let url = URL(fileURLWithPath: part, relativeTo: configParent).absoluteURL
+      return url
+    }
+    if urls.allSatisfy({ fm.fileExists(atPath: $0.path) }) {
+      return urls
+    }
+  }
+
+  // 3) <configParent>/Sources/<ModuleName>/ (SwiftPM convention).
+  if let moduleName, !moduleName.isEmpty {
+    let candidate =
+      configParent
+      .appendingPathComponent("Sources", isDirectory: true)
+      .appendingPathComponent(moduleName, isDirectory: true)
+    if fm.fileExists(atPath: candidate.path) {
+      return [candidate]
+    }
+  }
+
+  // 4) Config file's own parent directory.
+  guard fm.fileExists(atPath: configParent.path) else {
+    return []
+  }
+  return [configParent]
 }
 
 public func findSwiftJavaClasspaths(swiftModule: String) -> [String] {
@@ -535,6 +623,13 @@ public struct ConfigurationError: Error {
     self.text = text
     self.file = file
     self.line = line
+  }
+}
+
+public struct EmptyDependsOnArgumentError: Error, CustomStringConvertible {
+  public let argument: String
+  public var description: String {
+    "Empty '--depends-on' argument: '\(argument)'"
   }
 }
 

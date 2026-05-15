@@ -29,6 +29,7 @@ struct JavaTypeAnnotationsTests {
       moduleName: "TestModule",
       [SwiftJavaInputFile(syntax: "" as SourceFileSyntax, path: "Fake.swift")],
       config: nil,
+      sourceDependencies: SourceDependencies(),
       log: Logger(label: "test", logLevel: .critical)
     )
     self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)

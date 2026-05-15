@@ -43,8 +43,10 @@ public final class Swift2JavaTranslator {
   /// complain about missing declared outputs
   var filteredOutPaths: [String] = []
 
-  /// A list of used Swift class names that live in dependencies, e.g. `JavaInteger`
-  package var dependenciesClasses: [String] = []
+  /// Sources jextract needs for symbol resolution but does not generate bindings
+  /// for: wrapped Java classes plus real Swift sources from dependent modules.
+  /// Populated by `SwiftToJava.run` before `analyze()` runs.
+  package var sourceDependencies = SourceDependencies()
 
   // ==== Output state
 
@@ -204,6 +206,7 @@ extension Swift2JavaTranslator {
       moduleName: self.swiftModuleName,
       inputs + [dependenciesSource],
       config: self.config,
+      sourceDependencies: self.sourceDependencies,
       buildConfig: self.buildConfig,
       log: self.log,
     )
@@ -267,7 +270,7 @@ extension Swift2JavaTranslator {
 
   /// Returns a source file that contains all the available dependency classes.
   private func buildDependencyClassesSourceFile() -> SwiftJavaInputFile {
-    let contents = self.dependenciesClasses.map {
+    let contents = self.sourceDependencies.javaClasses.map {
       "@JavaClass public class \($0) {}"
     }
     .joined(separator: "\n")

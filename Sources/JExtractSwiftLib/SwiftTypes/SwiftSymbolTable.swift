@@ -90,6 +90,7 @@ extension SwiftSymbolTable {
     moduleName: String,
     _ inputFiles: some Collection<SwiftJavaInputFile>,
     config: Configuration?,
+    sourceDependencies: SourceDependencies,
     buildConfig: any BuildConfiguration = .jextractDefault,
     log: Logger,
   ) -> SwiftSymbolTable {
@@ -115,6 +116,29 @@ extension SwiftSymbolTable {
       }
     }
 
+    for dependentModuleName in sourceDependencies.swiftModuleNames {
+      // The module may already have been loaded as a known/built-in module
+      // (e.g. Swift, Foundation) above
+      guard importedModules[dependentModuleName] == nil else {
+        continue
+      }
+      let dependentInputs = sourceDependencies.swiftModuleInputs[dependentModuleName] ?? []
+      var dependencyModuleBuilder = SwiftParsedModuleSymbolTableBuilder(
+        moduleName: dependentModuleName,
+        importedModules: importedModules,
+        buildConfig: buildConfig,
+      )
+      for input in dependentInputs {
+        dependencyModuleBuilder.handle(sourceFile: input.syntax, sourceFilePath: input.path)
+      }
+      let dependencyModule = dependencyModuleBuilder.finalize()
+      importedModules[dependentModuleName] = dependencyModule
+      log.info(
+        "Loaded dependent module '\(dependentModuleName)' from \(dependentInputs.count) source(s); "
+          + "top-level types [\(dependencyModule.topLevelTypes.count)]: \(dependencyModule.topLevelTypes.keys.sorted())"
+      )
+    }
+
     // Load stub type declarations for imported modules from config.
     // This enables types from external modules (e.g. extension targets) to be
     // resolved in the symbol table without scanning their actual source.
@@ -125,7 +149,7 @@ extension SwiftSymbolTable {
           let sourceFile = Parser.parse(source: source)
           var stubBuilder = SwiftParsedModuleSymbolTableBuilder(
             moduleName: stubModuleName,
-            importedModules: ["Swift": importedModules["Swift"]!],
+            importedModules: importedModules,
             buildConfig: buildConfig,
           )
           stubBuilder.handle(sourceFile: sourceFile, sourceFilePath: "\(stubModuleName)_stub.swift")

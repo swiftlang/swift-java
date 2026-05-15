@@ -18,6 +18,7 @@ import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.swift.swiftkit.core.SwiftArena;
 
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -84,5 +85,14 @@ public class MySwiftLibraryTest {
         assertEquals(101, MySwiftLibrary.globalOverloadedA(100));
         assertEquals(202, MySwiftLibrary.globalOverloadedB(200));
         assertEquals(303, MySwiftLibrary.globalOverloaded(300));
+    }
+
+    @Test
+    void call_consumeValueFromOtherModule_crossModule() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var value = com.example.swift.dep.ValueInDependencyModule.init(41, arena);
+            int result = MySwiftLibrary.consumeValueFromOtherModule(value);
+            assertEquals(42, result);
+        }
     }
 }

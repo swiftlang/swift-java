@@ -16,6 +16,7 @@ import Foundation
 import OrderedCollections
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
+import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
@@ -112,7 +113,10 @@ public struct SwiftToJava {
       partialResult[moduleName] = javaPackage
     }
 
-    translator.dependenciesClasses = Array(wrappedJavaClassesLookupTable.keys)
+    translator.sourceDependencies.javaClasses = Array(wrappedJavaClassesLookupTable.keys)
+    for config in dependentConfigs {
+      translator.sourceDependencies.loadSwiftSources(from: config, log: translator.log)
+    }
 
     try translator.analyze()
 
@@ -145,17 +149,6 @@ public struct SwiftToJava {
     print("[swift-java] Imported Swift module '\(swiftModule)': " + "done.".green)
   }
 
-  func canExtract(from file: URL) -> Bool {
-    guard file.lastPathComponent.hasSuffix(".swift") || file.lastPathComponent.hasSuffix(".swiftinterface") else {
-      return false
-    }
-    if file.lastPathComponent.hasSuffix("+SwiftJava.swift") {
-      return false
-    }
-
-    return true
-  }
-
   /// Compute a relative path (sans `.swift` extension) for a file against the
   /// input paths, suitable for jextract filter matching
   func computeRelativePath(file: URL, inputPaths: [URL]) -> String {
@@ -173,7 +166,17 @@ public struct SwiftToJava {
     // Fallback: just the filename
     return file.lastPathComponent
   }
+}
 
+func canExtract(from file: URL) -> Bool {
+  guard file.lastPathComponent.hasSuffix(".swift") || file.lastPathComponent.hasSuffix(".swiftinterface") else {
+    return false
+  }
+  if file.lastPathComponent.hasSuffix("+SwiftJava.swift") {
+    return false
+  }
+
+  return true
 }
 
 extension URL {
