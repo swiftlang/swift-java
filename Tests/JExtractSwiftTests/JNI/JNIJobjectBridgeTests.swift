@@ -72,19 +72,19 @@ struct JNIJobjectBridgeTests {
   func generatesBridgeDeclarationForGenericType() throws {
     try assertOutput(
       input: """
-        public struct MyID<T: Hashable>: Hashable {}
-        public func f() -> [MyID<Int>: String] {}
+        public struct MyID<T: Hashable, U>: Hashable {}
+        public func f() -> [MyID<Int, Bool>: String] {}
         """,
       .jni,
       .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        enum _JNIBridge_MyID<T: Hashable>: JextractedGenericTypeBridge {
-          typealias SwiftType = MyID<T>
+        enum _JNIBridge_MyID<T: Hashable, U>: JextractedGenericTypeBridge {
+          typealias SwiftType = MyID<T, U>
         """,
         """
-        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _JNIBridge_MyID<Int>.self, valueBridge: JavaBoxableBridge<String>.self)
+        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _JNIBridge_MyID<Int, Bool>.self, valueBridge: JavaBoxableBridge<String>.self)
         """,
       ]
     )

@@ -814,7 +814,7 @@ extension JNISwift2JavaGenerator {
       if type.swiftNominal.genericParameters.isEmpty {
         ""
       } else {
-        "<\(type.swiftNominal.genericParameters.map { $0.syntax.trimmedDescription }.joined(separator: ", "))>"
+        "<\(type.swiftNominal.genericParameters.map { $0.syntax.trimmedDescription }.joined(separator: " "))>"
       }
     let bridgedSwiftType =
       if type.genericParameterNames.isEmpty {
