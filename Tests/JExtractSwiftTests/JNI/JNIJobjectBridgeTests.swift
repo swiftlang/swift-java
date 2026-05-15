@@ -68,12 +68,14 @@ struct JNIJobjectBridgeTests {
   }
 
 
-  @Test("JNI generates explicit bridges for generic dictionary keys")
+  @Test("JNI generates explicit bridges for generic dictionary keys and values")
   func generatesBridgeDeclarationForGenericType() throws {
     try assertOutput(
       input: """
         public struct MyID<T: Hashable, U>: Hashable {}
-        public func f() -> [MyID<Int, Bool>: String] {}
+        public struct MyValue<T, O, E> where O : Swift.Comparable, E : Swift.Error {}
+        public enum Never: Error {}
+        public func f() -> [MyID<Int, Bool>: MyValue<Int, Bool, Never>] {}
         """,
       .jni,
       .swift,
@@ -84,7 +86,11 @@ struct JNIJobjectBridgeTests {
           typealias SwiftType = MyID<T, U>
         """,
         """
-        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _JNIBridge_MyID<Int, Bool>.self, valueBridge: JavaBoxableBridge<String>.self)
+        enum _JNIBridge_MyValue<T, O, E>: JextractedGenericTypeBridge where O : Swift.Comparable, E : Swift.Error {
+          typealias SwiftType = MyValue<T, O, E>
+        """,
+        """
+        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _JNIBridge_MyID<Int, Bool>.self, valueBridge: _JNIBridge_MyValue<Int, Bool, Never>.self)
         """,
       ]
     )

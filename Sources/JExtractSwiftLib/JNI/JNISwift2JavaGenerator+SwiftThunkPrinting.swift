@@ -816,6 +816,7 @@ extension JNISwift2JavaGenerator {
       } else {
         "<\(type.swiftNominal.genericParameters.map { $0.syntax.trimmedDescription }.joined(separator: " "))>"
       }
+    let bridgeWhereClause = type.swiftNominal.genericWhereClause?.trimmedDescription
     let bridgedSwiftType =
       if type.genericParameterNames.isEmpty {
         type.effectiveSwiftTypeName
@@ -824,7 +825,14 @@ extension JNISwift2JavaGenerator {
       }
     let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
 
-    printer.printBraceBlock("enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol)") { printer in
+    let bridgeDeclaration =
+      if let bridgeWhereClause {
+        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol) \(bridgeWhereClause)"
+      } else {
+        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol)"
+      }
+
+    printer.printBraceBlock(bridgeDeclaration) { printer in
       printer.print("typealias SwiftType = \(bridgedSwiftType)")
       printer.println()
       printer.printBraceBlock("static var javaClass: jclass") { printer in
