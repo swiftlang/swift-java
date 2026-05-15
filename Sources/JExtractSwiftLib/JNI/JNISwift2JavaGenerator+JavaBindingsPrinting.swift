@@ -504,25 +504,40 @@ extension JNISwift2JavaGenerator {
     }
     printer.println()
 
-    let requiresSwiftArena = decl.cases.compactMap {
-      self.translatedEnumCase(for: $0)
-    }.contains(where: \.requiresSwiftArena)
+    // Ensure all cases can be generated to avoid inconsistency with the discriminator.
+    let allCasesCanBeTranslated = decl.cases.allSatisfy({
+      translatedEnumCase(for: $0) != nil
+    })
+    if !allCasesCanBeTranslated {
+      printer.print(
+        """
+        // This is unavailable because it contains unsupported cases.
+        private Case getCase() {
+          return null;
+        }
+        """
+      )
+    } else {
+      let requiresSwiftArena = decl.cases.compactMap {
+        self.translatedEnumCase(for: $0)
+      }.contains(where: \.requiresSwiftArena)
 
-    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
-      printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
-        for enumCase in decl.cases {
-          guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-            continue
-          }
-          if enumCase.parameters.isEmpty {
-            printer.print(
-              "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
-            )
-          } else {
-            let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
-            printer.print(
-              "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
-            )
+      printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
+        printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
+          for enumCase in decl.cases {
+            guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+              continue
+            }
+            if enumCase.parameters.isEmpty {
+              printer.print(
+                "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
+              )
+            } else {
+              let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
+              printer.print(
+                "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
+              )
+            }
           }
         }
       }

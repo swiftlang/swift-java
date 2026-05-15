@@ -88,6 +88,11 @@ public func makeIntGenericEnum() -> GenericEnum<Int> {
   if Bool.random() { return .foo } else { return .bar }
 }
 
+public enum GenericEnumWithValue<T> {
+  case some(T)
+  case none
+}
+
 extension MyID where T: BinaryInteger {
   // Conditional extension functions are not exported
   public func computeSomeValue() -> Int {

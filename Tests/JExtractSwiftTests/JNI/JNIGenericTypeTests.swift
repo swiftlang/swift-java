@@ -253,6 +253,43 @@ struct JNIGenericTypeTests {
   }
 
   @Test
+  func genericEnumWithAssociatedValue() throws {
+    let input =
+      #"""
+      public enum MyOptional<Wrapped> {
+        case some(Wrapped)
+        case none
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        public enum Discriminator {
+          SOME,
+          NONE
+        }
+        """,
+        """
+        public sealed interface Case {
+          record None() implements Case {}
+        }
+        """,
+        """
+        // This is unavailable because it contains unsupported cases.
+        private Case getCase() {
+          return null;
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
   func nestedGenericType() throws {
     let input =
       #"""
