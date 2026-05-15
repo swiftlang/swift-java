@@ -350,9 +350,6 @@ struct JNIEnumTests {
       expectedChunks: [],
       notExpectedChunks: [
         """
-        enum _JNI_MyEnum
-        """,
-        """
         public func Java_com_example_swift_MyEnum__00024getAsFirst__J("
         """,
         """
