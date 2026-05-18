@@ -280,9 +280,11 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        // This is unavailable because it contains unsupported cases.
-        private Case getCase() {
-          return null;
+        public Case getCase() {
+          return switch (this.getDiscriminator()) {
+           case SOME -> throw new UnsupportedOperationException("MyOptional.some contains unsupported associated values.");
+           case NONE -> new Case.None();
+          };
         }
         """,
       ]

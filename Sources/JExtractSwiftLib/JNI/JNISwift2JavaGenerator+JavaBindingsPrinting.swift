@@ -504,30 +504,14 @@ extension JNISwift2JavaGenerator {
     }
     printer.println()
 
-    // Ensure all cases can be generated to avoid inconsistency with the discriminator.
-    let allCasesCanBeTranslated = decl.cases.allSatisfy({
-      translatedEnumCase(for: $0) != nil
-    })
-    if !allCasesCanBeTranslated {
-      printer.print(
-        """
-        // This is unavailable because it contains unsupported cases.
-        private Case getCase() {
-          return null;
-        }
-        """
-      )
-    } else {
-      let requiresSwiftArena = decl.cases.compactMap {
-        self.translatedEnumCase(for: $0)
-      }.contains(where: \.requiresSwiftArena)
+    let requiresSwiftArena = decl.cases.compactMap {
+      self.translatedEnumCase(for: $0)
+    }.contains(where: \.requiresSwiftArena)
 
-      printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
-        printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
-          for enumCase in decl.cases {
-            guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-              continue
-            }
+    printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
+      printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
+        for enumCase in decl.cases {
+          if let translatedCase = self.translatedEnumCase(for: enumCase) {
             if enumCase.parameters.isEmpty {
               printer.print(
                 "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
@@ -538,6 +522,10 @@ extension JNISwift2JavaGenerator {
                 "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
               )
             }
+          } else {
+            printer.print(
+              "case \(enumCase.name.uppercased()) -> throw new UnsupportedOperationException(\"\(decl.effectiveJavaName).\(enumCase.name) contains unsupported associated values.\");"
+            )
           }
         }
       }
