@@ -213,6 +213,10 @@ struct SpecializationTests {
         public func count() -> Int {
           return items.count
         }
+
+        public static func elementDescription() -> String {
+          return "\(Element.self)"
+        }
       }
 
       public struct Fish {
@@ -226,10 +230,21 @@ struct SpecializationTests {
       input: input,
       .jni,
       .java,
-      detectChunkByInitialLines: 1,
+      detectChunkByInitialLines: 2,
       expectedChunks: [
         "public final class FishBox implements JNISwiftInstance {",
-        "public long count()",
+        """
+        public long count() {
+          return FishBox.$count(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        private static native long $count(long selfPointer, long selfTypePointer);
+        """,
+        """
+        public static java.lang.String elementDescription() {
+          return FishBox.$elementDescription($typeMetadataAddressDowncall());
+        }
+        private static native java.lang.String $elementDescription(long selfTypePointer);
+        """,
       ],
     )
   }

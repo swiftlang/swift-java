@@ -36,6 +36,11 @@ public class BoxSpecializationTest {
         Method setCount = fishBoxClass.getMethod("setCount", long.class);
         assertNotNull(setCount);
 
+        // Static method
+        Method describeElement = fishBoxClass.getMethod("describeElement");
+        assertNotNull(describeElement);
+        assertEquals(String.class, describeElement.getReturnType());
+
         // Constrained extension method (only on FishBox, not on Box)
         Method describeFish = fishBoxClass.getMethod("describeFish");
         assertNotNull(describeFish);
@@ -55,5 +60,10 @@ public class BoxSpecializationTest {
         assertEquals(1, Box.class.getTypeParameters().length,
             "Box should have one generic type parameter");
         assertEquals("Element", Box.class.getTypeParameters()[0].getName());
+    }
+
+    @Test
+    void callFishBoxStaticMethod() {
+        assertEquals("Fish", FishBox.describeElement());
     }
 }

@@ -18,6 +18,10 @@ public struct Box<Element>: Hashable {
   public init(count: Int64) {
     self.count = count
   }
+
+  public static func describeElement() -> String {
+    String(describing: Element.self)
+  }
 }
 
 public struct Fish: Hashable {

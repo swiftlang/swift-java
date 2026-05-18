@@ -349,11 +349,19 @@ extension JNISwift2JavaGenerator {
       }
 
       for method in decl.methods {
+        if isEffectivelyGeneric && method.isStatic {
+          self.logger.debug("Skipping static method '\(method.name)' on unspecialized generic type '\(decl.effectiveJavaName)'")
+          continue
+        }
         printFunctionDowncallMethods(&printer, method)
         printer.println()
       }
 
       for variable in decl.variables {
+        if isEffectivelyGeneric && variable.isStatic {
+          self.logger.debug("Skipping static property '\(variable.name)' on unspecialized generic type '\(decl.effectiveJavaName)'")
+          continue
+        }
         printFunctionDowncallMethods(&printer, variable)
         printer.println()
       }

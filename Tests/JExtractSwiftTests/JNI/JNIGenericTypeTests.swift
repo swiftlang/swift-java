@@ -215,6 +215,39 @@ struct JNIGenericTypeTests {
   }
 
   @Test
+  func generateOpenerForGenericStaticMethod() throws {
+    let input =
+      #"""
+      public struct Box<Element> {
+        public static func describeElement() -> String {
+          "\(Element.self)"
+        }
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        protocol _SwiftModule_Box_opener {
+          static func _describeElement(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring?
+        }
+        """,
+        #"""
+        extension Box: _SwiftModule_Box_opener {
+          static func _describeElement(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
+            return Box<Element>.describeElement().getJNILocalRefValue(in: environment)
+          }
+        }
+        """#,
+      ]
+    )
+  }
+
+  @Test
   func genericValueInEnumCase() throws {
     let input =
       #"""
