@@ -26,7 +26,7 @@ struct JNIJobjectBridgeTests {
         """,
       .jni,
       .swift,
-      detectChunkByInitialLines: 2,
+      detectChunkByInitialLines: 1,
       expectedChunks: [
         """
         private enum _JNI_ReefFish {
@@ -48,7 +48,7 @@ struct JNIJobjectBridgeTests {
           }
         """,
         """
-        enum _JNIBridge_ReefFish: JextractedTypeBridge {
+        struct _JNIBridge_ReefFish: JextractedTypeBridge {
           typealias SwiftType = ReefFish
 
           static var javaClass: jclass {
@@ -82,15 +82,37 @@ struct JNIJobjectBridgeTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        enum _JNIBridge_MyID<T: Hashable, U>: JextractedGenericTypeBridge {
+        struct _JNIBridge_MyID<T: Hashable, U>: JextractedGenericTypeBridge {
           typealias SwiftType = MyID<T, U>
         """,
         """
-        enum _JNIBridge_MyValue<T, O, E>: JextractedGenericTypeBridge where O : Swift.Comparable, E : Swift.Error {
+        struct _JNIBridge_MyValue<T, O, E>: JextractedGenericTypeBridge where O : Swift.Comparable, E : Swift.Error {
           typealias SwiftType = MyValue<T, O, E>
         """,
         """
         return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: _JNIBridge_MyID<Int, Bool>.self, valueBridge: _JNIBridge_MyValue<Int, Bool, Never>.self)
+        """,
+      ]
+    )
+  }
+
+  @Test("JNI generates explicit bridges for variadic generic types")
+  func generatesBridgeDeclarationForVariadicGenericType() throws {
+    try assertOutput(
+      input: """
+        public struct VariadicBox<each T> {}
+        public func f() -> [Int: VariadicBox<Int, String>] {}
+        """,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        struct _JNIBridge_VariadicBox<each T>: JextractedGenericTypeBridge {
+          typealias SwiftType = VariadicBox<repeat each T>
+        """,
+        """
+        return SwiftModule.f().dictionaryGetJNIValue(in: environment, keyBridge: JavaBoxableBridge<Int>.self, valueBridge: _JNIBridge_VariadicBox<Int, String>.self)
         """,
       ]
     )
