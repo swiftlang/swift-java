@@ -366,8 +366,7 @@ extension JNISwift2JavaGenerator {
       guard let selfParameter else {
         return nil
       }
-      let selfType = selfParameter.selfType
-      let isGeneric = selfType.asNominalTypeDeclaration?.isGeneric == true
+      let isGeneric = selfParameter.selfType.asNominalTypeDeclaration?.isGeneric == true
       guard isGeneric else {
         return nil
       }
@@ -381,7 +380,7 @@ extension JNISwift2JavaGenerator {
       case .staticMethod, .initializer:
         return TranslatedParameter(
           parameter: JavaParameter(name: "selfTypePointer", type: .long),
-          conversion: .call(.constant(""), function: "$typeMetadataAddressDowncall"),
+          conversion: .constant("$typeMetadataAddressDowncall()"),
         )
       }
     }
