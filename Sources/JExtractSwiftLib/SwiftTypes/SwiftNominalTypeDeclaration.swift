@@ -205,6 +205,26 @@ package class SwiftGenericParameterDeclaration: SwiftTypeDeclaration {
     self.syntax = node
     super.init(sourceFilePath: sourceFilePath, moduleName: moduleName, name: node.name.text)
   }
+
+  var hasEach: Bool {
+    syntax.specifier?.tokenKind == .keyword(.each)
+  }
+
+  var packReferenceName: String {
+    if hasEach {
+      "each \(name)"
+    } else {
+      name
+    }
+  }
+
+  var packExpansionName: String {
+    if hasEach {
+      "repeat each \(name)"
+    } else {
+      name
+    }
+  }
 }
 
 /// A plain typealias will resolve as the right hand type in generated code.
