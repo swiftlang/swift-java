@@ -213,11 +213,6 @@ final class Swift2JavaVisitor {
       functionSignature: signature,
     )
 
-    if typeContext?.swiftNominal.isGeneric == true && typeContext?.isSpecialization != true && imported.isStatic {
-      log.debug("Skip importing static function in generic type: '\(node.qualifiedNameForDebug)'")
-      return
-    }
-
     log.debug("Record imported method \(node.qualifiedNameForDebug)")
     if let typeContext {
       typeContext.methods.append(imported)
@@ -450,11 +445,6 @@ final class Swift2JavaVisitor {
       apiKind: kind,
       functionSignature: signature,
     )
-
-    if typeContext?.swiftNominal.isGeneric == true && typeContext?.isSpecialization != true && imported.isStatic {
-      log.debug("Skip importing static accessor in generic type: '\(node.qualifiedNameForDebug)'")
-      return
-    }
 
     log.debug(
       "Record imported variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
