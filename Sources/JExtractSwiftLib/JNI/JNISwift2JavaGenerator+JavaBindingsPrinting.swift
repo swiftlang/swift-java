@@ -523,8 +523,9 @@ extension JNISwift2JavaGenerator {
               )
             }
           } else {
+            logger.warning("\(decl.effectiveJavaName).\(enumCase.name) contains unsupported values so its getCase() method call throws an error.")
             printer.print(
-              "case \(enumCase.name.uppercased()) -> throw new UnsupportedOperationException(\"\(decl.effectiveJavaName).\(enumCase.name) contains unsupported associated values.\");"
+              "case \(enumCase.name.uppercased()) -> throw new UnsupportedOperationException(\"\(decl.effectiveJavaName).\(enumCase.name) contains unsupported values.\");"
             )
           }
         }

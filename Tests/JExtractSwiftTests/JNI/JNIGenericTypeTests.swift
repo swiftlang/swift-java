@@ -282,7 +282,7 @@ struct JNIGenericTypeTests {
         """
         public Case getCase() {
           return switch (this.getDiscriminator()) {
-           case SOME -> throw new UnsupportedOperationException("MyOptional.some contains unsupported associated values.");
+           case SOME -> throw new UnsupportedOperationException("MyOptional.some contains unsupported values.");
            case NONE -> new Case.None();
           };
         }
