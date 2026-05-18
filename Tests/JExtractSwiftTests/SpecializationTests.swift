@@ -213,7 +213,7 @@ struct SpecializationTests {
         public func count() -> Int {
           return items.count
         }
-      
+
         public static func elementDescription() -> String {
           return "\(Element.self)"
         }
@@ -244,7 +244,7 @@ struct SpecializationTests {
           return FishBox.$elementDescription($typeMetadataAddressDowncall());
         }
         private static native java.lang.String $elementDescription(long selfTypePointer);
-        """
+        """,
       ],
     )
   }
