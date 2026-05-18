@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct Box<Element> {
+public struct Box<Element>: Hashable {
   public var count: Int64
 
   public init(count: Int64) {
@@ -20,7 +20,7 @@ public struct Box<Element> {
   }
 }
 
-public struct Fish {
+public struct Fish: Hashable {
   public var name: String
 
   public init(name: String) {

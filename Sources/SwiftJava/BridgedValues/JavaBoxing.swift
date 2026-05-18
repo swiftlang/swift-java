@@ -329,10 +329,13 @@ class AnySwiftDictionaryBox {
 }
 
 /// Generic subclass that wraps a concrete `[K: V]` Swift dictionary.
-final class SwiftDictionaryBox<K: JavaBoxable & Hashable, V: JavaBoxable>: AnySwiftDictionaryBox {
-  let dictionary: [K: V]
+final class SwiftDictionaryBox<KeyBridge: JobjectBridge, ValueBridge: JobjectBridge>: AnySwiftDictionaryBox
+where KeyBridge.SwiftType: Hashable {
+  typealias Key = KeyBridge.SwiftType
+  typealias Value = ValueBridge.SwiftType
+  let dictionary: [Key: Value]
 
-  init(_ dictionary: [K: V]) {
+  init(_ dictionary: [Key: Value]) {
     self.dictionary = dictionary
   }
 
@@ -345,19 +348,19 @@ final class SwiftDictionaryBox<K: JavaBoxable & Hashable, V: JavaBoxable>: AnySw
   }
 
   override func get(key: jobject?, environment: JNIEnvironment) -> jobject? {
-    guard environment.interface.IsInstanceOf(environment, key, K.javaBoxClass) == JNI_TRUE else {
+    guard KeyBridge.isJavaObject(key, in: environment) else {
       return nil
     }
-    let swiftKey = K.fromJavaObject(key, in: environment)
+    let swiftKey = KeyBridge.fromJavaObject(key, in: environment)
     guard let value = dictionary[swiftKey] else { return nil }
-    return value.toJavaObject(in: environment)
+    return ValueBridge.toJavaObject(value, in: environment)
   }
 
   override func containsKey(key: jobject?, environment: JNIEnvironment) -> Bool {
-    guard environment.interface.IsInstanceOf(environment, key, K.javaBoxClass) == JNI_TRUE else {
+    guard KeyBridge.isJavaObject(key, in: environment) else {
       return false
     }
-    let swiftKey = K.fromJavaObject(key, in: environment)
+    let swiftKey = KeyBridge.fromJavaObject(key, in: environment)
     return dictionary[swiftKey] != nil
   }
 
@@ -366,7 +369,7 @@ final class SwiftDictionaryBox<K: JavaBoxable & Hashable, V: JavaBoxable>: AnySw
     let objectClass = environment.interface.FindClass(environment, "java/lang/Object")
     let result = environment.interface.NewObjectArray(environment, jsize(keysArray.count), objectClass, nil)
     for (i, key) in keysArray.enumerated() {
-      let javaKey = key.toJavaObject(in: environment)
+      let javaKey = KeyBridge.toJavaObject(key, in: environment)
       environment.interface.SetObjectArrayElement(environment, result, jsize(i), javaKey)
     }
     return result
@@ -377,7 +380,7 @@ final class SwiftDictionaryBox<K: JavaBoxable & Hashable, V: JavaBoxable>: AnySw
     let objectClass = environment.interface.FindClass(environment, "java/lang/Object")
     let result = environment.interface.NewObjectArray(environment, jsize(valuesArray.count), objectClass, nil)
     for (i, value) in valuesArray.enumerated() {
-      let javaValue = value.toJavaObject(in: environment)
+      let javaValue = ValueBridge.toJavaObject(value, in: environment)
       environment.interface.SetObjectArrayElement(environment, result, jsize(i), javaValue)
     }
     return result
@@ -400,10 +403,11 @@ class AnySwiftSetBox {
 }
 
 /// Generic subclass that wraps a concrete `Set<E>` Swift set.
-final class SwiftSetBox<E: JavaBoxable & Hashable>: AnySwiftSetBox {
-  let set: Set<E>
+final class SwiftSetBox<ElementBridge: JobjectBridge>: AnySwiftSetBox where ElementBridge.SwiftType: Hashable {
+  typealias Element = ElementBridge.SwiftType
+  let set: Set<Element>
 
-  init(_ set: Set<E>) {
+  init(_ set: Set<Element>) {
     self.set = set
   }
 
@@ -416,10 +420,10 @@ final class SwiftSetBox<E: JavaBoxable & Hashable>: AnySwiftSetBox {
   }
 
   override func contains(element: jobject?, environment: JNIEnvironment) -> Bool {
-    guard environment.interface.IsInstanceOf(environment, element, E.javaBoxClass) == JNI_TRUE else {
+    guard ElementBridge.isJavaObject(element, in: environment) else {
       return false
     }
-    let swiftElement = E.fromJavaObject(element, in: environment)
+    let swiftElement = ElementBridge.fromJavaObject(element, in: environment)
     return set.contains(swiftElement)
   }
 
@@ -428,7 +432,7 @@ final class SwiftSetBox<E: JavaBoxable & Hashable>: AnySwiftSetBox {
     let objectClass = environment.interface.FindClass(environment, "java/lang/Object")
     let result = environment.interface.NewObjectArray(environment, jsize(elements.count), objectClass, nil)
     for (i, element) in elements.enumerated() {
-      let javaElement = element.toJavaObject(in: environment)
+      let javaElement = ElementBridge.toJavaObject(element, in: environment)
       environment.interface.SetObjectArrayElement(environment, result, jsize(i), javaElement)
     }
     return result

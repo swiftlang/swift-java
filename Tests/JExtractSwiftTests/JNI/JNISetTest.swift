@@ -49,7 +49,7 @@ struct JNISetTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__")
         public func Java_com_example_swift_SwiftModule__00024f__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
-          return SwiftModule.f().setGetJNIValue(in: environment)
+          return SwiftModule.f().setGetJNIValue(in: environment, elementBridge: JavaBoxableBridge<String>.self)
         }
         """
       ]
@@ -87,7 +87,7 @@ struct JNISetTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong) {
-          SwiftModule.f(set: Set<String>(fromJNI: set, in: environment))
+          SwiftModule.f(set: Set<String>(fromJNI: set, in: environment, elementBridge: JavaBoxableBridge<String>.self))
         }
         """
       ]
@@ -125,7 +125,7 @@ struct JNISetTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__J")
         public func Java_com_example_swift_SwiftModule__00024f__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong) -> jlong {
-          return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment)).setGetJNIValue(in: environment)
+          return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment, elementBridge: JavaBoxableBridge<String>.self)).setGetJNIValue(in: environment, elementBridge: JavaBoxableBridge<String>.self)
         }
         """
       ]
@@ -220,7 +220,7 @@ struct JNISetTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JJ")
         public func Java_com_example_swift_SwiftModule__00024f__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, a: jlong, b: jlong) {
-          SwiftModule.f(a: Set<String>(fromJNI: a, in: environment), b: Set<Int64>(fromJNI: b, in: environment))
+          SwiftModule.f(a: Set<String>(fromJNI: a, in: environment, elementBridge: JavaBoxableBridge<String>.self), b: Set<Int64>(fromJNI: b, in: environment, elementBridge: JavaBoxableBridge<Int64>.self))
         }
         """
       ]
@@ -261,7 +261,7 @@ struct JNISetTest {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2")
         public func Java_com_example_swift_SwiftModule__00024f__JLjava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, set: jlong, element: jstring?) -> jlong {
-          return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment), element: String(fromJNI: element, in: environment)).setGetJNIValue(in: environment)
+          return SwiftModule.f(set: Set<String>(fromJNI: set, in: environment, elementBridge: JavaBoxableBridge<String>.self), element: String(fromJNI: element, in: environment)).setGetJNIValue(in: environment, elementBridge: JavaBoxableBridge<String>.self)
         }
         """
       ]

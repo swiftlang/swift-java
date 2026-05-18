@@ -121,6 +121,10 @@ package class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     self.syntax.inheritanceClause?.inheritedTypes
   }
 
+  var genericWhereClause: GenericWhereClauseSyntax? {
+    self.syntax.asProtocol(WithGenericParametersSyntax.self)?.genericWhereClause
+  }
+
   /// Returns true if this type conforms to `Sendable` and therefore is "threadsafe".
   private(set) lazy var isSendable: Bool = {
     // Check if Sendable is in the inheritance list

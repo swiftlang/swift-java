@@ -344,6 +344,14 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    let isNeverLike = type.swiftNominal.kind == .enum && type.cases.isEmpty // Never types cannot be values, so ignore them
+    if !type.isSpecialization && !isNeverLike {
+      printJNICache(&printer, type)
+      printer.println()
+      printNominalJavaBridge(&printer, type)
+      printer.println()
+    }
+
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
@@ -758,6 +766,82 @@ extension JNISwift2JavaGenerator {
       """
     ) { printer in
       body(&printer)
+    }
+  }
+
+  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let cacheName = JNICaching.cacheName(for: type)
+    let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
+    let signature =
+      if isEffectivelyGeneric {
+        "(JJLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+      } else {
+        "(JLorg/swift/swiftkit/core/SwiftArena;)L\(jniClassName);"
+      }
+
+    printer.printBraceBlock("private enum \(cacheName)") { printer in
+      printer.print(
+        """
+        private static let wrapMemoryAddressUnsafeMethod = _JNIMethodIDCache.Method(
+          name: "wrapMemoryAddressUnsafe",
+          signature: "\(signature)",
+          isStatic: true
+        )
+
+        private static let cache = _JNIMethodIDCache(
+          className: "\(jniClassName)",
+          methods: [wrapMemoryAddressUnsafeMethod]
+        )
+
+        static var javaClass: jclass {
+          cache.javaClass
+        }
+
+        static var wrapMemoryAddressUnsafe: jmethodID {
+          cache[wrapMemoryAddressUnsafeMethod]!
+        }
+        """
+      )
+    }
+  }
+
+  private func printNominalJavaBridge(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+    let bridgeName = JNICaching.bridgeName(for: type)
+    let cacheName = JNICaching.cacheName(for: type)
+    let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
+    let bridgeGenericClause =
+      if type.swiftNominal.genericParameters.isEmpty {
+        ""
+      } else {
+        "<\(type.swiftNominal.genericParameters.map { $0.syntax.trimmedDescription }.joined(separator: " "))>"
+      }
+    let bridgeWhereClause = type.swiftNominal.genericWhereClause?.trimmedDescription
+    let bridgedSwiftType =
+      if type.genericParameterNames.isEmpty {
+        type.effectiveSwiftTypeName
+      } else {
+        "\(type.baseTypeName)<\(type.genericParameterNames.joined(separator: ", "))>"
+      }
+    let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
+
+    let bridgeDeclaration =
+      if let bridgeWhereClause {
+        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol) \(bridgeWhereClause)"
+      } else {
+        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol)"
+      }
+
+    printer.printBraceBlock(bridgeDeclaration) { printer in
+      printer.print("typealias SwiftType = \(bridgedSwiftType)")
+      printer.println()
+      printer.printBraceBlock("static var javaClass: jclass") { printer in
+        printer.print("\(cacheName).javaClass")
+      }
+      printer.println()
+      printer.printBraceBlock("static var wrapMemoryAddressUnsafe: jmethodID") { printer in
+        printer.print("\(cacheName).wrapMemoryAddressUnsafe")
+      }
     }
   }
 
