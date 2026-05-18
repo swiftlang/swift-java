@@ -61,4 +61,9 @@ public class BoxSpecializationTest {
             "Box should have one generic type parameter");
         assertEquals("Element", Box.class.getTypeParameters()[0].getName());
     }
+
+    @Test
+    void callFishBoxStaticMethod() {
+        assertEquals("Fish", FishBox.describeElement());
+    }
 }
