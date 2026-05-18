@@ -1039,12 +1039,10 @@ extension JNISwift2JavaGenerator {
     printer.println()
     printer.printBraceBlock("extension \(type.swiftNominal.qualifiedName): \(protocolName)") { printer in
       for variable in type.variables {
-        if variable.isStatic { continue }
         printFunctionDecl(&printer, decl: variable, skipMethodBody: false)
       }
 
       for method in type.methods {
-        if method.isStatic { continue }
         printFunctionDecl(&printer, decl: method, skipMethodBody: false)
       }
     }

@@ -36,6 +36,11 @@ public class BoxSpecializationTest {
         Method setCount = fishBoxClass.getMethod("setCount", long.class);
         assertNotNull(setCount);
 
+        // Static method
+        Method describeElement = fishBoxClass.getMethod("describeElement");
+        assertNotNull(describeElement);
+        assertEquals(String.class, describeElement.getReturnType());
+
         // Constrained extension method (only on FishBox, not on Box)
         Method describeFish = fishBoxClass.getMethod("describeFish");
         assertNotNull(describeFish);
