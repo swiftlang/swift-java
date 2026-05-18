@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct MyID<T> {
+public struct MyID<T: Hashable>: Hashable {
   public var rawValue: T
   public init(_ rawValue: T) {
     self.rawValue = rawValue
