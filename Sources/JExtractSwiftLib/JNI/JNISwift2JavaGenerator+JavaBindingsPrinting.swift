@@ -519,17 +519,21 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock("public Case getCase(\(requiresSwiftArena ? "SwiftArena swiftArena" : ""))") { printer in
       printer.printBraceBlock("return switch (this.getDiscriminator())", .semicolonNewLine) { printer in
         for enumCase in decl.cases {
-          guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-            continue
-          }
-          if enumCase.parameters.isEmpty {
-            printer.print(
-              "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
-            )
+          if let translatedCase = self.translatedEnumCase(for: enumCase) {
+            if enumCase.parameters.isEmpty {
+              printer.print(
+                "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)();"
+              )
+            } else {
+              let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
+              printer.print(
+                "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
+              )
+            }
           } else {
-            let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
+            logger.warning("\(decl.effectiveJavaName).\(enumCase.name) contains unsupported values so its getCase() method call throws an error.")
             printer.print(
-              "case \(enumCase.name.uppercased()) -> this.getAs\(translatedCase.name)(\(arenaArgument)).orElseThrow();"
+              "case \(enumCase.name.uppercased()) -> throw new UnsupportedOperationException(\"\(decl.effectiveJavaName).\(enumCase.name) contains unsupported values.\");"
             )
           }
         }
