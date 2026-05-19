@@ -310,8 +310,8 @@ extension FFMSwift2JavaGenerator {
       )
     } else {
       // Otherwise, the lambda must be wrapped with the lowered function instance.
-      let apiParams = functionType.parameters.flatMap {
-        $0.javaParameters.map { param in "\(param.type) \(param.name)" }
+      let apiParams = functionType.parameters.map {
+        "\($0.parameter.type) \($0.parameter.name)"
       }
 
       printer.print(
@@ -338,7 +338,7 @@ extension FFMSwift2JavaGenerator {
         printer.indent()
         var convertedArgs: [String] = []
         for param in functionType.parameters {
-          let arg = param.conversion.render(&printer, param.javaParameters[0].name)
+          let arg = param.conversion.render(&printer, param.parameter.name)
           convertedArgs.append(arg)
         }
 
@@ -379,8 +379,7 @@ extension FFMSwift2JavaGenerator {
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
     var paramDecls = translatedSignature.parameters
-      .flatMap(\.javaParameters)
-      .map { $0.renderParameter() }
+      .map { $0.parameter.renderParameter() }
     if translatedSignature.requiresSwiftArena {
       paramDecls.append("AllocatingSwiftArena swiftArena")
     }
@@ -435,10 +434,8 @@ extension FFMSwift2JavaGenerator {
     var downCallArguments: [String] = []
 
     // Regular parameters.
-    for (i, parameter) in translatedSignature.parameters.enumerated() {
-      let original = decl.functionSignature.parameters[i]
-      let parameterName = original.parameterName ?? "_\(i)"
-      let lowered = parameter.conversion.render(&printer, parameterName)
+    for parameter in translatedSignature.parameters {
+      let lowered = parameter.conversion.render(&printer, parameter.parameter.name)
       downCallArguments.append(lowered)
     }
 
