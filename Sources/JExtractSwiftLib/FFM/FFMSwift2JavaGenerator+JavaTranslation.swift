@@ -42,7 +42,7 @@ extension FFMSwift2JavaGenerator {
 
   /// Represent a Swift API parameter translated to Java.
   struct TranslatedParameter {
-    /// Java parameter(s) mapped to the Swift parameter.
+    /// Java parameter mapped to the Swift parameter.
     var parameter: JavaParameter
 
     /// Describes how to convert the Java parameter to the lowered arguments for
@@ -426,9 +426,9 @@ extension FFMSwift2JavaGenerator {
           case .string:
             return TranslatedParameter(
               parameter: JavaParameter(
-                  name: parameterName,
-                  type: .javaLangString
-                ),
+                name: parameterName,
+                type: .javaLangString
+              ),
               conversion: .call(.placeholder, function: "SwiftStrings.toCString", withArena: true)
             )
 
@@ -466,19 +466,19 @@ extension FFMSwift2JavaGenerator {
 
         return TranslatedParameter(
           parameter: JavaParameter(
-              name: parameterName,
-              type: try translate(swiftType: swiftType)
-            ),
+            name: parameterName,
+            type: try translate(swiftType: swiftType)
+          ),
           conversion: .swiftValueSelfSegment(.placeholder)
         )
 
       case .tuple([]):
         return TranslatedParameter(
           parameter: JavaParameter(
-              name: parameterName,
-              type: .void,
-              annotations: parameterAnnotations
-            ),
+            name: parameterName,
+            type: .void,
+            annotations: parameterAnnotations
+          ),
           conversion: .placeholder
         )
 
@@ -495,9 +495,9 @@ extension FFMSwift2JavaGenerator {
       case .function:
         return TranslatedParameter(
           parameter: JavaParameter(
-              name: parameterName,
-              type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
-            ),
+            name: parameterName,
+            type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
+          ),
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
 
