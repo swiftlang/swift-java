@@ -42,10 +42,8 @@ extension FFMSwift2JavaGenerator {
 
   /// Represent a Swift API parameter translated to Java.
   struct TranslatedParameter {
-    /// Java parameter(s) mapped to the Swift parameter.
-    ///
-    /// Array because one Swift parameter can be mapped to multiple parameters.
-    var javaParameters: [JavaParameter]
+    /// Java parameter mapped to the Swift parameter.
+    var parameter: JavaParameter
 
     /// Describes how to convert the Java parameter to the lowered arguments for
     /// the foreign function.
@@ -255,9 +253,7 @@ extension FFMSwift2JavaGenerator {
     ) throws -> TranslatedParameter {
       if let cType = try? CType(cdeclType: type) {
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(name: parameterName, type: cType.javaType)
-          ],
+          parameter: JavaParameter(name: parameterName, type: cType.javaType),
           conversion: .placeholder
         )
       }
@@ -268,9 +264,7 @@ extension FFMSwift2JavaGenerator {
           switch knownType {
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
-              javaParameters: [
-                JavaParameter(name: parameterName, type: .javaForeignMemorySegment)
-              ],
+              parameter: JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
               conversion: .method(
                 .explodedName(component: "pointer"),
                 methodName: "reinterpret",
@@ -373,13 +367,11 @@ extension FFMSwift2JavaGenerator {
           overflowCheck = .none
         }
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(
-              name: parameterName,
-              type: javaType,
-              annotations: parameterAnnotations
-            )
-          ],
+          parameter: JavaParameter(
+            name: parameterName,
+            type: javaType,
+            annotations: parameterAnnotations
+          ),
           conversion: .placeholder,
           needs32BitIntOverflowCheck: overflowCheck
         )
@@ -389,13 +381,11 @@ extension FFMSwift2JavaGenerator {
       case .metatype:
         // Metatype are expressed as 'org.swift.swiftkit.SwiftAnyType'
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(
-              name: parameterName,
-              type: JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType"),
-              annotations: parameterAnnotations
-            )
-          ],
+          parameter: JavaParameter(
+            name: parameterName,
+            type: JavaType.class(package: "org.swift.swiftkit.ffm", name: "SwiftAnyType"),
+            annotations: parameterAnnotations
+          ),
           conversion: .swiftValueSelfSegment(.placeholder)
         )
 
@@ -415,9 +405,7 @@ extension FFMSwift2JavaGenerator {
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
-              javaParameters: [
-                JavaParameter(name: parameterName, type: .javaForeignMemorySegment)
-              ],
+              parameter: JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
               conversion: .commaSeparated([
                 .placeholder,
                 .method(.placeholder, methodName: "byteSize", arguments: [], withArena: false),
@@ -437,20 +425,16 @@ extension FFMSwift2JavaGenerator {
 
           case .string:
             return TranslatedParameter(
-              javaParameters: [
-                JavaParameter(
-                  name: parameterName,
-                  type: .javaLangString
-                )
-              ],
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .javaLangString
+              ),
               conversion: .call(.placeholder, function: "SwiftStrings.toCString", withArena: true)
             )
 
           case .array(let element) where element == knownTypes.uint8:
             return TranslatedParameter(
-              javaParameters: [
-                JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations)
-              ],
+              parameter: JavaParameter(name: parameterName, type: .array(.byte), annotations: parameterAnnotations),
               conversion:
                 .commaSeparated([
                   .call(
@@ -481,24 +465,20 @@ extension FFMSwift2JavaGenerator {
         }
 
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(
-              name: parameterName,
-              type: try translate(swiftType: swiftType)
-            )
-          ],
+          parameter: JavaParameter(
+            name: parameterName,
+            type: try translate(swiftType: swiftType)
+          ),
           conversion: .swiftValueSelfSegment(.placeholder)
         )
 
       case .tuple([]):
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(
-              name: parameterName,
-              type: .void,
-              annotations: parameterAnnotations
-            )
-          ],
+          parameter: JavaParameter(
+            name: parameterName,
+            type: .void,
+            annotations: parameterAnnotations
+          ),
           conversion: .placeholder
         )
 
@@ -514,12 +494,10 @@ extension FFMSwift2JavaGenerator {
 
       case .function:
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(
-              name: parameterName,
-              type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
-            )
-          ],
+          parameter: JavaParameter(
+            name: parameterName,
+            type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
+          ),
           conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
         )
 
@@ -578,22 +556,17 @@ extension FFMSwift2JavaGenerator {
           genericParameters: genericParameters,
           genericRequirements: genericRequirements
         )
-        guard elementTranslated.javaParameters.count == 1 else {
-          throw JavaTranslationError.unhandledType(element.type)
-        }
         let extraction = JavaConversionStep.replacingPlaceholder(
           elementTranslated.conversion,
           placeholder: "\(parameterName).$\(idx)"
         )
         elementConversions.append(extraction)
-        elementJavaTypes.append(elementTranslated.javaParameters[0].type.javaType)
+        elementJavaTypes.append(elementTranslated.parameter.type.javaType)
       }
 
       let javaType: JavaType = .tuple(elementTypes: elementJavaTypes)
       return TranslatedParameter(
-        javaParameters: [
-          JavaParameter(name: parameterName, type: javaType)
-        ],
+        parameter: JavaParameter(name: parameterName, type: javaType),
         conversion: .commaSeparated(elementConversions)
       )
     }
@@ -624,9 +597,7 @@ extension FFMSwift2JavaGenerator {
           default: throw JavaTranslationError.unhandledType(known: .optional(swiftType))
           }
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(name: parameterName, type: JavaType(className: translatedClass))
-          ],
+          parameter: JavaParameter(name: parameterName, type: JavaType(className: translatedClass)),
           conversion: .call(.placeholder, function: "SwiftRuntime.\(lowerFunc)", withArena: true)
         )
       }
@@ -646,9 +617,7 @@ extension FFMSwift2JavaGenerator {
 
         let translatedTy = try self.translate(swiftType: swiftType)
         return TranslatedParameter(
-          javaParameters: [
-            JavaParameter(name: parameterName, type: JavaType(className: "Optional<\(translatedTy.description)>"))
-          ],
+          parameter: JavaParameter(name: parameterName, type: .optional(translatedTy)),
           conversion: .call(.placeholder, function: "SwiftRuntime.toOptionalSegmentInstance", withArena: false)
         )
       case .existential, .opaque, .genericParameter:
