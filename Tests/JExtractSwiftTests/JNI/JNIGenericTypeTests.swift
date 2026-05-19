@@ -248,6 +248,39 @@ struct JNIGenericTypeTests {
   }
 
   @Test
+  func generatesOpenerForVariadicGenericStaticMethod() throws {
+    let input =
+      #"""
+      public struct VariadicBox<each T> {
+        public static func describe() -> String {
+          "\(VariadicBox<repeat each T>.self)"
+        }
+      }
+      """#
+
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        protocol _SwiftModule_VariadicBox_opener {
+          static func _describe(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring?
+        }
+        """,
+        #"""
+        extension VariadicBox: _SwiftModule_VariadicBox_opener {
+          static func _describe(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
+            return VariadicBox<repeat each T>.describe().getJNILocalRefValue(in: environment)
+          }
+        }
+        """#,
+      ]
+    )
+  }
+
+  @Test
   func genericValueInEnumCase() throws {
     let input =
       #"""

@@ -821,15 +821,15 @@ extension JNISwift2JavaGenerator {
       if type.genericParameterNames.isEmpty {
         type.effectiveSwiftTypeName
       } else {
-        "\(type.baseTypeName)<\(type.genericParameterNames.joined(separator: ", "))>"
+        "\(type.baseTypeName)<\(type.swiftNominal.genericParameters.map(\.packExpansionName).joined(separator: ", "))>"
       }
     let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
 
     let bridgeDeclaration =
       if let bridgeWhereClause {
-        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol) \(bridgeWhereClause)"
+        "struct \(bridgeName)\(bridgeGenericClause): \(parentProtocol) \(bridgeWhereClause)"
       } else {
-        "enum \(bridgeName)\(bridgeGenericClause): \(parentProtocol)"
+        "struct \(bridgeName)\(bridgeGenericClause): \(parentProtocol)"
       }
 
     printer.printBraceBlock(bridgeDeclaration) { printer in

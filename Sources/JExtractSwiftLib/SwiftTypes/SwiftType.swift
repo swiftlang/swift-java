@@ -156,7 +156,7 @@ extension SwiftType: CustomStringConvertible {
   var description: String {
     switch self {
     case .nominal(let nominal): return nominal.description
-    case .genericParameter(let genericParam): return genericParam.name
+    case .genericParameter(let genericParam): return genericParam.packExpansionName
     case .function(let functionType): return functionType.description
     case .metatype(let instanceType):
       var instanceTypeStr = instanceType.description

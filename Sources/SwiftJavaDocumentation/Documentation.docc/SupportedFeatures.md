@@ -88,7 +88,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Unsigned primitive types: `UInt`, `UInt8`, `UInt16`, `UInt32`, `UInt64`              | ✅ *      | ✅ * |
 | String (with copying data)                                                           | ✅        | ✅   |
 | Variadic parameters: `T...`                                                          | ❌        | ❌   |
-| Parametrer packs / Variadic generics                                                 | ❌        | ❌   |
+| Parametrer packs / Variadic generics                                                 | ❌        | 🟡   |
 | Ownership modifiers: `inout`, `borrowing`, `consuming`                               | ❌        | ❌   |
 | Default parameter values: `func p(name: String = "")`                                | ❌        | ❌   |
 | Operators: `+`, `-`, user defined                                                    | ❌        | ❌   |
