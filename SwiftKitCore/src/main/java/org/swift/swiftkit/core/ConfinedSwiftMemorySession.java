@@ -54,7 +54,7 @@ public class ConfinedSwiftMemorySession implements ClosableSwiftArena {
     public void register(SwiftInstance instance) {
         checkValid();
 
-        SwiftInstanceCleanup cleanup = instance.$createCleanup();
+        SwiftInstanceCleanup cleanup = instance.$cleanup();
         this.resources.add(cleanup);
     }
 

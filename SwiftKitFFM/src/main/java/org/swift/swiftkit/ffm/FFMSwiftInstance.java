@@ -18,14 +18,10 @@ import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.SwiftInstanceCleanup;
 
 import java.lang.foreign.MemorySegment;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class FFMSwiftInstance implements SwiftInstance {
     private final MemorySegment memorySegment;
-
-    // TODO: make this a flagset integer and/or use a field updater
-    /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
-    private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+    private final FFMSwiftInstanceCleanup cleanup;
 
     /**
      * The designated constructor of any imported Swift types.
@@ -35,6 +31,7 @@ public abstract class FFMSwiftInstance implements SwiftInstance {
      */
     protected FFMSwiftInstance(MemorySegment segment, AllocatingSwiftArena arena) {
         this.memorySegment = segment;
+        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
 
         // Only register once we have fully initialized the object since this will need the object pointer.
         arena.register(this);
@@ -57,24 +54,9 @@ public abstract class FFMSwiftInstance implements SwiftInstance {
      */
     public abstract SwiftAnyType $swiftType();
 
-    /**
-     * Exposes a boolean value which can be used to indicate if the object was destroyed.
-     * <p>
-     * This is exposing the object, rather than performing the action because we don't want to accidentally
-     * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
-     * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
-     */
-    public final AtomicBoolean $statusDestroyedFlag() {
-        return this.$state$destroyed;
-    }
-
     @Override
-    public SwiftInstanceCleanup $createCleanup() {
-        return new FFMSwiftInstanceCleanup(
-                $memorySegment(),
-                $swiftType(),
-                $statusDestroyedFlag()
-        );
+    public final SwiftInstanceCleanup $cleanup() {
+        return this.cleanup;
     }
 
     /**

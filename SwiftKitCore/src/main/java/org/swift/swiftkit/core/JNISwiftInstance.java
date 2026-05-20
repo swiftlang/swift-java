@@ -54,11 +54,13 @@ public interface JNISwiftInstance extends SwiftInstance {
      */
     long $typeMetadataAddress();
 
-    @Override
+    /**
+     * Build a fresh {@link SwiftInstanceCleanup} for this instance.
+     * <p>
+     * Concrete implementations are expected to call this once during construction
+     * and cache the result in a field exposed via {@link #$cleanup()}.
+     */
     default SwiftInstanceCleanup $createCleanup() {
-        return new JNISwiftInstanceCleanup(
-                $createDestroyFunction(),
-                $statusDestroyedFlag()
-        );
+        return new JNISwiftInstanceCleanup($createDestroyFunction());
     }
 }

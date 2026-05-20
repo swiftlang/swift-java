@@ -50,7 +50,7 @@ final class AutoSwiftMemorySession implements SwiftArena {
 
         // We make sure we don't capture `instance` in the
         // cleanup action, so we can ignore the warning below.
-        var cleanupAction = instance.$createCleanup();
+        var cleanupAction = instance.$cleanup();
         swiftCleaner.register(instance, cleanupAction);
     }
 }

@@ -58,7 +58,6 @@ struct JNIClassTests {
         import org.swift.swiftkit.core.util.*;
         import org.swift.swiftkit.core.collections.*;
         import java.util.*;
-        import java.util.concurrent.atomic.AtomicBoolean;
         import org.swift.swiftkit.core.annotations.*;
         """,
         """
@@ -85,6 +84,7 @@ struct JNIClassTests {
         private MyClass(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
+          this.$cleanup = $createCleanup();
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);

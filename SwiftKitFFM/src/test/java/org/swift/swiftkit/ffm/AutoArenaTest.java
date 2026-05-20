@@ -16,9 +16,7 @@ package org.swift.swiftkit.ffm;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemorySegment;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoArenaTest {
 
@@ -29,7 +27,7 @@ public class AutoArenaTest {
 
         // This object is registered to the arena.
         var object = new FakeSwiftInstance(arena);
-        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        var cleanup = object.$cleanup();
 
         // Release the object and hope it gets GC-ed soon
 
@@ -37,7 +35,7 @@ public class AutoArenaTest {
         object = null;
 
         var i = 1_000;
-        while (!statusDestroyedFlag.get()) {
+        while (!cleanup.isDestroyed()) {
             System.runFinalization();
             System.gc();
 

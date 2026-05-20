@@ -27,7 +27,6 @@ extension JNISwift2JavaGenerator {
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.core.collections.*",
     "java.util.*",
-    "java.util.concurrent.atomic.AtomicBoolean",
 
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
@@ -282,6 +281,7 @@ extension JNISwift2JavaGenerator {
         }
         printer.print(
           """
+          this.$cleanup = $createCleanup();
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
@@ -317,16 +317,16 @@ extension JNISwift2JavaGenerator {
         /** Pointer to the "self". */
         private final long selfPointer;
 
-        /** Used to track additional state of the underlying object, e.g. if it was explicitly destroyed. */
-        private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+        /** Tracks whether this instance has been destroyed; doubles as the destroyed-state holder. */
+        private final SwiftInstanceCleanup $cleanup;
 
         public long $memoryAddress() {
           return this.selfPointer;
         }
 
         @Override
-        public AtomicBoolean $statusDestroyedFlag() {
-          return $state$destroyed;
+        public SwiftInstanceCleanup $cleanup() {
+          return $cleanup;
         }
         """
       )

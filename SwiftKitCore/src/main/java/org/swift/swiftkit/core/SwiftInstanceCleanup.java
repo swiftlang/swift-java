@@ -16,5 +16,13 @@ package org.swift.swiftkit.core;
 
 /**
  * A Swift memory instance cleanup, e.g. count-down a reference count and destroy a class, or destroy struct/enum etc.
+ * <p>
+ * Implementations also serve as the destroyed-state holder for their associated {@link SwiftInstance},
+ * exposing {@link #isDestroyed()} which can be polled even after the instance has been GC-ed.
  */
-public interface SwiftInstanceCleanup extends Runnable {}
+public interface SwiftInstanceCleanup extends Runnable {
+    /**
+     * Whether this cleanup has run, i.e. the associated instance has been destroyed.
+     */
+    boolean isDestroyed();
+}
