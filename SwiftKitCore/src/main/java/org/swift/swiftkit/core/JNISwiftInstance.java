@@ -27,15 +27,38 @@ public interface JNISwiftInstance extends SwiftInstance {
      *
      * @return a function that is called when the value should be destroyed.
      */
-    Runnable $createDestroyFunction();
+    default Runnable $createDestroyFunction() {
+        var memoryAddress = $memoryAddress();
+        var typeMetadataAddress = $typeMetadataAddress();
+        if (CallTraces.TRACE_DOWNCALLS) {
+            CallTraces.trace(
+                    "this", this,
+                    "self", memoryAddress,
+                    "selfType", SwiftObjects.typeDescription(typeMetadataAddress)
+            );
+        }
+        return () -> {
+            if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(
+                        "SwiftObjects.destroy",
+                        "self", memoryAddress,
+                        "selfType", SwiftObjects.typeDescription(typeMetadataAddress)
+                );
+            }
+            SwiftObjects.destroy(memoryAddress, typeMetadataAddress);
+        };
+    }
 
+    /**
+     * The Swift type metadata address of this type.
+     */
     long $typeMetadataAddress();
 
     @Override
     default SwiftInstanceCleanup $createCleanup() {
-        var statusDestroyedFlag = $statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
-        return new JNISwiftInstanceCleanup(this.$createDestroyFunction(), markAsDestroyed);
+        return new JNISwiftInstanceCleanup(
+                $createDestroyFunction(),
+                $statusDestroyedFlag()
+        );
     }
 }

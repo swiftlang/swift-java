@@ -61,13 +61,10 @@ public abstract class FFMSwiftErrorInstance extends Exception implements SwiftIn
 
     @Override
     public SwiftInstanceCleanup $createCleanup() {
-        var statusDestroyedFlag = $statusDestroyedFlag();
-        Runnable markAsDestroyed = () -> statusDestroyedFlag.set(true);
-
         return new FFMSwiftInstanceCleanup(
                 $memorySegment(),
                 $swiftType(),
-                markAsDestroyed
+                $statusDestroyedFlag()
         );
     }
 }

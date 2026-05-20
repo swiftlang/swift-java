@@ -383,8 +383,6 @@ extension JNISwift2JavaGenerator {
         """
       )
       printer.println()
-
-      printDestroyFunction(&printer, decl)
     }
   }
 
@@ -872,58 +870,6 @@ extension JNISwift2JavaGenerator {
         // INFO: We are omitting `CallTraces.traceDowncall` here.
         // It internally calls `toString`, which in turn calls `$typeMetadataAddress`, creating an infinite loop.
         printer.print("return \(type.effectiveJavaSimpleName).$typeMetadataAddressDowncall();")
-      }
-    }
-  }
-
-  /// Prints the destroy function for a `JNISwiftInstance`
-  private func printDestroyFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
-    let funcName = "$createDestroyFunction"
-    let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
-    let typeName = type.effectiveJavaSimpleName
-    printer.print("@Override")
-    printer.printBraceBlock("public Runnable \(funcName)()") { printer in
-      printer.print("long self$ = this.$memoryAddress();")
-      printer.print("long selfType$ = this.$typeMetadataAddress();")
-      if isEffectivelyGeneric {
-        printer.print(
-          """
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(typeName).\(funcName)",
-                "this", this,
-                "self", self$,
-                "selfType", selfType$);
-          }
-          return new Runnable() {
-            @Override
-            public void run() {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("\(typeName).$destroy", "self", self$, "selfType", selfType$);
-              }
-              SwiftObjects.destroy(self$, selfType$);
-            }
-          };
-          """
-        )
-      } else {
-        printer.print(
-          """
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("\(typeName).\(funcName)",
-                "this", this,
-                "self", self$);
-          }
-          return new Runnable() {
-            @Override
-            public void run() {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("\(typeName).$destroy", "self", self$);
-              }
-              SwiftObjects.destroy(self$, selfType$);
-            }
-          };
-          """
-        )
       }
     }
   }
