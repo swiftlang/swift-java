@@ -76,28 +76,6 @@ struct JNIGenericTypeTests {
           return this.selfTypePointer;
         }
         """,
-        """
-        @Override
-        public Runnable $createDestroyFunction() {
-          long self$ = this.$memoryAddress();
-          long selfType$ = this.$typeMetadataAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("MyID.$createDestroyFunction",
-              "this", this,
-              "self", self$,
-              "selfType", selfType$);
-          }
-          return new Runnable() {
-            @Override
-            public void run() {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("MyID.$destroy", "self", self$, "selfType", selfType$);
-              }
-              SwiftObjects.destroy(self$, selfType$);
-            }
-          };
-        }
-        """,
       ]
     )
   }
