@@ -15,7 +15,6 @@
 package org.swift.swiftkit.core.collections;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.swift.swiftkit.core.*;
 
@@ -33,10 +32,11 @@ import org.swift.swiftkit.core.*;
 public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISwiftInstance {
 
     private final long selfPointer;
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
+    private final SwiftInstanceCleanup cleanup;
 
     private SwiftDictionaryMap(long selfPointer) {
         this.selfPointer = selfPointer;
+        this.cleanup = $createCleanup();
     }
 
     public static <K, V> SwiftDictionaryMap<K, V> wrapMemoryAddressUnsafe(long selfPointer, SwiftArena arena) {
@@ -58,8 +58,8 @@ public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISw
     }
 
     @Override
-    public AtomicBoolean $statusDestroyedFlag() {
-        return destroyed;
+    public SwiftInstanceCleanup $cleanup() {
+        return cleanup;
     }
 
     @Override

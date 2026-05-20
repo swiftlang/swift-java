@@ -71,6 +71,7 @@ struct JNIStructTests {
         private MyStruct(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
+          this.$cleanup = $createCleanup();
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);

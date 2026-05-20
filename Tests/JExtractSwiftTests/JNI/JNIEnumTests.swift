@@ -46,7 +46,6 @@ struct JNIEnumTests {
         import org.swift.swiftkit.core.util.*;
         import org.swift.swiftkit.core.collections.*;
         import java.util.*;
-        import java.util.concurrent.atomic.AtomicBoolean;
         import org.swift.swiftkit.core.annotations.*;
         """,
         """
@@ -65,6 +64,7 @@ struct JNIEnumTests {
         private MyEnum(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
           this.selfPointer = selfPointer;
+          this.$cleanup = $createCleanup();
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);

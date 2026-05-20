@@ -18,7 +18,6 @@ import org.swift.swiftkit.core.SwiftInstance;
 import org.swift.swiftkit.core.SwiftInstanceCleanup;
 
 import java.lang.foreign.MemorySegment;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base class for Swift errors passed across the FFM boundary.
@@ -27,17 +26,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class FFMSwiftErrorInstance extends Exception implements SwiftInstance {
     private final MemorySegment memorySegment;
-    private final AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+    private final FFMSwiftInstanceCleanup cleanup;
 
     protected FFMSwiftErrorInstance(String message, MemorySegment segment, AllocatingSwiftArena arena) {
         super(message);
         this.memorySegment = segment;
+        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
         arena.register(this);
     }
 
     protected FFMSwiftErrorInstance(MemorySegment segment, AllocatingSwiftArena arena) {
         super();
         this.memorySegment = segment;
+        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
         arena.register(this);
     }
 
@@ -50,21 +51,13 @@ public abstract class FFMSwiftErrorInstance extends Exception implements SwiftIn
         return $memorySegment().address();
     }
 
-    public final AtomicBoolean $statusDestroyedFlag() {
-        return $state$destroyed;
+    @Override
+    public final SwiftInstanceCleanup $cleanup() {
+        return this.cleanup;
     }
 
     /**
      * The Swift type metadata of this type.
      */
     public abstract SwiftAnyType $swiftType();
-
-    @Override
-    public SwiftInstanceCleanup $createCleanup() {
-        return new FFMSwiftInstanceCleanup(
-                $memorySegment(),
-                $swiftType(),
-                $statusDestroyedFlag()
-        );
-    }
 }

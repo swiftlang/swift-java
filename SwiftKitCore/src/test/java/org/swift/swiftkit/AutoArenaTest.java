@@ -17,8 +17,7 @@ package org.swift.swiftkit;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.JNISwiftInstance;
 import org.swift.swiftkit.core.SwiftArena;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.swift.swiftkit.core.SwiftInstanceCleanup;
 
 public class AutoArenaTest {
 
@@ -29,7 +28,7 @@ public class AutoArenaTest {
 
         // This object is registered to the arena.
         var object = new FakeSwiftInstance(arena);
-        var statusDestroyedFlag = object.$statusDestroyedFlag();
+        var cleanup = object.$cleanup();
 
         // Release the object and hope it gets GC-ed soon
 
@@ -37,7 +36,7 @@ public class AutoArenaTest {
         object = null;
 
         var i = 1_000;
-        while (!statusDestroyedFlag.get()) {
+        while (!cleanup.isDestroyed()) {
             System.runFinalization();
             System.gc();
 
@@ -48,9 +47,10 @@ public class AutoArenaTest {
     }
 
     private static class FakeSwiftInstance implements JNISwiftInstance {
-        AtomicBoolean $state$destroyed = new AtomicBoolean(false);
+        private final SwiftInstanceCleanup cleanup;
 
         public FakeSwiftInstance(SwiftArena arena) {
+            this.cleanup = $createCleanup();
             arena.register(this);
         }
 
@@ -69,8 +69,8 @@ public class AutoArenaTest {
         }
 
         @Override
-        public AtomicBoolean $statusDestroyedFlag() {
-            return $state$destroyed;
+        public SwiftInstanceCleanup $cleanup() {
+            return cleanup;
         }
     }
 }

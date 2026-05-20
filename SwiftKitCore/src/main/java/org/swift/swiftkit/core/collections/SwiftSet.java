@@ -15,7 +15,6 @@
 package org.swift.swiftkit.core.collections;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.swift.swiftkit.core.*;
 
@@ -32,10 +31,11 @@ import org.swift.swiftkit.core.*;
 public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
 
     private final long selfPointer;
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
+    private final SwiftInstanceCleanup cleanup;
 
     private SwiftSet(long selfPointer) {
         this.selfPointer = selfPointer;
+        this.cleanup = $createCleanup();
     }
 
     public static <E> SwiftSet<E> wrapMemoryAddressUnsafe(long selfPointer, SwiftArena arena) {
@@ -57,8 +57,8 @@ public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
     }
 
     @Override
-    public AtomicBoolean $statusDestroyedFlag() {
-        return destroyed;
+    public SwiftInstanceCleanup $cleanup() {
+        return cleanup;
     }
 
     @Override

@@ -14,8 +14,6 @@
 
 package org.swift.swiftkit.core;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public interface SwiftInstance {
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
@@ -27,20 +25,16 @@ public interface SwiftInstance {
     long $memoryAddress();
 
     /**
-     * Called when the arena has decided the value should be destroyed.
+     * Returns the cleanup associated with this instance.
      * <p>
-     * <b>Warning:</b> The cleanup action must not capture {@code this}.
+     * The same cleanup instance is returned on every call. The cleanup also serves as the
+     * destroyed-state holder, allowing callers to poll {@link SwiftInstanceCleanup#isDestroyed()}
+     * even after this instance has been GC-ed.
+     * <p>
+     * <b>Warning:</b> The cleanup must not capture {@code this}.
      */
-    SwiftInstanceCleanup $createCleanup();
+    SwiftInstanceCleanup $cleanup();
 
-    /**
-     * Exposes a boolean value which can be used to indicate if the object was destroyed.
-     * <p>
-     * This is exposing the object, rather than performing the action because we don't want to accidentally
-     * form a strong reference to the {@code SwiftInstance} which could prevent the cleanup from running,
-     * if using an GC managed instance (e.g. using an {@code AutoSwiftMemorySession}.
-     */
-    AtomicBoolean $statusDestroyedFlag();
     /**
      * Ensures that this instance has not been destroyed.
      * <p>
@@ -49,7 +43,7 @@ public interface SwiftInstance {
      * use-after-free errors.
      */
     default void $ensureAlive() {
-        if (this.$statusDestroyedFlag().get()) {
+        if (this.$cleanup().isDestroyed()) {
             throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
         }
     }
