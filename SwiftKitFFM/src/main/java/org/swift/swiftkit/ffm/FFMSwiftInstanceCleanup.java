@@ -19,26 +19,29 @@ import org.swift.swiftkit.core.SwiftInstanceCleanup;
 import static org.swift.swiftkit.ffm.SwiftJavaLogGroup.LIFECYCLE;
 
 import java.lang.foreign.MemorySegment;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
     private final MemorySegment memoryAddress;
     private final SwiftAnyType type;
-    private final Runnable markAsDestroyed;
+    private final AtomicBoolean statusDestroyedFlag;
 
-    public FFMSwiftInstanceCleanup(MemorySegment memoryAddress, SwiftAnyType type, Runnable markAsDestroyed) {
+    public FFMSwiftInstanceCleanup(MemorySegment memoryAddress, SwiftAnyType type, AtomicBoolean statusDestroyedFlag) {
         this.memoryAddress = memoryAddress;
         this.type = type;
-        this.markAsDestroyed = markAsDestroyed;
+        this.statusDestroyedFlag = statusDestroyedFlag;
     }
 
     @Override
     public void run() {
-        markAsDestroyed.run();
-
-        // Allow null pointers just for AutoArena tests.
-        if (type != null && memoryAddress != null) {
-            SwiftRuntime.log(LIFECYCLE, "Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
-            SwiftValueWitnessTable.destroy(type, memoryAddress);
+        if (statusDestroyedFlag.compareAndSet(false, true)) {
+            // Allow null pointers just for AutoArena tests.
+            if (type != null && memoryAddress != null) {
+                SwiftRuntime.log(LIFECYCLE, "Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
+                SwiftValueWitnessTable.destroy(type, memoryAddress);
+            }
+        } else {
+            throw new IllegalStateException("Double destruction attempt detected!");
         }
     }
 }

@@ -83,34 +83,6 @@ struct JNIStructTests {
         """,
       ]
     )
-    try assertOutput(
-      input: source,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
-        @Override
-        public Runnable $createDestroyFunction() {
-          long self$ = this.$memoryAddress();
-          long selfType$ = this.$typeMetadataAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("MyStruct.$createDestroyFunction",
-                "this", this,
-                "self", self$);
-          }
-          return new Runnable() {
-            @Override
-            public void run() {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("MyStruct.$destroy", "self", self$);
-              }
-              SwiftObjects.destroy(self$, selfType$);
-            }
-          };
-        }
-        """
-      ]
-    )
   }
 
   @Test

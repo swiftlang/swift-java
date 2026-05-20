@@ -89,4 +89,13 @@ extension SwiftObjects {
     }
     return perform(as: typeMetadata)
   }
+
+  @JavaMethod
+  public static func typeDescription(environment: UnsafeMutablePointer<JNIEnv?>!, selfTypePointer: Int64) -> String {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
+      fatalError("selfType metadata address was null")
+    }
+    let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+    return String(describing: typeMetadata)
+  }
 }

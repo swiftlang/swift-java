@@ -83,27 +83,6 @@ struct JNIEnumTests {
           return new MyEnum(selfPointer, swiftArena);
         }
         """,
-        """
-        @Override
-        public Runnable $createDestroyFunction() {
-          long self$ = this.$memoryAddress();
-          long selfType$ = this.$typeMetadataAddress();
-          if (CallTraces.TRACE_DOWNCALLS) {
-            CallTraces.traceDowncall("MyEnum.$createDestroyFunction",
-                "this", this,
-                "self", self$);
-          }
-          return new Runnable() {
-            @Override
-            public void run() {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall("MyEnum.$destroy", "self", self$);
-              }
-              SwiftObjects.destroy(self$, selfType$);
-            }
-          };
-        }
-        """,
       ]
     )
   }

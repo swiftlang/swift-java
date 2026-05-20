@@ -14,18 +14,23 @@
 
 package org.swift.swiftkit.core;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 class JNISwiftInstanceCleanup implements SwiftInstanceCleanup {
     private final Runnable destroyFunction;
-    private final Runnable markAsDestroyed;
+    private final AtomicBoolean statusDestroyedFlag;
 
-    public JNISwiftInstanceCleanup(Runnable destroyFunction, Runnable markAsDestroyed) {
+    public JNISwiftInstanceCleanup(Runnable destroyFunction, AtomicBoolean statusDestroyedFlag) {
         this.destroyFunction = destroyFunction;
-        this.markAsDestroyed = markAsDestroyed;
+        this.statusDestroyedFlag = statusDestroyedFlag;
     }
 
     @Override
     public void run() {
-        markAsDestroyed.run();
-        destroyFunction.run();
+        if (statusDestroyedFlag.compareAndSet(false, true)) {
+            destroyFunction.run();
+        } else {
+            throw new IllegalStateException("Double destruction attempt detected!");
+        }
     }
 }
