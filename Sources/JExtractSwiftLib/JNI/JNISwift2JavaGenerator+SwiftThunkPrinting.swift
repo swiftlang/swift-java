@@ -151,8 +151,10 @@ extension JNISwift2JavaGenerator {
       return
     }
 
+    let allSymbols = generatedCDeclSymbolNames + ["JNI_OnLoad"]
+
     let symbolLines =
-      generatedCDeclSymbolNames
+      allSymbols
       .sorted()
       .map { "  \($0);" }
       .joined(separator: "\n")
@@ -170,7 +172,7 @@ extension JNISwift2JavaGenerator {
       atomically: true,
       encoding: .utf8,
     )
-    logger.info("[swift-java] Generated linker export list (\(generatedCDeclSymbolNames.count) symbols): \(outputPath)")
+    logger.info("[swift-java] Generated linker export list (\(allSymbols.count) symbols): \(outputPath)")
   }
 
   /// Prints the extension needed to make allow upcalls from Swift to Java for protocols
