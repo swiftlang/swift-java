@@ -61,8 +61,14 @@ package class SwiftSymbolTable {
 
   private var knownTypeToNominal: [SwiftKnownTypeDeclKind: SwiftNominalTypeDeclaration] = [:]
   private var prioritySortedImportedModules: [SwiftModuleSymbolTable] {
-    importedModules.values.sorted(by: {
-      ($0.alternativeModules?.isMainSourceOfSymbols ?? false) && $0.moduleName < $1.moduleName
+    // Ordering with source of symbols preference:
+    // - main-source-of-symbols modules come first (alphabetical among themselves),
+    // - then the rest (alphabetical).
+    importedModules.values.sorted(by: { lhs, rhs in
+      let lhsIsMain = lhs.alternativeModules?.isMainSourceOfSymbols ?? false
+      let rhsIsMain = rhs.alternativeModules?.isMainSourceOfSymbols ?? false
+      if lhsIsMain != rhsIsMain { return lhsIsMain }
+      return lhs.moduleName < rhs.moduleName
     })
   }
 

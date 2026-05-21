@@ -132,31 +132,66 @@ extension Swift2JavaTranslator {
   }
 
   private func visitFoundationDeclsIfNeeded(with visitor: Swift2JavaVisitor) {
-    // If any API uses 'Foundation.Data' or 'FoundationEssentials.Data',
-    // import 'Data' as if it's declared in this module.
-    if let dataDecl = self.symbolTable[.foundationData] ?? self.symbolTable[.essentialsData] {
-      let dataProtocolDecl = (self.symbolTable[.foundationDataProtocol] ?? self.symbolTable[.essentialsDataProtocol])!
-      if self.isUsing(where: { $0 == dataDecl || $0 == dataProtocolDecl }) {
-        visitor.visit(
-          nominalDecl: dataDecl.syntax.asNominal!,
-          in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift",
-        )
-        visitor.visit(
-          nominalDecl: dataProtocolDecl.syntax.asNominal!,
-          in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift",
-        )
-      }
+    // Each entry pairs a Foundation/FoundationEssentials counterpart so the
+    // user-code reference can match either. Entries within the same group are
+    // visited together when any one of the candidates is referenced — so using
+    // Data also emits DataProtocol, etc.
+    struct FoundationTypeGroup {
+      let candidates: [SwiftKnownTypeDeclKind]
+      let fakeSourceFilePath: String
     }
+    let groups: [[FoundationTypeGroup]] = [
+      [
+        .init(
+          candidates: [.foundationData, .essentialsData],
+          fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_DATA.swift",
+        ),
+        .init(
+          candidates: [.foundationDataProtocol, .essentialsDataProtocol],
+          fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_DATAPROTOCOL.swift",
+        ),
+      ],
+      [
+        .init(
+          candidates: [.foundationDate, .essentialsDate],
+          fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift",
+        )
+      ],
+      [
+        .init(
+          candidates: [.foundationUUID, .essentialsUUID],
+          fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_UUID.swift",
+        )
+      ],
+    ]
 
-    // Foundation.Date
-    if let dateDecl = self.symbolTable[.foundationDate] ?? self.symbolTable[.essentialsDate] {
-      if self.isUsing(where: { $0 == dateDecl }) {
+    for group in groups {
+      let resolved: [(primary: SwiftNominalTypeDeclaration, source: String, candidates: [SwiftNominalTypeDeclaration])] =
+        group.compactMap { type in
+          let candidates = type.candidates.compactMap { self.symbolTable[$0] }
+          guard let primary = candidates.first else {
+            return nil
+          }
+          return (primary, type.fakeSourceFilePath, candidates)
+        }
+      guard !resolved.isEmpty else {
+        continue
+      }
+
+      let allCandidates = resolved.flatMap(\.candidates)
+      let isReferenced = self.isUsing(where: { decl in
+        allCandidates.contains(where: { $0 === decl })
+      })
+      guard isReferenced else {
+        continue
+      }
+
+      // Visit the fake source files, and register the types.
+      for entry in resolved {
         visitor.visit(
-          nominalDecl: dateDecl.syntax.asNominal!,
+          nominalDecl: entry.primary.syntax.asNominal!,
           in: nil,
-          sourceFilePath: "Foundation/FAKE_FOUNDATION_DATE.swift",
+          sourceFilePath: entry.source,
         )
       }
     }
