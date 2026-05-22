@@ -130,6 +130,19 @@ struct JExtractFileFilterTests {
     #expect(classifyPattern("Something.Other") == .typeName)
     #expect(classifyPattern("MyType") == .plain)
     #expect(classifyPattern("My*") == .plain)
+
+    // Filenames with a Swift source extension are file-path patterns even
+    // when they contain a `.`
+    #expect(classifyPattern("MyType.swift") == .filePath)
+    #expect(classifyPattern("User.swiftinterface") == .filePath)
+
+    // Dotted patterns with `**` are type-name patterns, not file-path
+    #expect(classifyPattern("**.Internal") == .typeName)
+    #expect(classifyPattern("Outer.**") == .typeName)
+    #expect(classifyPattern("Outer.**.Leaf") == .typeName)
+
+    // Bare `**` (no `.` or `/`) is still a file-path wildcard
+    #expect(classifyPattern("**") == .filePath)
   }
 
   // ==== -------------------------------------------------------------------
@@ -293,5 +306,106 @@ struct JExtractFileFilterTests {
     let config = try #require(try readConfiguration(string: json, configPath: nil))
     #expect(config.swiftFilterInclude == ["Models/**"])
     #expect(config.javaFilterInclude == ["org.apache.commons"])
+  }
+
+  // Source used by integration tests below: a top-level enum `Tank` containing
+  // nested types `Tank.Fish` and `Tank.Internal`, plus a sibling `FishTank`
+  static let nestedTypeSource =
+    #"""
+    public enum Tank {
+      public struct Fish {
+        public func swim() {}
+      }
+      public struct Internal {
+        public func dontExpose() {}
+      }
+    }
+
+    public struct FishTank {
+      public var capacity: Int = 0
+    }
+    """#
+
+  private func makeTranslator(
+    include: [String]? = nil,
+    exclude: [String]? = nil,
+  ) throws -> Swift2JavaTranslator {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    config.swiftFilterInclude = include
+    config.swiftFilterExclude = exclude
+    let translator = Swift2JavaTranslator(config: config)
+    translator.log.logLevel = .error
+    try translator.analyze(path: "Fake.swift", text: Self.nestedTypeSource)
+    return translator
+  }
+
+  @Test("swiftFilterExclude with exact nested type name")
+  func excludeExactNested() throws {
+    let st = try makeTranslator(exclude: ["Tank.Internal"])
+    #expect(st.importedTypes["Tank"] != nil)
+    #expect(st.importedTypes["Tank.Fish"] != nil)
+    #expect(st.importedTypes["Tank.Internal"] == nil)
+    #expect(st.importedTypes["FishTank"] != nil)
+  }
+
+  @Test("swiftFilterExclude with `Type.*` excludes direct children only")
+  func excludeDirectChildren() throws {
+    let st = try makeTranslator(exclude: ["Tank.*"])
+    #expect(st.importedTypes["Tank"] != nil, "Top-level Tank itself should not be excluded by `Tank.*`")
+    #expect(st.importedTypes["Tank.Fish"] == nil)
+    #expect(st.importedTypes["Tank.Internal"] == nil)
+    #expect(st.importedTypes["FishTank"] != nil)
+  }
+
+  @Test("swiftFilterExclude with suffix wildcard inside nested name")
+  func excludeSuffixWildcard() throws {
+    let st = try makeTranslator(exclude: ["Tank.Inter*"])
+    #expect(st.importedTypes["Tank"] != nil)
+    #expect(st.importedTypes["Tank.Fish"] != nil)
+    #expect(st.importedTypes["Tank.Internal"] == nil)
+    #expect(st.importedTypes["FishTank"] != nil)
+  }
+
+  @Test("swiftFilterExclude with `**.Name` matches at any depth")
+  func excludeRecursiveLeaf() throws {
+    let st = try makeTranslator(exclude: ["**.Internal"])
+    #expect(st.importedTypes["Tank"] != nil)
+    #expect(st.importedTypes["Tank.Fish"] != nil)
+    #expect(st.importedTypes["Tank.Internal"] == nil)
+    #expect(st.importedTypes["FishTank"] != nil)
+  }
+
+  @Test("plain-name swiftFilterExclude excludes top-level type and its nested members")
+  func excludePlainTopLevel() throws {
+    // Plain pattern matches the top-level component, so excluding `Tank` also
+    // prevents the visitor from descending into its nested types
+    let st = try makeTranslator(exclude: ["Tank"])
+    #expect(st.importedTypes["Tank"] == nil)
+    #expect(st.importedTypes["Tank.Fish"] == nil)
+    #expect(st.importedTypes["Tank.Internal"] == nil)
+    #expect(st.importedTypes["FishTank"] != nil)
+  }
+
+  @Test("swiftFilterInclude with `Type.**` keeps the parent and all nested members")
+  func includeTypeRecursive() throws {
+    // `Tank.**` is a type-name pattern; via the trailing-`**` rule it matches
+    // both `Tank` itself and any nested type underneath
+    let st = try makeTranslator(include: ["Tank.**"])
+    #expect(st.importedTypes["Tank"] != nil)
+    #expect(st.importedTypes["Tank.Fish"] != nil)
+    #expect(st.importedTypes["Tank.Internal"] != nil)
+    #expect(st.importedTypes["FishTank"] == nil)
+  }
+
+  @Test("file-path-only filter does not interfere with nested-type extraction")
+  func filePathOnlyKeepsNested() throws {
+    // A file-path-only filter must not accidentally gate type-level filtering;
+    // every nested type in the included file should still be extracted
+    let st = try makeTranslator(include: ["**/Fake.swift", "Fake.swift"])
+    #expect(st.importedTypes["Tank"] != nil)
+    #expect(st.importedTypes["Tank.Fish"] != nil)
+    #expect(st.importedTypes["Tank.Internal"] != nil)
+    #expect(st.importedTypes["FishTank"] != nil)
   }
 }
