@@ -323,6 +323,11 @@ extension Swift2JavaTranslator {
   func importedNominalType(_ nominal: SwiftNominalTypeDeclaration) -> ImportedNominalType? {
     let fullName = nominal.qualifiedName
 
+    guard shouldJExtractType(qualifiedName: fullName, config: config) else {
+      log.debug("Skip import '\(fullName)': filtered by swiftFilterInclude/swiftFilterExclude")
+      return nil
+    }
+
     if let alreadyImported = importedTypes[fullName] {
       return alreadyImported
     }

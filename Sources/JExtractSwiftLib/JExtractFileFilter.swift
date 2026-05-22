@@ -17,23 +17,38 @@ import SwiftJavaConfigurationShared
 // ==== -----------------------------------------------------------------------
 // MARK: Swift filter pattern classification
 
-/// A filter pattern is either a file-path pattern (uses `/`) or a type-name
-/// pattern (uses `.`). Plain names with neither separator match both
+/// A filter pattern is either a file-path pattern (uses `/` or a Swift file
+/// extension) or a type-name pattern (uses `.`). Plain names with neither
+/// match both
 enum SwiftFilterPatternKind {
-  /// Pattern contains `/` or `**` — matches against relative file paths
+  /// Pattern contains `/`, ends in a Swift source extension, or is a bare `**`
+  /// glob — matches against relative file paths
   case filePath
-  /// Pattern contains `.` — matches against qualified type names
+  /// Pattern uses `.` to separate components — matches against qualified type
+  /// names (e.g. `Outer.Inner`, `**.User`, `Outer.**`)
   case typeName
   /// Plain name with no separators — matches against both
   case plain
 }
 
 func classifyPattern(_ pattern: String) -> SwiftFilterPatternKind {
-  if pattern.contains("/") || pattern.contains("**") {
+  // Directory separator is the strongest signal for a file path
+  if pattern.contains("/") {
     return .filePath
   }
+  // A pattern ending in a Swift source extension is a filename pattern, even
+  // though it contains `.`, e.g. `MyType.swift`, `User.swiftinterface`
+  if pattern.hasSuffix(".swift") || pattern.hasSuffix(".swiftinterface") {
+    return .filePath
+  }
+  // Dotted patterns are nested type names. `**` segments are valid wildcards
+  // within dotted paths (e.g. `**.Internal`, `Outer.**`)
   if pattern.contains(".") {
     return .typeName
+  }
+  // `**` with no `.` or `/` is rare but we treat it as "all files" basically
+  if pattern.contains("**") {
+    return .filePath
   }
   return .plain
 }

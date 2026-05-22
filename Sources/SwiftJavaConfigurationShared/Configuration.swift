@@ -132,15 +132,24 @@ public struct Configuration: Codable {
   public var linkerExportListOutput: String?
 
   /// Include only Swift source files or types matching these patterns during jextract.
-  /// File-path patterns (containing `/`): matched against relative file paths
-  /// (including `.swift` extension). Supports `*` and `**` wildcards.
-  /// Type-name patterns (containing `.`): matched against qualified type names
-  /// (e.g. `Something.Other` for nested types).
-  /// Plain names match both
+  ///
+  /// File-path patterns (containing `/`, or ending in `.swift` /
+  /// `.swiftinterface`): matched against relative file paths. Supports `*` and
+  /// `**` wildcards. Example: `Models/**`, `**/User.swift`, `MyType.swift`.
+  ///
+  /// Type-name patterns (containing `.`): matched against the dotted nested
+  /// type path (e.g. `Outer.Inner`, `Outer.**`, `**.User`, `Logger.Internal*`).
+  /// The qualified name does NOT include the module prefix.
+  ///
+  /// `.` is the separator. `::` is reserved by Swift for module disambiguation
+  /// (SE-0491) and is NOT used by these filters.
+  ///
+  /// Plain names (no separator) match both: a filename without `.swift`, or the
+  /// top-level component of a type name
   public var swiftFilterInclude: [String]?
 
   /// Exclude Swift source files or types matching these patterns during jextract.
-  /// Same pattern syntax as swiftFilterInclude
+  /// Same pattern syntax as `swiftFilterInclude`
   public var swiftFilterExclude: [String]?
 
   /// Stub type declarations for imported modules whose source is not available
