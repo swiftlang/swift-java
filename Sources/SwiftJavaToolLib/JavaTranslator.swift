@@ -224,6 +224,38 @@ extension JavaTranslator {
           optionalSuffix = ""
         }
 
+        if let ownerType = parameterizedType.getOwnerType() {
+          var ownerSwiftType = try getSwiftTypeNameAsString(
+            method: method,
+            ownerType,
+            substitution: substitution,
+            preferValueTypes: false,
+            outerOptional: .nonoptional,
+            eraseTypeArguments: eraseTypeArguments
+          )
+
+          if ownerType.as(ParameterizedType.self) == nil,
+            let ownerClass = ownerType.as(JavaClass<JavaObject>.self),
+            ownerClass.getDeclaringClass() != nil
+          {
+            var ownerTypeArguments: [String] = []
+            for typeParam in ownerClass.getTypeParameters() {
+              guard let typeParam else { continue }
+              if eraseTypeArguments {
+                ownerTypeArguments.append("JavaObject")
+              } else {
+                ownerTypeArguments.append(typeParam.getName())
+              }
+            }
+
+            if !ownerTypeArguments.isEmpty {
+              ownerSwiftType += "<\(ownerTypeArguments.joined(separator: ", "))>"
+            }
+          }
+
+          rawSwiftType = "\(ownerSwiftType).\(rawSwiftType.splitSwiftTypeName().name)"
+        }
+
         let typeArguments: [String] = try parameterizedType.getActualTypeArguments().compactMap { typeArg in
           guard let typeArg else { return nil }
           if eraseTypeArguments {
@@ -250,6 +282,10 @@ extension JavaTranslator {
           }
 
           return mappedSwiftName
+        }
+
+        if typeArguments.isEmpty {
+          return "\(rawSwiftType)\(optionalSuffix)"
         }
 
         return "\(rawSwiftType)<\(typeArguments.joined(separator: ", "))>\(optionalSuffix)"

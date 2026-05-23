@@ -22,7 +22,7 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 
 class JavaTranslatorTests: XCTestCase {
 
-  func translateGenericMethodParameters() async throws {
+  func testTranslateGenericMethodParameters() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -55,5 +55,41 @@ class JavaTranslatorTests: XCTestCase {
     ) { translator in
 
     }
+  }
+
+  func testTranslateNestedParameterizedTypes() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
+      class MyOptional<Wrapped> {
+        interface Case<Wrapped> {
+          final class None<Wrapped> implements Case<Wrapped> {
+            None() {}
+          }
+        }
+
+        Case<Wrapped> getCase() { return null; }
+        Case.None<Wrapped> getAsNone() { return null; }
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyOptional$Case",
+        "com.example.MyOptional$Case$None",
+        "com.example.MyOptional",
+      ],
+      classNameMappings: [
+        "com.example.MyOptional$Case": "MyOptional.Case",
+        "com.example.MyOptional$Case$None": "MyOptional.Case.None",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        "func getCase() -> MyOptional.Case<Wrapped>!",
+        "func getAsNone() -> MyOptional.Case<Wrapped>.None<Wrapped>!",
+      ]
+    )
   }
 }
