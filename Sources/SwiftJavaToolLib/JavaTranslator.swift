@@ -158,7 +158,8 @@ extension JavaTranslator {
     substitution: SubstitutionMap?,
     preferValueTypes: Bool,
     outerOptional: OptionalKind,
-    eraseTypeArguments: Bool = false
+    eraseTypeArguments: Bool = false,
+    eraseRawOwnerTypeArguments: Bool = false
   ) throws -> String {
     // Replace if it is a type variable and we have a substitution for it.
     let javaType = substitution?.resolve(javaType) ?? javaType
@@ -181,7 +182,9 @@ extension JavaTranslator {
         bound,
         substitution: substitution,
         preferValueTypes: preferValueTypes,
-        outerOptional: outerOptional
+        outerOptional: outerOptional,
+        eraseTypeArguments: eraseTypeArguments,
+        eraseRawOwnerTypeArguments: eraseRawOwnerTypeArguments
       )
     }
 
@@ -192,7 +195,9 @@ extension JavaTranslator {
           arrayType.getGenericComponentType()!,
           substitution: substitution,
           preferValueTypes: preferValueTypes,
-          outerOptional: .optional
+          outerOptional: .optional,
+          eraseTypeArguments: eraseTypeArguments,
+          eraseRawOwnerTypeArguments: eraseRawOwnerTypeArguments
         )
         return "[\(elementType)]"
       }
@@ -213,7 +218,9 @@ extension JavaTranslator {
           rawJavaType,
           substitution: substitution,
           preferValueTypes: false,
-          outerOptional: outerOptional
+          outerOptional: outerOptional,
+          eraseTypeArguments: false,
+          eraseRawOwnerTypeArguments: false
         )
 
         let optionalSuffix: String
@@ -225,34 +232,16 @@ extension JavaTranslator {
         }
 
         if let ownerType = parameterizedType.getOwnerType() {
-          var ownerSwiftType = try getSwiftTypeNameAsString(
-            method: method,
-            ownerType,
-            substitution: substitution,
-            preferValueTypes: false,
-            outerOptional: .nonoptional,
-            eraseTypeArguments: eraseTypeArguments
-          )
-
-          if ownerType.as(ParameterizedType.self) == nil,
-            let ownerClass = ownerType.as(JavaClass<JavaObject>.self),
-            ownerClass.getDeclaringClass() != nil
-          {
-            var ownerTypeArguments: [String] = []
-            for typeParam in ownerClass.getTypeParameters() {
-              guard let typeParam else { continue }
-              if eraseTypeArguments {
-                ownerTypeArguments.append("JavaObject")
-              } else {
-                ownerTypeArguments.append(typeParam.getName())
-              }
-            }
-
-            if !ownerTypeArguments.isEmpty {
-              ownerSwiftType += "<\(ownerTypeArguments.joined(separator: ", "))>"
-            }
-          }
-
+          let ownerSwiftType =
+            try getSwiftTypeNameAsString(
+              method: method,
+              ownerType,
+              substitution: substitution,
+              preferValueTypes: false,
+              outerOptional: .nonoptional,
+              eraseTypeArguments: eraseTypeArguments,
+              eraseRawOwnerTypeArguments: ownerType.is(JavaClass<JavaObject>.self)
+            )
           rawSwiftType = "\(ownerSwiftType).\(rawSwiftType.splitSwiftTypeName().name)"
         }
 
@@ -267,7 +256,9 @@ extension JavaTranslator {
             typeArg,
             substitution: substitution,
             preferValueTypes: false,
-            outerOptional: .nonoptional
+            outerOptional: .nonoptional,
+            eraseTypeArguments: eraseTypeArguments,
+            eraseRawOwnerTypeArguments: eraseRawOwnerTypeArguments
           )
 
           // FIXME: improve the get instead...
@@ -297,7 +288,25 @@ extension JavaTranslator {
       throw TranslationError.unhandledJavaType(javaType)
     }
 
-    let (swiftName, isOptional) = try getSwiftTypeName(javaClass, preferValueTypes: preferValueTypes)
+    var (swiftName, isOptional) = try getSwiftTypeName(javaClass, preferValueTypes: preferValueTypes)
+    if eraseRawOwnerTypeArguments, let declaringClass = javaClass.getDeclaringClass() {
+      let ownerSwiftType = try getSwiftTypeNameAsString(
+        declaringClass.as(Type.self),
+        substitution: substitution,
+        preferValueTypes: preferValueTypes,
+        outerOptional: .nonoptional,
+        eraseTypeArguments: eraseTypeArguments,
+        eraseRawOwnerTypeArguments: true
+      )
+      swiftName = "\(ownerSwiftType).\(swiftName.splitSwiftTypeName().name)"
+    }
+
+    if eraseTypeArguments || eraseRawOwnerTypeArguments {
+      let typeParameterCount = javaClass.getTypeParameters().count
+      if typeParameterCount > 0 {
+        swiftName += "<\((0..<typeParameterCount).map { _ in "JavaObject" }.joined(separator: ", "))>"
+      }
+    }
     let resultString =
       if isOptional {
         outerOptional.adjustTypeName(swiftName)

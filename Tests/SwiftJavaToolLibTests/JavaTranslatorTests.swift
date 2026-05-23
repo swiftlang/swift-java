@@ -62,11 +62,42 @@ class JavaTranslatorTests: XCTestCase {
       """
       package com.example;
 
+      class MyString {}
+      class MyInt {}
+
+      class Outer<T> {
+        class Inner<U> {
+        }
+
+        Outer<MyString>.Inner<MyInt> foo() { return null; }
+        Outer<MyInt>.Inner<T> bar() { return null; }
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: [
+        "com.example.MyString",
+        "com.example.MyInt",
+        "com.example.Outer$Inner",
+        "com.example.Outer",
+      ],
+      classpath: [classpathURL],
+      expectedChunks: [
+        "func foo() -> Outer<MyString>.Inner<MyInt>!",
+        "func bar() -> Outer<MyInt>.Inner<T>!",
+      ]
+    )
+  }
+
+  func testTranslateNestedParameterizedStaticTypes() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+
       class MyOptional<Wrapped> {
         interface Case<Wrapped> {
-          final class None<Wrapped> implements Case<Wrapped> {
-            None() {}
-          }
+          record None<Wrapped>() implements Case<Wrapped> {}
         }
 
         Case<Wrapped> getCase() { return null; }
@@ -87,8 +118,8 @@ class JavaTranslatorTests: XCTestCase {
       ],
       classpath: [classpathURL],
       expectedChunks: [
-        "func getCase() -> MyOptional.Case<Wrapped>!",
-        "func getAsNone() -> MyOptional.Case<Wrapped>.None<Wrapped>!",
+        "func getCase() -> MyOptional<JavaObject>.Case<Wrapped>!",
+        "func getAsNone() -> MyOptional<JavaObject>.Case<JavaObject>.None<Wrapped>!",
       ]
     )
   }
