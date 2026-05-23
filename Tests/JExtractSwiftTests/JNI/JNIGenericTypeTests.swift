@@ -319,15 +319,15 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        public sealed interface Case {
-          record None() implements Case {}
+        public sealed interface Case<Wrapped> {
+          record None<Wrapped>() implements Case<Wrapped> {}
         }
         """,
         """
-        public Case getCase() {
+        public Case<Wrapped> getCase() {
           return switch (this.getDiscriminator()) {
            case SOME -> throw new UnsupportedOperationException("MyOptional.some contains unsupported values.");
-           case NONE -> new Case.None();
+           case NONE -> new Case.None<Wrapped>();
           };
         }
         """,
