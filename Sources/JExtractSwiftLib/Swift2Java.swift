@@ -22,11 +22,11 @@ import SwiftSyntaxBuilder
 
 public struct SwiftToJava {
   let config: Configuration
-  let dependentConfigs: [DependentConfig]
+  let dependencyConfigs: [DependencyConfig]
 
-  public init(config: Configuration, dependentConfigs: [DependentConfig]) {
+  public init(config: Configuration, dependencyConfigs: [DependencyConfig]) {
     self.config = config
-    self.dependentConfigs = dependentConfigs
+    self.dependencyConfigs = dependencyConfigs
   }
 
   public func run() throws {
@@ -96,13 +96,13 @@ public struct SwiftToJava {
       fatalError("Missing --output-java directory!")
     }
 
-    let wrappedJavaClassesLookupTable: JavaClassLookupTable = dependentConfigs.compactMap(\.configuration.classes).reduce(into: [:]) {
+    let wrappedJavaClassesLookupTable: JavaClassLookupTable = dependencyConfigs.compactMap(\.configuration.classes).reduce(into: [:]) {
       for (canonicalName, javaClass) in $1 {
         $0[javaClass] = canonicalName
       }
     }
 
-    let moduleJavaPackages = dependentConfigs.reduce(into: [String: String]()) { partialResult, dependency in
+    let moduleJavaPackages = dependencyConfigs.reduce(into: [String: String]()) { partialResult, dependency in
       guard
         let moduleName = dependency.swiftModuleName,
         let javaPackage = dependency.configuration.javaPackage,
@@ -114,7 +114,7 @@ public struct SwiftToJava {
     }
 
     translator.sourceDependencies.javaClasses = Array(wrappedJavaClassesLookupTable.keys)
-    for config in dependentConfigs {
+    for config in dependencyConfigs {
       translator.sourceDependencies.loadSwiftSources(from: config, log: translator.log)
     }
 

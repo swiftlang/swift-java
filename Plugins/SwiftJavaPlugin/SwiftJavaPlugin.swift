@@ -19,7 +19,7 @@ private let SwiftJavaConfigFileName = "swift-java.config"
 
 @main
 struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
-  struct DependentConfigFile {
+  struct DependencyConfigFile {
     let swiftModuleName: String
     let configURL: URL
   }
@@ -50,7 +50,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
     /// Find the manifest files from other swift-java executions in any targets
     /// this target depends on.
-    var dependentConfigFiles: [DependentConfigFile] = []
+    var dependencyConfigFiles: [DependencyConfigFile] = []
     func searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
       let dependencyURL = target.directoryURL
@@ -64,8 +64,8 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
-        dependentConfigFiles.append(
-          DependentConfigFile(swiftModuleName: target.name, configURL: dependencyConfigURL)
+        dependencyConfigFiles.append(
+          DependencyConfigFile(swiftModuleName: target.name, configURL: dependencyConfigURL)
         )
       }
     }
@@ -98,7 +98,7 @@ struct SwiftJavaBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     var arguments: [String] = []
     arguments += argumentsSwiftModule(sourceModule: sourceModule)
     arguments += argumentsOutputDirectory(context: context)
-    arguments += argumentsDependedOnConfigs(dependentConfigFiles)
+    arguments += dependsOnArguments(dependencyConfigFiles)
 
     let classes = config.classes ?? [:]
     print("[swift-java-plugin] Classes to wrap (\(classes.count)): \(classes.map(\.key))")
@@ -230,11 +230,11 @@ extension SwiftJavaBuildToolPlugin {
     ]
   }
 
-  func argumentsDependedOnConfigs(_ dependentConfigFiles: [DependentConfigFile]) -> [String] {
-    dependentConfigFiles.flatMap { dependentConfigFile in
+  func dependsOnArguments(_ dependencyConfigFiles: [DependencyConfigFile]) -> [String] {
+    dependencyConfigFiles.flatMap { dependencyConfigFile in
       [
         "--depends-on",
-        "\(dependentConfigFile.swiftModuleName)=\(dependentConfigFile.configURL.path(percentEncoded: false))",
+        "\(dependencyConfigFile.swiftModuleName)=\(dependencyConfigFile.configURL.path(percentEncoded: false))",
       ]
     }
   }

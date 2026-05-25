@@ -35,11 +35,11 @@ func assertOutput(
   swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   javaClassLookupTable: [String: String] = [:],
-  /// Map of dependent Swift module name → raw Swift source text. Used to seed
+  /// Map of dependency Swift module name → raw Swift source text. Used to seed
   /// `translator.sourceDependencies` so cross-module type lookups resolve.
-  dependentSwiftSources: [String: String] = [:],
+  dependencySwiftSources: [String: String] = [:],
   /// Map of Swift module name → Java package, mirroring what `--depends-on`
-  /// dependent configs would carry. Forwarded to the generator so cross-module
+  /// dependency configs would carry. Forwarded to the generator so cross-module
   /// type references print with their fully-qualified Java name.
   moduleJavaPackages: [String: String] = [:],
   expectedChunks: [String],
@@ -53,10 +53,10 @@ func assertOutput(
   config.swiftModule = swiftModuleName
   let translator = Swift2JavaTranslator(config: config)
   translator.sourceDependencies.javaClasses = Array(javaClassLookupTable.keys)
-  for (depModule, depSource) in dependentSwiftSources {
+  for (depModule, depSource) in dependencySwiftSources {
     let syntax = Parser.parse(source: depSource)
     let input = SwiftJavaInputFile(syntax: syntax, path: "/fake/\(depModule).swift")
-    translator.sourceDependencies.setSwiftSources([input], for: depModule)
+    translator.sourceDependencies.swiftModuleInputs[depModule] = [input]
   }
 
   try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)

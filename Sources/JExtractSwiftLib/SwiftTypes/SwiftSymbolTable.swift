@@ -116,25 +116,30 @@ extension SwiftSymbolTable {
       }
     }
 
-    for dependentModuleName in sourceDependencies.swiftModuleNames {
+    for dependencyModuleName in sourceDependencies.swiftModuleNames {
       // The module may already have been loaded as a known/built-in module
       // (e.g. Swift, Foundation) above
-      guard importedModules[dependentModuleName] == nil else {
+      guard importedModules[dependencyModuleName] == nil else {
         continue
       }
-      let dependentInputs = sourceDependencies.swiftModuleInputs[dependentModuleName] ?? []
+      let dependencyInputs = sourceDependencies.swiftModuleInputs[dependencyModuleName] ?? []
+      // TODO: build a `dependencyImportedModules` dict by scanning the dep's
+      // own source files with `importingModules(sourceFile:)`, instead of
+      // reusing the primary's `importedModules`. The current set is too broad
+      // (it can shadow names) and too narrow (it misses modules the dep
+      // imports but the primary doesn't).
       var dependencyModuleBuilder = SwiftParsedModuleSymbolTableBuilder(
-        moduleName: dependentModuleName,
+        moduleName: dependencyModuleName,
         importedModules: importedModules,
         buildConfig: buildConfig,
       )
-      for input in dependentInputs {
+      for input in dependencyInputs {
         dependencyModuleBuilder.handle(sourceFile: input.syntax, sourceFilePath: input.path)
       }
       let dependencyModule = dependencyModuleBuilder.finalize()
-      importedModules[dependentModuleName] = dependencyModule
+      importedModules[dependencyModuleName] = dependencyModule
       log.info(
-        "Loaded dependent module '\(dependentModuleName)' from \(dependentInputs.count) source(s); "
+        "Loaded dependency module '\(dependencyModuleName)' from \(dependencyInputs.count) source(s); "
           + "top-level types [\(dependencyModule.topLevelTypes.count)]: \(dependencyModule.topLevelTypes.keys.sorted())"
       )
     }

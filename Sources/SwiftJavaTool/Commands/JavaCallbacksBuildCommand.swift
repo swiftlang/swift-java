@@ -93,7 +93,7 @@ extension SwiftJava {
 
     @Option(
       help:
-        "Dependent module configurations (format: ModuleName=/path/to/swift-java.config)"
+        "Dependency module configurations (format: ModuleName=/path/to/swift-java.config)"
     )
     var dependsOn: [String] = []
 
@@ -133,9 +133,9 @@ extension SwiftJava {
         withIntermediateDirectories: true,
       )
 
-      // Dependent modules jextract writes to their respective directories, so
+      // Dependency modules jextract writes to their respective directories, so
       // we need to consider them when we try to compile java output
-      let dependentSourcePaths = dependentJavaSourceDirs(
+      let dependencySourcePaths = dependencyJavaSourceDirs(
         javaSourcesList: javaSourcesList,
         dependsOn: dependsOn
       )
@@ -146,9 +146,9 @@ extension SwiftJava {
         "-parameters",
         "-classpath", swiftKitCoreClasspath,
       ]
-      // Consider dependent modules generated java sources as well
-      if !dependentSourcePaths.isEmpty {
-        javacArgs += ["-sourcepath", dependentSourcePaths.joined(separator: ":")]
+      // Consider dependency modules generated java sources as well
+      if !dependencySourcePaths.isEmpty {
+        javacArgs += ["-sourcepath", dependencySourcePaths.joined(separator: ":")]
       }
 
       try await runSubprocess(
@@ -201,8 +201,7 @@ extension SwiftJava {
 
 // MARK: - Helpers
 
-/// Walk up from the consumer's `<plugin-outputs>/<sample>/<consumer>/destination/JExtractSwiftPlugin/src/generated/java/jextract-generated-sources.txt`
-/// to `<plugin-outputs>/<sample>/`, the root shared by every JExtractSwiftPlugin target in this package
+/// Find the plugin output path, walking up from a emitted generated source file
 private func pluginOutputsRoot(forJavaSourcesList javaSourcesList: String) -> URL {
   let url = URL(fileURLWithPath: javaSourcesList)
   // Validate the expected SwiftPM plugin-outputs layout before stripping suffix.
@@ -228,9 +227,9 @@ private func pluginOutputsRoot(forJavaSourcesList javaSourcesList: String) -> UR
   return root
 }
 
-/// For each `--depends-on Module=...` entry, derive the dependent module's
+/// For each `--depends-on Module=...` entry, derive the dependency module's
 /// generated Java directory.
-private func dependentJavaSourceDirs(
+private func dependencyJavaSourceDirs(
   javaSourcesList: String,
   dependsOn: [String]
 ) -> [String] {

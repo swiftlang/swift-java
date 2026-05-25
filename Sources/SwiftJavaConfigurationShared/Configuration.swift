@@ -426,22 +426,22 @@ public func readConfiguration(
   }
 }
 
-/// Parsed dependent configuration provided via `--depends-on`.
-public struct DependentConfig {
+/// Parsed dependency configuration provided via `--depends-on`.
+public struct DependencyConfig {
   public let swiftModuleName: String?
   public let configuration: Configuration
 
-  /// Absolute paths to the dependent module's Swift source directories (or individual files).
+  /// Absolute paths to the dependency module's Swift source directories (or individual files).
   ///
   /// Populated by `parseDependsOnSyntax` from, in order:
   /// 1. Explicit `,<sources-path>` suffixes on the `--depends-on` argument.
-  /// 2. The dependent's `configuration.inputSwiftDirectory`, resolved relative to the
+  /// 2. The dependency's `configuration.inputSwiftDirectory`, resolved relative to the
   ///    directory containing the config file.
   /// 3. `<configParent>/Sources/<swiftModuleName>/` if it exists (SwiftPM convention).
   /// 4. The directory containing the config file.
   ///
   /// Empty only when none of the above could be resolved; in that case cross-module
-  /// type lookups for this dependent will fail and `jextract` will log a warning.
+  /// type lookups for this dependency will fail and `jextract` will log a warning.
   public let swiftSourcePaths: [URL]
 
   public init(swiftModuleName: String?, configuration: Configuration, swiftSourcePaths: [URL] = []) {
@@ -451,18 +451,18 @@ public struct DependentConfig {
   }
 }
 
-/// Load all dependent configs configured with `--depends-on`.
+/// Load all dependency configs configured with `--depends-on`.
 ///
 /// Argument grammar: `[<ModuleName>=]<configPath>[,<sourcesPath>...]`.
 ///
 /// The optional comma-separated sources paths override the default inference chain
-/// described on ``DependentConfig/swiftSourcePaths``.
-public func parseDependsOnSyntax(dependsOn: [String]) throws -> [DependentConfig] {
+/// described on ``DependencyConfig/swiftSourcePaths``.
+public func parseDependsOnSyntax(dependsOn: [String]) throws -> [DependencyConfig] {
   try dependsOn.map(parseDependsOnSyntax)
 }
 
 /// Parse a single `--depends-on` argument
-public func parseDependsOnSyntax(_ dependsOn: String) throws -> DependentConfig {
+public func parseDependsOnSyntax(_ dependsOn: String) throws -> DependencyConfig {
   let equalLoc = dependsOn.firstIndex(of: "=")
 
   var swiftModuleName: String? = nil
@@ -483,25 +483,25 @@ public func parseDependsOnSyntax(_ dependsOn: String) throws -> DependentConfig 
   let configURL = URL(fileURLWithPath: configFileName)
   let config = try readConfiguration(configPath: configURL) ?? Configuration()
 
-  let sources = resolveDependentSources(
+  let sources = resolveDependencySources(
     moduleName: swiftModuleName,
     configURL: configURL,
     configuration: config,
     explicit: explicitSources,
   )
 
-  return DependentConfig(
+  return DependencyConfig(
     swiftModuleName: swiftModuleName,
     configuration: config,
     swiftSourcePaths: sources,
   )
 }
 
-/// Apply the fallback chain described on ``DependentConfig/swiftSourcePaths``.
+/// Apply the fallback chain described on ``DependencyConfig/swiftSourcePaths``.
 ///
 /// Returns an empty array when nothing could be resolved. Callers should log a warning
 /// in that case.
-private func resolveDependentSources(
+private func resolveDependencySources(
   moduleName: String?,
   configURL: URL,
   configuration: Configuration,
@@ -514,7 +514,7 @@ private func resolveDependentSources(
   let configParent = configURL.deletingLastPathComponent()
   let fm = FileManager.default
 
-  // 2) Dependent config's inputSwiftDirectory, relative to the config file's directory.
+  // 2) Dependency config's inputSwiftDirectory, relative to the config file's directory.
   if let input = configuration.inputSwiftDirectory, !input.isEmpty {
     let parts = input.split(separator: ",", omittingEmptySubsequences: true).map(String.init)
     let urls: [URL] = parts.map { part in

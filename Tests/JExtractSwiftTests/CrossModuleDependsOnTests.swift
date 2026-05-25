@@ -24,11 +24,11 @@ import Testing
 struct CrossModuleDependsOnTests {
 
   // ==== ----------------------------------------------------------------------
-  // MARK: Top-level type from a dependent module
+  // MARK: Top-level type from a dependency module
 
-  @Test("JNI: top-level type from dependent module is resolved and printed with its Java package")
+  @Test("JNI: top-level type from dependency module is resolved and printed with its Java package")
   func jni_topLevelType_resolvedAndQualified() throws {
-    let dependentSource = """
+    let dependencySource = """
       public struct DependencyPayload {
         public let value: Int32
         public init(value: Int32) {
@@ -49,7 +49,7 @@ struct CrossModuleDependsOnTests {
       .jni,
       .java,
       swiftModuleName: "PrimaryLib",
-      dependentSwiftSources: ["DependencyLib": dependentSource],
+      dependencySwiftSources: ["DependencyLib": dependencySource],
       moduleJavaPackages: ["DependencyLib": "com.example.dep"],
       expectedChunks: [
         "consumePayload(com.example.dep.DependencyPayload p)"
@@ -57,7 +57,7 @@ struct CrossModuleDependsOnTests {
     )
   }
 
-  @Test("JNI: without dependent sources the function is dropped from the bindings")
+  @Test("JNI: without dependency sources the function is dropped from the bindings")
   func jni_topLevelType_droppedWithoutDependency() throws {
     let primarySource = """
       import DependencyLib
@@ -72,7 +72,7 @@ struct CrossModuleDependsOnTests {
       .jni,
       .java,
       swiftModuleName: "PrimaryLib",
-      // Intentionally no dependentSwiftSources — simulates calling jextract
+      // Intentionally no dependencySwiftSources — simulates calling jextract
       // without --depends-on for DependencyLib. The function should be skipped.
       expectedChunks: [],
       notExpectedChunks: ["consumePayload"],
@@ -80,9 +80,9 @@ struct CrossModuleDependsOnTests {
   }
 
   // ==== ----------------------------------------------------------------------
-  // MARK: Multiple dependent modules
+  // MARK: Multiple dependency modules
 
-  @Test("JNI: parameters from two distinct dependent modules both resolve")
+  @Test("JNI: parameters from two distinct dependency modules both resolve")
   func jni_twoDependentModules() throws {
     let depA = """
       public struct InputBlob {
@@ -110,7 +110,7 @@ struct CrossModuleDependsOnTests {
       .jni,
       .java,
       swiftModuleName: "PrimaryLib",
-      dependentSwiftSources: [
+      dependencySwiftSources: [
         "DepA": depA,
         "DepB": depB,
       ],
@@ -125,16 +125,16 @@ struct CrossModuleDependsOnTests {
   }
 
   // ==== ----------------------------------------------------------------------
-  // MARK: Nested types from a dependent module
+  // MARK: Nested types from a dependency module
   //
   // Exercises the case where a primary module's API references a nested type
   // (e.g. `Outer.Inner`) declared inside an enum in another SwiftPM target.
-  // Without sourcing the dependent module's real declarations the only prior
+  // Without sourcing the dependency module's real declarations the only prior
   // workaround was hand-writing an empty `public enum Outer {}` stub.
 
-  @Test("JNI: nested type inside a dependent-module namespace enum is resolved")
+  @Test("JNI: nested type inside a dependency-module namespace enum is resolved")
   func jni_nestedTypeInDependentModule() throws {
-    let dependentSource = """
+    let dependencySource = """
       public enum Outer {
         public struct Inner {
           public let value: Int32
@@ -157,7 +157,7 @@ struct CrossModuleDependsOnTests {
       .jni,
       .java,
       swiftModuleName: "PrimaryLib",
-      dependentSwiftSources: ["DependencyLib": dependentSource],
+      dependencySwiftSources: ["DependencyLib": dependencySource],
       moduleJavaPackages: ["DependencyLib": "com.example.dep"],
       expectedChunks: [
         "consumeInner(com.example.dep.Outer.Inner inner)"

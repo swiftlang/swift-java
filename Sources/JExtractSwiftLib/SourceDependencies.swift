@@ -24,52 +24,45 @@ import Foundation
 
 
 package typealias SwiftModuleName = String
+package typealias SwiftTypeName = String
+package typealias SwiftSourceText = String
+package typealias JavaClassName = String
+package typealias JavaFullyQualifiedClassName = String
+package typealias JavaPackageName = String
 
 /// Holds the inputs jextract needs for symbol resolution but does not generate
 /// bindings for.
 ///
 /// Two flavours of "dependency" are tracked:
-/// - Wrapped Java classes referenced from this module's API (e.g. `JavaInteger`),
-///   exposed back to the symbol table as synthetic `@JavaClass public class X {}`
-///   stubs by ``Swift2JavaTranslator/buildDependencyClassesSourceFile``.
-/// - Real Swift sources from dependent Swift modules (passed via `--depends-on`),
+/// - Wrapped Java classes referenced from this module's API (e.g. `JavaInteger`).
+/// - Real Swift sources from dependency Swift modules (passed via `--depends-on`),
 ///   parsed once and registered as imported `SwiftModuleSymbolTable`s so that
 ///   cross-module type references in this module's API can resolve them.
-package final class SourceDependencies {
-  /// Java class names referenced from this module that live in wrapped Java
-  /// dependencies.
-  package var javaClasses: [String] = []
+package struct SourceDependencies {
+  /// Swift wrapper type names for Java classes referenced from this module's
+  /// API (by convention `Java<ClassName>`, e.g. `JavaVector`).
+  package var javaClasses: [SwiftTypeName] = []
 
-  /// Parsed Swift inputs from dependent modules, keyed by Swift module name.
-  package private(set) var swiftModuleInputs: [SwiftModuleName: [SwiftJavaInputFile]] = [:]
+  /// Parsed Swift inputs from dependency modules, keyed by Swift module name.
+  package var swiftModuleInputs: [SwiftModuleName: [SwiftJavaInputFile]] = [:]
 
   package init() {}
 
-  /// Replace the parsed Swift inputs for a dependent module.
-  package func setSwiftSources(_ inputs: [SwiftJavaInputFile], for moduleName: SwiftModuleName) {
-    swiftModuleInputs[moduleName] = inputs
-  }
-
-  /// Names of all dependent modules with associated Swift sources.
+  /// Names of all dependency modules with associated Swift sources.
   package var swiftModuleNames: Dictionary<SwiftModuleName, [SwiftJavaInputFile]>.Keys {
     swiftModuleInputs.keys
   }
 
-  /// Walk a single dependent module's resolved source paths and parse every
-  /// `.swift` file into a `SwiftJavaInputFile`, registering the result on this
-  /// resolver. Anonymous `--depends-on` entries and modules with no resolvable
-  /// sources are skipped with a warning, so the user has a clear signal when
-  /// cross-module lookups will fail.
-  package func loadSwiftSources(from dependency: DependentConfig, log: Logger) {
+  package mutating func loadSwiftSources(from dependency: DependencyConfig, log: Logger) {
     guard let moduleName = dependency.swiftModuleName else {
-      log.warning(
+      log.debug(
         "Skipping anonymous '--depends-on' entry (no '<Module>=' prefix); cross-module type references from it cannot be resolved."
       )
       return
     }
     guard !dependency.swiftSourcePaths.isEmpty else {
       log.warning(
-        "Dependent module '\(moduleName)' has no resolvable Swift sources; cross-module type references will fail to import. Pass an explicit '--depends-on \(moduleName)=<config>,<sources>' or set 'inputSwiftDirectory' in its swift-java.config."
+        "Dependency module '\(moduleName)' has no resolvable Swift sources; cross-module type references will fail to import. Pass an explicit '--depends-on \(moduleName)=<config>,<sources>' or set 'inputSwiftDirectory' in its swift-java.config."
       )
       return
     }
@@ -92,13 +85,13 @@ package final class SourceDependencies {
 
     if inputs.isEmpty {
       log.warning(
-        "Dependent module '\(moduleName)' source paths \(dependency.swiftSourcePaths.map(\.path)) contained no extractable .swift files."
+        "Dependency module '\(moduleName)' source paths \(dependency.swiftSourcePaths.map(\.path)) contained no extractable .swift files."
       )
       return
     }
     log.info(
-      "Loaded \(inputs.count) source file(s) for dependent module '\(moduleName)' from \(dependency.swiftSourcePaths.map(\.path))"
+      "Loaded \(inputs.count) source file(s) for dependency module '\(moduleName)' from \(dependency.swiftSourcePaths.map(\.path))"
     )
-    setSwiftSources(inputs, for: moduleName)
+    swiftModuleInputs[moduleName] = inputs
   }
 }

@@ -20,7 +20,7 @@ private let SwiftJavaConfigFileName = "swift-java.config"
 @main
 struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
-  struct DependentConfigFile {
+  struct DependencyConfigFile {
     let swiftModuleName: String
     // The specific URL of a swift-java.config file
     let configURL: URL
@@ -63,7 +63,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     let outputJavaDirectory = context.outputJavaDirectory
     let outputSwiftDirectory = context.outputSwiftDirectory
 
-    let dependentConfigFiles = searchForDependentConfigFiles(in: target)
+    let dependencyConfigFiles = searchForDependencyConfigFiles(in: target)
 
     var arguments: [String] = [
       /*subcommand=*/"jextract",
@@ -88,17 +88,17 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       arguments += ["--static-build-config", resolvedURL.absoluteURL.path(percentEncoded: false)]
     }
 
-    let dependentConfigFilesArguments = dependentConfigFiles.flatMap { dependentConfigFile -> [String] in
-      let configPath = dependentConfigFile.configURL.path(percentEncoded: false)
+    let dependsOnArguments = dependencyConfigFiles.flatMap { dependencyConfigFile -> [String] in
+      let configPath = dependencyConfigFile.configURL.path(percentEncoded: false)
       let value: String
-      if let src = dependentConfigFile.sourceDirURL {
-        value = "\(dependentConfigFile.swiftModuleName)=\(configPath),\(src.path(percentEncoded: false))"
+      if let src = dependencyConfigFile.sourceDirURL {
+        value = "\(dependencyConfigFile.swiftModuleName)=\(configPath),\(src.path(percentEncoded: false))"
       } else {
-        value = "\(dependentConfigFile.swiftModuleName)=\(configPath)"
+        value = "\(dependencyConfigFile.swiftModuleName)=\(configPath)"
       }
       return ["--depends-on", value]
     }
-    arguments += dependentConfigFilesArguments
+    arguments += dependsOnArguments
 
     let swiftFiles = sourceModule.sourceFiles.map { $0.url }.filter {
       $0.pathExtension == "swift"
@@ -258,7 +258,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       "--output-directory", outputSwiftDirectory.path(percentEncoded: false),
       "--single-swift-file-output", singleSwiftFileOutputName,
     ]
-    javaCallbacksArguments += dependentConfigFilesArguments
+    javaCallbacksArguments += dependsOnArguments
 
     commands += [
       .buildCommand(
@@ -284,8 +284,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
 
   /// Find the manifest files from other swift-java executions in any targets
   /// this target depends on.
-  func searchForDependentConfigFiles(in target: any Target) -> [DependentConfigFile] {
-    var dependentConfigFiles: [DependentConfigFile] = []
+  func searchForDependencyConfigFiles(in target: any Target) -> [DependencyConfigFile] {
+    var dependencyConfigFiles: [DependencyConfigFile] = []
 
     func _searchForConfigFiles(in target: any Target) {
       // log("Search for config files in target: \(target.name)")
@@ -300,8 +300,8 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
         .path(percentEncoded: false)
 
       if FileManager.default.fileExists(atPath: dependencyConfigString) {
-        dependentConfigFiles.append(
-          DependentConfigFile(
+        dependencyConfigFiles.append(
+          DependencyConfigFile(
             swiftModuleName: target.name,
             configURL: dependencyConfigURL,
             sourceDirURL: target.sourceModule?.directoryURL,
@@ -335,7 +335,7 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
       _searchForConfigFiles(in: dependency)
     }
 
-    return dependentConfigFiles
+    return dependencyConfigFiles
   }
 
   private func findSwiftJavaDirectory(for target: any Target) -> URL? {

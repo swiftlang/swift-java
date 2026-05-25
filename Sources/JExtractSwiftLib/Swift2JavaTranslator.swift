@@ -44,7 +44,7 @@ public final class Swift2JavaTranslator {
   var filteredOutPaths: [String] = []
 
   /// Sources jextract needs for symbol resolution but does not generate bindings
-  /// for: wrapped Java classes plus real Swift sources from dependent modules.
+  /// for: wrapped Java classes plus real Swift sources from dependency modules.
   /// Populated by `SwiftToJava.run` before `analyze()` runs.
   package var sourceDependencies = SourceDependencies()
 
