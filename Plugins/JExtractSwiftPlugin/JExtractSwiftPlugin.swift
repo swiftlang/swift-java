@@ -89,14 +89,11 @@ struct JExtractSwiftBuildToolPlugin: SwiftJavaPluginProtocol, BuildToolPlugin {
     }
 
     let dependsOnArguments = dependencyConfigFiles.flatMap { dependencyConfigFile -> [String] in
-      let configPath = dependencyConfigFile.configURL.path(percentEncoded: false)
-      let value: String
-      if let src = dependencyConfigFile.sourceDirURL {
-        value = "\(dependencyConfigFile.swiftModuleName)=\(configPath),\(src.path(percentEncoded: false))"
-      } else {
-        value = "\(dependencyConfigFile.swiftModuleName)=\(configPath)"
-      }
-      return ["--depends-on", value]
+      makeDependsOnArgument(
+        moduleName: dependencyConfigFile.swiftModuleName,
+        configPath: dependencyConfigFile.configURL.path(percentEncoded: false),
+        sourcePaths: dependencyConfigFile.sourceDirURL.map { [$0.path(percentEncoded: false)] } ?? []
+      )
     }
     arguments += dependsOnArguments
 

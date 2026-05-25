@@ -232,10 +232,10 @@ extension SwiftJavaBuildToolPlugin {
 
   func dependsOnArguments(_ dependencyConfigFiles: [DependencyConfigFile]) -> [String] {
     dependencyConfigFiles.flatMap { dependencyConfigFile in
-      [
-        "--depends-on",
-        "\(dependencyConfigFile.swiftModuleName)=\(dependencyConfigFile.configURL.path(percentEncoded: false))",
-      ]
+      makeDependsOnArgument(
+        moduleName: dependencyConfigFile.swiftModuleName,
+        configPath: dependencyConfigFile.configURL.path(percentEncoded: false)
+      )
     }
   }
 
