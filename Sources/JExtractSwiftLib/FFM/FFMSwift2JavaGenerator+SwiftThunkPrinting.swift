@@ -28,7 +28,7 @@ extension FFMSwift2JavaGenerator {
       return // no need to write any empty files, yay
     }
 
-    log.info(
+    log.debug(
       "Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/"
     )
 

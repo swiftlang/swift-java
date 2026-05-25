@@ -251,8 +251,9 @@ private func dependencyJavaSourceDirs(
       .appendingPathComponent("generated")
       .appendingPathComponent("java")
     let path = candidate.path
-    // already handled this module
-    guard fm.fileExists(atPath: path), seen.insert(path).inserted else { continue }
+    guard fm.fileExists(atPath: path), seen.insert(path).inserted else {
+      continue // already handled this module
+    }
     paths.append(path)
   }
   return paths
