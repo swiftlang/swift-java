@@ -53,6 +53,19 @@ package struct SourceDependencies {
     swiftModuleInputs.keys
   }
 
+  /// Synthetic Swift source registering `@JavaClass public class <Name> {}` stubs
+  package var syntheticJavaWrappersSwiftSource: SwiftJavaInputFile? {
+    guard !javaClasses.isEmpty else { return nil }
+    let text =
+      javaClasses
+      .map { "@JavaClass public class \($0) {}" }
+      .joined(separator: "\n")
+    return SwiftJavaInputFile(
+      syntax: Parser.parse(source: text),
+      path: "<javaClassStubs>.swift"
+    )
+  }
+
   package mutating func loadSwiftSources(from dependency: DependencyConfig, log: Logger) {
     guard let moduleName = dependency.swiftModuleName else {
       log.debug(

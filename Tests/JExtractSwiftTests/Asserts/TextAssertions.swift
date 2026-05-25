@@ -35,10 +35,10 @@ func assertOutput(
   swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   javaClassLookupTable: [String: String] = [:],
-  /// Map of dependency Swift module name → raw Swift source text. Used to seed
+  /// Map of dependency Swift module name to raw Swift source text. Used to seed
   /// `translator.sourceDependencies` so cross-module type lookups resolve.
   dependencySwiftSources: [String: String] = [:],
-  /// Map of Swift module name → Java package, mirroring what `--depends-on`
+  /// Map of Swift module name to Java package, mirroring what `--depends-on`
   /// dependency configs would carry. Forwarded to the generator so cross-module
   /// type references print with their fully-qualified Java name.
   moduleJavaPackages: [String: String] = [:],

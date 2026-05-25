@@ -181,6 +181,9 @@ extension SwiftSymbolTable {
     for sourceFile in inputFiles {
       builder.handle(sourceFile: sourceFile.syntax, sourceFilePath: sourceFile.path)
     }
+    if let stubs = sourceDependencies.syntheticJavaWrappersSwiftSource {
+      builder.handle(sourceFile: stubs.syntax, sourceFilePath: stubs.path)
+    }
     let parsedModule = builder.finalize()
     return SwiftSymbolTable(parsedModule: parsedModule, importedModules: importedModules)
   }
