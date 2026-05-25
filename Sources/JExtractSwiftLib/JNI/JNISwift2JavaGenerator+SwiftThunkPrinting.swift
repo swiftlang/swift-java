@@ -39,8 +39,9 @@ extension JNISwift2JavaGenerator {
       "Write empty [\(self.expectedOutputSwiftFileNames.count)] 'expected' files in: \(swiftOutputDirectory)/"
     )
 
+    // FIXME(SwiftPM): We'd like to avoid having to write these blank files
     for expectedFileName in self.expectedOutputSwiftFileNames {
-      logger.info("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
+      logger.trace("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
       var printer = CodePrinter()
       printer.print("// Empty file generated on purpose")
