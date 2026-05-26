@@ -22,7 +22,7 @@ import XCTest // NOTE: Workaround for https://github.com/swiftlang/swift-java/is
 
 class JavaTranslatorTests: XCTestCase {
 
-  func testTranslateGenericMethodParameters() async throws {
+  func translateGenericMethodParameters() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
