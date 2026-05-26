@@ -244,7 +244,7 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache sample .build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         continue-on-error: true
         with:
           path: Samples/${{ matrix.sample_app }}/.build
@@ -283,7 +283,7 @@ jobs:
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: Cache sample .build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         continue-on-error: true
         with:
           path: Samples/${{ matrix.sample_app }}/.build
