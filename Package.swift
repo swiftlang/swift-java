@@ -73,11 +73,6 @@ let package = Package(
       targets: ["JavaLangReflect"]
     ),
 
-    .executable(
-      name: "swift-java",
-      targets: ["swift-java"]
-    ),
-
     .library(
       name: "SwiftJavaDocumentation",
       targets: ["SwiftJavaDocumentation"]
