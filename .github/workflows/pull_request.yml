@@ -243,6 +243,26 @@ jobs:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Compute sample cache hash
+        id: sample_hash
+        shell: bash
+        run: |
+          if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum -a 256"; fi
+          hash="$( {
+            find Sources Plugins -type f -name '*.swift' 2>/dev/null
+            find "Samples/${{ matrix.sample_app }}" -type f \( -name '*.swift' -o -name '*.config' -o -name 'Package.swift' -o -name 'ci-validate.sh' \) 2>/dev/null
+            printf '%s\n' Package.swift Package.resolved
+          } | LC_ALL=C sort -u | xargs $SUM 2>/dev/null | $SUM | cut -d' ' -f1 )"
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+      - name: Cache sample .build
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: Samples/${{ matrix.sample_app }}/.build
+          key: ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-${{ matrix.sample_app }}-${{ steps.sample_hash.outputs.hash }}
+          restore-keys: |
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-${{ matrix.sample_app }}-
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-
       - name: "Verify sample: ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
@@ -273,6 +293,26 @@ jobs:
         run: ./.github/scripts/install_swiftly.sh
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
+      - name: Compute sample cache hash
+        id: sample_hash
+        shell: bash
+        run: |
+          if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum -a 256"; fi
+          hash="$( {
+            find Sources Plugins -type f -name '*.swift' 2>/dev/null
+            find "Samples/${{ matrix.sample_app }}" -type f \( -name '*.swift' -o -name '*.config' -o -name 'Package.swift' -o -name 'ci-validate.sh' \) 2>/dev/null
+            printf '%s\n' Package.swift Package.resolved
+          } | LC_ALL=C sort -u | xargs $SUM 2>/dev/null | $SUM | cut -d' ' -f1 )"
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+      - name: Cache sample .build
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: Samples/${{ matrix.sample_app }}/.build
+          key: ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-${{ matrix.sample_app }}-${{ steps.sample_hash.outputs.hash }}
+          restore-keys: |
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-${{ matrix.sample_app }}-
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-sample-
       - name: "Verify sample ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
