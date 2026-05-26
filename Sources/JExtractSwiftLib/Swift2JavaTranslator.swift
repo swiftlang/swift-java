@@ -43,8 +43,10 @@ public final class Swift2JavaTranslator {
   /// complain about missing declared outputs
   var filteredOutPaths: [String] = []
 
-  /// A list of used Swift class names that live in dependencies, e.g. `JavaInteger`
-  package var dependenciesClasses: [String] = []
+  /// Sources jextract needs for symbol resolution but does not generate bindings
+  /// for: wrapped Java classes plus real Swift sources from dependency modules.
+  /// Populated by `SwiftToJava.run` before `analyze()` runs.
+  package var sourceDependencies = SourceDependencies()
 
   // ==== Output state
 
@@ -198,12 +200,11 @@ extension Swift2JavaTranslator {
   }
 
   package func prepareForTranslation() {
-    let dependenciesSource = self.buildDependencyClassesSourceFile()
-
     let symbolTable = SwiftSymbolTable.setup(
       moduleName: self.swiftModuleName,
-      inputs + [dependenciesSource],
+      inputs,
       config: self.config,
+      sourceDependencies: self.sourceDependencies,
       buildConfig: self.buildConfig,
       log: self.log,
     )
@@ -264,17 +265,6 @@ extension Swift2JavaTranslator {
     }
     return false
   }
-
-  /// Returns a source file that contains all the available dependency classes.
-  private func buildDependencyClassesSourceFile() -> SwiftJavaInputFile {
-    let contents = self.dependenciesClasses.map {
-      "@JavaClass public class \($0) {}"
-    }
-    .joined(separator: "\n")
-
-    let syntax = SourceFileSyntax(stringLiteral: contents)
-    return SwiftJavaInputFile(syntax: syntax, path: "FakeDependencyClassesSourceFile.swift")
-  }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
@@ -306,10 +296,10 @@ extension Swift2JavaTranslator {
       return nil
     }
 
-    // Whether to import this extension?
     let isFromThisModule = swiftNominalDecl.moduleName == self.swiftModuleName
     let isFromStubbedModule = config.hasImportedModuleStub(moduleOfNominal: swiftNominalDecl.moduleName)
-    guard isFromThisModule || isFromStubbedModule else {
+    let isFromDependencyModule = sourceDependencies.swiftModuleNames.contains(swiftNominalDecl.moduleName)
+    guard isFromThisModule || isFromStubbedModule || isFromDependencyModule else {
       return nil
     }
 

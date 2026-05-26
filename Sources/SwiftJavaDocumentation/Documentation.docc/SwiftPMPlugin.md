@@ -50,3 +50,14 @@ let package = Package(
 ```
 
 > Note: Depending on the use case, swift-java may require running Gradle or accessing files outside the Swift package. Ensure that your environment allows Gradle to run, and add the `--disable-sandbox` parameter when invoking the `swift build` command to build the package.
+
+### Handling cross module Swift type dependencies
+
+Sometimes you may be wanting to treat a specific module with swift-java jextract and expose it to Java, only to find
+that it is also exposing types from other modules.
+
+In this situation it is best to also add a `swift-java.config` configuration into the other module, 
+and configure it appropriately. Next, when you run the plugin in the main module, it will automatically
+pick up the dependency (since your Swift module depends on the other one) and detect there is swift-java configuration there.
+
+This informs the source generator about the location and package of the generated sources and allows it to compile the generated sources in your main module.

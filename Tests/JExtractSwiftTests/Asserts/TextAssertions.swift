@@ -15,6 +15,8 @@
 import CodePrinting
 import JExtractSwiftLib
 import SwiftJavaConfigurationShared
+import SwiftParser
+import SwiftSyntax
 import Testing
 
 import struct Foundation.CharacterSet
@@ -33,6 +35,13 @@ func assertOutput(
   swiftModuleName: String = "SwiftModule",
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   javaClassLookupTable: [String: String] = [:],
+  /// Map of dependency Swift module name to raw Swift source text. Used to seed
+  /// `translator.sourceDependencies` so cross-module type lookups resolve.
+  dependencySwiftSources: [String: String] = [:],
+  /// Map of Swift module name to Java package, mirroring what `--depends-on`
+  /// dependency configs would carry. Forwarded to the generator so cross-module
+  /// type references print with their fully-qualified Java name.
+  moduleJavaPackages: [String: String] = [:],
   expectedChunks: [String],
   notExpectedChunks: [String] = [],
   fileID: String = #fileID,
@@ -43,7 +52,12 @@ func assertOutput(
   var config = config ?? Configuration()
   config.swiftModule = swiftModuleName
   let translator = Swift2JavaTranslator(config: config)
-  translator.dependenciesClasses = Array(javaClassLookupTable.keys)
+  translator.sourceDependencies.javaClasses = Array(javaClassLookupTable.keys)
+  for (depModule, depSource) in dependencySwiftSources {
+    let syntax = Parser.parse(source: depSource)
+    let input = SwiftJavaInputFile(syntax: syntax, path: "/fake/\(depModule).swift")
+    translator.sourceDependencies.swiftModuleInputs[depModule] = [input]
+  }
 
   try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
@@ -74,7 +88,7 @@ func assertOutput(
       swiftOutputDirectory: "/fake",
       javaOutputDirectory: "/fake",
       javaClassLookupTable: javaClassLookupTable,
-      moduleJavaPackages: [:]
+      moduleJavaPackages: moduleJavaPackages
     )
 
     switch renderKind {

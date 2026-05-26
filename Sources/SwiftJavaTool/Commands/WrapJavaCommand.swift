@@ -78,7 +78,7 @@ extension SwiftJava {
 }
 
 extension SwiftJava.WrapJavaCommand {
-  struct NamedDependentConfig {
+  struct NamedDependencyConfig {
     let swiftModuleName: String
     let configuration: Configuration
   }
@@ -104,24 +104,24 @@ extension SwiftJava.WrapJavaCommand {
       log: Self.log
     )
 
-    // Load all of the dependent configurations and associate them with Swift modules.
-    let dependentConfigs = try loadDependentConfigs(dependsOn: self.dependsOn).map { dependentConfig in
-      guard let moduleName = dependentConfig.swiftModuleName else {
+    // Load all of the dependency configurations and associate them with Swift modules.
+    let dependencyConfigs = try parseDependsOnSyntax(dependsOn: self.dependsOn).map { dependencyConfig in
+      guard let moduleName = dependencyConfig.swiftModuleName else {
         throw JavaToSwiftError.badConfigOption(self.dependsOn.joined(separator: " "))
       }
-      return NamedDependentConfig(swiftModuleName: moduleName, configuration: dependentConfig.configuration)
+      return NamedDependencyConfig(swiftModuleName: moduleName, configuration: dependencyConfig.configuration)
     }
-    print("[debug][swift-java] Dependent configs: \(dependentConfigs.count)")
+    print("[debug][swift-java] Dependency configs: \(dependencyConfigs.count)")
 
     // Include classpath entries which libs we depend on require...
-    for dependentConfig in dependentConfigs {
+    for dependencyConfig in dependencyConfigs {
       print(
-        "[trace][swift-java] Add dependent config (\(dependentConfig.swiftModuleName)) classpath elements: \(dependentConfig.configuration.classpathEntries.count)"
+        "[trace][swift-java] Add dependency config (\(dependencyConfig.swiftModuleName)) classpath elements: \(dependencyConfig.configuration.classpathEntries.count)"
       )
-      // TODO: may need to resolve the dependent configs rather than just get their configs
+      // TODO: may need to resolve the dependency configs rather than just get their configs
       // TODO: We should cache the resolved classpaths as well so we don't do it many times
-      for entry in dependentConfig.configuration.classpathEntries {
-        print("[trace][swift-java] Add dependent config (\(dependentConfig.swiftModuleName)) classpath element: \(entry)")
+      for entry in dependencyConfig.configuration.classpathEntries {
+        print("[trace][swift-java] Add dependency config (\(dependencyConfig.swiftModuleName)) classpath element: \(entry)")
         classpathEntries.append(entry)
       }
     }
@@ -131,7 +131,7 @@ extension SwiftJava.WrapJavaCommand {
     try self.generateWrappers(
       config: config,
       // classpathEntries: classpathEntries,
-      dependentConfigs: dependentConfigs,
+      dependencyConfigs: dependencyConfigs,
       environment: jvm.environment()
     )
   }
@@ -141,7 +141,7 @@ extension SwiftJava.WrapJavaCommand {
 
   mutating func generateWrappers(
     config: Configuration,
-    dependentConfigs: [NamedDependentConfig],
+    dependencyConfigs: [NamedDependencyConfig],
     environment: JNIEnvironment
   ) throws {
     let translator = JavaTranslator(
@@ -166,11 +166,11 @@ extension SwiftJava.WrapJavaCommand {
       log.info("Loaded Android API versions: \(apiVersions.stats())")
     }
 
-    // Note all of the dependent configurations.
-    for dependentConfig in dependentConfigs {
+    // Note all of the dependency configurations.
+    for dependencyConfig in dependencyConfigs {
       translator.addConfiguration(
-        dependentConfig.configuration,
-        forSwiftModule: dependentConfig.swiftModuleName
+        dependencyConfig.configuration,
+        forSwiftModule: dependencyConfig.swiftModuleName
       )
     }
 

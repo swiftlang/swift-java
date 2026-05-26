@@ -14,15 +14,20 @@ let package = Package(
       name: "MySwiftLibrary",
       type: .dynamic,
       targets: ["MySwiftLibrary"]
-    )
-
+    ),
+    .library(
+      name: "MySwiftDependencyLibrary",
+      type: .dynamic,
+      targets: ["MySwiftDependencyLibrary"]
+    ),
   ],
   dependencies: [
     .package(name: "swift-java", path: "../../")
   ],
   targets: [
+    // Separate module to show that we can handle cross module type references (automatic --depends-on)
     .target(
-      name: "MySwiftLibrary",
+      name: "MySwiftDependencyLibrary",
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java")
       ],
@@ -35,6 +40,22 @@ let package = Package(
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
       ]
-    )
+    ),
+    .target(
+      name: "MySwiftLibrary",
+      dependencies: [
+        .product(name: "SwiftJava", package: "swift-java"),
+        "MySwiftDependencyLibrary",
+      ],
+      exclude: [
+        "swift-java.config"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ],
+      plugins: [
+        .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
+      ]
+    ),
   ]
 )

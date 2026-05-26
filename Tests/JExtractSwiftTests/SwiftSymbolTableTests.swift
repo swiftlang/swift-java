@@ -40,6 +40,7 @@ struct SwiftSymbolTableSuite {
         .init(syntax: sourceFile2, path: "Fake2.swift"),
       ],
       config: nil,
+      sourceDependencies: SourceDependencies(),
       log: Logger(label: "swift-java", logLevel: .critical),
     )
 
@@ -103,6 +104,7 @@ struct SwiftSymbolTableSuite {
         .init(syntax: sourceFile, path: "Fake.swift")
       ],
       config: nil,
+      sourceDependencies: SourceDependencies(),
       log: Logger(label: "swift-java", logLevel: .critical),
     )
 

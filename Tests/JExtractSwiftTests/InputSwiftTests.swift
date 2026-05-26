@@ -44,7 +44,7 @@ struct InputSwiftTests {
       config.outputSwiftDirectory = outSwiftURL.absoluteURL.path()
       config.outputJavaDirectory = outJavaURL.absoluteURL.path()
 
-      try SwiftToJava(config: config, dependentConfigs: [])
+      try SwiftToJava(config: config, dependencyConfigs: [])
         .run()
     }
 
@@ -86,7 +86,7 @@ struct InputSwiftTests {
       config.outputSwiftDirectory = outSwiftURL.absoluteURL.path()
       config.outputJavaDirectory = outJavaURL.absoluteURL.path()
 
-      try SwiftToJava(config: config, dependentConfigs: [])
+      try SwiftToJava(config: config, dependencyConfigs: [])
         .run()
     }
 

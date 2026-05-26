@@ -15,6 +15,7 @@
 import ArgumentParser
 import Foundation
 import Subprocess
+import SwiftJavaConfigurationShared
 
 #if canImport(System)
 import System
@@ -92,7 +93,7 @@ extension SwiftJava {
 
     @Option(
       help:
-        "Dependent module configurations (format: ModuleName=/path/to/swift-java.config)"
+        "Dependency module configurations (format: ModuleName=/path/to/swift-java.config)"
     )
     var dependsOn: [String] = []
 
@@ -132,14 +133,27 @@ extension SwiftJava {
         withIntermediateDirectories: true,
       )
 
+      // Dependency modules jextract writes to their respective directories, so
+      // we need to consider them when we try to compile java output
+      let dependencySourcePaths = dependencyJavaSourceDirs(
+        javaSourcesList: javaSourcesList,
+        dependsOn: dependsOn
+      )
+
+      var javacArgs: [String] = [
+        "@\(javaSourcesList)",
+        "-d", javaOutputDirectory,
+        "-parameters",
+        "-classpath", swiftKitCoreClasspath,
+      ]
+      // Consider dependency modules generated java sources as well
+      if !dependencySourcePaths.isEmpty {
+        javacArgs += ["-sourcepath", dependencySourcePaths.joined(separator: ":")]
+      }
+
       try await runSubprocess(
         executable: javac,
-        arguments: [
-          "@\(javaSourcesList)",
-          "-d", javaOutputDirectory,
-          "-parameters",
-          "-classpath", swiftKitCoreClasspath,
-        ],
+        arguments: javacArgs,
         errorMessage: "javac",
       )
 
@@ -186,6 +200,64 @@ extension SwiftJava {
 }
 
 // MARK: - Helpers
+
+/// Find the plugin output path, walking up from a emitted generated source file
+private func pluginOutputsRoot(forJavaSourcesList javaSourcesList: String) -> URL {
+  let url = URL(fileURLWithPath: javaSourcesList)
+  // Validate the expected SwiftPM plugin-outputs layout before stripping suffix.
+  let expectedSuffix = [
+    "destination",
+    "JExtractSwiftPlugin",
+    "src",
+    "generated",
+    "java",
+    "jextract-generated-sources.txt",
+  ]
+  let comps = url.pathComponents
+  precondition(
+    comps.count >= expectedSuffix.count + 2
+      && Array(comps.suffix(expectedSuffix.count)) == expectedSuffix,
+    "javaSourcesList does not match the expected SwiftPM plugin-outputs layout: \(javaSourcesList)"
+  )
+  // Walk up: trailing fixed components + 1 consumer-module directory
+  var root = url
+  for _ in 0..<(expectedSuffix.count + 1) {
+    root.deleteLastPathComponent()
+  }
+  return root
+}
+
+/// For each `--depends-on Module=...` entry, derive the dependency module's
+/// generated Java directory.
+private func dependencyJavaSourceDirs(
+  javaSourcesList: String,
+  dependsOn: [String]
+) -> [String] {
+  let pluginRoot = pluginOutputsRoot(forJavaSourcesList: javaSourcesList)
+  let fm = FileManager.default
+  var seen: Set<String> = []
+  var paths: [String] = []
+  for arg in dependsOn {
+    guard
+      let parsed = try? parseDependsOnSyntax(arg),
+      let moduleName = parsed.swiftModuleName, !moduleName.isEmpty
+    else { continue }
+    let candidate =
+      pluginRoot
+      .appendingPathComponent(moduleName)
+      .appendingPathComponent("destination")
+      .appendingPathComponent("JExtractSwiftPlugin")
+      .appendingPathComponent("src")
+      .appendingPathComponent("generated")
+      .appendingPathComponent("java")
+    let path = candidate.path
+    guard fm.fileExists(atPath: path), seen.insert(path).inserted else {
+      continue // already handled this module
+    }
+    paths.append(path)
+  }
+  return paths
+}
 
 private func runSubprocess(
   executable: String,
