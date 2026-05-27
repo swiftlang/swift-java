@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -75,7 +76,7 @@ struct SpecializationTests {
   func multipleSpecializationsProduceDistinctTypes() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
     // Both specialized types should be registered
@@ -132,7 +133,7 @@ struct SpecializationTests {
   func specializationEntriesContainAll() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
     let baseBox = try #require(translator.importedTypes["Box"])
@@ -192,7 +193,7 @@ struct SpecializationTests {
     // Verify observeTheFish does NOT appear inside ToolBox's class body
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
     let toolBox = try #require(translator.importedTypes["ToolBox"])
     let methodNames = toolBox.methods.map(\.name)
@@ -337,7 +338,7 @@ struct SpecializationTests {
   func specializeNonGenericTypeThrows() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(
       path: "/fake/Fake.swiftinterface",
       text: """

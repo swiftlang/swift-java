@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -237,7 +238,7 @@ extension FunctionDescriptorTests {
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = Swift2JavaTranslator(config: config)
+    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
@@ -271,7 +272,7 @@ extension FunctionDescriptorTests {
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = Swift2JavaTranslator(config: config)
+    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)

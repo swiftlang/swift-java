@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
@@ -51,11 +52,11 @@ func assertOutput(
 ) throws {
   var config = config ?? Configuration()
   config.swiftModule = swiftModuleName
-  let translator = Swift2JavaTranslator(config: config)
-  translator.sourceDependencies.javaClasses = Array(javaClassLookupTable.keys)
+  let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+  translator.sourceDependencies.addJavaWrapperStubs(Array(javaClassLookupTable.keys))
   for (depModule, depSource) in dependencySwiftSources {
     let syntax = Parser.parse(source: depSource)
-    let input = SwiftJavaInputFile(syntax: syntax, path: "/fake/\(depModule).swift")
+    let input = SwiftInputFile(syntax: syntax, path: "/fake/\(depModule).swift")
     translator.sourceDependencies.swiftModuleInputs[depModule] = [input]
   }
 

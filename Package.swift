@@ -109,6 +109,11 @@ let package = Package(
     ),
 
     .library(
+      name: "SwiftExtract",
+      targets: ["SwiftExtract"]
+    ),
+
+    .library(
       name: "JExtractSwiftLib",
       targets: ["JExtractSwiftLib"]
     ),
@@ -337,6 +342,30 @@ let package = Package(
     ),
 
     .target(
+      name: "SwiftExtract",
+      dependencies: [
+        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
+        .product(name: "SwiftIfConfig", package: "swift-syntax"),
+        .product(name: "SwiftLexicalLookup", package: "swift-syntax"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+        .product(name: "Logging", package: "swift-log"),
+        "SwiftJavaConfigurationShared",
+      ],
+      path: "Sources/SwiftExtract",
+      resources: [
+        .process("Resources")
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ],
+      plugins: [
+        .plugin(name: "_StaticBuildConfigPlugin")
+      ]
+    ),
+
+    .target(
       name: "JExtractSwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -347,19 +376,14 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "OrderedCollections", package: "swift-collections"),
         .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
+        "SwiftExtract",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
         "CodePrinting",
       ],
-      resources: [
-        .process("Resources")
-      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .enableUpcomingFeature("BareSlashRegexLiterals"),
-      ],
-      plugins: [
-        .plugin(name: "_StaticBuildConfigPlugin")
       ]
     ),
 
@@ -435,7 +459,20 @@ let package = Package(
       name: "JExtractSwiftTests",
       dependencies: [
         "JExtractSwiftLib",
+        "SwiftExtract",
         "CodePrinting",
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .testTarget(
+      name: "SwiftExtractTests",
+      dependencies: [
+        "SwiftExtract",
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)

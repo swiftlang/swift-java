@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
@@ -65,7 +66,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   package init(
     config: Configuration,
-    translator: Swift2JavaTranslator,
+    translator: SwiftAnalyzer,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String,

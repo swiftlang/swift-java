@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 

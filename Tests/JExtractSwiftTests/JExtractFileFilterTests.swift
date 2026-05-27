@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -146,16 +147,16 @@ struct JExtractFileFilterTests {
   }
 
   // ==== -------------------------------------------------------------------
-  // MARK: shouldJExtractFile tests
+  // MARK: shouldExtractSwiftFile tests
 
   @Test("No filters means everything passes")
   func noFilters() {
     var config = Configuration()
-    #expect(shouldJExtractFile(relativePath: "Anything.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Anything.swift", config: config))
 
     config.swiftFilterInclude = []
     config.swiftFilterExclude = []
-    #expect(shouldJExtractFile(relativePath: "Anything.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Anything.swift", config: config))
   }
 
   @Test("File include filter only")
@@ -163,9 +164,9 @@ struct JExtractFileFilterTests {
     var config = Configuration()
     config.swiftFilterInclude = ["Models/**"]
 
-    #expect(shouldJExtractFile(relativePath: "Models/User.swift", config: config))
-    #expect(shouldJExtractFile(relativePath: "Models/Sub/Deep.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "Other/Thing.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Models/User.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Models/Sub/Deep.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "Other/Thing.swift", config: config))
   }
 
   @Test("File exclude filter only")
@@ -173,8 +174,8 @@ struct JExtractFileFilterTests {
     var config = Configuration()
     config.swiftFilterExclude = ["Internal/*"]
 
-    #expect(shouldJExtractFile(relativePath: "Models/User.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "Internal/Secret.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Models/User.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "Internal/Secret.swift", config: config))
   }
 
   @Test("File include and exclude combined")
@@ -183,28 +184,28 @@ struct JExtractFileFilterTests {
     config.swiftFilterInclude = ["Models/**"]
     config.swiftFilterExclude = ["Models/Internal*"]
 
-    #expect(shouldJExtractFile(relativePath: "Models/User.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "Models/InternalHelper.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "Other/Thing.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Models/User.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "Models/InternalHelper.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "Other/Thing.swift", config: config))
   }
 
-  @Test("Type-name patterns are ignored by shouldJExtractFile")
+  @Test("Type-name patterns are ignored by shouldExtractSwiftFile")
   func typeNamePatternsIgnoredByFileFilter() {
     var config = Configuration()
     config.swiftFilterInclude = ["Something.Other"]
 
     // Type-name-only includes should not restrict file-level filtering
-    #expect(shouldJExtractFile(relativePath: "Anything.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Anything.swift", config: config))
   }
 
   // ==== -------------------------------------------------------------------
-  // MARK: shouldJExtractType tests
+  // MARK: shouldExtractSwiftType tests
 
   @Test("No filters means all types pass")
   func noFiltersAllTypesPass() {
     let config = Configuration()
-    #expect(shouldJExtractType(qualifiedName: "Anything", config: config))
-    #expect(shouldJExtractType(qualifiedName: "A.B.C", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "Anything", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "A.B.C", config: config))
   }
 
   @Test("Type include filter")
@@ -212,8 +213,8 @@ struct JExtractFileFilterTests {
     var config = Configuration()
     config.swiftFilterInclude = ["Something.Other"]
 
-    #expect(shouldJExtractType(qualifiedName: "Something.Other", config: config))
-    #expect(!shouldJExtractType(qualifiedName: "Something.Wrong", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "Something.Other", config: config))
+    #expect(!shouldExtractSwiftType(qualifiedName: "Something.Wrong", config: config))
   }
 
   @Test("Type exclude filter")
@@ -221,17 +222,17 @@ struct JExtractFileFilterTests {
     var config = Configuration()
     config.swiftFilterExclude = ["Something.Internal*"]
 
-    #expect(shouldJExtractType(qualifiedName: "Something.Other", config: config))
-    #expect(!shouldJExtractType(qualifiedName: "Something.InternalHelper", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "Something.Other", config: config))
+    #expect(!shouldExtractSwiftType(qualifiedName: "Something.InternalHelper", config: config))
   }
 
-  @Test("File-path patterns are ignored by shouldJExtractType")
+  @Test("File-path patterns are ignored by shouldExtractSwiftType")
   func filePathPatternsIgnoredByTypeFilter() {
     var config = Configuration()
     config.swiftFilterInclude = ["Models/**"]
 
     // File-path-only includes should not restrict type-level filtering
-    #expect(shouldJExtractType(qualifiedName: "Anything", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "Anything", config: config))
   }
 
   @Test("Plain pattern matches both file and type")
@@ -240,12 +241,12 @@ struct JExtractFileFilterTests {
     config.swiftFilterInclude = ["MyType"]
 
     // Plain pattern works at file level (matched against filename segment)
-    #expect(shouldJExtractFile(relativePath: "MyType.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "OtherType.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "MyType.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "OtherType.swift", config: config))
 
     // Plain pattern works at type level
-    #expect(shouldJExtractType(qualifiedName: "MyType", config: config))
-    #expect(!shouldJExtractType(qualifiedName: "OtherType", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "MyType", config: config))
+    #expect(!shouldExtractSwiftType(qualifiedName: "OtherType", config: config))
   }
 
   @Test("Mixed file and type patterns in same config")
@@ -254,12 +255,12 @@ struct JExtractFileFilterTests {
     config.swiftFilterInclude = ["Models/**", "Something.Other"]
 
     // File filter applies the file-path pattern
-    #expect(shouldJExtractFile(relativePath: "Models/User.swift", config: config))
-    #expect(!shouldJExtractFile(relativePath: "Other/Thing.swift", config: config))
+    #expect(shouldExtractSwiftFile(relativePath: "Models/User.swift", config: config))
+    #expect(!shouldExtractSwiftFile(relativePath: "Other/Thing.swift", config: config))
 
     // Type filter applies the type-name pattern
-    #expect(shouldJExtractType(qualifiedName: "Something.Other", config: config))
-    #expect(!shouldJExtractType(qualifiedName: "Something.Wrong", config: config))
+    #expect(shouldExtractSwiftType(qualifiedName: "Something.Other", config: config))
+    #expect(!shouldExtractSwiftType(qualifiedName: "Something.Wrong", config: config))
   }
 
   // ==== -------------------------------------------------------------------
@@ -329,12 +330,12 @@ struct JExtractFileFilterTests {
   private func makeTranslator(
     include: [String]? = nil,
     exclude: [String]? = nil,
-  ) throws -> Swift2JavaTranslator {
+  ) throws -> SwiftAnalyzer {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
     config.swiftFilterInclude = include
     config.swiftFilterExclude = exclude
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     translator.log.logLevel = .error
     try translator.analyze(path: "Fake.swift", text: Self.nestedTypeSource)
     return translator

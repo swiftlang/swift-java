@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -354,7 +355,7 @@ struct JNIEnumTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
     var printer: CodePrinter = CodePrinter(mode: .accumulateAll)

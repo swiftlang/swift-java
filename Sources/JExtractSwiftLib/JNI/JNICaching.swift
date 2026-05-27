@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 enum JNICaching {
   static func cacheName(for type: ImportedNominalType) -> String {
     cacheName(for: type.effectiveJavaTypeName)

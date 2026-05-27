@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -48,7 +49,7 @@ struct TypealiasResolutionTests {
   func primitiveAliasResolvesStructMembers() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: primitiveAliasInput)
 
     let user = try #require(translator.importedTypes["TypealiasUser"])
@@ -62,7 +63,7 @@ struct TypealiasResolutionTests {
   func primitiveAliasResolvesFreeFunc() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: primitiveAliasInput)
 
     #expect(
@@ -88,7 +89,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let holder = try #require(translator.importedTypes["Holder"])
@@ -112,7 +113,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "unwrapOrZero" })
@@ -143,7 +144,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "describe" })
@@ -175,7 +176,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let holder = try #require(translator.importedTypes["Holder"])
@@ -200,7 +201,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     // The struct itself is still imported, but its members are dropped
@@ -259,7 +260,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "passA" })
@@ -284,7 +285,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "unwrap" })
@@ -309,7 +310,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "first" })
@@ -343,7 +344,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "add" })
@@ -375,7 +376,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let player = try #require(translator.importedTypes["Player"])
@@ -400,7 +401,7 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "openIntBag" })

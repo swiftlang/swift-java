@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing) import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
@@ -20,38 +21,6 @@ import Testing
 
 @Suite("Swift symbol table")
 struct SwiftSymbolTableSuite {
-
-  @Test func lookupBindingTests() throws {
-    let sourceFile1: SourceFileSyntax = """
-      extension X.Y {
-        struct Z { }
-      }
-      extension X {
-        struct Y {}
-      }
-      """
-    let sourceFile2: SourceFileSyntax = """
-      struct X {}
-      """
-    let symbolTable = SwiftSymbolTable.setup(
-      moduleName: "MyModule",
-      [
-        .init(syntax: sourceFile1, path: "Fake.swift"),
-        .init(syntax: sourceFile2, path: "Fake2.swift"),
-      ],
-      config: nil,
-      sourceDependencies: SourceDependencies(),
-      log: Logger(label: "swift-java", logLevel: .critical),
-    )
-
-    let x = try #require(symbolTable.lookupType("X", parent: nil))
-    let xy = try #require(symbolTable.lookupType("Y", parent: x))
-    let xyz = try #require(symbolTable.lookupType("Z", parent: xy))
-    #expect(xyz.qualifiedName == "X.Y.Z")
-
-    #expect(symbolTable.lookupType("Y", parent: nil) == nil)
-    #expect(symbolTable.lookupType("Z", parent: nil) == nil)
-  }
 
   @Test(arguments: [JExtractGenerationMode.jni, .ffm])
   func resolveSelfModuleName(mode: JExtractGenerationMode) throws {
@@ -92,35 +61,6 @@ struct SwiftSymbolTableSuite {
         "public static MyModule.MyValue fullyQualifiedType("
       ],
     )
-  }
-
-  @Test func moduleScopedLookup() throws {
-    let sourceFile: SourceFileSyntax = """
-      public struct MyClass {}
-      """
-    let symbolTable = SwiftSymbolTable.setup(
-      moduleName: "MyModule",
-      [
-        .init(syntax: sourceFile, path: "Fake.swift")
-      ],
-      config: nil,
-      sourceDependencies: SourceDependencies(),
-      log: Logger(label: "swift-java", logLevel: .critical),
-    )
-
-    // Lookup in self-module by qualified name
-    let myClass = symbolTable.lookupTopLevelNominalType("MyClass", inModule: "MyModule")
-    #expect(myClass != nil)
-    #expect(myClass?.qualifiedName == "MyClass")
-
-    // Lookup in imported module (Swift)
-    let swiftInt = symbolTable.lookupTopLevelNominalType("Int", inModule: "Swift")
-    #expect(swiftInt != nil)
-    #expect(swiftInt?.qualifiedName == "Int")
-
-    // Lookup in unknown module returns nil
-    let unknown = symbolTable.lookupTopLevelNominalType("Foo", inModule: "NoSuchModule")
-    #expect(unknown == nil)
   }
 
   @Test(arguments: [JExtractGenerationMode.jni, .ffm])

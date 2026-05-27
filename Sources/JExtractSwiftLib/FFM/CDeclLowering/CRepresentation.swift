@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 extension CType {
   /// Lower the given Swift type down to a its corresponding C type.
   ///

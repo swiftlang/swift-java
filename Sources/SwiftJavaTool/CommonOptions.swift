@@ -18,6 +18,7 @@ import JExtractSwiftLib
 import JavaNet
 import JavaUtilJar
 import Logging
+import SwiftExtract
 import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
@@ -63,7 +64,7 @@ extension SwiftJava {
     var inputSwift: String? = nil
 
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
-    var logLevel: JExtractSwiftLib.Logger.Level = .info
+    var logLevel: SwiftExtract.Logger.Level = .info
 
     @Option(help: "A path to a custom swift-java.config to use")
     var config: String? = nil

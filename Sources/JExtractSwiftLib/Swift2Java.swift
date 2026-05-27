@@ -14,6 +14,7 @@
 
 import Foundation
 import OrderedCollections
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
 import SwiftParser
@@ -34,7 +35,7 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-module' name.")
     }
 
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     let log = translator.log
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {
@@ -73,7 +74,7 @@ public struct SwiftToJava {
       // Apply jextract include/exclude filters if configured
       if hasFilters {
         let relativePath = computeRelativePath(file: file, inputPaths: inputPaths)
-        guard shouldJExtractFile(relativePath: relativePath, config: config) else {
+        guard shouldExtractSwiftFile(relativePath: relativePath, config: config) else {
           log.info("Skipping file (filtered out): \(file.path)")
           translator.filteredOutPaths.append(file.path)
           continue
@@ -113,7 +114,7 @@ public struct SwiftToJava {
       partialResult[moduleName] = javaPackage
     }
 
-    translator.sourceDependencies.javaClasses = Array(wrappedJavaClassesLookupTable.keys)
+    translator.sourceDependencies.addJavaWrapperStubs(Array(wrappedJavaClassesLookupTable.keys))
     for config in dependencyConfigs {
       translator.sourceDependencies.loadSwiftSources(from: config, log: translator.log)
     }

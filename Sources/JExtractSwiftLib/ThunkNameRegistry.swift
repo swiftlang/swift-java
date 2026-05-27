@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 /// Registry of names we've already emitted as @_cdecl and must be kept unique.
 /// In order to avoid duplicate symbols, the registry can append some unique identifier to duplicated names
 package struct ThunkNameRegistry {

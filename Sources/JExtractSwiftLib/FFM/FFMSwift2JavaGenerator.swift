@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 import SwiftSyntax
@@ -69,7 +70,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   package init(
     config: Configuration,
-    translator: Swift2JavaTranslator,
+    translator: SwiftAnalyzer,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String,

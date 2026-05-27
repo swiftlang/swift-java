@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 /// Detects Java method name conflicts caused by Swift overloads that differ
 /// only in parameter labels. When a conflict is detected, the affected methods
 /// get a camelCase suffix derived from their parameter labels (e.g. `takeValueA`,
@@ -33,8 +35,8 @@ package struct JavaIdentifierFactory {
     for method in methods {
       let baseName: String =
         switch method.apiKind {
-        case .getter, .subscriptGetter: method.javaGetterName
-        case .setter, .subscriptSetter: method.javaSetterName
+        case .getter, .subscriptGetter: method.javaGetterName!
+        case .setter, .subscriptSetter: method.javaSetterName!
         case .function, .initializer, .enumCase: method.name
         }
       methodsByBaseName[baseName, default: []].append(method)
@@ -64,8 +66,8 @@ package struct JavaIdentifierFactory {
   package func makeJavaMethodName(_ decl: ImportedFunc) -> String {
     let baseName: String =
       switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName
-      case .setter, .subscriptSetter: decl.javaSetterName
+      case .getter, .subscriptGetter: decl.javaGetterName!
+      case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
