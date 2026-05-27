@@ -149,6 +149,5 @@ extension JNISwift2JavaGenerator {
       .compactMap {
         self.analysis.importedTypes[$0.qualifiedName]
       }
-      .uniqued()
   }
 }

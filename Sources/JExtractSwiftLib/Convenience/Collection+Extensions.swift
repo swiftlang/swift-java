@@ -49,16 +49,3 @@ extension Collection where Element == Int {
     return s
   }
 }
-
-extension Sequence where Element: Hashable {
-  func uniqued() -> [Element] {
-    var seen: Set<Element> = []
-    var result: [Element] = []
-    for element in self {
-      if seen.insert(element).inserted {
-        result.append(element)
-      }
-    }
-    return result
-  }
-}
