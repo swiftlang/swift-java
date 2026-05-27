@@ -27,3 +27,7 @@ public func takeGenericProtocol<First: ProtocolA, Second: ProtocolB>(_ proto1: F
 public func takeCombinedGenericProtocol<T: ProtocolA & ProtocolB>(_ proto: T) -> Int64 {
   proto.constantA + proto.constantB
 }
+
+public func takeProtocolB(_ proto: some ProtocolB) -> Int64 {
+  proto.constantB
+}

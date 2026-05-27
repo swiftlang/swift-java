@@ -171,12 +171,12 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
-    var extends = [String]()
+    var extends = self.inheritedProtocols(of: decl).map(\.effectiveJavaSimpleName)
 
     // If we cannot generate Swift wrappers
     // that allows the user to implement the wrapped interface in Java
     // then we require only JExtracted types can conform to this.
-    if !self.interfaceProtocolWrappers.keys.contains(decl) {
+    if !self.interfaceProtocolWrappers.keys.contains(decl) && !extends.contains("JNISwiftInstance") {
       extends.append("JNISwiftInstance")
     }
     let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: ", "))"

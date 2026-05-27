@@ -181,13 +181,23 @@ extension JNISwift2JavaGenerator {
     _ printer: inout CodePrinter,
     _ translatedWrapper: JavaInterfaceSwiftWrapper,
   ) throws {
-    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(translatedWrapper.swiftName)") { printer in
+    let inheritedWrappers = self.inheritedProtocols(of: translatedWrapper.importedType).compactMap { self.interfaceProtocolWrappers[$0] }
+    let inheritedTypes = [translatedWrapper.swiftName] + inheritedWrappers.map(\.wrapperName)
+
+    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(inheritedTypes.joined(separator: ", "))") { printer in
       printer.print(
         "var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }"
       )
     }
     printer.println()
     try printer.printBraceBlock("extension \(translatedWrapper.wrapperName)") { printer in
+      for inherited in inheritedWrappers {
+        printer.printBraceBlock("var \(inherited.javaInterfaceVariableName): \(inherited.javaInterfaceName)") { printer in
+          printer.print("\(translatedWrapper.javaInterfaceVariableName)")
+        }
+        printer.println()
+      }
+
       for function in translatedWrapper.functions {
         try printInterfaceWrapperFunctionImpl(&printer, function, inside: translatedWrapper)
         printer.println()

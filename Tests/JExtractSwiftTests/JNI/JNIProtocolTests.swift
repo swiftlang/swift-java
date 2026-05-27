@@ -41,6 +41,16 @@ struct JNIProtocolTests {
       public func takeComposite(x: any SomeProtocol & B)
     """
 
+  let protocolInheritanceSource = """
+      public protocol ParentProtocol {
+        public func parentMethod()
+      }
+
+      public protocol ChildProtocol: ParentProtocol {
+        public func childMethod()
+      }
+    """
+
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
@@ -65,6 +75,33 @@ struct JNIProtocolTests {
           public void method();
           ...
           public SomeClass withObject(SomeClass c, SwiftArena swiftArena);
+          ...
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func generatesJavaInterfaceWithInheritedProtocol() throws {
+    try assertOutput(
+      input: protocolInheritanceSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public interface ParentProtocol {
+          ...
+          public void parentMethod();
+          ...
+        }
+        """,
+        """
+        public interface ChildProtocol extends ParentProtocol {
+          ...
+          public void childMethod();
           ...
         }
         """,
@@ -343,6 +380,39 @@ struct JNIProtocolTests {
         """,
         """
         extension SwiftJavaBWrapper {
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func generatesProtocolWrappersWithInheritedProtocol() throws {
+    try assertOutput(
+      input: protocolInheritanceSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        protocol SwiftJavaParentProtocolWrapper: ParentProtocol {
+          var _javaParentProtocolInterface: JavaParentProtocol { get }
+        }
+        """,
+        """
+        protocol SwiftJavaChildProtocolWrapper: ChildProtocol, SwiftJavaParentProtocolWrapper {
+          var _javaChildProtocolInterface: JavaChildProtocol { get }
+        }
+        """,
+        """
+        extension SwiftJavaChildProtocolWrapper {
+          var _javaParentProtocolInterface: JavaParentProtocol {
+            _javaChildProtocolInterface
+          }
+          public func childMethod() {
+            ...
+          }
         }
         """,
       ]

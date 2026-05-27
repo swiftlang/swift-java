@@ -141,4 +141,14 @@ extension JNISwift2JavaGenerator {
   static func indirectVariableName(for parameterName: String) -> String {
     "\(parameterName)$indirect"
   }
+
+  func inheritedProtocols(of type: ImportedNominalType) -> [ImportedNominalType] {
+    type.inheritedTypes
+      .compactMap(\.asNominalTypeDeclaration)
+      .filter { $0.kind == .protocol }
+      .compactMap {
+        self.analysis.importedTypes[$0.qualifiedName]
+      }
+      .uniqued()
+  }
 }
