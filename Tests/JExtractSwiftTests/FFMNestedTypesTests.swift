@@ -47,6 +47,6 @@ final class FFMNestedTypesTests {
       javaOutputDirectory: "/fake"
     )
 
-    #expect(st.importedTypes["MyNamespace.MyNestedStruct"] != nil, "Didn't import nested type!")
+    #expect(st.extractedTypes["MyNamespace.MyNestedStruct"] != nil, "Didn't import nested type!")
   }
 }

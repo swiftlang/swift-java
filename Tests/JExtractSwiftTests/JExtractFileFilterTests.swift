@@ -344,37 +344,37 @@ struct JExtractFileFilterTests {
   @Test("swiftFilterExclude with exact nested type name")
   func excludeExactNested() throws {
     let st = try makeTranslator(exclude: ["Tank.Internal"])
-    #expect(st.importedTypes["Tank"] != nil)
-    #expect(st.importedTypes["Tank.Fish"] != nil)
-    #expect(st.importedTypes["Tank.Internal"] == nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] != nil)
+    #expect(st.extractedTypes["Tank.Fish"] != nil)
+    #expect(st.extractedTypes["Tank.Internal"] == nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 
   @Test("swiftFilterExclude with `Type.*` excludes direct children only")
   func excludeDirectChildren() throws {
     let st = try makeTranslator(exclude: ["Tank.*"])
-    #expect(st.importedTypes["Tank"] != nil, "Top-level Tank itself should not be excluded by `Tank.*`")
-    #expect(st.importedTypes["Tank.Fish"] == nil)
-    #expect(st.importedTypes["Tank.Internal"] == nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] != nil, "Top-level Tank itself should not be excluded by `Tank.*`")
+    #expect(st.extractedTypes["Tank.Fish"] == nil)
+    #expect(st.extractedTypes["Tank.Internal"] == nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 
   @Test("swiftFilterExclude with suffix wildcard inside nested name")
   func excludeSuffixWildcard() throws {
     let st = try makeTranslator(exclude: ["Tank.Inter*"])
-    #expect(st.importedTypes["Tank"] != nil)
-    #expect(st.importedTypes["Tank.Fish"] != nil)
-    #expect(st.importedTypes["Tank.Internal"] == nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] != nil)
+    #expect(st.extractedTypes["Tank.Fish"] != nil)
+    #expect(st.extractedTypes["Tank.Internal"] == nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 
   @Test("swiftFilterExclude with `**.Name` matches at any depth")
   func excludeRecursiveLeaf() throws {
     let st = try makeTranslator(exclude: ["**.Internal"])
-    #expect(st.importedTypes["Tank"] != nil)
-    #expect(st.importedTypes["Tank.Fish"] != nil)
-    #expect(st.importedTypes["Tank.Internal"] == nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] != nil)
+    #expect(st.extractedTypes["Tank.Fish"] != nil)
+    #expect(st.extractedTypes["Tank.Internal"] == nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 
   @Test("plain-name swiftFilterExclude excludes top-level type and its nested members")
@@ -382,10 +382,10 @@ struct JExtractFileFilterTests {
     // Plain pattern matches the top-level component, so excluding `Tank` also
     // prevents the visitor from descending into its nested types
     let st = try makeTranslator(exclude: ["Tank"])
-    #expect(st.importedTypes["Tank"] == nil)
-    #expect(st.importedTypes["Tank.Fish"] == nil)
-    #expect(st.importedTypes["Tank.Internal"] == nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] == nil)
+    #expect(st.extractedTypes["Tank.Fish"] == nil)
+    #expect(st.extractedTypes["Tank.Internal"] == nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 
   @Test("swiftFilterInclude with `Type.**` keeps the parent and all nested members")
@@ -393,10 +393,10 @@ struct JExtractFileFilterTests {
     // `Tank.**` is a type-name pattern; via the trailing-`**` rule it matches
     // both `Tank` itself and any nested type underneath
     let st = try makeTranslator(include: ["Tank.**"])
-    #expect(st.importedTypes["Tank"] != nil)
-    #expect(st.importedTypes["Tank.Fish"] != nil)
-    #expect(st.importedTypes["Tank.Internal"] != nil)
-    #expect(st.importedTypes["FishTank"] == nil)
+    #expect(st.extractedTypes["Tank"] != nil)
+    #expect(st.extractedTypes["Tank.Fish"] != nil)
+    #expect(st.extractedTypes["Tank.Internal"] != nil)
+    #expect(st.extractedTypes["FishTank"] == nil)
   }
 
   @Test("file-path-only filter does not interfere with nested-type extraction")
@@ -404,9 +404,9 @@ struct JExtractFileFilterTests {
     // A file-path-only filter must not accidentally gate type-level filtering;
     // every nested type in the included file should still be extracted
     let st = try makeTranslator(include: ["**/Fake.swift", "Fake.swift"])
-    #expect(st.importedTypes["Tank"] != nil)
-    #expect(st.importedTypes["Tank.Fish"] != nil)
-    #expect(st.importedTypes["Tank.Internal"] != nil)
-    #expect(st.importedTypes["FishTank"] != nil)
+    #expect(st.extractedTypes["Tank"] != nil)
+    #expect(st.extractedTypes["Tank.Fish"] != nil)
+    #expect(st.extractedTypes["Tank.Internal"] != nil)
+    #expect(st.extractedTypes["FishTank"] != nil)
   }
 }

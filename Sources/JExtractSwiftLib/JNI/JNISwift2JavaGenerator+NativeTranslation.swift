@@ -24,7 +24,7 @@ extension JNISwift2JavaGenerator {
     let javaPackage: String
     let javaClassLookupTable: JavaClassLookupTable
     var knownTypes: SwiftKnownTypes
-    let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
 
     /// Translates a Swift function into the native JNI method signature.

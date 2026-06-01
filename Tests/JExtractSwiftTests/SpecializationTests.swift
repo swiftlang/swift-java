@@ -70,9 +70,9 @@ struct SpecializationTests {
     """#
 
   // ==== -----------------------------------------------------------------------
-  // MARK: importedTypes structure
+  // MARK: extractedTypes structure
 
-  @Test("Multiple specializations of same base type produce distinct importedTypes")
+  @Test("Multiple specializations of same base type produce distinct extractedTypes")
   func multipleSpecializationsProduceDistinctTypes() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
@@ -80,19 +80,19 @@ struct SpecializationTests {
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
     // Both specialized types should be registered
-    #expect(translator.importedTypes["FishBox"] != nil, "FishBox should be in importedTypes")
-    #expect(translator.importedTypes["ToolBox"] != nil, "ToolBox should be in importedTypes")
+    #expect(translator.extractedTypes["FishBox"] != nil, "FishBox should be in extractedTypes")
+    #expect(translator.extractedTypes["ToolBox"] != nil, "ToolBox should be in extractedTypes")
 
-    // The base generic type remains in importedTypes (not removed)
-    let baseBox = try #require(translator.importedTypes["Box"])
+    // The base generic type remains in extractedTypes (not removed)
+    let baseBox = try #require(translator.extractedTypes["Box"])
     #expect(!baseBox.isSpecialization, "Base 'Box' should not be a specialization")
     #expect(baseBox.genericParameterNames == ["Element"])
     #expect(baseBox.genericArguments.isEmpty)
     #expect(!baseBox.isFullySpecialized)
 
     // Specialized types link back to their base
-    let fishBox = try #require(translator.importedTypes["FishBox"])
-    let toolBox = try #require(translator.importedTypes["ToolBox"])
+    let fishBox = try #require(translator.extractedTypes["FishBox"])
+    let toolBox = try #require(translator.extractedTypes["ToolBox"])
     #expect(fishBox.isSpecialization)
     #expect(toolBox.isSpecialization)
 
@@ -118,12 +118,12 @@ struct SpecializationTests {
 
     // Both wrappers delegate to the same base type
     #expect(fishBox.specializationBaseType === toolBox.specializationBaseType, "Both should wrap the same base Box type")
-    #expect(fishBox.specializationBaseType === translator.importedTypes["Box"], "Base should be the original Box")
+    #expect(fishBox.specializationBaseType === translator.extractedTypes["Box"], "Base should be the original Box")
 
     // Both wrappers have owned method models
-    let baseCountFunc: ImportedFunc = try #require(baseBox.methods.first(where: { $0.name == "count" }))
-    let fishCountFunc: ImportedFunc = try #require(fishBox.methods.first(where: { $0.name == "count" }))
-    let toolCountFunc: ImportedFunc = try #require(toolBox.methods.first(where: { $0.name == "count" }))
+    let baseCountFunc: ExtractedFunc = try #require(baseBox.methods.first(where: { $0.name == "count" }))
+    let fishCountFunc: ExtractedFunc = try #require(fishBox.methods.first(where: { $0.name == "count" }))
+    let toolCountFunc: ExtractedFunc = try #require(toolBox.methods.first(where: { $0.name == "count" }))
     #expect(baseCountFunc.parentType?.description == "Box<Element>")
     #expect(fishCountFunc.parentType?.description == "FishBox")
     #expect(toolCountFunc.parentType?.description == "ToolBox")
@@ -136,7 +136,7 @@ struct SpecializationTests {
     let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
-    let baseBox = try #require(translator.importedTypes["Box"])
+    let baseBox = try #require(translator.extractedTypes["Box"])
     let specializations = try #require(translator.specializations[baseBox])
     #expect(specializations.count == 2, "Should have exactly 2 specializations for Box")
 
@@ -195,7 +195,7 @@ struct SpecializationTests {
     config.swiftModule = "SwiftModule"
     let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
-    let toolBox = try #require(translator.importedTypes["ToolBox"])
+    let toolBox = try #require(translator.extractedTypes["ToolBox"])
     let methodNames = toolBox.methods.map(\.name)
     #expect(!methodNames.contains("observeTheFish"), "ToolBox should not have Fish-constrained method")
   }
@@ -348,7 +348,7 @@ struct SpecializationTests {
         """,
     )
 
-    let fish = try #require(translator.importedTypes["Fish"])
+    let fish = try #require(translator.extractedTypes["Fish"])
     #expect(!fish.swiftNominal.isGeneric)
 
     #expect(throws: SpecializationError.self) {

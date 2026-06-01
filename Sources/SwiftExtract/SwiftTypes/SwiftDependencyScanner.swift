@@ -15,15 +15,15 @@
 import SwiftSyntax
 
 /// Scan importing modules.
-package func importingModules(sourceFile: SourceFileSyntax) -> [ImportedSwiftModule] {
-  var importingModuleNames: [ImportedSwiftModule] = []
+package func importingModules(sourceFile: SourceFileSyntax) -> [ExtractedSwiftModule] {
+  var importingModuleNames: [ExtractedSwiftModule] = []
   for item in sourceFile.statements {
     if let importDecl = item.item.as(ImportDeclSyntax.self) {
       guard let moduleName = importDecl.path.first?.name.text else {
         continue
       }
       importingModuleNames.append(
-        ImportedSwiftModule(name: moduleName, availableWithModuleName: nil, alternativeModuleNames: [])
+        ExtractedSwiftModule(name: moduleName, availableWithModuleName: nil, alternativeModuleNames: [])
       )
     } else if let ifConfigDecl = item.item.as(IfConfigDeclSyntax.self) {
       importingModuleNames.append(contentsOf: modules(from: ifConfigDecl))
@@ -32,7 +32,7 @@ package func importingModules(sourceFile: SourceFileSyntax) -> [ImportedSwiftMod
   return importingModuleNames
 }
 
-private func modules(from ifConfigDecl: IfConfigDeclSyntax) -> [ImportedSwiftModule] {
+private func modules(from ifConfigDecl: IfConfigDeclSyntax) -> [ExtractedSwiftModule] {
   guard
     let firstClause = ifConfigDecl.clauses.first,
     let calledExpression = firstClause.condition?.as(FunctionCallExprSyntax.self)?.calledExpression.as(
@@ -43,7 +43,7 @@ private func modules(from ifConfigDecl: IfConfigDeclSyntax) -> [ImportedSwiftMod
     return []
   }
 
-  var modules: [ImportedSwiftModule] = []
+  var modules: [ExtractedSwiftModule] = []
   modules.reserveCapacity(ifConfigDecl.clauses.count)
 
   for (index, clause) in ifConfigDecl.clauses.enumerated() {
@@ -65,7 +65,7 @@ private func modules(from ifConfigDecl: IfConfigDeclSyntax) -> [ImportedSwiftMod
       }
 
     let clauseModules = importedModuleNames.map {
-      ImportedSwiftModule(
+      ExtractedSwiftModule(
         name: $0,
         availableWithModuleName: importModuleName,
         alternativeModuleNames: []
@@ -76,7 +76,7 @@ private func modules(from ifConfigDecl: IfConfigDeclSyntax) -> [ImportedSwiftMod
     if clauseModules.count == 1 && index == (ifConfigDecl.clauses.count - 1)
       && clause.poundKeyword.tokenKind == .poundElse
     {
-      var fallbackModule: ImportedSwiftModule = clauseModules[0]
+      var fallbackModule: ExtractedSwiftModule = clauseModules[0]
       var moduleNames: [String] = []
       moduleNames.reserveCapacity(modules.count)
 

@@ -79,27 +79,27 @@ extension JNISwift2JavaGenerator {
       // We have to write all types to their corresponding output file that matches the file they were declared in,
       // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
 
-      let filteredTypes: [String: ImportedNominalType]
+      let filteredTypes: [String: ExtractedNominalType]
       if let singleType = config.singleType {
-        filteredTypes = self.analysis.importedTypes.filter { $0.key == singleType }
+        filteredTypes = self.analysis.extractedTypes.filter { $0.key == singleType }
       } else {
-        filteredTypes = self.analysis.importedTypes
+        filteredTypes = self.analysis.extractedTypes
       }
 
-      for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
+      for group: (key: String, value: [Dictionary<String, ExtractedNominalType>.Element]) in Dictionary(
         grouping: filteredTypes,
         by: { $0.value.sourceFilePath },
       ) {
         logger.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")
 
-        let importedTypesForThisFile = group.value
+        let extractedTypesForThisFile = group.value
           .map(\.value)
           .sorted(by: { $0.qualifiedName < $1.qualifiedName })
 
         let inputFileName = "\(group.key)".split(separator: "/").last ?? "__Unknown.swift"
         let filename = "\(inputFileName)".replacing(/\.swift(interface)?/, with: "+SwiftJava.swift")
 
-        for ty in importedTypesForThisFile {
+        for ty in extractedTypesForThisFile {
           logger.info("Printing Swift thunks for type: \(ty.effectiveJavaName.bold)")
           printer.printSeparator("Thunks for \(ty.effectiveJavaName)")
 
@@ -292,21 +292,21 @@ extension JNISwift2JavaGenerator {
     printHeader(&printer)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(
-      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+      self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables
     )
 
-    for decl in analysis.importedGlobalFuncs {
+    for decl in analysis.extractedGlobalFuncs {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
 
-    for decl in analysis.importedGlobalVariables {
+    for decl in analysis.extractedGlobalVariables {
       printSwiftFunctionThunk(&printer, decl)
       printer.println()
     }
   }
 
-  private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
+  private func printNominalTypeThunks(_ printer: inout CodePrinter, _ type: ExtractedNominalType) throws {
     printHeader(&printer)
     printer.println()
 
@@ -322,7 +322,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printConcreteTypeThunks(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     // Specialized types are treated as concrete even if the underlying Swift type is generic
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
 
@@ -371,7 +371,7 @@ extension JNISwift2JavaGenerator {
     printer.println()
   }
 
-  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) throws {
+  private func printProtocolThunks(_ printer: inout CodePrinter, _ type: ExtractedNominalType) throws {
     guard let protocolWrapper = self.interfaceProtocolWrappers[type] else {
       return
     }
@@ -379,7 +379,7 @@ extension JNISwift2JavaGenerator {
     try printSwiftInterfaceWrapper(&printer, protocolWrapper)
   }
 
-  private func printEnumRawDiscriminator(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printEnumRawDiscriminator(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     if type.cases.isEmpty {
       return
     }
@@ -395,7 +395,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCase(_ printer: inout CodePrinter, _ enumType: ImportedNominalType, _ enumCase: ImportedEnumCase) {
+  private func printEnumCase(_ printer: inout CodePrinter, _ enumType: ExtractedNominalType, _ enumCase: ExtractedEnumCase) {
     guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
       return
     }
@@ -418,7 +418,7 @@ extension JNISwift2JavaGenerator {
 
   private func printEnumGetAsCaseThunk(
     _ printer: inout CodePrinter,
-    _ enumType: ImportedNominalType,
+    _ enumType: ExtractedNominalType,
     _ enumCase: TranslatedEnumCase,
   ) {
     if let getAsCaseFunction = enumCase.getAsCaseFunction {
@@ -443,7 +443,7 @@ extension JNISwift2JavaGenerator {
 
   private func printSwiftFunctionThunk(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
@@ -466,7 +466,7 @@ extension JNISwift2JavaGenerator {
 
   private func printSwiftFunctionHelperClasses(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     let protocolParameters = decl.functionSignature.parameters.compactMap { parameter in
       if let concreteType = parameter.type.typeIn(
@@ -499,7 +499,7 @@ extension JNISwift2JavaGenerator {
     // we generate a Swift class that conforms to all of those.
     for (parameter, protocolTypes) in protocolParameters {
       let protocolWrappers: [JavaInterfaceSwiftWrapper] = protocolTypes.compactMap { protocolType in
-        guard let importedType = self.asImportedNominalTypeDecl(protocolType),
+        guard let importedType = self.asExtractedNominalTypeDecl(protocolType),
           let wrapper = self.interfaceProtocolWrappers[importedType]
         else {
           return nil
@@ -545,8 +545,8 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func asImportedNominalTypeDecl(_ type: SwiftType) -> ImportedNominalType? {
-    self.analysis.importedTypes.first(
+  private func asExtractedNominalTypeDecl(_ type: SwiftType) -> ExtractedNominalType? {
+    self.analysis.extractedTypes.first(
       where: ({ name, nominalType in
         nominalType.swiftType == type
       })
@@ -557,7 +557,7 @@ extension JNISwift2JavaGenerator {
 
   private func printFunctionDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     guard let translatedDecl = self.translatedDecl(for: decl) else {
       fatalError("Cannot print function downcall for a function that can't be translated: \(decl)")
@@ -783,7 +783,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printJNICache(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printJNICache(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     let cacheName = JNICaching.cacheName(for: type)
     let jniClassName = "\(javaPackagePath)/\(type.effectiveJavaTypeName.jniEscapedName)"
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && type.effectiveJavaTypeName == type.swiftNominal.qualifiedTypeName
@@ -820,7 +820,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printNominalJavaBridge(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printNominalJavaBridge(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     let bridgeName = JNICaching.bridgeName(for: type)
     let cacheName = JNICaching.cacheName(for: type)
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
@@ -881,7 +881,7 @@ extension JNISwift2JavaGenerator {
     self.lookupContext.symbolTable.printImportedModules(&printer)
   }
 
-  private func printTypeMetadataAddressThunk(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printTypeMetadataAddressThunk(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     // Specialized types are treated as concrete
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
     if isEffectivelyGeneric {
@@ -905,7 +905,7 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints thunks for specific known types like Foundation.Date, Foundation.Data
-  private func printSpecificTypeThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printSpecificTypeThunks(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     guard let knownType = type.swiftNominal.knownTypeKind else { return }
 
     switch knownType {
@@ -919,7 +919,7 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints Swift thunks for Foundation.Data helper methods
-  private func printFoundationDataThunks(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printFoundationDataThunks(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
     let parentName = type.qualifiedName
 
@@ -965,7 +965,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printFunctionOpenerCall(_ printer: inout CodePrinter, _ decl: ImportedFunc) {
+  private func printFunctionOpenerCall(_ printer: inout CodePrinter, _ decl: ExtractedFunc) {
     guard let translatedDecl = self.translatedDecl(for: decl) else {
       fatalError("Cannot print function opener for a function that can't be translated: \(decl)")
     }
@@ -1005,10 +1005,10 @@ extension JNISwift2JavaGenerator {
     "_\(swiftModuleName)_\(type.flatName)_opener"
   }
 
-  private func printOpenerProtocol(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printOpenerProtocol(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     let protocolName = openerProtocolName(for: type.swiftNominal)
 
-    func printFunctionDecl(_ printer: inout CodePrinter, decl: ImportedFunc, skipMethodBody: Bool) {
+    func printFunctionDecl(_ printer: inout CodePrinter, decl: ExtractedFunc, skipMethodBody: Bool) {
       guard let translatedDecl = self.translatedDecl(for: decl) else { return }
       let nativeSignature = translatedDecl.nativeFunctionSignature
 
@@ -1128,7 +1128,7 @@ extension SwiftNominalTypeDeclaration {
   }
 }
 
-extension ImportedFunc {
+extension ExtractedFunc {
   fileprivate var openerMethodName: String {
     let prefix =
       switch apiKind {

@@ -13,17 +13,17 @@
 //===----------------------------------------------------------------------===//
 
 public struct AnalysisResult {
-  public let importedTypes: [String: ImportedNominalType]
-  public let importedGlobalVariables: [ImportedFunc]
-  public let importedGlobalFuncs: [ImportedFunc]
+  public let extractedTypes: [String: ExtractedNominalType]
+  public let extractedGlobalVariables: [ExtractedFunc]
+  public let extractedGlobalFuncs: [ExtractedFunc]
 
   public init(
-    importedTypes: [String: ImportedNominalType],
-    importedGlobalVariables: [ImportedFunc],
-    importedGlobalFuncs: [ImportedFunc]
+    extractedTypes: [String: ExtractedNominalType],
+    extractedGlobalVariables: [ExtractedFunc],
+    extractedGlobalFuncs: [ExtractedFunc]
   ) {
-    self.importedTypes = importedTypes
-    self.importedGlobalVariables = importedGlobalVariables
-    self.importedGlobalFuncs = importedGlobalFuncs
+    self.extractedTypes = extractedTypes
+    self.extractedGlobalVariables = extractedGlobalVariables
+    self.extractedGlobalFuncs = extractedGlobalFuncs
   }
 }

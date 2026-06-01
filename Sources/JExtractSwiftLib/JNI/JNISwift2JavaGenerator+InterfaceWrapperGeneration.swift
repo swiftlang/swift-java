@@ -21,9 +21,9 @@ import SwiftSyntax
 extension JNISwift2JavaGenerator {
 
   func generateInterfaceWrappers(
-    _ types: [ImportedNominalType]
-  ) -> [ImportedNominalType: JavaInterfaceSwiftWrapper] {
-    var wrappers = [ImportedNominalType: JavaInterfaceSwiftWrapper]()
+    _ types: [ExtractedNominalType]
+  ) -> [ExtractedNominalType: JavaInterfaceSwiftWrapper] {
+    var wrappers = [ExtractedNominalType: JavaInterfaceSwiftWrapper]()
 
     for type in types where type.swiftNominal.kind == .protocol {
       // Skip protocols that have a known representative concrete type (e.g. DataProtocol).
@@ -51,7 +51,7 @@ extension JNISwift2JavaGenerator {
     let protocolType: SwiftNominalType
     let functions: [Function]
     let variables: [Variable]
-    let importedType: ImportedNominalType
+    let importedType: ExtractedNominalType
 
     var wrapperName: String {
       protocolType.nominalTypeDecl.javaInterfaceSwiftProtocolWrapperName
@@ -102,7 +102,7 @@ extension JNISwift2JavaGenerator {
   }
 
   struct JavaInterfaceProtocolWrapperGenerator {
-    func generate(for type: ImportedNominalType) throws -> JavaInterfaceSwiftWrapper {
+    func generate(for type: ExtractedNominalType) throws -> JavaInterfaceSwiftWrapper {
       if !type.initializers.isEmpty
         || type.methods.contains(where: \.isStatic)
         || type.variables.contains(where: \.isStatic)
@@ -164,7 +164,7 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    private func translate(function: ImportedFunc) throws -> JavaInterfaceSwiftWrapper.Function {
+    private func translate(function: ExtractedFunc) throws -> JavaInterfaceSwiftWrapper.Function {
       let parameters = try function.functionSignature.parameters.map {
         try self.translateParameter($0)
       }
@@ -181,8 +181,8 @@ extension JNISwift2JavaGenerator {
     }
 
     private func translateVariable(
-      getter: ImportedFunc,
-      setter: ImportedFunc?
+      getter: ExtractedFunc,
+      setter: ExtractedFunc?
     ) throws -> JavaInterfaceSwiftWrapper.Variable {
       try JavaInterfaceSwiftWrapper.Variable(
         swiftDecl: getter.swiftDecl, // they should be the same

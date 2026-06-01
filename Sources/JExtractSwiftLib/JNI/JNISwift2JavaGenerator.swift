@@ -50,9 +50,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   var generatedCDeclSymbolNames: [String] = []
 
   /// Cached Java translation result. 'nil' indicates failed translation.
-  var translatedDecls: [ImportedFunc: TranslatedFunctionDecl] = [:]
-  var translatedEnumCases: [ImportedEnumCase: TranslatedEnumCase] = [:]
-  var interfaceProtocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper] = [:]
+  var translatedDecls: [ExtractedFunc: TranslatedFunctionDecl] = [:]
+  var translatedEnumCases: [ExtractedEnumCase: TranslatedEnumCase] = [:]
+  var interfaceProtocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper] = [:]
 
   /// Duplicate identifier tracking for the current batch of methods being generated.
   var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
@@ -121,7 +121,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       // We translate all the protocol wrappers
       // as we need them to know what protocols we can allow the user to implement themselves
       // in Java.
-      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.importedTypes.values))
+      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.extractedTypes.values))
     }
   }
 
@@ -143,12 +143,12 @@ extension JNISwift2JavaGenerator {
     "\(parameterName)$indirect"
   }
 
-  func inheritedProtocols(of type: ImportedNominalType) -> [ImportedNominalType] {
+  func inheritedProtocols(of type: ExtractedNominalType) -> [ExtractedNominalType] {
     type.inheritedTypes
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
       .compactMap {
-        self.analysis.importedTypes[$0.qualifiedName]
+        self.analysis.extractedTypes[$0.qualifiedName]
       }
   }
 }

@@ -60,7 +60,7 @@ package class JavaTranslator {
   /// The set of Swift modules that need to be imported to make the generated
   /// code compile. Use `getImportDecls()` to format this into a list of
   /// import declarations.
-  package var importedSwiftModules: Set<String> = JavaTranslator.defaultImportedSwiftModules
+  package var importedSwiftModules: Set<String> = JavaTranslator.defaultExtractedSwiftModules
 
   /// The canonical names of Java classes whose declared 'native'
   /// methods will be implemented in Swift.
@@ -97,7 +97,7 @@ package class JavaTranslator {
 
   /// Clear out any per-file state when we want to start a new file.
   package func startNewFile() {
-    importedSwiftModules = Self.defaultImportedSwiftModules
+    importedSwiftModules = Self.defaultExtractedSwiftModules
   }
 
   /// Simplistic logging for all entities that couldn't be translated.
@@ -111,7 +111,7 @@ extension JavaTranslator {
   private static let defaultFormat = BasicFormat(indentationWidth: .spaces(2))
 
   /// Default set of modules that will always be imported.
-  private static let defaultImportedSwiftModules: Set<String> = [
+  private static let defaultExtractedSwiftModules: Set<String> = [
     "SwiftJava",
     "SwiftJavaJNICore",
   ]

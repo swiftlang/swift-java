@@ -54,16 +54,16 @@ public final class SwiftAnalyzer {
 
   // ==== Output state
 
-  package var importedGlobalVariables: [ImportedFunc] = []
+  package var extractedGlobalVariables: [ExtractedFunc] = []
 
-  package var importedGlobalFuncs: [ImportedFunc] = []
+  package var extractedGlobalFuncs: [ExtractedFunc] = []
 
   /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
   /// type representation.
-  package var importedTypes: [String: ImportedNominalType] = [:]
+  package var extractedTypes: [String: ExtractedNominalType] = [:]
 
   /// Specializations of generic types that will get their concrete Java declarations, "as if" they were independent types
-  package var specializations: [ImportedNominalType: Set<ImportedNominalType>] = [:]
+  package var specializations: [ExtractedNominalType: Set<ExtractedNominalType>] = [:]
 
   package var lookupContext: SwiftTypeLookupContext! = nil
 
@@ -109,9 +109,9 @@ extension SwiftAnalyzer {
   /// Snapshot of the analysis state as a value-typed `AnalysisResult`.
   public var result: AnalysisResult {
     AnalysisResult(
-      importedTypes: self.importedTypes,
-      importedGlobalVariables: self.importedGlobalVariables,
-      importedGlobalFuncs: self.importedGlobalFuncs,
+      extractedTypes: self.extractedTypes,
+      extractedGlobalVariables: self.extractedGlobalVariables,
+      extractedGlobalFuncs: self.extractedGlobalFuncs,
     )
   }
 
@@ -267,7 +267,7 @@ extension SwiftAnalyzer {
       }
     }
 
-    func check(_ fn: ImportedFunc) -> Bool {
+    func check(_ fn: ExtractedFunc) -> Bool {
       if check(fn.functionSignature.result.type) {
         return true
       }
@@ -277,13 +277,13 @@ extension SwiftAnalyzer {
       return false
     }
 
-    if self.importedGlobalFuncs.contains(where: check) {
+    if self.extractedGlobalFuncs.contains(where: check) {
       return true
     }
-    if self.importedGlobalVariables.contains(where: check) {
+    if self.extractedGlobalVariables.contains(where: check) {
       return true
     }
-    for importedType in self.importedTypes.values {
+    for importedType in self.extractedTypes.values {
       if importedType.initializers.contains(where: check) {
         return true
       }
@@ -302,10 +302,10 @@ extension SwiftAnalyzer {
 // MARK: Type translation
 extension SwiftAnalyzer {
   /// Try to resolve the given nominal declaration node into its imported representation.
-  func importedNominalType(
+  func extractedNominalType(
     _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
-    parent: ImportedNominalType?,
-  ) -> ImportedNominalType? {
+    parent: ExtractedNominalType?,
+  ) -> ExtractedNominalType? {
     if !nominalNode.shouldExtract(config: config, log: log, in: parent, decider: extractDecider) {
       return nil
     }
@@ -313,13 +313,13 @@ extension SwiftAnalyzer {
     guard let nominal = symbolTable.lookupType(nominalNode.name.text, parent: parent?.swiftNominal) else {
       return nil
     }
-    return self.importedNominalType(nominal)
+    return self.extractedNominalType(nominal)
   }
 
   /// Try to resolve the given nominal type node into its imported representation.
-  func importedNominalType(
+  func extractedNominalType(
     _ typeNode: TypeSyntax
-  ) -> ImportedNominalType? {
+  ) -> ExtractedNominalType? {
     guard let swiftType = try? SwiftType(typeNode, lookupContext: lookupContext) else {
       return nil
     }
@@ -334,14 +334,14 @@ extension SwiftAnalyzer {
       return nil
     }
 
-    guard swiftNominalDecl.syntax.shouldExtract(config: config, log: log, in: nil as ImportedNominalType?, decider: extractDecider) else {
+    guard swiftNominalDecl.syntax.shouldExtract(config: config, log: log, in: nil as ExtractedNominalType?, decider: extractDecider) else {
       return nil
     }
 
-    return importedNominalType(swiftNominalDecl)
+    return extractedNominalType(swiftNominalDecl)
   }
 
-  func importedNominalType(_ nominal: SwiftNominalTypeDeclaration) -> ImportedNominalType? {
+  func extractedNominalType(_ nominal: SwiftNominalTypeDeclaration) -> ExtractedNominalType? {
     let fullName = nominal.qualifiedName
 
     guard shouldExtractSwiftType(qualifiedName: fullName, config: config) else {
@@ -349,13 +349,13 @@ extension SwiftAnalyzer {
       return nil
     }
 
-    if let alreadyImported = importedTypes[fullName] {
+    if let alreadyImported = extractedTypes[fullName] {
       return alreadyImported
     }
 
-    let importedNominal = try? ImportedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
+    let importedNominal = try? ExtractedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
 
-    importedTypes[fullName] = importedNominal
+    extractedTypes[fullName] = importedNominal
     return importedNominal
   }
 }

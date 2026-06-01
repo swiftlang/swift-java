@@ -43,13 +43,13 @@ extension JNISwift2JavaGenerator {
   }
 
   package func writeExportedJavaSources(_ printer: inout CodePrinter) throws {
-    let typesToExport: [(key: String, value: ImportedNominalType)]
+    let typesToExport: [(key: String, value: ExtractedNominalType)]
     if let singleType = config.singleType {
-      typesToExport = analysis.importedTypes
+      typesToExport = analysis.extractedTypes
         .filter { $0.key == singleType }
         .sorted(by: { $0.key < $1.key })
     } else {
-      typesToExport = analysis.importedTypes
+      typesToExport = analysis.extractedTypes
         .sorted(by: { $0.key < $1.key })
     }
 
@@ -106,7 +106,7 @@ extension JNISwift2JavaGenerator {
     printImports(&printer)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(
-      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+      self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables
     )
 
     printModuleClass(&printer) { printer in
@@ -140,13 +140,13 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      for decl in analysis.importedGlobalFuncs {
+      for decl in analysis.extractedGlobalFuncs {
         self.logger.trace("Print global function: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
         printer.println()
       }
 
-      for decl in analysis.importedGlobalVariables {
+      for decl in analysis.extractedGlobalVariables {
         self.logger.trace("Print global variable: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
         printer.println()
@@ -154,7 +154,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printImportedNominal(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
@@ -171,7 +171,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printProtocol(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printProtocol(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     var extends = self.inheritedProtocols(of: decl).map(\.effectiveJavaSimpleName)
 
     // If we cannot generate Swift wrappers
@@ -207,7 +207,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printConcreteType(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printConcreteType(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printNominal(&printer, decl) { printer in
       printer.print(
         """
@@ -245,7 +245,7 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let nestedTypes = self.analysis.importedTypes.filter { _, type in
+      let nestedTypes = self.analysis.extractedTypes.filter { _, type in
         type.parent == decl.swiftNominal
       }
 
@@ -399,7 +399,7 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints helpers for specific types like `Foundation.Date`
-  private func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     guard let knownType = decl.swiftNominal.knownTypeKind else { return }
 
     switch knownType {
@@ -442,7 +442,7 @@ extension JNISwift2JavaGenerator {
 
   private func printNominal(
     _ printer: inout CodePrinter,
-    _ decl: ImportedNominalType,
+    _ decl: ExtractedNominalType,
     body: (inout CodePrinter) -> Void,
   ) {
     if decl.swiftNominal.isSendable {
@@ -474,7 +474,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printEnumHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printEnumDiscriminator(&printer, decl)
     printer.println()
     printEnumCaseInterface(&printer, decl)
@@ -484,7 +484,7 @@ extension JNISwift2JavaGenerator {
     printEnumCases(&printer, decl)
   }
 
-  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printEnumDiscriminator(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     if decl.cases.isEmpty {
       return
     }
@@ -501,7 +501,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printEnumCaseInterface(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     if decl.cases.isEmpty {
       return
     }
@@ -558,7 +558,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printEnumStaticInitializers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     let isEffectivelyGeneric = decl.swiftNominal.isGeneric && !decl.isSpecialization
     if !decl.cases.isEmpty && isEffectivelyGeneric {
       self.logger.debug("Skipping generic static initializers in '\(decl.effectiveJavaSimpleName)'")
@@ -570,7 +570,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printEnumCases(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printEnumCases(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     let caseTypeParameters: [JavaType] = decl.genericParameterNames.map {
       .class(package: nil, name: $0)
     }
@@ -626,7 +626,7 @@ extension JNISwift2JavaGenerator {
 
   private func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
     skipMethodBody: Bool = false,
   ) {
     guard translatedDecl(for: decl) != nil else {
@@ -650,7 +650,7 @@ extension JNISwift2JavaGenerator {
   /// * User-facing functional interfaces.
   private func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     if translated.functionTypes.isEmpty {
@@ -687,7 +687,7 @@ extension JNISwift2JavaGenerator {
 
   private func printNecessarySupportTypes(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc
+    _ decl: ExtractedFunc
   ) {
     let translatedDecl = translatedDecl(for: decl)!
 
@@ -698,7 +698,7 @@ extension JNISwift2JavaGenerator {
 
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
     skipMethodBody: Bool,
   ) {
     guard let translatedDecl = translatedDecl(for: decl) else {
@@ -710,7 +710,7 @@ extension JNISwift2JavaGenerator {
   private func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
     _ translatedDecl: TranslatedFunctionDecl,
-    importedFunc: ImportedFunc? = nil,
+    importedFunc: ExtractedFunc? = nil,
     skipMethodBody: Bool,
   ) {
     var modifiers = ["public"]
@@ -879,7 +879,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printTypeMetadataAddressFunction(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     let isEffectivelyGeneric = type.swiftNominal.isGeneric && !type.isSpecialization
     if isEffectivelyGeneric {
       printer.print("@Override")
@@ -897,7 +897,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printFoundationDateHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printFoundationDateHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printer.print(
       """
       /**
@@ -950,7 +950,7 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-  private func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printer.print(
       """
       /**

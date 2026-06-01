@@ -47,18 +47,18 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    #expect(result.importedTypes["Tank"] != nil)
-    #expect(result.importedTypes["FishTank"] != nil)
-    #expect(result.importedTypes["Status"] != nil)
+    #expect(result.extractedTypes["Tank"] != nil)
+    #expect(result.extractedTypes["FishTank"] != nil)
+    #expect(result.extractedTypes["Status"] != nil)
 
-    let tank = try #require(result.importedTypes["Tank"])
+    let tank = try #require(result.extractedTypes["Tank"])
     #expect(tank.swiftNominal.kind == .struct)
     #expect(tank.swiftNominal.isGeneric)
 
-    let fishTank = try #require(result.importedTypes["FishTank"])
+    let fishTank = try #require(result.extractedTypes["FishTank"])
     #expect(fishTank.swiftNominal.kind == .class)
 
-    let status = try #require(result.importedTypes["Status"])
+    let status = try #require(result.extractedTypes["Status"])
     #expect(status.swiftNominal.kind == .enum)
   }
 
@@ -82,7 +82,7 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let fishTank = try #require(result.importedTypes["FishTank"])
+    let fishTank = try #require(result.extractedTypes["FishTank"])
     let methodNames = Set(fishTank.methods.map(\.name))
     #expect(methodNames == ["feed", "count"])
     #expect(fishTank.initializers.count == 1)
@@ -107,7 +107,7 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let fishTank = try #require(result.importedTypes["FishTank"])
+    let fishTank = try #require(result.extractedTypes["FishTank"])
     let capacityAccessors = fishTank.variables.filter { $0.name == "capacity" }
     let kinds = Set(capacityAccessors.map(\.apiKind))
     #expect(kinds == [.getter, .setter])
@@ -129,7 +129,7 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let fishTank = try #require(result.importedTypes["FishTank"])
+    let fishTank = try #require(result.extractedTypes["FishTank"])
     let nameAccessors = fishTank.variables.filter { $0.name == "name" }
     let kinds = nameAccessors.map(\.apiKind)
     #expect(kinds == [.getter])
@@ -152,9 +152,9 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let names = Set(result.importedGlobalFuncs.map(\.name))
+    let names = Set(result.extractedGlobalFuncs.map(\.name))
     #expect(names == ["feedAll", "mood"])
-    #expect(result.importedTypes.isEmpty)
+    #expect(result.extractedTypes.isEmpty)
   }
 
   @Test func globalVariableProducesGetterSetterPair() throws {
@@ -170,7 +170,7 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let counterAccessors = result.importedGlobalVariables.filter { $0.name == "globalCounter" }
+    let counterAccessors = result.extractedGlobalVariables.filter { $0.name == "globalCounter" }
     let kinds = Set(counterAccessors.map(\.apiKind))
     #expect(kinds == [.getter, .setter])
   }
@@ -194,7 +194,7 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    let byName = Dictionary(uniqueKeysWithValues: result.importedGlobalFuncs.map { ($0.name, $0) })
+    let byName = Dictionary(uniqueKeysWithValues: result.extractedGlobalFuncs.map { ($0.name, $0) })
     let plain = try #require(byName["plain"])
     #expect(plain.functionSignature.effectSpecifiers.isEmpty)
 
@@ -235,9 +235,9 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    #expect(result.importedTypes["Public"] != nil)
-    #expect(result.importedTypes["Internal"] == nil)
-    #expect(result.importedTypes["Private"] == nil)
+    #expect(result.extractedTypes["Public"] != nil)
+    #expect(result.extractedTypes["Internal"] == nil)
+    #expect(result.extractedTypes["Private"] == nil)
   }
 
   // ==== -----------------------------------------------------------------------
@@ -268,9 +268,9 @@ struct AnalysisResultSuite {
       config: config
     )
 
-    #expect(result.importedTypes["Tank"] != nil)
-    #expect(result.importedTypes["SkipMe"] == nil)
-    #expect(result.importedTypes["SkipAlso"] == nil)
+    #expect(result.extractedTypes["Tank"] != nil)
+    #expect(result.extractedTypes["SkipMe"] == nil)
+    #expect(result.extractedTypes["SkipAlso"] == nil)
   }
 
   // ==== -----------------------------------------------------------------------
@@ -293,9 +293,9 @@ struct AnalysisResultSuite {
       moduleName: "Aquarium"
     )
 
-    // Both the generic base and its specialization land in importedTypes.
-    #expect(result.importedTypes["Tank"] != nil)
-    let fishTank = try #require(result.importedTypes["FishTank"])
+    // Both the generic base and its specialization land in extractedTypes.
+    #expect(result.extractedTypes["Tank"] != nil)
+    let fishTank = try #require(result.extractedTypes["FishTank"])
     #expect(fishTank.isSpecialization)
   }
 
@@ -310,8 +310,8 @@ struct AnalysisResultSuite {
       moduleName: "Empty"
     )
 
-    #expect(result.importedTypes.isEmpty)
-    #expect(result.importedGlobalFuncs.isEmpty)
-    #expect(result.importedGlobalVariables.isEmpty)
+    #expect(result.extractedTypes.isEmpty)
+    #expect(result.extractedGlobalFuncs.isEmpty)
+    #expect(result.extractedGlobalVariables.isEmpty)
   }
 }

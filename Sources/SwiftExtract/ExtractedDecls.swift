@@ -28,17 +28,17 @@ public enum SwiftAPIKind: Equatable {
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
-/// imported and is being translated into Java.
+/// extracted by the analyzer for a downstream language target.
 ///
 /// When `base` is non-nil, this is a specialization of a generic type
 /// (e.g. `FishBox` specializing `Box<Element>` with `Element` = `Fish`).
 /// The specialization delegates its member collections to the base type
 /// so that extensions discovered later are visible through all specializations.
-public final class ImportedNominalType: ExtractedSwiftDecl {
+public final class ExtractedNominalType: ExtractedSwiftDecl {
   public let swiftNominal: SwiftNominalTypeDeclaration
 
   /// If this type is a specialization (FishTank), it points at the Tank base type of the specialization
-  public let specializationBaseType: ImportedNominalType?
+  public let specializationBaseType: ExtractedNominalType?
 
   // The short path from module root to the file in which this nominal was originally declared.
   // E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
@@ -47,10 +47,10 @@ public final class ImportedNominalType: ExtractedSwiftDecl {
   }
 
   // Backing storage for member collections
-  public var initializers: [ImportedFunc] = []
-  public var methods: [ImportedFunc] = []
-  public var variables: [ImportedFunc] = []
-  public var cases: [ImportedEnumCase] = []
+  public var initializers: [ExtractedFunc] = []
+  public var methods: [ExtractedFunc] = []
+  public var variables: [ExtractedFunc] = []
+  public var cases: [ExtractedEnumCase] = []
   public var inheritedTypes: [SwiftType]
   public var parent: SwiftNominalTypeDeclaration?
 
@@ -89,7 +89,7 @@ public final class ImportedNominalType: ExtractedSwiftDecl {
   }
 
   /// Init for creating a specialization
-  private init(base: ImportedNominalType, specializedTypeName: String, genericArguments: [String: String]) {
+  private init(base: ExtractedNominalType, specializedTypeName: String, genericArguments: [String: String]) {
     self.swiftNominal = base.swiftNominal
     self.specializationBaseType = base
 
@@ -166,7 +166,7 @@ public final class ImportedNominalType: ExtractedSwiftDecl {
   public func specialize(
     as specializedName: String,
     with substitutions: [String: String],
-  ) throws -> ImportedNominalType {
+  ) throws -> ExtractedNominalType {
     guard !genericParameterNames.isEmpty else {
       throw SpecializationError(
         message: "Unable to specialize non-generic type '\(baseTypeName)' as '\(specializedName)'"
@@ -178,7 +178,7 @@ public final class ImportedNominalType: ExtractedSwiftDecl {
         message: "Missing type arguments for: \(missingParams) when specializing \(baseTypeName) as \(specializedName)"
       )
     }
-    return ImportedNominalType(
+    return ExtractedNominalType(
       base: self,
       specializedTypeName: specializedName,
       genericArguments: substitutions,
@@ -186,14 +186,14 @@ public final class ImportedNominalType: ExtractedSwiftDecl {
   }
 
   /// Checks if this type, or any of types it inherits from, conforms to the passed in protocol.
-  public func conformsTo(_ protocolName: String, in importedTypes: [String: ImportedNominalType]) -> Bool {
+  public func conformsTo(_ protocolName: String, in extractedTypes: [String: ExtractedNominalType]) -> Bool {
     var visited: Set<ObjectIdentifier> = []
-    var queue: [ImportedNominalType] = [self]
+    var queue: [ExtractedNominalType] = [self]
     while let current = queue.popLast() {
       for inherited in current.inheritedTypes {
         guard let name = inherited.asNominalTypeDeclaration?.name else { continue }
         if name == protocolName { return true }
-        if let next = importedTypes[name], visited.insert(ObjectIdentifier(next)).inserted {
+        if let next = extractedTypes[name], visited.insert(ObjectIdentifier(next)).inserted {
           queue.append(next)
         }
       }
@@ -206,7 +206,7 @@ public struct SpecializationError: Error {
   public let message: String
 }
 
-public final class ImportedEnumCase: ExtractedSwiftDecl, CustomStringConvertible {
+public final class ExtractedEnumCase: ExtractedSwiftDecl, CustomStringConvertible {
   /// The case name
   public let name: String
 
@@ -218,14 +218,14 @@ public final class ImportedEnumCase: ExtractedSwiftDecl, CustomStringConvertible
   public let enumType: SwiftNominalType
 
   /// A function that represents the Swift static "initializer" for cases
-  public let caseFunction: ImportedFunc
+  public let caseFunction: ExtractedFunc
 
   public init(
     name: String,
     parameters: [SwiftEnumCaseParameter],
     swiftDecl: any DeclSyntaxProtocol,
     enumType: SwiftNominalType,
-    caseFunction: ImportedFunc,
+    caseFunction: ExtractedFunc,
   ) {
     self.name = name
     self.parameters = parameters
@@ -236,7 +236,7 @@ public final class ImportedEnumCase: ExtractedSwiftDecl, CustomStringConvertible
 
   public var description: String {
     """
-    ImportedEnumCase {
+    ExtractedEnumCase {
       name: \(name),
       parameters: \(parameters),
       swiftDecl: \(swiftDecl),
@@ -246,8 +246,8 @@ public final class ImportedEnumCase: ExtractedSwiftDecl, CustomStringConvertible
     """
   }
 
-  public func clone(for parent: SwiftType) -> ImportedEnumCase {
-    ImportedEnumCase(
+  public func clone(for parent: SwiftType) -> ExtractedEnumCase {
+    ExtractedEnumCase(
       name: name,
       parameters: parameters,
       swiftDecl: swiftDecl,
@@ -257,16 +257,16 @@ public final class ImportedEnumCase: ExtractedSwiftDecl, CustomStringConvertible
   }
 }
 
-extension ImportedEnumCase: Hashable {
+extension ExtractedEnumCase: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
-  public static func == (lhs: ImportedEnumCase, rhs: ImportedEnumCase) -> Bool {
+  public static func == (lhs: ExtractedEnumCase, rhs: ExtractedEnumCase) -> Bool {
     lhs === rhs
   }
 }
 
-public final class ImportedFunc: ExtractedSwiftDecl, CustomStringConvertible {
+public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
   /// Swift module name (e.g. the target name where a type or function was declared)
   public let module: String
 
@@ -353,7 +353,7 @@ public final class ImportedFunc: ExtractedSwiftDecl, CustomStringConvertible {
 
   public var description: String {
     """
-    ImportedFunc {
+    ExtractedFunc {
       apiKind: \(apiKind)
       module: \(module)
       name: \(name)
@@ -362,11 +362,11 @@ public final class ImportedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     """
   }
 
-  public func clone(for parent: SwiftType) -> ImportedFunc {
+  public func clone(for parent: SwiftType) -> ExtractedFunc {
     var functionSignature = functionSignature
     assert(functionSignature.selfParameter?.selfType != nil)
     functionSignature.selfParameter?.selfType = parent
-    return ImportedFunc(
+    return ExtractedFunc(
       module: module,
       swiftDecl: swiftDecl,
       name: name,
@@ -376,20 +376,20 @@ public final class ImportedFunc: ExtractedSwiftDecl, CustomStringConvertible {
   }
 }
 
-extension ImportedFunc: Hashable {
+extension ExtractedFunc: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
-  public static func == (lhs: ImportedFunc, rhs: ImportedFunc) -> Bool {
+  public static func == (lhs: ExtractedFunc, rhs: ExtractedFunc) -> Bool {
     lhs === rhs
   }
 }
 
-extension ImportedNominalType: Hashable {
+extension ExtractedNominalType: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
-  public static func == (lhs: ImportedNominalType, rhs: ImportedNominalType) -> Bool {
+  public static func == (lhs: ExtractedNominalType, rhs: ExtractedNominalType) -> Bool {
     lhs === rhs
   }
 }

@@ -19,13 +19,13 @@ import SwiftExtract
 package struct ThunkNameRegistry {
   /// Maps base names such as "swiftjava_Module_Type_method_a_b_c" to the number of times we've seen them.
   /// This is used to de-duplicate symbols as we emit them.
-  private var registry: [ImportedFunc: String] = [:]
+  private var registry: [ExtractedFunc: String] = [:]
   private var duplicateNames: [String: Int] = [:]
 
   package init() {}
 
   package mutating func functionThunkName(
-    decl: ImportedFunc,
+    decl: ExtractedFunc,
     file: String = #fileID,
     line: UInt = #line
   ) -> String {

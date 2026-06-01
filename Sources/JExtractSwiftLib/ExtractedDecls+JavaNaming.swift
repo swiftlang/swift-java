@@ -15,9 +15,16 @@
 import SwiftExtract
 
 // ==== -----------------------------------------------------------------------
-// MARK: Java-facing name aliases for ImportedNominalType
+// MARK: Java name typealiases
 
-extension ImportedNominalType {
+package typealias JavaClassName = String
+package typealias JavaFullyQualifiedClassName = String
+package typealias JavaPackageName = String
+
+// ==== -----------------------------------------------------------------------
+// MARK: Java-facing name aliases for ExtractedNominalType
+
+extension ExtractedNominalType {
   package var effectiveJavaTypeName: SwiftQualifiedTypeName { effectiveOutputTypeName }
   package var effectiveJavaName: String { effectiveOutputName }
   package var effectiveJavaSimpleName: String { effectiveOutputSimpleName }
@@ -25,9 +32,9 @@ extension ImportedNominalType {
 }
 
 // ==== -----------------------------------------------------------------------
-// MARK: Java-facing name aliases for ImportedFunc
+// MARK: Java-facing name aliases for ExtractedFunc
 
-extension ImportedFunc {
+extension ExtractedFunc {
   /// The Java getter name for a Swift property/subscript getter, following
   /// Java Beans conventions: `get<Name>` for non-boolean, `is<Name>` for
   /// boolean (unless the property already starts with `is`, in which case

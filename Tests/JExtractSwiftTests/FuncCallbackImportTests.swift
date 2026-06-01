@@ -47,7 +47,7 @@ final class FuncCallbackImportTests {
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMe" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -136,7 +136,7 @@ final class FuncCallbackImportTests {
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMeMore" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeMore" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -252,7 +252,7 @@ final class FuncCallbackImportTests {
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "withBuffer" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "withBuffer" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,

@@ -85,7 +85,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first { $0.name == "helloWorld" })
+    let funcDecl = try #require(st.extractedGlobalFuncs.first { $0.name == "helloWorld" })
 
     let output = CodePrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
@@ -120,7 +120,7 @@ final class MethodImportTests {
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalTakeInt"
       }
     )
@@ -169,7 +169,7 @@ final class MethodImportTests {
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalTakeIntLongString"
       }
     )
@@ -215,7 +215,7 @@ final class MethodImportTests {
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalReturnClass"
       }
     )
@@ -261,7 +261,7 @@ final class MethodImportTests {
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "swapRawBufferPointer"
       }
     )
@@ -309,8 +309,8 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.methods.first {
+    let funcDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.methods.first {
         $0.name == "helloMemberFunction"
       }
     )
@@ -354,8 +354,8 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.methods.first {
+    let funcDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.methods.first {
         $0.name == "makeInt"
       }
     )
@@ -405,8 +405,8 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.initializers.first {
+    let initDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.initializers.first {
         $0.name == "init"
       }
     )
@@ -460,8 +460,8 @@ final class MethodImportTests {
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftStruct"]!.initializers.first {
+    let initDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftStruct"]!.initializers.first {
         $0.name == "init"
       }
     )
@@ -515,7 +515,7 @@ final class MethodImportTests {
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     #expect(
-      !st.importedGlobalFuncs.contains {
+      !st.extractedGlobalFuncs.contains {
         $0.name == "globalReturnAny"
       },
       "'Any' return type is not supported yet"

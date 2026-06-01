@@ -108,7 +108,7 @@ extension SwiftSymbolTable {
 
     // Prepare imported modules.
     // FIXME: Support arbitrary dependencies.
-    var modules: Set<ImportedSwiftModule> = []
+    var modules: Set<ExtractedSwiftModule> = []
     for inputFile in inputFiles {
       let importedModules = importingModules(sourceFile: inputFile.syntax)
       modules.formUnion(importedModules)

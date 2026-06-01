@@ -48,7 +48,7 @@ final class SwiftAnalysisVisitor {
     }
   }
 
-  func visit(decl node: DeclSyntax, in parent: ImportedNominalType?, sourceFilePath: String) {
+  func visit(decl node: DeclSyntax, in parent: ExtractedNominalType?, sourceFilePath: String) {
     switch node.as(DeclSyntaxEnum.self) {
     case .actorDecl(let node):
       self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
@@ -87,24 +87,24 @@ final class SwiftAnalysisVisitor {
   func visit(
     nominalDecl node: some DeclSyntaxProtocol & DeclGroupSyntax & NamedDeclSyntax
       & WithAttributesSyntax & WithModifiersSyntax,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard let importedNominalType = translator.importedNominalType(node, parent: parent) else {
+    guard let extractedNominalType = translator.extractedNominalType(node, parent: parent) else {
       return
     }
 
     // Check if there's a specialization entry for this type
-    applySpecialization(to: importedNominalType)
+    applySpecialization(to: extractedNominalType)
 
     for memberItem in node.memberBlock.members {
-      self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
+      self.visit(decl: memberItem.decl, in: extractedNominalType, sourceFilePath: sourceFilePath)
     }
   }
 
   func visit(
     enumDecl node: EnumDeclSyntax,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
     self.visit(nominalDecl: node, in: parent, sourceFilePath: sourceFilePath)
@@ -114,14 +114,14 @@ final class SwiftAnalysisVisitor {
 
   func visit(
     extensionDecl node: ExtensionDeclSyntax,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
     guard parent == nil else {
       // 'extension' in a nominal type is invalid. Ignore
       return
     }
-    guard let importedNominalType = translator.importedNominalType(node.extendedType) else {
+    guard let extractedNominalType = translator.extractedNominalType(node.extendedType) else {
       return
     }
 
@@ -134,12 +134,12 @@ final class SwiftAnalysisVisitor {
 
     guard !constraints.isEmpty else {
       // The extension is unconstrained: add to the base type (visible through all specializations)
-      importedNominalType.inheritedTypes +=
+      extractedNominalType.inheritedTypes +=
         node.inheritanceClause?.inheritedTypes.compactMap {
           try? SwiftType($0.type, lookupContext: translator.lookupContext)
         } ?? []
       for memberItem in node.memberBlock.members {
-        self.visit(decl: memberItem.decl, in: importedNominalType, sourceFilePath: sourceFilePath)
+        self.visit(decl: memberItem.decl, in: extractedNominalType, sourceFilePath: sourceFilePath)
       }
       return
     }
@@ -156,7 +156,7 @@ final class SwiftAnalysisVisitor {
     }
 
     let matchingSpecializations = findMatchingSpecializations(
-      extendedType: importedNominalType,
+      extendedType: extractedNominalType,
       whereConstraints: constraints,
     )
     if matchingSpecializations.isEmpty {
@@ -177,7 +177,7 @@ final class SwiftAnalysisVisitor {
 
   func visit(
     functionDecl node: FunctionDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
     guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
@@ -210,7 +210,7 @@ final class SwiftAnalysisVisitor {
       return
     }
 
-    let imported = ImportedFunc(
+    let imported = ExtractedFunc(
       module: translator.swiftModuleName,
       swiftDecl: node,
       name: node.name.text.unescapedSwiftName,
@@ -222,13 +222,13 @@ final class SwiftAnalysisVisitor {
     if let typeContext {
       typeContext.methods.append(imported)
     } else {
-      translator.importedGlobalFuncs.append(imported)
+      translator.extractedGlobalFuncs.append(imported)
     }
   }
 
   func visit(
     enumCaseDecl node: EnumCaseDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
   ) {
     guard let typeContext else {
       self.log.info("Enum case must be within a current type; \(node)")
@@ -250,7 +250,7 @@ final class SwiftAnalysisVisitor {
         )
 
         let caseName = caseElement.name.text.unescapedSwiftName
-        let caseFunction = ImportedFunc(
+        let caseFunction = ExtractedFunc(
           module: translator.swiftModuleName,
           swiftDecl: node,
           name: caseName,
@@ -258,7 +258,7 @@ final class SwiftAnalysisVisitor {
           functionSignature: signature,
         )
 
-        let importedCase = ImportedEnumCase(
+        let importedCase = ExtractedEnumCase(
           name: caseName,
           parameters: parameters ?? [],
           swiftDecl: node,
@@ -279,7 +279,7 @@ final class SwiftAnalysisVisitor {
 
   func visit(
     variableDecl node: VariableDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
     guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
@@ -323,7 +323,7 @@ final class SwiftAnalysisVisitor {
 
   func visit(
     initializerDecl node: InitializerDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
   ) {
     guard let typeContext else {
       self.log.info("Initializer must be within a current type; \(node)")
@@ -355,7 +355,7 @@ final class SwiftAnalysisVisitor {
       )
       return
     }
-    let imported = ImportedFunc(
+    let imported = ExtractedFunc(
       module: translator.swiftModuleName,
       swiftDecl: node,
       name: "init",
@@ -368,7 +368,7 @@ final class SwiftAnalysisVisitor {
 
   private func visit(
     subscriptDecl node: SubscriptDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
   ) {
     guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
       return
@@ -409,7 +409,7 @@ final class SwiftAnalysisVisitor {
 
   private func visit(
     ifConfigDecl node: IfConfigDeclSyntax,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
     sourceFilePath: String
   ) {
     let (clause, _) = node.activeClause(in: translator.buildConfig)
@@ -433,7 +433,7 @@ final class SwiftAnalysisVisitor {
 
   private func importAccessor(
     from node: DeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
     kind: SwiftAPIKind,
     name: String,
   ) throws {
@@ -459,7 +459,7 @@ final class SwiftAnalysisVisitor {
       return
     }
 
-    let imported = ImportedFunc(
+    let imported = ExtractedFunc(
       module: translator.swiftModuleName,
       swiftDecl: node,
       name: name,
@@ -473,15 +473,15 @@ final class SwiftAnalysisVisitor {
     if let typeContext {
       typeContext.variables.append(imported)
     } else {
-      translator.importedGlobalVariables.append(imported)
+      translator.extractedGlobalVariables.append(imported)
     }
   }
 
   private func synthesizeRawRepresentableConformance(
     enumDecl node: EnumDeclSyntax,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
   ) {
-    guard let imported = translator.importedNominalType(node, parent: parent) else {
+    guard let imported = translator.extractedNominalType(node, parent: parent) else {
       return
     }
 
@@ -515,7 +515,7 @@ final class SwiftAnalysisVisitor {
 
   func visit(
     typeAliasDecl node: TypeAliasDeclSyntax,
-    in typeContext: ImportedNominalType?,
+    in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
     let outputName = node.name.text
@@ -534,7 +534,7 @@ final class SwiftAnalysisVisitor {
     guard !genericArgs.isEmpty else { return }
 
     // Resolve the base type through the symbol table
-    guard let baseType = translator.importedNominalType(rhsType) else {
+    guard let baseType = translator.extractedNominalType(rhsType) else {
       log.debug("Could not resolve base type for specialization: \(rhsType.trimmedDescription)")
       return
     }
@@ -550,7 +550,7 @@ final class SwiftAnalysisVisitor {
   /// Register a specialization from a typealias that specializes a generic type
   private func registerSpecialization(
     outputName: String,
-    baseType: ImportedNominalType,
+    baseType: ExtractedNominalType,
     genericArgs: [String],
     rhsDescription: String,
   ) {
@@ -565,7 +565,7 @@ final class SwiftAnalysisVisitor {
       }
     }
 
-    let specialized: ImportedNominalType
+    let specialized: ExtractedNominalType
     do {
       specialized = try baseType.specialize(as: outputName, with: substitutions)
     } catch {
@@ -580,13 +580,13 @@ final class SwiftAnalysisVisitor {
   // MARK: Specialization support
 
   /// Apply specializations to a type if matching entries exist
-  func applySpecialization(to importedType: ImportedNominalType) {
+  func applySpecialization(to importedType: ExtractedNominalType) {
     guard let specializations = translator.specializations[importedType] else {
       return
     }
 
     for specialized in specializations {
-      translator.importedTypes[specialized.effectiveOutputName] = specialized
+      translator.extractedTypes[specialized.effectiveOutputName] = specialized
       log.info("Applied specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
     }
   }
@@ -596,17 +596,17 @@ final class SwiftAnalysisVisitor {
   func applyPendingSpecializations() {
     for (_, specializations) in translator.specializations {
       for specialized in specializations {
-        if translator.importedTypes[specialized.effectiveOutputName] != nil {
+        if translator.extractedTypes[specialized.effectiveOutputName] != nil {
           continue
         }
-        translator.importedTypes[specialized.effectiveOutputName] = specialized
+        translator.extractedTypes[specialized.effectiveOutputName] = specialized
         log.info("Applied pending specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
       }
     }
 
     // Process constrained extensions that were deferred
     for deferred in deferredConstrainedExtensions {
-      guard let baseType = translator.importedNominalType(deferred.node.extendedType) else {
+      guard let baseType = translator.extractedNominalType(deferred.node.extendedType) else {
         continue
       }
       let matchingSpecializations = findMatchingSpecializations(
@@ -668,9 +668,9 @@ final class SwiftAnalysisVisitor {
 
   /// Find specializations whose type args match the given where-clause constraints
   private func findMatchingSpecializations(
-    extendedType: ImportedNominalType,
+    extendedType: ExtractedNominalType,
     whereConstraints: [ParsedWhereConstraint],
-  ) -> [ImportedNominalType] {
+  ) -> [ExtractedNominalType] {
     guard let specializations = translator.specializations[extendedType] else {
       return []
     }
@@ -683,7 +683,7 @@ final class SwiftAnalysisVisitor {
   /// Where-clauses are conjunctive: every constraint must hold.
   private func constraintsMatchSpecialization(
     _ constraints: [ParsedWhereConstraint],
-    specialized: ImportedNominalType,
+    specialized: ExtractedNominalType,
   ) -> Bool {
     for constraint in constraints {
       switch constraint {
@@ -696,10 +696,10 @@ final class SwiftAnalysisVisitor {
         guard let concreteName = specialized.genericArguments[typeParam] else {
           return false
         }
-        guard let concreteType = translator.importedTypes[concreteName] else {
+        guard let concreteType = translator.extractedTypes[concreteName] else {
           return false
         }
-        guard concreteType.conformsTo(proto, in: translator.importedTypes) else {
+        guard concreteType.conformsTo(proto, in: translator.extractedTypes) else {
           return false
         }
       }
@@ -722,7 +722,7 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
   func shouldExtract(
     config: Configuration,
     log: Logger,
-    in parent: ImportedNominalType?,
+    in parent: ExtractedNominalType?,
     decider: (any ExtractDecider)?
   ) -> Bool {
     let accessLevelPasses: Bool =

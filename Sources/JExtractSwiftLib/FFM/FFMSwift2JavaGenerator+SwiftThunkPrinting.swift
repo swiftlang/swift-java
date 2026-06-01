@@ -74,20 +74,20 @@ extension FFMSwift2JavaGenerator {
     // We have to write all types to their corresponding output file that matches the file they were declared in,
     // because otherwise SwiftPM plugins will not pick up files apropriately -- we expect 1 output +SwiftJava.swift file for every input.
 
-    let filteredTypes: [String: ImportedNominalType]
+    let filteredTypes: [String: ExtractedNominalType]
     if let singleType = config.singleType {
-      filteredTypes = self.analysis.importedTypes.filter { $0.key == singleType }
+      filteredTypes = self.analysis.extractedTypes.filter { $0.key == singleType }
     } else {
-      filteredTypes = self.analysis.importedTypes
+      filteredTypes = self.analysis.extractedTypes
     }
 
-    for group: (key: String, value: [Dictionary<String, ImportedNominalType>.Element]) in Dictionary(
+    for group: (key: String, value: [Dictionary<String, ExtractedNominalType>.Element]) in Dictionary(
       grouping: filteredTypes,
       by: { $0.value.sourceFilePath },
     ) {
       log.warning("Writing types in file group: \(group.key): \(group.value.map(\.key))")
 
-      let importedTypesForThisFile = group.value
+      let extractedTypesForThisFile = group.value
         .map(\.value)
         .sorted(by: { $0.qualifiedName < $1.qualifiedName })
 
@@ -105,7 +105,7 @@ extension FFMSwift2JavaGenerator {
       )
       self.lookupContext.symbolTable.printImportedModules(&printer)
 
-      for ty in importedTypesForThisFile {
+      for ty in extractedTypesForThisFile {
         log.info("Printing Swift thunks for type: \(ty.qualifiedName.bold)")
         printer.printSeparator("Thunks for \(ty.qualifiedName)")
 
@@ -148,7 +148,7 @@ extension FFMSwift2JavaGenerator {
     self.lookupContext.symbolTable.printImportedModules(&printer)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(
-      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+      self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables
     )
 
     for thunk in stt.renderGlobalThunks() {
@@ -157,7 +157,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  public func printSwiftThunkSources(_ printer: inout CodePrinter, decl: ImportedFunc) {
+  public func printSwiftThunkSources(_ printer: inout CodePrinter, decl: ExtractedFunc) {
     let stt = SwiftThunkTranslator(self)
 
     for thunk in stt.render(forFunc: decl) {
@@ -166,7 +166,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  package func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ImportedNominalType) throws {
+  package func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ExtractedNominalType) throws {
     let stt = SwiftThunkTranslator(self)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(
@@ -191,14 +191,14 @@ struct SwiftThunkTranslator {
   func renderGlobalThunks() -> [DeclSyntax] {
     var decls: [DeclSyntax] = []
     decls.reserveCapacity(
-      st.analysis.importedGlobalVariables.count + st.analysis.importedGlobalFuncs.count
+      st.analysis.extractedGlobalVariables.count + st.analysis.extractedGlobalFuncs.count
     )
 
-    for decl in st.analysis.importedGlobalVariables {
+    for decl in st.analysis.extractedGlobalVariables {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
-    for decl in st.analysis.importedGlobalFuncs {
+    for decl in st.analysis.extractedGlobalFuncs {
       decls.append(contentsOf: render(forFunc: decl))
     }
 
@@ -206,7 +206,7 @@ struct SwiftThunkTranslator {
   }
 
   /// Render all the thunks that make Swift methods accessible to Java.
-  func renderThunks(forType nominal: ImportedNominalType) -> [DeclSyntax] {
+  func renderThunks(forType nominal: ExtractedNominalType) -> [DeclSyntax] {
     var decls: [DeclSyntax] = []
     decls.reserveCapacity(
       1 + nominal.initializers.count + nominal.variables.count + nominal.methods.count
@@ -233,7 +233,7 @@ struct SwiftThunkTranslator {
   }
 
   /// Accessor to get the `T.self` of the Swift type, without having to rely on mangled name lookups.
-  func renderSwiftTypeAccessor(_ nominal: ImportedNominalType) -> DeclSyntax {
+  func renderSwiftTypeAccessor(_ nominal: ExtractedNominalType) -> DeclSyntax {
     let funcName = SwiftKitPrinting.Names.getType(
       module: st.swiftModuleName,
       nominal: nominal,
@@ -248,7 +248,7 @@ struct SwiftThunkTranslator {
       """
   }
 
-  func render(forFunc decl: ImportedFunc) -> [DeclSyntax] {
+  func render(forFunc decl: ExtractedFunc) -> [DeclSyntax] {
     st.log.trace("Rendering thunks for: \(decl.displayName)")
 
     let thunkName = st.thunkNameRegistry.functionThunkName(decl: decl)
@@ -265,7 +265,7 @@ struct SwiftThunkTranslator {
   }
 
   /// Render special thunks for known types like Foundation.Data
-  func renderSpecificTypeThunks(_ nominal: ImportedNominalType) -> [DeclSyntax] {
+  func renderSpecificTypeThunks(_ nominal: ExtractedNominalType) -> [DeclSyntax] {
     guard let knownType = nominal.swiftNominal.knownTypeKind else {
       return []
     }
@@ -279,7 +279,7 @@ struct SwiftThunkTranslator {
   }
 
   /// Render Swift thunks for Foundation.Data helper methods
-  private func renderFoundationDataThunks(_ nominal: ImportedNominalType) -> [DeclSyntax] {
+  private func renderFoundationDataThunks(_ nominal: ExtractedNominalType) -> [DeclSyntax] {
     let thunkName = "swiftjava_\(st.swiftModuleName)_\(nominal.swiftNominal.name)_copyBytes__"
     let qualifiedName = nominal.swiftNominal.qualifiedName
 

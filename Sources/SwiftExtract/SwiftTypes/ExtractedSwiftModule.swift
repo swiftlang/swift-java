@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct ImportedSwiftModule: Hashable {
+public struct ExtractedSwiftModule: Hashable {
   public let name: String
   public let availableWithModuleName: String?
   public var alternativeModuleNames: Set<String>

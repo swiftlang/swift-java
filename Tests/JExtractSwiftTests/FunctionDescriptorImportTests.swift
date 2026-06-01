@@ -243,7 +243,7 @@ extension FunctionDescriptorTests {
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first {
+    let funcDecl = st.extractedGlobalFuncs.first {
       $0.name == methodIdentifier
     }!
 
@@ -285,8 +285,8 @@ extension FunctionDescriptorTests {
       javaOutputDirectory: "/fake"
     )
 
-    let accessorDecl: ImportedFunc? =
-      st.importedTypes.values.compactMap {
+    let accessorDecl: ExtractedFunc? =
+      st.extractedTypes.values.compactMap {
         $0.variables.first {
           $0.name == identifier && $0.apiKind == accessorKind
         }
