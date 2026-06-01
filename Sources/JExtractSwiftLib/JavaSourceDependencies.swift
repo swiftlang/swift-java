@@ -24,10 +24,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-package typealias JavaClassName = String
-package typealias JavaFullyQualifiedClassName = String
-package typealias JavaPackageName = String
-
 extension SourceDependencies {
   /// Inject synthetic `@JavaClass public class <Name> {}` stubs so the symbol
   /// table can resolve Java wrapper types referenced in the Swift API.
