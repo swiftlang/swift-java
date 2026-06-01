@@ -30,16 +30,6 @@ extension String {
     return "\(f.lowercased())\(String(dropFirst()))"
   }
 
-  /// Returns whether the string is of the format `isX`
-  package var hasJavaBooleanNamingConvention: Bool {
-    guard self.hasPrefix("is"), self.count > 2 else {
-      return false
-    }
-
-    let thirdCharacterIndex = self.index(self.startIndex, offsetBy: 2)
-    return self[thirdCharacterIndex].isUppercase
-  }
-
   /// If the string ends with `.swift`, return it without that suffix;
   /// otherwise return self unchanged
   package func dropSwiftFileSuffix() -> String {
