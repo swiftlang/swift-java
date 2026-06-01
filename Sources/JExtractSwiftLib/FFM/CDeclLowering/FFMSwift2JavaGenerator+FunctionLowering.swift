@@ -365,10 +365,6 @@ struct CdeclLowering {
         case .foundationData, .essentialsData:
           break
 
-        case .swiftJavaError:
-          // SwiftJavaError is a class — treat as arbitrary nominal type below
-          break
-
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
           throw LoweringError.unhandledType(type)

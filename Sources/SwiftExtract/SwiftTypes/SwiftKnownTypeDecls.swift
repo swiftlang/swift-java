@@ -53,9 +53,6 @@ public enum SwiftKnownType: Equatable {
   case foundationUUID
   case essentialsUUID
 
-  // SwiftRuntimeFunctions
-  case swiftJavaError
-
   public init?(kind: SwiftKnownTypeDeclKind, genericArguments: [SwiftType]?) {
     switch kind {
     case .bool: self = .bool
@@ -109,7 +106,6 @@ public enum SwiftKnownType: Equatable {
     case .essentialsDate: self = .essentialsDate
     case .foundationUUID: self = .foundationUUID
     case .essentialsUUID: self = .essentialsUUID
-    case .swiftJavaError: self = .swiftJavaError
     }
   }
 
@@ -150,7 +146,6 @@ public enum SwiftKnownType: Equatable {
     case .essentialsDate: .essentialsDate
     case .foundationUUID: .foundationUUID
     case .essentialsUUID: .essentialsUUID
-    case .swiftJavaError: .swiftJavaError
     }
   }
 }
@@ -195,9 +190,6 @@ public enum SwiftKnownTypeDeclKind: String, Hashable {
   case foundationUUID = "Foundation.UUID"
   case essentialsUUID = "FoundationEssentials.UUID"
 
-  // SwiftRuntimeFunctions
-  case swiftJavaError = "SwiftRuntimeFunctions.SwiftJavaError"
-
   public var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue
     let period = qualified.firstIndex(of: ".")!
@@ -210,21 +202,6 @@ public enum SwiftKnownTypeDeclKind: String, Hashable {
   public var isPointer: Bool {
     switch self {
     case .unsafePointer, .unsafeMutablePointer, .unsafeRawPointer, .unsafeMutableRawPointer:
-      return true
-    default:
-      return false
-    }
-  }
-
-  /// Indicates whether this known type is translated by `wrap-java`
-  /// into the same type as `jextract`.
-  ///
-  /// This means we do not have to perform any mapping when passing
-  /// this type between jextract and wrap-java
-  public var isDirectlyTranslatedToWrapJava: Bool {
-    switch self {
-    case .bool, .int, .uint, .int8, .uint8, .int16, .uint16, .int32, .uint32, .int64, .uint64, .float, .double, .string,
-      .void:
       return true
     default:
       return false

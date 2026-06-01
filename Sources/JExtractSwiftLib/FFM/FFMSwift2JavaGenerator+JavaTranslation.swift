@@ -18,7 +18,7 @@ import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(
-    for decl: ImportedFunc
+    for decl: ExtractedFunc
   ) -> TranslatedFunctionDecl? {
     if let cached = translatedDecls[decl] {
       return cached
@@ -176,7 +176,7 @@ extension FFMSwift2JavaGenerator {
       self.javaIdentifiers = javaIdentifiers
     }
 
-    func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
+    func translate(_ decl: ExtractedFunc) throws -> TranslatedFunctionDecl {
       let lowering = CdeclLowering(knownTypes: knownTypes)
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
@@ -449,10 +449,6 @@ extension FFMSwift2JavaGenerator {
             )
 
           case .foundationData, .essentialsData:
-            break
-
-          case .swiftJavaError:
-            // SwiftJavaError is a class — treat as arbitrary nominal type below
             break
 
           default:
