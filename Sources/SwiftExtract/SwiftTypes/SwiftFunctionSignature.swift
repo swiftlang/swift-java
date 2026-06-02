@@ -38,6 +38,11 @@ public struct SwiftFunctionSignature: Equatable {
     effectSpecifiers.contains(.throws)
   }
 
+  /// Whether any parameter is variadic (`T...`).
+  public var hasVariadicParams: Bool {
+    parameters.contains(where: \.isVariadic)
+  }
+
   public init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],
