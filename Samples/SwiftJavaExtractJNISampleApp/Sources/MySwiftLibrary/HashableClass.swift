@@ -12,18 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-public class EquatableClass: Equatable {
+public class HashableClass: Hashable {
   public let value: Int
   public init(value: Int) {
     self.value = value
   }
 
-  public static func == (lhs: EquatableClass, rhs: EquatableClass) -> Bool {
+  public static func == (lhs: HashableClass, rhs: HashableClass) -> Bool {
     lhs.value == rhs.value
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(value)
   }
 }
 
-public class EquatableSubclass: EquatableClass {
+public class HashableSubclass: HashableClass {
   public override init(value: Int) {
     super.init(value: value)
   }

@@ -19,10 +19,13 @@ import org.swift.swiftkit.core.SwiftArena;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashSet;
+import java.util.List;
+
 @SuppressWarnings({"AssertBetweenInconvertibleTypes", "EqualsWithItself"})
-public class EquatableTest {
+public class HashableTest {
     @Test
-    void genericStructType() {
+    void valueTypeEquals() {
         try (var arena = SwiftArena.ofConfined()) {
             var a = MyIDs.makeIntID(42, arena);
             var b = MyIDs.makeIntID(42, arena);
@@ -37,16 +40,50 @@ public class EquatableTest {
     }
 
     @Test
-    void classType() {
+    void referenceTypeEquals() {
         try (var arena = SwiftArena.ofConfined()) {
-            var a = EquatableClass.init(42, arena);
-            var b = EquatableSubclass.init(42, arena);
-            var c = EquatableSubclass.init(0, arena);
+            var a = HashableClass.init(42, arena);
+            var b = HashableSubclass.init(42, arena);
+            var c = HashableSubclass.init(0, arena);
             assertEquals(a, b);
             assertEquals(b, a);
             assertEquals(b, b);
             assertNotEquals(a, c);
             assertNotEquals(b, c);
+        }
+    }
+
+    @Test
+    void hashSetValueType() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var a = MyIDs.makeIntID(42, arena);
+            var b = MyIDs.makeIntID(42, arena);
+            var c = MyIDs.makeIntID(0, arena);
+            var set = new HashSet<>(List.of(
+                    a, b
+            ));
+            assertTrue(set.contains(a));
+            assertTrue(set.contains(b));
+            assertFalse(set.contains(c));
+            assertEquals(1, set.size());
+        }
+    }
+
+    @Test
+    void hashSetReferenceType() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var a = HashableClass.init(42, arena);
+            var b = HashableClass.init(42, arena);
+            var c = HashableSubclass.init(42, arena);
+            var d = HashableSubclass.init(0, arena);
+            var set = new HashSet<>(List.of(
+                    a, b, c
+            ));
+            assertTrue(set.contains(a));
+            assertTrue(set.contains(b));
+            assertTrue(set.contains(c));
+            assertFalse(set.contains(d));
+            assertEquals(1, set.size());
         }
     }
 }

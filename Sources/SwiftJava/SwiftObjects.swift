@@ -156,3 +156,18 @@ extension SwiftObjects {
     return perform(as: typeMetadata)
   }
 }
+
+public class HashableClass: Hashable {
+  public let value: Int
+  public init(value: Int) {
+    self.value = value
+  }
+
+  public static func == (lhs: HashableClass, rhs: HashableClass) -> Bool {
+    lhs.value == rhs.value
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(value)
+  }
+}
