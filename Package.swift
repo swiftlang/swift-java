@@ -351,7 +351,6 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "Logging", package: "swift-log"),
-        "SwiftJavaConfigurationShared",
       ],
       path: "Sources/SwiftExtract",
       resources: [

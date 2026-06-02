@@ -15,13 +15,12 @@
 import Foundation
 import Logging
 import SwiftIfConfig
-import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
 
 final class SwiftAnalysisVisitor {
   let translator: SwiftAnalyzer
-  var config: Configuration {
+  var config: any SwiftExtractConfiguration {
     self.translator.config
   }
 
@@ -186,8 +185,14 @@ final class SwiftAnalysisVisitor {
 
     switch node.name.tokenKind {
     case .binaryOperator, .prefixOperator, .postfixOperator:
-      self.log.debug("Skip importing: '\(node.qualifiedNameForDebug)'; Operators are not supported.")
-      return
+      // Operators are extracted as ordinary `.function`s only when the target
+      // opts in (other language code generators may map them to language
+      // constructs in a post-pass). Most targets (e.g. Java) cannot express
+      // Swift operators and skip them.
+      guard config.extractsOperators else {
+        self.log.debug("Skip importing: '\(node.qualifiedNameForDebug)'; Operators are not supported.")
+        return
+      }
     default:
       break
     }
@@ -720,13 +725,13 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
   /// the result on a per-decl basis (e.g. Java honors `@JavaExport` /
   /// `@JavaClass` here)
   func shouldExtract(
-    config: Configuration,
+    config: any SwiftExtractConfiguration,
     log: Logger,
     in parent: ExtractedNominalType?,
     decider: (any ExtractDecider)?
   ) -> Bool {
     let accessLevelPasses: Bool =
-      switch config.effectiveMinimumInputAccessLevelMode {
+      switch config.swiftExtractAccessLevel {
       case .public: self.isPublic(in: parent?.swiftNominal.syntax)
       case .package: self.isAtLeastPackage
       case .internal: self.isAtLeastInternal
@@ -744,7 +749,7 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
 
     if !accessLevelPasses {
       log.debug(
-        "Skip import '\(self.qualifiedNameForDebug)': not at least \(config.effectiveMinimumInputAccessLevelMode)"
+        "Skip import '\(self.qualifiedNameForDebug)': not at least \(config.swiftExtractAccessLevel)"
       )
     }
     return accessLevelPasses

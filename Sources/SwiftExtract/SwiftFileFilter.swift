@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaConfigurationShared
-
 // ==== -----------------------------------------------------------------------
 // MARK: Swift filter pattern classification
 
@@ -195,7 +193,7 @@ package func matchesTypeNameFilter(qualifiedName: String, pattern: String) -> Bo
 /// Only file-path patterns (containing `/`) and plain patterns (no `/` or `.`)
 /// are checked here. Type-name patterns are skipped — use
 /// `shouldExtractSwiftType` for those
-package func shouldExtractSwiftFile(relativePath: String, config: Configuration) -> Bool {
+package func shouldExtractSwiftFile(relativePath: String, config: any SwiftExtractConfiguration) -> Bool {
   if let includeFilters = config.swiftFilterInclude, !includeFilters.isEmpty {
     // Must match at least one file-level include pattern.
     // If all include patterns are type-name patterns, don't filter at file level
@@ -246,7 +244,7 @@ private func matchesFilePattern(relativePath: String, pattern: String) -> Bool {
 /// Only type-name patterns (containing `.`) and plain patterns (no `/` or `.`)
 /// are checked here. File-path patterns are skipped — use `shouldExtractSwiftFile`
 /// for those
-package func shouldExtractSwiftType(qualifiedName: String, config: Configuration) -> Bool {
+package func shouldExtractSwiftType(qualifiedName: String, config: any SwiftExtractConfiguration) -> Bool {
   if let includeFilters = config.swiftFilterInclude, !includeFilters.isEmpty {
     let typePatterns = includeFilters.filter { classifyPattern($0) != .filePath }
     if !typePatterns.isEmpty {

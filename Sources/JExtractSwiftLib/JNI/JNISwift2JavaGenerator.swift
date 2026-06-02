@@ -86,7 +86,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
     // If we are forced to write empty files, construct the expected outputs.
     // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
-    if translator.config.effectiveWriteEmptyFiles {
+    if config.effectiveWriteEmptyFiles {
       self.expectedOutputSwiftFileNames = Set(
         translator.inputs.compactMap { (input) -> String? in
           guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
@@ -117,7 +117,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       self.expectedOutputSwiftFileNames = []
     }
 
-    if translator.config.enableJavaCallbacks ?? false {
+    if config.enableJavaCallbacks ?? false {
       // We translate all the protocol wrappers
       // as we need them to know what protocols we can allow the user to implement themselves
       // in Java.

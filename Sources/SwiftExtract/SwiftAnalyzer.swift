@@ -15,7 +15,6 @@
 import Foundation
 import Logging
 import SwiftIfConfig
-import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
 
@@ -30,7 +29,7 @@ public final class SwiftAnalyzer {
 
   package var log: Logger
 
-  package let config: Configuration
+  package let config: any SwiftExtractConfiguration
 
   /// The build configuration used to resolve #if conditional compilation blocks.
   package let buildConfig: any BuildConfiguration
@@ -76,13 +75,14 @@ public final class SwiftAnalyzer {
   package let extractDecider: (any ExtractDecider)?
 
   public init(
-    config: Configuration,
+    config: any SwiftExtractConfiguration,
+    moduleName: String? = nil,
     extractDecider: (any ExtractDecider)? = nil
   ) {
-    guard let swiftModule = config.swiftModule else {
+    guard let swiftModule = moduleName ?? config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
-    self.log = Logger(label: "translator", logLevel: config.logLevel ?? .info)
+    self.log = Logger(label: "translator", logLevel: config.swiftExtractLogLevel ?? .info)
     self.config = config
     self.swiftModuleName = swiftModule
     self.extractDecider = extractDecider
@@ -150,13 +150,12 @@ extension SwiftAnalyzer {
   public static func analyze(
     sources: [(path: String, text: String)],
     moduleName: String,
-    config: Configuration? = nil,
+    config: (any SwiftExtractConfiguration)? = nil,
     sourceDependencies: SourceDependencies = SourceDependencies(),
     extractDecider: (any ExtractDecider)? = nil
   ) throws -> AnalysisResult {
-    var effectiveConfig = config ?? Configuration()
-    effectiveConfig.swiftModule = moduleName
-    let translator = SwiftAnalyzer(config: effectiveConfig, extractDecider: extractDecider)
+    let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
+    let translator = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)
     translator.sourceDependencies = sourceDependencies
     for source in sources {
       translator.add(filePath: source.path, text: source.text)

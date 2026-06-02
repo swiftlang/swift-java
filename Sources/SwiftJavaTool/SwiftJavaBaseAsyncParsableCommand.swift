@@ -183,7 +183,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
       config = Configuration()
     }
     // override configuration with options from command line
-    config.logLevel = command.logLevel
+    config.logLevel = LogLevel(command.logLevel)
     return config
   }
 }

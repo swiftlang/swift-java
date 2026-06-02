@@ -14,7 +14,6 @@
 
 import Logging
 import SwiftIfConfig
-import SwiftJavaConfigurationShared
 import SwiftParser
 import SwiftSyntax
 
@@ -100,7 +99,7 @@ extension SwiftSymbolTable {
     moduleName: String,
     _ inputFiles: some Collection<SwiftInputFile>,
     additionalInputFiles: [SwiftInputFile] = [],
-    config: Configuration?,
+    config: (any SwiftExtractConfiguration)?,
     sourceDependencies: SourceDependencies,
     buildConfig: any BuildConfiguration = .swiftExtractDefault,
     log: Logger? = nil,

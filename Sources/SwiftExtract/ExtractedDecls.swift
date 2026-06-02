@@ -151,6 +151,20 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     self.swiftNominal.qualifiedName
   }
 
+  /// The attribute list on this type's declaration (e.g. `@resultBuilder`),
+  /// for language targets that key behavior off attributes.
+  /// Mirrors `ExtractedFunc.swiftDecl` being public for the function case.
+  public var declAttributes: AttributeListSyntax {
+    swiftNominal.syntax.attributes
+  }
+
+  /// The declaration-group syntax for this type (protocol/struct/class/enum/
+  /// actor), for language targets that need to inspect members or clauses the
+  /// neutral model doesn't surface (e.g. a protocol's primary associated types).
+  public var declGroupSyntax: any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax & WithModifiersSyntax {
+    swiftNominal.syntax
+  }
+
   /// The output generic clause, e.g. "<Element>" for generic base types, "" for specialized or non-generic
   public var outputGenericClause: String {
     if isSpecialization {

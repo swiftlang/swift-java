@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftExtract
-import SwiftJavaConfigurationShared
 import Testing
 
 /// End-to-end tests that drive the analysis pipeline (Swift source →
@@ -244,7 +243,7 @@ struct AnalysisResultSuite {
   // MARK: Filter include/exclude
 
   @Test func swiftFilterExcludeSkipsMatchingTypes() throws {
-    var config = Configuration()
+    var config = DefaultSwiftExtractConfiguration()
     config.swiftFilterExclude = ["Skip*"]
 
     let result = try SwiftAnalyzer.analyze(

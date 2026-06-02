@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import SwiftJavaConfigurationShared
 import SwiftSyntax
 
 // Placeholder for some better logger, we could depend on swift-log
@@ -113,7 +112,19 @@ public struct Logger {
 }
 
 extension Logger {
-  public typealias Level = SwiftJavaConfigurationShared.LogLevel
+  /// Log verbosity levels for the analysis layer's lightweight logger.
+  ///
+  /// Language-neutral; language-specific configuration modules map their own
+  /// log-level enums onto this via `SwiftExtractConfiguration`.
+  public enum Level: String, Codable, Hashable, Sendable {
+    case trace
+    case debug
+    case info
+    case notice
+    case warning
+    case error
+    case critical
+  }
 }
 
 extension Logger.Level {
