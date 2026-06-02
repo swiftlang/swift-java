@@ -380,6 +380,10 @@ extension JNISwift2JavaGenerator {
           return false;
         }
 
+        public int hashCode() {
+          return SwiftObjects.hashCode(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+
         public java.lang.String toString() {
           return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }

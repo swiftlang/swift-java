@@ -135,4 +135,24 @@ extension SwiftObjects {
     }
     return perform(lhsType: lhsMetatype, rhsType: rhsMetatype)
   }
+
+  @JavaMethod
+  public static func hashCode(environment: UnsafeMutablePointer<JNIEnv?>!, selfPointer: Int64, selfTypePointer: Int64) -> Int32 {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
+      fatalError("selfType metadata address was null")
+    }
+    let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+    guard let typeMetadata = typeMetadata as? (any Hashable.Type) else {
+      // For value types, different instances may return different hash codes even if the values are same.
+      return Int32(truncatingIfNeeded: selfPointer.hashValue)
+    }
+
+    func perform<T: Hashable>(as type: T.Type) -> Int32 {
+      guard let self$ = UnsafeMutablePointer<T>(bitPattern: Int(selfPointer)) else {
+        fatalError("self memory address was null")
+      }
+      return Int32(truncatingIfNeeded: self$.pointee.hashValue)
+    }
+    return perform(as: typeMetadata)
+  }
 }
