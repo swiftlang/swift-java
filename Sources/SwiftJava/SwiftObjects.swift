@@ -98,4 +98,41 @@ extension SwiftObjects {
     let typeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
     return String(describing: typeMetadata)
   }
+
+  @JavaMethod
+  public static func equals(environment: UnsafeMutablePointer<JNIEnv?>!, lhsPointer: Int64, lhsTypePointer: Int64, rhsPointer: Int64, rhsTypePointer: Int64) -> Bool {
+    guard let lhsType$ = UnsafeRawPointer(bitPattern: Int(lhsTypePointer)) else {
+      fatalError("lhsType metadata address was null")
+    }
+    let lhsMetatype = unsafeBitCast(lhsType$, to: Any.Type.self)
+    guard let lhsMetatype = lhsMetatype as? (any Equatable.Type) else {
+      return false
+    }
+
+    guard let rhsType$ = UnsafeRawPointer(bitPattern: Int(rhsTypePointer)) else {
+      fatalError("rhsType metadata address was null")
+    }
+    let rhsMetatype = unsafeBitCast(rhsType$, to: Any.Type.self)
+    guard let rhsMetatype = rhsMetatype as? (any Equatable.Type) else {
+      return false
+    }
+
+    func perform<L: Equatable, R: Equatable>(lhsType: L.Type, rhsType: R.Type) -> Bool {
+      guard let lhs$ = UnsafeMutablePointer<L>(bitPattern: Int(lhsPointer)) else {
+        fatalError("lhs memory address was null")
+      }
+      guard let rhs$ = UnsafeMutablePointer<R>(bitPattern: Int(rhsPointer)) else {
+        fatalError("rhs memory address was null")
+      }
+      if lhsType == rhsType {
+        return lhs$.pointee == rhs$.pointee as! L
+      } else if let lhs = lhs$.pointee as? R {
+        return lhs == rhs$.pointee
+      } else if let rhs = rhs$.pointee as? L {
+        return lhs$.pointee == rhs
+      }
+      return false
+    }
+    return perform(lhsType: lhsMetatype, rhsType: rhsMetatype)
+  }
 }

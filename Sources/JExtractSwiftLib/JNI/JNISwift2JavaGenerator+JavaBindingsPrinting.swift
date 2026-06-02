@@ -373,6 +373,13 @@ extension JNISwift2JavaGenerator {
 
       printer.print(
         """
+        public boolean equals(Object obj) {
+          if (obj instanceof JNISwiftInstance rhs) {
+            return SwiftObjects.equals(this.$memoryAddress(), this.$typeMetadataAddress(), rhs.$memoryAddress(), rhs.$typeMetadataAddress());
+          }
+          return false;
+        }
+
         public java.lang.String toString() {
           return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
         }
