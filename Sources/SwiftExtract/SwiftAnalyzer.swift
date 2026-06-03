@@ -91,14 +91,26 @@ public final class SwiftAnalyzer {
       do {
         let data = try Data(contentsOf: URL(fileURLWithPath: staticBuildConfigPath))
         let decoder = JSONDecoder()
-        self.buildConfig = try decoder.decode(StaticBuildConfiguration.self, from: data)
+        let staticConfig = try decoder.decode(StaticBuildConfiguration.self, from: data)
+        self.buildConfig = SwiftAnalyzer.overlayingAvailableModules(staticConfig, config.availableImportModules)
         self.log.info("Using custom static build configuration from: \(staticBuildConfigPath)")
       } catch {
         fatalError("Failed to load static build configuration from '\(staticBuildConfigPath)': \(error)")
       }
     } else {
-      self.buildConfig = .swiftExtractDefault
+      self.buildConfig = SwiftAnalyzer.overlayingAvailableModules(.swiftExtractDefault, config.availableImportModules)
     }
+  }
+
+  /// Overlay the configured extra importable modules onto a base build config
+  /// (returns the base unchanged when none are configured).
+  private static func overlayingAvailableModules<Base: BuildConfiguration>(
+    _ base: Base,
+    _ availableImportModules: Set<String>
+  ) -> any BuildConfiguration {
+    availableImportModules.isEmpty
+      ? base
+      : ImportOverlayBuildConfiguration(base: base, availableImportModules: availableImportModules)
   }
 }
 

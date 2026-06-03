@@ -338,7 +338,9 @@ final class SwiftAnalysisVisitor {
       return
     }
 
-    if typeContext.swiftNominal.isGeneric && !typeContext.isSpecialization {
+    if typeContext.swiftNominal.isGeneric && !typeContext.isSpecialization
+      && !config.extractsGenericTypeInitializers
+    {
       log.debug("Skip Importing generic type initializer \(node.kind) '\(node.qualifiedNameForDebug)'")
       return
     }
