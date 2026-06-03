@@ -354,6 +354,9 @@ let package = Package(
       ],
       path: "Sources/SwiftExtract",
       resources: [
+        // Holds the `dummy.json` placeholder so SwiftPM emits a `Bundle.module`
+        // for this target. The real `static-build-config.json` is generated at
+        // build time by the `_StaticBuildConfigPlugin` build tool below.
         .process("Resources")
       ],
       swiftSettings: [
