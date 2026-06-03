@@ -29,4 +29,6 @@ public class SwiftObjects {
     public static native String toDebugString(long selfPointer, long selfTypePointer);
     public static native void destroy(long selfPointer, long selfTypePointer);
     public static native String typeDescription(long selfTypePointer);
+    public static native boolean equals(long lhsPointer, long lhsTypePointer, long rhsPointer, long rhsTypePointer);
+    public static native int hashCode(long selfPointer, long selfTypePointer);
 }
