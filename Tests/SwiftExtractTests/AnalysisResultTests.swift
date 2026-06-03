@@ -313,4 +313,118 @@ struct AnalysisResultSuite {
     #expect(result.extractedGlobalFuncs.isEmpty)
     #expect(result.extractedGlobalVariables.isEmpty)
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Configuration knobs
+
+  /// By default, initializers on an unspecialized generic type are NOT
+  /// extracted: the open generic isn't directly constructible, so swift-java
+  /// (and any caller leaving the knob at its default `false`) drops them.
+  @Test func unspecializedGenericInitializersAreSkippedByDefault() throws {
+    let result = try SwiftAnalyzer.analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct Tank<Fish> {
+            public init() {}
+            public init(capacity: Int) {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let tank = try #require(result.extractedTypes["Tank"])
+    #expect(tank.swiftNominal.isGeneric)
+    #expect(!tank.isSpecialization)
+    #expect(tank.initializers.isEmpty)
+  }
+
+  /// Opting into `extractsGenericTypeInitializers` keeps the base type's
+  /// initializers in the analysis result so post-analysis specializers can
+  /// clone them onto a concrete `Tank<Fish>`.
+  @Test func extractsGenericTypeInitializersKeepsBaseInitializers() throws {
+    var config = DefaultSwiftExtractConfiguration()
+    config.extractsGenericTypeInitializers = true
+
+    let result = try SwiftAnalyzer.analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct Tank<Fish> {
+            public init() {}
+            public init(capacity: Int) {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium",
+      config: config
+    )
+
+    let tank = try #require(result.extractedTypes["Tank"])
+    #expect(tank.swiftNominal.isGeneric)
+    #expect(!tank.isSpecialization)
+    #expect(tank.initializers.count == 2)
+  }
+
+  /// `#if canImport(<module>)` blocks are inactive by default for modules the
+  /// build configuration doesn't know about — the type guarded behind them
+  /// must not appear in the analysis result.
+  @Test func canImportGuardedDeclsAreSkippedWhenModuleNotAvailable() throws {
+    let result = try SwiftAnalyzer.analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct AlwaysHere {
+            public init() {}
+          }
+          #if canImport(MadeUpModule)
+          public struct OnlyWhenImportable {
+            public init() {}
+          }
+          #endif
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    #expect(result.extractedTypes["AlwaysHere"] != nil)
+    #expect(result.extractedTypes["OnlyWhenImportable"] == nil)
+  }
+
+  /// Adding the module to `availableImportModules` activates the
+  /// `#if canImport(<module>)` clause so its declarations are extracted.
+  @Test func availableImportModulesActivatesCanImportClause() throws {
+    var config = DefaultSwiftExtractConfiguration()
+    config.availableImportModules = ["MadeUpModule"]
+
+    let result = try SwiftAnalyzer.analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct AlwaysHere {
+            public init() {}
+          }
+          #if canImport(MadeUpModule)
+          public struct OnlyWhenImportable {
+            public init() {}
+          }
+          #endif
+          """
+        )
+      ],
+      moduleName: "Aquarium",
+      config: config
+    )
+
+    #expect(result.extractedTypes["AlwaysHere"] != nil)
+    #expect(result.extractedTypes["OnlyWhenImportable"] != nil)
+  }
 }

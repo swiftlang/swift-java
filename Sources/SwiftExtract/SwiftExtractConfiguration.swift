@@ -110,6 +110,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var swiftExtractAccessLevel: AccessLevelMode
   public var swiftExtractLogLevel: Logger.Level?
   public var extractsOperators: Bool
+  public var extractsGenericTypeInitializers: Bool
   public var availableImportModules: Set<String>
 
   public init(
@@ -117,6 +118,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     accessLevel: AccessLevelMode = .public,
     logLevel: Logger.Level? = nil,
     extractsOperators: Bool = false,
+    extractsGenericTypeInitializers: Bool = false,
     staticBuildConfigurationFile: String? = nil,
     swiftFilterInclude: [String]? = nil,
     swiftFilterExclude: [String]? = nil,
@@ -127,6 +129,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     self.swiftExtractAccessLevel = accessLevel
     self.swiftExtractLogLevel = logLevel
     self.extractsOperators = extractsOperators
+    self.extractsGenericTypeInitializers = extractsGenericTypeInitializers
     self.staticBuildConfigurationFile = staticBuildConfigurationFile
     self.swiftFilterInclude = swiftFilterInclude
     self.swiftFilterExclude = swiftFilterExclude
