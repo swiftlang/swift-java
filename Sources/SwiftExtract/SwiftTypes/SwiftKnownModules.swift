@@ -130,6 +130,11 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
   }
 
   public struct UUID {}
+
+  public struct URL {
+    public init?(string: String)
+    public var absoluteString: String { get }
+  }
   """
 
 private var foundationSourceFile: SourceFileSyntax {
