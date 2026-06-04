@@ -44,6 +44,11 @@ let package = Package(
     ),
 
     .library(
+      name: "SwiftExtractConfigurationShared",
+      targets: ["SwiftExtractConfigurationShared"]
+    ),
+
+    .library(
       name: "JavaUtil",
       targets: ["JavaUtil"]
     ),
@@ -276,7 +281,14 @@ let package = Package(
     ),
 
     .target(
-      name: "SwiftJavaConfigurationShared"
+      name: "SwiftJavaConfigurationShared",
+      dependencies: [
+        "SwiftExtractConfigurationShared"
+      ]
+    ),
+
+    .target(
+      name: "SwiftExtractConfigurationShared"
     ),
 
     .target(
@@ -351,6 +363,7 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "Logging", package: "swift-log"),
+        "SwiftExtractConfigurationShared",
       ],
       path: "Sources/SwiftExtract",
       resources: [

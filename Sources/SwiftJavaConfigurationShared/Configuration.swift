@@ -14,6 +14,13 @@
 
 import Foundation
 
+// In a real module build this resolves to a separate target. In plugin builds
+// the file is inlined (via symlink) alongside `AccessLevelMode.swift`, so the
+// module isn't a discoverable import — guard with canImport.
+#if canImport(SwiftExtractConfigurationShared)
+@_exported import SwiftExtractConfigurationShared
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // This file is only supposed to be edited in `Shared/` and must be symlinked //
 // from everywhere else! We cannot share dependencies with or between plugins //
@@ -62,8 +69,8 @@ public struct Configuration: Codable {
     writeEmptyFiles ?? false
   }
 
-  public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
-  public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {
+  public var minimumInputAccessLevelMode: AccessLevelMode?
+  public var effectiveMinimumInputAccessLevelMode: AccessLevelMode {
     minimumInputAccessLevelMode ?? .default
   }
 

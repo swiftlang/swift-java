@@ -18,16 +18,14 @@ import SwiftJavaConfigurationShared
 /// Bridges swift-java's `Configuration` onto the language-neutral
 /// `SwiftExtractConfiguration` surface consumed by `SwiftExtract`.
 ///
-/// Most members are satisfied directly by `Configuration`'s own properties; only
-/// the two enum-typed members need a mapping from swift-java's enums onto the
-/// neutral `AccessLevelMode` / `Logger.Level`.
+/// Most members are satisfied directly by `Configuration`'s own properties.
+/// `Configuration` shares `AccessLevelMode` with the analyzer (both pull it in
+/// from `SwiftExtractConfigurationShared`), so `swiftExtractAccessLevel` is a
+/// straight passthrough. Only `swiftExtractLogLevel` needs a mapping from
+/// swift-java's `LogLevel` onto the neutral `Logger.Level`.
 extension Configuration: SwiftExtractConfiguration {
   public var swiftExtractAccessLevel: AccessLevelMode {
-    switch effectiveMinimumInputAccessLevelMode {
-    case .public: .public
-    case .package: .package
-    case .internal: .internal
-    }
+    effectiveMinimumInputAccessLevelMode
   }
 
   public var swiftExtractLogLevel: SwiftExtract.Logger.Level? {

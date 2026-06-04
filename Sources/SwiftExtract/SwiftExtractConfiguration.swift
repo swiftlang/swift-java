@@ -12,16 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Minimum access level a declaration must have to be considered for extraction.
-///
-/// Language-neutral counterpart to a configuration's access-level setting. The
-/// concrete `Configuration` types in language layers (e.g. swift-java, or other
-/// language code generators) map their own enums onto this.
-public enum AccessLevelMode: String, Sendable {
-  case `public`
-  case `package`
-  case `internal`
-}
+@_exported import SwiftExtractConfigurationShared
 
 /// The configuration surface required by the language-neutral `SwiftExtract`
 /// analysis layer.
@@ -33,9 +24,14 @@ public enum AccessLevelMode: String, Sendable {
 /// (e.g. Java/JNI/FFM, or other language code generators) without pulling
 /// target-specific config types into `SwiftExtract`.
 ///
-/// The two enum-typed members use `swiftExtract`-prefixed names so a conforming
-/// type can keep its own, differently-typed `logLevel` /
-/// `effectiveMinimumInputAccessLevelMode` members without a name collision.
+/// `AccessLevelMode` lives in the small `SwiftExtractConfigurationShared`
+/// target so language-specific configuration shared modules (e.g.
+/// `SwiftJavaConfigurationShared`) can use the same enum directly without
+/// taking a dependency on SwiftSyntax.
+///
+/// The enum-typed `swiftExtractLogLevel` member uses a `swiftExtract`-prefixed
+/// name so a conforming type can keep its own, differently-typed `logLevel`
+/// member without a name collision.
 public protocol SwiftExtractConfiguration {
   /// Name of the Swift module being analyzed.
   var swiftModule: String? { get }
