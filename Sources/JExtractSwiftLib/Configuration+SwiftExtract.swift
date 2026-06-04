@@ -42,6 +42,11 @@ extension Configuration: SwiftExtractConfiguration {
     case .critical: return .critical
     }
   }
+
+  // swift-java targets Java, which cannot express Swift operators or
+  // construct open generic types directly: leave both knobs off
+  public var extractsOperators: Bool { false }
+  public var extractsGenericTypeInitializers: Bool { false }
 }
 
 extension LogLevel {

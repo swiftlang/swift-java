@@ -19,9 +19,9 @@ import SwiftParser
 import SwiftSyntax
 
 /// Drives the analysis of Swift source code into an `AnalysisResult` that
-/// downstream language generators (e.g. Java/JNI/FFM, others) can consume
+/// downstream language generators can consume.
 ///
-/// The analysis is language-neutral; language-specific extraction rules
+/// The analysis output is language-neutral; language-specific extraction rules
 /// (such as honoring Java's `@JavaExport` or skipping `@JavaClass`-wrapped
 /// types) are layered in via an optional `ExtractDecider`
 public final class SwiftAnalyzer {
@@ -157,8 +157,7 @@ extension SwiftAnalyzer {
   }
 
   /// Top-level convenience: run analysis on the given Swift sources and return
-  /// the resulting `AnalysisResult`. Useful for tests and for callers that only
-  /// need analysis (no code generation).
+  /// the resulting `AnalysisResult`.
   public static func analyze(
     sources: [(path: String, text: String)],
     moduleName: String,

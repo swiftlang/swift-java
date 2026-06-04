@@ -87,10 +87,6 @@ public protocol SwiftExtractConfiguration {
 }
 
 extension SwiftExtractConfiguration {
-  public var extractsOperators: Bool { false }
-
-  public var extractsGenericTypeInitializers: Bool { false }
-
   public var availableImportModules: Set<String> { [] }
 
   public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
