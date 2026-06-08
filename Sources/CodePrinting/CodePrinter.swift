@@ -21,10 +21,17 @@ import Foundation
 // ==== -----------------------------------------------------------------------
 // MARK: CodePrinter
 
-public struct CodePrinter {
+public struct CodePrinter: Sendable {
   public var contents: String = ""
 
   public var verbose: Bool = false
+
+  /// When true, terminators of `.sloc` append a `// function @ file:line`
+  /// trailer to each line. Useful for debugging the generator (the default,
+  /// preserving long-standing behavior). Downstream targets that compare
+  /// generated output against goldens can flip this off to get a clean
+  /// terminator equivalent to `.newLine`.
+  public var emitSourceLocations: Bool = true
 
   public var indentationDepth: Int = 0 {
     didSet {
@@ -49,7 +56,7 @@ public struct CodePrinter {
   }
 
   public var mode: PrintMode
-  public enum PrintMode {
+  public enum PrintMode: Sendable {
     case accumulateAll
     case flushToFileOnWrite
   }
@@ -167,7 +174,11 @@ public struct CodePrinter {
     }
 
     if terminator == .sloc {
-      append(" // \(function) @ \(file):\(line)\n")
+      if emitSourceLocations {
+        append(" // \(function) @ \(file):\(line)\n")
+      } else {
+        append("\n")
+      }
       atNewline = true
     } else {
       append(terminator.rawValue)
@@ -218,7 +229,7 @@ public struct CodePrinter {
 // ==== -----------------------------------------------------------------------
 // MARK: PrinterTerminator
 
-public enum PrinterTerminator: String {
+public enum PrinterTerminator: String, Sendable {
   case newLine = "\n"
   case space = " "
   case commaSpace = ", "

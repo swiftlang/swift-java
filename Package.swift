@@ -119,6 +119,11 @@ let package = Package(
     ),
 
     .library(
+      name: "CodePrinting",
+      targets: ["CodePrinting"]
+    ),
+
+    .library(
       name: "JExtractSwiftLib",
       targets: ["JExtractSwiftLib"]
     ),
