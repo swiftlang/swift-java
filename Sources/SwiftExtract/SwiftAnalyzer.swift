@@ -141,6 +141,26 @@ extension SwiftAnalyzer {
 
   /// Analyze registered inputs.
   package func analyze() throws {
+    try analyze(beforeProcessingDeferredExtensions: { _ in })
+  }
+
+  /// Analyze registered inputs, with a hook that fires after the per-source
+  /// walk has populated the specialization registry from any in-source
+  /// `typealias Alias = Base<Args…>` declarations, but before the deferred
+  /// constrained-extension queue is processed against those specializations.
+  ///
+  /// Downstream language code generators that drive specialization from a
+  /// configuration source other than Swift typealiases (e.g. swift-python's
+  /// `@Python typealias` post-pass, or a `specialize:` config entry that
+  /// names a base type by qualified name) can use the hook to call
+  /// `registerSpecialization(_:outputName:typeArgs:)` so their
+  /// specializations participate in `findMatchingSpecializations` alongside
+  /// the analyzer's natively-registered ones. Without the hook, those
+  /// specializations are registered too late and any constrained extension
+  /// (`extension Box where T == ConcreteT { … }`) is silently dropped.
+  package func analyze(
+    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
+  ) throws {
     prepareForTranslation()
 
     let visitor = SwiftAnalysisVisitor(translator: self)
@@ -150,10 +170,98 @@ extension SwiftAnalyzer {
       visitor.visit(inputFile: input)
     }
 
+    try hook(self)
+
     // Apply any specializations registered after their target types were visited
     visitor.applyPendingSpecializations()
 
     self.visitFoundationDeclsIfNeeded(with: visitor)
+  }
+
+  /// Register a specialization of a generic type, producing a concrete
+  /// extracted type as if an in-source `typealias \(outputName) = \(baseQualifiedName)<…>`
+  /// had been declared. Intended for use from the
+  /// `analyze(beforeProcessingDeferredExtensions:)` hook so deferred
+  /// constrained extensions can match against the registered specialization.
+  ///
+  /// The base type is resolved via the parsed module's symbol table by its
+  /// qualified name (e.g. `"Box"`, `"ATHM.Server"`); returns `nil` if the
+  /// base can't be found, isn't generic, or specialization fails.
+  ///
+  /// Note: this lower-cases over `ExtractedNominalType.specialize`, but unlike
+  /// the visitor's typealias path it accepts already-substituted argument
+  /// names (so callers that consume external configuration can pass the
+  /// concrete type names directly without going through TypeSyntax parsing).
+  @discardableResult
+  public func registerSpecialization(
+    baseQualifiedName: String,
+    outputName: String,
+    typeArgs: [String: String]
+  ) -> ExtractedNominalType? {
+    guard let base = resolveBaseForSpecialization(baseQualifiedName: baseQualifiedName) else {
+      return nil
+    }
+    let specialized: ExtractedNominalType
+    do {
+      specialized = try base.specialize(as: outputName, with: typeArgs)
+    } catch {
+      log.warning("Failed to specialize \(base.baseTypeName) as \(outputName): \(error)")
+      return nil
+    }
+    self.specializations[base, default: []].insert(specialized)
+    log.info("Registered specialization (external): \(outputName) = \(base.baseTypeName)<\(typeArgs.values.joined(separator: ", "))>")
+    return specialized
+  }
+
+  /// Like `registerSpecialization(baseQualifiedName:outputName:typeArgs:)`,
+  /// but accepts positional generic arguments (matched in order to the
+  /// base's generic parameters). Convenient for callers that scrape
+  /// `typealias Foo = Bar<Args…>` from source syntax and don't already
+  /// know the parameter names.
+  @discardableResult
+  public func registerSpecializationByPosition(
+    baseQualifiedName: String,
+    outputName: String,
+    positionalArgs: [String]
+  ) -> ExtractedNominalType? {
+    guard let base = resolveBaseForSpecialization(baseQualifiedName: baseQualifiedName) else {
+      return nil
+    }
+    var typeArgs: [String: String] = [:]
+    for (i, name) in base.genericParameterNames.enumerated() where i < positionalArgs.count {
+      typeArgs[name] = positionalArgs[i]
+    }
+    return registerSpecialization(
+      baseQualifiedName: baseQualifiedName,
+      outputName: outputName,
+      typeArgs: typeArgs
+    )
+  }
+
+  private func resolveBaseForSpecialization(baseQualifiedName: String) -> ExtractedNominalType? {
+    let parts = baseQualifiedName.split(separator: ".").map(String.init)
+    var resolvedBase: SwiftNominalTypeDeclaration? = nil
+    var parent: SwiftNominalTypeDeclaration? = nil
+    for part in parts {
+      let next = symbolTable.lookupType(part, parent: parent)
+      guard let next else { return nil }
+      parent = next
+      resolvedBase = next
+    }
+    guard let baseDecl = resolvedBase else { return nil }
+    let base = self.extractedNominalType(baseDecl)
+    guard let base, !base.genericParameterNames.isEmpty else { return nil }
+    return base
+  }
+
+  /// The set of effective output names of every specialization currently
+  /// registered with the analyzer (across all base types). Useful for
+  /// callers driving `registerSpecialization` from a hook to skip names
+  /// already registered by the analyzer's own typealias-decl visitor and
+  /// avoid double-registering distinct `ExtractedNominalType` instances
+  /// with the same effective output name.
+  public var registeredSpecializationNames: Set<String> {
+    Set(self.specializations.values.flatMap { $0 }.map(\.effectiveOutputName))
   }
 
   /// Top-level convenience: run analysis on the given Swift sources and return
@@ -165,13 +273,38 @@ extension SwiftAnalyzer {
     sourceDependencies: SourceDependencies = SourceDependencies(),
     extractDecider: (any ExtractDecider)? = nil
   ) throws -> AnalysisResult {
+    try analyze(
+      sources: sources,
+      moduleName: moduleName,
+      config: config,
+      sourceDependencies: sourceDependencies,
+      extractDecider: extractDecider,
+      beforeProcessingDeferredExtensions: { _ in }
+    )
+  }
+
+  /// Top-level convenience that accepts a hook fired after the per-source
+  /// walk and before deferred-constrained-extension processing. See
+  /// `SwiftAnalyzer.analyze(beforeProcessingDeferredExtensions:)` for the
+  /// hook semantics. Use to drive specialization registration from
+  /// downstream configuration sources (e.g. `@Python typealias`,
+  /// `specialize:` config entries) so deferred constrained extensions
+  /// match against those specializations before they're dropped.
+  public static func analyze(
+    sources: [(path: String, text: String)],
+    moduleName: String,
+    config: (any SwiftExtractConfiguration)? = nil,
+    sourceDependencies: SourceDependencies = SourceDependencies(),
+    extractDecider: (any ExtractDecider)? = nil,
+    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
+  ) throws -> AnalysisResult {
     let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
     let translator = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)
     translator.sourceDependencies = sourceDependencies
     for source in sources {
       translator.add(filePath: source.path, text: source.text)
     }
-    try translator.analyze()
+    try translator.analyze(beforeProcessingDeferredExtensions: hook)
     return translator.result
   }
 
