@@ -250,6 +250,8 @@ extension SwiftAnalyzer {
       buildConfig: self.buildConfig,
     )
     self.lookupContext = SwiftTypeLookupContext(symbolTable: symbolTable)
+    self.lookupContext.permitsUnresolvedTypeReferences =
+      self.config.permitsUnresolvedTypeReferences
   }
 
   /// Check if any of the imported decls uses a nominal declaration that satisfies

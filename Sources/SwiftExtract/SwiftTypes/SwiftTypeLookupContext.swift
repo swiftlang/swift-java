@@ -22,6 +22,12 @@ import SwiftSyntax
 public class SwiftTypeLookupContext {
   public var symbolTable: SwiftSymbolTable
 
+  /// When true, name lookups that fail to resolve fall back to a synthetic
+  /// unresolved nominal (via `SwiftSyntheticTypes.unresolvedNominal(_:)`)
+  /// instead of throwing. See
+  /// `SwiftExtractConfiguration.permitsUnresolvedTypeReferences`.
+  public var permitsUnresolvedTypeReferences: Bool = false
+
   private var typeDecls: [Syntax.ID: SwiftTypeDeclaration] = [:]
 
   /// Set of typealias syntax ids currently being resolved, to break

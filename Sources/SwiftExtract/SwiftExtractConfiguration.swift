@@ -78,12 +78,35 @@ public protocol SwiftExtractConfiguration {
   /// generator can declare its runtime module importable here). Default: empty.
   var availableImportModules: Set<String> { get }
 
+  /// Whether type lookups that can't resolve a name should fall back to a
+  /// synthetic, unresolved nominal reference instead of throwing
+  /// `TypeTranslationError.unknown`.
+  ///
+  /// `SwiftExtract` defaults to a strict policy: when a parameter, return
+  /// type, property type, etc. references a name the symbol table can't
+  /// resolve, the enclosing declaration is silently dropped (the analyzer
+  /// emits a `[warning] Failed to import: …` log line). That's correct for
+  /// Java/JNI, where the generator can't render code referencing an
+  /// unresolved Swift type.
+  ///
+  /// Other language code generators that treat unresolved names *symbolically*
+  /// (e.g. associated types in a protocol requirement before carrier
+  /// substitution; a property type that names a generic parameter to be
+  /// replaced during specialization; an external type the user is expected
+  /// to bridge by simple name) can opt-in by setting this `true`. Unresolved
+  /// names then become synthetic nominal types via
+  /// `SwiftSyntheticTypes.unresolvedNominal(_:)` so downstream passes can
+  /// substitute or recognize them. Default: false.
+  var permitsUnresolvedTypeReferences: Bool { get }
+
   /// Whether the given module name has stub declarations configured.
   func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool
 }
 
 extension SwiftExtractConfiguration {
   public var availableImportModules: Set<String> { [] }
+
+  public var permitsUnresolvedTypeReferences: Bool { false }
 
   public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
     importedModuleStubs?.keys.contains(moduleName) ?? false
@@ -104,6 +127,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var extractsOperators: Bool
   public var extractsGenericTypeInitializers: Bool
   public var availableImportModules: Set<String>
+  public var permitsUnresolvedTypeReferences: Bool
 
   public init(
     swiftModule: String? = nil,
@@ -115,7 +139,8 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     swiftFilterInclude: [String]? = nil,
     swiftFilterExclude: [String]? = nil,
     importedModuleStubs: [String: [String]]? = nil,
-    availableImportModules: Set<String> = []
+    availableImportModules: Set<String> = [],
+    permitsUnresolvedTypeReferences: Bool = false
   ) {
     self.swiftModule = swiftModule
     self.swiftExtractAccessLevel = accessLevel
@@ -127,5 +152,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     self.swiftFilterExclude = swiftFilterExclude
     self.importedModuleStubs = importedModuleStubs
     self.availableImportModules = availableImportModules
+    self.permitsUnresolvedTypeReferences = permitsUnresolvedTypeReferences
   }
 }
