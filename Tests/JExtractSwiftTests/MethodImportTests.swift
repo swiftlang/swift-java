@@ -674,35 +674,45 @@ final class MethodImportTests {
 
     public class OverloadedInitializerClass {
       public init(throwing: Swift.Bool) throws
-      public init?(doInit: Swift.Bool)
-    }
-    """
-
-  let overloadedFFMInitializers_interfaceFile =
-    """
-    import Swift
-
-    public class OverloadedFFMInitializerClass {
-      public init(throwing: Swift.Bool) throws
       public init(doInit: Swift.Bool)
     }
     """
 
-  @Test("FFM: Overloaded initializers with same Java signature get suffixed Java names")
-  func ffm_overloaded_initializers_suffixed() throws {
+  @Test("Overloaded initializers with same Java signature get suffixed Java names", arguments: [
+    JExtractGenerationMode.jni, .ffm
+  ])
+  func overloaded_initializers_suffixed(mode: JExtractGenerationMode) throws {
+    let expectedChunks: [String]
+    let notExpectedChunks: [String]
+
+    switch mode {
+    case .ffm:
+      expectedChunks = [
+        "public static OverloadedInitializerClass initThrowing(boolean throwing, AllocatingSwiftArena swiftArena)",
+        "public static OverloadedInitializerClass initDoInit(boolean doInit, AllocatingSwiftArena swiftArena)",
+      ]
+      notExpectedChunks = [
+        "public static OverloadedInitializerClass init(boolean throwing, AllocatingSwiftArena swiftArena)",
+        "public static OverloadedInitializerClass init(boolean doInit, AllocatingSwiftArena swiftArena)",
+      ]
+    case .jni:
+      expectedChunks = [
+        "public static OverloadedInitializerClass initThrowing(boolean throwing, SwiftArena swiftArena) throws Exception",
+        "public static OverloadedInitializerClass initDoInit(boolean doInit, SwiftArena swiftArena)",
+      ]
+      notExpectedChunks = [
+        "public static OverloadedInitializerClass init(boolean throwing, SwiftArena swiftArena)",
+        "public static OverloadedInitializerClass init(boolean doInit, SwiftArena swiftArena)",
+      ]
+    }
+
     try assertOutput(
-      input: overloadedFFMInitializers_interfaceFile,
-      .ffm,
+      input: overloadedInitializers_interfaceFile,
+      mode,
       .java,
       swiftModuleName: "OverloadModule",
-      expectedChunks: [
-        "public static OverloadedFFMInitializerClass initThrowing(boolean throwing, AllocatingSwiftArena swiftArena)",
-        "public static OverloadedFFMInitializerClass initDoInit(boolean doInit, AllocatingSwiftArena swiftArena)",
-      ],
-      notExpectedChunks: [
-        "public static OverloadedFFMInitializerClass init(boolean throwing, AllocatingSwiftArena swiftArena)",
-        "public static OverloadedFFMInitializerClass init(boolean doInit, AllocatingSwiftArena swiftArena)",
-      ]
+      expectedChunks: expectedChunks,
+      notExpectedChunks: notExpectedChunks
     )
   }
 
@@ -815,21 +825,4 @@ final class MethodImportTests {
     )
   }
 
-  @Test("JNI: Overloaded initializers with same Java signature get suffixed Java names")
-  func jni_overloaded_initializers_suffixed() throws {
-    try assertOutput(
-      input: overloadedInitializers_interfaceFile,
-      .jni,
-      .java,
-      swiftModuleName: "OverloadModule",
-      expectedChunks: [
-        "public static OverloadedInitializerClass initThrowing(boolean throwing, SwiftArena swiftArena) throws Exception",
-        "public static java.util.Optional<OverloadedInitializerClass> initDoInit(boolean doInit, SwiftArena swiftArena)",
-      ],
-      notExpectedChunks: [
-        "public static OverloadedInitializerClass init(boolean throwing, SwiftArena swiftArena)",
-        "public static java.util.Optional<OverloadedInitializerClass> init(boolean doInit, SwiftArena swiftArena)",
-      ]
-    )
-  }
 }
