@@ -311,3 +311,26 @@ jobs:
         run: ./scripts/run-linkage-test.sh
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+
+  verify-wrap-java-idempotent:
+    name: JavaStdlib wrap-java up-to-date
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk_vendor: ['corretto']
+    container:
+      image: swift:6.3-jammy
+    steps:
+      - uses: actions/checkout@v6
+      - name: Prepare CI Environment
+        uses: ./.github/actions/prepare_env
+      - name: Regenerate JavaStdlib wrappers
+        run: ./scripts/wrap-java-generate.sh
+      - name: Verify no changes (whitespace-tolerant)
+        run: |
+          if ! git diff --ignore-all-space --ignore-blank-lines --exit-code -- '**/generated/*.swift'; then
+            echo "::error::wrap-java output drifted. Re-run ./scripts/wrap-java-generate.sh and commit the result."
+            git diff --ignore-all-space --ignore-blank-lines -- '**/generated/*.swift'
+            exit 1
+          fi
