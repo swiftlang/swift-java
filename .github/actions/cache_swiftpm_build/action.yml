@@ -1,0 +1,35 @@
+name: 'Cache SwiftPM .build'
+description: |
+  Restore/save a SwiftPM .build directory keyed on Swift version, OS, a
+  job-specific tag, and a hash of the relevant package + source files.
+  Falls back to the most recent cache for the same job tag so SwiftPM
+  performs incremental compilation when sources change.
+
+inputs:
+  path:
+    description: 'Path to the .build directory to cache (e.g. .build, Benchmarks/.build)'
+    required: true
+  tag:
+    description: 'Short job-specific tag, used to keep different jobs from sharing caches'
+    required: true
+  hash-files:
+    description: 'Newline-separated glob patterns hashed into the cache key'
+    required: true
+  swift-version:
+    description: 'Swift version, used as part of the cache key (defaults to matrix.swift_version)'
+    required: true
+  os-version:
+    description: 'OS version, used as part of the cache key (defaults to matrix.os_version)'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Cache ${{ inputs.path }}
+      uses: actions/cache@v5
+      continue-on-error: true
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ runner.os }}-swift${{ inputs.swift-version }}-${{ inputs.os-version }}-build-${{ inputs.tag }}-${{ hashFiles(inputs.hash-files) }}
+        restore-keys: |
+          ${{ runner.os }}-swift${{ inputs.swift-version }}-${{ inputs.os-version }}-build-${{ inputs.tag }}-
