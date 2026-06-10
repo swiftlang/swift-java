@@ -678,9 +678,12 @@ final class MethodImportTests {
     }
     """
 
-  @Test("Overloaded initializers with same Java signature get suffixed Java names", arguments: [
-    JExtractGenerationMode.jni, .ffm
-  ])
+  @Test(
+    "Overloaded initializers with same Java signature get suffixed Java names",
+    arguments: [
+      JExtractGenerationMode.jni, .ffm,
+    ]
+  )
   func overloaded_initializers_suffixed(mode: JExtractGenerationMode) throws {
     let expectedChunks: [String]
     let notExpectedChunks: [String]
