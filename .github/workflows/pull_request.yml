@@ -49,7 +49,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-docs-
       - name: Swift Build
-        run: swift build --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+        run: swift build
       - name: Run documentation check
         run: ./.github/scripts/validate_docs.sh
 
@@ -153,7 +153,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-benchmarks-
       - name: Swift Benchmarks
-        run: swift package --package-path Benchmarks/ --disable-experimental-prebuilts benchmark  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
+        run: swift package --package-path Benchmarks/ benchmark
 
   test-swift:
     name: Test (Swift) (${{ matrix.os_version }} swift:${{ matrix.swift_version }} jdk:${{matrix.jdk_vendor}})
