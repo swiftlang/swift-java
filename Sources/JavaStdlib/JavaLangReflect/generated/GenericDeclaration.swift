@@ -4,14 +4,14 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.GenericDeclaration")
 public struct GenericDeclaration {
-  /// Java method `getTypeParameters`.
+  /// Java method `getAnnotation`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.reflect.TypeVariable<?>[] java.lang.reflect.GenericDeclaration.getTypeParameters()
+  /// public abstract <T extends java.lang.annotation.Annotation> T java.lang.reflect.AnnotatedElement.getAnnotation(java.lang.Class<T>)
   /// ```
-  @JavaMethod
-  public func getTypeParameters() -> [TypeVariable<JavaObject>?]
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
+  public func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
   /// Java method `isAnnotationPresent`.
   ///
@@ -22,14 +22,14 @@ public struct GenericDeclaration {
   @JavaMethod
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
 
-  /// Java method `getAnnotation`.
+  /// Java method `getAnnotations`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract <T extends java.lang.annotation.Annotation> T java.lang.reflect.AnnotatedElement.getAnnotation(java.lang.Class<T>)
+  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedElement.getAnnotations()
   /// ```
-  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
-  public func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
+  @JavaMethod
+  public func getAnnotations() -> [Annotation?]
 
   /// Java method `getAnnotationsByType`.
   ///
@@ -40,15 +40,6 @@ public struct GenericDeclaration {
   @JavaMethod
   public func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
-  /// Java method `getAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedElement.getAnnotations()
-  /// ```
-  @JavaMethod
-  public func getAnnotations() -> [Annotation?]
-
   /// Java method `getDeclaredAnnotation`.
   ///
   /// ### Java method signature
@@ -57,6 +48,15 @@ public struct GenericDeclaration {
   /// ```
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   public func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
+
+  /// Java method `getDeclaredAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedElement.getDeclaredAnnotations()
+  /// ```
+  @JavaMethod
+  public func getDeclaredAnnotations() -> [Annotation?]
 
   /// Java method `getDeclaredAnnotationsByType`.
   ///
@@ -67,12 +67,12 @@ public struct GenericDeclaration {
   @JavaMethod
   public func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
-  /// Java method `getDeclaredAnnotations`.
+  /// Java method `getTypeParameters`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedElement.getDeclaredAnnotations()
+  /// public abstract java.lang.reflect.TypeVariable<?>[] java.lang.reflect.GenericDeclaration.getTypeParameters()
   /// ```
   @JavaMethod
-  public func getDeclaredAnnotations() -> [Annotation?]
+  public func getTypeParameters() -> [TypeVariable<JavaObject>?]
 }

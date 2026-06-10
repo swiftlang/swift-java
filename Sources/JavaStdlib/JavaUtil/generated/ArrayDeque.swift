@@ -7,67 +7,13 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   public typealias E = ArrayDeque_E
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
-
-  @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
+  @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
   @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
-
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.remove()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func remove() -> E!
-
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.ArrayDeque.remove(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func remove(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `size`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.util.ArrayDeque.size()
-  /// ```
-  @JavaMethod
-  open func size() -> Int32
-
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.ArrayDeque<E> java.util.ArrayDeque.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> ArrayDeque<E>!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.ArrayDeque.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
-  /// Java method `isEmpty`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.ArrayDeque.isEmpty()
-  /// ```
-  @JavaMethod
-  open func isEmpty() -> Bool
 
   /// Java method `add`.
   ///
@@ -78,42 +24,6 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func add(_ arg0: E?) -> Bool
 
-  /// Java method `toArray`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <T> T[] java.util.ArrayDeque.toArray(T[])
-  /// ```
-  @JavaMethod
-  open func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
-
-  /// Java method `toArray`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object[] java.util.ArrayDeque.toArray()
-  /// ```
-  @JavaMethod
-  open func toArray() -> [JavaObject?]
-
-  /// Java method `iterator`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.Iterator<E> java.util.ArrayDeque.iterator()
-  /// ```
-  @JavaMethod
-  open func iterator() -> JavaIterator<E>!
-
-  /// Java method `contains`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.ArrayDeque.contains(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func contains(_ arg0: JavaObject?) -> Bool
-
   /// Java method `addAll`.
   ///
   /// ### Java method signature
@@ -122,42 +32,6 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func addAll(_ arg0: JavaCollection<E>?) -> Bool
-
-  /// Java method `peek`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.peek()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func peek() -> E!
-
-  /// Java method `getFirst`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.getFirst()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func getFirst() -> E!
-
-  /// Java method `getLast`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.getLast()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func getLast() -> E!
-
-  /// Java method `element`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.element()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func element() -> E!
 
   /// Java method `addFirst`.
   ///
@@ -177,50 +51,77 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func addLast(_ arg0: E?)
 
-  /// Java method `removeFirst`.
+  /// Java method `clear`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public E java.util.ArrayDeque.removeFirst()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func removeFirst() -> E!
-
-  /// Java method `removeLast`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.removeLast()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func removeLast() -> E!
-
-  /// Java method `removeAll`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.ArrayDeque.removeAll(java.util.Collection<?>)
+  /// public void java.util.ArrayDeque.clear()
   /// ```
   @JavaMethod
-  open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func clear()
 
-  /// Java method `retainAll`.
+  /// Java method `contains`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.ArrayDeque.retainAll(java.util.Collection<?>)
+  /// public boolean java.util.ArrayDeque.contains(java.lang.Object)
   /// ```
   @JavaMethod
-  open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+  open func contains(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `poll`.
+  /// Java method `descendingIterator`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public E java.util.ArrayDeque.poll()
+  /// public java.util.Iterator<E> java.util.ArrayDeque.descendingIterator()
+  /// ```
+  @JavaMethod
+  open func descendingIterator() -> JavaIterator<E>!
+
+  /// Java method `element`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.element()
   /// ```
   @JavaMethod(typeErasedResult: "E!")
-  open func poll() -> E!
+  open func element() -> E!
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.isEmpty()
+  /// ```
+  @JavaMethod
+  open func isEmpty() -> Bool
+
+  /// Java method `getFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.getFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func getFirst() -> E!
+
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.ArrayDeque.iterator()
+  /// ```
+  @JavaMethod
+  open func iterator() -> JavaIterator<E>!
+
+  /// Java method `getLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.getLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func getLast() -> E!
 
   /// Java method `offer`.
   ///
@@ -231,23 +132,59 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func offer(_ arg0: E?) -> Bool
 
-  /// Java method `push`.
+  /// Java method `offerFirst`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.util.ArrayDeque.push(E)
+  /// public boolean java.util.ArrayDeque.offerFirst(E)
   /// ```
   @JavaMethod
-  open func push(_ arg0: E?)
+  open func offerFirst(_ arg0: E?) -> Bool
 
-  /// Java method `pop`.
+  /// Java method `offerLast`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public E java.util.ArrayDeque.pop()
+  /// public boolean java.util.ArrayDeque.offerLast(E)
+  /// ```
+  @JavaMethod
+  open func offerLast(_ arg0: E?) -> Bool
+
+  /// Java method `peek`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.peek()
   /// ```
   @JavaMethod(typeErasedResult: "E!")
-  open func pop() -> E!
+  open func peek() -> E!
+
+  /// Java method `peekFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.peekFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func peekFirst() -> E!
+
+  /// Java method `peekLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.peekLast()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func peekLast() -> E!
+
+  /// Java method `poll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.poll()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func poll() -> E!
 
   /// Java method `pollFirst`.
   ///
@@ -267,23 +204,59 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod(typeErasedResult: "E!")
   open func pollLast() -> E!
 
-  /// Java method `offerLast`.
+  /// Java method `pop`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.ArrayDeque.offerLast(E)
-  /// ```
-  @JavaMethod
-  open func offerLast(_ arg0: E?) -> Bool
-
-  /// Java method `peekFirst`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.peekFirst()
+  /// public E java.util.ArrayDeque.pop()
   /// ```
   @JavaMethod(typeErasedResult: "E!")
-  open func peekFirst() -> E!
+  open func pop() -> E!
+
+  /// Java method `push`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.ArrayDeque.push(E)
+  /// ```
+  @JavaMethod
+  open func push(_ arg0: E?)
+
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.remove()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func remove() -> E!
+
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.remove(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func remove(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `removeAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.ArrayDeque.removeAll(java.util.Collection<?>)
+  /// ```
+  @JavaMethod
+  open func removeAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+
+  /// Java method `removeFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.ArrayDeque.removeFirst()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func removeFirst() -> E!
 
   /// Java method `removeFirstOccurrence`.
   ///
@@ -294,23 +267,14 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func removeFirstOccurrence(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `offerFirst`.
+  /// Java method `removeLast`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.ArrayDeque.offerFirst(E)
-  /// ```
-  @JavaMethod
-  open func offerFirst(_ arg0: E?) -> Bool
-
-  /// Java method `peekLast`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.ArrayDeque.peekLast()
+  /// public E java.util.ArrayDeque.removeLast()
   /// ```
   @JavaMethod(typeErasedResult: "E!")
-  open func peekLast() -> E!
+  open func removeLast() -> E!
 
   /// Java method `removeLastOccurrence`.
   ///
@@ -321,12 +285,48 @@ open class ArrayDeque<ArrayDeque_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func removeLastOccurrence(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `descendingIterator`.
+  /// Java method `retainAll`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.util.Iterator<E> java.util.ArrayDeque.descendingIterator()
+  /// public boolean java.util.ArrayDeque.retainAll(java.util.Collection<?>)
   /// ```
   @JavaMethod
-  open func descendingIterator() -> JavaIterator<E>!
+  open func retainAll(_ arg0: JavaCollection<JavaObject>?) -> Bool
+
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.ArrayDeque.size()
+  /// ```
+  @JavaMethod
+  open func size() -> Int32
+
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public <T> T[] java.util.ArrayDeque.toArray(T[])
+  /// ```
+  @JavaMethod
+  open func toArray<T: AnyJavaObject>(_ arg0: [T?]) -> [T?]
+
+  /// Java method `toArray`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object[] java.util.ArrayDeque.toArray()
+  /// ```
+  @JavaMethod
+  open func toArray() -> [JavaObject?]
+
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.ArrayDeque<E> java.util.ArrayDeque.clone()
+  /// ```
+  @JavaMethod
+  open override func clone() -> ArrayDeque<E>!
 }

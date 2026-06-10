@@ -5,15 +5,6 @@ import SwiftJavaJNICore
 public struct JavaIterator<JavaIterator_E: AnyJavaObject> {
   public typealias E = JavaIterator_E
 
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default void java.util.Iterator.remove()
-  /// ```
-  @JavaMethod
-  public func remove()
-
   /// Java method `hasNext`.
   ///
   /// ### Java method signature
@@ -31,4 +22,13 @@ public struct JavaIterator<JavaIterator_E: AnyJavaObject> {
   /// ```
   @JavaMethod(typeErasedResult: "E!")
   public func next() -> E!
+
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default void java.util.Iterator.remove()
+  /// ```
+  @JavaMethod
+  public func remove()
 }

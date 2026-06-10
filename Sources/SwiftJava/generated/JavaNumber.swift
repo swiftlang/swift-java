@@ -15,14 +15,23 @@ open class JavaNumber: JavaObject {
   @JavaMethod
   open func byteValue() -> Int8
 
-  /// Java method `shortValue`.
+  /// Java method `doubleValue`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public short java.lang.Number.shortValue()
+  /// public abstract double java.lang.Number.doubleValue()
   /// ```
   @JavaMethod
-  open func shortValue() -> Int16
+  open func doubleValue() -> Double
+
+  /// Java method `floatValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract float java.lang.Number.floatValue()
+  /// ```
+  @JavaMethod
+  open func floatValue() -> Float
 
   /// Java method `intValue`.
   ///
@@ -42,21 +51,12 @@ open class JavaNumber: JavaObject {
   @JavaMethod
   open func longValue() -> Int64
 
-  /// Java method `floatValue`.
+  /// Java method `shortValue`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract float java.lang.Number.floatValue()
+  /// public short java.lang.Number.shortValue()
   /// ```
   @JavaMethod
-  open func floatValue() -> Float
-
-  /// Java method `doubleValue`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract double java.lang.Number.doubleValue()
-  /// ```
-  @JavaMethod
-  open func doubleValue() -> Double
+  open func shortValue() -> Int16
 }

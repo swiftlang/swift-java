@@ -2,35 +2,27 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<Reader> {
+  /// Java method `nullReader`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.io.Reader java.io.Reader.nullReader()
+  /// ```
+  @JavaStaticMethod
+  public func nullReader() -> Reader!
+
+  /// Java method `of`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.io.Reader java.io.Reader.of(java.lang.CharSequence)
+  /// ```
+  @JavaStaticMethod
+  public func of(_ arg0: CharSequence?) -> Reader!
+}
 @JavaClass("java.io.Reader", implements: Readable.self, Closeable.self)
 open class Reader: JavaObject {
-  /// Java method `ready`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.io.Reader.ready() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func ready() throws -> Bool
-
-  /// Java method `readAllAsString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.io.Reader.readAllAsString() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func readAllAsString() throws -> String
-
-  /// Java method `reset`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.io.Reader.reset() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func reset() throws
-
   /// Java method `close`.
   ///
   /// ### Java method signature
@@ -48,6 +40,15 @@ open class Reader: JavaObject {
   /// ```
   @JavaMethod
   open func mark(_ arg0: Int32) throws
+
+  /// Java method `markSupported`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.Reader.markSupported()
+  /// ```
+  @JavaMethod
+  open func markSupported() -> Bool
 
   /// Java method `read`.
   ///
@@ -76,14 +77,41 @@ open class Reader: JavaObject {
   @JavaMethod
   open func read(_ arg0: [UInt16]) throws -> Int32
 
-  /// Java method `transferTo`.
+  /// Java method `readAllAsString`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public long java.io.Reader.transferTo(java.io.Writer) throws java.io.IOException
+  /// public java.lang.String java.io.Reader.readAllAsString() throws java.io.IOException
   /// ```
   @JavaMethod
-  open func transferTo(_ arg0: Writer?) throws -> Int64
+  open func readAllAsString() throws -> String
+
+  /// Java method `readAllLines`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.List<java.lang.String> java.io.Reader.readAllLines() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func readAllLines() throws -> List<JavaString>!
+
+  /// Java method `ready`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.Reader.ready() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func ready() throws -> Bool
+
+  /// Java method `reset`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.Reader.reset() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func reset() throws
 
   /// Java method `skip`.
   ///
@@ -94,40 +122,12 @@ open class Reader: JavaObject {
   @JavaMethod
   open func skip(_ arg0: Int64) throws -> Int64
 
-  /// Java method `markSupported`.
+  /// Java method `transferTo`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.io.Reader.markSupported()
+  /// public long java.io.Reader.transferTo(java.io.Writer) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func markSupported() -> Bool
-
-  /// Java method `readAllLines`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.List<java.lang.String> java.io.Reader.readAllLines() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func readAllLines() throws -> List<JavaString>!
-}
-extension JavaClass<Reader> {
-  /// Java method `nullReader`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.io.Reader java.io.Reader.nullReader()
-  /// ```
-  @JavaStaticMethod
-  public func nullReader() -> Reader!
-
-  /// Java method `of`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.io.Reader java.io.Reader.of(java.lang.CharSequence)
-  /// ```
-  @JavaStaticMethod
-  public func of(_ arg0: CharSequence?) -> Reader!
+  open func transferTo(_ arg0: Writer?) throws -> Int64
 }

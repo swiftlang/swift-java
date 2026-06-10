@@ -4,14 +4,14 @@ import SwiftJavaJNICore
 
 @JavaInterface("org.swift.swiftkit.core.JNISwiftInstance", extends: JavaSwiftInstance.self)
 public struct JavaJNISwiftInstance {
-  /// Java method `$typeMetadataAddress`.
+  /// Java method `$ensureAlive`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract long org.swift.swiftkit.core.JNISwiftInstance.$typeMetadataAddress()
+  /// public default void org.swift.swiftkit.core.SwiftInstance.$ensureAlive()
   /// ```
-  @JavaMethod("$typeMetadataAddress")
-  public func _typeMetadataAddress() -> Int64
+  @JavaMethod("$ensureAlive")
+  public func _ensureAlive()
 
   /// Java method `$memoryAddress`.
   ///
@@ -22,12 +22,12 @@ public struct JavaJNISwiftInstance {
   @JavaMethod("$memoryAddress")
   public func _memoryAddress() -> Int64
 
-  /// Java method `$ensureAlive`.
+  /// Java method `$typeMetadataAddress`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public default void org.swift.swiftkit.core.SwiftInstance.$ensureAlive()
+  /// public abstract long org.swift.swiftkit.core.JNISwiftInstance.$typeMetadataAddress()
   /// ```
-  @JavaMethod("$ensureAlive")
-  public func _ensureAlive()
+  @JavaMethod("$typeMetadataAddress")
+  public func _typeMetadataAddress() -> Int64
 }

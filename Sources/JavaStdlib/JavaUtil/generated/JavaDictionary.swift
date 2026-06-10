@@ -11,6 +11,51 @@ open class JavaDictionary<JavaDictionary_K: AnyJavaObject, JavaDictionary_V: Any
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
+  /// Java method `elements`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.Enumeration<V> java.util.Dictionary.elements()
+  /// ```
+  @JavaMethod
+  open func elements() -> Enumeration<V>!
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.Dictionary.isEmpty()
+  /// ```
+  @JavaMethod
+  open func isEmpty() -> Bool
+
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract V java.util.Dictionary.get(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func get(_ arg0: JavaObject?) -> V!
+
+  /// Java method `keys`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.util.Enumeration<K> java.util.Dictionary.keys()
+  /// ```
+  @JavaMethod
+  open func keys() -> Enumeration<K>!
+
+  /// Java method `put`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract V java.util.Dictionary.put(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func put(_ arg0: K?, _ arg1: V?) -> V!
+
   /// Java method `remove`.
   ///
   /// ### Java method signature
@@ -28,49 +73,4 @@ open class JavaDictionary<JavaDictionary_K: AnyJavaObject, JavaDictionary_V: Any
   /// ```
   @JavaMethod
   open func size() -> Int32
-
-  /// Java method `get`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract V java.util.Dictionary.get(java.lang.Object)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func get(_ arg0: JavaObject?) -> V!
-
-  /// Java method `put`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract V java.util.Dictionary.put(K,V)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func put(_ arg0: K?, _ arg1: V?) -> V!
-
-  /// Java method `isEmpty`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract boolean java.util.Dictionary.isEmpty()
-  /// ```
-  @JavaMethod
-  open func isEmpty() -> Bool
-
-  /// Java method `elements`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.util.Enumeration<V> java.util.Dictionary.elements()
-  /// ```
-  @JavaMethod
-  open func elements() -> Enumeration<V>!
-
-  /// Java method `keys`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.util.Enumeration<K> java.util.Dictionary.keys()
-  /// ```
-  @JavaMethod
-  open func keys() -> Enumeration<K>!
 }

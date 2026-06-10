@@ -2,6 +2,16 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<JavaSwiftArena> {
+  /// Java method `ofAuto`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static org.swift.swiftkit.core.SwiftArena org.swift.swiftkit.core.SwiftArena.ofAuto()
+  /// ```
+  @JavaStaticMethod
+  public func ofAuto() -> JavaSwiftArena!
+}
 @JavaInterface("org.swift.swiftkit.core.SwiftArena")
 public struct JavaSwiftArena {
   /// Java method `register`.
@@ -12,14 +22,4 @@ public struct JavaSwiftArena {
   /// ```
   @JavaMethod
   public func register(_ arg0: JavaSwiftInstance?)
-}
-extension JavaClass<JavaSwiftArena> {
-  /// Java method `ofAuto`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static org.swift.swiftkit.core.SwiftArena org.swift.swiftkit.core.SwiftArena.ofAuto()
-  /// ```
-  @JavaStaticMethod
-  public func ofAuto() -> JavaSwiftArena!
 }

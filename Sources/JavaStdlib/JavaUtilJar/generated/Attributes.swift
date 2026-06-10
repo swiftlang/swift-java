@@ -2,16 +2,97 @@
 import SwiftJava
 import SwiftJavaJNICore
 
-@JavaClass("java.util.jar.Attributes")
+@JavaClass("java.util.jar.Attributes", implements: JavaMap<JavaObject, JavaObject>.self)
 open class Attributes: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: Attributes?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Attributes?, environment: JNIEnvironment? = nil)
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.jar.Attributes.clear()
+  /// ```
+  @JavaMethod
+  open func clear()
+
+  /// Java method `containsKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.jar.Attributes.containsKey(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func containsKey(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `containsValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.jar.Attributes.containsValue(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func containsValue(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.jar.Attributes.isEmpty()
+  /// ```
+  @JavaMethod
+  open func isEmpty() -> Bool
+
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.jar.Attributes.get(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func get(_ arg0: JavaObject?) -> JavaObject!
+
+  /// Java method `keySet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Set<java.lang.Object> java.util.jar.Attributes.keySet()
+  /// ```
+  @JavaMethod
+  open func keySet() -> JavaSet<JavaObject>!
+
+  /// Java method `put`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.jar.Attributes.put(java.lang.Object,java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
+
+  /// Java method `putAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.jar.Attributes.putAll(java.util.Map<?, ?>)
+  /// ```
+  @JavaMethod
+  open func putAll(_ arg0: JavaMap<JavaObject, JavaObject>?)
+
+  /// Java method `putValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.jar.Attributes.putValue(java.lang.String,java.lang.String)
+  /// ```
+  @JavaMethod
+  open func putValue(_ arg0: String, _ arg1: String) -> String
 
   /// Java method `remove`.
   ///
@@ -31,69 +112,6 @@ open class Attributes: JavaObject {
   @JavaMethod
   open func size() -> Int32
 
-  /// Java method `get`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.jar.Attributes.get(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func get(_ arg0: JavaObject?) -> JavaObject!
-
-  /// Java method `put`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.jar.Attributes.put(java.lang.Object,java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func put(_ arg0: JavaObject?, _ arg1: JavaObject?) -> JavaObject!
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.jar.Attributes.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `values`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.Collection<java.lang.Object> java.util.jar.Attributes.values()
-  /// ```
-  @JavaMethod
-  open func values() -> JavaCollection<JavaObject>!
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.util.jar.Attributes.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.jar.Attributes.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> JavaObject!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.jar.Attributes.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
   /// Java method `getValue`.
   ///
   /// ### Java method signature
@@ -112,50 +130,99 @@ open class Attributes: JavaObject {
   @JavaMethod
   open func getValue(_ arg0: Attributes.Name?) -> String
 
-  /// Java method `isEmpty`.
+  /// Java method `values`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.jar.Attributes.isEmpty()
+  /// public java.util.Collection<java.lang.Object> java.util.jar.Attributes.values()
   /// ```
   @JavaMethod
-  open func isEmpty() -> Bool
+  open func values() -> JavaCollection<JavaObject>!
 
-  /// Java method `keySet`.
+  /// Java method `clone`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.util.Set<java.lang.Object> java.util.jar.Attributes.keySet()
+  /// public java.lang.Object java.util.jar.Attributes.clone()
   /// ```
   @JavaMethod
-  open func keySet() -> JavaSet<JavaObject>!
+  open override func clone() -> JavaObject!
 
-  /// Java method `containsValue`.
+  /// Java method `equals`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.jar.Attributes.containsValue(java.lang.Object)
+  /// public boolean java.util.jar.Attributes.equals(java.lang.Object)
   /// ```
   @JavaMethod
-  open func containsValue(_ arg0: JavaObject?) -> Bool
+  open override func equals(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `containsKey`.
+  /// Java method `hashCode`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.util.jar.Attributes.containsKey(java.lang.Object)
+  /// public int java.util.jar.Attributes.hashCode()
   /// ```
   @JavaMethod
-  open func containsKey(_ arg0: JavaObject?) -> Bool
+  open override func hashCode() -> Int32
+}
+extension JavaClass<Attributes.Name> {
+  @JavaStaticField(isFinal: true)
+  public var CLASS_PATH: Attributes.Name!
 
-  /// Java method `putValue`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.util.jar.Attributes.putValue(java.lang.String,java.lang.String)
-  /// ```
-  @JavaMethod
-  open func putValue(_ arg0: String, _ arg1: String) -> String
+  @JavaStaticField(isFinal: true)
+  public var CONTENT_TYPE: Attributes.Name!
+
+  @available(*, deprecated)
+  @JavaStaticField(isFinal: true)
+  public var EXTENSION_INSTALLATION: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var EXTENSION_LIST: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var EXTENSION_NAME: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var IMPLEMENTATION_TITLE: Attributes.Name!
+
+  @available(*, deprecated)
+  @JavaStaticField(isFinal: true)
+  public var IMPLEMENTATION_URL: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var IMPLEMENTATION_VENDOR: Attributes.Name!
+
+  @available(*, deprecated)
+  @JavaStaticField(isFinal: true)
+  public var IMPLEMENTATION_VENDOR_ID: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var IMPLEMENTATION_VERSION: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var MAIN_CLASS: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var MANIFEST_VERSION: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var MULTI_RELEASE: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var SEALED: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var SIGNATURE_VERSION: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var SPECIFICATION_TITLE: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var SPECIFICATION_VENDOR: Attributes.Name!
+
+  @JavaStaticField(isFinal: true)
+  public var SPECIFICATION_VERSION: Attributes.Name!
 }
 extension Attributes {
   @JavaClass("java.util.jar.Attributes$Name")
@@ -172,15 +239,6 @@ extension Attributes {
     @JavaMethod
     open override func equals(_ arg0: JavaObject?) -> Bool
 
-    /// Java method `toString`.
-    ///
-    /// ### Java method signature
-    /// ```java
-    /// public java.lang.String java.util.jar.Attributes$Name.toString()
-    /// ```
-    @JavaMethod
-    open override func toString() -> String
-
     /// Java method `hashCode`.
     ///
     /// ### Java method signature
@@ -189,63 +247,14 @@ extension Attributes {
     /// ```
     @JavaMethod
     open override func hashCode() -> Int32
+
+    /// Java method `toString`.
+    ///
+    /// ### Java method signature
+    /// ```java
+    /// public java.lang.String java.util.jar.Attributes$Name.toString()
+    /// ```
+    @JavaMethod
+    open override func toString() -> String
   }
-}
-extension JavaClass<Attributes.Name> {
-  @JavaStaticField(isFinal: true)
-  public var MANIFEST_VERSION: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var SIGNATURE_VERSION: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var CONTENT_TYPE: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var CLASS_PATH: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var MAIN_CLASS: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var SEALED: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var EXTENSION_LIST: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var EXTENSION_NAME: Attributes.Name!
-
-  @available(*, deprecated)
-  @JavaStaticField(isFinal: true)
-  public var EXTENSION_INSTALLATION: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_TITLE: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VERSION: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VENDOR: Attributes.Name!
-
-  @available(*, deprecated)
-  @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_VENDOR_ID: Attributes.Name!
-
-  @available(*, deprecated)
-  @JavaStaticField(isFinal: true)
-  public var IMPLEMENTATION_URL: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_TITLE: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_VERSION: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var SPECIFICATION_VENDOR: Attributes.Name!
-
-  @JavaStaticField(isFinal: true)
-  public var MULTI_RELEASE: Attributes.Name!
 }

@@ -2,8 +2,27 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<JavaIntUnaryOperator> {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.identity()
+  /// ```
+  @JavaStaticMethod
+  public func identity() -> JavaIntUnaryOperator!
+}
 @JavaInterface("java.util.function.IntUnaryOperator")
 public struct JavaIntUnaryOperator {
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.andThen(java.util.function.IntUnaryOperator)
+  /// ```
+  @JavaMethod
+  public func andThen(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator!
+
   /// Java method `applyAsInt`.
   ///
   /// ### Java method signature
@@ -21,23 +40,4 @@ public struct JavaIntUnaryOperator {
   /// ```
   @JavaMethod
   public func compose(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator!
-
-  /// Java method `andThen`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.andThen(java.util.function.IntUnaryOperator)
-  /// ```
-  @JavaMethod
-  public func andThen(_ arg0: JavaIntUnaryOperator?) -> JavaIntUnaryOperator!
-}
-extension JavaClass<JavaIntUnaryOperator> {
-  /// Java method `identity`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.util.function.IntUnaryOperator java.util.function.IntUnaryOperator.identity()
-  /// ```
-  @JavaStaticMethod
-  public func identity() -> JavaIntUnaryOperator!
 }

@@ -2,9 +2,28 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.function.UnaryOperator<T> java.util.function.UnaryOperator.identity()
+  /// ```
+  @JavaStaticMethod
+  public func identity<T: AnyJavaObject>() -> JavaUnaryOperator<T>! where ObjectType == JavaUnaryOperator<T>
+}
 @JavaInterface("java.util.function.UnaryOperator", extends: JavaFunction<JavaObject, JavaObject>.self)
 public struct JavaUnaryOperator<JavaUnaryOperator_T: AnyJavaObject> {
   public typealias T = JavaUnaryOperator_T
+
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default <V> java.util.function.Function<T, V> java.util.function.Function.andThen(java.util.function.Function<? super R, ? extends V>)
+  /// ```
+  @JavaMethod
+  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaFunction<T, V>!
 
   /// Java method `apply`.
   ///
@@ -23,23 +42,4 @@ public struct JavaUnaryOperator<JavaUnaryOperator_T: AnyJavaObject> {
   /// ```
   @JavaMethod
   public func compose<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, T>?) -> JavaFunction<V, T>!
-
-  /// Java method `andThen`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default <V> java.util.function.Function<T, V> java.util.function.Function.andThen(java.util.function.Function<? super R, ? extends V>)
-  /// ```
-  @JavaMethod
-  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaFunction<T, V>!
-}
-extension JavaClass {
-  /// Java method `identity`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static <T> java.util.function.UnaryOperator<T> java.util.function.UnaryOperator.identity()
-  /// ```
-  @JavaStaticMethod
-  public func identity<T: AnyJavaObject>() -> JavaUnaryOperator<T>! where ObjectType == JavaUnaryOperator<T>
 }

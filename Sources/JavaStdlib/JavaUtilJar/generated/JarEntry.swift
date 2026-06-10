@@ -5,22 +5,13 @@ import SwiftJavaJNICore
 @JavaClass("java.util.jar.JarEntry")
 open class JarEntry: ZipEntry {
   @JavaMethod
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
   @_nonoverride public convenience init(_ arg0: JarEntry?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
-
-  @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
-
-  /// Java method `getRealName`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.util.jar.JarEntry.getRealName()
-  /// ```
-  @JavaMethod
-  open func getRealName() -> String
 
   /// Java method `getAttributes`.
   ///
@@ -30,4 +21,13 @@ open class JarEntry: ZipEntry {
   /// ```
   @JavaMethod
   open func getAttributes() throws -> Attributes!
+
+  /// Java method `getRealName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.jar.JarEntry.getRealName()
+  /// ```
+  @JavaMethod
+  open func getRealName() -> String
 }

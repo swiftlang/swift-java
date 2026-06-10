@@ -6,60 +6,6 @@ import SwiftJavaJNICore
 open class Constructor<Constructor_T: AnyJavaObject>: Executable {
   public typealias T = Constructor_T
 
-  /// Java method `getName`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Constructor.getName()
-  /// ```
-  @JavaMethod
-  open override func getName() -> String
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Constructor.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Constructor.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Constructor.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `getModifiers`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Constructor.getModifiers()
-  /// ```
-  @JavaMethod
-  open override func getModifiers() -> Int32
-
-  /// Java method `getTypeParameters`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.TypeVariable<java.lang.reflect.Constructor<T>>[] java.lang.reflect.Constructor.getTypeParameters()
-  /// ```
-  @JavaMethod
-  open func getTypeParameters() -> [TypeVariable<Constructor<T>>?]
-
   /// Java method `setAccessible`.
   ///
   /// ### Java method signature
@@ -69,50 +15,23 @@ open class Constructor<Constructor_T: AnyJavaObject>: Executable {
   @JavaMethod
   open override func setAccessible(_ arg0: Bool)
 
-  /// Java method `newInstance`.
+  /// Java method `getAnnotatedReceiverType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public T java.lang.reflect.Constructor.newInstance(java.lang.Object...) throws java.lang.InstantiationException,java.lang.IllegalAccessException,java.lang.IllegalArgumentException,java.lang.reflect.InvocationTargetException
-  /// ```
-  @JavaMethod(typeErasedResult: "T!")
-  open func newInstance(_ arg0: [JavaObject?]) throws -> T!
-
-  /// Java method `getParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<?>[] java.lang.reflect.Constructor.getParameterTypes()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Constructor.getAnnotatedReceiverType()
   /// ```
   @JavaMethod
-  open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+  open override func getAnnotatedReceiverType() -> AnnotatedType!
 
-  /// Java method `toGenericString`.
+  /// Java method `getAnnotatedReturnType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.lang.reflect.Constructor.toGenericString()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Constructor.getAnnotatedReturnType()
   /// ```
   @JavaMethod
-  open override func toGenericString() -> String
-
-  /// Java method `isSynthetic`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Constructor.isSynthetic()
-  /// ```
-  @JavaMethod
-  open override func isSynthetic() -> Bool
-
-  /// Java method `getDeclaringClass`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<T> java.lang.reflect.Constructor.getDeclaringClass()
-  /// ```
-  @JavaMethod
-  open func getDeclaringClass() -> JavaClass<T>!
+  open override func getAnnotatedReturnType() -> AnnotatedType!
 
   /// Java method `getAnnotation`.
   ///
@@ -132,50 +51,14 @@ open class Constructor<Constructor_T: AnyJavaObject>: Executable {
   @JavaMethod
   open override func getDeclaredAnnotations() -> [Annotation?]
 
-  /// Java method `isVarArgs`.
+  /// Java method `getDeclaringClass`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.Constructor.isVarArgs()
+  /// public java.lang.Class<T> java.lang.reflect.Constructor.getDeclaringClass()
   /// ```
   @JavaMethod
-  open override func isVarArgs() -> Bool
-
-  /// Java method `getParameterCount`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Constructor.getParameterCount()
-  /// ```
-  @JavaMethod
-  open override func getParameterCount() -> Int32
-
-  /// Java method `getParameterAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.annotation.Annotation[][] java.lang.reflect.Constructor.getParameterAnnotations()
-  /// ```
-  @JavaMethod
-  open override func getParameterAnnotations() -> [[Annotation?]]
-
-  /// Java method `getGenericParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Constructor.getGenericParameterTypes()
-  /// ```
-  @JavaMethod
-  open override func getGenericParameterTypes() -> [Type?]
-
-  /// Java method `getGenericExceptionTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Constructor.getGenericExceptionTypes()
-  /// ```
-  @JavaMethod
-  open override func getGenericExceptionTypes() -> [Type?]
+  open func getDeclaringClass() -> JavaClass<T>!
 
   /// Java method `getExceptionTypes`.
   ///
@@ -186,21 +69,138 @@ open class Constructor<Constructor_T: AnyJavaObject>: Executable {
   @JavaMethod
   open override func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
-  /// Java method `getAnnotatedReturnType`.
+  /// Java method `getGenericExceptionTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Constructor.getAnnotatedReturnType()
+  /// public java.lang.reflect.Type[] java.lang.reflect.Constructor.getGenericExceptionTypes()
   /// ```
   @JavaMethod
-  open override func getAnnotatedReturnType() -> AnnotatedType!
+  open override func getGenericExceptionTypes() -> [Type?]
 
-  /// Java method `getAnnotatedReceiverType`.
+  /// Java method `getGenericParameterTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Constructor.getAnnotatedReceiverType()
+  /// public java.lang.reflect.Type[] java.lang.reflect.Constructor.getGenericParameterTypes()
   /// ```
   @JavaMethod
-  open override func getAnnotatedReceiverType() -> AnnotatedType!
+  open override func getGenericParameterTypes() -> [Type?]
+
+  /// Java method `getModifiers`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Constructor.getModifiers()
+  /// ```
+  @JavaMethod
+  open override func getModifiers() -> Int32
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Constructor.getName()
+  /// ```
+  @JavaMethod
+  open override func getName() -> String
+
+  /// Java method `newInstance`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public T java.lang.reflect.Constructor.newInstance(java.lang.Object...) throws java.lang.InstantiationException,java.lang.IllegalAccessException,java.lang.IllegalArgumentException,java.lang.reflect.InvocationTargetException
+  /// ```
+  @JavaMethod(typeErasedResult: "T!")
+  open func newInstance(_ arg0: [JavaObject?]) throws -> T!
+
+  /// Java method `getParameterAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.annotation.Annotation[][] java.lang.reflect.Constructor.getParameterAnnotations()
+  /// ```
+  @JavaMethod
+  open override func getParameterAnnotations() -> [[Annotation?]]
+
+  /// Java method `getParameterCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Constructor.getParameterCount()
+  /// ```
+  @JavaMethod
+  open override func getParameterCount() -> Int32
+
+  /// Java method `getParameterTypes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?>[] java.lang.reflect.Constructor.getParameterTypes()
+  /// ```
+  @JavaMethod
+  open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+
+  /// Java method `isSynthetic`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Constructor.isSynthetic()
+  /// ```
+  @JavaMethod
+  open override func isSynthetic() -> Bool
+
+  /// Java method `toGenericString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Constructor.toGenericString()
+  /// ```
+  @JavaMethod
+  open override func toGenericString() -> String
+
+  /// Java method `getTypeParameters`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.reflect.TypeVariable<java.lang.reflect.Constructor<T>>[] java.lang.reflect.Constructor.getTypeParameters()
+  /// ```
+  @JavaMethod
+  open func getTypeParameters() -> [TypeVariable<Constructor<T>>?]
+
+  /// Java method `isVarArgs`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Constructor.isVarArgs()
+  /// ```
+  @JavaMethod
+  open override func isVarArgs() -> Bool
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Constructor.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Constructor.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Constructor.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }

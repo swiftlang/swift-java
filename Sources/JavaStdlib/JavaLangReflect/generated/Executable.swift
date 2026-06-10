@@ -4,68 +4,41 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.reflect.Executable", implements: GenericDeclaration.self)
 open class Executable: AccessibleObject {
-  /// Java method `getName`.
+  /// Java method `getAnnotatedExceptionTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.String java.lang.reflect.Executable.getName()
+  /// public java.lang.reflect.AnnotatedType[] java.lang.reflect.Executable.getAnnotatedExceptionTypes()
   /// ```
   @JavaMethod
-  open func getName() -> String
+  open func getAnnotatedExceptionTypes() -> [AnnotatedType?]
 
-  /// Java method `getModifiers`.
+  /// Java method `getAnnotatedParameterTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract int java.lang.reflect.Executable.getModifiers()
+  /// public java.lang.reflect.AnnotatedType[] java.lang.reflect.Executable.getAnnotatedParameterTypes()
   /// ```
   @JavaMethod
-  open func getModifiers() -> Int32
+  open func getAnnotatedParameterTypes() -> [AnnotatedType?]
 
-  /// Java method `getTypeParameters`.
+  /// Java method `getAnnotatedReceiverType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.reflect.TypeVariable<?>[] java.lang.reflect.Executable.getTypeParameters()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Executable.getAnnotatedReceiverType()
   /// ```
   @JavaMethod
-  open func getTypeParameters() -> [TypeVariable<JavaObject>?]
+  open func getAnnotatedReceiverType() -> AnnotatedType!
 
-  /// Java method `getParameterTypes`.
+  /// Java method `getAnnotatedReturnType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.Class<?>[] java.lang.reflect.Executable.getParameterTypes()
+  /// public abstract java.lang.reflect.AnnotatedType java.lang.reflect.Executable.getAnnotatedReturnType()
   /// ```
   @JavaMethod
-  open func getParameterTypes() -> [JavaClass<JavaObject>?]
-
-  /// Java method `toGenericString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.String java.lang.reflect.Executable.toGenericString()
-  /// ```
-  @JavaMethod
-  open func toGenericString() -> String
-
-  /// Java method `isSynthetic`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Executable.isSynthetic()
-  /// ```
-  @JavaMethod
-  open func isSynthetic() -> Bool
-
-  /// Java method `getDeclaringClass`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.Class<?> java.lang.reflect.Executable.getDeclaringClass()
-  /// ```
-  @JavaMethod
-  open func getDeclaringClass() -> JavaClass<JavaObject>!
+  open func getAnnotatedReturnType() -> AnnotatedType!
 
   /// Java method `getAnnotation`.
   ///
@@ -94,59 +67,14 @@ open class Executable: AccessibleObject {
   @JavaMethod
   open override func getDeclaredAnnotations() -> [Annotation?]
 
-  /// Java method `isVarArgs`.
+  /// Java method `getDeclaringClass`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.Executable.isVarArgs()
+  /// public abstract java.lang.Class<?> java.lang.reflect.Executable.getDeclaringClass()
   /// ```
   @JavaMethod
-  open func isVarArgs() -> Bool
-
-  /// Java method `getAnnotatedParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.AnnotatedType[] java.lang.reflect.Executable.getAnnotatedParameterTypes()
-  /// ```
-  @JavaMethod
-  open func getAnnotatedParameterTypes() -> [AnnotatedType?]
-
-  /// Java method `getParameterCount`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract int java.lang.reflect.Executable.getParameterCount()
-  /// ```
-  @JavaMethod
-  open func getParameterCount() -> Int32
-
-  /// Java method `getParameterAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.annotation.Annotation[][] java.lang.reflect.Executable.getParameterAnnotations()
-  /// ```
-  @JavaMethod
-  open func getParameterAnnotations() -> [[Annotation?]]
-
-  /// Java method `getGenericParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Executable.getGenericParameterTypes()
-  /// ```
-  @JavaMethod
-  open func getGenericParameterTypes() -> [Type?]
-
-  /// Java method `getGenericExceptionTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Executable.getGenericExceptionTypes()
-  /// ```
-  @JavaMethod
-  open func getGenericExceptionTypes() -> [Type?]
+  open func getDeclaringClass() -> JavaClass<JavaObject>!
 
   /// Java method `getExceptionTypes`.
   ///
@@ -157,14 +85,59 @@ open class Executable: AccessibleObject {
   @JavaMethod
   open func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
-  /// Java method `getAnnotatedReturnType`.
+  /// Java method `getGenericExceptionTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.reflect.AnnotatedType java.lang.reflect.Executable.getAnnotatedReturnType()
+  /// public java.lang.reflect.Type[] java.lang.reflect.Executable.getGenericExceptionTypes()
   /// ```
   @JavaMethod
-  open func getAnnotatedReturnType() -> AnnotatedType!
+  open func getGenericExceptionTypes() -> [Type?]
+
+  /// Java method `getGenericParameterTypes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.reflect.Type[] java.lang.reflect.Executable.getGenericParameterTypes()
+  /// ```
+  @JavaMethod
+  open func getGenericParameterTypes() -> [Type?]
+
+  /// Java method `getModifiers`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.lang.reflect.Executable.getModifiers()
+  /// ```
+  @JavaMethod
+  open func getModifiers() -> Int32
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.String java.lang.reflect.Executable.getName()
+  /// ```
+  @JavaMethod
+  open func getName() -> String
+
+  /// Java method `getParameterAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.annotation.Annotation[][] java.lang.reflect.Executable.getParameterAnnotations()
+  /// ```
+  @JavaMethod
+  open func getParameterAnnotations() -> [[Annotation?]]
+
+  /// Java method `getParameterCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract int java.lang.reflect.Executable.getParameterCount()
+  /// ```
+  @JavaMethod
+  open func getParameterCount() -> Int32
 
   /// Java method `getParameters`.
   ///
@@ -175,21 +148,48 @@ open class Executable: AccessibleObject {
   @JavaMethod
   open func getParameters() -> [Parameter?]
 
-  /// Java method `getAnnotatedReceiverType`.
+  /// Java method `getParameterTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Executable.getAnnotatedReceiverType()
+  /// public abstract java.lang.Class<?>[] java.lang.reflect.Executable.getParameterTypes()
   /// ```
   @JavaMethod
-  open func getAnnotatedReceiverType() -> AnnotatedType!
+  open func getParameterTypes() -> [JavaClass<JavaObject>?]
 
-  /// Java method `getAnnotatedExceptionTypes`.
+  /// Java method `isSynthetic`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType[] java.lang.reflect.Executable.getAnnotatedExceptionTypes()
+  /// public boolean java.lang.reflect.Executable.isSynthetic()
   /// ```
   @JavaMethod
-  open func getAnnotatedExceptionTypes() -> [AnnotatedType?]
+  open func isSynthetic() -> Bool
+
+  /// Java method `toGenericString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.String java.lang.reflect.Executable.toGenericString()
+  /// ```
+  @JavaMethod
+  open func toGenericString() -> String
+
+  /// Java method `getTypeParameters`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.TypeVariable<?>[] java.lang.reflect.Executable.getTypeParameters()
+  /// ```
+  @JavaMethod
+  open func getTypeParameters() -> [TypeVariable<JavaObject>?]
+
+  /// Java method `isVarArgs`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Executable.isVarArgs()
+  /// ```
+  @JavaMethod
+  open func isVarArgs() -> Bool
 }

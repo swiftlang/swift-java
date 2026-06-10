@@ -4,16 +4,70 @@ import SwiftJavaJNICore
 @JavaClass("java.lang.Throwable")
 open class Throwable: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: Throwable?, environment: JNIEnvironment? = nil)
-
-  @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, _ arg1: Throwable?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: Throwable?, environment: JNIEnvironment? = nil)
+
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: Throwable?, environment: JNIEnvironment? = nil)
+
+  /// Java method `addSuppressed`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final synchronized void java.lang.Throwable.addSuppressed(java.lang.Throwable)
+  /// ```
+  @JavaMethod
+  open func addSuppressed(_ arg0: Throwable?)
+
+  /// Java method `getCause`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.getCause()
+  /// ```
+  @JavaMethod
+  open func getCause() -> Throwable!
+
+  /// Java method `fillInStackTrace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.fillInStackTrace()
+  /// ```
+  @JavaMethod
+  open func fillInStackTrace() -> Throwable!
+
+  /// Java method `initCause`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.lang.Throwable java.lang.Throwable.initCause(java.lang.Throwable)
+  /// ```
+  @JavaMethod
+  open func initCause(_ arg0: Throwable?) -> Throwable!
+
+  /// Java method `getLocalizedMessage`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Throwable.getLocalizedMessage()
+  /// ```
+  @JavaMethod
+  open func getLocalizedMessage() -> String
+
+  /// Java method `getMessage`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Throwable.getMessage()
+  /// ```
+  @JavaMethod
+  open func getMessage() -> String
 
   /// Java method `printStackTrace`.
   ///
@@ -33,51 +87,6 @@ open class Throwable: JavaObject {
   @JavaMethod
   open func printStackTrace(_ arg0: PrintWriter?)
 
-  /// Java method `fillInStackTrace`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public synchronized java.lang.Throwable java.lang.Throwable.fillInStackTrace()
-  /// ```
-  @JavaMethod
-  open func fillInStackTrace() -> Throwable!
-
-  /// Java method `getCause`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public synchronized java.lang.Throwable java.lang.Throwable.getCause()
-  /// ```
-  @JavaMethod
-  open func getCause() -> Throwable!
-
-  /// Java method `initCause`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public synchronized java.lang.Throwable java.lang.Throwable.initCause(java.lang.Throwable)
-  /// ```
-  @JavaMethod
-  open func initCause(_ arg0: Throwable?) -> Throwable!
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.Throwable.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `getMessage`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.Throwable.getMessage()
-  /// ```
-  @JavaMethod
-  open func getMessage() -> String
-
   /// Java method `getSuppressed`.
   ///
   /// ### Java method signature
@@ -87,21 +96,12 @@ open class Throwable: JavaObject {
   @JavaMethod
   open func getSuppressed() -> [Throwable?]
 
-  /// Java method `getLocalizedMessage`.
+  /// Java method `toString`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.lang.Throwable.getLocalizedMessage()
+  /// public java.lang.String java.lang.Throwable.toString()
   /// ```
   @JavaMethod
-  open func getLocalizedMessage() -> String
-
-  /// Java method `addSuppressed`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public final synchronized void java.lang.Throwable.addSuppressed(java.lang.Throwable)
-  /// ```
-  @JavaMethod
-  open func addSuppressed(_ arg0: Throwable?)
+  open override func toString() -> String
 }

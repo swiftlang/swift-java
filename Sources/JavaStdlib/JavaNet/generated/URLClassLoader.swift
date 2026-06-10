@@ -2,6 +2,25 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<URLClassLoader> {
+  /// Java method `newInstance`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.net.URLClassLoader java.net.URLClassLoader.newInstance(java.net.URL[])
+  /// ```
+  @JavaStaticMethod
+  public func newInstance(_ arg0: [JavaURL?]) -> URLClassLoader!
+
+  /// Java method `newInstance`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.net.URLClassLoader java.net.URLClassLoader.newInstance(java.net.URL[],java.lang.ClassLoader)
+  /// ```
+  @JavaStaticMethod
+  public func newInstance(_ arg0: [JavaURL?], _ arg1: JavaClassLoader?) -> URLClassLoader!
+}
 @JavaClass("java.net.URLClassLoader", implements: Closeable.self)
 open class URLClassLoader: JavaClassLoader {
   @JavaMethod
@@ -13,41 +32,14 @@ open class URLClassLoader: JavaClassLoader {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [JavaURL?], _ arg1: JavaClassLoader?, environment: JNIEnvironment? = nil)
 
-  /// Java method `findResource`.
+  /// Java method `addURL`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.net.URL java.net.URLClassLoader.findResource(java.lang.String)
+  /// protected void java.net.URLClassLoader.addURL(java.net.URL)
   /// ```
   @JavaMethod
-  open override func findResource(_ arg0: String) -> JavaURL!
-
-  /// Java method `getResourceAsStream`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.io.InputStream java.net.URLClassLoader.getResourceAsStream(java.lang.String)
-  /// ```
-  @JavaMethod
-  open override func getResourceAsStream(_ arg0: String) -> InputStream!
-
-  /// Java method `findClass`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// protected java.lang.Class<?> java.net.URLClassLoader.findClass(java.lang.String) throws java.lang.ClassNotFoundException
-  /// ```
-  @JavaMethod
-  open override func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
-
-  /// Java method `findResources`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.Enumeration<java.net.URL> java.net.URLClassLoader.findResources(java.lang.String) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func findResources(_ arg0: String) throws -> Enumeration<JavaURL>!
+  open func addURL(_ arg0: JavaURL?)
 
   /// Java method `close`.
   ///
@@ -58,14 +50,41 @@ open class URLClassLoader: JavaClassLoader {
   @JavaMethod
   open func close() throws
 
-  /// Java method `addURL`.
+  /// Java method `findClass`.
   ///
   /// ### Java method signature
   /// ```java
-  /// protected void java.net.URLClassLoader.addURL(java.net.URL)
+  /// protected java.lang.Class<?> java.net.URLClassLoader.findClass(java.lang.String) throws java.lang.ClassNotFoundException
   /// ```
   @JavaMethod
-  open func addURL(_ arg0: JavaURL?)
+  open override func findClass(_ arg0: String) throws -> JavaClass<JavaObject>!
+
+  /// Java method `findResource`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.net.URL java.net.URLClassLoader.findResource(java.lang.String)
+  /// ```
+  @JavaMethod
+  open override func findResource(_ arg0: String) -> JavaURL!
+
+  /// Java method `findResources`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Enumeration<java.net.URL> java.net.URLClassLoader.findResources(java.lang.String) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open override func findResources(_ arg0: String) throws -> Enumeration<JavaURL>!
+
+  /// Java method `getResourceAsStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.io.InputStream java.net.URLClassLoader.getResourceAsStream(java.lang.String)
+  /// ```
+  @JavaMethod
+  open override func getResourceAsStream(_ arg0: String) -> InputStream!
 
   /// Java method `getURLs`.
   ///
@@ -75,23 +94,4 @@ open class URLClassLoader: JavaClassLoader {
   /// ```
   @JavaMethod
   open func getURLs() -> [JavaURL?]
-}
-extension JavaClass<URLClassLoader> {
-  /// Java method `newInstance`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.net.URLClassLoader java.net.URLClassLoader.newInstance(java.net.URL[],java.lang.ClassLoader)
-  /// ```
-  @JavaStaticMethod
-  public func newInstance(_ arg0: [JavaURL?], _ arg1: JavaClassLoader?) -> URLClassLoader!
-
-  /// Java method `newInstance`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.net.URLClassLoader java.net.URLClassLoader.newInstance(java.net.URL[])
-  /// ```
-  @JavaStaticMethod
-  public func newInstance(_ arg0: [JavaURL?]) -> URLClassLoader!
 }

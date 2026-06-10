@@ -10,14 +10,14 @@ open class BufferedInputStream: InputStream {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: InputStream?, _ arg1: Int32, environment: JNIEnvironment? = nil)
 
-  /// Java method `reset`.
+  /// Java method `available`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized void java.io.BufferedInputStream.reset() throws java.io.IOException
+  /// public synchronized int java.io.BufferedInputStream.available() throws java.io.IOException
   /// ```
   @JavaMethod
-  open override func reset() throws
+  open override func available() throws -> Int32
 
   /// Java method `close`.
   ///
@@ -37,14 +37,14 @@ open class BufferedInputStream: InputStream {
   @JavaMethod
   open override func mark(_ arg0: Int32)
 
-  /// Java method `read`.
+  /// Java method `markSupported`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized int java.io.BufferedInputStream.read(byte[],int,int) throws java.io.IOException
+  /// public boolean java.io.BufferedInputStream.markSupported()
   /// ```
   @JavaMethod
-  open override func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  open override func markSupported() -> Bool
 
   /// Java method `read`.
   ///
@@ -55,14 +55,23 @@ open class BufferedInputStream: InputStream {
   @JavaMethod
   open override func read() throws -> Int32
 
-  /// Java method `transferTo`.
+  /// Java method `read`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized long java.io.BufferedInputStream.transferTo(java.io.OutputStream) throws java.io.IOException
+  /// public synchronized int java.io.BufferedInputStream.read(byte[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open override func transferTo(_ arg0: OutputStream?) throws -> Int64
+  open override func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+
+  /// Java method `reset`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized void java.io.BufferedInputStream.reset() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open override func reset() throws
 
   /// Java method `skip`.
   ///
@@ -73,21 +82,12 @@ open class BufferedInputStream: InputStream {
   @JavaMethod
   open override func skip(_ arg0: Int64) throws -> Int64
 
-  /// Java method `available`.
+  /// Java method `transferTo`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized int java.io.BufferedInputStream.available() throws java.io.IOException
+  /// public synchronized long java.io.BufferedInputStream.transferTo(java.io.OutputStream) throws java.io.IOException
   /// ```
   @JavaMethod
-  open override func available() throws -> Int32
-
-  /// Java method `markSupported`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.io.BufferedInputStream.markSupported()
-  /// ```
-  @JavaMethod
-  open override func markSupported() -> Bool
+  open override func transferTo(_ arg0: OutputStream?) throws -> Int64
 }

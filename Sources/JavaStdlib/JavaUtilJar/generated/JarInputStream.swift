@@ -10,6 +10,24 @@ open class JarInputStream: InputStream {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: InputStream?, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
 
+  /// Java method `createZipEntry`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected java.util.zip.ZipEntry java.util.jar.JarInputStream.createZipEntry(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func createZipEntry(_ arg0: String) -> ZipEntry!
+
+  /// Java method `getManifest`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.jar.Manifest java.util.jar.JarInputStream.getManifest()
+  /// ```
+  @JavaMethod
+  open func getManifest() -> Manifest!
+
   /// Java method `getNextEntry`.
   ///
   /// ### Java method signature
@@ -28,15 +46,6 @@ open class JarInputStream: InputStream {
   @JavaMethod
   open func getNextJarEntry() throws -> JarEntry!
 
-  /// Java method `createZipEntry`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// protected java.util.zip.ZipEntry java.util.jar.JarInputStream.createZipEntry(java.lang.String)
-  /// ```
-  @JavaMethod
-  open func createZipEntry(_ arg0: String) -> ZipEntry!
-
   /// Java method `read`.
   ///
   /// ### Java method signature
@@ -45,13 +54,4 @@ open class JarInputStream: InputStream {
   /// ```
   @JavaMethod
   open override func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
-
-  /// Java method `getManifest`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.jar.Manifest java.util.jar.JarInputStream.getManifest()
-  /// ```
-  @JavaMethod
-  open func getManifest() -> Manifest!
 }

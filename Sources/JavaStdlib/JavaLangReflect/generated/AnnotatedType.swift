@@ -22,33 +22,6 @@ public struct AnnotatedType {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   public func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
-  /// Java method `getAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedType.getAnnotations()
-  /// ```
-  @JavaMethod
-  public func getAnnotations() -> [Annotation?]
-
-  /// Java method `getDeclaredAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedType.getDeclaredAnnotations()
-  /// ```
-  @JavaMethod
-  public func getDeclaredAnnotations() -> [Annotation?]
-
-  /// Java method `getType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.reflect.Type java.lang.reflect.AnnotatedType.getType()
-  /// ```
-  @JavaMethod
-  public func getType() -> Type!
-
   /// Java method `isAnnotationPresent`.
   ///
   /// ### Java method signature
@@ -57,6 +30,15 @@ public struct AnnotatedType {
   /// ```
   @JavaMethod
   public func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
+
+  /// Java method `getAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedType.getAnnotations()
+  /// ```
+  @JavaMethod
+  public func getAnnotations() -> [Annotation?]
 
   /// Java method `getAnnotationsByType`.
   ///
@@ -76,6 +58,15 @@ public struct AnnotatedType {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   public func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
+  /// Java method `getDeclaredAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.annotation.Annotation[] java.lang.reflect.AnnotatedType.getDeclaredAnnotations()
+  /// ```
+  @JavaMethod
+  public func getDeclaredAnnotations() -> [Annotation?]
+
   /// Java method `getDeclaredAnnotationsByType`.
   ///
   /// ### Java method signature
@@ -84,4 +75,13 @@ public struct AnnotatedType {
   /// ```
   @JavaMethod
   public func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
+
+  /// Java method `getType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type java.lang.reflect.AnnotatedType.getType()
+  /// ```
+  @JavaMethod
+  public func getType() -> Type!
 }

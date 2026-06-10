@@ -2,8 +2,27 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<JavaLongUnaryOperator> {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.identity()
+  /// ```
+  @JavaStaticMethod
+  public func identity() -> JavaLongUnaryOperator!
+}
 @JavaInterface("java.util.function.LongUnaryOperator")
 public struct JavaLongUnaryOperator {
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.andThen(java.util.function.LongUnaryOperator)
+  /// ```
+  @JavaMethod
+  public func andThen(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator!
+
   /// Java method `applyAsLong`.
   ///
   /// ### Java method signature
@@ -21,23 +40,4 @@ public struct JavaLongUnaryOperator {
   /// ```
   @JavaMethod
   public func compose(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator!
-
-  /// Java method `andThen`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.andThen(java.util.function.LongUnaryOperator)
-  /// ```
-  @JavaMethod
-  public func andThen(_ arg0: JavaLongUnaryOperator?) -> JavaLongUnaryOperator!
-}
-extension JavaClass<JavaLongUnaryOperator> {
-  /// Java method `identity`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static java.util.function.LongUnaryOperator java.util.function.LongUnaryOperator.identity()
-  /// ```
-  @JavaStaticMethod
-  public func identity() -> JavaLongUnaryOperator!
 }

@@ -5,22 +5,13 @@ import SwiftJavaJNICore
 @JavaClass("java.io.InputStreamReader")
 open class InputStreamReader: Reader {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: InputStream?, _ arg1: Charset?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: InputStream?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: InputStream?, _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: InputStream?, environment: JNIEnvironment? = nil)
-
-  /// Java method `ready`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.io.InputStreamReader.ready() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open override func ready() throws -> Bool
+  @_nonoverride public convenience init(_ arg0: InputStream?, _ arg1: Charset?, environment: JNIEnvironment? = nil)
 
   /// Java method `close`.
   ///
@@ -31,14 +22,14 @@ open class InputStreamReader: Reader {
   @JavaMethod
   open override func close() throws
 
-  /// Java method `read`.
+  /// Java method `getEncoding`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public int java.io.InputStreamReader.read(char[],int,int) throws java.io.IOException
+  /// public java.lang.String java.io.InputStreamReader.getEncoding()
   /// ```
   @JavaMethod
-  open override func read(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  open func getEncoding() -> String
 
   /// Java method `read`.
   ///
@@ -49,12 +40,21 @@ open class InputStreamReader: Reader {
   @JavaMethod
   open override func read() throws -> Int32
 
-  /// Java method `getEncoding`.
+  /// Java method `read`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.io.InputStreamReader.getEncoding()
+  /// public int java.io.InputStreamReader.read(char[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func getEncoding() -> String
+  open override func read(_ arg0: [UInt16], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+
+  /// Java method `ready`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.io.InputStreamReader.ready() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open override func ready() throws -> Bool
 }

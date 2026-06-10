@@ -8,23 +8,14 @@ public struct JavaBiPredicate<JavaBiPredicate_T: AnyJavaObject, JavaBiPredicate_
 
   public typealias U = JavaBiPredicate_U
 
-  /// Java method `test`.
+  /// Java method `and`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract boolean java.util.function.BiPredicate.test(T,U)
+  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.and(java.util.function.BiPredicate<? super T, ? super U>)
   /// ```
   @JavaMethod
-  public func test(_ arg0: T?, _ arg1: U?) -> Bool
-
-  /// Java method `or`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.or(java.util.function.BiPredicate<? super T, ? super U>)
-  /// ```
-  @JavaMethod
-  public func or(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
+  public func and(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
 
   /// Java method `negate`.
   ///
@@ -35,12 +26,21 @@ public struct JavaBiPredicate<JavaBiPredicate_T: AnyJavaObject, JavaBiPredicate_
   @JavaMethod
   public func negate() -> JavaBiPredicate<T, U>!
 
-  /// Java method `and`.
+  /// Java method `or`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.and(java.util.function.BiPredicate<? super T, ? super U>)
+  /// public default java.util.function.BiPredicate<T, U> java.util.function.BiPredicate.or(java.util.function.BiPredicate<? super T, ? super U>)
   /// ```
   @JavaMethod
-  public func and(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
+  public func or(_ arg0: JavaBiPredicate<JavaObject, JavaObject>?) -> JavaBiPredicate<T, U>!
+
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.BiPredicate.test(T,U)
+  /// ```
+  @JavaMethod
+  public func test(_ arg0: T?, _ arg1: U?) -> Bool
 }

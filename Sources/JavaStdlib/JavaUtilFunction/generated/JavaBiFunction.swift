@@ -10,15 +10,6 @@ public struct JavaBiFunction<JavaBiFunction_T: AnyJavaObject, JavaBiFunction_U: 
 
   public typealias R = JavaBiFunction_R
 
-  /// Java method `apply`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract R java.util.function.BiFunction.apply(T,U)
-  /// ```
-  @JavaMethod(typeErasedResult: "R!")
-  public func apply(_ arg0: T?, _ arg1: U?) -> R!
-
   /// Java method `andThen`.
   ///
   /// ### Java method signature
@@ -27,4 +18,13 @@ public struct JavaBiFunction<JavaBiFunction_T: AnyJavaObject, JavaBiFunction_U: 
   /// ```
   @JavaMethod
   public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaBiFunction<T, U, V>!
+
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.BiFunction.apply(T,U)
+  /// ```
+  @JavaMethod(typeErasedResult: "R!")
+  public func apply(_ arg0: T?, _ arg1: U?) -> R!
 }

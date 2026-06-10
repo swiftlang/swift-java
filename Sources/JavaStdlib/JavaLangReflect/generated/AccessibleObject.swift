@@ -2,8 +2,28 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<AccessibleObject> {
+  /// Java method `setAccessible`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static void java.lang.reflect.AccessibleObject.setAccessible(java.lang.reflect.AccessibleObject[],boolean)
+  /// ```
+  @JavaStaticMethod
+  public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
+}
 @JavaClass("java.lang.reflect.AccessibleObject")
 open class AccessibleObject: JavaObject {
+  /// Java method `isAccessible`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.AccessibleObject.isAccessible()
+  /// ```
+  @available(*, deprecated)
+  @JavaMethod
+  open func isAccessible() -> Bool
+
   /// Java method `setAccessible`.
   ///
   /// ### Java method signature
@@ -12,15 +32,6 @@ open class AccessibleObject: JavaObject {
   /// ```
   @JavaMethod
   open func setAccessible(_ arg0: Bool)
-
-  /// Java method `isAnnotationPresent`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.AccessibleObject.isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>)
-  /// ```
-  @JavaMethod
-  open func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
 
   /// Java method `getAnnotation`.
   ///
@@ -31,14 +42,14 @@ open class AccessibleObject: JavaObject {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
-  /// Java method `getAnnotationsByType`.
+  /// Java method `isAnnotationPresent`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.AccessibleObject.getAnnotationsByType(java.lang.Class<T>)
+  /// public boolean java.lang.reflect.AccessibleObject.isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>)
   /// ```
   @JavaMethod
-  open func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
+  open func isAnnotationPresent(_ arg0: JavaClass<Annotation>?) -> Bool
 
   /// Java method `getAnnotations`.
   ///
@@ -49,41 +60,14 @@ open class AccessibleObject: JavaObject {
   @JavaMethod
   open func getAnnotations() -> [Annotation?]
 
-  /// Java method `getDeclaredAnnotation`.
+  /// Java method `getAnnotationsByType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.AccessibleObject.getDeclaredAnnotation(java.lang.Class<T>)
-  /// ```
-  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
-  open func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
-
-  /// Java method `getDeclaredAnnotationsByType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.AccessibleObject.getDeclaredAnnotationsByType(java.lang.Class<T>)
+  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.AccessibleObject.getAnnotationsByType(java.lang.Class<T>)
   /// ```
   @JavaMethod
-  open func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
-
-  /// Java method `getDeclaredAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.annotation.Annotation[] java.lang.reflect.AccessibleObject.getDeclaredAnnotations()
-  /// ```
-  @JavaMethod
-  open func getDeclaredAnnotations() -> [Annotation?]
-
-  /// Java method `trySetAccessible`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public final boolean java.lang.reflect.AccessibleObject.trySetAccessible()
-  /// ```
-  @JavaMethod
-  open func trySetAccessible() -> Bool
+  open func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
   /// Java method `canAccess`.
   ///
@@ -94,23 +78,39 @@ open class AccessibleObject: JavaObject {
   @JavaMethod
   open func canAccess(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `isAccessible`.
+  /// Java method `getDeclaredAnnotation`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.AccessibleObject.isAccessible()
+  /// public <T extends java.lang.annotation.Annotation> T java.lang.reflect.AccessibleObject.getDeclaredAnnotation(java.lang.Class<T>)
   /// ```
-  @available(*, deprecated)
+  @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
+  open func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
+
+  /// Java method `getDeclaredAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.annotation.Annotation[] java.lang.reflect.AccessibleObject.getDeclaredAnnotations()
+  /// ```
   @JavaMethod
-  open func isAccessible() -> Bool
-}
-extension JavaClass<AccessibleObject> {
-  /// Java method `setAccessible`.
+  open func getDeclaredAnnotations() -> [Annotation?]
+
+  /// Java method `getDeclaredAnnotationsByType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static void java.lang.reflect.AccessibleObject.setAccessible(java.lang.reflect.AccessibleObject[],boolean)
+  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.AccessibleObject.getDeclaredAnnotationsByType(java.lang.Class<T>)
   /// ```
-  @JavaStaticMethod
-  public func setAccessible(_ arg0: [AccessibleObject?], _ arg1: Bool)
+  @JavaMethod
+  open func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
+
+  /// Java method `trySetAccessible`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final boolean java.lang.reflect.AccessibleObject.trySetAccessible()
+  /// ```
+  @JavaMethod
+  open func trySetAccessible() -> Bool
 }

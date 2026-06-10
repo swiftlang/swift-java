@@ -4,132 +4,6 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.reflect.Field")
 open class Field: AccessibleObject {
-  /// Java method `getName`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Field.getName()
-  /// ```
-  @JavaMethod
-  open func getName() -> String
-
-  /// Java method `get`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.lang.reflect.Field.get(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func get(_ arg0: JavaObject?) throws -> JavaObject!
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Field.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Field.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Field.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `getBoolean`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Field.getBoolean(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getBoolean(_ arg0: JavaObject?) throws -> Bool
-
-  /// Java method `getByte`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public byte java.lang.reflect.Field.getByte(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getByte(_ arg0: JavaObject?) throws -> Int8
-
-  /// Java method `getShort`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public short java.lang.reflect.Field.getShort(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getShort(_ arg0: JavaObject?) throws -> Int16
-
-  /// Java method `getChar`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public char java.lang.reflect.Field.getChar(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getChar(_ arg0: JavaObject?) throws -> UInt16
-
-  /// Java method `getInt`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Field.getInt(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getInt(_ arg0: JavaObject?) throws -> Int32
-
-  /// Java method `getLong`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public long java.lang.reflect.Field.getLong(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getLong(_ arg0: JavaObject?) throws -> Int64
-
-  /// Java method `getFloat`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public float java.lang.reflect.Field.getFloat(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getFloat(_ arg0: JavaObject?) throws -> Float
-
-  /// Java method `getDouble`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public double java.lang.reflect.Field.getDouble(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func getDouble(_ arg0: JavaObject?) throws -> Double
-
-  /// Java method `getModifiers`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Field.getModifiers()
-  /// ```
-  @JavaMethod
-  open func getModifiers() -> Int32
-
   /// Java method `setAccessible`.
   ///
   /// ### Java method signature
@@ -139,32 +13,14 @@ open class Field: AccessibleObject {
   @JavaMethod
   open override func setAccessible(_ arg0: Bool)
 
-  /// Java method `toGenericString`.
+  /// Java method `getAnnotatedType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.lang.reflect.Field.toGenericString()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Field.getAnnotatedType()
   /// ```
   @JavaMethod
-  open func toGenericString() -> String
-
-  /// Java method `isSynthetic`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Field.isSynthetic()
-  /// ```
-  @JavaMethod
-  open func isSynthetic() -> Bool
-
-  /// Java method `getDeclaringClass`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<?> java.lang.reflect.Field.getDeclaringClass()
-  /// ```
-  @JavaMethod
-  open func getDeclaringClass() -> JavaClass<JavaObject>!
+  open func getAnnotatedType() -> AnnotatedType!
 
   /// Java method `getAnnotation`.
   ///
@@ -184,41 +40,14 @@ open class Field: AccessibleObject {
   @JavaMethod
   open override func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
-  /// Java method `getDeclaredAnnotations`.
+  /// Java method `getBoolean`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.annotation.Annotation[] java.lang.reflect.Field.getDeclaredAnnotations()
+  /// public boolean java.lang.reflect.Field.getBoolean(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
   /// ```
   @JavaMethod
-  open override func getDeclaredAnnotations() -> [Annotation?]
-
-  /// Java method `set`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.lang.reflect.Field.set(java.lang.Object,java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func set(_ arg0: JavaObject?, _ arg1: JavaObject?) throws
-
-  /// Java method `getGenericType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type java.lang.reflect.Field.getGenericType()
-  /// ```
-  @JavaMethod
-  open func getGenericType() -> Type!
-
-  /// Java method `getType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<?> java.lang.reflect.Field.getType()
-  /// ```
-  @JavaMethod
-  open func getType() -> JavaClass<JavaObject>!
+  open func getBoolean(_ arg0: JavaObject?) throws -> Bool
 
   /// Java method `setBoolean`.
   ///
@@ -229,6 +58,15 @@ open class Field: AccessibleObject {
   @JavaMethod
   open func setBoolean(_ arg0: JavaObject?, _ arg1: Bool) throws
 
+  /// Java method `getByte`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public byte java.lang.reflect.Field.getByte(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func getByte(_ arg0: JavaObject?) throws -> Int8
+
   /// Java method `setByte`.
   ///
   /// ### Java method signature
@@ -237,6 +75,15 @@ open class Field: AccessibleObject {
   /// ```
   @JavaMethod
   open func setByte(_ arg0: JavaObject?, _ arg1: Int8) throws
+
+  /// Java method `getChar`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public char java.lang.reflect.Field.getChar(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func getChar(_ arg0: JavaObject?) throws -> UInt16
 
   /// Java method `setChar`.
   ///
@@ -247,41 +94,32 @@ open class Field: AccessibleObject {
   @JavaMethod
   open func setChar(_ arg0: JavaObject?, _ arg1: UInt16) throws
 
-  /// Java method `setShort`.
+  /// Java method `getDeclaredAnnotations`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.lang.reflect.Field.setShort(java.lang.Object,short) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// public java.lang.annotation.Annotation[] java.lang.reflect.Field.getDeclaredAnnotations()
   /// ```
   @JavaMethod
-  open func setShort(_ arg0: JavaObject?, _ arg1: Int16) throws
+  open override func getDeclaredAnnotations() -> [Annotation?]
 
-  /// Java method `setInt`.
+  /// Java method `getDeclaringClass`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.lang.reflect.Field.setInt(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// public java.lang.Class<?> java.lang.reflect.Field.getDeclaringClass()
   /// ```
   @JavaMethod
-  open func setInt(_ arg0: JavaObject?, _ arg1: Int32) throws
+  open func getDeclaringClass() -> JavaClass<JavaObject>!
 
-  /// Java method `setLong`.
+  /// Java method `getDouble`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.lang.reflect.Field.setLong(java.lang.Object,long) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// public double java.lang.reflect.Field.getDouble(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
   /// ```
   @JavaMethod
-  open func setLong(_ arg0: JavaObject?, _ arg1: Int64) throws
-
-  /// Java method `setFloat`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.lang.reflect.Field.setFloat(java.lang.Object,float) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
-  /// ```
-  @JavaMethod
-  open func setFloat(_ arg0: JavaObject?, _ arg1: Float) throws
+  open func getDouble(_ arg0: JavaObject?) throws -> Double
 
   /// Java method `setDouble`.
   ///
@@ -301,12 +139,174 @@ open class Field: AccessibleObject {
   @JavaMethod
   open func isEnumConstant() -> Bool
 
-  /// Java method `getAnnotatedType`.
+  /// Java method `getFloat`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Field.getAnnotatedType()
+  /// public float java.lang.reflect.Field.getFloat(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
   /// ```
   @JavaMethod
-  open func getAnnotatedType() -> AnnotatedType!
+  open func getFloat(_ arg0: JavaObject?) throws -> Float
+
+  /// Java method `setFloat`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.reflect.Field.setFloat(java.lang.Object,float) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func setFloat(_ arg0: JavaObject?, _ arg1: Float) throws
+
+  /// Java method `getGenericType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.reflect.Type java.lang.reflect.Field.getGenericType()
+  /// ```
+  @JavaMethod
+  open func getGenericType() -> Type!
+
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.lang.reflect.Field.get(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func get(_ arg0: JavaObject?) throws -> JavaObject!
+
+  /// Java method `getInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Field.getInt(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func getInt(_ arg0: JavaObject?) throws -> Int32
+
+  /// Java method `setInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.reflect.Field.setInt(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func setInt(_ arg0: JavaObject?, _ arg1: Int32) throws
+
+  /// Java method `getLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.lang.reflect.Field.getLong(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func getLong(_ arg0: JavaObject?) throws -> Int64
+
+  /// Java method `setLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.reflect.Field.setLong(java.lang.Object,long) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func setLong(_ arg0: JavaObject?, _ arg1: Int64) throws
+
+  /// Java method `getModifiers`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Field.getModifiers()
+  /// ```
+  @JavaMethod
+  open func getModifiers() -> Int32
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Field.getName()
+  /// ```
+  @JavaMethod
+  open func getName() -> String
+
+  /// Java method `set`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.reflect.Field.set(java.lang.Object,java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func set(_ arg0: JavaObject?, _ arg1: JavaObject?) throws
+
+  /// Java method `getShort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public short java.lang.reflect.Field.getShort(java.lang.Object) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func getShort(_ arg0: JavaObject?) throws -> Int16
+
+  /// Java method `setShort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.lang.reflect.Field.setShort(java.lang.Object,short) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException
+  /// ```
+  @JavaMethod
+  open func setShort(_ arg0: JavaObject?, _ arg1: Int16) throws
+
+  /// Java method `isSynthetic`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Field.isSynthetic()
+  /// ```
+  @JavaMethod
+  open func isSynthetic() -> Bool
+
+  /// Java method `toGenericString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Field.toGenericString()
+  /// ```
+  @JavaMethod
+  open func toGenericString() -> String
+
+  /// Java method `getType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?> java.lang.reflect.Field.getType()
+  /// ```
+  @JavaMethod
+  open func getType() -> JavaClass<JavaObject>!
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Field.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Field.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Field.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }
