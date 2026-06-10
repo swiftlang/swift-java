@@ -328,6 +328,8 @@ jobs:
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Regenerate JavaStdlib wrappers
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_25 }}
         run: ./scripts/wrap-java-generate.sh
       - name: Verify no changes (whitespace-tolerant)
         run: |
