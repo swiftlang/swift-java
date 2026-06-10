@@ -298,8 +298,6 @@ extension JavaClassTranslator {
       let className = split.first!
       let excludedName = split.dropFirst().first!
 
-      self.log.warning("Exclude filter: \(exclude) ||| \(javaClassName) / \(javaMemberName)")
-
       if javaClassName.starts(with: className) {
         if excludedName.hasSuffix("*"), javaMemberName.starts(with: excludedName.dropLast()) {
           log.info("Skip Java member '\(javaClassName)#\(javaMemberName)', prefix exclude matched: \(exclude)")
